@@ -49,16 +49,35 @@ func types(result: Dictionary, unit: String = "") -> Array:
 			out.append(String(event.type))
 	return out
 
+## Samples at which the (single) station has the ship inside its WEAPON range (min..max), counted here
+## independently of exposure_window.
 func in_range_samples(vehicles: Array, start: Vector2, lz: Vector2) -> int:
 	var count := 0
 	for sample in PLAN.approach_samples(start, lz):
 		var cell: Vector2i = PLAN.plane_to_cell(Vector2(sample))
 		for vehicle in vehicles:
 			var unit: Dictionary = AD.unit(String(vehicle.unit_id))
-			if HEX.distance(Vector2i(vehicle.cell), cell) <= maxi(int(unit.get("sight_range_hex", 0)), int(unit.get("radar_range_hex", 0))):
+			var distance: int = HEX.distance(Vector2i(vehicle.cell), cell)
+			if distance >= int(unit.get("weapon_min_range_hex", 0)) and distance <= int(unit.get("weapon_range_hex", 0)):
 				count += 1
 				break
 	return count
+
+## The batteries' firing opportunities of one approach, without any dice that could change them: the
+## ship has a hull no hit can break, always presses on, and every flak volley / missile launch of the
+## resolver's event list is one opportunity. Returns {instance_id: count}.
+func opportunities(context: Dictionary) -> Dictionary:
+	var volleys: Array = PLAN.approach_volleys(context).volleys
+	var ship: Dictionary = PLAN.ship_for("cutlass", 100)
+	var state: Dictionary = ship.state
+	state.hull = 1.0e9
+	state.hull_capacity = 1.0e9
+	var result: Dictionary = AD.resolve_approach({"seed": "opportunities", "pilot_skill": 0.5, "ship_model": "cutlass", "ship_stats": ship.stats, "ship_state": state, "decision": AD.DECISION_PRESS_ON, "volleys": volleys})
+	var counts: Dictionary = {}
+	for event in Array(result.get("events", [])):
+		if String(event.type) in ["flak_volley", "missile_launch"]:
+			counts[String(event.unit)] = int(counts.get(String(event.unit), 0)) + 1
+	return counts
 
 func _run() -> void:
 	var map: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MAP_PATH))
@@ -67,9 +86,14 @@ func _run() -> void:
 	var vehicles: Array = PLAN.vehicles_from_props(Array(Dictionary(map.get("place_presentation", {})).get("props", [])), height_at)
 	_normal_unchanged(vehicles)
 	_tief_masking()
+	_tief_real_heights(vehicles)
+	_station_cover_counts_weapon_range()
 	_steil_window()
+	_steil_per_battery_window()
+	_steil_gm02_counts(vehicles)
 	_accident_formula()
 	_accident_without_flak_and_hull()
+	_accident_text_after_flak()
 	_pilot_skill_per_model()
 	_repeat_and_data()
 	print("APPROACH_PROFILE_RULES passed=%d failed=%d" % [passed, failed])
@@ -128,7 +152,7 @@ func _tief_masking() -> void:
 	var low_ridge: Dictionary = PLAN.resolve(context.merged({"approach_path": "tief"}))
 	check(types(low_ridge.result, "hagel@A").has("flak_volley"), "(b) a ridge as low as the ground masks nothing")
 
-## (c) Steil keeps only exposure_factor of the time inside the batteries' reach.
+## (c) Steil keeps only exposure_factor of the time inside each battery's WEAPON range.
 func _steil_window() -> void:
 	var stations: Array = [{"instance_id": "hagel@A", "unit_id": "hagel", "cell": Vector2i(0, -4), "ground_level": 0}]
 	var start: Vector2 = cell_plane(Vector2i(-40, 0))
@@ -141,12 +165,153 @@ func _steil_window() -> void:
 	var steil: Dictionary = PLAN.resolve(context.merged({"approach_path": "steil"}))
 	var window: Dictionary = Dictionary(Dictionary(steil.get("path_report", {})).get("window", {}))
 	var kept: int = ceili(float(total) * factor)
-	check(total >= 4 and int(window.get("in_range", -1)) == total and int(window.get("kept", -1)) == kept and kept < total, "(c) steil keeps ceil(%d x %.1f) = %d of %d in-reach volleys: %s" % [total, factor, kept, total, str(window)])
-	check(int(steil.volley_count) == kept and int(normal.volley_count) >= total, "(c) steil resolves %d volleys against normal's %d" % [int(steil.volley_count), int(normal.volley_count)])
+	check(total >= 4 and int(window.get("in_range", -1)) == total and int(window.get("kept", -1)) == kept and kept < total, "(c) steil keeps ceil(%d x %.1f) = %d of %d volleys inside the weapon range: %s" % [total, factor, kept, total, str(window)])
+	check(int(steil.volley_count) == int(normal.volley_count), "(c) steil flies the whole approach (%d volleys, as normal's %d); only the battery's window is cut" % [int(steil.volley_count), int(normal.volley_count)])
 	var normal_fire: int = types(normal.result).count("flak_volley")
 	var steil_fire: int = types(steil.result).count("flak_volley")
 	check(steil_fire < normal_fire, "(c) fewer opportunities to fire: %d flak volleys against %d" % [steil_fire, normal_fire])
 	check(String(steil.approach_profile) == "normal" and Array(steil.path_report.stations_masked).is_empty(), "(c) steil flies at normal height and takes no terrain cover")
+
+## (b2) Tief on the REAL GM02 heights (the map file is only read): from LZ (93,73) on the NW approach
+## the Hagel at (96,86) has the ship in weapon range but no clear line to it; the Donnerkeil still sees it.
+func _tief_real_heights(vehicles: Array) -> void:
+	var lz: Vector2 = cell_plane(Vector2i(93, 73))
+	var context := {"vehicles": vehicles, "start_plane": lz + inbound_offset(Vector2(-180.0, -112.0)), "lz_plane": lz, "height_at": height_at, "crew_ready": true,
+		"pilot_skill": 0.5, "seed": "tiefcase", "model_id": "cutlass", "integrity": 100, "approach_style": "aggressiv"}
+	var normal: Dictionary = PLAN.resolve(context.merged({"approach_path": "normal"}))
+	var tief: Dictionary = PLAN.resolve(context.merged({"approach_path": "tief"}))
+	var report: Dictionary = Dictionary(tief.get("path_report", {}))
+	check(Array(report.get("stations_masked", [])) == ["hagel@96,86"] and Array(report.get("stations_in_range", [])).size() == 2, "(b2) GM02 real heights: only the Hagel is masked, both batteries had the ship in weapon range: " + str(report.get("stations_masked")))
+	check(types(normal.result, "hagel@96,86").has("flak_volley"), "(b2) the same approach flown as normal: the Hagel fires")
+	check(not types(tief.result, "hagel@96,86").has("flak_volley") and types(tief.result, "hagel@96,86").has("masked"), "(b2) flown as tief: the Hagel is masked by the real hills and does not fire")
+	check(String(tief.message).contains("Tiefflug: 1 von 2 Stellungen durch Gelände verdeckt."), "(b2) the card sentence counts the stations that had the ship in weapon range: " + String(tief.message))
+	check(int(tief.volley_count) == int(normal.volley_count) and String(tief.approach_profile) == "low", "(b2) tief flies the same %d volleys as normal, at the low profile" % int(tief.volley_count))
+
+## (b3) "N of M stations masked" counts the stations that had the ship in their WEAPON range, not their radar range.
+func _station_cover_counts_weapon_range() -> void:
+	var vehicles: Array = [{"instance_id": "a", "unit_id": "hagel"}, {"instance_id": "b", "unit_id": "donnerkeil"}, {"instance_id": "c", "unit_id": "hagel"}]
+	var shut := {"in_reach": true, "in_weapon_range": true, "has_line_of_sight": false}
+	var open := {"in_reach": true, "in_weapon_range": true, "has_line_of_sight": true}
+	var radar_only := {"in_reach": true, "in_weapon_range": false, "has_line_of_sight": false}
+	var volleys: Array = [
+		{"contacts": {"a": shut, "b": radar_only, "c": open}},
+		{"contacts": {"a": shut, "b": radar_only, "c": shut}},
+	]
+	var cover: Dictionary = PLAN.station_cover(vehicles, volleys)
+	check(Array(cover.masked) == ["a"] and Array(cover.in_range) == ["a", "c"], "(b3) a station blocked only outside its weapon range is neither masked nor counted; one with a clear volley is not masked: " + str(cover))
+	check(PLAN.masked_stations(vehicles, volleys) == ["a"], "(b3) masked_stations gives the same list")
+	check(PLAN.in_weapon_range("donnerkeil", 5) == false and PLAN.in_weapon_range("donnerkeil", 6) and PLAN.in_weapon_range("donnerkeil", 45) and not PLAN.in_weapon_range("donnerkeil", 46) and PLAN.in_weapon_range("hagel", 0) and PLAN.in_weapon_range("hagel", 16) and not PLAN.in_weapon_range("hagel", 17), "(b3) weapon range is min..max from the unit data (Donnerkeil 6..45, Hagel 0..16)")
+
+## (c2) The Steil window is cut PER BATTERY from its weapon range: n >= 3 volleys always lose one, 1 or 2 lose none.
+func _steil_per_battery_window() -> void:
+	var station: Array = [{"instance_id": "hagel@W", "unit_id": "hagel", "cell": Vector2i(0, 0), "ground_level": 0}]
+	var cut_ok := true
+	var spared_ok := true
+	var shape_ok := true
+	var failed_n: Array = []
+	for n in range(1, 41):
+		var samples: Array = []
+		for _i in range(5):
+			samples.append(cell_plane(Vector2i(40, 0)))
+		for _i in range(n):
+			samples.append(cell_plane(Vector2i(8, 0)))
+		samples.append(cell_plane(Vector2i(40, 0)))
+		var window: Dictionary = PLAN.exposure_window(samples, station, 0.6)
+		var entry: Dictionary = Dictionary(window.stations).get("hagel@W", {})
+		var kept: int = int(entry.get("kept", -1))
+		var dropped: Array = Array(entry.get("dropped", []))
+		shape_ok = shape_ok and int(entry.get("in_range", -1)) == n and kept == ceili(float(n) * 0.6) and dropped.size() == n - kept
+		if n >= 3:
+			cut_ok = cut_ok and kept < n and dropped.size() >= 1
+		else:
+			spared_ok = spared_ok and kept == n and dropped.is_empty()
+		if not (shape_ok and cut_ok and spared_ok) and failed_n.is_empty():
+			failed_n.append(n)
+		# The dropped volleys are the FIRST ones of the battery's zone (indices 5 ..).
+		for index in range(dropped.size()):
+			shape_ok = shape_ok and int(dropped[index]) == 5 + index
+	check(shape_ok and cut_ok and spared_ok, "(c2) for n = 1..40 volleys in weapon range: kept = ceil(0.6 n), n >= 3 loses at least one, n = 1 and 2 lose none, the first ones are dropped (first failing n: %s)" % str(failed_n))
+	var untouched: Dictionary = PLAN.exposure_window([cell_plane(Vector2i(8, 0)), cell_plane(Vector2i(8, 0)), cell_plane(Vector2i(8, 0))], station, 1.0)
+	var floor_one: Dictionary = PLAN.exposure_window([cell_plane(Vector2i(8, 0)), cell_plane(Vector2i(8, 0)), cell_plane(Vector2i(8, 0))], station, 0.0)
+	check(int(untouched.kept) == 3 and int(floor_one.kept) == 1, "(c2) factor 1.0 keeps everything, factor 0 keeps one volley")
+	# Two batteries with different weapon ranges: each window starts where ITS weapon reaches the ship.
+	var two: Array = [{"instance_id": "hagel@H", "unit_id": "hagel", "cell": Vector2i(0, -4), "ground_level": 0}, {"instance_id": "donnerkeil@D", "unit_id": "donnerkeil", "cell": Vector2i(0, -6), "ground_level": 0}]
+	var start: Vector2 = cell_plane(Vector2i(-60, 0))
+	var lz: Vector2 = cell_plane(Vector2i(6, 0))
+	var samples2: Array = PLAN.approach_samples(start, lz)
+	var window2: Dictionary = PLAN.exposure_window(samples2, two, 0.6)
+	var zones: Dictionary = {"hagel@H": [], "donnerkeil@D": []}
+	for index in range(samples2.size()):
+		var cell: Vector2i = PLAN.plane_to_cell(Vector2(samples2[index]))
+		if HEX.distance(Vector2i(0, -4), cell) <= 16:
+			zones["hagel@H"].append(index)
+		var d: int = HEX.distance(Vector2i(0, -6), cell)
+		if d >= 6 and d <= 45:
+			zones["donnerkeil@D"].append(index)
+	var hagel: Dictionary = Dictionary(window2.stations).get("hagel@H", {})
+	var donnerkeil: Dictionary = Dictionary(window2.stations).get("donnerkeil@D", {})
+	check(int(hagel.get("in_range", -1)) == Array(zones["hagel@H"]).size() and int(donnerkeil.get("in_range", -1)) == Array(zones["donnerkeil@D"]).size() and int(donnerkeil.in_range) > int(hagel.in_range), "(c2) each battery counts its own weapon-range volleys: Hagel %d, Donnerkeil %d" % [int(hagel.get("in_range", -1)), int(donnerkeil.get("in_range", -1))])
+	var hagel_first_kept: int = int(Array(zones["hagel@H"])[Array(hagel.dropped).size()])
+	var donnerkeil_first_kept: int = int(Array(zones["donnerkeil@D"])[Array(donnerkeil.dropped).size()])
+	check(Array(hagel.dropped) == Array(zones["hagel@H"]).slice(0, Array(hagel.dropped).size()) and hagel_first_kept > int(Array(zones["hagel@H"])[0]) and donnerkeil_first_kept > int(Array(zones["donnerkeil@D"])[0]) and hagel_first_kept > donnerkeil_first_kept, "(c2) the Hagel's kept window starts at volley %d, the Donnerkeil's at %d: not at the radar range of the longest-reaching battery" % [hagel_first_kept, donnerkeil_first_kept])
+	# The volleys the resolver gets: dropped volleys carry no contact for that battery only.
+	var volleys: Array = PLAN.build_volleys(two, samples2, flat_height_at, true, "normal", false, PLAN.silenced_volleys(window2))
+	var silenced_hagel := 0
+	var silenced_wrong := 0
+	for index in range(volleys.size()):
+		var contacts: Dictionary = Dictionary(volleys[index]).contacts
+		if bool(Dictionary(contacts["hagel@H"]).get("outside_window", false)):
+			silenced_hagel += 1
+			silenced_wrong += 0 if Array(hagel.dropped).has(index) else 1
+		if bool(Dictionary(contacts["donnerkeil@D"]).get("outside_window", false)) != Array(donnerkeil.dropped).has(index):
+			silenced_wrong += 1
+	check(silenced_hagel == Array(hagel.dropped).size() and silenced_wrong == 0, "(c2) exactly the dropped volleys of each battery are silenced (%d for the Hagel)" % silenced_hagel)
+	# A window with nothing in weapon range cuts nothing.
+	var far: Dictionary = PLAN.exposure_window([cell_plane(Vector2i(60, 0)), cell_plane(Vector2i(61, 0))], station, 0.6)
+	check(Dictionary(far.stations).is_empty() and int(far.kept) == 0, "(c2) no battery in weapon range: nothing to cut")
+
+## (c3) Steil on the REAL GM02 batteries, counted without dice (the map file is only read): every landing cell within 30 of
+## a battery x the four approach angles. Hagel must lose at least a quarter of its firing opportunities; the Donnerkeil
+## (two missiles, reload 3) reaches 25 % only with a smaller factor, which is measured here as well.
+func _steil_gm02_counts(vehicles: Array) -> void:
+	var angles: Array = [Vector2(-180.0, -112.0), Vector2(180.0, -112.0), Vector2(-180.0, 112.0), Vector2(180.0, 112.0)]
+	var cells: Array = []
+	for cell in heights.keys():
+		for vehicle in vehicles:
+			if HEX.distance(Vector2i(vehicle.cell), cell) <= 30:
+				cells.append(cell)
+				break
+	cells.sort()
+	var half_rules: Dictionary = AD.definition().duplicate(true)
+	half_rules.approach_paths.paths.steil.exposure_factor = 0.5
+	var sums := {"normal": {"hagel": 0, "donnerkeil": 0}, "steil": {"hagel": 0, "donnerkeil": 0}, "half": {"hagel": 0, "donnerkeil": 0}}
+	var combos := 0
+	for index in range(0, cells.size(), 6):
+		var lz: Vector2 = cell_plane(cells[index])
+		for world_offset in angles:
+			var context := {"vehicles": vehicles, "start_plane": lz + inbound_offset(world_offset), "lz_plane": lz, "height_at": height_at, "crew_ready": true, "pilot_skill": 0.5, "seed": "scan", "model_id": "cutlass", "integrity": 100, "approach_style": "aggressiv"}
+			var normal: Dictionary = opportunities(context.merged({"approach_path": "normal"}))
+			var steil: Dictionary = opportunities(context.merged({"approach_path": "steil"}))
+			var half: Dictionary = opportunities(context.merged({"approach_path": "steil", "rules": half_rules}))
+			combos += 1
+			for vehicle in vehicles:
+				var id: String = String(vehicle.instance_id)
+				var kind: String = String(vehicle.unit_id)
+				sums.normal[kind] += int(normal.get(id, 0))
+				sums.steil[kind] += int(steil.get(id, 0))
+				sums.half[kind] += int(half.get(id, 0))
+	var cut := {}
+	for key in ["steil", "half"]:
+		for kind in ["hagel", "donnerkeil"]:
+			cut["%s_%s" % [key, kind]] = 100.0 * (1.0 - float(sums[key][kind]) / maxf(float(sums.normal[kind]), 1.0))
+	print("GM02 firing opportunities over %d landing zone x angle combinations (no dice):" % combos)
+	for kind in ["hagel", "donnerkeil"]:
+		print("  ", kind, ": normal ", sums.normal[kind], ", steil 0.6 ", sums.steil[kind], " (-", snappedf(cut["steil_" + kind], 0.1), " %), steil 0.5 ", sums.half[kind], " (-", snappedf(cut["half_" + kind], 0.1), " %)")
+	check(combos >= 1500 and int(sums.normal.hagel) > 1000 and int(sums.normal.donnerkeil) > 1000, "(c3) the count covers %d combinations with %d Hagel and %d Donnerkeil opportunities in normal" % [combos, int(sums.normal.hagel), int(sums.normal.donnerkeil)])
+	check(float(cut.steil_hagel) >= 25.0, "(c3) steil 0.6 takes %.1f %% of the Hagel's firing opportunities (target 25 %%)" % float(cut.steil_hagel))
+	check(float(cut.steil_donnerkeil) >= 15.0, "(c3) steil 0.6 takes %.1f %% of the Donnerkeil's firing opportunities (it has 2 missiles; the 25 %% target is not reached at 0.6)" % float(cut.steil_donnerkeil))
+	check(float(cut.half_hagel) >= 25.0 and float(cut.half_donnerkeil) >= 25.0, "(c3) with the factor 0.5 both kinds lose at least 25 %%: Hagel %.1f %%, Donnerkeil %.1f %%" % [float(cut.half_hagel), float(cut.half_donnerkeil)])
+	print("NOTE (c3): the 25 %% target for the Donnerkeil is %s at 0.6 (%.1f %%); the factor 0.5 gives %.1f %%." % ["reached" if float(cut.steil_donnerkeil) >= 25.0 else "NOT reached", float(cut.steil_donnerkeil), float(cut.half_donnerkeil)])
 
 ## (d) Accident chance = pmax x (1 - pilot)^2; zero for normal.
 func _accident_formula() -> void:
@@ -205,14 +370,39 @@ func _accident_without_flak_and_hull() -> void:
 	var hot: Dictionary = PLAN.resolve(hot_context)
 	check(not bool(hot.landing_allowed) and not bool(Dictionary(Dictionary(hot.path_report).get("accident", {})).get("occurred", false)), "(f) a broken-off approach never lands, so it does not roll an accident")
 
+## (f2) K2: flak hits and an accident in one approach: the card names the hull ONCE, after the accident.
+func _accident_text_after_flak() -> void:
+	var stations: Array = [{"instance_id": "hagel@A", "unit_id": "hagel", "cell": Vector2i(0, -4), "ground_level": 0}]
+	var context := {"vehicles": stations, "start_plane": cell_plane(Vector2i(-40, 0)), "lz_plane": cell_plane(Vector2i(6, 0)), "height_at": flat_height_at, "crew_ready": true, "pilot_skill": 0.0,
+		"model_id": "cutlass", "integrity": 100, "approach_style": "aggressiv", "approach_path": "tief"}
+	var found := false
+	for index in range(2000):
+		var seed_text := "k2-%d" % index
+		var plan: Dictionary = PLAN.resolve(context.merged({"seed": seed_text}, true))
+		if not (bool(plan.accident_occurred) and bool(plan.engaged) and bool(plan.landing_allowed) and int(plan.hits) > 0):
+			continue
+		# On a flat map tief changes nothing about the flak: normal gives the hull BEFORE the accident.
+		var normal: Dictionary = PLAN.resolve(context.merged({"seed": seed_text, "approach_path": "normal"}, true))
+		var loss: int = int(plan.path_report.accident.hull_loss_applied)
+		var expected: String = "Flugabwehr: %d Treffer. Unfall im Tiefflug: Rumpf -%d %%, jetzt %d %%." % [int(plan.hits), loss, int(plan.hull_percent)]
+		check(String(plan.message) == expected, "(f2) flak hits plus accident read '%s'" % String(plan.message))
+		check(int(plan.hull_percent) == maxi(int(normal.hull_percent) - loss, 1) and int(plan.hull_percent) < int(normal.hull_percent) and not String(plan.message).contains("Treffer, Rumpf"), "(f2) the stated hull is the one AFTER the accident (%d), not the flak-only value (%d)" % [int(plan.hull_percent), int(normal.hull_percent)])
+		check(String(plan.outcome) == "pressed_on" and bool(plan.landing_allowed), "(f2) the outcome stays the flak outcome and the landing goes on")
+		found = true
+		break
+	check(found, "(f2) a fixed seed with flak hits and an accident exists")
+
 ## (g) the pilot value belongs to the ship: fighter_piloting for the fighter, dropship_piloting for the dropship.
 func _pilot_skill_per_model() -> void:
 	var skills := {"dropship_piloting": 0.9, "fighter_piloting": 0.1}
-	check(PLAN.pilot_skill_for_model("cutlass", skills) == 0.9 and PLAN.pilot_skill_for_model("buccaneer", skills) == 0.1, "(g) cutlass reads dropship_piloting, buccaneer reads fighter_piloting")
-	check(PLAN.pilot_skill_for_model("", skills) == 0.9 and PLAN.pilot_skill_for_model("unbekannt", skills) == 0.9, "(g) an unknown model keeps the old dropship value")
-	check(PLAN.pilot_skill_for_model("buccaneer", {"dropship_piloting": 0.9, "fighter_piloting": -1.0}) == 0.5 and PLAN.pilot_skill_for_model("cutlass", {}) == 0.5, "(g) a missing or negative value falls back to 0.5 as before")
-	var steil_fighter: float = PLAN.accident_probability("steil", PLAN.pilot_skill_for_model("buccaneer", skills))
-	var steil_dropship: float = PLAN.accident_probability("steil", PLAN.pilot_skill_for_model("cutlass", skills))
+	check(PLAN.pilot_skill_for_craft_type("dropship", skills) == 0.9 and PLAN.pilot_skill_for_craft_type("fighter", skills) == 0.1, "(g) a dropship reads dropship_piloting, a fighter reads fighter_piloting (by craft_type, no model name in the code)")
+	check(PLAN.pilot_skill_for_craft_type("", skills) == 0.9 and PLAN.pilot_skill_for_craft_type("freighter", skills) == 0.9 and PLAN.pilot_skill_for_craft_type("FIGHTER ", skills) == 0.1, "(g) an unknown or empty craft_type keeps the old dropship value; fighter is matched without case and blanks")
+	# K1: campaign pilots carry only dropship_piloting (fighter_piloting stays unset = -1): the fighter then flies with that value as before LA.
+	check(PLAN.pilot_skill_for_craft_type("fighter", {"dropship_piloting": 0.7, "fighter_piloting": -1.0}) == 0.7 and PLAN.pilot_skill_for_craft_type("fighter", {"dropship_piloting": 0.7}) == 0.7, "(g) a fighter without fighter_piloting falls back to dropship_piloting, not to 0.5")
+	check(PLAN.pilot_skill_for_craft_type("fighter", {"dropship_piloting": -1.0, "fighter_piloting": -1.0}) == 0.5 and PLAN.pilot_skill_for_craft_type("fighter", {}) == 0.5 and PLAN.pilot_skill_for_craft_type("dropship", {"fighter_piloting": 0.8}) == 0.5, "(g) with neither value (or only the other craft's) the value is 0.5 as before")
+	check(PLAN.pilot_skill_for_craft_type("dropship", {"dropship_piloting": -1.0, "fighter_piloting": 0.8}) == 0.5, "(g) a dropship never reads fighter_piloting")
+	var steil_fighter: float = PLAN.accident_probability("steil", PLAN.pilot_skill_for_craft_type("fighter", skills))
+	var steil_dropship: float = PLAN.accident_probability("steil", PLAN.pilot_skill_for_craft_type("dropship", skills))
 	check(absf(steil_fighter - 0.15 * 0.81) < 0.00001 and absf(steil_dropship - 0.15 * 0.01) < 0.00001, "(g) the same pilot has a different chance in the fighter than in the dropship")
 
 ## (h) repeating the same order gives the same result; (i) every number comes from the data block.
@@ -251,5 +441,6 @@ func _repeat_and_data() -> void:
 		check(digest(plain) == digest(without_block), "(i) without the data block %s behaves exactly like normal" % path)
 	var steil_tip: String = PLAN.path_tooltip("steil", 0.5)
 	check(steil_tip.contains("15 %") and steil_tip.contains("60 %") and PLAN.path_tooltip("tief", 0.5).contains("25 %"), "(i) the tooltips take their numbers from the data: " + steil_tip)
+	check(steil_tip.contains("Waffenreichweite") and steil_tip.contains("kurzem Wirkbereich"), "(i) the Steil tooltip says the cut counts in weapon range and is hardly felt in a very short effective area: " + steil_tip)
 	var changed_tip: String = PLAN.path_tooltip("steil", 0.5, rules)
 	check(changed_tip.contains("20 %") and changed_tip.contains("30 %") and not changed_tip.contains("15 %") and not changed_tip.contains("60 %"), "(i) and follow a changed block: " + changed_tip)

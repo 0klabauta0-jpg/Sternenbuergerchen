@@ -38551,12 +38551,13 @@ func _resolve_campaign_field_lz() -> Dictionary:
 func _mission_drop_pilot_skill() -> float:
 	return _mission_drop_pilot_skill_for_craft(_mission_drop_craft_id)
 
-# The pilot's flying skill FOR THIS SHIP: dropship_piloting in the dropship, fighter_piloting in the fighter (LA).
+# The pilot's flying skill FOR THIS SHIP: dropship_piloting in the dropship, fighter_piloting in the fighter (LA),
+# told apart by the card's craft_type (a fighter pilot without fighter_piloting falls back to dropship_piloting).
 func _mission_drop_pilot_skill_for_craft(craft_id: String) -> float:
 	var entry: Dictionary = _find_mission_dropship_card_entry(craft_id)
 	var pilot = _get_campaign_sortie_unit(String(entry.get("pilot_unit_id", "")))
 	if pilot == null: return AIR_DEFENSE_PLAN.DEFAULT_PILOT_SKILL
-	return AIR_DEFENSE_PLAN.pilot_skill_for_model(String(entry.get("model_id", "")), {"dropship_piloting": pilot.get("dropship_piloting"), "fighter_piloting": pilot.get("fighter_piloting")})
+	return AIR_DEFENSE_PLAN.pilot_skill_for_craft_type(String(entry.get("craft_type", "")), {"dropship_piloting": pilot.get("dropship_piloting"), "fighter_piloting": pilot.get("fighter_piloting")})
 
 # Ground air defence at the landing commit point (ground_air_defense_engagement_contract).
 # Authoritative side only. Returns false when the approach is broken off.

@@ -74,21 +74,31 @@ sich jede Art wie "Normal". Regelkern: `scripts/mission/air_defense_approach_pla
 | Art | Flugabwehr | Unfallrisiko |
 | --- | --- | --- |
 | Normal (Standard) | rechnet exakt wie vor LA, kein Wurf | keines |
-| Steil | kuerzere Zeit im Wirkbereich: nur die letzten 60 % der Salven ab der ersten Stellung in Reichweite (`exposure_factor`); keine Gelaendedeckung, Flughoehe wie der Stil | `pmax` 0,15 |
+| Steil | kuerzere Zeit im Wirkbereich, **je Stellung** gerechnet: von den Salven, in denen das Schiff in der Waffenreichweite (Minimum bis Maximum) dieser Stellung liegt, bleiben die letzten `ceil(n x 0,6)` (`exposure_factor`); in den frueheren hat diese Stellung keine Spur auf das Schiff und muss es neu erfassen (Warnung, Aufschaltung). Bei n = 1 oder 2 faellt nichts weg, ab n = 3 mindestens eine Salve; keine Gelaendedeckung, Flughoehe wie der Stil | `pmax` 0,15 |
 | Tief | Flughoehe `low`; fuer jede Stellung und jeden Stuetzpunkt (alle 4 Felder plus LZ, `sample_step_hex`) wird die Sichtlinie mit `LosSystem.find_first_blocker_grid` gegen die Hoehenstufen der Karte geprueft, zwischen Lafette (Boden + 1) und Schiff. Eine Stellung, die nie freie Sicht hat, greift nicht ein | `pmax` 0,25 |
 - Unfallwahrscheinlichkeit = `pmax x (1 - Pilot)^2`. "Pilot" ist die Flugfertigkeit des Piloten fuer dieses
   Schiff: `dropship_piloting` bei der Landefaehre, `fighter_piloting` beim Jaeger (gilt fuer die ganze
-  Anflugrechnung, auch Flugabwehr und Landegenauigkeit).
+  Anflugrechnung, auch Flugabwehr und Landegenauigkeit). Landefaehre oder Jaeger sagt der `craft_type` der
+  Schiffskarte ("fighter" = Jaeger, alles andere Landefaehre), nicht der Modellname. Hat ein Jaeger-Pilot kein
+  `fighter_piloting` (Kampagnen-Piloten fuehren nur `dropship_piloting`; im Skirmish setzt die Startkonfiguration
+  beide auf 0,75), gilt sein `dropship_piloting` wie vor LA, sonst 0,5.
 - Ein Wurf je Anflug, gesaet mit demselben Text wie die Salven (`<Schiff><LZ>:air_defense`), plus
   `:approach_path:<Art>`; derselbe Befehl liefert dasselbe Ergebnis. Folge eines Unfalls: Rumpf minus 20 bis 40
   Prozentpunkte (`accident.hull_loss_min_percent` / `_max_percent`), nie unter 1 %; die Landung geht weiter.
   Wird der Anflug von der Flugabwehr abgebrochen, wird nicht gegen den Unfall gewuerfelt.
 - Der Unfallwurf laeuft auch, wenn am Ort keine Flugabwehr steht (Fruehausstieg in `_resolve_air_defense_on_approach`
   gilt nur noch fuer "Normal").
-- Ergebnis des Anflugs: `path_report` mit `stations_total`, `stations_masked` (Instanz-IDs), `window`
-  (`in_range`, `kept`, `factor`) und `accident` (`probability`, `roll`, `occurred`, `hull_loss`, `reason`).
-  Rueckmeldung der Schiffskarte: "Tiefflug: 1 von 2 Stellungen durch Gelaende verdeckt." und/oder "Unfall im
-  Tiefflug: Rumpf -30 %." (nach dem Flugabwehr-Satz, falls es einen gibt).
+- Ergebnis des Anflugs: `path_report` mit `stations_total`, `stations_in_range` (Stellungen, die das Schiff in
+  Waffenreichweite hatten), `stations_masked` (Instanz-IDs, davon nie freie Sicht), `window` (`in_range`, `kept`,
+  `factor`, je Stellung `stations`) und `accident` (`probability`, `roll`, `occurred`, `hull_loss`, `reason`).
+  Rueckmeldung der Schiffskarte: "Tiefflug: 1 von 2 Stellungen durch Gelaende verdeckt." (gezaehlt werden nur
+  Stellungen, die das Schiff in Waffenreichweite hatten) und/oder "Unfall im Tiefflug: Rumpf -30 %." (nach dem
+  Flugabwehr-Satz, falls es einen gibt). Nach Flak-Treffern steht die Rumpfzahl einmal, nach dem Unfall:
+  "Flugabwehr: 2 Treffer. Unfall im Steilflug: Rumpf -30 %, jetzt 55 %."
+- Wirkung auf GM02 (Zaehlung der Feuergelegenheiten ohne Wuerfel, alle Landezellen im Umkreis 30 der Stellungen x
+  vier Anflugwinkel, `approach_profile_rules_verifier` (c3)): Steil 0,6 nimmt dem Hagel rund 47 %, dem Donnerkeil
+  rund 20 % (zwei Raketen, Nachladen 3); bei 0,5 sind es rund 63 % und 31 %. Tief verdeckt auf GM02 nur in wenigen
+  Anfluegen (rund 4 % der Kombinationen eine Stellung in Waffenreichweite).
 - Die Hoehenstufen der Karte gelten als Verdecker, auch wo ein Feld nicht `blocks_los` traegt (Huegel haben das
   in den Karten nicht gesetzt).
 

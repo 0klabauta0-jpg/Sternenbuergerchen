@@ -44,7 +44,10 @@ const DEFAULT_APPROACH_PATH := PATH_NORMAL
 const PATH_LABELS := {"steil": "Steil", "normal": "Normal", "tief": "Tief"}
 const PATH_FLIGHT_NAMES := {"steil": "Steilflug", "normal": "Normalflug", "tief": "Tiefflug"}
 const OUTCOME_ACCIDENT := "accident"
+const CRAFT_TYPE_FIGHTER := "fighter"
 const DEFAULT_PILOT_SKILL := 0.5
+## Steil: a battery's volley outside its kept window sees the ship this far away, i.e. not at all.
+const OUTSIDE_WINDOW_RANGE := 100000
 
 
 static func plane_to_cell(plane: Vector2) -> Vector2i:
@@ -100,12 +103,12 @@ static func approach_samples(start_plane: Vector2, lz_plane: Vector2, step: floa
 ## One volley per sample. Line of sight is true unless terrain_masking is set (approach
 ## path "tief"): then every contact in reach is checked with LosSystem.find_first_blocker_grid
 ## against the map's height levels, between the weapon mount and the ship's flight height.
-static func build_volleys(vehicles: Array, samples: Array, height_at: Callable, crew_ready: bool, profile_id: String = APPROACH_PROFILE, terrain_masking: bool = false) -> Array:
+static func build_volleys(vehicles: Array, samples: Array, height_at: Callable, crew_ready: bool, profile_id: String = APPROACH_PROFILE, terrain_masking: bool = false, silenced: Dictionary = {}) -> Array:
 	var volleys: Array = []
 	var los: Variant = LOS.new() if terrain_masking else null
 	var reader: Variant = _HeightReader.new(height_at) if terrain_masking else null
-	for sample in samples:
-		var cell: Vector2i = plane_to_cell(Vector2(sample))
+	for index in range(samples.size()):
+		var cell: Vector2i = plane_to_cell(Vector2(samples[index]))
 		var ship_ground: int = int(height_at.call(cell))
 		var contacts: Dictionary = {}
 		for vehicle in vehicles:
@@ -115,13 +118,24 @@ static func build_volleys(vehicles: Array, samples: Array, height_at: Callable, 
 			if terrain_masking:
 				var in_reach: bool = range_hex <= reach_hex(String(vehicle.unit_id))
 				contact["in_reach"] = in_reach
+				contact["in_weapon_range"] = in_weapon_range(String(vehicle.unit_id), range_hex)
 				if in_reach:
 					var mount: float = float(int(vehicle.ground_level) + AD.MOUNT_LEVELS)
 					var blocker: Vector2i = los.find_first_blocker_grid(Vector2i(vehicle.cell), cell, reader, Vector2.INF, Vector2.INF, false, Vector2(mount, mount + float(height_delta)))
 					contact["has_line_of_sight"] = blocker == LOS.NO_BLOCKER_GRID
+			# Steil: this battery's volleys before its kept window do not see the ship (and lose its track).
+			if Dictionary(silenced.get(String(vehicle.instance_id), {})).has(index):
+				contact["range_hex"] = OUTSIDE_WINDOW_RANGE
+				contact["outside_window"] = true
 			contacts[String(vehicle.instance_id)] = contact
 		volleys.append({"cell": cell, "contacts": contacts})
 	return volleys
+
+
+## Distance (hex cells) at which the unit can shoot: between its minimum and maximum weapon range.
+static func in_weapon_range(unit_id: String, range_hex: int) -> bool:
+	var unit_data: Dictionary = AD.unit(unit_id)
+	return float(range_hex) >= float(unit_data.get("weapon_min_range_hex", 0)) and float(range_hex) <= float(unit_data.get("weapon_range_hex", 0))
 
 
 ## Farthest distance (hex cells) at which the unit can notice a ship at all.
@@ -243,56 +257,85 @@ static func accident_check(approach_path: String, pilot_skill: float, seed_text:
 	return result
 
 
-## The pilot value that belongs to the ship: fighter_piloting in the fighter, dropship_piloting in
-## the dropship. skills: {"dropship_piloting": float, "fighter_piloting": float}; missing or
-## negative values (unset) fall back to 0.5 like the approach always did.
-static func pilot_skill_for_model(model_id: String, skills: Dictionary) -> float:
-	var key: String = "fighter_piloting" if model_id.strip_edges().to_lower() == "buccaneer" else "dropship_piloting"
-	var value: Variant = skills.get(key, -1.0)
-	if typeof(value) in [TYPE_FLOAT, TYPE_INT] and float(value) >= 0.0:
-		return clampf(float(value), 0.0, 1.0)
+## The pilot value that belongs to the ship, by the craft's own craft_type (the craft card / aircraft
+## definition carries "dropship" or "fighter"): a fighter reads fighter_piloting and, where that is
+## unset (campaign pilots carry only dropship_piloting), the dropship_piloting the approach read before
+## LA; every other craft reads dropship_piloting. skills: {"dropship_piloting": float, "fighter_piloting":
+## float}; missing or negative values (unset) fall back to 0.5 like the approach always did.
+static func pilot_skill_for_craft_type(craft_type: String, skills: Dictionary) -> float:
+	var keys: Array = ["fighter_piloting", "dropship_piloting"] if craft_type.strip_edges().to_lower() == CRAFT_TYPE_FIGHTER else ["dropship_piloting"]
+	for key in keys:
+		var value: Variant = skills.get(key, -1.0)
+		if typeof(value) in [TYPE_FLOAT, TYPE_INT] and float(value) >= 0.0:
+			return clampf(float(value), 0.0, 1.0)
 	return DEFAULT_PILOT_SKILL
 
 
-## Steil: the volleys inside any battery's reach are the time in the effective area; the ship
-## keeps only the last exposure_factor of them (it comes down almost vertically over the LZ).
-## Returns {"samples", "in_range", "kept", "factor"}. No battery in reach: nothing to cut.
+## Steil: the time in the effective area is counted PER BATTERY, in the volleys where the ship is inside
+## that battery's weapon range (not its radar or sight range, which is longer). Of those n volleys
+## the ship keeps the last ceil(n x factor); in the earlier ones that battery has no track on it
+## (it has to find the ship again, so it needs its warning and lock volleys anew). Fewer than three
+## volleys in weapon range lose nothing: ceil(1 x f) = 1, ceil(2 x f) = 2 for f = 0.6.
+## Returns {"stations": {id: {"in_range", "kept", "dropped": [volley indices]}}, "in_range", "kept", "factor"}
+## (in_range / kept summed over the stations). No battery in weapon range: nothing to cut.
 static func exposure_window(samples: Array, vehicles: Array, factor: float) -> Dictionary:
-	var first: int = -1
-	for index in range(samples.size()):
-		var cell: Vector2i = plane_to_cell(Vector2(samples[index]))
-		for vehicle in vehicles:
-			if HEX.distance(Vector2i(vehicle.cell), cell) <= reach_hex(String(vehicle.unit_id)):
-				first = index
-				break
-		if first >= 0:
-			break
-	if first < 0 or factor >= 1.0:
-		var untouched: int = 0 if first < 0 else samples.size() - first
-		return {"samples": samples, "in_range": untouched, "kept": untouched, "factor": factor}
-	var in_range: int = samples.size() - first
-	var kept: int = clampi(ceili(float(in_range) * maxf(factor, 0.0)), 1, in_range)
-	return {"samples": samples.slice(samples.size() - kept), "in_range": in_range, "kept": kept, "factor": factor}
+	var stations: Dictionary = {}
+	var total: int = 0
+	var kept_total: int = 0
+	for vehicle in vehicles:
+		var zone: Array = []
+		for index in range(samples.size()):
+			var cell: Vector2i = plane_to_cell(Vector2(samples[index]))
+			if in_weapon_range(String(vehicle.unit_id), HEX.distance(Vector2i(vehicle.cell), cell)):
+				zone.append(index)
+		var in_range: int = zone.size()
+		if in_range == 0:
+			continue
+		var kept: int = in_range if factor >= 1.0 else clampi(ceili(float(in_range) * maxf(factor, 0.0)), 1, in_range)
+		stations[String(vehicle.instance_id)] = {"in_range": in_range, "kept": kept, "dropped": zone.slice(0, in_range - kept)}
+		total += in_range
+		kept_total += kept
+	return {"stations": stations, "in_range": total, "kept": kept_total, "factor": factor}
 
 
-## Stations that never had a clear line to the ship while it was inside their reach.
-static func masked_stations(vehicles: Array, volleys: Array) -> Array:
+## exposure_window -> build_volleys' silenced argument: {instance_id: {volley index: true}}.
+static func silenced_volleys(window: Dictionary) -> Dictionary:
+	var silenced: Dictionary = {}
+	var stations: Dictionary = Dictionary(window.get("stations", {}))
+	for instance_id in stations.keys():
+		var indices: Dictionary = {}
+		for index in Array(Dictionary(stations[instance_id]).get("dropped", [])):
+			indices[int(index)] = true
+		silenced[String(instance_id)] = indices
+	return silenced
+
+
+## Stations that had the ship inside their WEAPON range (min..max) at some volley but never a clear
+## line to it there. "in_range" lists the stations that had it in weapon range at all.
+static func station_cover(vehicles: Array, volleys: Array) -> Dictionary:
 	var masked: Array = []
+	var in_range: Array = []
 	for vehicle in vehicles:
 		var instance_id: String = String(vehicle.instance_id)
 		var clear: int = 0
 		var blocked: int = 0
 		for volley in volleys:
 			var contact: Dictionary = Dictionary(Dictionary(volley).get("contacts", {})).get(instance_id, {})
-			if not bool(contact.get("in_reach", false)):
+			if not bool(contact.get("in_weapon_range", false)):
 				continue
 			if bool(contact.get("has_line_of_sight", true)):
 				clear += 1
 			else:
 				blocked += 1
+		if clear + blocked > 0:
+			in_range.append(instance_id)
 		if blocked > 0 and clear == 0:
 			masked.append(instance_id)
-	return masked
+	return {"masked": masked, "in_range": in_range}
+
+
+static func masked_stations(vehicles: Array, volleys: Array) -> Array:
+	return Array(station_cover(vehicles, volleys).masked)
 
 
 static func _percent_text(fraction: float) -> String:
@@ -314,7 +357,7 @@ static func path_tooltip(approach_path: String, pilot_skill: float = -1.0, rules
 		return "%s: ohne Wirkung (keine Daten)." % label
 	var parts: Array = []
 	if data.has("exposure_factor"):
-		parts.append("kürzer im Feuer (nur %s %% der Zeit im Wirkbereich)" % _percent_text(float(data.exposure_factor)))
+		parts.append("kürzer im Feuer (je Stellung nur %s %% der Zeit in deren Waffenreichweite; bei sehr kurzem Wirkbereich kaum spürbar)" % _percent_text(float(data.exposure_factor)))
 	if bool(data.get("terrain_masking", false)):
 		parts.append("Gelände kann die Flugabwehr verdecken")
 	var text: String = "%s: %s." % [label, ", ".join(parts)] if not parts.is_empty() else "%s." % label
@@ -343,6 +386,27 @@ static func ship_for(model_id: String, integrity: int, max_integrity: int = 100)
 	return {"ok": true, "model_id": model, "stats": stats, "state": state}
 
 
+## The samples and volleys of one approach (before any dice): path, its data, the steil window per
+## battery, the volley list the resolver gets. Same context as resolve(). Tests count the batteries'
+## firing opportunities with it; resolve() uses it.
+static func approach_volleys(context: Dictionary) -> Dictionary:
+	var rules: Dictionary = Dictionary(context.get("rules", {}))
+	var path: String = sanitize_path(String(context.get("approach_path", "")))
+	var path_data: Dictionary = path_rules(path, rules)
+	var height_at: Callable = context.get("height_at")
+	var vehicles: Array = Array(context.get("vehicles", []))
+	var samples: Array = approach_samples(Vector2(context.get("start_plane", Vector2.ZERO)), Vector2(context.get("lz_plane", Vector2.ZERO)), float(path_data.get("sample_step_hex", SAMPLE_STEP_HEX)))
+	var style: String = sanitize_style(String(context.get("approach_style", "")))
+	var profile_id: String = String(path_data.get("profile", profile_for_style(style)))
+	var window: Dictionary = {}
+	if path_data.has("exposure_factor"):
+		window = exposure_window(samples, vehicles, float(path_data.exposure_factor))
+	var masking: bool = bool(path_data.get("terrain_masking", false))
+	var volleys: Array = build_volleys(vehicles, samples, height_at, bool(context.get("crew_ready", false)), profile_id, masking, silenced_volleys(window))
+	return {"path": path, "path_data": path_data, "vehicles": vehicles, "samples": samples, "style": style, "profile_id": profile_id,
+		"decision": decision_for_style(style), "window": window, "volleys": volleys}
+
+
 ## context: vehicles, start_plane, lz_plane, height_at, crew_ready, pilot_skill,
 ## seed, model_id, integrity (0..100), approach_style, approach_path (LA; "" = normal),
 ## rules (optional replacement of the data file, tests only).
@@ -352,20 +416,16 @@ static func resolve(context: Dictionary) -> Dictionary:
 	if not bool(ship.get("ok", false)):
 		return ship
 	var rules: Dictionary = Dictionary(context.get("rules", {}))
-	var path: String = sanitize_path(String(context.get("approach_path", "")))
-	var path_data: Dictionary = path_rules(path, rules)
-	var height_at: Callable = context.get("height_at")
-	var vehicles: Array = Array(context.get("vehicles", []))
-	var samples: Array = approach_samples(Vector2(context.get("start_plane", Vector2.ZERO)), Vector2(context.get("lz_plane", Vector2.ZERO)), float(path_data.get("sample_step_hex", SAMPLE_STEP_HEX)))
-	var style: String = sanitize_style(String(context.get("approach_style", "")))
-	var profile_id: String = String(path_data.get("profile", profile_for_style(style)))
-	var decision: String = decision_for_style(style)
-	var window: Dictionary = {}
-	if path_data.has("exposure_factor"):
-		window = exposure_window(samples, vehicles, float(path_data.exposure_factor))
-		samples = Array(window.samples)
-	var masking: bool = bool(path_data.get("terrain_masking", false))
-	var volleys: Array = build_volleys(vehicles, samples, height_at, bool(context.get("crew_ready", false)), profile_id, masking)
+	var approach: Dictionary = approach_volleys(context)
+	var path: String = String(approach.path)
+	var path_data: Dictionary = approach.path_data
+	var vehicles: Array = approach.vehicles
+	var samples: Array = approach.samples
+	var style: String = String(approach.style)
+	var profile_id: String = String(approach.profile_id)
+	var decision: String = String(approach.decision)
+	var window: Dictionary = approach.window
+	var volleys: Array = approach.volleys
 	var result: Dictionary = AD.resolve_approach({
 		"seed": String(context.get("seed", "")), "pilot_skill": float(context.get("pilot_skill", 0.5)),
 		"ship_model": String(ship.model_id), "ship_stats": ship.stats, "ship_state": ship.state, "decision": decision,
@@ -385,16 +445,22 @@ static func resolve(context: Dictionary) -> Dictionary:
 ## LA: terrain cover report, steil window and the one accident roll, written into the plan
 ## (plan.path_report, a changed plan.message / outcome / hull_percent). Only for paths with data.
 static func _apply_path_effects(plan: Dictionary, path: String, path_data: Dictionary, vehicles: Array, volleys: Array, window: Dictionary, context: Dictionary, rules: Dictionary) -> void:
-	var report := {"path": path, "stations_total": vehicles.size(), "stations_masked": [], "window": {}}
+	var report := {"path": path, "stations_total": vehicles.size(), "stations_in_range": [], "stations_masked": [], "window": {}}
 	if not window.is_empty():
-		report["window"] = {"in_range": int(window.in_range), "kept": int(window.kept), "factor": float(window.factor)}
+		var window_stations: Dictionary = {}
+		for instance_id in Dictionary(window.stations).keys():
+			window_stations[instance_id] = {"in_range": int(Dictionary(window.stations[instance_id]).in_range), "kept": int(Dictionary(window.stations[instance_id]).kept)}
+		report["window"] = {"in_range": int(window.in_range), "kept": int(window.kept), "factor": float(window.factor), "stations": window_stations}
 	var sentences: Array = []
 	var flight_name: String = String(PATH_FLIGHT_NAMES.get(path, path))
 	if bool(path_data.get("terrain_masking", false)):
-		var masked: Array = masked_stations(vehicles, volleys)
+		var cover: Dictionary = station_cover(vehicles, volleys)
+		var masked: Array = cover.masked
 		report["stations_masked"] = masked
+		report["stations_in_range"] = cover.in_range
 		if not masked.is_empty():
-			sentences.append("%s: %d von %d Stellungen durch Gelände verdeckt." % [flight_name, masked.size(), vehicles.size()])
+			# N of the stations that would have had the ship in weapon range (not all stations on the map).
+			sentences.append("%s: %d von %d Stellungen durch Gelände verdeckt." % [flight_name, masked.size(), Array(cover.in_range).size()])
 	var accident: Dictionary = accident_check(path, float(context.get("pilot_skill", DEFAULT_PILOT_SKILL)), String(context.get("seed", "")), rules)
 	if bool(accident.possible) and not bool(plan.get("landing_allowed", true)):
 		# The air defence turned the approach away: it never reaches the ground, so nothing is rolled against it.
@@ -408,7 +474,13 @@ static func _apply_path_effects(plan: Dictionary, path: String, path_data: Dicti
 		accident["hull_loss_applied"] = before - int(plan.hull_percent)
 		if String(plan.get("outcome", OUTCOME_NONE)) == OUTCOME_NONE:
 			plan["outcome"] = OUTCOME_ACCIDENT
-		sentences.append("Unfall im %s: Rumpf -%d %%." % [flight_name, int(accident.hull_loss_applied)])
+		if String(plan.get("message", "")).begins_with("Flugabwehr: "):
+			# After flak hits the card names the hull once, AFTER the accident: the flak sentence loses its
+			# own hull figure (it was the value before the accident).
+			plan["message"] = "Flugabwehr: %d Treffer" % int(plan.get("hits", 0))
+			sentences.append("Unfall im %s: Rumpf -%d %%, jetzt %d %%." % [flight_name, int(accident.hull_loss_applied), int(plan.hull_percent)])
+		else:
+			sentences.append("Unfall im %s: Rumpf -%d %%." % [flight_name, int(accident.hull_loss_applied)])
 	report["accident"] = accident
 	plan["path_report"] = report
 	plan["accident_occurred"] = bool(accident.occurred)

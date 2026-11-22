@@ -56,6 +56,7 @@ func _run() -> void:
 	await _ui_and_commands()
 	await _accident_run("tief")
 	await _accident_run("steil")
+	await _accident_run("tief", true)
 	await _hot_tief_run()
 	print("APPROACH_PROFILE_FLOW passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed else 0)
@@ -107,7 +108,12 @@ func _ui_and_commands() -> void:
 		var dropship_skill: float = float(controller.call("_mission_drop_pilot_skill"))
 		controller.call("_select_mission_dropship_craft", "craft_j", false)
 		var fighter_skill: float = float(controller.call("_mission_drop_pilot_skill"))
-		check(is_equal_approx(dropship_skill, 0.9) and is_equal_approx(fighter_skill, 0.1), "the dropship flies with dropship_piloting, the fighter with fighter_piloting: %.2f / %.2f" % [dropship_skill, fighter_skill])
+		check(is_equal_approx(dropship_skill, 0.9) and is_equal_approx(fighter_skill, 0.1), "the dropship flies with dropship_piloting, the fighter (card craft_type fighter) with fighter_piloting: %.2f / %.2f" % [dropship_skill, fighter_skill])
+		# Campaign pilots carry no fighter_piloting (unset = -1): the fighter then flies with dropship_piloting as before LA.
+		pilot.set("fighter_piloting", -1.0)
+		var fallback_skill: float = float(controller.call("_mission_drop_pilot_skill"))
+		check(is_equal_approx(fallback_skill, 0.9), "a fighter pilot without fighter_piloting falls back to dropship_piloting: %.2f" % fallback_skill)
+		pilot.set("fighter_piloting", 0.1)
 		controller.call("_select_mission_dropship_craft", "craft_a", false)
 		controller.call("_set_selected_fireteams", PackedStringArray([team]), false)
 	# Card buttons.
@@ -130,20 +136,28 @@ func _ui_and_commands() -> void:
 		check(refreshed != null and bool(refreshed.get_meta("mission_dropship_card_command_active", false)), "the card shows Tief as the active path")
 	await _close(env)
 
-func _accident_run(path: String) -> void:
+## no_props: the mission's map carries no air-defence props (the loaded map data in memory is emptied, the
+## map file is untouched): the controller's "site without air defence" branch (vehicles.is_empty()) still rolls the accident.
+func _accident_run(path: String, no_props: bool = false) -> void:
 	var env: Dictionary = await _open_mission()
+	var tag: String = path + (" no air defence" if no_props else "")
 	if not bool(env.ok):
-		check(false, path + ": scenario exposes two fireteams")
+		check(false, tag + ": scenario exposes two fireteams")
 		await _close(env)
 		return
 	var mission: Node = env.mission
 	var controller: Node = env.controller
 	var registry: Node = env.registry
 	var team: String = String(env.teams[1])
+	if no_props:
+		var loaded_map = mission.get_node("MissionSetup").get("_loaded_terrain_map_data")
+		var presentation: Dictionary = loaded_map.get("_place_presentation")
+		presentation["props"] = []
+		check(Array(loaded_map.get_place_presentation().get("props", [])).is_empty(), tag + ": the mission map has no air-defence vehicles left (loaded data only, the map file is untouched)")
 	controller.call("_select_mission_dropship_craft", "craft_b", false)
 	controller.call("_set_selected_fireteams", PackedStringArray([team]), false)
 	var chosen: bool = bool(controller.call("apply_authoritative_dropship_command", {"command_type": "set_dropship_approach_path", "craft_id": "craft_b", "fireteam_id": team, "approach_path": path}))
-	check(chosen and String(controller.get("_current_approach_path")) == path, path + ": the path is chosen through the command path")
+	check(chosen and String(controller.get("_current_approach_path")) == path, tag + ": the path is chosen through the command path")
 	var base_grid: Vector2i = registry.call("world_to_grid", env.quiet_lz)
 	var simulation_root: Node = mission.get_node("SimulationRoot")
 	var done := false
@@ -171,7 +185,7 @@ func _accident_run(path: String) -> void:
 				# Same LZ, path Normal: no roll, no message, no stored status.
 				controller.call("_select_approach_path", "normal")
 				var calm: bool = bool(controller.call("_resolve_air_defense_on_approach", landing_lz))
-				check(calm and String(controller.get("_air_defense_feedback_text")).is_empty(), path + ": the same approach with Normal does not roll an accident")
+				check(calm and String(controller.get("_air_defense_feedback_text")).is_empty(), tag + ": the same approach with Normal does not roll an accident")
 				controller.call("_select_approach_path", path)
 				control_checked = true
 			var started: bool = bool(controller.call("_try_start_drop_sequence", true))
@@ -180,15 +194,15 @@ func _accident_run(path: String) -> void:
 			var text: String = String(controller.get("_last_command_text"))
 			var label: String = "Steilflug" if path == "steil" else "Tiefflug"
 			print(path, " accident approach: lz=", lz, " text=", text, " expected loss=", expected.hull_loss)
-			check(text == "Unfall im %s: Rumpf -%d %%." % [label, int(expected.hull_loss)], path + ": the card sentence names the accident and the hull loss: " + text)
-			check(String(_find_card(controller, "craft_b").get("card_feedback_text", "")) == text, path + ": the craft card shows the same sentence")
-			check(String(controller.get("_drop_sequence_phase")) == "inbound", path + ": the craft still flies on to its landing after the accident")
+			check(text == "Unfall im %s: Rumpf -%d %%." % [label, int(expected.hull_loss)], tag + ": the card sentence names the accident and the hull loss: " + text)
+			check(String(_find_card(controller, "craft_b").get("card_feedback_text", "")) == text, tag + ": the craft card shows the same sentence")
+			check(String(controller.get("_drop_sequence_phase")) == "inbound", tag + ": the craft still flies on to its landing after the accident")
 			for _frame in range(3):
 				await physics_frame
 			var status: Dictionary = simulation_root.call("get_air_asset_status_snapshot", "craft_b")
-			check(not status.is_empty() and int(status.get("integrity", -1)) == 100 - int(expected.hull_loss), path + ": SimulationRoot stores the hull value 100 - %d: %s" % [int(expected.hull_loss), str(status.get("integrity"))])
+			check(not status.is_empty() and int(status.get("integrity", -1)) == 100 - int(expected.hull_loss), tag + ": SimulationRoot stores the hull value 100 - %d: %s" % [int(expected.hull_loss), str(status.get("integrity"))])
 			done = true
-	check(done, path + ": an LZ with a fixed-seed accident was found and flown")
+	check(done, tag + ": an LZ with a fixed-seed accident was found and flown")
 	await _close(env)
 
 ## Tief beside the battery on open ground: nothing hides the Hagel, so the air defence still breaks the approach off.
@@ -224,7 +238,7 @@ func _find_path_button(node: Node, craft_id: String, path: String, key: String =
 	return null
 
 func _card(id: String, team: String, units: Array, lz: Vector2, model: String, pilot: String) -> Dictionary:
-	var card := {"craft_id": id, "model_id": model, "display_name": id, "payload_source": "homebase_direct", "state": "waiting", "progress": 0.0, "passenger_count": units.size(), "embarked_unit_ids": units, "boarded_fireteam_ids": [team], "has_lz_position": true, "lz_position": lz, "approach_angle": "NW"}
+	var card := {"craft_id": id, "model_id": model, "craft_type": "fighter" if model == "buccaneer" else "dropship", "display_name": id, "payload_source": "homebase_direct", "state": "waiting", "progress": 0.0, "passenger_count": units.size(), "embarked_unit_ids": units, "boarded_fireteam_ids": [team], "has_lz_position": true, "lz_position": lz, "approach_angle": "NW"}
 	if not pilot.is_empty():
 		card["pilot_unit_id"] = pilot
 	return card
