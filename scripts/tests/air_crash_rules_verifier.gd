@@ -132,5 +132,35 @@ func _run() -> void:
 	var d2: Dictionary = R.resolve_occupants("crash", ids, rules, 555)
 	check(d1 == d2, "occupants: same state gives the same result")
 
+	# Fixed values for the LCG step, computed by hand: (s * 1103515245 + 12345) & 0x7fffffff, roll = next / 2147483648.0.
+	# Same calculation as SimulationRoot.draw_air_ground_roll (simulation_root.gd:8455-8456); that is an instance method
+	# on a scene node, so it is not called here.
+	var fixed := [[1, 1103527590, 0.51387007813900709], [12345, 1406932606, 0.65515404846519232], [2147483647, 1043980748, 0.48614141903817654]]
+	for f in fixed:
+		var s: Dictionary = R._step(int(f[0]))
+		check(int(s.rng_state) == int(f[1]) and near(float(s.roll), float(f[2]), 1e-12), "LCG step from state %d gives %d" % [int(f[0]), int(f[1])])
+		var sd: Dictionary = R.resolve_shootdown(0.5, rules, int(f[0]))
+		check(int(sd.rng_state) == int(f[1]) and near(float(sd.roll), float(f[2]), 1e-12), "resolve_shootdown uses that step from state %d" % int(f[0]))
+
+	var forced: Dictionary = rules.duplicate()
+	forced["crash_dead_chance"] = 1.0
+	forced["crash_max_dead"] = 1
+	var one: Dictionary = R.resolve_occupants("crash", ids, forced, 77)
+	var others_alive := true
+	for i in range(1, ids.size()):
+		if one.results[ids[i]].state == "dead": others_alive = false
+	check(one.results["a"].state == "dead" and Array(one.dead_ids) == ["a"] and others_alive, "crash_dead_chance 1.0, max 1: exactly the first is dead")
+	forced["crash_max_dead"] = 2
+	var two: Dictionary = R.resolve_occupants("crash", ids, forced, 77)
+	var rest_alive := true
+	for i in range(2, ids.size()):
+		if two.results[ids[i]].state == "dead": rest_alive = false
+	check(Array(two.dead_ids) == ["a", "b"] and rest_alive, "crash_dead_chance 1.0, max 2: exactly two dead")
+
+	check(R.outcome_chances(0.5, {}).is_empty(), "outcome_chances with empty rules gives {}")
+	check(R.resolve_shootdown(0.5, {}, 1).is_empty(), "resolve_shootdown with empty rules gives {}")
+	check(R.resolve_occupants("crash", ids, {}, 1).is_empty(), "resolve_occupants with empty rules gives {}")
+	check(R.resolve_occupants("crash", ids, bad, 1).is_empty(), "resolve_occupants with invalid rules gives {}")
+
 	print("AIR_CRASH_RULES passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed else 0)

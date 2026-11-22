@@ -41,6 +41,9 @@ static func _step(rng_state: int) -> Dictionary:
 	return {"roll": float(next) / 2147483648.0, "rng_state": next}
 
 static func outcome_chances(pilot_skill: float, rules: Dictionary) -> Dictionary:
+	if not validate_rules(rules):
+		push_error("air_crash_rules: outcome_chances called with empty or invalid rules")
+		return {}
 	var p := 0.0 if is_nan(pilot_skill) else clampf(pilot_skill, 0.0, 1.0)
 	var explosion := clampf(float(rules.explosion_base) - float(rules.explosion_pilot_factor) * p, 0.0, 1.0)
 	var landing := clampf(float(rules.emergency_landing_base) + float(rules.emergency_landing_pilot_factor) * p, 0.0, 1.0)
@@ -56,6 +59,8 @@ static func outcome_for_roll(roll: float, chances: Dictionary) -> String:
 
 static func resolve_shootdown(pilot_skill: float, rules: Dictionary, rng_state: int) -> Dictionary:
 	var chances := outcome_chances(pilot_skill, rules)
+	if chances.is_empty():
+		return {}
 	var step := _step(rng_state)
 	return {"outcome": outcome_for_roll(float(step.roll), chances), "roll": step.roll, "chances": chances, "rng_state": step.rng_state}
 
@@ -63,6 +68,9 @@ static func _entry(state: String, loss: float) -> Dictionary:
 	return {"state": state, "health_loss_fraction": loss}
 
 static func resolve_occupants(outcome: String, occupant_ids: Array, rules: Dictionary, rng_state: int) -> Dictionary:
+	if not validate_rules(rules):
+		push_error("air_crash_rules: resolve_occupants called with empty or invalid rules")
+		return {}
 	if outcome != "explosion" and outcome != "emergency_landing" and outcome != "crash":
 		push_error("air_crash_rules: unknown outcome " + outcome)
 		return {}
