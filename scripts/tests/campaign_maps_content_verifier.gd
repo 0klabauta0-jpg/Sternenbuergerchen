@@ -42,43 +42,9 @@ func _run() -> void:
 			_check(String(scenario.enemy_groups[0].tactics.get("weapon_id",""))==("pistol" if id=="outpost_recovery" else "smg"), "loaded runtime retains explicit guard weapon: " + id)
 			var gates = GATES.new()
 			gates.configure_from_slice(scenario.vertical_slice)
-			# Je Gruppe die Zahl ihrer Wachen (der Auftrag mit Raketenwerfer hat zwei Gruppen).
-			var alive: Dictionary = {}
-			var down: Dictionary = {}
-			for group in scenario.enemy_groups:
-				alive[String(group.group_id)] = Array(group.get("enemy_ids", [])).size()
-				down[String(group.group_id)] = 0
-			var pending: Dictionary = gates.update({"enemy_group_fit_counts":alive})
+			var pending: Dictionary = gates.update({"enemy_group_fit_counts":{"outpost_guards":enemies}})
 			_check(not bool(pending.all_gates_complete) and Array(pending.completed_step_ids).is_empty(), "living guards block authored outpost gates: " + id)
-			if id == "outpost_chip_recovery":
-				# (i) nur die Wache mit der Maschinenpistole ausgeschaltet: Schritt NICHT erledigt, Chip bleibt gesperrt.
-				var smg_only: Dictionary = alive.duplicate()
-				smg_only["outpost_guards"] = 0
-				var gates_smg = GATES.new()
-				gates_smg.configure_from_slice(scenario.vertical_slice)
-				var partial: Dictionary = gates_smg.update({"enemy_group_fit_counts":smg_only})
-				_check(not Array(partial.completed_step_ids).has("clear_outpost") and not Array(partial.completed_step_ids).has("secure_outpost_chip"), "only the smg guard down: clear_outpost not done, chip stays locked")
-				var rocket_only: Dictionary = alive.duplicate()
-				rocket_only["outpost_guards_rocket"] = 0
-				var gates_rocket = GATES.new()
-				gates_rocket.configure_from_slice(scenario.vertical_slice)
-				_check(not Array(gates_rocket.update({"enemy_group_fit_counts":rocket_only}).completed_step_ids).has("clear_outpost"), "only the rocket guard down: clear_outpost not done")
-				var gates_unknown = GATES.new()
-				gates_unknown.configure_from_slice(scenario.vertical_slice)
-				_check(not Array(gates_unknown.update({"enemy_group_fit_counts":{"outpost_guards":0}}).completed_step_ids).has("clear_outpost"), "a group missing from the counts is not treated as down")
-				# Szenariodaten: Hin-und-Rueck-Serialisierung und unbekannte Gruppen-ID.
-				var kept := false
-				for step in Dictionary(scenario.to_dict().vertical_slice).flow_steps:
-					if String(step.step_id) == "clear_outpost": kept = Array(step.get("enemy_group_ids", [])) == ["outpost_guards", "outpost_guards_rocket"]
-				_check(kept, "enemy_group_ids survives load and save")
-				var raw_chip: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))
-				for flow_step in raw_chip.vertical_slice.flow_steps:
-					if String(flow_step.step_id) == "clear_outpost": flow_step["enemy_group_ids"] = ["outpost_guards", "no_such_group"]
-				var bad = SCENARIO.from_dict(raw_chip)
-				var has_unknown := false
-				for error in PackedStringArray(Dictionary(bad.validate()).get("errors", PackedStringArray())): has_unknown = has_unknown or String(error).contains("unknown group: no_such_group")
-				_check(has_unknown, "unknown group id in enemy_group_ids is a validation error")
-			var cleared: Dictionary = gates.update({"enemy_group_fit_counts":down})
+			var cleared: Dictionary = gates.update({"enemy_group_fit_counts":{"outpost_guards":0}})
 			_check(Array(cleared.completed_step_ids).has("clear_outpost") and not bool(cleared.all_gates_complete), "defeating guards still requires physical recovery and return: " + id)
 	for name in ["satellite_crash_site", "trade_outpost", "fortified_outpost"]:
 		var path: String = "res://maps/%s.json" % name

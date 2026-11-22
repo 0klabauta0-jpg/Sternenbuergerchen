@@ -156,7 +156,6 @@
         "step_id": "clear_outpost",
         "objective_type": "air_defense_shutdown",
         "enemy_group_id": "outpost_guards",
-        "enemy_group_ids": ["outpost_guards", "outpost_guards_rocket"],
         "required_state": "outpost_cleared",
         "target_marker_id": "spawn_enemy_defense",
         "min_hold_seconds": 0.0

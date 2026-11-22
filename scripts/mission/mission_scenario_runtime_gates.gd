@@ -108,23 +108,7 @@ func _evaluate_air_defense_step(step: Dictionary, context: Dictionary) -> Dictio
 		return _build_gate_entry(step, STATUS_COMPLETE, 1.0, 0.0, 0.0, "")
 	var enemy_group_id: String = String(step.get("enemy_group_id", "")).strip_edges()
 	var group_fit_counts: Dictionary = Dictionary(context.get("enemy_group_fit_counts", {}))
-	# Zusatz: enemy_group_ids (Liste) - erledigt erst, wenn JEDE genannte Gruppe bekannt und ohne kampffaehige Wache ist.
-	# Ohne die Liste gilt unveraendert nur enemy_group_id.
-	var group_ids: Array = []
-	for list_variant in Array(step.get("enemy_group_ids", [])):
-		var list_id: String = String(list_variant).strip_edges()
-		if not list_id.is_empty() and not group_ids.has(list_id):
-			group_ids.append(list_id)
-	if not group_ids.is_empty():
-		if not enemy_group_id.is_empty() and not group_ids.has(enemy_group_id):
-			group_ids.append(enemy_group_id)
-		var all_down: bool = true
-		for group_id in group_ids:
-			if not group_fit_counts.has(group_id) or int(group_fit_counts.get(group_id, 0)) > 0:
-				all_down = false
-		if all_down:
-			return _build_gate_entry(step, STATUS_COMPLETE, 1.0, 0.0, 0.0, "")
-	elif not enemy_group_id.is_empty() and group_fit_counts.has(enemy_group_id):
+	if not enemy_group_id.is_empty() and group_fit_counts.has(enemy_group_id):
 		if int(group_fit_counts.get(enemy_group_id, 0)) <= 0:
 			return _build_gate_entry(step, STATUS_COMPLETE, 1.0, 0.0, 0.0, "")
 	return _build_gate_entry(step, STATUS_ACTIVE, 0.0, 0.0, 0.0, "")
