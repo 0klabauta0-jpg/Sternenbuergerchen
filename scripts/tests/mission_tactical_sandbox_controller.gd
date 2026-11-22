@@ -509,6 +509,7 @@ var _current_phase_index: int = 1
 var _current_approach_index: int = 0
 var _current_approach_style: String = "normal" # per selected craft, like _current_approach_index
 var _current_approach_path: String = "normal" # steil / normal / tief, per selected craft like the style (task LA)
+var _current_arrival_mode: String = "land" # land / circle, per selected craft like the path (task LB)
 var _selected_fireteam_ids: PackedStringArray = []
 var _default_fireteam_selection_initialized: bool = false
 var _focused_fireteam_id: String = ""
@@ -665,6 +666,9 @@ var _drop_sequence_timer: float = 0.0
 var _drop_sequence_position: Vector2 = Vector2.ZERO
 var _drop_sequence_fireteam_name: String = "ALL"
 var _drop_sequence_visual_only: bool = false
+var _drop_sequence_circle_reason: String = "" # root refusal reason behind the sentence below (kept for diagnosis and tests)
+var _drop_sequence_circle_note: String = "" # sentence "Kreisen nicht möglich: ..." shown instead of "Touchdown" after a refused circling arrival
+var _drop_sequence_arrival_mode: String = "land" # fixed when the sequence starts (task LB); "circle" = stay airborne at the end of inbound
 var _drop_sequence_craft_id: String = ""
 var _drop_sequence_display_name: String = ""
 var _drop_sequence_lz_position: Vector2 = Vector2.ZERO
@@ -1244,6 +1248,8 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		_current_approach_style = AIR_DEFENSE_PLAN.sanitize_style(String(planning_state.get("approach_style", "")))
 	if planning_state.has("approach_path"):
 		_current_approach_path = AIR_DEFENSE_PLAN.sanitize_path(String(planning_state.get("approach_path", "")))
+	if planning_state.has("arrival_mode"):
+		_current_arrival_mode = AIR_DEFENSE_PLAN.sanitize_arrival_mode(String(planning_state.get("arrival_mode", "")))
 	if planning_state.has("has_lz_position"):
 		_has_lz_position = bool(planning_state.get("has_lz_position", false))
 	if planning_state.has("lz_position"):
@@ -1303,6 +1309,8 @@ func set_planning_state(planning_state: Dictionary) -> void:
 					selected_drop_card["approach_style"] = planning_state["approach_style"]
 				if planning_state.has("approach_path") and (planning_has_lz_position or not selected_drop_card.has("approach_path")):
 					selected_drop_card["approach_path"] = planning_state["approach_path"]
+				if planning_state.has("arrival_mode") and (planning_has_lz_position or not selected_drop_card.has("arrival_mode")):
+					selected_drop_card["arrival_mode"] = planning_state["arrival_mode"]
 				if not selected_drop_card.has("drop_ship_requested") and planning_state.has("drop_ship_requested"):
 					selected_drop_card["drop_ship_requested"] = bool(planning_state.get("drop_ship_requested", false))
 				if not selected_drop_card.has("drop_ship_staged") and planning_state.has("drop_ship_staged"):
@@ -1480,6 +1488,7 @@ func get_planning_state() -> Dictionary:
 		"approach_angle": _get_approach_angle_name(),
 		"approach_style": _current_approach_style,
 		"approach_path": _current_approach_path,
+		"arrival_mode": _current_arrival_mode,
 		"drop_ship_requested": _drop_ship_requested,
 		"drop_ship_staged": _drop_ship_staged,
 		"mission_drop_source": _mission_drop_source,
@@ -2615,6 +2624,8 @@ func _does_authoritative_dropship_card_satisfy_pending(card: Dictionary, pending
 			return AIR_DEFENSE_PLAN.sanitize_style(String(card.get("approach_style", ""))) == AIR_DEFENSE_PLAN.sanitize_style(String(payload.get("approach_style", "")))
 		"set_dropship_approach_path":
 			return AIR_DEFENSE_PLAN.sanitize_path(String(card.get("approach_path", ""))) == AIR_DEFENSE_PLAN.sanitize_path(String(payload.get("approach_path", "")))
+		"set_dropship_arrival_mode":
+			return AIR_DEFENSE_PLAN.sanitize_arrival_mode(String(card.get("arrival_mode", ""))) == AIR_DEFENSE_PLAN.sanitize_arrival_mode(String(payload.get("arrival_mode", "")))
 		"call_dropship":
 			return String(card.get("state", "")).strip_edges().to_lower() != "waiting"
 		"return_dropship":
@@ -2632,6 +2643,8 @@ func _build_dropship_command_action_label(command_type: String) -> String:
 			return "ANFLUGSTIL"
 		"set_dropship_approach_path":
 			return "ANFLUGART"
+		"set_dropship_arrival_mode":
+			return "ANKUNFT"
 		"call_dropship":
 			return "DROP"
 		"return_dropship":
@@ -2675,6 +2688,8 @@ func apply_authoritative_dropship_command(command: Dictionary) -> bool:
 			return _select_approach_style(String(command.get("approach_style", "")))
 		"set_dropship_approach_path":
 			return _select_approach_path(String(command.get("approach_path", "")))
+		"set_dropship_arrival_mode":
+			return _select_arrival_mode(String(command.get("arrival_mode", "")))
 		"call_dropship":
 			_request_selected_mission_dropship_drop(true, true)
 			return true
@@ -3833,6 +3848,19 @@ func _select_approach_path(path_name: String) -> bool:
 		return false
 	_current_approach_path = path
 	_last_command_text = "ANFLUGART %s" % String(AIR_DEFENSE_PLAN.PATH_LABELS.get(path, path))
+	_store_selected_mission_dropship_plan()
+	_update_ui()
+	_emit_planning_state_changed()
+	return true
+
+
+## Arrival mode (land / circle): same route as the path. Unknown modes are rejected (task LB).
+func _select_arrival_mode(mode_name: String) -> bool:
+	var mode: String = AIR_DEFENSE_PLAN.normalize_arrival_mode(mode_name)
+	if mode.is_empty():
+		return false
+	_current_arrival_mode = mode
+	_last_command_text = "ANKUNFT %s" % String(AIR_DEFENSE_PLAN.ARRIVAL_LABELS.get(mode, mode))
 	_store_selected_mission_dropship_plan()
 	_update_ui()
 	_emit_planning_state_changed()
@@ -12172,6 +12200,8 @@ func _sanitize_mission_dropship_card(card: Dictionary) -> Dictionary:
 		result["approach_style"] = AIR_DEFENSE_PLAN.sanitize_style(String(card.get("approach_style", "")))
 	if card.has("approach_path"):
 		result["approach_path"] = AIR_DEFENSE_PLAN.sanitize_path(String(card.get("approach_path", "")))
+	if card.has("arrival_mode"):
+		result["arrival_mode"] = AIR_DEFENSE_PLAN.sanitize_arrival_mode(String(card.get("arrival_mode", "")))
 	if card.has("drop_ship_requested"):
 		result["drop_ship_requested"] = bool(card.get("drop_ship_requested", false))
 	if card.has("drop_ship_staged"):
@@ -12436,6 +12466,7 @@ func _write_current_mission_dropship_state_to_card(card: Dictionary) -> Dictiona
 	result["approach_angle"] = _get_approach_angle_name()
 	result["approach_style"] = _current_approach_style
 	result["approach_path"] = _current_approach_path
+	result["arrival_mode"] = _current_arrival_mode
 	result["drop_ship_requested"] = _drop_ship_requested
 	result["drop_ship_staged"] = _drop_ship_staged
 	if not _mission_drop_source.is_empty() and not result.has("payload_source"):
@@ -12667,6 +12698,10 @@ func _apply_mission_dropship_card_selection(card: Dictionary) -> void:
 		_current_approach_path = AIR_DEFENSE_PLAN.sanitize_path(String(card.get("approach_path", "")))
 	elif card_count > 1:
 		_current_approach_path = AIR_DEFENSE_PLAN.DEFAULT_APPROACH_PATH
+	if card.has("arrival_mode"):
+		_current_arrival_mode = AIR_DEFENSE_PLAN.sanitize_arrival_mode(String(card.get("arrival_mode", "")))
+	elif card_count > 1:
+		_current_arrival_mode = AIR_DEFENSE_PLAN.DEFAULT_ARRIVAL_MODE
 	if card.has("has_lz_position"):
 		_has_lz_position = bool(card.get("has_lz_position", false))
 		_lz_position = _coerce_vector2_value(card.get("lz_position", Vector2.ZERO), Vector2.ZERO)
@@ -13326,6 +13361,7 @@ func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, ca
 	_append_mission_dropship_card_command_row(host, card)
 	_append_mission_dropship_card_approach_style_row(host, card)
 	_append_mission_dropship_card_approach_path_row(host, card)
+	_append_mission_dropship_card_arrival_mode_row(host, card)
 	_append_air_support_card_row(host, card)
 	var content_changed := _refresh_mission_dropship_card_command_row(host, card)
 	var feedback_text: String = _get_mission_dropship_card_feedback_text(card)
@@ -13353,7 +13389,7 @@ func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, ca
 		return content_changed
 	host.set_meta("mission_dropship_payload_rendered_fields", payload_fields)
 	for child in host.get_children():
-		if child.name in ["MissionDropshipCardCommandRow", "MissionDropshipApproachStyleRow", "MissionDropshipApproachPathRow", "AirSupportCardRow", "MissionDropshipCardFeedbackLabel"]:
+		if child.name in ["MissionDropshipCardCommandRow", "MissionDropshipApproachStyleRow", "MissionDropshipApproachPathRow", "MissionDropshipArrivalModeRow", "AirSupportCardRow", "MissionDropshipCardFeedbackLabel"]:
 			continue
 		host.remove_child(child)
 		child.queue_free()
@@ -13517,9 +13553,59 @@ func _append_mission_dropship_card_approach_path_row(host: VBoxContainer, card: 
 		row.add_child(button)
 
 
+## True where the air support row (Start / Fliegen / Landen / Feuer) is offered; the arrival row (LB) shows exactly there.
+func _is_air_support_offered() -> bool:
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	return simulation != null and simulation.get("_air_support_source") != null and String(get_parent().get_meta("location_id", "")) != "polisa"
+
+
+## Arrival mode (task LB): row "Ankunft: Landen / Kreisen" under the path row, only where air support is offered.
+func _append_mission_dropship_card_arrival_mode_row(host: VBoxContainer, card: Dictionary) -> void:
+	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+	if host == null or craft_id.is_empty() or host.get_node_or_null("MissionDropshipArrivalModeRow") != null or not _is_air_support_offered():
+		return
+	var row := HBoxContainer.new()
+	row.name = "MissionDropshipArrivalModeRow"
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", 1)
+	row.set_meta("mission_dropship_card_arrival_mode_row", true)
+	row.set_meta("mission_dropship_craft_id", craft_id)
+	host.add_child(row)
+	var row_label := Label.new()
+	row_label.text = "Ankunft:"
+	row_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row_label.add_theme_font_size_override("font_size", MISSION_DROPSHIP_APPROACH_BUTTON_FONT_SIZE)
+	row.add_child(row_label)
+	var active_mode: String = AIR_DEFENSE_PLAN.sanitize_arrival_mode(String(card.get("arrival_mode", _current_arrival_mode)))
+	var disabled: bool = _is_network_dropship_command_pending(craft_id) or not _can_request_mission_dropship_card_lz(card)
+	for mode in AIR_DEFENSE_PLAN.ARRIVAL_MODES:
+		var button := _build_mission_dropship_card_command_button(String(AIR_DEFENSE_PLAN.ARRIVAL_LABELS[mode]), _arrival_mode_tooltip(String(mode)), disabled,
+			Callable(self, "_on_mission_dropship_card_arrival_mode_pressed").bind(craft_id, String(mode)), craft_id, "arrival_%s" % String(mode), String(mode) == active_mode)
+		button.custom_minimum_size = Vector2(0.0, MISSION_DROPSHIP_APPROACH_BUTTON_SIZE.y)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.set_meta("mission_dropship_arrival_mode", String(mode))
+		row.add_child(button)
+
+
+func _arrival_mode_tooltip(mode: String) -> String:
+	if mode == AIR_DEFENSE_PLAN.ARRIVAL_CIRCLE:
+		return AIR_DEFENSE_PLAN.ARRIVAL_CIRCLE_HINT
+	return "Das Schiff landet auf der Landezone und der Trupp steigt aus."
+
+
+func _on_mission_dropship_card_arrival_mode_pressed(craft_id: String, mode_name: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty() or not _select_mission_dropship_craft(normalized_craft_id, false):
+		return
+	if _should_route_dropship_command_through_network_authority():
+		request_network_authoritative_dropship_command("set_dropship_arrival_mode", normalized_craft_id, _get_dropship_command_fireteam_id(normalized_craft_id), {"arrival_mode": AIR_DEFENSE_PLAN.sanitize_arrival_mode(mode_name)})
+		return
+	_select_arrival_mode(mode_name)
+
+
 func _append_air_support_card_row(host: VBoxContainer, card: Dictionary) -> void:
 	var simulation: Node = get_node_or_null("../SimulationRoot")
-	if host == null or host.get_node_or_null("AirSupportCardRow") != null or simulation == null or simulation.get("_air_support_source") == null or String(get_parent().get_meta("location_id", "")) == "polisa": return
+	if host == null or host.get_node_or_null("AirSupportCardRow") != null or not _is_air_support_offered(): return
 	var craft_id := String(card.get("craft_id", ""))
 	if craft_id.is_empty(): return
 	var row := GridContainer.new()
@@ -13594,6 +13680,13 @@ func _refresh_mission_dropship_card_command_row(host: VBoxContainer, card: Dicti
 			if path_button is Button:
 				var path_id: String = String(path_button.get_meta("mission_dropship_approach_path", ""))
 				changed = _apply_mission_dropship_command_button_delta(path_button, path_button.text, AIR_DEFENSE_PLAN.path_tooltip(path_id, path_skill), lz_disabled, path_id == active_path) or changed
+	var arrival_row := host.get_node_or_null("MissionDropshipArrivalModeRow")
+	if arrival_row != null:
+		var active_mode: String = AIR_DEFENSE_PLAN.sanitize_arrival_mode(String(card.get("arrival_mode", _current_arrival_mode)))
+		for mode_button in arrival_row.get_children():
+			if mode_button is Button:
+				var mode_id: String = String(mode_button.get_meta("mission_dropship_arrival_mode", ""))
+				changed = _apply_mission_dropship_command_button_delta(mode_button, mode_button.text, _arrival_mode_tooltip(mode_id), lz_disabled, mode_id == active_mode) or changed
 	return changed
 
 
@@ -36633,13 +36726,38 @@ func _update_primary_drop_sequence(delta: float) -> void:
 			if _is_active_drop_sequence_for_craft(_mission_drop_craft_id):
 				_mission_drop_progress = _build_active_drop_sequence_progress_value()
 			_store_active_drop_sequence_card()
+			if _drop_sequence_arrival_mode == AIR_DEFENSE_PLAN.ARRIVAL_CIRCLE and not _drop_sequence_visual_only and _drop_sequence_position.distance_to(_drop_sequence_lz_position) <= 2.0 and _drop_sequence_timer >= 1.25:
+				# Task LB: arrive in the air. No landed/unloading phase, the troop stays aboard.
+				var circle: Dictionary = _begin_circling_arrival(_drop_sequence_craft_id, _drop_sequence_lz_position)
+				if bool(circle.get("ok", false)):
+					_drop_sequence_position = _drop_sequence_lz_position
+					_drop_sequence_phase = DROP_SEQUENCE_COMPLETE
+					_drop_sequence_timer = 0.0
+					_mission_drop_progress = 100.0
+					_last_command_text = "Schiff kreist über der Landezone"
+					_set_mission_dropship_card_feedback(_drop_sequence_craft_id, "Kreist über der Landezone")
+					_store_active_drop_sequence_card()
+					_store_selected_mission_dropship_plan()
+					_emit_planning_state_changed()
+					_update_ui()
+					_refresh_world_overlays()
+					return
+				_drop_sequence_arrival_mode = AIR_DEFENSE_PLAN.ARRIVAL_LAND
+				_drop_sequence_circle_reason = String(circle.get("reason", ""))
+				_drop_sequence_circle_note = _circle_refusal_message(_drop_sequence_circle_reason)
+				_last_command_text = _drop_sequence_circle_note
+				_set_mission_dropship_card_feedback(_drop_sequence_craft_id, _drop_sequence_circle_note)
 			if _drop_sequence_position.distance_to(_drop_sequence_lz_position) <= 2.0 and (not _should_keep_campaign_dropship_landed() or _drop_sequence_timer >= 1.25) and _ground_ship_touchdown_ready(_drop_sequence_craft_id,_drop_sequence_lz_position,_drop_sequence_visual_only):
 				_drop_sequence_position = _drop_sequence_lz_position
 				_drop_sequence_phase = DROP_SEQUENCE_LANDED
 				_drop_sequence_timer = 0.0
 				_last_command_text = "DROPSHIP LANDED" if _drop_sequence_visual_only else "TOUCHDOWN %s" % _drop_sequence_fireteam_name
 				if not _drop_sequence_visual_only:
-					_set_mission_dropship_card_feedback(_drop_sequence_craft_id, "Touchdown")
+					# A refused circling arrival keeps its sentence on the card instead of the plain "Touchdown".
+					if not _drop_sequence_circle_note.is_empty():
+						_last_command_text = _drop_sequence_circle_note
+					_set_mission_dropship_card_feedback(_drop_sequence_craft_id, _drop_sequence_circle_note if not _drop_sequence_circle_note.is_empty() else "Touchdown")
+					_drop_sequence_circle_note = ""
 				_store_active_drop_sequence_card()
 				_update_ui()
 			_refresh_world_overlays()
@@ -36772,14 +36890,32 @@ func _update_drop_sequence_dict(sequence: Dictionary, delta: float) -> bool:
 			sequence["position"] = position
 			if _should_keep_campaign_dropship_landed() and position.distance_to(lz_position) <= 2.0:
 				sequence["timer"] = float(sequence.get("timer",0.0)) + delta
+			if String(sequence.get("arrival_mode", "")) == AIR_DEFENSE_PLAN.ARRIVAL_CIRCLE and not bool(sequence.get("visual_only", false)) and position.distance_to(lz_position) <= 2.0 and float(sequence.get("timer",0.0)) >= 1.25:
+				# Task LB: same weiche as the primary sequence; the troop stays aboard.
+				var circle: Dictionary = _begin_circling_arrival(String(sequence.get("craft_id", "")).strip_edges(), lz_position)
+				if bool(circle.get("ok", false)):
+					sequence["position"] = lz_position
+					sequence["phase"] = DROP_SEQUENCE_COMPLETE
+					sequence["timer"] = 0.0
+					sequence["progress"] = 100.0
+					sequence["card_feedback_text"] = "Kreist über der Landezone"
+					_set_mission_dropship_card_feedback(String(sequence.get("craft_id", "")).strip_edges(), "Kreist über der Landezone")
+					_last_command_text = "Schiff kreist über der Landezone"
+					return true
+				sequence["arrival_mode"] = AIR_DEFENSE_PLAN.ARRIVAL_LAND
+				sequence["circle_note"] = _circle_refusal_message(String(circle.get("reason", "")))
+				_last_command_text = String(sequence.circle_note)
+				_set_mission_dropship_card_feedback(String(sequence.get("craft_id", "")).strip_edges(), String(sequence.circle_note))
 			if position.distance_to(lz_position) <= 2.0 and (not _should_keep_campaign_dropship_landed() or float(sequence.get("timer",0.0)) >= 1.25) and _ground_ship_touchdown_ready(String(sequence.get("craft_id","")),lz_position,bool(sequence.get("visual_only",false))):
 				sequence["position"] = lz_position
 				sequence["phase"] = DROP_SEQUENCE_LANDED
 				sequence["timer"] = 0.0
 				if bool(sequence.get("service_reentry", false)): record_polisa_service_landing(sequence)
 				if not bool(sequence.get("visual_only", false)):
-					sequence["card_feedback_text"] = "Touchdown"
-					_set_mission_dropship_card_feedback(String(sequence.get("craft_id", "")).strip_edges(), "Touchdown")
+					var landing_note: String = String(sequence.get("circle_note", ""))
+					sequence["circle_note"] = ""
+					sequence["card_feedback_text"] = landing_note if not landing_note.is_empty() else "Touchdown"
+					_set_mission_dropship_card_feedback(String(sequence.get("craft_id", "")).strip_edges(), landing_note if not landing_note.is_empty() else "Touchdown")
 					_last_command_text = "TOUCHDOWN %s" % String(sequence.get("fireteam_name", "ALL")).strip_edges()
 			return true
 		DROP_SEQUENCE_LANDED:
@@ -37235,6 +37371,8 @@ func _capture_active_drop_sequence() -> Dictionary:
 		"position": _drop_sequence_position,
 		"fireteam_name": _drop_sequence_fireteam_name,
 		"visual_only": _drop_sequence_visual_only,
+		"arrival_mode": _drop_sequence_arrival_mode,
+		"circle_note": _drop_sequence_circle_note,
 		"craft_id": _drop_sequence_craft_id,
 		"display_name": _drop_sequence_display_name,
 		"lz_position": _drop_sequence_lz_position,
@@ -37263,7 +37401,48 @@ func _prepare_drop_sequence_context() -> void:
 	_drop_sequence_display_name = _mission_drop_display_name if not _mission_drop_display_name.is_empty() else "Dropship"
 	_drop_sequence_lz_position = Vector2(Dictionary(_field_landing_by_craft.get(_mission_drop_craft_id, {})).get("resolved_lz_position", _lz_position))
 	_drop_sequence_approach_angle = _get_approach_angle_name()
+	_drop_sequence_arrival_mode = _effective_arrival_mode()
 	_drop_sequence_embarked_unit_ids = _build_drop_unit_state_dict(_build_sorted_drop_unit_id_array(_embarked_unit_ids))
+
+
+## "circle" only where the arrival can really stay airborne: campaign landings that offer air support (E1). Else "land".
+func _effective_arrival_mode() -> String:
+	if _current_arrival_mode == AIR_DEFENSE_PLAN.ARRIVAL_CIRCLE and not preview_mode and _should_keep_campaign_dropship_landed() and _is_air_support_offered():
+		return AIR_DEFENSE_PLAN.ARRIVAL_CIRCLE
+	return AIR_DEFENSE_PLAN.ARRIVAL_LAND
+
+
+## Reason text of a refused circling arrival (one German half sentence per refusal reason of the root entry).
+func _circle_refusal_text(reason: String) -> String:
+	match reason:
+		"pilot_not_aboard", "pilot_unavailable", "pilot_presence_unknown", "pilot_assignment_changed", "pilot_boarding_pending", "boarding_owner_unavailable", "pilot_not_assigned_to_craft", "crew_unavailable", "crew_not_aboard":
+			return "kein Pilot an Bord"
+		"no_planetary_atmosphere":
+			return "hier gibt es keine Atmosphäre"
+		"systems_unavailable", "equipment_unavailable":
+			return "die Schiffssysteme sind ausgefallen"
+		"already_airborne":
+			return "das Schiff ist schon in der Luft"
+		"occupied_or_invalid_footprint", "map_edge", "invalid_landing_site", "landing_position_unavailable":
+			return "die Zelle über der Landezone ist belegt"
+		"ground_unavailable", "invalid_context", "simulation_busy", "air_source_unavailable", "air_source_changed", "mission_context_changed", "craft_not_at_location", "air_owner_unavailable", "craft_not_ready":
+			return "die Luftunterstützung ist hier nicht bereit"
+	return "Grund: %s" % reason
+
+
+## End of inbound for a circling arrival: ask the root for the air sortie. Returns {"ok":bool,"reason":String}.
+func _begin_circling_arrival(craft_id: String, lz_position: Vector2) -> Dictionary:
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	if simulation == null or not simulation.has_method("request_air_support_arrival"):
+		return {"ok": false, "reason": "air_source_unavailable"}
+	var result: Dictionary = Dictionary(simulation.call("request_air_support_arrival", craft_id, lz_position))
+	if bool(result.get("ok", false)):
+		return {"ok": true}
+	return {"ok": false, "reason": String(result.get("reason", "unknown"))}
+
+
+func _circle_refusal_message(reason: String) -> String:
+	return "Kreisen nicht möglich: %s – das Schiff landet." % _circle_refusal_text(reason)
 
 
 func _clear_drop_sequence_context(preserve_hex_admission:bool=false) -> void:
@@ -37276,6 +37455,9 @@ func _clear_drop_sequence_context(preserve_hex_admission:bool=false) -> void:
 	_drop_sequence_timer = 0.0
 	_drop_sequence_fireteam_name = "ALL"
 	_drop_sequence_visual_only = false
+	_drop_sequence_arrival_mode = AIR_DEFENSE_PLAN.ARRIVAL_LAND
+	_drop_sequence_circle_note = ""
+	_drop_sequence_circle_reason = ""
 	_drop_sequence_craft_id = ""
 	_drop_sequence_display_name = ""
 	_drop_sequence_lz_position = Vector2.ZERO
