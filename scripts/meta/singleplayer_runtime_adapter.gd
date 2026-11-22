@@ -2107,6 +2107,27 @@ func advance_debt_interest(delta: float) -> Dictionary:
 	if _supply == null or not _campaign_mode: return {"ok": true, "charges": [], "credits": 0}
 	return _supply.advance_debt_clock(delta)
 
+## Abschnitt P: Pleite-Pruefung. Sammelt Kontostand, Kreditrahmen und den Treibstoffzustand jedes eigenen Schiffs (get_fuel_status, dazu ob
+## fuer das Schiff ein Nottanker bestellt ist) und fragt die reine Regel (campaign_bankruptcy_rules.gd). Nur lesend. Ausserhalb der Kampagne
+## und ohne Versorgungsstand: nie pleite.
+func get_bankruptcy_check() -> Dictionary:
+	var result := {"bankrupt": false, "reason": "no_campaign", "credits": 0, "debt_limit": 0}
+	if _supply == null or not _campaign_mode or _flow == null: return result
+	var open_orders: Dictionary = _supply.get_open_tanker_orders()
+	var ordered: Dictionary = {}
+	for order: Dictionary in open_orders.values(): ordered[String(order.get("craft_id", ""))] = true
+	var states: Array = []
+	for definition: Variant in Array(_flow.get("_homebase_aircraft_definitions")):
+		var craft_id := String(Dictionary(definition).get("craft_id", ""))
+		var status: Dictionary = get_fuel_status(craft_id)
+		if status.is_empty(): continue
+		status["tanker_order_open"] = ordered.has(craft_id)
+		states.append(status)
+	result = load("res://scripts/core/campaign_bankruptcy_rules.gd").is_bankrupt(_supply.get_credits(), _supply.get_debt_limit(), states)
+	result["credits"] = _supply.get_credits()
+	result["debt_limit"] = _supply.get_debt_limit()
+	return result
+
 ## Gefallenenliste der Kampagne (Besitzer: dieser Adapter). Eintrag: unit_id, display_name, job_id, location_id.
 ## Seit dem Respawn zusaetzlich optional: reason ("respawn_limit"), respawns_used, respawn_limit (ganze Zahlen >= 0);
 ## alte Eintraege ohne diese Felder bleiben gueltig und unveraendert.

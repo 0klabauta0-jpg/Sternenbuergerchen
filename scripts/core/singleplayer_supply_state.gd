@@ -1192,6 +1192,10 @@ func advance_debt_clock(delta: float) -> Dictionary:
 func get_debt_interest_remaining() -> float:
 	return _debt_remaining if _credits < 0 else -1.0
 
+## Kreditrahmen aus dem Block debt (Abschnitt P, Pleite) oder 0, wenn die Daten keinen Block haben (dann gibt es keine Pleite).
+func get_debt_limit() -> int:
+	return int(Dictionary(_definitions.get("debt", {})).get("debt_limit", 0))
+
 func get_modular_base() -> Dictionary:
 	if _modular_plan_cache_revision != _revision:
 		var replay: Dictionary = MODULAR.replay(_requests)
