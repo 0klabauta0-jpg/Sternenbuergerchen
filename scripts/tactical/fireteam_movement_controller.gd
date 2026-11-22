@@ -4,7 +4,6 @@ extends RefCounted
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const FIRETEAM_BEHAVIOR_PROFILE_SCRIPT: GDScript = preload("res://scripts/command/fireteam_behavior_profile.gd")
 const TACTICAL_COMMAND_RULES_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_command_rules.gd")
-const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 
 const ADVANCE_STYLE_RUSH: String = FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_RUSH
 const ADVANCE_STYLE_BOUNDING: String = FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_BOUNDING
@@ -1095,10 +1094,8 @@ func _resolve_occupied_hex_formation_targets(simulation_root,member_records:Arra
 	var ids:PackedStringArray=_packed_unit_ids(member_records)
 	var snapshot:Dictionary=simulation_root.get_hex_ground_planning_snapshot()
 	var result:Dictionary=targets.duplicate()
-	var current_positions:Dictionary=_build_current_positions(member_records)
 	var changed:=false
 	for id in ids:
-		if not result.has(id):continue
 		var grid:Vector2i=terrain_registry.world_to_grid(result[id])
 		var occupant:String=String(snapshot.occupant_by_grid.get(grid,""))
 		if occupant.is_empty() or occupant==id:continue
@@ -1115,37 +1112,9 @@ func _resolve_occupied_hex_formation_targets(simulation_root,member_records:Arra
 			if other!=id and other_grid!=grid:excluded.append(other_grid)
 		var plan:Dictionary=simulation_root.plan_hex_ground_actor_approach(PackedStringArray([id]),result[id],128.0,excluded)
 		if plan.get("ok",false):
-			var replacement:Vector2=plan.targets[id]
-			# Prefer the free neighbor closest to the approaching unit over the
-			# planner's first cell, which may lie behind the occupier.
-			if current_positions.has(id):
-				var near:Dictionary=_nearest_free_neighbor_goal(simulation_root,terrain_registry,id,grid,Vector2(current_positions[id]),excluded)
-				if near.has("target"):replacement=near.target
-			result[id]=replacement
+			result[id]=plan.targets[id]
 			changed=true
 	return result if changed else {}
-
-
-## Free neighboring cell of an occupied goal that lies closest (world distance)
-## to the approaching unit. Each candidate is validated by Root's own planner,
-## so admission and walkability rules stay with Root. Returns {} if none.
-func _nearest_free_neighbor_goal(simulation_root,terrain_registry,unit_id:String,goal_grid:Vector2i,from_world:Vector2,excluded:Array[Vector2i])->Dictionary:
-	var candidates:Array=[]
-	for neighbor in HEX_GRID_SCRIPT.neighbors(goal_grid):
-		if excluded.has(neighbor):continue
-		candidates.append({"grid":neighbor,"world":terrain_registry.grid_to_world(neighbor)})
-	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
-		var da:float=Vector2(a.world).distance_squared_to(from_world)
-		var db:float=Vector2(b.world).distance_squared_to(from_world)
-		if not is_equal_approx(da,db):return da<db
-		var ga:Vector2i=a.grid
-		var gb:Vector2i=b.grid
-		return ga.x<gb.x or (ga.x==gb.x and ga.y<gb.y))
-	for candidate in candidates:
-		var check:Dictionary=simulation_root.plan_hex_ground_actor_approach(PackedStringArray([unit_id]),candidate.world,8.0,excluded)
-		if check.get("ok",false) and terrain_registry.world_to_grid(check.targets[unit_id])==candidate.grid:
-			return {"target":Vector2(check.targets[unit_id])}
-	return {}
 
 
 func _resolve_completion_targets(state: Dictionary, member_records: Array, final_target_position: Vector2) -> Dictionary:
@@ -1489,14 +1458,6 @@ func _reissue_current_stage(state: Dictionary, member_records: Array, simulation
 		var spacing_diagnostic: Dictionary = Dictionary(target_resolution.get("diagnostic", {}))
 		if not spacing_diagnostic.is_empty():
 			target_spacing_debug.append(spacing_diagnostic)
-		# Same occupied-goal repair as _issue_stage: a goal that became occupied
-		# after the stage was issued moves once to a free neighbor. The repaired
-		# cell is stored below, so later ticks see a free goal and issue it again unchanged.
-		var reissue_candidates:Dictionary=current_target_positions.duplicate()
-		reissue_candidates.merge(accepted_moving_targets,true)
-		reissue_candidates[unit_id]=walkable_target
-		var reissue_repaired:Dictionary=_resolve_occupied_hex_formation_targets(simulation_root,member_records,reissue_candidates,terrain_registry,moving_unit_ids)
-		if not reissue_repaired.is_empty():walkable_target=Vector2(reissue_repaired[unit_id])
 		move_target = walkable_target
 		accepted_moving_targets[unit_id] = move_target
 		current_target_positions[unit_id] = move_target
