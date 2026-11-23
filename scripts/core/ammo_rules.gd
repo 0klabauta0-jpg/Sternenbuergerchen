@@ -46,6 +46,13 @@ static func compartment_capacity(armor_id: String, rules: Dictionary) -> int:
 		return int(by_armor[armor_id])
 	return int(rules.get("default_compartment_capacity", 0))
 
+## Faktor auf reload_ticks der Waffe fuer die Nachladezeit im Gefecht (M4a); ohne Eintrag 6, nie unter 1.
+const DEFAULT_RELOAD_SCALE := 6
+
+static func reload_scale(rules: Dictionary) -> int:
+	var value: Variant = rules.get("reload_scale", DEFAULT_RELOAD_SCALE)
+	return maxi(1, int(value)) if _is_number(value) else DEFAULT_RELOAD_SCALE
+
 static func is_ammo_item(item_id: String, rules: Dictionary) -> bool:
 	return Dictionary(rules.get("ammo_items", {})).has(item_id)
 

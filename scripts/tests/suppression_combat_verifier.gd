@@ -206,6 +206,7 @@ func _rig(specs: Array, seed_value: int = 7) -> Dictionary:
 	scope.add_child(cache)
 	cache.begin_tick(1)
 	var driver := QuietDriver.new()
+	driver.ammo_enabled = false  # zaehlt Gelegenheiten und Schuesse ueber viele Schritte; die Munition prueft ammo_combat_verifier
 	driver.name = "CombatLoopDriver"
 	driver.friendly_team_id = "blue"
 	driver.contact_range = 1000.0

@@ -265,6 +265,16 @@ func _armor_of_person_for_supply(unit_id: String) -> String:
 	if _personnel_loadout_owner == null or not bool(_personnel_loadout_owner.call("has_unit", unit_id)): return ""
 	return String(Dictionary(_personnel_loadout_owner.call("get_loadout", unit_id)).get("armor", ""))
 
+## Reservemagazine einer Person fuer das Gefecht (M4a). Ohne Versorgung (Tests, Skirmish) hat niemand Reserve.
+func get_person_magazine_count(unit_id: String, ammo_class: String) -> int:
+	if _singleplayer_supply_owner == null or not _singleplayer_supply_owner.has_method("person_magazine_count"): return 0
+	return int(_singleplayer_supply_owner.call("person_magazine_count", unit_id, ammo_class))
+
+## Zieht ein Reservemagazin ab (Nachladen); nur der Host fuehrt das Gefecht, also auch nur er bucht den Verbrauch.
+func take_person_magazine(unit_id: String, ammo_class: String) -> bool:
+	if _singleplayer_supply_owner == null or not _singleplayer_supply_owner.has_method("take_person_magazine"): return false
+	return bool(_singleplayer_supply_owner.call("take_person_magazine", unit_id, ammo_class))
+
 func configure_departure_adapter(adapter: Node) -> Dictionary:
 	if not is_instance_valid(adapter) or not adapter.has_method("preview_departure") or not adapter.has_method("_built_home_pad_ids"): return {"ok":false, "reason":"invalid_adapter"}
 	if _departure_adapter != null and _departure_adapter.get_ref() != adapter: return {"ok":false, "reason":"adapter_already_bound"}

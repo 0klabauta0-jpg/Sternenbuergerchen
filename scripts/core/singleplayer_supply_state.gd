@@ -1093,6 +1093,24 @@ func return_skirmish_person_equipment(unit_id: String, loadout: Dictionary) -> D
 	return {"ok": true}
 
 
+## Reservemagazine einer Person im Gefecht (M4a): Fach und Rucksack liegen im selben Behaelter (`items`), also zaehlt beides.
+func person_magazine_count(unit_id: String, ammo_class: String) -> int:
+	var bag: Dictionary = _inventory.get("unit:" + unit_id + ":backpack", {})
+	return maxi(0, int(Dictionary(bag.get("items", {})).get(ammo_class, 0)))
+
+## Zieht ein Reservemagazin der Sorte ab (Nachladen im Gefecht); false, wenn die Person keines traegt. Das Magazin ist verbraucht.
+func take_person_magazine(unit_id: String, ammo_class: String) -> bool:
+	var bag: Dictionary = _inventory.get("unit:" + unit_id + ":backpack", {})
+	if not INVENTORY.AMMO_RULES.is_ammo_item(ammo_class, INVENTORY.ammo_rules()) or person_magazine_count(unit_id, ammo_class) <= 0:
+		return false
+	var left: int = int(bag.items[ammo_class]) - 1
+	if left <= 0:
+		bag.items.erase(ammo_class)
+	else:
+		bag.items[ammo_class] = left
+	_revision += 1
+	return true
+
 ## Rucksack einer gefallenen Person: alles darin geht verloren (bleibt am Ort zurueck), ausser der Auftragsfracht
 ## (RESERVED_QUEST_ITEMS). Die kommt wie bei return_skirmish_person_equipment ins Basislager, damit kein Auftrag unloesbar wird;
 ## ist dort schon ein Stueck derselben Auftragsfracht, ist das Duplikat eines und wird verworfen (mehr als eines darf es nie geben).
