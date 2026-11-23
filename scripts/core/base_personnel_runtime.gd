@@ -1153,7 +1153,7 @@ func rescue_crew_from_lost_craft(craft:String)->Dictionary:
 		_board_groups.erase(craft)
 		state_changed.emit()
 		return {"ok":true,"rescued":Array(rescued)}
-	if not _sim.is_hex_ground_runtime_active():return _reject("hex_ground_unavailable","Bodenplaetze sind noch nicht bereit")
+	if not _sim.is_hex_ground_runtime_active():return _rescue_fallback(rescued,craft,_reject("hex_ground_unavailable","Bodenplaetze sind noch nicht bereit"))
 	var aboard:=PackedStringArray()
 	for id in rescued:
 		if _sim.get_hex_unit_state(id).is_empty():aboard.append(id)
@@ -1165,13 +1165,13 @@ func rescue_crew_from_lost_craft(craft:String)->Dictionary:
 		var ticket:Dictionary=_sim.prepare_base_ground_deployment(self,aboard,_terrain.world_to_grid(_pad_world("")))
 		if not ticket.ok:
 			for id in aboard:_states[id].craft_id=craft
-			return ticket
+			return _rescue_fallback(rescued,craft,ticket)
 		admission_id=String(ticket.admission_id)
 		var committed:Dictionary=_sim.commit_base_ground_deployment(self,admission_id,false)
 		if not committed.ok:
 			_sim.cancel_hex_ground_deployment(admission_id,"base_deployment_changed")
 			for id in aboard:_states[id].craft_id=craft
-			return committed
+			return _rescue_fallback(rescued,craft,committed)
 	for id in rescued:_cancel(id,false)
 	_board_groups.erase(craft)
 	_sim.call("_publish_base_ground_actors",rescued)
@@ -1180,6 +1180,20 @@ func rescue_crew_from_lost_craft(craft:String)->Dictionary:
 		if is_instance_valid(returned) and not _sim.get_hex_unit_state(id).is_empty():returned.visible=true
 	state_changed.emit()
 	return {"ok":true,"rescued":Array(rescued)}
+
+
+## LC2f W5: Rueckfallweg der Notrettung. Scheitert das normale Abstellen (Bodenplaetze nicht bereit, Zulassung abgelehnt), wird jede gerettete
+## Person trotzdem an die Basis gebucht (draussen, craft_id leer, am ersten Landeplatz - wie Personen ohne Einsatz), nie an Bord eines Schiffs,
+## das es nicht mehr gibt. Der Fall wird protokolliert und im Ergebnis gemeldet (fallback:true, failure:<Grund>).
+func _rescue_fallback(rescued:PackedStringArray,craft:String,failure:Dictionary)->Dictionary:
+	push_warning("Notrettung: Abstellen gescheitert (%s), Rueckfallweg: %s"%[String(failure.get("reason","")),", ".join(rescued)])
+	for id in rescued:
+		_cancel(id,false)
+		var actor:=get_actor(id)
+		if is_instance_valid(actor):actor.position=_pad_world("")
+	_board_groups.erase(craft)
+	state_changed.emit()
+	return {"ok":true,"fallback":true,"failure":String(failure.get("reason","")),"rescued":Array(rescued)}
 
 
 func _unboard_hex(id:String,craft:String,payload:Dictionary)->Dictionary:

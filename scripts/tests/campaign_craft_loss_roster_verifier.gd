@@ -8,8 +8,32 @@ func _run() -> void:
 	_configure_entry()
 	_w1b_playable_roster_is_not_total_loss()
 	await _w1a_last_leader_dies_in_crash()
+	await _w5_rescue_fallback()
 	print("CAMPAIGN_CRAFT_LOSS_ROSTER passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
+
+## W5: Scheitert das normale Abstellen der Notrettung (hier: Bodenplaetze nicht bereit), steht trotzdem niemand mehr "an Bord" eines Schiffs,
+## das es nicht mehr gibt: alle stehen draussen an der Basis (craft_id leer), das Ergebnis meldet den Rueckfallweg, und der Stand ist speicherbar.
+func _w5_rescue_fallback() -> void:
+	if not await _open_scene("campaign", "new"): return
+	var base: Node = _runtime.call("get_base_personnel_runtime")
+	var states: Dictionary = base.get("_states")
+	base.set("_hex_required", true)
+	var sim: Node = base.get("_sim")
+	# Bodenplaetze "nicht bereit" erzwingen: ohne Hex-Register meldet die Bodenlaufzeit "nicht aktiv", verlangt aber weiter Hex-Boden.
+	sim.set("_hex_ground_registry", null)
+	var forced: bool = not bool(sim.call("is_hex_ground_runtime_active")) and bool(sim.call("is_hex_ground_runtime_required"))
+	print("W5_SETUP hex_active=", not forced, " units=", states.keys())
+	for id in [LEADER, PILOT]:
+		states[id]["status"] = "aboard"
+		states[id]["craft_id"] = "lc2f_lost_ship"
+	var result: Dictionary = Dictionary(base.call("rescue_crew_from_lost_craft", "lc2f_lost_ship"))
+	print("W5_RESULT ", result)
+	for id in [LEADER, PILOT]:
+		_check(String(states[id].get("craft_id", "x")).is_empty() and String(states[id].get("status", "")) != "aboard", "W5: %s steht nicht mehr an Bord des verlorenen Schiffs (%s / %s)" % [id, str(states[id].get("status")), str(states[id].get("craft_id"))])
+	_check(bool(result.get("ok", false)), "W5: die Notrettung meldet Erfolg (auch ueber den Rueckfallweg): %s" % str(result))
+	_check(forced == bool(result.get("fallback", false)), "W5: bei nicht bereiten Bodenplaetzen meldet das Ergebnis den Rueckfallweg (fallback=%s)" % str(result.get("fallback")))
+	await _close()
 
 func _w1b_playable_roster_is_not_total_loss() -> void:
 	var flow: Node = FLOW.instantiate()
