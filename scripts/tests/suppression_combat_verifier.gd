@@ -151,6 +151,7 @@ func _run() -> void:
 	_test_t4_fire()
 	CADENCE.reset_config()
 	_test_t5_movement()
+	_test_t12_advance_margin()
 	_test_t7_decay()
 	_test_t8_hit_and_cover()
 	_test_t9_read_time_modifiers()
@@ -522,7 +523,8 @@ func _test_t5_movement() -> void:
 	]
 	var f := _rig(specs)
 	_check(_has(f.sim, "set_movement_suppression_provider"), "T5: SimulationRoot nimmt einen Tempo-Lieferanten fuer die Unterdrueckung an")
-	var toward := CENTER + HEX.DIRECTIONS[0]
+	# "Zum Feind hin" heisst: das Ziel liegt um MEHR als ein Feld naeher am naechsten Gegner (Nachbesserung 1, W3).
+	var toward := CENTER + HEX.DIRECTIONS[0] * 2
 	var away := CENTER - HEX.DIRECTIONS[0]
 	var own: NPC = f.units["own"]
 	var enemy: NPC = f.units["enemy"]
@@ -544,7 +546,7 @@ func _test_t5_movement() -> void:
 	_pin(f, "own", 0, 0.0)
 	for level in range(1, 4):
 		_pin(f, "enemy", level, 5.0)
-		var e_toward: float = f.sim._extract_move_speed_factor(_move_cmd(f, "enemy", CENTER + HEX.DIRECTIONS[0] * 3, 1.0), enemy)
+		var e_toward: float = f.sim._extract_move_speed_factor(_move_cmd(f, "enemy", CENTER + HEX.DIRECTIONS[0] * 2, 1.0), enemy)
 		var e_away: float = f.sim._extract_move_speed_factor(_move_cmd(f, "enemy", CENTER + HEX.DIRECTIONS[0] * 5, 1.0), enemy)
 		var want_away: float = [0.8, 0.6, 0.35][level - 1]
 		var want_toward: float = [0.8, 0.0, 0.0][level - 1]
@@ -554,6 +556,62 @@ func _test_t5_movement() -> void:
 	_pin(f, "own", 2, 5.0)
 	var no_enemy: float = f.sim._extract_move_speed_factor(_move_cmd(f, "own", toward, 1.0), own)
 	_check(absf(no_enemy - 0.6) < 0.001, "T5: ohne bekannten Gegner gilt Stufe 2 mit 0,6 (%s)" % str(no_enemy))
+	f.scope.free()
+
+
+# ---- T12: Vorruecken mit Spielraum, Deckung und Rueckzug nie gesperrt (Nachbesserung 1, W3) --------------
+
+func _test_t12_advance_margin() -> void:
+	var specs: Array = [
+		{"id": "own", "team": "blue", "grid": CENTER, "facing": 0},
+		{"id": "enemy", "team": "red", "grid": CENTER + HEX.DIRECTIONS[0] * 4, "facing": 3},
+	]
+	var f := _rig(specs)
+	var own: NPC = f.units["own"]
+	var enemy: NPC = f.units["enemy"]
+	var d0: Vector2i = HEX.DIRECTIONS[0]
+	var enemy_grid := CENTER + d0 * 4
+	# Ein Deckungsfeld seitlich, hoechstens ein Feld naeher am Gegner als jetzt.
+	var side_cell := Vector2i(-999, -999)
+	for direction in HEX.DIRECTIONS:
+		var cell: Vector2i = CENTER + direction
+		if HEX.distance(cell, enemy_grid) == HEX.distance(CENTER, enemy_grid):
+			side_cell = cell
+	var one_closer: Vector2i = CENTER + d0
+	var two_closer: Vector2i = CENTER + d0 * 2
+	_check(side_cell != Vector2i(-999, -999), "T12: Vorbereitung: ein seitliches Feld gleich weit vom Gegner gefunden")
+	for level in [2, 3]:
+		var want_slow: float = [0.0, 0.0, 0.6, 0.35][level]
+		_reset_tracker(f)
+		_pin(f, "own", level, 5.0)
+		var side: float = f.sim._extract_move_speed_factor(_move_cmd(f, "own", side_cell, -1.0), own)
+		var near: float = f.sim._extract_move_speed_factor(_move_cmd(f, "own", one_closer, -1.0), own)
+		var far: float = f.sim._extract_move_speed_factor(_move_cmd(f, "own", two_closer, -1.0), own)
+		_check(absf(side - want_slow) < 0.001, "T12: Stufe %d: Deckungsziel seitlich laeuft mit %s (%s)" % [level, str(want_slow), str(side)])
+		_check(absf(near - want_slow) < 0.001, "T12: Stufe %d: ein Feld naeher am Gegner zaehlt noch nicht als Vorruecken (%s)" % [level, str(near)])
+		_check(far == 0.0, "T12: Stufe %d: Vorruecken um zwei Felder steht (%s)" % [level, str(far)])
+		# Deckung und Rueckzug sind nie gesperrt, auch wenn das Ziel naeher am Gegner liegt.
+		for purpose in [
+			{"command_type": "seek_cover"},
+			{"command_type": "retreat"},
+			{"source_command_type": "retreat"},
+			{"source_command_type": "fall_back"},
+			{"source_command_type": "disengage"},
+			{"contact_cover_decision": "take_cover"},
+		]:
+			var cmd := _move_cmd(f, "own", two_closer, -1.0)
+			for k in purpose.keys():
+				cmd[k] = purpose[k]
+			var factor: float = f.sim._extract_move_speed_factor(cmd, own)
+			_check(absf(factor - want_slow) < 0.001, "T12: eigene Einheit Stufe %d, %s: laeuft mit %s (%s)" % [level, str(purpose), str(want_slow), str(factor)])
+	# Gegner: Ausweichen in Deckung (enemy_limbo_cover) ist nie gesperrt, echtes Vorruecken schon.
+	_reset_tracker(f)
+	_pin(f, "enemy", 2, 3.0)
+	var enemy_cmd := _move_cmd(f, "enemy", CENTER + d0 * 2, -1.0)
+	var advance: float = f.sim._extract_move_speed_factor(enemy_cmd, enemy)
+	enemy_cmd["source_command_type"] = "enemy_limbo_cover"
+	var cover_run: float = f.sim._extract_move_speed_factor(enemy_cmd, enemy)
+	_check(advance == 0.0 and absf(cover_run - 0.6) < 0.001, "T12: Gegner Stufe 2: Vorruecken steht (%s), Ausweichen in Deckung laeuft mit 0,6 (%s)" % [str(advance), str(cover_run)])
 	f.scope.free()
 
 

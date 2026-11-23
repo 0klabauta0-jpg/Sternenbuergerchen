@@ -11,6 +11,11 @@ const COMBAT_CADENCE_SCRIPT: GDScript = preload("res://scripts/combat/combat_cad
 const COMBAT_DECISION_INTERVAL_TICKS: int = COMBAT_CADENCE_SCRIPT.DECISION_INTERVAL_TICKS
 const SUPPRESSION_MATH_SCRIPT: GDScript = preload("res://scripts/tactical/suppression_math.gd")
 const SUPPRESSION_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/suppression_tracker.gd")
+const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
+## Befehlsart oder Quelle, deren Zweck Deckung oder Rueckzug ist: nie als Vorruecken gesperrt.
+const SUPPRESSION_SAFE_MOVE_TYPES: PackedStringArray = ["retreat", "seek_cover", "fall_back", "disengage", "enemy_limbo_cover"]
+## Ohne Hexraster: eine Kachelbreite in Weltpunkten gilt als ein Feld Spielraum.
+const SUPPRESSION_ADVANCE_MARGIN_WORLD: float = 64.0
 const CONTACT_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/contact_tracker.gd")
 const FLANK_VULNERABILITY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/flank_vulnerability_resolver.gd")
 const MEDIC_SUPPORT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/medic_support_resolver.gd")
@@ -6479,8 +6484,23 @@ func get_suppression_move_factor(unit, cmd: Dictionary) -> float:
 	return SUPPRESSION_MATH_SCRIPT.move_factor(_suppression_rules, level, _suppression_move_is_toward_enemy(unit, cmd))
 
 
+## Bewegungen, deren Zweck Deckung oder Rueckzug ist, gelten nie als Vorruecken (beide Seiten): Befehlsart oder Quelle
+## retreat / seek_cover / fall_back / disengage, das Ausweichen der Gegner in Deckung (enemy_limbo_cover) und der
+## Deckungslauf bei Feindkontakt (contact_cover_decision = take_cover).
+func _suppression_move_is_cover_or_retreat(cmd: Dictionary) -> bool:
+	var command_type: String = String(cmd.get("command_type", "")).strip_edges().to_lower()
+	var source_type: String = String(cmd.get("source_command_type", "")).strip_edges().to_lower()
+	if command_type in SUPPRESSION_SAFE_MOVE_TYPES or source_type in SUPPRESSION_SAFE_MOVE_TYPES:
+		return true
+	return String(cmd.get("contact_cover_decision", "")).strip_edges().to_lower() == "take_cover"
+
+
+## Regel 8: "zum Feind hin" = das Ziel des Befehls liegt um MEHR als ein Feld (Hexfeld) naeher am naechsten lebenden Gegner
+## als die jetzige Position. Ohne Hexraster gilt eine Weltstrecke von einer Kachelbreite als Feld.
 func _suppression_move_is_toward_enemy(unit, cmd: Dictionary) -> bool:
 	if not cmd.has("target_position") or not (unit is Node2D):
+		return false
+	if _suppression_move_is_cover_or_retreat(cmd):
 		return false
 	var target_position: Vector2 = _coerce_vector2(cmd.get("target_position"), Vector2.INF)
 	if not target_position.is_finite():
@@ -6497,4 +6517,10 @@ func _suppression_move_is_toward_enemy(unit, cmd: Dictionary) -> bool:
 			nearest_position = opponent_position
 	if not nearest_position.is_finite():
 		return false
-	return target_position.distance_to(nearest_position) < nearest_distance
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry != null and terrain_registry.has_method("world_to_grid"):
+		var enemy_grid: Vector2i = terrain_registry.call("world_to_grid", nearest_position)
+		var now_cells: int = HEX_GRID_SCRIPT.distance(terrain_registry.call("world_to_grid", own_position), enemy_grid)
+		var then_cells: int = HEX_GRID_SCRIPT.distance(terrain_registry.call("world_to_grid", target_position), enemy_grid)
+		return then_cells < now_cells - 1
+	return target_position.distance_to(nearest_position) < nearest_distance - SUPPRESSION_ADVANCE_MARGIN_WORLD
