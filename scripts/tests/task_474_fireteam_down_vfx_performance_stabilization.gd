@@ -59,9 +59,9 @@ func _test_down_state_lingers_before_bleedout_queue() -> void:
 	driver.call("_queue_bleedout_for_downed_enemy", simulation)
 	_assert(Array(simulation.get("effects_queue")).is_empty(), "Freshly downed unit is not queued for bleedout immediately")
 
-	var down_started: Dictionary = Dictionary(driver.get("_down_state_started_msec_by_unit_id")).duplicate(true)
-	down_started["enemy_task474"] = Time.get_ticks_msec() - 5000
-	driver.set("_down_state_started_msec_by_unit_id", down_started)
+	var down_started: Dictionary = Dictionary(driver.get("_down_state_started_tick_by_unit_id")).duplicate(true)
+	down_started["enemy_task474"] = int(driver.get("_current_tick")) - 300 # 5 s Spielzeit zurueckdatiert
+	driver.set("_down_state_started_tick_by_unit_id", down_started)
 	driver.call("_queue_bleedout_for_downed_enemy", simulation)
 
 	var effects: Array = Array(simulation.get("effects_queue"))

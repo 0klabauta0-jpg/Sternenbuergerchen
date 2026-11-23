@@ -3361,6 +3361,8 @@ func refresh_fireteam_security_state(refresh_visuals: bool = true) -> bool:
 			var security_context: Dictionary = _get_area_execution_security_context(fireteam_id).duplicate(true)
 			if hex_adapter != null and hex_adapter.is_active():
 				security_context["hex_sight_adapter"] = hex_adapter
+			if combat_driver != null and combat_driver.has_method("get_game_tick"):
+				security_context["current_tick"] = int(combat_driver.call("get_game_tick")) # Spielzeit statt Wanduhr (G3b)
 			_fireteam_security_controller.call(
 				"update_fireteam_state",
 				fireteam_id,

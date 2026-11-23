@@ -5,13 +5,13 @@ extends RefCounted
 const CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
 const RNG = preload("res://scripts/core/gameplay_rng_state.gd")
 const COOLDOWN_FIELDS := ["_discipline_break_cooldown", "_misidentification_cooldown", "_medic_support_cooldown", "_recent_incoming_fire_tick_by_fireteam"]
-const BLOCKING_DICTS := ["_queued_bleedout_by_unit_id", "_down_state_started_msec_by_unit_id", "_detection_progress", "_enemy_patrol_paths_by_unit_id", "_enemy_security_states_by_group_id", "_enemy_team_tactics_states_by_group_id", "_mission_interaction_runtime_states", "_mission_scenario_runtime_step_states", "_combat_outcome_by_fire_event_id"]
+const BLOCKING_DICTS := ["_queued_bleedout_by_unit_id", "_down_state_started_tick_by_unit_id", "_detection_progress", "_enemy_patrol_paths_by_unit_id", "_enemy_security_states_by_group_id", "_enemy_team_tactics_states_by_group_id", "_mission_interaction_runtime_states", "_mission_scenario_runtime_step_states", "_combat_outcome_by_fire_event_id"]
 class PreparedLifecycle extends RefCounted:
 	pass
 var _preparations: Dictionary = {}
 
 func _guard(sim: Node, driver: Node) -> Dictionary:
-	if not is_instance_valid(sim) or not is_instance_valid(driver) or not sim.has_method("get_unit_registry") or not sim.has_method("is_hex_ground_runtime_active") or not is_instance_valid(sim.get_unit_registry()) or sim.is_processing_tick or not sim.command_queue.is_empty() or not sim.effects_queue.is_empty() or driver._combat_finished or driver._current_tick != sim.tick_counter or driver._objective_owned_since_msec >= 0: return _reject("mission_lifecycle_busy")
+	if not is_instance_valid(sim) or not is_instance_valid(driver) or not sim.has_method("get_unit_registry") or not sim.has_method("is_hex_ground_runtime_active") or not is_instance_valid(sim.get_unit_registry()) or sim.is_processing_tick or not sim.command_queue.is_empty() or not sim.effects_queue.is_empty() or driver._combat_finished or driver._current_tick != sim.tick_counter or driver._objective_owned_since_tick >= 0: return _reject("mission_lifecycle_busy")
 	if sim.is_hex_ground_runtime_active() and not sim.get_hex_checkpoint_guard().get("ok",false): return _reject("mission_lifecycle_busy")
 	for key in BLOCKING_DICTS:
 		var value: Variant = driver.get(key)

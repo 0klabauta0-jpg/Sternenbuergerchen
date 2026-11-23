@@ -78,7 +78,10 @@ const MEDIC_SUPPORT_MOVE_PRIORITY: int = 14
 const MEDIC_EVENT_COLOR: Color = Color(0.55, 1.0, 0.72, 1.0)
 const FRIENDLY_STANDARD_COVER_RADIUS: float = 48.0
 const FRIENDLY_STANDARD_COVER_MIN_DISTANCE: float = 10.0
-const FRIENDLY_STANDARD_COVER_COOLDOWN_MSEC: int = 1600
+# Spielzeit: ein Tick = ein Physik-Tick des SimulationRoot, normal 60 je Sekunde (project.godot setzt nichts anderes).
+const GAME_TICKS_PER_SECOND: int = 60
+const FRIENDLY_STANDARD_COVER_COOLDOWN_TICKS: int = 96 # vorher 1600 ms
+const DOWN_STATE_VISIBLE_MIN_TICKS: int = 180 # vorher DOWN_STATE_VISIBLE_MIN_SECONDS = 3,0 s
 const FRIENDLY_LOW_COVER_THRESHOLD: int = 16
 const ENEMY_PATROL_WAYPOINT_REACHED_DISTANCE: float = 18.0
 const ENEMY_TACTICS_PUSH_STEP_DISTANCE: float = 144.0
@@ -150,7 +153,7 @@ func _record_resolver_target_evaluation(_attacker, _target) -> void:
 
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _queued_bleedout_by_unit_id: Dictionary = {}
-var _down_state_started_msec_by_unit_id: Dictionary = {}
+var _down_state_started_tick_by_unit_id: Dictionary = {}
 var _was_downed_unit_ids: Dictionary = {}
 var _enemy_reposition_ready_at_tick: Dictionary = {}
 var _combat_finished: bool = false
@@ -194,7 +197,7 @@ var _last_contact_pair: Dictionary = {}
 var _last_event_text: String = "Combat waiting"
 var _mission_started_at_msec: int = 0
 var _checkpoint_elapsed_offset_msec: int = 0
-var _objective_owned_since_msec: int = -1
+var _objective_owned_since_tick: int = -1
 var _mission_result: Dictionary = {}
 var _mission_result_condition_override: String = ""
 var _runs_local_authority: bool = true
@@ -218,7 +221,7 @@ var _recent_hit_tick_by_shooter_and_group: Dictionary = {}
 var _misidentification_cooldown: Dictionary = {}
 var _medic_support_cooldown: Dictionary = {}
 var _medic_support_move_ready_tick: Dictionary = {}
-var _friendly_cover_ready_at_msec: Dictionary = {}
+var _friendly_cover_ready_at_tick: Dictionary = {}
 var _enemy_limbo_cover_ready_at_tick: Dictionary = {}
 var _enemy_limbo_behavior_decisions: Dictionary = {}
 var _overlays_visible: bool = true
@@ -1925,7 +1928,7 @@ func _poll_friendly_casualty_state(units: Array) -> void:
 			continue
 		if String(unit.call("get_vital_state")) != "fit":
 			_was_downed_unit_ids[unit_id] = true
-		elif _down_state_started_msec_by_unit_id.has(unit_id):
+		elif _down_state_started_tick_by_unit_id.has(unit_id):
 			_clear_down_state_linger(unit_id)
 			_queued_bleedout_by_unit_id.erase(unit_id)
 
@@ -1962,13 +1965,18 @@ func _queue_bleedout_for_downed_units(simulation_root: Node, units: Array) -> vo
 
 func _mark_unit_down_started(unit_id: String) -> void:
 	var normalized_unit_id: String = unit_id.strip_edges()
-	if normalized_unit_id.is_empty() or _down_state_started_msec_by_unit_id.has(normalized_unit_id):
+	if normalized_unit_id.is_empty() or _down_state_started_tick_by_unit_id.has(normalized_unit_id):
 		return
-	_down_state_started_msec_by_unit_id[normalized_unit_id] = Time.get_ticks_msec()
+	_down_state_started_tick_by_unit_id[normalized_unit_id] = _current_tick
 
 
 func _clear_down_state_linger(unit_id: String) -> void:
-	_down_state_started_msec_by_unit_id.erase(unit_id.strip_edges())
+	_down_state_started_tick_by_unit_id.erase(unit_id.strip_edges())
+
+
+## Aktueller Spiel-Tick des Gefechts (Zaehler des SimulationRoot, wie im Treiber gefuehrt).
+func get_game_tick() -> int:
+	return _current_tick
 
 
 func _is_friendly_unit(unit) -> bool:
@@ -1979,15 +1987,15 @@ func _has_down_state_linger_elapsed(unit_id: String, unit = null) -> bool:
 	var normalized_unit_id: String = unit_id.strip_edges()
 	if normalized_unit_id.is_empty():
 		return false
-	if not _down_state_started_msec_by_unit_id.has(normalized_unit_id):
+	if not _down_state_started_tick_by_unit_id.has(normalized_unit_id):
 		_mark_unit_down_started(normalized_unit_id)
 		return false
-	var started_msec: int = int(_down_state_started_msec_by_unit_id.get(normalized_unit_id, Time.get_ticks_msec()))
-	var elapsed_seconds: float = float(Time.get_ticks_msec() - started_msec) / 1000.0
-	var linger_seconds: float = DOWN_STATE_VISIBLE_MIN_SECONDS
+	var started_tick: int = int(_down_state_started_tick_by_unit_id.get(normalized_unit_id, _current_tick))
+	var linger_ticks: int = DOWN_STATE_VISIBLE_MIN_TICKS
 	if campaign_casualty_rules_enabled and _is_friendly_unit(unit):
-		linger_seconds = down_revive_window_seconds
-	return elapsed_seconds >= linger_seconds
+		# Das Aufricht-Fenster kommt aus den Regeln in Sekunden; ceil: nie vor Ablauf der Sekunden frei.
+		linger_ticks = int(ceil(down_revive_window_seconds * float(GAME_TICKS_PER_SECOND) - 0.000001))
+	return _current_tick - started_tick >= linger_ticks
 
 
 func get_casualty_flags() -> Dictionary:
@@ -3772,7 +3780,7 @@ func _build_readability_status_context() -> Dictionary:
 		"duration_seconds": _get_duration_seconds(),
 		"objective_status_text": _build_objective_status_text(),
 		"wave_status_text": _build_wave_status_text(),
-		"show_hold_timer": win_condition == WIN_CONDITION_OBJECTIVE_DEFENSE and _objective_owned_since_msec >= 0 and not _combat_finished,
+		"show_hold_timer": win_condition == WIN_CONDITION_OBJECTIVE_DEFENSE and _objective_owned_since_tick >= 0 and not _combat_finished,
 		"objective_defense_elapsed_seconds": _get_objective_defense_elapsed_seconds(),
 		"objective_defense_hold_seconds": objective_defense_hold_seconds,
 		"mission_scenario_runtime_gates": get_mission_scenario_runtime_gate_snapshot(),
@@ -4597,6 +4605,10 @@ func restore_checkpoint_elapsed_time(elapsed_msec: int) -> Dictionary:
 	if elapsed_msec < 0 or elapsed_msec > 2678400000: return {"ok":false, "reason":"invalid_mission_elapsed"}
 	_mission_started_at_msec = maxi(Time.get_ticks_msec(), 1)
 	_checkpoint_elapsed_offset_msec = elapsed_msec
+	# Der Tickzaehler kann beim Laden zurueckspringen: Abkuehl-Eintraege aus dem alten Lauf verwerfen.
+	_enemy_reposition_ready_at_tick.clear()
+	_enemy_limbo_cover_ready_at_tick.clear()
+	_friendly_cover_ready_at_tick.clear()
 	return {"ok":true}
 
 func _get_duration_seconds() -> float:
@@ -4670,18 +4682,18 @@ func _update_objective_hold_tracking() -> void:
 		return
 
 	if _is_objective_captured_by_friendly():
-		if _objective_owned_since_msec < 0:
-			_objective_owned_since_msec = Time.get_ticks_msec()
+		if _objective_owned_since_tick < 0:
+			_objective_owned_since_tick = _current_tick
 		return
 
-	_objective_owned_since_msec = -1
+	_objective_owned_since_tick = -1
 
 
 func _get_objective_defense_elapsed_seconds() -> float:
-	if _objective_owned_since_msec < 0:
+	if _objective_owned_since_tick < 0:
 		return 0.0
 
-	return maxf(float(Time.get_ticks_msec() - _objective_owned_since_msec) / 1000.0, 0.0)
+	return maxf(float(_current_tick - _objective_owned_since_tick) / float(GAME_TICKS_PER_SECOND), 0.0)
 
 
 func _build_objective_status_text() -> String:
@@ -6029,8 +6041,7 @@ func _apply_friendly_standard_behavior(simulation_root: Node) -> void:
 		if friendly.has_method("get_effective_cover_score") and int(friendly.call("get_effective_cover_score")) >= FRIENDLY_LOW_COVER_THRESHOLD:
 			continue
 		var unit_id: String = String(friendly.call("get_unit_id"))
-		var now_msec: int = Time.get_ticks_msec()
-		if int(_friendly_cover_ready_at_msec.get(unit_id, 0)) > now_msec:
+		if _friendly_cover_on_cooldown(unit_id):
 			continue
 		var cover_target: Vector2 = _build_friendly_cover_target(friendly, profile_dict)
 		if cover_target == Vector2.INF:
@@ -6046,9 +6057,17 @@ func _apply_friendly_standard_behavior(simulation_root: Node) -> void:
 				"requeue_until_target": true,
 			}
 		)
-		_friendly_cover_ready_at_msec[unit_id] = now_msec + FRIENDLY_STANDARD_COVER_COOLDOWN_MSEC
+		_arm_friendly_cover_cooldown(unit_id)
 		if friendly.has_method("show_event_text"):
 			friendly.call("show_event_text", "SEEK COVER", DEFAULT_EVENT_COLOR, 0.9)
+
+
+func _friendly_cover_on_cooldown(unit_id: String) -> bool:
+	return _tick_cooldown_active(int(_friendly_cover_ready_at_tick.get(unit_id, 0)), FRIENDLY_STANDARD_COVER_COOLDOWN_TICKS)
+
+
+func _arm_friendly_cover_cooldown(unit_id: String) -> void:
+	_friendly_cover_ready_at_tick[unit_id] = _current_tick + FRIENDLY_STANDARD_COVER_COOLDOWN_TICKS
 
 
 func _try_enqueue_overwatch(simulation_root: Node) -> Array:
