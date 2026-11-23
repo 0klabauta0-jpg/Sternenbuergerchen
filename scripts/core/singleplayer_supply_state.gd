@@ -1186,6 +1186,20 @@ func fill_person_compartments(unit_ids: Array, from_base: bool) -> Dictionary:
 	if not short_text.is_empty(): parts.append(short_text)
 	return {"added": added, "short": short, "message": " ".join(parts), "short_message": short_text}
 
+## M6b (B1): Wie viele der Personen haben ein LEERES Fach (kein Magazin ihrer Waffensorte in Fach oder Rucksack)? Nur lesen, nichts bewegen.
+## Personen ohne Behaelter, ohne Fach oder ohne Waffe mit Munitionsbedarf zaehlen nicht.
+func count_empty_compartments(unit_ids: Array) -> int:
+	_sync_compartments()
+	var empty := 0
+	for id in unit_ids:
+		var key := "unit:" + String(id) + ":backpack"
+		if not _inventory.has(key) or not Dictionary(_inventory[key]).has("armor_chip_capacity"): continue
+		if int(Dictionary(_inventory[key]).armor_chip_capacity) <= 0: continue
+		var item := _ammo_class_of_person(String(id))
+		if item.is_empty(): continue
+		if INVENTORY.count_ammo(Dictionary(_inventory[key]).items) <= 0: empty += 1
+	return empty
+
 ## Einmal je Spielstand: 16 leichte und 8 Gewehr-Magazine ins Basislager (Zahlen: ammo_rules.json start_base_stock, soweit sie
 ## ins Lager passen) und volle Faecher fuer die Personen. Gibt true zurueck, wenn jetzt gewaehrt wurde; mit dem Merker nie wieder.
 func grant_ammo_start_if_missing(unit_ids: Array) -> bool:

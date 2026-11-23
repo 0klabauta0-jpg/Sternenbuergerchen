@@ -9270,15 +9270,8 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 	_homecoming_forget_craft(craft_id) # a later landing of the same craft replaces its note
 	_restore_returning_visit_membership(craft_id)
 	_aircraft_location_by_craft[craft_id] = "homebase"
-	# M4b/M4e: wer mit diesem Schiff heimkehrt. Erst NACH dem Setzen des Heimatortes lesen: vorher gelten die Mitfliegenden im
-	# Personalbestand als "away" (_unit_is_home), und nur der Pilot haette sein Fach aufgefuellt bekommen.
-	var ammo_refill_ids: Array = _aboard_unit_ids_of_craft(craft_id).duplicate()
-	var ammo_pilot := String(_assigned_aircraft_pilot_by_craft.get(craft_id, ""))
-	if not ammo_pilot.is_empty() and not ammo_refill_ids.has(ammo_pilot): ammo_refill_ids.append(ammo_pilot)
 	_admit_unplaced_aboard_crew(craft_id)
 	_remove_pending_mission_craft_transfer(craft_id)
-	for ammo_late_id in _aboard_unit_ids_of_craft(craft_id): # erst jetzt ist auch ein ausstehender Transfer des Schiffs entfernt
-		if not ammo_refill_ids.has(ammo_late_id): ammo_refill_ids.append(ammo_late_id)
 	# Ein Rueckzug ohne Ausfaelle (Regel 8) hat keinen Debrief, der die Ortsinstanz freigibt. Bleibt sie fokussiert, gilt das Schiff
 	# nicht als zu Hause (Heim-Speicherpunkt und Wiederoeffnen sind gesperrt): Mit der Heimkehr des letzten Schiffs wird sie freigegeben.
 	if release_legacy:
@@ -9290,20 +9283,9 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 	_homecoming_warned.clear()
 	if follow_arrival or release_legacy: _show_homebase(true)
 	_singleplayer_runtime.call("observe_campaign_progress")
-	_replenish_ammo_after_landing(craft_id, ammo_refill_ids)
+	# M6b (B1): die Heimkehr fuellt keine Faecher mehr auf; Magazine kommen von Hand per Drag and Drop aus dem Lager.
 	_arm_landing_save()
 
-
-## M4b: Landung an der Heimatbasis: die Faecher der heimgekehrten Personen werden aus dem Basislager aufgefuellt (feste Reihenfolge,
-## soweit der Vorrat reicht); die Meldung geht ueber den Heimkehr-Meldeweg (_homecoming_warn_once) und liegt als Meta "ammo_refill_message".
-func _replenish_ammo_after_landing(craft_id: String, unit_ids: Array) -> void:
-	if not is_campaign_start() or _singleplayer_runtime == null or unit_ids.is_empty() or not _singleplayer_runtime.has_method("replenish_ammo"): return
-	var result: Dictionary = Dictionary(_singleplayer_runtime.call("replenish_ammo", unit_ids))
-	var text := String(result.get("message", ""))
-	if text.is_empty(): return
-	set_meta("ammo_refill_message", text)
-	_ammo_landing_note = text if _ammo_landing_note.is_empty() else _ammo_landing_note + " " + text  # M4c (W4): sichtbar im Hinweis der Landungs-Speicherung
-	_homecoming_warn_once(craft_id, "ammo", text)
 
 
 # The escape menu invokes the owning campaign saver, never the generic

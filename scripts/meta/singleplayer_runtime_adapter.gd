@@ -1799,8 +1799,8 @@ func launch_to_moon_orbit(craft_id: String) -> Dictionary:
 		# edit pilot or payload using the old homebase transport projection.
 		_flow.call("_refresh_homebase_screen")
 		if not result.get("replayed", false): call_deferred("_publish_space_launch_event", request_id)
-		# M4c (W2): der Abflug von der Heimatbasis ist bestaetigt -> die Faecher der Mitfliegenden aus dem Basislager auffuellen.
-		var ammo_departure: Dictionary = {} if result.get("replayed", false) else replenish_ammo_for_departure(craft_id, ammo_crew)
+		# M6b (B1): der Abflug ist bestaetigt -> nur melden, wie viele Faecher der Mitfliegenden leer sind (nichts wird aufgefuellt).
+		var ammo_departure: Dictionary = {} if result.get("replayed", false) else departure_ammo_notice(craft_id, ammo_crew)
 		var travel: Dictionary = Dictionary(result.travel_result)
 		if not String(ammo_departure.get("short_message", "")).is_empty():
 			travel = travel.duplicate()
@@ -2221,20 +2221,18 @@ func grant_ammo_start_if_missing() -> bool:
 	for unit in Array(_flow.get("_all_team_units")): ids.append(String(Dictionary(unit).get("unit_id", "")))
 	return bool(_supply.grant_ammo_start_if_missing(ids))
 
-## M4b: Faecher der heimgekehrten Personen aus dem Basislager auffuellen (feste Reihenfolge); Ergebnis mit "message".
-func replenish_ammo(unit_ids: Array) -> Dictionary:
-	if not _campaign_mode: return {"added": 0, "short": 0, "message": ""}
-	return Dictionary(_supply.fill_person_compartments(unit_ids, true))
-
-## M4c (W2): Faecher der mitfliegenden Personen (an Bord des Schiffs plus zugeteilter Pilot) beim bestaetigten Abflug von der
-## Heimatbasis aus dem Basislager auffuellen; dieselbe Funktion und Reihenfolge wie bei der Heimkehr. Wiederholbar (ergaenzt nur Fehlendes).
+## M6b (B1): KEIN automatisches Auffuellen mehr (weder beim Abflug noch bei der Heimkehr): Magazine kommen von Hand per Drag and Drop
+## ins Fach. Beim bestaetigten Abflug von der Heimatbasis nur der Hinweis, wie viele Faecher der Mitfliegenden (an Bord plus zugeteilter
+## Pilot) leer sind: {"empty": n, "short_message": "Munition knapp: n Fächer leer." oder ""}. Es wird nichts bewegt.
 ## Aufgerufen von launch_to_moon_orbit (der einzigen verbindlichen Abflugstelle von der Heimatbasis), nie beim Oeffnen eines Dialogs.
-func replenish_ammo_for_departure(craft_id: String, crew_ids: Array = []) -> Dictionary:
-	if not _campaign_mode or _flow == null or _supply == null: return {"added": 0, "short": 0, "message": "", "short_message": ""}
+func departure_ammo_notice(craft_id: String, crew_ids: Array = []) -> Dictionary:
+	if not _campaign_mode or _flow == null or _supply == null: return {"empty": 0, "short_message": ""}
 	var ids: Array = crew_ids.duplicate() if not crew_ids.is_empty() else Array(_flow.call("_aboard_unit_ids_of_craft", craft_id)).duplicate()
 	var pilot := String(Dictionary(_flow.get("_assigned_aircraft_pilot_by_craft")).get(craft_id, ""))
 	if not pilot.is_empty() and not ids.has(pilot): ids.append(pilot)
-	return Dictionary(_supply.fill_person_compartments(ids, true))
+	var empty := int(_supply.count_empty_compartments(ids))
+	var text := "" if empty <= 0 else "Munition knapp: %d %s leer." % [empty, "Fach" if empty == 1 else "Fächer"]
+	return {"empty": empty, "short_message": text}
 
 ## Rucksack und Ausruestung einer gefallenen Person verwerfen (Auftragsfracht siehe SingleplayerSupplyState.discard_person_equipment).
 func discard_person_equipment(unit_id: String) -> Dictionary:
