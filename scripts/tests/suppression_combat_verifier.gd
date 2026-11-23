@@ -155,6 +155,7 @@ func _run() -> void:
 	_test_t8_hit_and_cover()
 	_test_t9_read_time_modifiers()
 	await _test_t6_plan()
+	await _test_t10_planning_sync()
 	CADENCE.reset_config()
 	await process_frame
 	print("suppression_combat_verifier passed=%d failed=%d" % [passed, failed])
@@ -746,6 +747,59 @@ func _test_t9_read_time_modifiers() -> void:
 		var pressed := _resolve_shot_with(g, shooter_id, target_id, 0.0, 1.0)
 		_check(not clean.is_empty() and int(clean.get("damage_resolved", -1)) > 0 and int(clean.get("damage_resolved", -1)) == int(pressed.get("damage_resolved", -2)), "T9c: %s: Schaden bei Treffer mit und ohne Stufe 3 gleich (%s/%s)" % [shooter_id, str(clean.get("damage_resolved", -1)), str(pressed.get("damage_resolved", -2))])
 		g.scope.free()
+
+
+# ---- T10: Planabgleich im Gefecht (Nachbesserung 1, W2) ----------------------
+
+## Ein Planabgleich (set_planning_state) mitten im Gefecht loescht weder die Stufen beider Seiten noch die Vormerkung der
+## Unterbrechung; der unterbrochene Plan wird nach dem Abklingen fortgesetzt.
+func _test_t10_planning_sync() -> void:
+	var scene = load(SCENE_PATH).instantiate()
+	root.add_child(scene)
+	for _index in range(10):
+		await process_frame
+	var controller = scene.get_node("TacticalController")
+	var driver = scene.get_node("CombatLoopDriver")
+	var sim = scene.get_node("SimulationRoot")
+	sim.set_physics_process(false)
+	sim.set_process(false)
+	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
+	controller.call("_create_waypoints_for_selected_fireteams", Vector2(240.0, 170.0))
+	controller.call("advance_to_next_phase")
+	var unit_alpha = scene.get_node("UnitAlpha")
+	var key := String(_call_quiet(driver, "suppression_group_key", [unit_alpha], ""))
+	var tick := 40020
+	for i in range(60):
+		_call(driver, "note_suppression_shot", [unit_alpha, 18, true])
+		tick += 30
+		_call(driver, "_advance_suppression", [tick])
+		controller.call("_update_fireteam_suppression", 0.016)
+		if int(_call_quiet(driver, "get_suppression_level", [key], 0)) >= 3:
+			break
+	var tracker = _call_quiet(driver, "get_suppression_tracker")
+	if tracker != null:
+		tracker.set_state("enemy:probe", 3.0, 2)
+	_check(int(_call_quiet(driver, "get_suppression_level", [key], 0)) >= 3, "T10: eigenes Fireteam steht vor dem Planabgleich auf Stufe 3")
+	_check(_first_waypoint_status(controller.call("get_order_plans_snapshot"), "blue") == "interrupted", "T10: der Plan ist unterbrochen")
+	controller.call("set_planning_state", {})
+	_check(int(_call_quiet(driver, "get_suppression_level", [key], 0)) >= 3, "T10: ein Planabgleich laesst die Stufe des eigenen Fireteams stehen")
+	_check(int(_call_quiet(driver, "get_suppression_level", ["enemy:probe"], 0)) == 2, "T10: ein Planabgleich laesst die Stufe der Gegnergruppe stehen")
+	_check(bool(controller.get("_suppression_interrupt_pending_by_fireteam").get("blue", false)), "T10: die Vormerkung der Unterbrechung bleibt nach dem Planabgleich")
+	controller.call("_update_fireteam_suppression", 0.016)
+	_check(int(_call_quiet(driver, "get_suppression_level", [key], 0)) >= 3, "T10: auch ein Bild danach steht die Stufe noch")
+	# Feuer hoert auf; nach dem Abklingen unter Stufe 2 wird der Plan fortgesetzt.
+	var resumed := false
+	for i in range(80):
+		tick += 30
+		_call(driver, "_advance_suppression", [tick])
+		controller.call("_update_fireteam_suppression", 0.016)
+		if int(_call_quiet(driver, "get_suppression_level", [key], 0)) < 2:
+			resumed = not bool(controller.get("_suppression_interrupt_pending_by_fireteam").get("blue", false))
+			break
+	_check(resumed, "T10: nach dem Abklingen wird fortgesetzt, auch wenn dazwischen ein Planabgleich lief")
+	_check(_first_waypoint_status(controller.call("get_order_plans_snapshot"), "blue") != "interrupted", "T10: kein Plan bleibt auf interrupted stehen")
+	scene.queue_free()
+	await process_frame
 
 
 # ---- T6: Plan -----------------------------------------------------------------
