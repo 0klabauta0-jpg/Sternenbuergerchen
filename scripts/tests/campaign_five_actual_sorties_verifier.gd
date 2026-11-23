@@ -250,10 +250,15 @@ func _dbg_watch_leader(tick: int, simulation: Node) -> void:
 	_dbg_last_cmd[key] = text
 	var state: Dictionary = simulation.get_hex_unit_state("campaign_leader")
 	print("FIVE_DBG leader_cmd scenario=%s tick=%d cmd=%s grid=%s" % [_dbg_scenario(simulation), tick, text, str(state.get("grid", null))])
+## G5c: Eine abgeschlossene Mission (Rueckkehr ans Schiff geschafft) laeuft als Simulation noch eine von Wanduhr/Bildtakt
+## abhaengige Zeit weiter, bis der Ablauf sie freigibt. Ihre Ticks gehen deshalb ab dem Abschluss nicht mehr in die Spur
+## und die Pruefsumme ein (Abschluss = Ende von _move_and_use fuer "ship_return", also ein tickfester Zeitpunkt).
+var _trace_closed_simulations: Dictionary = {}
 func _on_trace_tick(tick: int, simulation: Node) -> void:
 	if is_instance_valid(simulation):
 		_dbg_watch_leader(tick, simulation)
 		_dbg_watch_position(tick, simulation)
+		if _trace_closed_simulations.has(simulation.get_instance_id()): return
 	if tick <= 0 or tick % FIVE_TRACE_TICK_INTERVAL != 0 or not is_instance_valid(simulation): return
 	var mission: Node = simulation.get_parent()
 	if mission == null or mission.get_node_or_null("UnitRegistry") == null: return
@@ -536,6 +541,11 @@ func _move_and_use(mission: Node, interaction: String, step: String, map_path: S
 		return step == "return_to_ship" and String(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}).get("status", "")) == "completed", 45000, interaction + " actual timed Use commits required runtime step"):
 		_dump("use_execution_" + interaction)
 		return false
+	if interaction == "ship_return" and is_instance_valid(mission):
+		var closed_simulation: Node = mission.get_node_or_null("SimulationRoot")
+		if closed_simulation != null:
+			_trace_closed_simulations[closed_simulation.get_instance_id()] = true
+			print("FIVE_DBG trace_closed tick=%d" % int(closed_simulation.call("get_tick")))
 	return true
 
 
