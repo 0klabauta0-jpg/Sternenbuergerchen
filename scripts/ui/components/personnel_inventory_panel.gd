@@ -72,7 +72,7 @@ func _ready() -> void:
 	bag_body.add_child(_bag_heading)
 	var bag_scroll:=ScrollContainer.new();bag_scroll.custom_minimum_size.y=240;bag_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;bag_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;bag_body.add_child(bag_scroll)
 	_bag_grid=GridContainer.new();_bag_grid.columns=2;bag_scroll.add_child(_bag_grid)
-	_bag_preview.payload_dropped.connect(func(data:Dictionary):_move(String(data.get("source_container_id","")),String(data.get("item_id","")),"unit:"+_unit_id+":backpack",1))
+	_bag_preview.payload_dropped.connect(func(data:Dictionary):_drop_to(data,"unit:"+_unit_id+":backpack"))
 	_slots.draw.connect(_draw_equipment_guides)
 	_slots.resized.connect(_layout_body_slots)
 	_containers=HFlowContainer.new(); add_child(_containers)
@@ -122,6 +122,7 @@ func _ready() -> void:
 func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, accessible: Array, equipment_allowed: bool=true, actor:Node=null) -> void:
 	_update_identity(unit)
 	_accessible=accessible
+	_inventory_data=inventory
 	var next_id := String(unit.get("id",""))
 	var selected_source := String(_selection.get("source_container_id",""))
 	var selected_item := String(_selection.get("item_id",""))
@@ -167,7 +168,7 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 		var id: String=spec[0]
 		var data: Dictionary=inventory.get(id,{})
 		var box: PanelContainer=SURFACE.new(); box.name="Inventory_"+id.validate_node_name(); box.accepted_type="inventory_item"; box.custom_minimum_size=Vector2(280 if id=="base:homebase" else 200,160); _containers.add_child(box)
-		box.payload_dropped.connect(func(item:Dictionary): _move(String(item.get("source_container_id","")),String(item.get("item_id","")),id,1))
+		box.payload_dropped.connect(func(item:Dictionary): _drop_to(item,id))
 		var style:=StyleBoxFlat.new(); style.bg_color=Color("102f3b"); style.border_color=Color("3e6972"); style.set_border_width_all(1); style.content_margin_left=8; style.content_margin_right=8; style.content_margin_top=8; style.content_margin_bottom=8; box.add_theme_stylebox_override("panel",style)
 		SKIN.panel(box,true)
 		var body:=VBoxContainer.new(); box.add_child(body); _bodies[id]=body
@@ -386,6 +387,14 @@ func update_rest_snapshot(person: Dictionary) -> void:
 	_rest_row.visible=not person.is_empty()
 	_rest.set_pressed_no_signal(bool(person.get("auto_rest_enabled",true)))
 
+## M6b (B2): Ein Zug per Drag and Drop bewegt den ganzen Stapel, soweit im Ziel Platz ist; mit gedrueckter Umschalttaste genau 1 Stueck.
+## Passt nichts, geht 1 Stueck als Anfrage hinaus, damit der Befehl mit seinem Ablehnungs-Hinweis antwortet (es bleibt alles, wo es ist).
+var _inventory_data: Dictionary = {}
+func _drop_to(data: Dictionary, target: String, one_only: bool = false) -> void:
+	var source := String(data.get("source_container_id",""))
+	var item := String(data.get("item_id",""))
+	var amount := ITEMS.drag_amount(Dictionary(_inventory_data.get(source,{})),Dictionary(_inventory_data.get(target,{})),item,one_only or Input.is_key_pressed(KEY_SHIFT))
+	_move(source,item,target,maxi(1,amount))
 func _move(source: String, item: String, target: String, amount: int) -> void:
 	operation_requested.emit("inventory_transfer",{"unit_id":_unit_id,"craft_id":_craft_id,"source_container_id":source,"destination_container_id":target,"item_id":item,"amount":amount})
 func _wear(data: Dictionary, slot: String) -> void:
