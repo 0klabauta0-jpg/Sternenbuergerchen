@@ -4852,6 +4852,10 @@ func _physics_process(delta: float) -> void:
 		_advance_space_flights(delta, tick_counter)
 	_advance_air_support_orders(delta)
 	is_processing_tick = true
+	# G5d: _process schiebt die Knoten je Bild um einen bildtaktabhaengigen Bruchteil vor (nur Darstellung). Alle Regeln dieses
+	# Ticks (Befehle, Effekte, Abstand, Zielnahme) sollen den exakten Tickstand lesen: Bruchteil 0.0 ist der Stand, den der
+	# vorige Tick hinterlassen hat (dieselbe Projektion wie nach der Bewegung unten).
+	_project_hex_ground_actors(0.0)
 	_hex_boundary_facing.clear()
 	_begin_navigation_budget_tick()
 	_advance_hex_ground_tick()
@@ -4906,6 +4910,9 @@ func _physics_process(delta: float) -> void:
 		profile_scopes["snapshot_broadcast_usec"] = Time.get_ticks_usec() - scope_started_usec
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
+	# G5d: Rueckrufe von tick_processed (Gefechtstreiber, Befehlsausfuehrung, Zeitgeber) lesen den exakten Tickstand, auch wenn
+	# Effekte oder Abstandspruefung nach der Bewegung etwas verschoben haben.
+	_project_hex_ground_actors(0.0)
 	tick_processed.emit(tick_counter)
 	if profile_enabled:
 		profile_scopes["tick_signal_emit_usec"] = Time.get_ticks_usec() - scope_started_usec

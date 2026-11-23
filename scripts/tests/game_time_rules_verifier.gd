@@ -4,6 +4,10 @@ extends SceneTree
 ## von Hand (sim._physics_process), die Bilder ebenfalls (controller._process). Zwischen den Ticks wird nie gewartet.
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 const SIMULATION_ROOT_SCRIPT: GDScript = preload("res://scripts/core/simulation_root.gd")
+const HEX_MAP_DATA: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
+const HEX_REGISTRY: GDScript = preload("res://scripts/terrain/terrain_registry.gd")
+const HEX_TILE: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
+const HEX_UNITS: GDScript = preload("res://scripts/registries/unit_registry.gd")
 const FIRETEAM_ID: String = "blue"
 const TICK: float = 1.0 / 60.0
 const ENEMY_NODES: Array[String] = ["EnemyDelta", "EnemyEcho"]
@@ -42,6 +46,7 @@ func _run_tests() -> void:
 	_test_t2_contact_path_recompute_lock()
 	await _test_t3_mission_duration()
 	await _test_t4_controller_timers_follow_ticks()
+	await _test_t5_rules_read_tick_exact_positions()
 	print("GAME_TIME_RULES passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed > 0 else 0)
 
@@ -192,3 +197,130 @@ func _test_t4_controller_timers_follow_ticks() -> void:
 	_check(int(a.refreshes) == 10 and int(b.refreshes) == 10, "T4 Sicherungs-Auffrischung genau einmal je 12 Ticks: 120 Ticks = 10 (A %d, B %d)" % [int(a.refreshes), int(b.refreshes)])
 	_check(absf(float(a.cooldown) - 8.0) < 0.01 and absf(float(b.cooldown) - 8.0) < 0.01, "T4 Abkuehlzeit des Truppschiffs sinkt nach 120 Ticks um 2 s (A %.3f, B %.3f)" % [float(a.cooldown), float(b.cooldown)])
 	_check(absf(float(a.boarding) - 2.0) < 0.01 and absf(float(b.boarding) - 2.0) < 0.01, "T4 Einsteige-Anfrage zaehlt 120 Ticks = 2 s (A %.3f, B %.3f)" % [float(a.boarding), float(b.boarding)])
+
+
+## G5d: Bodeneinheit fuer die Lage-Probe. Merkt sich, welche global_position eine Regel beim Befehlsannehmen (mitten im Tick) sieht.
+class ProbeActor:
+	extends Node2D
+
+	var unit_id: String = ""
+	var current_command: RefCounted
+	var target_position: Vector2 = Vector2.ZERO
+	var vital_state: String = "fit"
+	var health: int = 100
+	var command_reads: Array = []
+
+	func get_unit_id() -> String:
+		return unit_id
+
+	func get_team_id() -> String:
+		return "blue"
+
+	func get_vital_state() -> String:
+		return vital_state
+
+	func get_current_unit_command() -> RefCounted:
+		return current_command
+
+	func assign_unit_command(value: RefCounted) -> void:
+		current_command = value
+		command_reads.append(global_position)
+
+	func set_target_position(value: Vector2) -> void:
+		target_position = value
+
+	func get_target_position() -> Vector2:
+		return target_position
+
+	func get_move_speed_factor() -> float:
+		return 1.0
+
+	func get_combat_speed_multiplier() -> float:
+		return 1.0
+
+	func refresh_terrain_readability() -> void:
+		pass
+
+	func get_health() -> int:
+		return health
+
+	func apply_damage(amount: int, _context: Dictionary = {}) -> bool:
+		health = maxi(0, health - amount)
+		return true
+
+
+var _probe_signal_reads: Array = []
+var _probe_sim: Node
+var _probe_actor: Node2D
+
+
+func _on_probe_tick(_tick: int) -> void:
+	_probe_signal_reads.append(_probe_actor.global_position)
+
+
+func _hex_move_command(target: Vector2, token: String) -> Dictionary:
+	return {"type": "move_to_position", "unit_id": "a", "team_id": "blue", "target_position": target, "move_speed_factor": 1.0, "command_token": token, "requeue_until_target": true}
+
+
+## Ein Lauf: 60 Ticks von Hand, nach je ticks_per_frame Ticks ein "Bild", das die Knoten wie SimulationRoot._process mit einem
+## Bruchteil aus fractions vorschiebt. Bei Tick 20 und 40 kommt ein neuer Befehl (die Regel liest die Lage beim Annehmen).
+func _run_hex_probe(ticks_per_frame: int, fractions: Array) -> Dictionary:
+	var sim: Node = SIMULATION_ROOT_SCRIPT.new()
+	root.add_child(sim)
+	sim.set_physics_process(false)
+	sim.set_process(false)
+	var terrain: Node = HEX_REGISTRY.new()
+	root.add_child(terrain)
+	terrain.call("configure_iso_grid", Vector2.ZERO, 64, 32, "hex_axial_v1")
+	for x in range(8):
+		for y in range(2):
+			terrain.call("register_tile", HEX_TILE.new({"tile_id": "%d_%d" % [x, y], "grid_position": Vector2i(x, y)}))
+	var registry: Node = HEX_UNITS.new()
+	root.add_child(registry)
+	sim.set("unit_registry_path", sim.get_path_to(registry))
+	sim.set("terrain_registry_path", sim.get_path_to(terrain))
+	var map = HEX_MAP_DATA.create_empty("tick_exact_probe", Vector2i(8, 2), Vector2.ZERO, 64, 32, 3, "hex_axial_v1")
+	map.set_tactical_grid_rules("hex_tactical_v1")
+	sim.call("configure_hex_ground_runtime", map, terrain)
+	var actor := ProbeActor.new()
+	actor.unit_id = "a"
+	root.add_child(actor)
+	actor.global_position = terrain.call("grid_to_world", Vector2i.ZERO)
+	registry.call("register_unit", "a", actor)
+	sim.call("register_known_unit", "a", actor)
+	var batch: Array[Dictionary] = [{"unit_id": "a", "grid": Vector2i.ZERO}]
+	sim.call("admit_hex_ground_units", batch)
+	_probe_signal_reads = []
+	_probe_sim = sim
+	_probe_actor = actor
+	sim.connect("tick_processed", Callable(self, "_on_probe_tick"))
+	sim.call("enqueue_command", _hex_move_command(terrain.call("grid_to_world", Vector2i(7, 0)), "probe_1"))
+	var frame: int = 0
+	for tick in range(1, 61):
+		if tick == 20 or tick == 40:
+			sim.call("enqueue_command", _hex_move_command(terrain.call("grid_to_world", Vector2i(7 - (tick / 20), 1)), "probe_%d" % tick))
+		sim._physics_process(TICK)
+		if tick % ticks_per_frame == 0:
+			sim.call("_project_hex_ground_actors", float(fractions[frame % fractions.size()]))
+			frame += 1
+	var exact: Vector2 = Dictionary(sim.call("get_hex_motion_projection", "a", 0.0)).get("position_world", Vector2.INF)
+	var halfway: Vector2 = Dictionary(sim.call("get_hex_motion_projection", "a", 0.5)).get("position_world", Vector2.INF)
+	var result: Dictionary = {"signal": _probe_signal_reads.duplicate(), "commands": actor.command_reads.duplicate(), "exact": exact, "halfway": halfway, "displayed": actor.global_position}
+	actor.free()
+	registry.free()
+	terrain.free()
+	sim.free()
+	return result
+
+
+## G5d: Regeln lesen im Tick die tickgenaue Lage, egal wie das Bild die Knoten zwischen den Ticks vorgeschoben hat.
+func _test_t5_rules_read_tick_exact_positions() -> void:
+	var a: Dictionary = await _run_hex_probe(1, [0.0])
+	var b: Dictionary = await _run_hex_probe(1, [0.37, 0.81, 0.5])
+	var c: Dictionary = await _run_hex_probe(4, [0.5, 0.13, 0.9])
+	_check(Array(a.commands).size() == 3 and Array(b.commands).size() == 3 and Array(c.commands).size() == 3, "T5 Aufbau: je Lauf drei Befehle angenommen (A %d, B %d, C %d)" % [Array(a.commands).size(), Array(b.commands).size(), Array(c.commands).size()])
+	_check(Array(a.signal).size() == 60 and Array(b.signal).size() == 60 and Array(c.signal).size() == 60, "T5 Aufbau: je Lauf 60 Tick-Rueckrufe")
+	_check(Vector2(a.exact).distance_to(Vector2(a.signal.back())) < 0.001, "T5 Aufbau: im Tick-Rueckruf steht die Einheit auf ihrem Tickstand")
+	_check(Array(a.signal) == Array(b.signal) and Array(a.signal) == Array(c.signal), "T5 Im Tick-Rueckruf gelesene Lage ist bei 1 Bild je Tick, 1 Bild je 4 Ticks und anderen Bruchteilen gleich")
+	_check(Array(a.commands) == Array(b.commands) and Array(a.commands) == Array(c.commands), "T5 Beim Befehlsannehmen mitten im Tick gelesene Lage ist bei allen Bildtakten gleich (A %s, B %s, C %s)" % [str(a.commands), str(b.commands), str(c.commands)])
+	_check(Vector2(c.halfway).distance_to(Vector2(c.exact)) > 0.001 and Vector2(c.displayed).distance_to(Vector2(c.exact)) > 0.001, "T5 Die Anzeige zwischen den Ticks bleibt interpoliert (Bildlage %s, Tickstand %s)" % [str(c.displayed), str(c.exact)])
