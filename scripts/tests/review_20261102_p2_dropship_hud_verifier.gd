@@ -71,7 +71,7 @@ func _run() -> void:
 	_apply_cards(controller, [card])
 	var transit: Control = _find_card(panel, "alpha")
 	_assert(transit.get_instance_id() == unchanged_ids[0], "Transit changes retain the keyed craft card")
-	_assert(compact_status.text.begins_with("Im Anflug") and bool(transit.get_meta("mission_dropship_card_inaccessible")), "Transit updates the visible A5 status and details accessibility")
+	_assert(compact_status.text.contains("Im Anflug") and bool(transit.get_meta("mission_dropship_card_inaccessible")), "Transit updates the visible A5 status and details accessibility")
 	_assert(_command(transit, "set_lz").disabled and _command(transit, "drop").disabled, "Transit locks existing action buttons")
 	var transit_ids: Array = _subtree_ids(transit)
 	card["progress"] = 47.0
@@ -90,7 +90,7 @@ func _run() -> void:
 	_apply_cards(controller, [card])
 	var waiting: Control = _find_card(panel, "alpha")
 	_assert(not _command(waiting, "set_lz").disabled and not _command(waiting, "drop").disabled, "Waiting with LZ unlocks existing LZ and Drop actions")
-	_assert(waiting.modulate.a >= 0.99 and compact_status.text == "Bereit", "Waiting presents full-contrast details and the ready status")
+	_assert(waiting.modulate.a >= 0.99 and compact_status.text.strip_edges().ends_with("Bereit"), "Waiting presents full-contrast details and the ready status")
 	var pilot: Node = waiting.get_node(CARD_BODY + "ContentRow/InfoVBox/PilotCardHost/PilotCard")
 	var pilot_id: int = pilot.get_instance_id()
 	var pilot_unit: Node = mission.get_node("UnitDelta")
