@@ -1,7 +1,9 @@
 extends SceneTree
 ## M6b (23.11.2026): Munition von Hand auffuellen per Drag and Drop.
 ##   B2 ein Zug bewegt den ganzen Stapel, soweit im Ziel Platz ist (Fach plus Rucksack); Umschalttaste = 1; passt nichts -> alles bleibt
-##   B4 Schiffsfracht im Einsatz: nah (erreichbar, Zug moeglich) / fern (nicht erreichbar, Hinweis); an der Basis Lager -> Schiffsfracht
+##   K1 Besatzung an Bord eines an der Heimatbasis gelandeten Schiffs erreicht Basislager, Schiffslager und Fach (ohne Aussteigen); Gegenfaelle
+##   B4 NUR KAMPAGNE (keine Skirmish-Deckung, W2): Schiffsfracht im Einsatz: nah (erreichbar, Zug moeglich) / fern (nicht erreichbar, Hinweis); an der Basis Lager -> Schiffslager
+##      Im Skirmish-Kampfeinsatz ist das Schiff nie "geparkt" (das braucht `campaign_ground_pilot_id`), die Schiffsfracht im Feld ist dort nicht erreichbar.
 ##   B5 Fach voll ohne Rucksack: Hinweis "Fach voll - mit einem Rucksack passen mehr Magazine hinein."
 ## Alles ueber den echten Weg: Panel (_drop_to) -> Signal operation_requested -> Befehl inventory_transfer im echten Versorgungszustand.
 ## Abschlusszeile: AMMO_DRAG_DROP passed=%d failed=%d
@@ -34,6 +36,7 @@ class FakeController extends Node:
 	func _find_friendly_unit_by_id(_id: String) -> Node: return unit
 	func _find_mission_dropship_card_entry(_craft: String) -> Dictionary: return {}
 	func _get_deployed_unit_fireteam_id(_id: String) -> String: return ""
+	# Kampagnen-Annahme (geparktes Schiff): im Skirmish-Kampfeinsatz ist das nie so, darum gilt dieser Teil nur fuer die Kampagne.
 	func _is_parked_campaign_dropship(_craft: String) -> bool: return true
 	func _campaign_landed_craft_position(_craft: String) -> Vector2: return Vector2.ZERO
 class FakeFlow extends Node:
@@ -123,7 +126,7 @@ func _stack_part() -> void:
 	_give(s, BASE, "ammo_light", 2)
 	var one: Dictionary = _drag(s, BASE, "ammo_light", BAG)
 	check(int(one.amount) == 2 and bool(one.result.get("ok", false)) and _n(s, BAG, "ammo_light") == 2 and _n(s, BASE, "ammo_light") == 0, "B2: ein Zug bewegt den ganzen Stapel (2), Lager 0, Fach 2 (%s)" % str(one))
-	# Platzgrenze: 10 im Lager, Fach 3, kein Rucksack -> 3 bewegt (eins ist schon da: nur 1 passt noch).
+	# Platzgrenze: 10 im Lager, Fach 3 (leer), kein Rucksack -> 3 bewegt, Lager 7.
 	var t := _sup("light")
 	_give(t, BASE, "ammo_light", 10)
 	var limit: Dictionary = _drag(t, BASE, "ammo_light", BAG)
@@ -197,7 +200,7 @@ func _home_part() -> void:
 		check(not bool(denied.result.get("ok", true)) and String(denied.result.get("reason", "")) == "inventory_access" and _n(sup, BAG, "ammo_light") == 0, "K1: %s: abgelehnt (%s), nichts bewegt" % [label, str(denied.result.get("reason", ""))])
 		adapter.free()
 
-# ---------- B4 ----------
+# ---------- B4 (nur Kampagne) ----------
 
 ## Echter Adapter mit Attrappen fuer Ablauf und Einsatzszene; die Einheit u1 steht `distance` vom geparkten Schiff (Position 0,0) entfernt.
 func _field_adapter(s: RefCounted, distance: float) -> Object:

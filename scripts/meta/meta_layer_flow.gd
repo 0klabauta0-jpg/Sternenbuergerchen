@@ -9348,8 +9348,6 @@ var _save_toast: Node = null
 ## Fix-Runde 1 (W1): die Heimlandung hat ein Speichern angespannt und der Spieler hat noch keinen Ausgang gesehen / welchen Grund er zuletzt gelesen hat.
 var _landing_feedback_open: bool = false
 var _landing_told_reason: String = ""
-## M4c (W4): Auffuell-Meldung der Heimkehr; haengt am Hinweis der Landungs-Speicherung ("Gespeichert. Munition aufgefüllt: ...").
-var _ammo_landing_note: String = ""
 
 func _completed_campaign_job_count() -> int:
 	if _singleplayer_runtime == null: return -1
@@ -9382,7 +9380,6 @@ func _reset_completion_save_baseline() -> void:
 	_completion_save_warned = false
 	_landing_feedback_open = false
 	_landing_told_reason = ""
-	_ammo_landing_note = ""
 	_save_wish.clear() # Ein vorgemerkter Wunsch verfaellt beim Laden und beim Kampagnenstart.
 
 
@@ -9418,11 +9415,10 @@ func _poll_completion_save() -> void:
 		if wish_open:
 			# Ein Schreibvorgang erledigt Wunsch und Abschluss/Landung zugleich.
 			_save_wish.clear()
-			_show_save_feedback(String(result.get("message", "Kampagne gespeichert.")) + ("" if _ammo_landing_note.is_empty() else " " + _ammo_landing_note))
+			_show_save_feedback(String(result.get("message", "Kampagne gespeichert.")))
 		elif _landing_feedback_open:
-			# Fix-Runde 1 (W1): die automatische Speicherung nach der Landung sagt, dass sie geklappt hat; M4c (W4): mit der Auffuell-Meldung, falls es eine gibt
-			_show_save_feedback("Gespeichert." if _ammo_landing_note.is_empty() else "Gespeichert. " + _ammo_landing_note)
-		_ammo_landing_note = ""
+			# Fix-Runde 1 (W1): die automatische Speicherung nach der Landung sagt, dass sie geklappt hat.
+			_show_save_feedback("Gespeichert.")
 		_landing_feedback_open = false
 		_landing_told_reason = ""
 		return

@@ -2232,7 +2232,7 @@ func grant_ammo_start_if_missing() -> bool:
 ## Pilot) leer sind: {"empty": n, "short_message": "Munition knapp: n Fächer leer." oder ""}. Es wird nichts bewegt.
 ## Aufgerufen von launch_to_moon_orbit (der einzigen verbindlichen Abflugstelle von der Heimatbasis), nie beim Oeffnen eines Dialogs.
 func departure_ammo_notice(craft_id: String, crew_ids: Array = []) -> Dictionary:
-	if not _campaign_mode or _flow == null or _supply == null: return {"empty": 0, "short_message": ""}
+	if not (_campaign_mode or _skirmish_mode) or _flow == null or _supply == null: return {"empty": 0, "short_message": ""}
 	var ids: Array = crew_ids.duplicate() if not crew_ids.is_empty() else Array(_flow.call("_aboard_unit_ids_of_craft", craft_id)).duplicate()
 	var pilot := String(Dictionary(_flow.get("_assigned_aircraft_pilot_by_craft")).get(craft_id, ""))
 	if not pilot.is_empty() and not ids.has(pilot): ids.append(pilot)

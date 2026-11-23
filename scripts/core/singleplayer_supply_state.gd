@@ -1111,8 +1111,8 @@ func person_magazine_count(unit_id: String, ammo_class: String) -> int:
 func person_has_container(unit_id: String) -> bool:
 	return _inventory.has("unit:" + unit_id + ":backpack")
 
-## Kampagnenmodus der Munition (nicht gespeichert, vom Adapter je Lauf gesetzt): NUR dort zaehlt der Magazinvorrat der Person.
-## Ausserhalb (Skirmish, Mehrspieler, Testlagen ohne Kampagnenstand) gibt es weder Startausstattung noch Auffuellen, also
+## Magazinmodus der Munition (nicht gespeichert, vom Adapter je Lauf gesetzt): nur dort zaehlt der Magazinvorrat der Person.
+## Er gilt in Kampagne UND Skirmish (Startausstattung, Auffuellen von Hand). Ausserhalb (Mehrspieler, Testlagen ohne Kampagnenstand)
 ## haben alle Einheiten unbegrenzte Reserve wie die Gegner (nachladen muessen sie weiter, die Magazingroesse gilt weiter).
 var _campaign_magazine_mode: bool = false
 
@@ -1190,7 +1190,7 @@ func fill_person_compartments(unit_ids: Array, from_base: bool) -> Dictionary:
 	if not short_text.is_empty(): parts.append(short_text)
 	return {"added": added, "short": short, "message": " ".join(parts), "short_message": short_text}
 
-## M6b (B1): Wie viele der Personen haben ein LEERES Fach (kein Magazin ihrer Waffensorte in Fach oder Rucksack)? Nur lesen, nichts bewegen.
+## M6b (B1): Wie viele der Personen haben ein LEERES Fach (gar kein Magazin, gleich welcher Sorte, in Fach oder Rucksack)? Nur lesen, nichts bewegen.
 ## Personen ohne Behaelter, ohne Fach oder ohne Waffe mit Munitionsbedarf zaehlen nicht.
 func count_empty_compartments(unit_ids: Array) -> int:
 	_sync_compartments()
