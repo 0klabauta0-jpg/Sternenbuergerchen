@@ -63,6 +63,13 @@ func _everything_reachable(label: String) -> void:
 func _buy(request_id: String) -> Dictionary:
 	return adapter.request_operation("campaign_build_housing", {"request_id":request_id})
 
+## Ein Kauf loest hoechstens vier begrenzte Wegsuchen aus (2 alte Betten + 1 Bett je neuer Kopie), nie bis zur Grenze.
+func _check_search_stats(label: String) -> void:
+	var stats: Dictionary = base.get_hex_purchase_search_stats()
+	print("SEARCHES %s: %s" % [label, str(stats)])
+	check(int(stats.get("searches", 99)) >= 1 and int(stats.get("searches", 99)) <= 4, "%s: hoechstens vier Wegsuchen je Kauf (%s)" % [label, str(stats)])
+	check(int(stats.get("max_expanded", 999999)) * 2 < int(stats.get("limit", 0)), "%s: keine Suche kommt in die Naehe der Obergrenze (%s)" % [label, str(stats)])
+
 func _credits() -> int:
 	return int(adapter._supply.get_supply_snapshot().credits)
 
@@ -99,6 +106,7 @@ func _run() -> void:
 	# Kauf
 	var result: Dictionary = _buy("hex-1")
 	check(result.get("ok", false), "Kauf gelingt: " + str(result))
+	_check_search_stats("erster Container")
 	var snapshot: Dictionary = base.get_snapshot()
 	check(_credits() == 19000 and adapter._supply.get_campaign_housing_count() == 1 and adapter._supply.get_campaign_bed_count() == 6, "Kauf: Credits -1000, sechs Betten")
 	check(Array(snapshot.layout.beds).size() == 6 and base.get_recruitment_bed_capacity().beds == 6 and Array(snapshot.layout.campaign_housing).size() == 2, "Layout: sechs Betten, zwei Habitat-Kopien, Anwerbekapazitaet 6")
@@ -164,8 +172,30 @@ func _run() -> void:
 	for number in range(3, sites + 1):
 		var next: Dictionary = _buy("hex-%d" % number)
 		check(next.get("ok", false), "Container %d gebaut: %s" % [number, str(next)])
+		_check_search_stats("Container %d" % number)
 		_everything_reachable("nach Container %d" % number)
 	check(adapter._supply.get_campaign_housing_count() == sites and base.get_recruitment_bed_capacity().beds == 2 + 4 * sites and _credits() == 19000 - 1000 * (sites - 1), "alle Stellplaetze belegt: Betten und Credits stimmen")
+	# Sperrmaske bleibt unter der Grenze aus simulation_root.gd (4096 Zellen), auch mit zwei geparkten Schiffen.
+	var mask_cells: int = Array(base.get_ground_ship_blocked_cells().blocked_cells).size()
+	var footprint = load("res://scripts/meta/home_craft_footprint.gd")
+	var ship_rects: Array[Rect2] = []
+	for pad: Dictionary in Array(base.get_snapshot().layout.landing_pads).slice(0, 2):
+		var body: Dictionary = footprint.rect_for_craft({"craft_id":"parked_probe", "model_id":"cutlass", "craft_type":"dropship"}, pad)
+		if body.get("ok", false): ship_rects.append(body.rect)
+	base._navigation_graph.call("set_craft_rectangles", ship_rects)
+	var full_mask: Dictionary = sim._get_hex_respawn_ship_mask()
+	print("MASK vier Container: %d Zellen, mit %d Schiffen: %d" % [mask_cells, ship_rects.size(), Array(full_mask.get("blocked_cells", [])).size()])
+	check(ship_rects.size() == 2 and full_mask.get("ok", false) and Array(full_mask.blocked_cells).size() < 4096 and Array(full_mask.blocked_cells).size() > mask_cells, "vier Container + zwei geparkte Schiffe: Sperrmaske gueltig und unter 4096 Zellen (%d)" % Array(full_mask.get("blocked_cells", [])).size())
+	# Obergrenze der Suche: ein ringsum zugesperrtes Ziel erschoepft die Suche nicht ueber die Grenze hinaus -> nicht erreichbar.
+	var lonely: Vector2i = _bed_cells(base.get_snapshot())[0]
+	var ring := {}
+	for direction: Vector2i in load("res://scripts/terrain/hex_grid.gd").DIRECTIONS: ring[lonely + direction] = true
+	var spawn_cell := Vector2i(int(base.get_snapshot().layout.avatar_spawn_grid[0]), int(base.get_snapshot().layout.avatar_spawn_grid[1]))
+	var started := Time.get_ticks_msec()
+	var found: bool = base._hex_bed_reachable(load("res://scripts/terrain/terrain_pathfinder.gd").new(), spawn_cell, lonely, ring)
+	var capped: Dictionary = base.get_hex_purchase_search_stats()
+	print("OBERGRENZE: %d ms, %s" % [Time.get_ticks_msec() - started, str(capped)])
+	check(not found and int(capped.max_expanded) == int(capped.limit), "eingemauertes Bett: Suche bricht an der Obergrenze ab, Ziel gilt als nicht erreichbar (%s)" % str(capped))
 	var credits_full := _credits()
 	var over: Dictionary = _buy("hex-over")
 	check(not over.get("ok", false) and String(over.get("message", "")) == "Kein freier Stellplatz für einen weiteren Wohncontainer" and _credits() == credits_full, "naechster Kauf abgelehnt mit Text (%s)" % str(over))

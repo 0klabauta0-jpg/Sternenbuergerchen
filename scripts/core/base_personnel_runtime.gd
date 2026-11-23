@@ -30,6 +30,9 @@ var _source_layout: Dictionary = {}
 var _building_blockers: Dictionary = {}
 var _hex_required:=false
 var _hex_admission_waiting:=false
+## Obergrenze je Wegsuche beim Container-Kauf (aufgeklappte Zellen); darueber gilt das Bett als nicht erreichbar.
+const HEX_PURCHASE_SEARCH_EXPANSION_LIMIT := 14000
+var _hex_purchase_stats := {"searches":0, "expanded":0, "max_expanded":0}
 const BUILDING_BOUNDS := {
 	"habitat": Rect2(7.0, 2.0, 10.0, 6.3),
 	"workshop": Rect2(22.0, 2.0, 11.0, 6.5),
@@ -407,6 +410,7 @@ func _build_hex_container(count: int) -> Dictionary:
 	if not _sim.is_hex_ground_runtime_active(): return _reject("hex_ground_unavailable", "Die Bodenplanung der Basis ist nicht verfügbar")
 	_refresh_home_craft_blockers()
 	if not _home_craft_geometry_valid: return _reject("home_craft_geometry_unavailable", "Schiffsfläche ist noch nicht verfügbar")
+	_hex_purchase_stats = {"searches":0, "expanded":0, "max_expanded":0}
 	var kinds: Array = Array(_flow.get_meta("campaign_built_housing_beds", [])).duplicate()
 	while kinds.size() < count - 1: kinds.append(2)
 	kinds = kinds.slice(0, count - 1)
@@ -430,10 +434,12 @@ func _build_hex_container(count: int) -> Dictionary:
 		for cell in mask.blocked_cells: blocked[cell] = true
 		var origin := Vector2i(int(_layout.avatar_spawn_grid[0]), int(_layout.avatar_spawn_grid[1]))
 		var pathfinder = HEX_PATHFINDER.new()
-		for bed: Dictionary in candidate.beds:
+		# Hoechstens vier begrenzte Suchen je Kauf (keine Standbilder): die zwei alten Betten und je ein Bett
+		# jeder neuen Habitat-Kopie (beide Betten einer Kopie liegen im selben Raum hinter derselben Tuer).
+		# Fruehere Container sind durch den Pruefer ueber alle vier belegten Stellplaetze belegt.
+		for bed: Dictionary in _hex_purchase_probe_beds(candidate.beds, fresh):
 			var cell := Vector2i(int(bed.grid[0]), int(bed.grid[1]))
-			var path: Array = [] if blocked.has(cell) else pathfinder.find_path_with_options(origin, cell, _terrain, {"blocked_grids":blocked})
-			if path.is_empty() or Vector2i(path[-1]) != cell: reachable = false; break
+			if blocked.has(cell) or not _hex_bed_reachable(pathfinder, origin, cell, blocked): reachable = false; break
 	_navigation_graph.set_campaign_housing(previous)
 	if not reachable: return _reject("housing_site_blocked", "Der Wohncontainer wäre nicht begehbar angebunden")
 	_flow.set_meta("campaign_built_housing", count)
@@ -444,6 +450,34 @@ func _build_hex_container(count: int) -> Dictionary:
 	for id in _states:
 		if String(Dictionary(_states[id]).get("status", "")) == "moving": _cancel(String(id), false)
 	return {"ok":true,"housing_count":count}
+
+## Bett-Auswahl fuer die Erreichbarkeitspruefung beim Kauf: die zwei alten Betten (Anfang der Liste) und
+## das erste Bett je neuer Kopie.
+func _hex_purchase_probe_beds(beds: Array, fresh: Array) -> Array:
+	var probes: Array = beds.slice(0, 2)
+	for house: Dictionary in fresh:
+		for bed: Dictionary in beds:
+			if String(bed.get("room_id", "")) == String(house.get("id", "")):
+				probes.append(bed)
+				break
+	return probes
+
+## Eine begrenzte Wegsuche (A*, hoechstens HEX_PURCHASE_SEARCH_EXPANSION_LIMIT Zellen). Wird die Grenze
+## erreicht, gilt das Ziel als nicht erreichbar. Zaehlt Suchen und Zellen als reine Lese-Statistik.
+func _hex_bed_reachable(pathfinder, origin: Vector2i, cell: Vector2i, blocked: Dictionary) -> bool:
+	_hex_purchase_stats["searches"] = int(_hex_purchase_stats.get("searches", 0)) + 1
+	if origin == cell: return true
+	var search = HEX_PATHFINDER.RegionalHexSearch.new(origin, cell, 0, {"blocked_grids":blocked}, _terrain)
+	var used: int = search.advance(pathfinder, _terrain, HEX_PURCHASE_SEARCH_EXPANSION_LIMIT)
+	_hex_purchase_stats["expanded"] = int(_hex_purchase_stats.get("expanded", 0)) + used
+	_hex_purchase_stats["max_expanded"] = maxi(int(_hex_purchase_stats.get("max_expanded", 0)), used)
+	return search.finished and not search.path.is_empty() and Vector2i(search.path[-1]) == cell
+
+## Nur lesen: Wegsuchen des letzten Wohncontainer-Kaufs {searches, expanded, max_expanded, limit}.
+func get_hex_purchase_search_stats() -> Dictionary:
+	var stats := _hex_purchase_stats.duplicate()
+	stats["limit"] = HEX_PURCHASE_SEARCH_EXPANSION_LIMIT
+	return stats
 
 ## Steht eine Person auf dem Stellplatz oder ist ein Feld dort fuer einen Weg reserviert?
 func _hex_site_busy(houses: Array) -> bool:
