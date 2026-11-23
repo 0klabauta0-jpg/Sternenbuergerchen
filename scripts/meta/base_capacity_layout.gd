@@ -4,8 +4,52 @@ extends RefCounted
 const NAV = preload("res://scripts/meta/base_interior_navigation.gd")
 const MODULAR_GEOMETRY = preload("res://scripts/meta/modular_base_geometry.gd")
 
-## Gepruefte Stellplaetze fuer Wohncontainer auf Hex-Boden (Teil B1). Ein Platz = ein Container.
-const HEX_CONTAINER_SITES: Array = []
+## Gepruefte Stellplaetze fuer Wohncontainer auf Hex-Boden. Ein Platz = ein Container; Wert = Versatz
+## (Feingitter-Zellen) der ersten Habitat-Kopie gegenueber dem Original-Habitat, die zweite Kopie liegt
+## HEX_CONTAINER_COPY_STEP Zellen (4,25 m) daneben. Geprueft mit scripts/tests/campaign_housing_site_probe.gd
+## gegen die echte Basiskarte: alle Zellen samt 0,75 m Rand begehbar, Abstand zu Pads (3 m), Terminals,
+## Spawn und Tank, Hexwege zu Betten, Terminals und Pads mit der echten Sperrmaske.
+const HEX_CONTAINER_SITES: Array = [Vector2i(-40, 23), Vector2i(-44, 48), Vector2i(-56, 73), Vector2i(-24, 88)]
+const HEX_CONTAINER_COPY_STEP := 17
+
+## Habitat-Kopien eines Wohncontainers auf Hex-Boden: je Kopie zwei fest verbaute Betten.
+## Gebaeude Nummer n steht auf Stellplatz n. Altbelege (zwei Betten) bekommen nur eine Kopie.
+static func hex_container_housing(source: Dictionary, terrain: Node, infrastructure: Dictionary) -> Dictionary:
+	var assets: Array = Array(source.get("assets", [])).duplicate(true)
+	var houses: Array = []
+	var beds: Array = []
+	var habitat: Dictionary = {}
+	for asset: Dictionary in assets:
+		if asset.get("id") == "habitat_cutaway_01": habitat = asset; break
+	var source_beds: Array = Array(source.get("beds", []))
+	var kinds: Array = Array(infrastructure.get("campaign_housing_beds", []))
+	for index in range(mini(int(infrastructure.get("campaign_housing", 0)), HEX_CONTAINER_SITES.size())):
+		var container := index < kinds.size() and int(kinds[index]) >= 4
+		for copy in range(2 if container else 1):
+			if habitat.is_empty() or source_beds.size() < 2: return {"assets":assets, "houses":houses, "beds":beds}
+			var delta: Vector2i = Vector2i(HEX_CONTAINER_SITES[index]) + Vector2i(HEX_CONTAINER_COPY_STEP * copy, 0)
+			var offset: Vector3 = NAV.plane_at_grid(delta)
+			var building_id := "campaign_habitat_c%02d%s" % [index + 1, "ab"[copy]] if container else "campaign_habitat_%02d" % (index + 1)
+			var translated: Array = []
+			for bed_index in range(2):
+				var original: Dictionary = source_beds[bed_index]
+				var raw: Array = original.grid
+				var grid := Vector2i(int(raw[0]), int(raw[1])) + delta
+				if not terrain.is_walkable(grid): return {"assets":assets, "houses":houses, "beds":beds}
+				var bed := original.duplicate(true)
+				bed.id = "container_%02d_bed_%d" % [index + 1, copy * 2 + bed_index + 1] if container else "field_bed_%02d" % (index * 2 + bed_index + 1)
+				bed.grid = [grid.x, grid.y]
+				bed.room_id = building_id
+				for key in ["sleep_plane", "rest_plane"]:
+					bed[key] = [float(original[key][0]) + offset.x, float(original[key][1]) + offset.z]
+				translated.append(bed)
+			var building := habitat.duplicate(true)
+			building.id = building_id
+			building.plane = [float(habitat.plane[0]) + offset.x, float(habitat.plane[1]) + offset.z]
+			building["nav_delta"] = [delta.x, delta.y]
+			assets.append(building); houses.append(building)
+			beds.append_array(translated)
+	return {"assets":assets, "houses":houses, "beds":beds}
 
 static func hex_container_site_count() -> int:
 	return HEX_CONTAINER_SITES.size()
@@ -69,7 +113,13 @@ static func expand(source: Dictionary, terrain: Node, navigation: RefCounted, ro
 	var spawn: Array = result.get("avatar_spawn_grid", [36, 40])
 	var origin: Vector2 = terrain.grid_to_world(Vector2i(int(spawn[0]), int(spawn[1])))
 	if navigation.has_method("nearest_available_world"): origin = navigation.call("nearest_available_world", origin)
-	if not paid and infrastructure.has("campaign_housing"):
+	if not paid and infrastructure.has("campaign_housing") and bool(infrastructure.get("hex_containers", false)):
+		var containers := hex_container_housing(source, terrain, infrastructure)
+		result["assets"] = containers.assets
+		result["campaign_housing"] = containers.houses
+		result["interiors"] = Array(result.get("interiors", [])).duplicate(true)
+		beds.append_array(containers.beds)
+	elif not paid and infrastructure.has("campaign_housing"):
 		var houses: Array = []
 		var assets: Array = Array(result.get("assets", [])).duplicate(true)
 		var interiors: Array = Array(result.get("interiors", [])).duplicate(true)

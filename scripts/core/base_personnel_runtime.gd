@@ -35,6 +35,7 @@ const BUILDING_BOUNDS := {
 	"workshop": Rect2(22.0, 2.0, 11.0, 6.5),
 }
 const CAPACITY_LAYOUT = preload("res://scripts/meta/base_capacity_layout.gd")
+const HEX_PATHFINDER = preload("res://scripts/terrain/terrain_pathfinder.gd")
 const HOME_CRAFT_FOOTPRINT = preload("res://scripts/meta/home_craft_footprint.gd")
 const MODULAR_GEOMETRY = preload("res://scripts/meta/modular_base_geometry.gd")
 const PERSONNEL_RECOVERY = preload("res://scripts/core/personnel_recovery_runtime.gd")
@@ -165,6 +166,8 @@ func configure(flow: Node, screen: Node, simulation: Node, checkpoint: Dictionar
 	var navigation = load(NAV_PATH)
 	var base_path := "res://maps/campaign_intro_base.json"
 	var map_data = navigation.load_map(base_path)
+	# Frueh setzen: das erste Kapazitaets-Layout (Wohncontainer) haengt davon ab.
+	_hex_required = not String(map_data.get_tactical_grid_rules()).is_empty()
 	_visible_base_map = load("res://scripts/terrain/terrain_map_data.gd").load_from_file(base_path)
 	_layout = navigation.layout(base_path)
 	_source_layout = _layout.duplicate(true)
@@ -282,6 +285,8 @@ func _capacity_infrastructure() -> Dictionary:
 	if _flow.call("is_campaign_start"):
 		infrastructure["campaign_beds"] = int(_flow.get_meta("campaign_built_beds", 2))
 		infrastructure["campaign_housing"] = int(_flow.get_meta("campaign_built_housing", 0))
+		infrastructure["campaign_housing_beds"] = Array(_flow.get_meta("campaign_built_housing_beds", []))
+		infrastructure["hex_containers"] = _requires_hex_ground()
 	return infrastructure
 
 func _modular_bed_layout(layout: Dictionary) -> Array:
@@ -366,7 +371,7 @@ func validate_modular_base(candidate: Dictionary) -> Dictionary:
 func build_campaign_housing(count: int) -> Dictionary:
 	if _flow == null or not _flow.call("is_campaign_start") or count != int(_flow.get_meta("campaign_built_housing", 0)) + 1 or count > 9:
 		return _reject("invalid_housing_construction", "Unterkunftsbau nicht verfügbar")
-	if _requires_hex_ground(): return _reject("housing_site_blocked", "Unterkunftsbau ist auf dieser Karte noch nicht verfügbar")
+	if _requires_hex_ground(): return _build_hex_container(count)
 	for state: Dictionary in _states.values():
 		if String(state.get("status", "")) == "moving": return _reject("housing_site_busy", "Unterkunftsbau während laufender Wege nicht möglich")
 	var infrastructure := _capacity_infrastructure()
@@ -393,6 +398,76 @@ func build_campaign_housing(count: int) -> Dictionary:
 	_flow.set_meta("campaign_built_beds", 2 + 2 * count)
 	_refresh_capacity()
 	return {"ok":true,"housing_count":count}
+
+## Wohncontainer auf Hex-Boden: zwei Habitat-Kopien mit vier Betten auf dem geprueften Stellplatz
+## `count`. Nichts wird veraendert, solange eine Pruefung fehlschlaegt; die Abbuchung macht der
+## Versorgungs-Besitzer erst nach dieser Bestaetigung.
+func _build_hex_container(count: int) -> Dictionary:
+	if count > CAPACITY_LAYOUT.hex_container_site_count(): return _reject("housing_limit", "Kein freier Stellplatz für einen weiteren Wohncontainer")
+	if not _sim.is_hex_ground_runtime_active(): return _reject("hex_ground_unavailable", "Die Bodenplanung der Basis ist nicht verfügbar")
+	_refresh_home_craft_blockers()
+	if not _home_craft_geometry_valid: return _reject("home_craft_geometry_unavailable", "Schiffsfläche ist noch nicht verfügbar")
+	var kinds: Array = Array(_flow.get_meta("campaign_built_housing_beds", [])).duplicate()
+	while kinds.size() < count - 1: kinds.append(2)
+	kinds = kinds.slice(0, count - 1)
+	kinds.append(4)
+	var total_beds := 2
+	for kind in kinds: total_beds += int(kind)
+	var infrastructure := _capacity_infrastructure()
+	infrastructure["campaign_housing"] = count
+	infrastructure["campaign_housing_beds"] = kinds
+	infrastructure["campaign_beds"] = total_beds
+	var candidate: Dictionary = CAPACITY_LAYOUT.expand(_source_layout, _terrain, _navigation_graph, Array(_flow.get("_all_team_units")).size(), infrastructure)
+	var fresh: Array = Array(candidate.get("campaign_housing", [])).filter(func(house: Dictionary) -> bool: return String(house.get("id", "")).begins_with("campaign_habitat_c%02d" % count))
+	if fresh.size() != 2 or Array(candidate.get("beds", [])).size() != total_beds: return _reject("housing_site_blocked", "Kein erreichbarer Stellplatz für den Wohncontainer")
+	if _hex_site_busy(fresh): return _reject("housing_site_busy", "Der Stellplatz ist belegt. Person zuerst vom Platz bewegen")
+	var previous: Array = Array(_layout.get("campaign_housing", []))
+	_navigation_graph.set_campaign_housing(Array(candidate.get("campaign_housing", [])))
+	var mask: Dictionary = _navigation_graph.get_ground_clearance_mask()
+	var reachable: bool = bool(mask.get("ok", false))
+	if reachable:
+		var blocked := {}
+		for cell in mask.blocked_cells: blocked[cell] = true
+		var origin := Vector2i(int(_layout.avatar_spawn_grid[0]), int(_layout.avatar_spawn_grid[1]))
+		var pathfinder = HEX_PATHFINDER.new()
+		for bed: Dictionary in candidate.beds:
+			var cell := Vector2i(int(bed.grid[0]), int(bed.grid[1]))
+			var path: Array = [] if blocked.has(cell) else pathfinder.find_path_with_options(origin, cell, _terrain, {"blocked_grids":blocked})
+			if path.is_empty() or Vector2i(path[-1]) != cell: reachable = false; break
+	_navigation_graph.set_campaign_housing(previous)
+	if not reachable: return _reject("housing_site_blocked", "Der Wohncontainer wäre nicht begehbar angebunden")
+	_flow.set_meta("campaign_built_housing", count)
+	_flow.set_meta("campaign_built_housing_beds", kinds)
+	_flow.set_meta("campaign_built_beds", total_beds)
+	_refresh_capacity()
+	# Die Sperrmaske hat sich geaendert: laufende Wege wie bei Schiffen abbrechen, neu befehlbar.
+	for id in _states:
+		if String(Dictionary(_states[id]).get("status", "")) == "moving": _cancel(String(id), false)
+	return {"ok":true,"housing_count":count}
+
+## Steht eine Person auf dem Stellplatz oder ist ein Feld dort fuer einen Weg reserviert?
+func _hex_site_busy(houses: Array) -> bool:
+	var rects: Array[Rect2] = []
+	for house: Dictionary in houses: rects.append(Rect2(float(house.plane[0]) - 2.1, float(house.plane[1]) - 2.1, 4.2, 4.2))
+	for id in _states:
+		var actor := get_actor(String(id))
+		if not is_instance_valid(actor) or not actor.visible or not _unit_is_home(String(id)): continue
+		var plane: Vector3 = load(NAV_PATH).plane_at_grid(_terrain.world_to_grid(actor.position))
+		for rect: Rect2 in rects:
+			if rect.has_point(Vector2(plane.x, plane.z)): return true
+	var snapshot: Dictionary = _sim.get_hex_ground_planning_snapshot()
+	var claimed: Dictionary = snapshot.occupant_by_grid.duplicate()
+	claimed.merge(snapshot.admission_slots_by_grid)
+	for segment: Dictionary in snapshot.committed_segments:
+		claimed[segment.from_grid] = true
+		claimed[segment.to_grid] = true
+	for grant: Dictionary in snapshot.committed_corridor_grants:
+		for cell in grant.get("cells", []): claimed[cell] = true
+	for cell: Vector2i in claimed:
+		var plane: Vector3 = load(NAV_PATH).plane_at_grid(cell)
+		for rect: Rect2 in rects:
+			if rect.has_point(Vector2(plane.x, plane.z)): return true
+	return false
 
 func build_campaign_bed(count: int) -> Dictionary:
 	if _flow == null or not _flow.call("is_campaign_start") or count != int(_flow.get_meta("campaign_built_beds", 2)) + 1 or count > 20:
