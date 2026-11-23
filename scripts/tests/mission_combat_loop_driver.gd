@@ -2156,6 +2156,7 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	due_pairs.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return String(a["attacker_id"]) < String(b["attacker_id"]))
 	for pair_index in range(due_pairs.size()):
 		_enqueue_attack_for_pair(due_pairs[pair_index], simulation_root, profile_enabled, pair_index > 0)
+	_flush_combat_noise_facing()
 
 
 ## Rueckruf des Aufloesers (nur fuer find_contact_pairs): 0 = dran, 1 = nur Anlauf (suchen, Erfassung starten),
@@ -2276,6 +2277,7 @@ func _enqueue_attack_for_pair(contact_pair: Dictionary, simulation_root: Node, p
 	if _overwatch_controller != null and _overwatch_controller.has_method("note_member_fired"):
 		_overwatch_controller.call("note_member_fired", attacker_id, _current_tick + ((_get_attack_period_milli(attacker) + 999) / 1000) * COMBAT_DECISION_INTERVAL_TICKS)
 	_record_return_fire_window_if_needed(attacker, actual_target)
+	_note_combat_facing_shot(attacker, actual_target)
 	var flank_modifiers: Dictionary = Dictionary(decision.get("flank_modifiers", {}))
 	_maybe_publish_flank_event(flank_modifiers, attacker, actual_target)
 	if is_friendly_fire:
@@ -2294,6 +2296,144 @@ func _enqueue_attack_for_pair(contact_pair: Dictionary, simulation_root: Node, p
 	fired_diagnostic["damage"] = int(damage_effect.get("damage", 0))
 	fired_diagnostic["weapon_ticks"] = int(decision.get("weapon_ticks", 1))
 	_record_contact_decision_diagnostics("fired", fired_diagnostic)
+
+
+## FT-A: Blickrichtung im Gefecht. Wer schiesst, sieht sein Ziel an (R1); wer beschossen wird, dreht sich zum Schuetzen,
+## mit dem Erkennungsverzug der Einheit (R2, Treffer wie Fehlschuss: es zaehlt der eingereihte Schuss); die uebrigen
+## Mitglieder der Gruppe des Beschossenen reagieren 30 Ticks spaeter mit (R3). Rein rechnerisch, nur der Host reiht ein
+## (SimulationRoot.queue_hex_facing_intent prueft die Befugnis), keine Zufallsquelle, nichts im Speicherstand.
+const COMBAT_FACING_MIN_INTERVAL_TICKS: int = 30
+const COMBAT_FACING_NOISE_EXTRA_TICKS: int = 30
+const COMBAT_FACING_BEING_SHOT_TICKS: int = 30
+const COMBAT_FACING_TARGET_MEMORY_TICKS: int = 120
+## unit_id -> Tick, ab dem die Drehung wirkt; Kind "noise" darf von einer eigenen Kampfreaktion ersetzt werden.
+var _facing_last_turn_tick: Dictionary = {}
+var _facing_last_turn_is_noise: Dictionary = {}
+## unit_id -> {"target_id", "tick"}: auf wen die Einheit zuletzt geschossen hat.
+var _facing_target_by_unit: Dictionary = {}
+var _facing_shot_at_tick: Dictionary = {}
+var _facing_noise_shots: Array = []
+var _facing_serial: int = 0
+
+
+func _combat_facing_now() -> int:
+	var tick: int = int(get_hex_sight_adapter().get_current_tick())
+	return tick if tick >= 0 else _current_tick
+
+
+func _unit_id_for_facing(unit) -> String:
+	if unit != null and unit.has_method("get_unit_id"):
+		return String(unit.call("get_unit_id")).strip_edges()
+	return ""
+
+
+func _unit_is_fit_for_facing(unit) -> bool:
+	if unit == null or not is_instance_valid(unit):
+		return false
+	return not unit.has_method("get_vital_state") or String(unit.call("get_vital_state")) == "fit"
+
+
+## Hex-Richtung 0..5 von `unit` zu `toward`, -1 wenn nicht bestimmbar.
+func _facing_direction_toward(unit, toward) -> int:
+	var adapter = get_hex_sight_adapter()
+	if not adapter.is_active():
+		return -1
+	var from_info: Dictionary = adapter.read_position(unit)
+	var to_info: Dictionary = adapter.read_position(toward)
+	var from_position: Vector2 = Vector2(from_info.get("position", _get_unit_world_position(unit))) if bool(from_info.get("valid", false)) else _get_unit_world_position(unit)
+	var to_position: Vector2 = Vector2(to_info.get("position", _get_unit_world_position(toward))) if bool(to_info.get("valid", false)) else _get_unit_world_position(toward)
+	if from_position.distance_squared_to(to_position) <= 0.0001:
+		return -1
+	return int(adapter.world_angle_to_facing((to_position - from_position).angle()))
+
+
+## Hat die Einheit ein eigenes Ziel, das sie gerade sieht (Schuss auf es innerhalb des Gedaechtnisses, Sicht ohne Abbruch)?
+func _unit_has_visible_own_target(unit, unit_id: String, now: int) -> bool:
+	var entry: Dictionary = Dictionary(_facing_target_by_unit.get(unit_id, {}))
+	if entry.is_empty() or now - int(entry.get("tick", -1000000)) > COMBAT_FACING_TARGET_MEMORY_TICKS:
+		return false
+	var own_target = _resolve_unit_by_id(String(entry.get("target_id", "")))
+	if not _unit_is_fit_for_facing(own_target):
+		return false
+	return bool(_query_current_visibility(unit, own_target, contact_range).get("visible", false))
+
+
+## Reiht die Drehabsicht ein; false, wenn nichts eingereiht wurde (gesperrt, schon so gerichtet, zu frueh nach der letzten).
+func _queue_combat_facing(unit, toward, delay_ticks: int, reason: String, guard_visible_target: bool) -> bool:
+	var unit_id: String = _unit_id_for_facing(unit)
+	if unit_id.is_empty() or toward == null or not _unit_is_fit_for_facing(unit):
+		return false
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root == null or not simulation_root.has_method("queue_hex_facing_intent"):
+		return false
+	var now: int = _combat_facing_now()
+	# Hoechstens eine Drehung je 30 Ticks. Eine noch wartende Kameradendrehung darf die eigene Kampfreaktion ersetzen.
+	var last: int = int(_facing_last_turn_tick.get(unit_id, -1000000))
+	if last > now + 200:
+		last = -1000000
+	var replaces_pending_noise: bool = reason == "combat_reaction" and bool(_facing_last_turn_is_noise.get(unit_id, false)) and last > now
+	if now < last + COMBAT_FACING_MIN_INTERVAL_TICKS and not replaces_pending_noise:
+		return false
+	if guard_visible_target and _unit_has_visible_own_target(unit, unit_id, now):
+		return false
+	var direction: int = _facing_direction_toward(unit, toward)
+	if direction < 0:
+		return false
+	var ready_tick: int = now + maxi(delay_ticks, 1)
+	_facing_serial += 1
+	var command_id: String = "combat:%d:%d:%s" % [now, _facing_serial, unit_id]
+	var result: Dictionary = Dictionary(simulation_root.call("queue_hex_facing_intent", unit_id, direction, command_id, reason, ready_tick))
+	if not bool(result.get("ok", false)) or bool(result.get("replayed", false)) or bool(result.get("unchanged", false)):
+		return false
+	_facing_last_turn_tick[unit_id] = ready_tick
+	_facing_last_turn_is_noise[unit_id] = reason == "noise_reaction"
+	return true
+
+
+## Einhaengepunkt fuer jeden eingereihten Schuss (Normalschuss und Ueberwachung): R1 und R2 sofort, R3 gesammelt.
+func _note_combat_facing_shot(attacker, target) -> void:
+	if attacker == null or target == null or attacker == target:
+		return
+	var attacker_id: String = _unit_id_for_facing(attacker)
+	var target_id: String = _unit_id_for_facing(target)
+	if attacker_id.is_empty() or target_id.is_empty():
+		return
+	var now: int = _combat_facing_now()
+	_facing_target_by_unit[attacker_id] = {"target_id": target_id, "tick": now}
+	_facing_shot_at_tick[target_id] = now
+	_queue_combat_facing(attacker, target, 1, "combat_reaction", false)
+	_queue_combat_facing(target, attacker, _get_detection_delay_ticks(target), "combat_reaction", true)
+	_facing_noise_shots.append([attacker_id, target_id])
+
+
+## Nach allen Schuessen des Schritts: die Gruppe des Beschossenen schaut mit (R3), wenn die Kameraden frei dafuer sind.
+func _flush_combat_noise_facing() -> void:
+	if _facing_noise_shots.is_empty():
+		return
+	var shots: Array = _facing_noise_shots
+	_facing_noise_shots = []
+	var now: int = _combat_facing_now()
+	for shot in shots:
+		var attacker = _resolve_unit_by_id(String(shot[0]))
+		var target = _resolve_unit_by_id(String(shot[1]))
+		if not _unit_is_fit_for_facing(attacker) or target == null:
+			continue
+		var group_id: String = _get_unit_fireteam_id(target)
+		if group_id.is_empty():
+			continue
+		var target_is_friendly: bool = _get_unit_team_id_for_diagnostics(target) == friendly_team_id
+		var mates: Array = _get_friendly_combat_units() if target_is_friendly else _get_enemy_combat_units()
+		for mate in mates:
+			if mate == null or mate == target or mate == attacker or _get_unit_fireteam_id(mate) != group_id:
+				continue
+			var mate_id: String = _unit_id_for_facing(mate)
+			if mate_id.is_empty() or not _unit_is_fit_for_facing(mate):
+				continue
+			if now - int(_facing_shot_at_tick.get(mate_id, -1000000)) <= COMBAT_FACING_BEING_SHOT_TICKS:
+				continue
+			if _attack_contact_ids.has(mate_id) or _unit_has_visible_own_target(mate, mate_id, now):
+				continue
+			_queue_combat_facing(mate, attacker, _get_detection_delay_ticks(mate) + COMBAT_FACING_NOISE_EXTRA_TICKS, "noise_reaction", true)
 
 
 func _record_contact_decision_diagnostics(reason: String, data: Dictionary = {}) -> void:
@@ -5955,6 +6095,7 @@ func _try_enqueue_overwatch(simulation_root: Node) -> Array:
 		var shot: Dictionary = Dictionary(shot_variant)
 		var attacker = _resolve_unit_by_id(String(shot.get("attacker_unit_id", "")))
 		var target = _resolve_unit_by_id(String(shot.get("target_unit_id", "")))
+		_note_combat_facing_shot(attacker, target)
 		var fire_event_id: String = _record_fire_event_from_shot(shot, attacker, target, "overwatch")
 		if attacker != null and target != null:
 			_set_contact_visuals(attacker, target)

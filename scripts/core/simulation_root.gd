@@ -3385,7 +3385,10 @@ func queue_hex_facing_intent(unit_id: String, direction: int, command_id: String
 		var command_type := String(order.get("command_type",""))
 		var source_type := String(order.get("source_command_type",""))
 		if command_type in ["hold_position","retreat","seek_cover"] or source_type in ["defend","take","retreat"] or (command_type == "move_to_position" and source_type not in ["engage","flank"]):
-			return {"ok":false,"reason":"assignment_locks_facing"}
+			# Wer schiesst oder beschossen wird, sieht den Gegner an, auch mit Halten/Sicherungsauftrag: nur fuer eine Einheit,
+			# die gerade nicht laeuft. Laufende behalten die Wegrichtung; noise_reaction (Kameraden) bleibt gesperrt.
+			if reason != "combat_reaction" or _hex_unit_is_walking(unit_id):
+				return {"ok":false,"reason":"assignment_locks_facing"}
 	var replay_key := JSON.stringify([unit_id,command_id])
 	if _hex_facing_seen.has(replay_key):
 		return {"ok":true,"replayed":true}
@@ -3411,6 +3414,14 @@ func queue_hex_facing_intent(unit_id: String, direction: int, command_id: String
 	_hex_facing_pending[unit_id] = {"direction":direction,"ready_tick":resolved_ready,
 		"priority":HEX_FACING_PRIORITIES[reason],"order_key":order_key}
 	return {"ok":true,"replayed":false}
+
+
+## Laeuft die Einheit gerade (aktives Wegsegment oder zugesagte Folgeschritte)? Dann gewinnt die Wegrichtung.
+func _hex_unit_is_walking(unit_id: String) -> bool:
+	var state := get_hex_unit_state(unit_id)
+	if state.is_empty():
+		return false
+	return bool(state.movement_state.moving) or bool(state.route_state.has_commitments)
 
 
 func _get_hex_facing_order(unit) -> Dictionary:
