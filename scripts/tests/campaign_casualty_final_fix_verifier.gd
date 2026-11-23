@@ -115,7 +115,7 @@ func _down_and_revive_leader(tag: String, s: Dictionary) -> bool:
 	if not await _wait(func(): return bool(Dictionary(driver.call("get_casualty_flags")).get("campaign_leader", {}).get("was_downed", false)), 5000, tag + ": Treiber merkt sich die ausgefallene Person"): return false
 	_check(String(leader.call("get_vital_state")) != "fit", tag + ": Truppfuehrer liegt")
 	_check(bool(leader.call("apply_heal", 10, {})) and String(leader.call("get_vital_state")) == "fit", tag + ": innerhalb der Frist aufgerichtet")
-	return await _wait(func(): return Dictionary(driver.get("_down_state_started_msec_by_unit_id")).is_empty() and Dictionary(driver.get("_queued_bleedout_by_unit_id")).is_empty(), 5000, tag + ": der Driver hat das Liegen abgeraeumt")
+	return await _wait(func(): return Dictionary(driver.get("_down_state_started_tick_by_unit_id")).is_empty() and Dictionary(driver.get("_queued_bleedout_by_unit_id")).is_empty(), 5000, tag + ": der Driver hat das Liegen abgeraeumt")
 
 func _i3_flags_survive_resume() -> void:
 	var s: Dictionary = await _begin_saveable_sortie()
@@ -239,7 +239,7 @@ func _probe_lying_unit(s: Dictionary) -> void:
 	var pilot: Node2D = s.controller.call("_get_campaign_sortie_unit", "campaign_pilot")
 	driver.set("down_revive_window_seconds", 600.0)
 	pilot.call("apply_damage", 10000)
-	if not await _wait(func(): return Dictionary(driver.get("_down_state_started_msec_by_unit_id")).has("campaign_pilot"), 5000, "I4 Messung: der Pilot liegt (Fristbeginn gemerkt)"): return
+	if not await _wait(func(): return Dictionary(driver.get("_down_state_started_tick_by_unit_id")).has("campaign_pilot"), 5000, "I4 Messung: der Pilot liegt (Fristbeginn gemerkt)"): return
 	var lying: Dictionary = capture.capture_components(_flow, _runtime)
 	print("I4_PROBE lying hp=", pilot.call("get_health"), " vital=", pilot.call("get_vital_state"), " capture_ok=", lying.get("ok"), " reason=", lying.get("reason"))
 	_check(not bool(lying.get("ok", false)), "I4 Messung: solange jemand am Boden liegt, ist der Einsatz nicht speicherbar [%s]" % [lying.get("reason", "")])

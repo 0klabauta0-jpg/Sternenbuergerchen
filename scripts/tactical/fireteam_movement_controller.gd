@@ -1117,6 +1117,21 @@ func _resolve_occupied_hex_formation_targets(simulation_root,member_records:Arra
 	return result if changed else {}
 
 
+## R-A: only for a member that waits with target_occupied on a goal held by a unit that is no longer fit. Returns the
+## repaired targets ({} when nothing applies); every other assigned slot stays excluded, as in the issue path.
+func _repair_goal_held_by_downed_occupant(simulation_root,record:Dictionary,unit_id:String,goal:Vector2,targets:Dictionary,terrain_registry)->Dictionary:
+	if simulation_root==null or terrain_registry==null or not simulation_root.has_method("is_hex_ground_runtime_active") or not simulation_root.is_hex_ground_runtime_active():return {}
+	var readout:Dictionary=simulation_root.get_hex_movement_readout(unit_id)
+	if String(readout.get("status",""))!="waiting_reservation" or String(readout.get("reason",""))!="target_occupied":return {}
+	var occupant:String=String(Dictionary(simulation_root.get_hex_ground_planning_snapshot().get("occupant_by_grid",{})).get(terrain_registry.world_to_grid(goal),""))
+	if occupant.is_empty() or occupant==unit_id:return {}
+	var occupant_unit=simulation_root.call("_resolve_known_unit_for_contract",occupant)
+	if occupant_unit==null or not occupant_unit.has_method("get_vital_state") or String(occupant_unit.call("get_vital_state"))=="fit":return {}
+	var candidates:Dictionary=targets.duplicate()
+	candidates[unit_id]=goal
+	return _resolve_occupied_hex_formation_targets(simulation_root,[record],candidates,terrain_registry)
+
+
 func _resolve_completion_targets(state: Dictionary, member_records: Array, final_target_position: Vector2) -> Dictionary:
 	var current_target_positions: Dictionary = Dictionary(state.get("current_target_positions", {}))
 	if _target_positions_cover_member_records(current_target_positions, member_records):
@@ -1459,6 +1474,11 @@ func _reissue_current_stage(state: Dictionary, member_records: Array, simulation
 		if not spacing_diagnostic.is_empty():
 			target_spacing_debug.append(spacing_diagnostic)
 		move_target = walkable_target
+		# R-A (Stillstand 23.11.): a goal that only a unit that is no longer fit occupies (down, bleedout, dead) never frees
+		# up. Redirect it once with the same neighbour planner the issue path uses; a fit occupant is treated as before.
+		var downed_goal_repair: Dictionary = _repair_goal_held_by_downed_occupant(simulation_root, record, unit_id, move_target, current_target_positions, terrain_registry)
+		if not downed_goal_repair.is_empty():
+			move_target = Vector2(downed_goal_repair[unit_id])
 		accepted_moving_targets[unit_id] = move_target
 		current_target_positions[unit_id] = move_target
 		var navigation_context: Dictionary = _build_stage_navigation_context(

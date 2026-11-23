@@ -379,16 +379,7 @@ const DEV_CHARACTER_STAT_ROWS: Array = [
 	{"key": "discipline", "label": "Disziplin"},
 	{"key": "stealth", "label": "Tarnung"},
 ]
-const SUPPRESSION_HIT_GAIN: float = 1.5
-const SUPPRESSION_NEAR_MISS_GAIN: float = 0.35
-const SUPPRESSION_BASE_DECAY_PER_SECOND: float = 0.2
-const SUPPRESSION_MIN_HOLD_MSEC: int = 500
-const SUPPRESSION_NEAR_MISS_INTERVAL_MSEC: int = 950
-const SUPPRESSION_HIT_CHANCE_MALUS: float = -0.3
-const SUPPRESSION_MOVE_FACTOR: float = 0.3
-const SUPPRESSION_HEAVY_MOVE_FACTOR: float = 0.0
-const SUPPRESSION_COVER_BONUS: float = 24.0
-const SUPPRESSION_RUNTIME_BASELINE_META_KEY: String = "fireteam_suppression_runtime_baseline"
+const SUPPRESSION_MATH_SCRIPT: GDScript = preload("res://scripts/tactical/suppression_math.gd")
 const LEADER_INITIATED_FLANK_COOLDOWN_SECONDS: float = 6.0
 const AUTONOMOUS_LEADER_FLANKS_ENABLED: bool = false
 const WAYPOINT_MENU_MOVE_ID: int = 100
@@ -746,8 +737,7 @@ var _area_defense_execution_by_fireteam: Dictionary = {}
 var _area_attack_execution_by_fireteam: Dictionary = {}
 var _suppression_state_by_fireteam: Dictionary = {}
 var _suppression_interrupt_pending_by_fireteam: Dictionary = {}
-var _suppression_near_miss_ready_at_msec_by_fireteam: Dictionary = {}
-var _tracked_health_by_unit_id: Dictionary = {}
+var _suppression_rules_cache: Dictionary = {}
 var _coordination_manager = null
 var _fireteam_movement_controller = null
 var _recent_movement_trace_by_fireteam: Dictionary = {}
@@ -1374,7 +1364,8 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		_area_defense_execution_by_fireteam.clear()
 		_area_attack_execution_by_fireteam.clear()
 		_active_coordination_by_id.clear()
-		_initialize_fireteam_suppression_state()
+		# Unterdrueckung bleibt beim Planabgleich im Einsatz stehen (Stufen, Vormerkung); nur fehlende Eintraege anlegen.
+		_ensure_fireteam_suppression_state_entries()
 	if not selected_tile_state_provided:
 		_ensure_default_tile_selection(false)
 	else:
@@ -3371,6 +3362,8 @@ func refresh_fireteam_security_state(refresh_visuals: bool = true) -> bool:
 			var security_context: Dictionary = _get_area_execution_security_context(fireteam_id).duplicate(true)
 			if hex_adapter != null and hex_adapter.is_active():
 				security_context["hex_sight_adapter"] = hex_adapter
+			if combat_driver != null and combat_driver.has_method("get_game_tick"):
+				security_context["current_tick"] = int(combat_driver.call("get_game_tick")) # Spielzeit statt Wanduhr (G3b)
 			_fireteam_security_controller.call(
 				"update_fireteam_state",
 				fireteam_id,
@@ -5125,9 +5118,9 @@ func _is_fireteam_go_recovery_blocked(fireteam_id: String) -> bool:
 	var suppression_state: Dictionary = Dictionary(_suppression_state_by_fireteam.get(normalized_fireteam_id, {}))
 	if suppression_state.is_empty():
 		return false
-	var suppression_value: float = maxf(float(suppression_state.get("value", 0.0)), 0.0)
-	var suppression_threshold: float = maxf(float(suppression_state.get("threshold", 1.0)), 1.0)
-	return bool(suppression_state.get("is_heavily_suppressed", false)) or suppression_value >= suppression_threshold * 1.8
+	# FT-0b: gesperrt ab Stufe 2 (Niedergehalten) - passend dazu, dass der Plan erst unter Stufe 2 automatisch weiterlaeuft.
+	var suppression_level: int = int(suppression_state.get("level", 0))
+	return suppression_level >= 2 or bool(suppression_state.get("is_heavily_suppressed", false))
 
 
 func _refresh_ad_hoc_panel_visibility() -> void:
@@ -6314,7 +6307,7 @@ func _apply_fireteam_mini_suppression_indicator(card: Control, status_snapshot: 
 	bar.visible = not native_a5_style
 	bar.max_value = threshold
 	bar.value = clampf(value, 0.0, threshold)
-	bar.tooltip_text = "SUPP = Suppression. Steigt unter Beschuss; bei vollem Balken ist das Fireteam gepinnt."
+	bar.tooltip_text = "SUPP = Suppression. Steigt unter Beschuss: Unter Feuer, Niedergehalten, Festgenagelt."
 	TACTICAL_UI_THEME_SCRIPT.call("style_progress_bar", bar, status_key)
 	bar.set_meta("mission_fireteam_mini_suppression_bar", true)
 	bar.set_meta("mission_fireteam_mini_suppression_bar_visible", true)
@@ -7311,13 +7304,16 @@ func _build_fireteam_suppression_status_context(fireteam_id: String) -> Dictiona
 	var suppression_state: String = "ready"
 	var label: String = "READY"
 	var status_key: String = "success"
+	# FT-0b Regel 10: Anzeige mit den Stufennamen aus den Regeldaten; die Zustandswoerter bleiben fuer die Kartenlogik.
+	var level: int = clampi(int(state.get("level", 0)), 0, SUPPRESSION_MATH_SCRIPT.MAX_LEVEL)
+	var level_name: String = SUPPRESSION_MATH_SCRIPT.level_label(_get_suppression_rules(), level) if level > 0 else ""
 	if is_heavily_suppressed:
 		suppression_state = "pinned"
-		label = "PINNED"
+		label = level_name if not level_name.is_empty() else "PINNED"
 		status_key = "danger"
 	elif is_suppressed:
 		suppression_state = "suppressed"
-		label = "SUPP"
+		label = level_name if not level_name.is_empty() else "SUPP"
 		status_key = "warning"
 	elif value > 0.001:
 		suppression_state = "contact"
@@ -7330,6 +7326,7 @@ func _build_fireteam_suppression_status_context(fireteam_id: String) -> Dictiona
 		"ratio": ratio,
 		"percent": percent,
 		"state": suppression_state,
+		"level": level,
 		"label": label,
 		"status_key": status_key,
 		"is_suppressed": is_suppressed,
@@ -21349,108 +21346,80 @@ func _is_unit_current_fireteam_lead(unit: Node) -> bool:
 	return String(leader.call("get_unit_id")) == String(unit.call("get_unit_id"))
 
 
+## Regeln und Stufennamen der Unterdrueckung (data/combat/suppression_rules.json), einmal gelesen.
+func _get_suppression_rules() -> Dictionary:
+	if _suppression_rules_cache.is_empty():
+		_suppression_rules_cache = SUPPRESSION_MATH_SCRIPT.load_rules()
+	return _suppression_rules_cache
+
+
+## Der Wert lebt nur im Lauf (nicht im Speicherstand): beim Start und beim Missionsneustart leer (das Laden eines
+## Zwischenstands leert den Treiber ueber stable_mission_lifecycle_checkpoint). NICHT bei einem Planabgleich im laufenden Einsatz.
 func _initialize_fireteam_suppression_state() -> void:
 	_suppression_state_by_fireteam.clear()
 	_suppression_interrupt_pending_by_fireteam.clear()
-	_suppression_near_miss_ready_at_msec_by_fireteam.clear()
-	_tracked_health_by_unit_id.clear()
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver != null and combat_driver.has_method("reset_suppression"):
+		combat_driver.call("reset_suppression")
+	_ensure_fireteam_suppression_state_entries()
+
+
+## Legt fehlende Eintraege der Fireteams an und laesst vorhandene (Stufe, Vormerkung der Planunterbrechung) und den Treiber
+## unberuehrt. Fuer den Planabgleich im Einsatz und fuer spaeter hinzukommende Fireteams.
+func _ensure_fireteam_suppression_state_entries() -> void:
 	for fireteam_id in _get_available_fireteam_ids():
 		var normalized_fireteam_id: String = String(fireteam_id).strip_edges().to_lower()
+		if _suppression_state_by_fireteam.has(normalized_fireteam_id):
+			continue
 		_suppression_state_by_fireteam[normalized_fireteam_id] = {
 			"value": 0.0,
 			"threshold": 1.0,
+			"level": 0,
 			"is_suppressed": false,
 			"is_heavily_suppressed": false,
-			"applied_level": 0,
-			"hold_until_msec": 0,
+			"driver_fed": true,
 		}
 		_suppression_interrupt_pending_by_fireteam[normalized_fireteam_id] = false
-		_suppression_near_miss_ready_at_msec_by_fireteam[normalized_fireteam_id] = 0
-		for unit in _get_fireteam_units(normalized_fireteam_id, true):
-			if unit == null or not unit.has_method("get_unit_id"):
-				continue
-			var health_points: int = _get_unit_health_points(unit)
-			if health_points < 0:
-				continue
-			_tracked_health_by_unit_id[String(unit.call("get_unit_id"))] = health_points
 
 
-func _update_fireteam_suppression(delta: float) -> void:
+## Anzeige- und Planstand der eigenen Fireteams aus dem Wert des Gefechtstreibers: Ein Wert je Gruppe, gerechnet in Spiel-Ticks
+## (MissionCombatLoopDriver._advance_suppression, Zahlen aus suppression_rules.json), gleich fuer beide Seiten. Hier wird der
+## Stand uebernommen, der Plan ab "interrupts_plan" (Stufe 3) unterbrochen und fortgesetzt, sobald die Stufe unter 2 faellt.
+## Keine Wanduhr, kein eigener Zeitgeber. Zustaende ohne "driver_fed" (von Tests gesetzt) bleiben unberuehrt.
+func _update_fireteam_suppression(_delta: float) -> void:
 	if preview_mode:
 		return
 	if _suppression_state_by_fireteam.is_empty():
-		_initialize_fireteam_suppression_state()
-	var now_msec: int = Time.get_ticks_msec()
+		_ensure_fireteam_suppression_state_entries()
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("get_suppression_snapshot"):
+		return
+	var rules: Dictionary = _get_suppression_rules()
 	for fireteam_id in _get_available_fireteam_ids():
 		var normalized_fireteam_id: String = String(fireteam_id).strip_edges().to_lower()
 		var state: Dictionary = Dictionary(_suppression_state_by_fireteam.get(normalized_fireteam_id, {})).duplicate(true)
-		if state.is_empty():
+		if state.is_empty() or not bool(state.get("driver_fed", false)):
 			continue
-		var units: Array = _get_fireteam_units(normalized_fireteam_id, true)
-		var leader = _resolve_fireteam_leader_for_behavior(normalized_fireteam_id)
-		var leadership: float = float(leader.call("get_leadership_skill")) if leader != null and leader.has_method("get_leadership_skill") else 0.0
-		var trait_ids: PackedStringArray = PackedStringArray(leader.call("get_trait_ids")) if leader != null and leader.has_method("get_trait_ids") else PackedStringArray()
-		var threshold: float = _resolve_suppression_threshold(normalized_fireteam_id)
-		if trait_ids.has("reckless"):
-			threshold *= 1.8
-		state["threshold"] = threshold
-		var suppression_gain: float = _compute_suppression_gain_from_damage(units)
-		if _is_fireteam_in_combat(normalized_fireteam_id) and now_msec >= int(_suppression_near_miss_ready_at_msec_by_fireteam.get(normalized_fireteam_id, 0)):
-			suppression_gain += SUPPRESSION_NEAR_MISS_GAIN
-			_suppression_near_miss_ready_at_msec_by_fireteam[normalized_fireteam_id] = now_msec + SUPPRESSION_NEAR_MISS_INTERVAL_MSEC
-		var decay_per_second: float = SUPPRESSION_BASE_DECAY_PER_SECOND * (1.0 + clampf(leadership, 0.0, 1.0))
-		if trait_ids.has("calm"):
-			decay_per_second *= 2.0
-		var next_value: float = maxf(float(state.get("value", 0.0)) + suppression_gain - (decay_per_second * delta), 0.0)
-		state["value"] = next_value
-		var was_suppressed: bool = bool(state.get("is_suppressed", false))
-		var was_heavy: bool = bool(state.get("is_heavily_suppressed", false))
-		var hold_until_msec: int = int(state.get("hold_until_msec", 0))
-		var threshold_triggered: bool = next_value >= threshold
-		if threshold_triggered and not was_suppressed:
-			hold_until_msec = now_msec + SUPPRESSION_MIN_HOLD_MSEC
-		var is_suppressed: bool = threshold_triggered or now_msec < hold_until_msec
-		var is_heavy: bool = next_value >= threshold * 1.8
-		state["is_suppressed"] = is_suppressed
-		state["is_heavily_suppressed"] = is_heavy
-		state["hold_until_msec"] = hold_until_msec if is_suppressed else 0
+		var snapshot: Dictionary = Dictionary(combat_driver.call("get_suppression_snapshot", String(combat_driver.call("suppression_own_key", normalized_fireteam_id))))
+		var level: int = clampi(int(snapshot.get("level", 0)), 0, SUPPRESSION_MATH_SCRIPT.MAX_LEVEL)
+		var was_level: int = clampi(int(state.get("level", 0)), 0, SUPPRESSION_MATH_SCRIPT.MAX_LEVEL)
+		state["value"] = float(snapshot.get("value", 0.0))
+		state["threshold"] = maxf(float(snapshot.get("threshold", 1.0)), 0.001)
+		state["level"] = level
+		state["is_suppressed"] = level >= 1
+		state["is_heavily_suppressed"] = level >= 2
 		_suppression_state_by_fireteam[normalized_fireteam_id] = state
-		if is_heavy and not was_heavy and not _should_ignore_suppression(normalized_fireteam_id):
+		if SUPPRESSION_MATH_SCRIPT.interrupts_plan(rules, level) and not SUPPRESSION_MATH_SCRIPT.interrupts_plan(rules, was_level) and not _should_ignore_suppression(normalized_fireteam_id):
 			_interrupt_plan_for_suppression(normalized_fireteam_id)
-		if (was_suppressed != is_suppressed) or (was_heavy != is_heavy):
+		if was_level != level:
 			_notify_suppression_changed(normalized_fireteam_id, state)
-		_apply_suppression_effects_for_fireteam(normalized_fireteam_id, state)
-		if (was_suppressed or was_heavy) and not is_suppressed:
+		if level < 2 and bool(_suppression_interrupt_pending_by_fireteam.get(normalized_fireteam_id, false)):
 			_try_auto_resume_after_suppression(normalized_fireteam_id)
 
 
-func _resolve_suppression_threshold(fireteam_id: String) -> float:
-	var profile_dict: Dictionary = get_active_behavior_profile(fireteam_id)
-	var base_threshold: float = 2.0
-	if not profile_dict.is_empty():
-		base_threshold = maxf(float(profile_dict.get("suppression_threshold", 2.0)), 1.0)
-	var flank_state: Dictionary = get_fireteam_flank_vulnerability_state(fireteam_id)
-	if bool(flank_state.get("is_active", false)) or bool(flank_state.get("is_morale_active", false)):
-		base_threshold = maxf(base_threshold * float(flank_state.get("effective_suppression_threshold_multiplier", flank_state.get("suppression_threshold_multiplier", 1.0))), 1.0)
-	return base_threshold
-
-
-func _compute_suppression_gain_from_damage(units: Array) -> float:
-	var gain: float = 0.0
-	for unit in units:
-		if unit == null or not unit.has_method("get_unit_id"):
-			continue
-		var unit_id: String = String(unit.call("get_unit_id"))
-		var current_health: int = _get_unit_health_points(unit)
-		if current_health < 0:
-			continue
-		var previous_health: int = int(_tracked_health_by_unit_id.get(unit_id, current_health))
-		_tracked_health_by_unit_id[unit_id] = current_health
-		if current_health >= previous_health:
-			continue
-		var damage_delta: int = previous_health - current_health
-		gain += SUPPRESSION_HIT_GAIN + clampf(float(damage_delta) / 8.0, 0.25, 2.5)
-	return gain
+## Fuer den Gefechtstreiber: hold_till_last_man ignoriert die Unterdrueckung (wie bisher).
+func is_suppression_ignored_for_fireteam(fireteam_id: String) -> bool:
+	return _should_ignore_suppression(fireteam_id.strip_edges().to_lower())
 
 
 func _get_unit_health_points(unit: Node) -> int:
@@ -21497,126 +21466,6 @@ func _interrupt_plan_for_suppression(fireteam_id: String) -> void:
 		"anchor_position": anchor.global_position if anchor != null else _get_target_position(),
 		"sequence": Time.get_ticks_msec(),
 	}, {"now_msec": Time.get_ticks_msec()})
-
-
-func _apply_suppression_effects_for_fireteam(fireteam_id: String, suppression_state: Dictionary) -> void:
-	if _should_ignore_suppression(fireteam_id):
-		return
-	var suppression_level: int = 0
-	if bool(suppression_state.get("is_heavily_suppressed", false)):
-		suppression_level = 2
-	elif bool(suppression_state.get("is_suppressed", false)):
-		suppression_level = 1
-	var previously_applied: int = int(suppression_state.get("applied_level", 0))
-	if suppression_level == previously_applied:
-		return
-	for unit in _get_fireteam_units(fireteam_id, true):
-		if unit == null or not unit.has_method("get_runtime_status") or not unit.has_method("set_runtime_status"):
-			continue
-		var runtime_status = unit.call("get_runtime_status")
-		if runtime_status == null:
-			continue
-		var baseline: Dictionary = _get_or_store_suppression_runtime_baseline(unit, runtime_status, suppression_level)
-		if suppression_level == 0:
-			if not baseline.is_empty():
-				_apply_suppression_runtime_snapshot(unit, baseline)
-				if unit is Node:
-					(unit as Node).remove_meta(SUPPRESSION_RUNTIME_BASELINE_META_KEY)
-			continue
-		var next_move_speed_factor: float = float(baseline.get("move_speed_factor", runtime_status.move_speed_factor))
-		var next_fire_status: String = String(baseline.get("fire_status", runtime_status.fire_status))
-		var next_cover_score: float = float(baseline.get("cover_score", runtime_status.cover_score))
-		var next_attack_bonus: float = float(baseline.get("attack_bonus", runtime_status.attack_bonus))
-		if suppression_level == 2:
-			next_move_speed_factor = SUPPRESSION_HEAVY_MOVE_FACTOR
-			next_fire_status = "semi_disciplined"
-			next_cover_score = maxf(next_cover_score, SUPPRESSION_COVER_BONUS)
-			next_attack_bonus += SUPPRESSION_HIT_CHANCE_MALUS
-		elif suppression_level == 1:
-			next_move_speed_factor = maxf(next_move_speed_factor * 0.65, SUPPRESSION_MOVE_FACTOR)
-			if next_fire_status.strip_edges().to_lower() == "hold_fire":
-				next_fire_status = "hold_fire"
-			next_cover_score = maxf(next_cover_score, SUPPRESSION_COVER_BONUS)
-			next_attack_bonus += SUPPRESSION_HIT_CHANCE_MALUS
-		unit.call(
-			"set_runtime_status",
-			String(baseline.get("status", runtime_status.status)),
-			String(baseline.get("active_command_type", runtime_status.active_command_type)),
-			int(baseline.get("priority", runtime_status.priority)),
-			next_fire_status,
-			String(baseline.get("source_command_type", runtime_status.source_command_type)),
-			next_move_speed_factor,
-			next_cover_score,
-			next_attack_bonus,
-			int(baseline.get("phase", runtime_status.phase)),
-			baseline.get("target_position", runtime_status.target_position),
-			String(baseline.get("movement_posture", runtime_status.movement_posture)),
-			String(baseline.get("weapon_posture", runtime_status.weapon_posture)),
-			String(baseline.get("posture_policy_id", runtime_status.posture_policy_id)),
-			float(baseline.get("sight_range_factor", runtime_status.sight_range_factor)),
-			float(baseline.get("aim_readiness_percent", runtime_status.get("aim_readiness_percent")))
-		)
-	var next_state := suppression_state.duplicate(true)
-	next_state["applied_level"] = suppression_level
-	_suppression_state_by_fireteam[fireteam_id] = next_state
-
-
-func _get_or_store_suppression_runtime_baseline(unit, runtime_status, suppression_level: int) -> Dictionary:
-	if not (unit is Node):
-		return _build_suppression_runtime_snapshot(runtime_status)
-	var unit_node: Node = unit as Node
-	if unit_node.has_meta(SUPPRESSION_RUNTIME_BASELINE_META_KEY):
-		return Dictionary(unit_node.get_meta(SUPPRESSION_RUNTIME_BASELINE_META_KEY)).duplicate(true)
-	if suppression_level <= 0:
-		return {}
-	var baseline: Dictionary = _build_suppression_runtime_snapshot(runtime_status)
-	unit_node.set_meta(SUPPRESSION_RUNTIME_BASELINE_META_KEY, baseline.duplicate(true))
-	return baseline
-
-
-func _build_suppression_runtime_snapshot(runtime_status) -> Dictionary:
-	if runtime_status == null:
-		return {}
-	return {
-		"status": String(runtime_status.status),
-		"active_command_type": String(runtime_status.active_command_type),
-		"priority": int(runtime_status.priority),
-		"fire_status": String(runtime_status.fire_status),
-		"source_command_type": String(runtime_status.source_command_type),
-		"move_speed_factor": float(runtime_status.move_speed_factor),
-		"cover_score": float(runtime_status.cover_score),
-		"attack_bonus": float(runtime_status.attack_bonus),
-		"phase": int(runtime_status.phase),
-		"target_position": runtime_status.target_position,
-		"movement_posture": String(runtime_status.movement_posture),
-		"weapon_posture": String(runtime_status.weapon_posture),
-		"posture_policy_id": String(runtime_status.posture_policy_id),
-		"sight_range_factor": float(runtime_status.sight_range_factor),
-		"aim_readiness_percent": float(runtime_status.get("aim_readiness_percent")),
-	}
-
-
-func _apply_suppression_runtime_snapshot(unit, snapshot: Dictionary) -> void:
-	if unit == null or snapshot.is_empty() or not unit.has_method("set_runtime_status"):
-		return
-	unit.call(
-		"set_runtime_status",
-		String(snapshot.get("status", "idle")),
-		String(snapshot.get("active_command_type", "")),
-		int(snapshot.get("priority", 0)),
-		String(snapshot.get("fire_status", "fire_at_will")),
-		String(snapshot.get("source_command_type", "")),
-		float(snapshot.get("move_speed_factor", 1.0)),
-		float(snapshot.get("cover_score", 0.0)),
-		float(snapshot.get("attack_bonus", 0.0)),
-		int(snapshot.get("phase", -1)),
-		snapshot.get("target_position", null),
-		String(snapshot.get("movement_posture", "")),
-		String(snapshot.get("weapon_posture", "")),
-		String(snapshot.get("posture_policy_id", "")),
-		float(snapshot.get("sight_range_factor", 1.0)),
-		float(snapshot.get("aim_readiness_percent", 0.0))
-	)
 
 
 func _try_auto_resume_after_suppression(fireteam_id: String) -> void:

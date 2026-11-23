@@ -54,8 +54,17 @@ func _test_runtime_records_fired_and_cooldown_diagnostics() -> void:
 	var enemy_paths: Array[NodePath] = [driver.get_path_to(enemy)]
 	driver.friendly_unit_paths = friendly_paths
 	driver.enemy_unit_paths = enemy_paths
-	driver.set("_current_tick", 50)
-	driver.set("_next_attack_tick", 0)
+	# Gefechtstakt (stufenlos, Initiative): erster faelliger Schritt ab 16 und der naechste nicht faellige danach,
+	# aus dem Takt der Einheit selbst gerechnet.
+	var cadence: GDScript = preload("res://scripts/combat/combat_cadence.gd")
+	var period_milli: int = int(driver.call("_get_attack_period_milli", friendly))
+	var due_step: int = 16
+	while not cadence.is_due(due_step, period_milli):
+		due_step += 1
+	var wait_step: int = due_step + 1
+	while cadence.is_due(wait_step, period_milli):
+		wait_step += 1
+	driver.set("_current_tick", due_step * 3)
 	driver.set("_detection_progress", {"task458_alpha:task458_enemy": 0})
 	driver.call("_try_enqueue_attacks", simulation)
 	var fired_snapshot: Dictionary = Dictionary(driver.call("get_contact_decision_diagnostics_snapshot"))
@@ -64,7 +73,12 @@ func _test_runtime_records_fired_and_cooldown_diagnostics() -> void:
 	_assert(String(fired_snapshot.get("target_unit_id", "")) == "task458_enemy", "Fired diagnostic names target")
 	_assert(String(fired_snapshot.get("weapon_id", "")) == "rifle", "Fired diagnostic names weapon")
 	_assert(not String(fired_snapshot.get("fire_event_id", "")).is_empty(), "Fired diagnostic links muzzle/fire event")
-	_assert(simulation.effects.size() == 1, "Fired diagnostic corresponds to one enqueued damage effect")
+	var friendly_effects: int = 0
+	for effect in simulation.effects:
+		if String(Dictionary(effect).get("attacker_unit_id", "")) == "task458_alpha":
+			friendly_effects += 1
+	_assert(friendly_effects == 1, "Fired diagnostic corresponds to one enqueued damage effect of the friendly shooter")
+	driver.set("_current_tick", wait_step * 3)
 	driver.call("_try_enqueue_attacks", simulation)
 	var cooldown_snapshot: Dictionary = Dictionary(driver.call("get_contact_decision_diagnostics_snapshot"))
 	_assert(String(cooldown_snapshot.get("reason", "")) == "cooldown", "Runtime diagnostic records cooldown when contact exists but weapon waits")
@@ -128,8 +142,13 @@ func _test_mission_control_snapshot_exposes_contact_diagnostics() -> void:
 	var friendly_id: String = String(friendly.call("get_unit_id"))
 	var enemy_id: String = String(enemy.call("get_unit_id"))
 	combat_loop.set("_detection_progress", {"%s:%s" % [friendly_id, enemy_id]: 0})
-	combat_loop.set("_current_tick", 80)
-	combat_loop.set("_next_attack_tick", 0)
+	# Gefechtstakt (stufenlos): erster faelliger Schritt ab 28 fuer den Takt dieser Einheit.
+	var scene_cadence: GDScript = preload("res://scripts/combat/combat_cadence.gd")
+	var scene_period_milli: int = int(combat_loop.call("_get_attack_period_milli", friendly))
+	var scene_due_step: int = 28
+	while not scene_cadence.is_due(scene_due_step, scene_period_milli):
+		scene_due_step += 1
+	combat_loop.set("_current_tick", scene_due_step * 3)
 	combat_loop.call("_try_enqueue_attacks", simulation_root)
 	controller.call("_update_ui")
 	var feedback: Dictionary = Dictionary(controller.call("get_command_feedback_snapshot"))

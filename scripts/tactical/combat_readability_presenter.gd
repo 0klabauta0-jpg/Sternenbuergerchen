@@ -103,15 +103,34 @@ func set_contact_line(attacker: Node, target: Node, color: Color = Color(1.0, 0.
 	if _contact_line == null:
 		return
 	_contact_line.default_color = color
+	_free_extra_contact_lines()
 	_contact_line.clear_points()
 	if attacker is Node2D and target is Node2D:
 		_contact_line.add_point((attacker as Node2D).position)
 		_contact_line.add_point((target as Node2D).position)
 
 
+## Gefechtstakt: weitere Paare desselben Schritts. Die Linien haengen als Kinder an der ersten und verschwinden mit ihr.
+func add_contact_line(attacker: Node, target: Node, color: Color = Color(1.0, 0.18, 0.12, 0.92)) -> void:
+	if _contact_line == null or not (attacker is Node2D and target is Node2D):
+		return
+	var extra: Line2D = Line2D.new()
+	extra.default_color = color
+	extra.width = _contact_line.width
+	extra.add_point((attacker as Node2D).position)
+	extra.add_point((target as Node2D).position)
+	_contact_line.add_child(extra)
+
+
 func clear_contact_line() -> void:
 	if _contact_line != null:
+		_free_extra_contact_lines()
 		_contact_line.clear_points()
+
+
+func _free_extra_contact_lines() -> void:
+	for extra in _contact_line.get_children():
+		extra.queue_free()
 
 
 func build_status_text(state_name: String, context: Dictionary) -> String:

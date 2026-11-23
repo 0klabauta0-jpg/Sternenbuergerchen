@@ -2431,6 +2431,8 @@ var _accepted_network_dropship_command_ids: Dictionary = {}
 var _accepted_network_dropship_command_id_order: Array = []
 var _network_command_dedupe_hit_count: int = 0
 var _network_command_preflight_validator: Callable = Callable()
+var _movement_suppression_provider: Callable = Callable()
+var _combat_suppression_provider: Callable = Callable()
 var _multiplayer_snapshot_context: Dictionary = {}
 var _authoritative_fire_rules_by_fireteam: Dictionary = {}
 var _air_asset_status_by_id: Dictionary = {}
@@ -3394,7 +3396,10 @@ func queue_hex_facing_intent(unit_id: String, direction: int, command_id: String
 		var command_type := String(order.get("command_type",""))
 		var source_type := String(order.get("source_command_type",""))
 		if command_type in ["hold_position","retreat","seek_cover"] or source_type in ["defend","take","retreat"] or (command_type == "move_to_position" and source_type not in ["engage","flank"]):
-			return {"ok":false,"reason":"assignment_locks_facing"}
+			# Wer schiesst, beschossen wird oder Kameraden beschossen sieht, schaut hin, auch mit Halten/Verteidigen/Einnehmen:
+			# nur fuer eine Einheit, die gerade nicht laeuft. Laufende behalten die Wegrichtung (beide Gruende gesperrt).
+			if _hex_unit_is_walking(unit_id):
+				return {"ok":false,"reason":"assignment_locks_facing"}
 	var replay_key := JSON.stringify([unit_id,command_id])
 	if _hex_facing_seen.has(replay_key):
 		return {"ok":true,"replayed":true}
@@ -3420,6 +3425,19 @@ func queue_hex_facing_intent(unit_id: String, direction: int, command_id: String
 	_hex_facing_pending[unit_id] = {"direction":direction,"ready_tick":resolved_ready,
 		"priority":HEX_FACING_PRIORITIES[reason],"order_key":order_key}
 	return {"ok":true,"replayed":false}
+
+
+## Wartet fuer die Einheit noch eine Drehabsicht auf ihr Wirksamwerden? (Nur lesend, fuer den Kampftreiber.)
+func has_hex_facing_intent_pending(unit_id: String) -> bool:
+	return _hex_facing_pending.has(unit_id)
+
+
+## Laeuft die Einheit gerade (aktives Wegsegment oder zugesagte Folgeschritte)? Dann gewinnt die Wegrichtung.
+func _hex_unit_is_walking(unit_id: String) -> bool:
+	var state := get_hex_unit_state(unit_id)
+	if state.is_empty():
+		return false
+	return bool(state.movement_state.moving) or bool(state.route_state.has_commitments)
 
 
 func _get_hex_facing_order(unit) -> Dictionary:
@@ -3448,6 +3466,9 @@ func _commit_hex_facing_intents() -> void:
 		if int(intent["ready_tick"]) > tick_counter:
 			continue
 		_hex_facing_pending.erase(unit_id)
+		# Kampf-/Laermdrehungen (Prioritaet bis combat_reaction) gelten nicht mehr, wenn die Einheit beim Wirksamwerden laeuft.
+		if int(intent["priority"]) <= int(HEX_FACING_PRIORITIES["combat_reaction"]) and _hex_unit_is_walking(String(unit_id)):
+			continue
 		var unit = _resolve_known_unit_for_contract(unit_id)
 		if not is_instance_valid(unit) or String(intent["order_key"]) != JSON.stringify(_get_hex_facing_order(unit)):
 			continue
@@ -4064,6 +4085,34 @@ func set_network_command_preflight_validator(validator: Callable) -> void:
 func clear_network_command_preflight_validator(validator: Callable = Callable()) -> void:
 	if not validator.is_valid() or _network_command_preflight_validator == validator:
 		_network_command_preflight_validator = Callable()
+
+
+## Unterdrueckung (FT-0b): Der Gefechtstreiber des Hosts liefert je Einheit und Befehl einen Tempofaktor 0..1, der als
+## echter Multiplikator auf das Lauftempo wirkt (auch wenn der Befehl einen eigenen Faktor mitbringt). Ohne Lieferant 1.0.
+func set_movement_suppression_provider(provider: Callable) -> void:
+	_movement_suppression_provider = provider
+
+
+func clear_movement_suppression_provider(provider: Callable = Callable()) -> void:
+	if not provider.is_valid() or _movement_suppression_provider == provider:
+		_movement_suppression_provider = Callable()
+
+
+## Unterdrueckung (FT-0b): Lieferant fuer {"hit_bonus", "cover_floor"} je Einheit, aus der aktuellen Stufe ihrer Gruppe.
+## Wird beim Lesen aufgeschlagen (Trefferchance des Schuetzen, Deckung des Ziels); nichts davon steht im Laufzeitstatus.
+func set_combat_suppression_provider(provider: Callable) -> void:
+	_combat_suppression_provider = provider
+
+
+func clear_combat_suppression_provider(provider: Callable = Callable()) -> void:
+	if not provider.is_valid() or _combat_suppression_provider == provider:
+		_combat_suppression_provider = Callable()
+
+
+func _get_combat_suppression_modifiers(unit) -> Dictionary:
+	if unit == null or not _combat_suppression_provider.is_valid():
+		return {}
+	return Dictionary(_combat_suppression_provider.call(unit))
 
 
 func get_authoritative_fire_rule_state(fireteam_id: String) -> Dictionary:
@@ -7126,6 +7175,9 @@ func _record_terrain_move_debug(cmd: Dictionary, unit, current_position: Vector2
 	}
 
 
+## Gefechtstakt: Gewuerfelt und gebucht wird hier je Effekt nacheinander. "Gleichzeitig" im Schritt gilt nur,
+## solange Trefferchance und Schussfreigabe nicht von Gesundheit oder Vitalzustand des Schuetzen abhaengen
+## (heute der Fall: combat_cadence_verifier pinnt es). Wer das aendert, muss erst alle Wuerfe, dann alle Buchungen machen.
 func _apply_damage_effect(effect: Dictionary) -> void:
 	var unit_id: String = String(effect.get("unit_id", ""))
 	if unit_id.is_empty():
@@ -7171,6 +7223,10 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 	var target_cover_score: float = _extract_effective_cover_score(unit)
 	if effect.has("target_cover_override"):
 		target_cover_score = clampf(_extract_float(effect.get("target_cover_override", target_cover_score), target_cover_score), 0.0, 80.0)
+	# Unterdrueckung (FT-0b): Treffer-Abzug des Schuetzen und Deckungsboden des Ziels werden hier beim Lesen aus der aktuellen
+	# Stufe der Gruppe aufgeschlagen; im Laufzeitstatus der Einheiten steht davon nichts. Der Abzug senkt nur die Trefferchance.
+	var attacker_suppression_hit_bonus: float = float(_get_combat_suppression_modifiers(attacker_unit).get("hit_bonus", 0.0))
+	target_cover_score = maxf(target_cover_score, float(_get_combat_suppression_modifiers(unit).get("cover_floor", 0.0)))
 	var attacker_attack_bonus: float = _extract_unit_attack_bonus(attacker_unit)
 	var attacker_cover_score: float = _extract_unit_cover_score(attacker_unit)
 	var target_cover_ratio: float = _normalize_cover_score_for_combat(target_cover_score)
@@ -7180,6 +7236,7 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 	hit_chance = clampf(
 		hit_chance
 		+ attacker_attack_bonus
+		+ attacker_suppression_hit_bonus
 		+ attacker_hit_modifier
 		+ height_modifier
 		+ range_band_modifier
@@ -7565,6 +7622,8 @@ func _extract_move_speed_factor(cmd: Dictionary, unit) -> float:
 	elif unit != null and unit.has_method("get_move_speed_factor"):
 		move_speed_factor = maxf(float(unit.call("get_move_speed_factor")), 0.0)
 
+	if _movement_suppression_provider.is_valid() and unit != null:
+		move_speed_factor *= clampf(float(_movement_suppression_provider.call(unit, cmd)), 0.0, 1.0)
 	return move_speed_factor * _extract_unit_speed_multiplier(unit)
 
 

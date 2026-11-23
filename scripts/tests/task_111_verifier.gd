@@ -94,14 +94,17 @@ func _test_directional_sector_shift_reacts_with_leadership_delay() -> void:
 	var leader = _make_unit("shift_lead", "blue", true, Vector2(0.0, 0.0), 0.55, 0.42, 0.58, ["aggressive"])
 	var wing = _make_unit("shift_wing", "blue", false, Vector2(-8.0, 10.0), 0.49, 0.62, 0.31, [])
 	var enemy_right = _make_enemy("enemy_right", Vector2(100.0, 0.0))
-	var state_a: Dictionary = controller.update_fireteam_state("blue", [leader, wing], leader, _build_behavior_profile("hold_position"), {}, {}, {}, [enemy_right])
+	# Spielzeit statt Wanduhr (G3b): die Verzoegerung zaehlt in Ticks, der Aufrufer reicht den Tick im Kontext mit.
+	var state_a: Dictionary = controller.update_fireteam_state("blue", [leader, wing], leader, _build_behavior_profile("hold_position"), {}, {}, {}, [enemy_right], {"current_tick": 100})
 	var angle_a: float = float(state_a.get("direction_angle", 0.0))
 	var enemy_left = _make_enemy("enemy_left", Vector2(-100.0, 0.0))
-	var state_b: Dictionary = controller.update_fireteam_state("blue", [leader, wing], leader, _build_behavior_profile("hold_position"), {}, {}, {}, [enemy_left])
+	var state_b: Dictionary = controller.update_fireteam_state("blue", [leader, wing], leader, _build_behavior_profile("hold_position"), {}, {}, {}, [enemy_left], {"current_tick": 101})
 	var angle_b: float = float(state_b.get("direction_angle", 0.0))
 	_assert(absf(angle_a - angle_b) < 0.001, "Mid-leadership fireteams keep their sector until the delayed shift matures")
-	await create_timer(1.3).timeout
-	var state_c: Dictionary = controller.update_fireteam_state("blue", [leader, wing], leader, _build_behavior_profile("hold_position"), {}, {}, {}, [enemy_left])
+	await create_timer(0.3).timeout # Wanduhrzeit allein reift die Verzoegerung nicht
+	var state_wall: Dictionary = controller.update_fireteam_state("blue", [leader, wing], leader, _build_behavior_profile("hold_position"), {}, {}, {}, [enemy_left], {"current_tick": 101})
+	_assert(absf(float(state_wall.get("direction_angle", 0.0)) - angle_a) < 0.001, "Wall-clock time alone does not mature the delayed shift")
+	var state_c: Dictionary = controller.update_fireteam_state("blue", [leader, wing], leader, _build_behavior_profile("hold_position"), {}, {}, {}, [enemy_left], {"current_tick": 101 + 80})
 	var angle_c: float = float(state_c.get("direction_angle", 0.0))
 	_assert(absf(angle_c - angle_a) > 1.0, "Delayed directional sector shifts eventually rotate toward an uncovered threat")
 	_cleanup_units([leader, wing, enemy_right, enemy_left])

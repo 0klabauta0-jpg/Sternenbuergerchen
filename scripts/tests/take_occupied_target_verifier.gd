@@ -18,6 +18,7 @@ func _run()->void:
 	_test_t4_free_target()
 	_test_t5_moving_comrade()
 	_test_t6_all_neighbors_blocked()
+	_test_t7_downed_occupant()
 	print("TAKE_OCCUPIED_TARGET passed=%d failed=%d" % [passed,failed])
 	quit(1 if failed else 0)
 
@@ -130,6 +131,61 @@ func _test_t2_enemy_arrives_later()->void:
 		_check(result.stuck.is_empty(),"T2 %s: no member waits on target_occupied 20 s after the enemy arrived"%tag)
 		_check(_any_adjacent(rig,squad),"T2 %s: a member stands next to the enemy"%tag)
 		_check(_changes(result.history,"take_a")<=4,"T2 %s: target does not flicker (%d changes)"%[tag,_changes(result.history,"take_a")])
+		rig.scene.free()
+
+## R-A (Stillstand 23.11.): a guard that falls on the TAKE cell while the order runs (as in the campaign run fta2)
+## must not block the cell forever. The member is redirected to a free neighbour and the TAKE completes there.
+func _test_t7_downed_occupant()->void:
+	# [arrival tick of the guard on the TAKE cell (-1 = before the order, -2 = on a member's already issued goal while it
+	# walks there), tick he falls (-1 = before the order), squad size]. Only [-2,..,2] was red before R-A (member waited
+	# target_occupied forever, TAKE never completed); the others already pass through the issue-time repair.
+	for combo in [[-1,-1,1],[-1,3,1],[-1,30,1],[-1,80,1],[3,4,1],[30,31,1],[30,60,1],[-1,-1,2],[-1,30,2],[3,4,2],[30,31,2],[30,60,2],[-2,9999,2],[-2,-5,2]]:
+		var arrival_tick:int=combo[0]
+		var fall_tick:int=combo[1]
+		var rig:=_make_rig(_cells(10,6))
+		var squad:=_squad(rig,int(combo[2]))
+		var enemy:=_add_actor(rig,"enemy_1","team_enemy","enemy_ft")
+		if arrival_tick==-1:rig.sim.admit_hex_ground_actor_group(PackedStringArray(["enemy_1"]),TARGET)
+		if fall_tick==-1:enemy.apply_damage(1000)
+		var fmc:=FMC.new()
+		_start_take(rig,fmc,squad)
+		var finished:=false
+		var placed:=arrival_tick==-1
+		var goal_cell:Vector2i=TARGET
+		var waiter_id:=""
+		for tick in range(300):
+			if tick==arrival_tick:rig.sim.admit_hex_ground_actor_group(PackedStringArray(["enemy_1"]),TARGET);placed=true
+			if tick==fall_tick:enemy.apply_damage(1000)
+			if arrival_tick==-2 and not placed:
+				# As in fta2: the guard steps onto the cell that is already a member's issued goal (the TAKE cell for a
+				# lone member, a formation slot for a pair), then falls there next tick.
+				for id in squad.ids:
+					var readout:Dictionary=rig.sim.get_hex_movement_readout(id)
+					var goal=readout.get("goal_grid",null)
+					if goal is Vector2i and String(readout.get("status",""))=="active" and (HEX.distance(_grid(rig,id),goal)>=2 or (goal==TARGET and HEX.distance(_grid(rig,id),goal)>=1)):
+						if bool(rig.sim.admit_hex_ground_actor_group(PackedStringArray(["enemy_1"]),goal).get("ok",false)):
+							placed=true;goal_cell=goal;waiter_id=id
+							if fall_tick!=-5:fall_tick=tick+1
+							break
+			var update:Dictionary=fmc.update_execution("ft1",squad.units,squad.lead,rig.sim,rig.terrain)
+			if bool(update.get("finished",false)) or not fmc.has_active_execution("ft1"):finished=true;break
+			rig.sim._physics_process(TICK)
+		var tag:="n%d_arrive@%d_fall@%d"%[int(combo[2]),arrival_tick,fall_tick]
+		var stuck:=_stuck(rig,squad.ids)
+		_diag("T7_DIAG_"+tag+" finished=%s goal_cell=%s enemy=%s"%[finished,goal_cell,rig.sim.get_hex_unit_state("enemy_1").get("grid",null)],rig,squad,{"stuck":stuck})
+		_check(placed,"T7 %s: guard was placed on the TAKE cell"%tag)
+		if fall_tick==-5:
+			# Control: a FIT occupant is treated as before (no redirect by R-A; the member keeps its goal).
+			_check(placed and rig.sim.get_hex_movement_readout(waiter_id).get("goal_grid",null)==goal_cell,"T7 %s: fit occupant: member keeps its goal %s"%[tag,goal_cell])
+			rig.scene.free()
+			continue
+		_check(String(enemy.get_vital_state())!="fit","T7 %s: guard is down on the TAKE cell"%tag)
+		_check(placed and _grid(rig,"enemy_1")==goal_cell,"T7 %s: downed guard still lies on the cell %s"%[tag,goal_cell])
+		_check(stuck.is_empty(),"T7 %s: no member waits on target_occupied for a downed occupant"%tag)
+		var beside:=false
+		for id in squad.ids:beside=beside or HEX.distance(_grid(rig,id),goal_cell)==1
+		_check(beside,"T7 %s: a member stands on a neighbour of the guard's cell"%tag)
+		_check(finished,"T7 %s: the TAKE execution completes on the neighbour"%tag)
 		rig.scene.free()
 
 func _test_t4_free_target()->void:

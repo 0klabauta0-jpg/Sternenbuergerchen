@@ -7,7 +7,15 @@ const OVERWATCH_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/ov
 const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_security_controller.gd")
 const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
 const LOCAL_AVOIDANCE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/local_avoidance_resolver.gd")
-const COMBAT_DECISION_INTERVAL_TICKS: int = 3
+const COMBAT_CADENCE_SCRIPT: GDScript = preload("res://scripts/combat/combat_cadence.gd")
+const COMBAT_DECISION_INTERVAL_TICKS: int = COMBAT_CADENCE_SCRIPT.DECISION_INTERVAL_TICKS
+const SUPPRESSION_MATH_SCRIPT: GDScript = preload("res://scripts/tactical/suppression_math.gd")
+const SUPPRESSION_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/suppression_tracker.gd")
+const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
+## Befehlsart oder Quelle, deren Zweck Deckung oder Rueckzug ist: nie als Vorruecken gesperrt.
+const SUPPRESSION_SAFE_MOVE_TYPES: PackedStringArray = ["retreat", "seek_cover", "fall_back", "disengage", "enemy_limbo_cover"]
+## Ohne Hexraster: eine Kachelbreite in Weltpunkten gilt als ein Feld Spielraum.
+const SUPPRESSION_ADVANCE_MARGIN_WORLD: float = 64.0
 const CONTACT_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/contact_tracker.gd")
 const FLANK_VULNERABILITY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/flank_vulnerability_resolver.gd")
 const MEDIC_SUPPORT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/medic_support_resolver.gd")
@@ -43,7 +51,7 @@ const CONTACT_INITIATIVE_BASELINE_SECONDS: float = 2.0
 const AIM_READINESS_BASELINE_PERCENT: float = 50.0
 const AIM_READINESS_MAX_DELAY_DELTA_TICKS: int = 4
 const RECENT_FIRE_EVENT_TTL_TICKS: int = 72
-const MAX_RECENT_FIRE_EVENTS: int = 8
+const MAX_RECENT_FIRE_EVENTS: int = 24
 const DOWN_STATE_VISIBLE_MIN_SECONDS: float = 3.0
 const TACTICAL_COMBAT_VISUAL_REFRESH_INTERVAL_MSEC: int = 160
 const COMBAT_HOTPATH_AUDIT_BUCKET_CELL_SIZE: float = 256.0
@@ -54,6 +62,8 @@ const DISCIPLINE_BREAK_BASE_CHANCE: float = 0.08
 const DISCIPLINE_BREAK_COOLDOWN_TICKS: int = 10
 const DISCIPLINE_BREAK_EVENT_COLOR: Color = Color(1.0, 0.65, 0.3, 1.0)
 const RETURN_FIRE_WINDOW_TICKS: int = 18
+## Aufraeumgrenze fuer die Fenstermerker: groesser als jedes Fenster max(18, ceil(p) x 3 + 18) (p bis rund 100 Schritte).
+const RETURN_FIRE_WINDOW_CLEANUP_TICKS: int = 400
 const MISIDENTIFICATION_BASE_CHANCE: float = 0.03
 const MISIDENTIFICATION_COOLDOWN_TICKS: int = 15
 const MISIDENTIFICATION_EVENT_COLOR: Color = Color(1.0, 0.4, 0.4, 1.0)
@@ -73,7 +83,10 @@ const MEDIC_SUPPORT_MOVE_PRIORITY: int = 14
 const MEDIC_EVENT_COLOR: Color = Color(0.55, 1.0, 0.72, 1.0)
 const FRIENDLY_STANDARD_COVER_RADIUS: float = 48.0
 const FRIENDLY_STANDARD_COVER_MIN_DISTANCE: float = 10.0
-const FRIENDLY_STANDARD_COVER_COOLDOWN_MSEC: int = 1600
+# Spielzeit: ein Tick = ein Physik-Tick des SimulationRoot, normal 60 je Sekunde (project.godot setzt nichts anderes).
+const GAME_TICKS_PER_SECOND: int = 60
+const FRIENDLY_STANDARD_COVER_COOLDOWN_TICKS: int = 96 # vorher 1600 ms
+const DOWN_STATE_VISIBLE_MIN_TICKS: int = 180 # vorher DOWN_STATE_VISIBLE_MIN_SECONDS = 3,0 s
 const FRIENDLY_LOW_COVER_THRESHOLD: int = 16
 const ENEMY_PATROL_WAYPOINT_REACHED_DISTANCE: float = 18.0
 const ENEMY_TACTICS_PUSH_STEP_DISTANCE: float = 144.0
@@ -105,12 +118,14 @@ signal combat_resolved(mission_result: Dictionary)
 @export var enemy_advance_speed_factor: float = 0.3
 @export var enemy_engage_distance: float = 200.0
 @export var enemy_reposition_enabled: bool = true
-@export var enemy_reposition_cooldown_seconds: float = 4.0
+# Wartezeiten der Gegnerbewegung zaehlen in Spiel-Ticks (Physik-Tick, normal 60 je Sekunde), nicht in Wanduhr-ms.
+# 240 Ticks = 4,0 s, 120 Ticks = 2,0 s bei normalem Tempo (vorher enemy_*_cooldown_seconds).
+@export var enemy_reposition_cooldown_ticks: int = 240
 @export var enemy_reposition_min_distance: float = 30.0
 @export var enemy_reposition_max_distance: float = 60.0
 @export var enemy_reposition_move_speed_factor: float = 0.45
 @export var enemy_limbo_behavior_smoke_enabled: bool = true
-@export var enemy_limbo_cover_cooldown_seconds: float = 2.0
+@export var enemy_limbo_cover_cooldown_ticks: int = 120
 @export var enemy_limbo_cover_min_cover_score: int = 20
 @export var enemy_limbo_cover_search_radius: float = 160.0
 @export var enemy_limbo_cover_min_distance: float = 16.0
@@ -143,9 +158,9 @@ func _record_resolver_target_evaluation(_attacker, _target) -> void:
 
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _queued_bleedout_by_unit_id: Dictionary = {}
-var _down_state_started_msec_by_unit_id: Dictionary = {}
+var _down_state_started_tick_by_unit_id: Dictionary = {}
 var _was_downed_unit_ids: Dictionary = {}
-var _enemy_reposition_ready_at_msec: Dictionary = {}
+var _enemy_reposition_ready_at_tick: Dictionary = {}
 var _combat_finished: bool = false
 var _winning_team_id: String = ""
 var _last_contact: Dictionary = {}
@@ -154,11 +169,39 @@ var _fire_candidate_target_ids_by_attacker_id: Dictionary = {}
 var _fire_candidate_index_tick: int = -1
 var _fire_candidate_index_pair_count: int = 0
 var _resolver_target_evaluation_count: int = 0
-var _next_attack_tick: int = 1
+## Nur Anzeige (HUD "CONTACT WAIT", Diagnose): fruehester Tick, an dem eine Einheit mit Ziel wieder dran ist. Kein Spielzustand, nicht gespeichert.
+var _earliest_next_shot_tick: int = 0
+# Gefechtstakt, Schrittzustand (fluechtig, nicht gespeichert): wer in diesem Schritt nicht normal schiesst
+# (Ueberwachungsschuss oder laufende Sperre), wer gerade ein Ziel kennt, und wer schon einen Anlauf hatte.
+var _attack_step: int = 0
+var _attack_excluded_unit_ids: Dictionary = {}
+var _attack_due_ids: Dictionary = {}
+var _attack_warmed_ids: Dictionary = {}
+var _attack_contact_ids: Dictionary = {}
+var _attack_contact_next: Dictionary = {}
+var _attack_follow_by_id: Dictionary = {}
+var _attack_follow_next: Dictionary = {}
+var _attack_period_cache: Dictionary = {}
+# n3: Die Initiative gilt fuer die ganze Mission. Aendert sich die Achse kuenftig im Einsatz (Moral, Verwundung),
+# muss der Eintrag der Einheit hier verworfen werden, sonst bleibt ihr Takt still veraltet.
+var _attack_initiative_cache: Dictionary = {}
+# Unterdrueckung (FT-0b), fluechtig, nicht gespeichert: Wert und Stufe je Gruppe, laufende Nummer der Schussgelegenheit je
+# Einheit. Die Wirkung (Treffer-Abzug, Deckungsboden, Tempo) wird beim Lesen aus der Stufe aufgeschlagen, nicht gespeichert.
+var _suppression_rules: Dictionary = SUPPRESSION_MATH_SCRIPT.load_rules()
+var _suppression_tracker = SUPPRESSION_TRACKER_SCRIPT.new(_suppression_rules)
+var _suppression_last_step_tick: int = -1
+var _suppression_slot_count_by_unit_id: Dictionary = {}
+var _suppression_slot_memo: Dictionary = {}
+var _suppression_overwatch_slot_by_unit_id: Dictionary = {}
+var _suppression_ignored_by_key: Dictionary = {}
+var _suppression_key_by_instance: Dictionary = {}
+var _suppression_movement_provider: Callable = Callable()
+var _suppression_combat_provider: Callable = Callable()
+var _last_contact_pair: Dictionary = {}
 var _last_event_text: String = "Combat waiting"
 var _mission_started_at_msec: int = 0
 var _checkpoint_elapsed_offset_msec: int = 0
-var _objective_owned_since_msec: int = -1
+var _objective_owned_since_tick: int = -1
 var _mission_result: Dictionary = {}
 var _mission_result_condition_override: String = ""
 var _runs_local_authority: bool = true
@@ -179,11 +222,15 @@ var _recent_incoming_fire_tick_by_fireteam: Dictionary = {}
 ## Regel D (Sicht): wer wen getroffen hat. Schluessel "<Schuetze>><Gruppe des Opfers>" -> Tick des Treffers;
 ## die Gruppe ist die Fireteam des Opfers (sonst die Einheit selbst). Gilt fuer beide Seiten gleich.
 var _recent_hit_tick_by_shooter_and_group: Dictionary = {}
+## R-C "Wer schiesst, verraet sich": letzter Schuss (Treffer ODER Fehlschuss) je "schuetze>gruppe"; im selben Fenster wie
+## oben gilt fuer den Beschossenen und seine Gruppe gegenueber genau diesem Schuetzen die eigene Waffenreichweite als
+## Erkennungsreichweite (Sichtlinie und Verdeckung unveraendert, Sichtbogen weiter nur nach Treffern).
+var _recent_shot_tick_by_shooter_and_group: Dictionary = {}
 var _misidentification_cooldown: Dictionary = {}
 var _medic_support_cooldown: Dictionary = {}
 var _medic_support_move_ready_tick: Dictionary = {}
-var _friendly_cover_ready_at_msec: Dictionary = {}
-var _enemy_limbo_cover_ready_at_msec: Dictionary = {}
+var _friendly_cover_ready_at_tick: Dictionary = {}
+var _enemy_limbo_cover_ready_at_tick: Dictionary = {}
 var _enemy_limbo_behavior_decisions: Dictionary = {}
 var _overlays_visible: bool = true
 var _enemy_patrol_paths_by_unit_id: Dictionary = {}
@@ -288,6 +335,8 @@ func _ready() -> void:
 		if not simulation_root.is_connected("damage_effect_resolved", damage_resolved_callable):
 			simulation_root.connect("damage_effect_resolved", damage_resolved_callable)
 
+	if _runs_local_authority:
+		register_suppression_movement_provider(simulation_root)
 	if _runs_local_authority and not simulation_root.tick_processed.is_connected(_on_tick_processed):
 		simulation_root.tick_processed.connect(_on_tick_processed)
 	if _runs_local_authority and simulation_root.has_signal("network_command_accepted"):
@@ -304,6 +353,10 @@ func _exit_tree() -> void:
 	var simulation_root = get_node_or_null(simulation_root_path)
 	if simulation_root != null and simulation_root.has_method("clear_network_command_preflight_validator"):
 		simulation_root.call("clear_network_command_preflight_validator", Callable(self, "_validate_network_interaction_command_preflight"))
+	if simulation_root != null and _suppression_movement_provider.is_valid() and simulation_root.has_method("clear_movement_suppression_provider"):
+		simulation_root.call("clear_movement_suppression_provider", _suppression_movement_provider)
+	if simulation_root != null and _suppression_combat_provider.is_valid() and simulation_root.has_method("clear_combat_suppression_provider"):
+		simulation_root.call("clear_combat_suppression_provider", _suppression_combat_provider)
 
 
 func is_combat_finished() -> bool:
@@ -1014,7 +1067,7 @@ func _visibility_group_key(unit) -> String:
 
 
 func _record_incoming_hit_for_visibility(result: Dictionary) -> void:
-	if not bool(result.get("hit", false)) or bool(result.get("friendly_fire", false)):
+	if bool(result.get("friendly_fire", false)):
 		return
 	var shooter_id: String = String(result.get("attacker_unit_id", "")).strip_edges()
 	var victim_id: String = String(result.get("target_unit_id", result.get("unit_id", ""))).strip_edges()
@@ -1023,7 +1076,38 @@ func _record_incoming_hit_for_visibility(result: Dictionary) -> void:
 	var group_key: String = _visibility_group_key(_resolve_unit_by_id(victim_id))
 	if group_key.is_empty():
 		return
+	# R-C: jeder aufgeloeste Schuss (Treffer und Fehlschuss) verraet den Schuetzen.
+	_recent_shot_tick_by_shooter_and_group["%s>%s" % [shooter_id, group_key]] = _current_tick
+	if not bool(result.get("hit", false)):
+		return
 	_recent_hit_tick_by_shooter_and_group["%s>%s" % [shooter_id, group_key]] = _current_tick
+
+
+## R-C: hat `shooter` die Gruppe von `observer` innerhalb des Rueckfeuerfensters beschossen (Treffer oder Fehlschuss)?
+func _was_recently_shot_by(observer, shooter) -> bool:
+	if _recent_shot_tick_by_shooter_and_group.is_empty():
+		return false
+	if observer == null or shooter == null or not shooter.has_method("get_unit_id"):
+		return false
+	var group_key: String = _visibility_group_key(observer)
+	if group_key.is_empty():
+		return false
+	var key: String = "%s>%s" % [String(shooter.call("get_unit_id")).strip_edges(), group_key]
+	if not _recent_shot_tick_by_shooter_and_group.has(key):
+		return false
+	var shot_tick: int = int(_recent_shot_tick_by_shooter_and_group[key])
+	return shot_tick <= _current_tick and _current_tick - shot_tick <= _get_return_fire_window_ticks(observer)
+
+
+## R-B/R-C: die eine Reichweite, in der `observer` den Gegner `target` erkennen kann. Gilt fuer die Erkennung
+## (_has_valid_los) und fuer alle "sieht einen Gegner"-Abfragen des Dreh- und Umsehcodes: Kontaktreichweite abzueglich
+## Tarnung, beim Angriffsbefehl (engage) mindestens die Waffenreichweite, gegenueber einem Schuetzen, der die eigene
+## Gruppe im Fenster beschossen hat, ebenfalls mindestens die eigene Waffenreichweite.
+func _get_detection_range_for(observer, target) -> float:
+	var detection_range: float = _get_effective_range(target)
+	if _uses_weapon_range_for_contact_detection(observer) or _was_recently_shot_by(observer, target):
+		detection_range = maxf(detection_range, _get_weapon_attack_range(observer, target))
+	return detection_range
 
 
 func _was_recently_hit_by(observer, shooter) -> bool:
@@ -1037,7 +1121,16 @@ func _was_recently_hit_by(observer, shooter) -> bool:
 	var key: String = "%s>%s" % [String(shooter.call("get_unit_id")).strip_edges(), group_key]
 	if not _recent_hit_tick_by_shooter_and_group.has(key):
 		return false
-	return _current_tick - int(_recent_hit_tick_by_shooter_and_group[key]) <= RETURN_FIRE_WINDOW_TICKS
+	return _current_tick - int(_recent_hit_tick_by_shooter_and_group[key]) <= _get_return_fire_window_ticks(observer)
+
+
+## Gefechtstakt: Rueckfeuer- und Sichtfenster dauern eine eigene Periode der Einheit plus das Grundfenster
+## (max(18, ceil(p) x 3 + 18) Ticks), sonst waere es bei Perioden ab 72 Ticks fast nie offen, wenn die Einheit dran ist.
+func _get_return_fire_window_ticks(unit) -> int:
+	if unit == null:
+		return RETURN_FIRE_WINDOW_TICKS
+	var period_steps: int = (_get_attack_period_milli(unit) + 999) / 1000
+	return maxi(RETURN_FIRE_WINDOW_TICKS, period_steps * COMBAT_DECISION_INTERVAL_TICKS + RETURN_FIRE_WINDOW_TICKS)
 
 
 func _get_attack_distance(attacker, target) -> float:
@@ -1290,7 +1383,7 @@ func get_enemy_limbo_behavior_snapshot() -> Dictionary:
 		return {}
 	var snapshot: Dictionary = Dictionary(_enemy_limbo_behavior_adapter.call("get_behavior_tree_snapshot")).duplicate(true)
 	snapshot["enabled"] = enemy_limbo_behavior_smoke_enabled
-	snapshot["cover_cooldown_count"] = _enemy_limbo_cover_ready_at_msec.size()
+	snapshot["cover_cooldown_count"] = _enemy_limbo_cover_ready_at_tick.size()
 	snapshot["decision_count"] = _enemy_limbo_behavior_decisions.size()
 	snapshot["decisions"] = _build_enemy_limbo_behavior_decision_snapshot()
 	return snapshot
@@ -1463,6 +1556,7 @@ func _prune_recent_fire_events() -> void:
 
 func _on_damage_effect_resolved(result: Dictionary) -> void:
 	_record_incoming_hit_for_visibility(result)
+	_note_suppression_from_result(result)
 	var fire_event_id: String = String(result.get("fire_event_id", "")).strip_edges()
 	if fire_event_id.is_empty():
 		return
@@ -1673,6 +1767,9 @@ func _on_tick_processed(tick: int) -> void:
 		if _try_recover_premature_startup_resolution():
 			pass
 		else:
+			# FT-0b N1: Die Unterdrueckung klingt auch nach Gefechtsende normal ab (gleicher Schritt wie im Gefecht, kein
+			# hartes Zuruecksetzen); sonst bleiben Tempo, Plan und GO-Erholung bis zum naechsten Einsatz gesperrt.
+			_advance_suppression(tick)
 			_update_status_label("resolved")
 			_sync_objective_countdown_state()
 			if profile_enabled:
@@ -1726,6 +1823,7 @@ func _on_tick_processed(tick: int) -> void:
 	_advance_return_fire_windows()
 	_advance_misidentification_cooldowns()
 	_advance_medic_support_cooldowns()
+	_advance_suppression(tick)
 	if profile_enabled:
 		profile_scopes["cooldowns_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
@@ -1758,20 +1856,7 @@ func _on_tick_processed(tick: int) -> void:
 	if profile_enabled:
 		profile_scopes["friendly_standard_behavior_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
-	var overwatch_shots: Array = _try_enqueue_overwatch(simulation_root)
-	if profile_enabled:
-		profile_scopes["overwatch_security_usec"] = Time.get_ticks_usec() - scope_started_usec
-	if overwatch_shots.is_empty():
-		if profile_enabled:
-			scope_started_usec = Time.get_ticks_usec()
-		_try_enqueue_attacks(simulation_root)
-		if profile_enabled:
-			profile_scopes["combat_fire_decision_usec"] = Time.get_ticks_usec() - scope_started_usec
-			for fire_scope_name_variant in _combat_fire_decision_debug_scopes_usec.keys():
-				var fire_scope_name: String = String(fire_scope_name_variant)
-				profile_scopes[fire_scope_name] = int(_combat_fire_decision_debug_scopes_usec.get(fire_scope_name_variant, 0))
-	elif profile_enabled:
-		profile_scopes["combat_fire_decision_usec"] = 0
+	_run_overwatch_and_attack_step(simulation_root, profile_enabled, profile_scopes)
 	_advance_ground_fire_vs_air(simulation_root)
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
@@ -1801,6 +1886,13 @@ func _on_tick_processed(tick: int) -> void:
 
 func _should_run_combat_decision_tick(tick: int) -> bool:
 	return tick % COMBAT_DECISION_INTERVAL_TICKS == 0
+
+
+## Nur fuer Tests (ersetzt das alte Freigeben des Schussplatzes): springt auf den naechsten Entscheidungsschritt,
+## an dem jede Einheit mit Periode 1..9 Schritte dran ist (kleinstes gemeinsames Vielfaches 2520).
+func align_to_common_decision_step_for_test() -> void:
+	var common_ticks: int = COMBAT_DECISION_INTERVAL_TICKS * 2520
+	_current_tick = (_current_tick / common_ticks + 1) * common_ticks
 
 
 func _refresh_runtime_authority(simulation_root: Node) -> bool:
@@ -1880,7 +1972,7 @@ func _poll_friendly_casualty_state(units: Array) -> void:
 			continue
 		if String(unit.call("get_vital_state")) != "fit":
 			_was_downed_unit_ids[unit_id] = true
-		elif _down_state_started_msec_by_unit_id.has(unit_id):
+		elif _down_state_started_tick_by_unit_id.has(unit_id):
 			_clear_down_state_linger(unit_id)
 			_queued_bleedout_by_unit_id.erase(unit_id)
 
@@ -1917,13 +2009,18 @@ func _queue_bleedout_for_downed_units(simulation_root: Node, units: Array) -> vo
 
 func _mark_unit_down_started(unit_id: String) -> void:
 	var normalized_unit_id: String = unit_id.strip_edges()
-	if normalized_unit_id.is_empty() or _down_state_started_msec_by_unit_id.has(normalized_unit_id):
+	if normalized_unit_id.is_empty() or _down_state_started_tick_by_unit_id.has(normalized_unit_id):
 		return
-	_down_state_started_msec_by_unit_id[normalized_unit_id] = Time.get_ticks_msec()
+	_down_state_started_tick_by_unit_id[normalized_unit_id] = _current_tick
 
 
 func _clear_down_state_linger(unit_id: String) -> void:
-	_down_state_started_msec_by_unit_id.erase(unit_id.strip_edges())
+	_down_state_started_tick_by_unit_id.erase(unit_id.strip_edges())
+
+
+## Aktueller Spiel-Tick des Gefechts (Zaehler des SimulationRoot, wie im Treiber gefuehrt).
+func get_game_tick() -> int:
+	return _current_tick
 
 
 func _is_friendly_unit(unit) -> bool:
@@ -1934,15 +2031,15 @@ func _has_down_state_linger_elapsed(unit_id: String, unit = null) -> bool:
 	var normalized_unit_id: String = unit_id.strip_edges()
 	if normalized_unit_id.is_empty():
 		return false
-	if not _down_state_started_msec_by_unit_id.has(normalized_unit_id):
+	if not _down_state_started_tick_by_unit_id.has(normalized_unit_id):
 		_mark_unit_down_started(normalized_unit_id)
 		return false
-	var started_msec: int = int(_down_state_started_msec_by_unit_id.get(normalized_unit_id, Time.get_ticks_msec()))
-	var elapsed_seconds: float = float(Time.get_ticks_msec() - started_msec) / 1000.0
-	var linger_seconds: float = DOWN_STATE_VISIBLE_MIN_SECONDS
+	var started_tick: int = int(_down_state_started_tick_by_unit_id.get(normalized_unit_id, _current_tick))
+	var linger_ticks: int = DOWN_STATE_VISIBLE_MIN_TICKS
 	if campaign_casualty_rules_enabled and _is_friendly_unit(unit):
-		linger_seconds = down_revive_window_seconds
-	return elapsed_seconds >= linger_seconds
+		# Das Aufricht-Fenster kommt aus den Regeln in Sekunden; ceil: nie vor Ablauf der Sekunden frei.
+		linger_ticks = int(ceil(down_revive_window_seconds * float(GAME_TICKS_PER_SECOND) - 0.000001))
+	return _current_tick - started_tick >= linger_ticks
 
 
 func get_casualty_flags() -> Dictionary:
@@ -2017,7 +2114,7 @@ func _request_respawn_for_unit(unit, unit_id: String) -> void:
 
 
 ## LC6: Bodentruppen mit Raketenwerfer oder Schienenkanone beschiessen eigene Schiffe in der Luft. Eigener Takt je
-## Einheit, der Schussplatz des Bodengefechts (_next_attack_tick) bleibt unberuehrt. Ohne Schiff in der Luft
+## Einheit (_locks), unabhaengig vom Takt des Infanteriegefechts (CombatCadence). Ohne Schiff in der Luft
 ## (Skirmish, Mehrspieler) tut der Aufruf nichts. Siehe scripts/combat/ground_fire_vs_air.gd.
 const GROUND_FIRE_VS_AIR_SCRIPT: GDScript = preload("res://scripts/combat/ground_fire_vs_air.gd")
 var _ground_fire_vs_air = null
@@ -2028,15 +2125,75 @@ func _advance_ground_fire_vs_air(simulation_root: Node) -> void:
 	_ground_fire_vs_air.call("advance", self, simulation_root, _get_tactical_controller(), _current_tick)
 
 
+## Ein Entscheidungsschritt am Boden: erst Ueberwachungsschuesse, dann der normale Gefechtstakt.
+## Der normale Schritt laeuft IMMER; ein Ueberwachungsschuss verdraengt keinen anderen Schuetzen.
+func _run_overwatch_and_attack_step(simulation_root: Node, profile_enabled: bool, profile_scopes: Dictionary) -> void:
+	var scope_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+	var overwatch_shots: Array = _try_enqueue_overwatch(simulation_root)
+	if profile_enabled:
+		profile_scopes["overwatch_security_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
+	# Wer in diesem Schritt einen Ueberwachungsschuss abgegeben hat oder dessen Sperre noch laeuft, gibt keinen
+	# zusaetzlichen normalen Schuss ab. Alle anderen Einheiten beider Seiten schiessen in ihrem Takt.
+	_attack_excluded_unit_ids = {}
+	for shot_variant in overwatch_shots:
+		if typeof(shot_variant) == TYPE_DICTIONARY:
+			_attack_excluded_unit_ids[String(Dictionary(shot_variant).get("attacker_unit_id", ""))] = true
+	var ready_snapshot: Dictionary = get_overwatch_member_ready_snapshot()
+	for member_id in ready_snapshot.keys():
+		if not bool(Dictionary(ready_snapshot[member_id]).get("ready", true)):
+			_attack_excluded_unit_ids[String(member_id)] = true
+	_try_enqueue_attacks(simulation_root)
+	_attack_excluded_unit_ids = {}
+	_flush_combat_noise_facing()
+	_advance_combat_lookaround()
+	if profile_enabled:
+		profile_scopes["combat_fire_decision_usec"] = Time.get_ticks_usec() - scope_started_usec
+		for fire_scope_name_variant in _combat_fire_decision_debug_scopes_usec.keys():
+			var fire_scope_name: String = String(fire_scope_name_variant)
+			profile_scopes[fire_scope_name] = int(_combat_fire_decision_debug_scopes_usec.get(fire_scope_name_variant, 0))
+
+
 func _try_enqueue_attacks(simulation_root: Node) -> void:
 	var profile_enabled: bool = combat_tick_budget_debug_enabled
 	if profile_enabled:
 		_combat_fire_decision_debug_scopes_usec.clear()
 	var scope_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
-	var contact_pair: Dictionary = _find_first_contact_pair()
+	# Gefechtstakt: jede Einheit beider Seiten mit gueltigem Ziel hat ihre Periode; dran ist sie, wenn
+	# step % Periode == 0. Kein gemeinsamer Schussplatz, kein Vorrang einer Seite.
+	# Zuerst wird je Einheit billig geprueft, ob sie dran ist (Waffe und Initiative, siehe _combat_attack_phase);
+	# Ziele werden nur fuer faellige Einheiten gesucht, plus ein Anlauf je Einheit, damit die Erfassung laeuft.
+	_attack_step = _current_tick / COMBAT_DECISION_INTERVAL_TICKS
+	_attack_due_ids = {}
+	_attack_contact_next = {}
+	_attack_follow_next = {}
+	var contact_pairs: Array = _find_contact_pairs()
+	var paired_ids: Dictionary = {}
+	for pair in contact_pairs:
+		paired_ids[String(pair["attacker_id"])] = true
+	for due_id in _attack_due_ids.keys():
+		if not paired_ids.has(due_id):
+			_attack_warmed_ids.erase(due_id)
+	_attack_contact_ids = _attack_contact_next
+	_attack_follow_by_id = _attack_follow_next
+	var next_due_step: int = -1
+	for follow_id in _attack_follow_by_id.keys():
+		if _attack_contact_ids.has(follow_id) and (next_due_step < 0 or int(_attack_follow_by_id[follow_id]) < next_due_step):
+			next_due_step = int(_attack_follow_by_id[follow_id])
+	_earliest_next_shot_tick = maxi(next_due_step, 0) * COMBAT_DECISION_INTERVAL_TICKS
 	if profile_enabled:
 		_combat_fire_decision_debug_scopes_usec["fire_find_contact_pair_usec"] = Time.get_ticks_usec() - scope_started_usec
-	if contact_pair.is_empty():
+	if not contact_pairs.is_empty():
+		_last_contact_pair = contact_pairs[0]
+	if contact_pairs.is_empty() and not _attack_contact_ids.is_empty() and is_instance_valid(_last_contact_pair.get("attacker", null)) and is_instance_valid(_last_contact_pair.get("target", null)):
+		var waiting_pair: Dictionary = _last_contact_pair
+		_last_contact = {"attacker_id": String(waiting_pair["attacker_id"]), "target_id": String(waiting_pair["target_id"])}
+		_set_contact_visuals(waiting_pair["attacker"], waiting_pair["target"])
+		_update_status_label("contact")
+		_record_contact_decision_diagnostics("cooldown", _build_contact_pair_decision_diagnostic(waiting_pair))
+		return
+	if contact_pairs.is_empty():
+		_earliest_next_shot_tick = 0
 		if profile_enabled:
 			scope_started_usec = Time.get_ticks_usec()
 		_clear_contact_visuals()
@@ -2045,11 +2202,85 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 			_combat_fire_decision_debug_scopes_usec["fire_no_contact_diagnostic_usec"] = Time.get_ticks_usec() - scope_started_usec
 		return
 
+	# Der Aufloeser liefert nur Paare faelliger Einheiten (Anlaufschritte liefern keins).
+	var due_pairs: Array = contact_pairs
+	# Feste Reihenfolge nach unit_id, unabhaengig von Seite und Anlegereihenfolge. Alle Schuesse des Schritts
+	# werden zuerst eingereiht; gewuerfelt und gebucht wird erst im Folgetick, Effekt fuer Effekt in dieser
+	# Reihenfolge, und ein Schuetze verliert seinen Schuss nicht, weil er in diesem Schritt faellt.
+	due_pairs.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return String(a["attacker_id"]) < String(b["attacker_id"]))
+	for pair_index in range(due_pairs.size()):
+		_enqueue_attack_for_pair(due_pairs[pair_index], simulation_root, profile_enabled, pair_index > 0)
+	_flush_combat_noise_facing()
+
+
+## Rueckruf des Aufloesers (nur fuer find_contact_pairs): 0 = dran, 1 = nur Anlauf (suchen, Erfassung starten),
+## 2 = nichts tun. Billig: Waffe und Initiative je Einheit gemerkt, keine Kopie des Profils je Aufruf.
+func _combat_attack_phase(unit) -> int:
+	var unit_id: String = String(unit.call("get_unit_id"))
+	if _attack_excluded_unit_ids.has(unit_id):
+		return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.ATTACK_PHASE_SKIP
+	var period: int = _get_attack_period_milli(unit)
+	if _get_unit_team_id_for_diagnostics(unit) == friendly_team_id:
+		_attack_follow_next[unit_id] = _attack_step + 1 + COMBAT_CADENCE_SCRIPT.steps_until_due(_attack_step + 1, period)
+	if COMBAT_CADENCE_SCRIPT.is_due(_attack_step, period):
+		if not _suppression_fire_slot_open(unit_id, unit):
+			# Unterdrueckung: die Gelegenheit ist verbraucht (keine Zielsuche, kein Wurf, kein Nachholen).
+			if _attack_contact_ids.has(unit_id):
+				_attack_contact_next[unit_id] = true
+			return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.ATTACK_PHASE_SKIP
+		_attack_due_ids[unit_id] = true
+		return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.ATTACK_PHASE_DUE
+	if _attack_warmed_ids.has(unit_id):
+		# N1: In den letzten Schritten vor der Faelligkeit laeuft die Erkennung an, damit sie zum faelligen
+		# Schritt fertig ist (laengste moegliche Erkennung der Einheit, in Schritten).
+		if COMBAT_CADENCE_SCRIPT.steps_until_due(_attack_step, period) <= _get_detection_window_steps(unit):
+			return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.ATTACK_PHASE_WARMUP
+		if _attack_contact_ids.has(unit_id):
+			_attack_contact_next[unit_id] = true
+		return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.ATTACK_PHASE_SKIP
+	_attack_warmed_ids[unit_id] = true
+	return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.ATTACK_PHASE_WARMUP
+
+
+## Laengste Erkennungsdauer der Einheit in Entscheidungsschritten (Sichtbereitschaft 0 plus die Auftragszuschlaege).
+func _get_detection_window_steps(unit) -> int:
+	var longest_ticks: int = maxi(MAX_DETECTION_DELAY_TICKS + COMBAT_CADENCE_SCRIPT.reaction_ticks(_get_attack_initiative(unit)) + _get_contact_initiative_delay_delta_ticks(unit) + _get_aim_readiness_delay_delta_ticks(unit), 0)
+	return int(ceil(float(longest_ticks) / float(COMBAT_DECISION_INTERVAL_TICKS)))
+
+
+## Initiative-Achse der Einheit (0..1), -1 wenn keine; einmal gelesen und gemerkt, keine Profilkopie je Aufruf.
+func _get_attack_initiative(unit) -> float:
+	if unit == null:
+		return -1.0
+	var key: int = unit.get_instance_id()
+	if _attack_initiative_cache.has(key):
+		return float(_attack_initiative_cache[key])
+	var initiative: float = -1.0
+	if unit.has_method("get_character_profile_bundle"):
+		var axes: Dictionary = Dictionary(Dictionary(unit.call("get_character_profile_bundle")).get("behavior_axes", {}))
+		initiative = float(axes.get("initiative", -1.0))
+	_attack_initiative_cache[key] = initiative
+	return initiative
+
+
+## Takt der Einheit in Tausendsteln von Schritten (siehe CombatCadence.period_milli), je Waffe gemerkt.
+func _get_attack_period_milli(attacker) -> int:
+	var weapon_id: String = String(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("get_unit_active_weapon_id", attacker))
+	var key: int = attacker.get_instance_id() if attacker != null else 0
+	var cached: Dictionary = Dictionary(_attack_period_cache.get(key, {}))
+	if not cached.is_empty() and String(cached.get("weapon_id", "")) == weapon_id:
+		return int(cached["period"])
+	var period: int = COMBAT_CADENCE_SCRIPT.period_milli(WEAPON_DATA_SCRIPT.get_ticks_between_attacks(weapon_id), _get_attack_initiative(attacker))
+	_attack_period_cache[key] = {"weapon_id": weapon_id, "period": period}
+	return period
+
+
+func _enqueue_attack_for_pair(contact_pair: Dictionary, simulation_root: Node, profile_enabled: bool, keep_previous_visuals: bool = false) -> void:
+	var scope_started_usec: int = 0
 	var attacker = contact_pair["attacker"]
 	var target = contact_pair["target"]
 	var attacker_id: String = String(contact_pair["attacker_id"])
 	var target_id: String = String(contact_pair["target_id"])
-	var contact_state: String = String(contact_pair.get("contact_state", "")).strip_edges().to_lower()
 	if attacker_id.is_empty() or target_id.is_empty():
 		_clear_contact_visuals()
 		_record_contact_decision_diagnostics("invalid_contact_pair", _build_contact_pair_decision_diagnostic(contact_pair))
@@ -2059,15 +2290,8 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 		"attacker_id": attacker_id,
 		"target_id": target_id,
 	}
-	_set_contact_visuals(attacker, target)
+	_set_contact_visuals(attacker, target, keep_previous_visuals)
 	_update_status_label("contact")
-	if _current_tick < _next_attack_tick:
-		if profile_enabled:
-			scope_started_usec = Time.get_ticks_usec()
-		_record_contact_decision_diagnostics("cooldown", _build_contact_pair_decision_diagnostic(contact_pair))
-		if profile_enabled:
-			_combat_fire_decision_debug_scopes_usec["fire_cooldown_diagnostic_usec"] = Time.get_ticks_usec() - scope_started_usec
-		return
 
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
@@ -2103,7 +2327,11 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 		damage_effect["fire_event_id"] = fire_event_id
 		_refresh_tactical_combat_visuals()
 	simulation_root.call("enqueue_effect", damage_effect)
+	# K1r: ein Normalschuss sperrt dasselbe Mitglied fuer die Ueberwachung eine Periode lang.
+	if _overwatch_controller != null and _overwatch_controller.has_method("note_member_fired"):
+		_overwatch_controller.call("note_member_fired", attacker_id, _current_tick + ((_get_attack_period_milli(attacker) + 999) / 1000) * COMBAT_DECISION_INTERVAL_TICKS)
 	_record_return_fire_window_if_needed(attacker, actual_target)
+	_note_combat_facing_shot(attacker, actual_target)
 	var flank_modifiers: Dictionary = Dictionary(decision.get("flank_modifiers", {}))
 	_maybe_publish_flank_event(flank_modifiers, attacker, actual_target)
 	if is_friendly_fire:
@@ -2114,7 +2342,6 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 		_broadcast_remote_event("%s verwechselt Ziel! -> %s" % [attacker_id, actual_target_id], attacker_id, MISIDENTIFICATION_EVENT_COLOR, 1.6, "EIGENBESCHUSS!")
 		_broadcast_remote_event("FRIENDLY FIRE %s" % actual_target_id, actual_target_id, MISIDENTIFICATION_EVENT_COLOR, 1.8, "FRIENDLY FIRE")
 		_record_friendly_fire_feedback(attacker, actual_target, attacker_id, target_id, actual_target_id)
-	_next_attack_tick = _current_tick + max(int(decision.get("weapon_ticks", 1)), 1)
 	var fired_diagnostic: Dictionary = _build_contact_pair_decision_diagnostic(contact_pair, decision)
 	fired_diagnostic["fire_event_id"] = fire_event_id
 	fired_diagnostic["actual_target_id"] = actual_target_id
@@ -2123,6 +2350,332 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	fired_diagnostic["damage"] = int(damage_effect.get("damage", 0))
 	fired_diagnostic["weapon_ticks"] = int(decision.get("weapon_ticks", 1))
 	_record_contact_decision_diagnostics("fired", fired_diagnostic)
+
+
+## FT-A: Blickrichtung im Gefecht. Wer schiesst, sieht sein Ziel an (R1); wer beschossen wird, dreht sich zum Schuetzen,
+## mit dem Erkennungsverzug der Einheit (R2, Treffer wie Fehlschuss: es zaehlt der eingereihte Schuss); die uebrigen
+## Mitglieder der Gruppe des Beschossenen reagieren 30 Ticks spaeter mit (R3). Rein rechnerisch, nur der Host reiht ein
+## (SimulationRoot.queue_hex_facing_intent prueft die Befugnis), keine Zufallsquelle, nichts im Speicherstand.
+const COMBAT_FACING_MIN_INTERVAL_TICKS: int = 30
+const COMBAT_FACING_NOISE_EXTRA_TICKS: int = 30
+const COMBAT_FACING_BEING_SHOT_TICKS: int = 30
+const COMBAT_FACING_STALE_FUTURE_TICKS: int = 200
+## unit_id -> Tick, ab dem die Drehung wirkt; Kind "noise" darf von einer eigenen Kampfreaktion ersetzt werden.
+var _facing_last_turn_tick: Dictionary = {}
+var _facing_last_turn_is_noise: Dictionary = {}
+## unit_id -> Richtung der noch nicht als wirksam bestaetigten Drehung.
+var _facing_last_turn_dir: Dictionary = {}
+## unit_id -> {"target_id", "tick"}: auf wen die Einheit zuletzt geschossen hat.
+var _facing_target_by_unit: Dictionary = {}
+var _facing_shot_at_tick: Dictionary = {}
+var _facing_noise_shots: Array = []
+var _facing_serial: int = 0
+
+
+func _combat_facing_now() -> int:
+	var tick: int = int(get_hex_sight_adapter().get_current_tick())
+	return tick if tick >= 0 else _current_tick
+
+
+func _unit_id_for_facing(unit) -> String:
+	if unit != null and unit.has_method("get_unit_id"):
+		return String(unit.call("get_unit_id")).strip_edges()
+	return ""
+
+
+func _unit_is_fit_for_facing(unit) -> bool:
+	if unit == null or not is_instance_valid(unit):
+		return false
+	return not unit.has_method("get_vital_state") or String(unit.call("get_vital_state")) == "fit"
+
+
+## Hex-Richtung 0..5 von `unit` zu `toward`, -1 wenn nicht bestimmbar.
+func _facing_direction_toward(unit, toward) -> int:
+	var adapter = get_hex_sight_adapter()
+	if not adapter.is_active():
+		return -1
+	var from_info: Dictionary = adapter.read_position(unit)
+	var to_info: Dictionary = adapter.read_position(toward)
+	var from_position: Vector2 = Vector2(from_info.get("position", _get_unit_world_position(unit))) if bool(from_info.get("valid", false)) else _get_unit_world_position(unit)
+	var to_position: Vector2 = Vector2(to_info.get("position", _get_unit_world_position(toward))) if bool(to_info.get("valid", false)) else _get_unit_world_position(toward)
+	if from_position.distance_squared_to(to_position) <= 0.0001:
+		return -1
+	return int(adapter.world_angle_to_facing((to_position - from_position).angle()))
+
+
+## Hat die Einheit ein eigenes Ziel, das sie gerade sieht (Schuss auf es innerhalb des Gedaechtnisses, Sicht ohne Abbruch)?
+## Klaert, ob die zuletzt eingereihte Drehung der Einheit wirksam wurde. Wurde sie verworfen (Befehlswechsel, Laufen,
+## nicht fit), gelten Stempel und der durch sie gesetzte Bezugsgegner nicht.
+func _facing_refresh_turn(unit_id: String) -> void:
+	if not _facing_last_turn_dir.has(unit_id):
+		return
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root == null or not simulation_root.has_method("has_hex_facing_intent_pending"):
+		return
+	if bool(simulation_root.call("has_hex_facing_intent_pending", unit_id)):
+		return
+	var expected: int = int(_facing_last_turn_dir[unit_id])
+	_facing_last_turn_dir.erase(unit_id)
+	var facing_now: int = int(Dictionary(simulation_root.call("get_hex_unit_state", unit_id)).get("facing_dir", -1))
+	var entry: Dictionary = Dictionary(_facing_target_by_unit.get(unit_id, {}))
+	if facing_now == expected:
+		if bool(entry.get("pending", false)):
+			entry["pending"] = false
+			_facing_target_by_unit[unit_id] = entry
+		return
+	_facing_last_turn_tick.erase(unit_id)
+	_facing_last_turn_is_noise.erase(unit_id)
+	if bool(entry.get("pending", false)):
+		_facing_target_by_unit.erase(unit_id)
+
+
+## Leert den Drehzustand (neuer Einsatz, Wiederherstellen eines Zwischenstands: der Tickzaehler kann zurueckspringen).
+func _reset_combat_facing_state() -> void:
+	_facing_last_turn_tick.clear()
+	_facing_last_turn_is_noise.clear()
+	_facing_last_turn_dir.clear()
+	_facing_target_by_unit.clear()
+	_facing_shot_at_tick.clear()
+	_facing_noise_shots.clear()
+	_facing_alert_until.clear()
+	_facing_last_enemy_position.clear()
+	_facing_search.clear()
+
+
+func _unit_has_visible_own_target(unit, unit_id: String, now: int) -> bool:
+	_facing_refresh_turn(unit_id)
+	# Bezugsgegner: das eigene Ziel oder der Schuetze, zu dem sich die Einheit zuletzt gedreht hat. Er haelt, solange sie ihn
+	# sieht; sieht sie ihn nicht mehr, noch eine eigene Schussperiode lang. Tot oder weg: frei.
+	var entry: Dictionary = Dictionary(_facing_target_by_unit.get(unit_id, {}))
+	if entry.is_empty():
+		return false
+	if int(entry.get("seen", -1000000)) > now + COMBAT_FACING_STALE_FUTURE_TICKS:
+		_facing_target_by_unit.erase(unit_id)
+		return false
+	var own_target = _resolve_unit_by_id(String(entry.get("target_id", "")))
+	if not _unit_is_fit_for_facing(own_target):
+		_facing_target_by_unit.erase(unit_id)
+		return false
+	# R-B: "sieht" = in Erkennungsreichweite (gemeinsame Hilfsfunktion mit der Erkennung), nicht die volle Kontaktreichweite.
+	if bool(_query_current_visibility(unit, own_target, _get_detection_range_for(unit, own_target)).get("visible", false)):
+		entry["seen"] = now
+		_facing_target_by_unit[unit_id] = entry
+		return true
+	var period_ticks: int = ((_get_attack_period_milli(unit) + 999) / 1000) * COMBAT_DECISION_INTERVAL_TICKS
+	if now - int(entry.get("seen", -1000000)) < period_ticks:
+		return true
+	_facing_target_by_unit.erase(unit_id)
+	return false
+
+
+## Reiht die Drehabsicht ein; false, wenn nichts eingereiht wurde (gesperrt, schon so gerichtet, zu frueh nach der letzten).
+func _queue_combat_facing(unit, toward, delay_ticks: int, reason: String, guard_visible_target: bool) -> bool:
+	var unit_id: String = _unit_id_for_facing(unit)
+	if unit_id.is_empty() or toward == null or not _unit_is_fit_for_facing(unit):
+		return false
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root == null or not simulation_root.has_method("queue_hex_facing_intent"):
+		return false
+	var now: int = _combat_facing_now()
+	_facing_refresh_turn(unit_id)
+	# Hoechstens eine Drehung je 30 Ticks. Eine noch wartende Kameradendrehung darf die eigene Kampfreaktion ersetzen.
+	var last: int = int(_facing_last_turn_tick.get(unit_id, -1000000))
+	if last > now + 200:
+		last = -1000000
+	var replaces_pending_noise: bool = reason == "combat_reaction" and bool(_facing_last_turn_is_noise.get(unit_id, false)) and last > now
+	if now < last + COMBAT_FACING_MIN_INTERVAL_TICKS and not replaces_pending_noise:
+		return false
+	if guard_visible_target and _unit_has_visible_own_target(unit, unit_id, now):
+		return false
+	var direction: int = _facing_direction_toward(unit, toward)
+	if direction < 0:
+		return false
+	var ready_tick: int = now + maxi(delay_ticks, 1)
+	_facing_serial += 1
+	var command_id: String = "combat:%d:%d:%s" % [now, _facing_serial, unit_id]
+	var result: Dictionary = Dictionary(simulation_root.call("queue_hex_facing_intent", unit_id, direction, command_id, reason, ready_tick))
+	if not bool(result.get("ok", false)) or bool(result.get("replayed", false)) or bool(result.get("unchanged", false)):
+		return false
+	_facing_last_turn_tick[unit_id] = ready_tick
+	_facing_last_turn_is_noise[unit_id] = reason == "noise_reaction"
+	_facing_last_turn_dir[unit_id] = direction
+	if guard_visible_target:
+		# Wer sich zu einem Schuetzen dreht, bleibt bei ihm (Bezugsgegner), bis er ihn eine Schussperiode lang nicht sieht;
+		# "pending" bis die Drehung wirksam wurde.
+		_facing_target_by_unit[unit_id] = {"target_id": _unit_id_for_facing(toward), "tick": ready_tick, "seen": ready_tick, "pending": true}
+	return true
+
+
+## Einhaengepunkt fuer jeden eingereihten Schuss (Normalschuss und Ueberwachung): R1 und R2 sofort, R3 gesammelt.
+func _note_combat_facing_shot(attacker, target) -> void:
+	if attacker == null or target == null or attacker == target:
+		return
+	var attacker_id: String = _unit_id_for_facing(attacker)
+	var target_id: String = _unit_id_for_facing(target)
+	if attacker_id.is_empty() or target_id.is_empty():
+		return
+	var now: int = _combat_facing_now()
+	_facing_target_by_unit[attacker_id] = {"target_id": target_id, "tick": now, "seen": now}
+	if _get_unit_team_id_for_diagnostics(attacker) == _get_unit_team_id_for_diagnostics(target):
+		# Feuer der eigenen Seite: der Schuetze schaut auf sein (verwechseltes) Ziel, sonst dreht sich niemand, kein Alarm.
+		_queue_combat_facing(attacker, target, 1, "combat_reaction", false)
+		return
+	_facing_shot_at_tick[target_id] = now
+	_mark_combat_alert(attacker, _facing_logical_position(target))
+	_mark_combat_alert(target, _facing_logical_position(attacker))
+	_queue_combat_facing(attacker, target, 1, "combat_reaction", false)
+	_queue_combat_facing(target, attacker, _get_detection_delay_ticks(target), "combat_reaction", true)
+	_facing_noise_shots.append([attacker_id, target_id])
+
+
+## Nach allen Schuessen des Schritts: die Gruppe des Beschossenen schaut mit (R3), wenn die Kameraden frei dafuer sind.
+func _flush_combat_noise_facing() -> void:
+	if _facing_noise_shots.is_empty():
+		return
+	var shots: Array = _facing_noise_shots
+	_facing_noise_shots = []
+	var now: int = _combat_facing_now()
+	for shot in shots:
+		var attacker = _resolve_unit_by_id(String(shot[0]))
+		var target = _resolve_unit_by_id(String(shot[1]))
+		if not _unit_is_fit_for_facing(attacker) or target == null:
+			continue
+		# Gruppe wie bei der Unterdrueckung: eigene Seite je Fireteam, Gegner je group_id des Taktikprofils.
+		var group_id: String = suppression_group_key(target)
+		if group_id.is_empty():
+			continue
+		var target_is_friendly: bool = _get_unit_team_id_for_diagnostics(target) == friendly_team_id
+		var mates: Array = _get_friendly_combat_units() if target_is_friendly else _get_enemy_combat_units()
+		for mate in mates:
+			if mate == null or mate == target or mate == attacker or suppression_group_key(mate) != group_id:
+				continue
+			var mate_id: String = _unit_id_for_facing(mate)
+			if mate_id.is_empty() or not _unit_is_fit_for_facing(mate):
+				continue
+			if now - int(_facing_shot_at_tick.get(mate_id, -1000000)) <= COMBAT_FACING_BEING_SHOT_TICKS:
+				continue
+			if _attack_contact_ids.has(mate_id) or _unit_has_visible_own_target(mate, mate_id, now):
+				continue
+			_queue_combat_facing(mate, attacker, _get_detection_delay_ticks(mate) + COMBAT_FACING_NOISE_EXTRA_TICKS, "noise_reaction", true)
+
+
+## ---- Umsehen nach Kontakt (FT-A, W3) -------------------------------------------------------------------------------------
+## Eine stehende Einheit, die in den letzten 600 Ticks beschossen wurde oder geschossen hat ("alarmiert") und keinen Gegner
+## sieht, schaut zuerst zur letzten bekannten Gegnerposition, dann reihum (+1, -1, +2, -2, +3 um die Ausgangsrichtung), je
+## nach Aufmerksamkeit alle 30 bis 90 Ticks, bis sie einen Gegner sieht oder alle sechs Richtungen durch sind.
+## Rein rechnerisch (keine Zufallsquelle); gedreht wird ueber noise_reaction (niedrigste Prioritaet, nie gegen Laufende).
+const COMBAT_LOOKAROUND_ALERT_TICKS: int = 600
+const COMBAT_LOOKAROUND_OFFSETS: Array[int] = [1, -1, 2, -2, 3]
+var _facing_alert_until: Dictionary = {}
+var _facing_last_enemy_position: Dictionary = {}
+var _facing_search: Dictionary = {}
+
+
+## Alarmiert die Einheit; `enemy_position` ist die Position des Gegners beim Schusswechsel.
+func _mark_combat_alert(unit, enemy_position: Vector2) -> void:
+	var unit_id: String = _unit_id_for_facing(unit)
+	if unit_id.is_empty():
+		return
+	_facing_alert_until[unit_id] = _combat_facing_now() + COMBAT_LOOKAROUND_ALERT_TICKS
+	_facing_last_enemy_position[unit_id] = enemy_position
+	_facing_search.erase(unit_id)
+
+
+func _facing_logical_position(unit) -> Vector2:
+	var info: Dictionary = get_hex_sight_adapter().read_position(unit)
+	if bool(info.get("valid", false)):
+		return Vector2(info.get("position", Vector2.ZERO))
+	return _get_unit_world_position(unit)
+
+
+func _facing_direction_to_position(unit, to_position: Vector2) -> int:
+	var adapter = get_hex_sight_adapter()
+	if not adapter.is_active():
+		return -1
+	var from_position: Vector2 = _facing_logical_position(unit)
+	if from_position.distance_squared_to(to_position) <= 0.0001:
+		return -1
+	return int(adapter.world_angle_to_facing((to_position - from_position).angle()))
+
+
+func _facing_unit_is_walking(simulation_root, unit_id: String) -> bool:
+	var state: Dictionary = Dictionary(simulation_root.call("get_hex_unit_state", unit_id))
+	if state.is_empty():
+		return true
+	return bool(Dictionary(state.get("movement_state", {})).get("moving", false)) or bool(Dictionary(state.get("route_state", {})).get("has_commitments", false))
+
+
+func _facing_unit_sees_opponent(unit) -> bool:
+	var opponents: Array = _get_enemy_combat_units() if _get_unit_team_id_for_diagnostics(unit) == friendly_team_id else _get_friendly_combat_units()
+	for opponent in opponents:
+		if opponent == null or opponent == unit or not _unit_is_fit_for_facing(opponent):
+			continue
+		# R-B: dieselbe Reichweite wie die Erkennung, sonst endet die Suche bei einem nie erkennbaren Gegner.
+		if bool(_query_current_visibility(unit, opponent, _get_detection_range_for(unit, opponent)).get("visible", false)):
+			return true
+	return false
+
+
+## Einmal je Entscheidungsschritt (nach den Schuessen).
+func _advance_combat_lookaround() -> void:
+	if _facing_alert_until.is_empty():
+		return
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root == null or not simulation_root.has_method("queue_hex_facing_intent") or not get_hex_sight_adapter().is_active():
+		return
+	var now: int = _combat_facing_now()
+	var unit_ids: Array = _facing_alert_until.keys()
+	unit_ids.sort()
+	for unit_id in unit_ids:
+		var alert_until: int = int(_facing_alert_until[unit_id])
+		if now > alert_until or alert_until - COMBAT_LOOKAROUND_ALERT_TICKS > now + COMBAT_FACING_STALE_FUTURE_TICKS:
+			_facing_alert_until.erase(unit_id)
+			_facing_last_enemy_position.erase(unit_id)
+			_facing_search.erase(unit_id)
+			continue
+		var unit = _resolve_unit_by_id(String(unit_id))
+		if not _unit_is_fit_for_facing(unit) or _facing_unit_is_walking(simulation_root, String(unit_id)):
+			_facing_search.erase(unit_id)
+			continue
+		if _facing_unit_sees_opponent(unit):
+			_facing_search.erase(unit_id)
+			continue
+		var search: Dictionary = Dictionary(_facing_search.get(unit_id, {}))
+		var facing_now: int = int(Dictionary(simulation_root.call("get_hex_unit_state", unit_id)).get("facing_dir", 0))
+		if search.is_empty():
+			search = {"base": facing_now, "step": -1, "next": now}
+		var step: int = int(search["step"])
+		# R-D: nach der letzten Suchrichtung noch ein Schritt (Rueckdrehung), dann Ende.
+		if step > COMBAT_LOOKAROUND_OFFSETS.size() or now < int(search["next"]):
+			_facing_search[unit_id] = search
+			continue
+		if now < int(_facing_last_turn_tick.get(unit_id, -1000000)) + COMBAT_FACING_MIN_INTERVAL_TICKS:
+			_facing_search[unit_id] = search
+			continue
+		var awareness: float = clampf(float(unit.call("get_awareness")), 0.0, 1.0) if unit.has_method("get_awareness") else 0.5
+		var interval: int = 30 + int(round((1.0 - awareness) * 60.0))
+		var direction: int = -1
+		if step < 0:
+			direction = _facing_direction_to_position(unit, Vector2(_facing_last_enemy_position.get(unit_id, _facing_logical_position(unit))))
+		elif step == COMBAT_LOOKAROUND_OFFSETS.size():
+			# R-D: erfolglose Suche endet nicht mit dem Ruecken zur Front: zurueck zur Richtung der letzten bekannten
+			# Gegnerposition, gibt es keine, zur Blickrichtung vor der Suche.
+			direction = _facing_direction_to_position(unit, Vector2(_facing_last_enemy_position.get(unit_id, _facing_logical_position(unit))))
+			if direction < 0:
+				direction = int(search["base"])
+		else:
+			direction = posmod(int(search["base"]) + COMBAT_LOOKAROUND_OFFSETS[step], 6)
+		search["step"] = step + 1
+		search["next"] = now + interval
+		_facing_search[unit_id] = search
+		if direction < 0 or direction == facing_now:
+			continue
+		_facing_serial += 1
+		var result: Dictionary = Dictionary(simulation_root.call("queue_hex_facing_intent", unit_id, direction, "look:%d:%d:%s" % [now, _facing_serial, unit_id], "noise_reaction", now + 1))
+		if bool(result.get("ok", false)) and not bool(result.get("replayed", false)) and not bool(result.get("unchanged", false)):
+			_facing_last_turn_tick[unit_id] = now + 1
+			_facing_last_turn_is_noise[unit_id] = true
+			_facing_last_turn_dir[unit_id] = direction
 
 
 func _record_contact_decision_diagnostics(reason: String, data: Dictionary = {}) -> void:
@@ -2134,8 +2687,8 @@ func _record_contact_decision_diagnostics(reason: String, data: Dictionary = {})
 		"reason": normalized_reason,
 		"status": _resolve_contact_decision_status(normalized_reason),
 		"current_tick": _current_tick,
-		"next_attack_tick": _next_attack_tick,
-		"cooldown_ticks_remaining": maxi(_next_attack_tick - _current_tick, 0),
+		"next_attack_tick": _earliest_next_shot_tick,
+		"cooldown_ticks_remaining": maxi(_earliest_next_shot_tick - _current_tick, 0),
 		"active_friendly_count": _get_units(friendly_unit_paths).size(),
 		"active_enemy_count": _get_active_enemy_units().size(),
 		"combat_friendly_count": _get_friendly_combat_units().size(),
@@ -3076,7 +3629,7 @@ func _can_unit_return_fire(unit) -> bool:
 	if fireteam_id.is_empty() or not _recent_incoming_fire_tick_by_fireteam.has(fireteam_id):
 		return false
 	var last_incoming_tick: int = int(_recent_incoming_fire_tick_by_fireteam.get(fireteam_id, -RETURN_FIRE_WINDOW_TICKS - 1))
-	return _current_tick - last_incoming_tick <= RETURN_FIRE_WINDOW_TICKS
+	return _current_tick - last_incoming_tick <= _get_return_fire_window_ticks(unit)
 
 
 func _get_unit_fire_rule_for_diagnostics(unit) -> String:
@@ -3094,7 +3647,9 @@ func _get_detection_delay_ticks(unit) -> int:
 		unit_awareness = clampf(float(unit.call("get_awareness")), 0.0, 1.0)
 
 	var base_delay: int = int(round((1.0 - unit_awareness) * float(MAX_DETECTION_DELAY_TICKS)))
-	return maxi(base_delay + _get_contact_initiative_delay_delta_ticks(unit) + _get_aim_readiness_delay_delta_ticks(unit), 0)
+	# INI-5: Reaktionszeit aus der Initiative, round((0,5 - Initiative) x 20) Ticks, fuer beide Seiten gleich.
+	var reaction_delta: int = COMBAT_CADENCE_SCRIPT.reaction_ticks(_get_attack_initiative(unit))
+	return maxi(base_delay + reaction_delta + _get_contact_initiative_delay_delta_ticks(unit) + _get_aim_readiness_delay_delta_ticks(unit), 0)
 
 
 func _get_contact_initiative_delay_delta_ticks(unit) -> int:
@@ -3135,6 +3690,7 @@ func _is_detection_complete(attacker_id: String, target_id: String) -> bool:
 
 
 func _start_or_continue_detection(attacker, attacker_id: String, target_id: String) -> void:
+	_attack_contact_next[attacker_id] = true  # Gefechtstakt: diese Einheit kennt gerade ein Ziel
 	var key: String = _make_detection_key(attacker_id, target_id)
 	if _detection_progress.has(key):
 		return
@@ -3195,16 +3751,23 @@ func _advance_return_fire_windows() -> void:
 	var keys_to_remove: Array = []
 	for key in _recent_incoming_fire_tick_by_fireteam.keys():
 		var last_tick: int = int(_recent_incoming_fire_tick_by_fireteam[key])
-		if _current_tick - last_tick > RETURN_FIRE_WINDOW_TICKS:
+		if _current_tick - last_tick > RETURN_FIRE_WINDOW_CLEANUP_TICKS:
 			keys_to_remove.append(key)
 	for key in keys_to_remove:
 		_recent_incoming_fire_tick_by_fireteam.erase(key)
 	var hit_keys_to_remove: Array = []
 	for hit_key in _recent_hit_tick_by_shooter_and_group.keys():
-		if _current_tick - int(_recent_hit_tick_by_shooter_and_group[hit_key]) > RETURN_FIRE_WINDOW_TICKS:
+		if _current_tick - int(_recent_hit_tick_by_shooter_and_group[hit_key]) > RETURN_FIRE_WINDOW_CLEANUP_TICKS:
 			hit_keys_to_remove.append(hit_key)
 	for hit_key in hit_keys_to_remove:
 		_recent_hit_tick_by_shooter_and_group.erase(hit_key)
+	var shot_keys_to_remove: Array = []
+	for shot_key in _recent_shot_tick_by_shooter_and_group.keys():
+		var shot_age: int = _current_tick - int(_recent_shot_tick_by_shooter_and_group[shot_key])
+		if shot_age > RETURN_FIRE_WINDOW_CLEANUP_TICKS or shot_age < 0:
+			shot_keys_to_remove.append(shot_key)
+	for shot_key in shot_keys_to_remove:
+		_recent_shot_tick_by_shooter_and_group.erase(shot_key)
 
 
 func get_return_fire_window_snapshot() -> Dictionary:
@@ -3306,9 +3869,7 @@ func _has_valid_los(attacker, target) -> bool:
 	if not target.has_method("get_vital_state") or String(target.call("get_vital_state")) != "fit":
 		return false
 
-	var los_range: float = _get_effective_range(target)
-	if _uses_weapon_range_for_contact_detection(attacker):
-		los_range = maxf(los_range, _get_weapon_attack_range(attacker, target))
+	var los_range: float = _get_detection_range_for(attacker, target)
 	var logical: Dictionary = _query_current_visibility(attacker,target,los_range)
 	if bool(logical.get("handled",false)):
 		return bool(logical.get("visible",false))
@@ -3458,7 +4019,7 @@ func _build_readability_status_context() -> Dictionary:
 		"duration_seconds": _get_duration_seconds(),
 		"objective_status_text": _build_objective_status_text(),
 		"wave_status_text": _build_wave_status_text(),
-		"show_hold_timer": win_condition == WIN_CONDITION_OBJECTIVE_DEFENSE and _objective_owned_since_msec >= 0 and not _combat_finished,
+		"show_hold_timer": win_condition == WIN_CONDITION_OBJECTIVE_DEFENSE and _objective_owned_since_tick >= 0 and not _combat_finished,
 		"objective_defense_elapsed_seconds": _get_objective_defense_elapsed_seconds(),
 		"objective_defense_hold_seconds": objective_defense_hold_seconds,
 		"mission_scenario_runtime_gates": get_mission_scenario_runtime_gate_snapshot(),
@@ -3574,6 +4135,28 @@ func _find_first_contact_pair() -> Dictionary:
 			)
 		)
 	).duplicate(true)
+	if cache != null and cache.has_method("set_debug_profile_scope_active"):
+		cache.call("set_debug_profile_scope_active", false)
+	return result
+
+
+## Gefechtstakt: je Schuetze beider Seiten sein Paar (siehe CombatFireDecisionResolver.find_contact_pairs).
+func _find_contact_pairs() -> Array:
+	var cache = get_node_or_null(combat_visibility_cache_path)
+	if combat_tick_budget_debug_enabled and cache != null and cache.has_method("set_debug_profile_scope_active"):
+		cache.call("set_debug_profile_scope_active", true)
+	var result: Array = Array(
+		COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call(
+			"find_contact_pairs",
+			_build_fire_decision_context(
+				{
+					"friendly_units": _get_friendly_combat_units(),
+					"enemy_units": _get_enemy_combat_units(),
+					"attack_phase": Callable(self, "_combat_attack_phase"),
+				}
+			)
+		)
+	)
 	if cache != null and cache.has_method("set_debug_profile_scope_active"):
 		cache.call("set_debug_profile_scope_active", false)
 	return result
@@ -3893,19 +4476,23 @@ func _connect_wave_controller_signals() -> void:
 func _on_unit_respawn_completed(unit_id: String) -> void:
 	_queued_bleedout_by_unit_id.erase(unit_id)
 	_clear_down_state_linger(unit_id)
+	_attack_warmed_ids.erase(unit_id)  # n2: gleiche ID, neuer Anlauf fuer die Erkennung
+	_attack_contact_ids.erase(unit_id)
 	_set_event_text("%s RESPAWN READY" % unit_id)
 	_broadcast_remote_event("%s RESPAWN READY" % unit_id, unit_id, RESPAWN_EVENT_COLOR, 1.6, "RESPAWN READY")
 
 
-func _set_contact_visuals(attacker, target) -> void:
-	_clear_unit_contact_states()
+## add_to_previous: weiteres Paar desselben Schritts (Gefechtstakt), die bisherigen Paare bleiben gezeichnet.
+func _set_contact_visuals(attacker, target, add_to_previous: bool = false) -> void:
+	if not add_to_previous:
+		_clear_unit_contact_states()
 	if attacker == null or target == null:
-		if _readability_presenter != null:
+		if _readability_presenter != null and not add_to_previous:
 			_readability_presenter.call("clear_contact_line")
 		return
 
 	if _readability_presenter != null:
-		_readability_presenter.call("set_contact_line", attacker, target)
+		_readability_presenter.call("add_contact_line" if add_to_previous else "set_contact_line", attacker, target)
 
 	if attacker.has_method("set_contact_state"):
 		attacker.call("set_contact_state", true, String(target.call("get_unit_id")))
@@ -4091,10 +4678,10 @@ func _count_fit_enemy_units() -> int:
 
 
 func _build_attack_readiness_text() -> String:
-	if _current_tick >= _next_attack_tick:
+	if _current_tick >= _earliest_next_shot_tick:
 		return "ready"
 
-	return "tick %d" % (_next_attack_tick - _current_tick)
+	return "tick %d" % (_earliest_next_shot_tick - _current_tick)
 
 
 func _finish_readability_setup() -> void:
@@ -4257,6 +4844,11 @@ func restore_checkpoint_elapsed_time(elapsed_msec: int) -> Dictionary:
 	if elapsed_msec < 0 or elapsed_msec > 2678400000: return {"ok":false, "reason":"invalid_mission_elapsed"}
 	_mission_started_at_msec = maxi(Time.get_ticks_msec(), 1)
 	_checkpoint_elapsed_offset_msec = elapsed_msec
+	# Der Tickzaehler kann beim Laden zurueckspringen: Abkuehl-Eintraege aus dem alten Lauf verwerfen.
+	_enemy_reposition_ready_at_tick.clear()
+	_enemy_limbo_cover_ready_at_tick.clear()
+	_friendly_cover_ready_at_tick.clear()
+	_reset_combat_facing_state()
 	return {"ok":true}
 
 func _get_duration_seconds() -> float:
@@ -4330,18 +4922,18 @@ func _update_objective_hold_tracking() -> void:
 		return
 
 	if _is_objective_captured_by_friendly():
-		if _objective_owned_since_msec < 0:
-			_objective_owned_since_msec = Time.get_ticks_msec()
+		if _objective_owned_since_tick < 0:
+			_objective_owned_since_tick = _current_tick
 		return
 
-	_objective_owned_since_msec = -1
+	_objective_owned_since_tick = -1
 
 
 func _get_objective_defense_elapsed_seconds() -> float:
-	if _objective_owned_since_msec < 0:
+	if _objective_owned_since_tick < 0:
 		return 0.0
 
-	return maxf(float(Time.get_ticks_msec() - _objective_owned_since_msec) / 1000.0, 0.0)
+	return maxf(float(_current_tick - _objective_owned_since_tick) / float(GAME_TICKS_PER_SECOND), 0.0)
 
 
 func _build_objective_status_text() -> String:
@@ -5348,8 +5940,7 @@ func _enemy_limbo_has_patrol(unit_id: String) -> bool:
 func _enemy_limbo_should_seek_cover(enemy, has_contact: bool, unit_id: String) -> bool:
 	if not has_contact or enemy == null or not (enemy is Node2D):
 		return false
-	var now_msec: int = Time.get_ticks_msec()
-	if int(_enemy_limbo_cover_ready_at_msec.get(unit_id, 0)) > now_msec:
+	if _enemy_limbo_cover_on_cooldown(unit_id):
 		return false
 	if _get_enemy_limbo_cover_score(enemy) >= enemy_limbo_cover_min_cover_score:
 		return false
@@ -5375,7 +5966,7 @@ func _try_enqueue_enemy_limbo_cover_move(simulation_root: Node, enemy) -> bool:
 		ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.REASON_SEEK_COVER
 	))):
 		return false
-	_enemy_limbo_cover_ready_at_msec[unit_id] = Time.get_ticks_msec() + int(enemy_limbo_cover_cooldown_seconds * 1000.0)
+	_enemy_limbo_cover_ready_at_tick[unit_id] = _current_tick + maxi(enemy_limbo_cover_cooldown_ticks, 0)
 	if _enemy_patrol_paths_by_unit_id.has(unit_id):
 		_enemy_patrol_contact_locked[unit_id] = true
 	return true
@@ -5521,8 +6112,7 @@ func _try_reposition_enemy_on_damage(unit, hit_context: Dictionary) -> void:
 		return
 
 	var unit_id: String = String(unit.call("get_unit_id"))
-	var now_msec: int = Time.get_ticks_msec()
-	if int(_enemy_reposition_ready_at_msec.get(unit_id, 0)) > now_msec:
+	if _enemy_reposition_on_cooldown(unit_id):
 		return
 
 	var simulation_root = get_node_or_null(simulation_root_path)
@@ -5538,7 +6128,21 @@ func _try_reposition_enemy_on_damage(unit, hit_context: Dictionary) -> void:
 		ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.MOVEMENT_POSTURE_POLICY_AGGRESSIVE_READY
 	))):
 		return
-	_enemy_reposition_ready_at_msec[unit_id] = now_msec + int(round(enemy_reposition_cooldown_seconds * 1000.0))
+	_enemy_reposition_ready_at_tick[unit_id] = _current_tick + maxi(enemy_reposition_cooldown_ticks, 0)
+
+
+# Wartezeit laeuft nur mit Spiel-Ticks. Ein Eintrag, der weiter in der Zukunft liegt als die
+# Abkuehlzeit selbst, stammt aus einem frueheren Tickzaehler (Neustart der Simulation) und gilt als abgelaufen.
+func _tick_cooldown_active(ready_at_tick: int, cooldown_ticks: int) -> bool:
+	return ready_at_tick > _current_tick and ready_at_tick - _current_tick <= maxi(cooldown_ticks, 0)
+
+
+func _enemy_reposition_on_cooldown(unit_id: String) -> bool:
+	return _tick_cooldown_active(int(_enemy_reposition_ready_at_tick.get(unit_id, 0)), enemy_reposition_cooldown_ticks)
+
+
+func _enemy_limbo_cover_on_cooldown(unit_id: String) -> bool:
+	return _tick_cooldown_active(int(_enemy_limbo_cover_ready_at_tick.get(unit_id, 0)), enemy_limbo_cover_cooldown_ticks)
 
 
 func _build_enemy_reposition_target(unit, hit_context: Dictionary) -> Vector2:
@@ -5677,8 +6281,7 @@ func _apply_friendly_standard_behavior(simulation_root: Node) -> void:
 		if friendly.has_method("get_effective_cover_score") and int(friendly.call("get_effective_cover_score")) >= FRIENDLY_LOW_COVER_THRESHOLD:
 			continue
 		var unit_id: String = String(friendly.call("get_unit_id"))
-		var now_msec: int = Time.get_ticks_msec()
-		if int(_friendly_cover_ready_at_msec.get(unit_id, 0)) > now_msec:
+		if _friendly_cover_on_cooldown(unit_id):
 			continue
 		var cover_target: Vector2 = _build_friendly_cover_target(friendly, profile_dict)
 		if cover_target == Vector2.INF:
@@ -5694,9 +6297,17 @@ func _apply_friendly_standard_behavior(simulation_root: Node) -> void:
 				"requeue_until_target": true,
 			}
 		)
-		_friendly_cover_ready_at_msec[unit_id] = now_msec + FRIENDLY_STANDARD_COVER_COOLDOWN_MSEC
+		_arm_friendly_cover_cooldown(unit_id)
 		if friendly.has_method("show_event_text"):
 			friendly.call("show_event_text", "SEEK COVER", DEFAULT_EVENT_COLOR, 0.9)
+
+
+func _friendly_cover_on_cooldown(unit_id: String) -> bool:
+	return _tick_cooldown_active(int(_friendly_cover_ready_at_tick.get(unit_id, 0)), FRIENDLY_STANDARD_COVER_COOLDOWN_TICKS)
+
+
+func _arm_friendly_cover_cooldown(unit_id: String) -> void:
+	_friendly_cover_ready_at_tick[unit_id] = _current_tick + FRIENDLY_STANDARD_COVER_COOLDOWN_TICKS
 
 
 func _try_enqueue_overwatch(simulation_root: Node) -> Array:
@@ -5711,8 +6322,11 @@ func _try_enqueue_overwatch(simulation_root: Node) -> Array:
 	else:
 		tactical_controller.call("refresh_fireteam_security_state")
 	var friendly_units_by_fireteam: Dictionary = {}
+	var overwatch_ready_snapshot: Dictionary = get_overwatch_member_ready_snapshot()
 	for friendly in _get_friendly_combat_units():
 		if friendly == null or not friendly.has_method("get_fireteam_id"):
+			continue
+		if not _suppression_overwatch_slot_open(friendly, overwatch_ready_snapshot):
 			continue
 		var fireteam_id: String = String(friendly.call("get_fireteam_id")).strip_edges().to_lower()
 		if fireteam_id.is_empty():
@@ -5740,6 +6354,7 @@ func _try_enqueue_overwatch(simulation_root: Node) -> Array:
 		var shot: Dictionary = Dictionary(shot_variant)
 		var attacker = _resolve_unit_by_id(String(shot.get("attacker_unit_id", "")))
 		var target = _resolve_unit_by_id(String(shot.get("target_unit_id", "")))
+		_note_combat_facing_shot(attacker, target)
 		var fire_event_id: String = _record_fire_event_from_shot(shot, attacker, target, "overwatch")
 		if attacker != null and target != null:
 			_set_contact_visuals(attacker, target)
@@ -5882,4 +6497,284 @@ func reset_for_location_job(scenario_path: String) -> void:
 	_combat_finished=false; _winning_team_id=""; _mission_result.clear()
 	_mission_result_condition_override=""; _resolved_without_seen_friendly=false
 	_has_seen_active_friendly_units=false; _mission_started_at_msec=Time.get_ticks_msec(); _checkpoint_elapsed_offset_msec=0
+	reset_suppression()
+	_reset_combat_facing_state()
 	configure_scenario_runtime_gates_from_file(scenario_path)
+
+
+# ---- Unterdrueckung (FT-0b) -------------------------------------------------------------------------------------------
+# Ein Wert je Gruppe fuer beide Seiten: eigene Seite je Fireteam, Gegner je group_id. Gerechnet nur hier auf dem Host,
+# nur ueber suppression_math.gd (Zahlen aus data/combat/suppression_rules.json), im Takt der Spiel-Ticks.
+
+## Schluessel einer eigenen Fireteam-Gruppe (so liest ihn der Taktik-Controller).
+static func suppression_own_key(fireteam_id: String) -> String:
+	return "own:" + fireteam_id.strip_edges().to_lower()
+
+
+func get_suppression_tracker():
+	return _suppression_tracker
+
+
+## Gruppe der Einheit: eigene Seite = Fireteam, Gegner = group_id (Taktikprofil), sonst Fireteam oder Team.
+func suppression_group_key(unit) -> String:
+	if unit == null or not is_instance_valid(unit):
+		return ""
+	var instance_id: int = unit.get_instance_id()
+	if _suppression_key_by_instance.has(instance_id):
+		return String(_suppression_key_by_instance[instance_id])
+	var key: String = ""
+	if _get_unit_team_id_for_diagnostics(unit) == friendly_team_id:
+		var fireteam_id: String = _get_unit_fireteam_id(unit)
+		key = suppression_own_key(fireteam_id if not fireteam_id.is_empty() else "team")
+	else:
+		key = "enemy:" + _get_enemy_security_group_id(unit, _get_enemy_tactics_config(unit))
+	_suppression_key_by_instance[instance_id] = key
+	return key
+
+
+func get_suppression_level(group_key: String) -> int:
+	return _suppression_tracker.level_of(group_key) if _suppression_tracker != null else 0
+
+
+## Stufe, die fuer diese Einheit gilt (0, wenn ihre Gruppe die Unterdrueckung ignoriert, z. B. "hold_till_last_man").
+func get_suppression_level_for_unit(unit) -> int:
+	if _suppression_tracker == null or unit == null or not _suppression_tracker.any_active():
+		return 0
+	var key: String = suppression_group_key(unit)
+	if bool(_suppression_ignored_by_key.get(key, false)):
+		return 0
+	return _suppression_tracker.level_of(key)
+
+
+## Anzeige: Wert, Schwelle der naechsten Stufe, Stufe und Stufenname einer Gruppe.
+func get_suppression_snapshot(group_key: String) -> Dictionary:
+	if _suppression_tracker == null:
+		return {}
+	var level: int = _suppression_tracker.level_of(group_key)
+	return {
+		"value": _suppression_tracker.value_of(group_key),
+		"threshold": _suppression_tracker.next_threshold_of(group_key),
+		"level": level,
+		"label": SUPPRESSION_MATH_SCRIPT.level_label(_suppression_rules, level),
+		"ignored": bool(_suppression_ignored_by_key.get(group_key, false)),
+	}
+
+
+func get_suppression_slot_count(unit_id: String) -> int:
+	return int(_suppression_slot_count_by_unit_id.get(unit_id, 0))
+
+
+## Nichts davon steht im Speicherstand: beim Laden eines Zwischenstands und beim Missionsneustart leeren.
+func reset_suppression() -> void:
+	if _suppression_tracker == null:
+		return
+	_suppression_tracker.reset()
+	_suppression_slot_count_by_unit_id.clear()
+	_suppression_slot_memo.clear()
+	_suppression_overwatch_slot_by_unit_id.clear()
+	_suppression_ignored_by_key.clear()
+	_suppression_key_by_instance.clear()
+	_suppression_last_step_tick = -1
+
+
+func register_suppression_movement_provider(simulation_root) -> void:
+	if simulation_root != null and simulation_root.has_method("set_movement_suppression_provider"):
+		_suppression_movement_provider = Callable(self, "get_suppression_move_factor")
+		simulation_root.call("set_movement_suppression_provider", _suppression_movement_provider)
+	if simulation_root != null and simulation_root.has_method("set_combat_suppression_provider"):
+		_suppression_combat_provider = Callable(self, "get_suppression_combat_modifiers")
+		simulation_root.call("set_combat_suppression_provider", _suppression_combat_provider)
+
+
+## Jeder aufgeloeste Schuss zaehlt fuer die Gruppe des ZIELS: Treffer mit dem angerichteten Schaden, Fehlschuss mit dem
+## Schaden, den die Waffe gemacht haette.
+func note_suppression_shot(target_unit, damage: float, hit: bool) -> void:
+	if _suppression_tracker == null:
+		return
+	var key: String = suppression_group_key(target_unit)
+	if not key.is_empty():
+		_suppression_tracker.note_shot(key, damage, hit)
+
+
+func _note_suppression_from_result(result: Dictionary) -> void:
+	var target = _resolve_unit_by_id(String(result.get("target_unit_id", result.get("unit_id", ""))))
+	if target == null:
+		return
+	var hit: bool = bool(result.get("hit", false))
+	var damage: float = float(result.get("damage_resolved", 0)) if hit else float(result.get("base_damage", 0))
+	note_suppression_shot(target, damage, hit)
+
+
+## Alle step_ticks Ticks ein Schritt: erst Wert (Gewinne seit dem letzten Schritt, Abbau), dann Stufe; danach die Wirkung auf
+## die Einheiten. Keine Wanduhr. Gibt zurueck, ob in diesem Tick ein Schritt lief.
+func _advance_suppression(tick: int) -> bool:
+	if _suppression_tracker == null:
+		return false
+	var every: int = SUPPRESSION_MATH_SCRIPT.step_ticks(_suppression_rules)
+	if tick <= 0 or tick % every != 0 or tick == _suppression_last_step_tick:
+		return false
+	_suppression_last_step_tick = tick
+	_suppression_key_by_instance.clear()
+	var has_groups: bool = not _suppression_tracker.group_keys().is_empty()
+	if not has_groups:
+		return true
+	var members_by_key: Dictionary = {}
+	for unit in _get_friendly_combat_units() + _get_enemy_combat_units():
+		var key: String = suppression_group_key(unit)
+		if not members_by_key.has(key):
+			members_by_key[key] = []
+		members_by_key[key].append(unit)
+	for key in _suppression_tracker.group_keys():
+		var members: Array = Array(members_by_key.get(key, []))
+		if members.is_empty():
+			# Niemand lebt mehr: die Gruppe haelt keinen Wert (nichts bleibt haengen).
+			_suppression_tracker.forget(key)
+			_suppression_ignored_by_key.erase(key)
+			continue
+		_step_suppression_group(key, members)
+	return true
+
+
+func _step_suppression_group(key: String, members: Array) -> void:
+	var leader = _suppression_leader(members)
+	var leadership: float = float(leader.call("get_leadership_skill")) if leader != null and leader.has_method("get_leadership_skill") else 0.5
+	var trait_ids: PackedStringArray = PackedStringArray(leader.call("get_trait_ids")) if leader != null and leader.has_method("get_trait_ids") else PackedStringArray()
+	var stability_sum: float = 0.0
+	for member in members:
+		stability_sum += _suppression_contact_stability(member)
+	var stability: float = clampf(stability_sum / float(members.size()), 0.0, 1.0)
+	var decay_factor: float = 2.0 if trait_ids.has("calm") else 1.0
+	var threshold_factor: float = 1.4 if trait_ids.has("reckless") else 1.0
+	var ignored: bool = false
+	if key.begins_with("own:"):
+		var fireteam_id: String = key.substr(4)
+		var flank_state: Dictionary = get_fireteam_flank_vulnerability_state(fireteam_id)
+		if bool(flank_state.get("is_active", false)) or bool(flank_state.get("is_morale_active", false)):
+			threshold_factor *= float(flank_state.get("effective_suppression_threshold_multiplier", flank_state.get("suppression_threshold_multiplier", 1.0)))
+		var tactical_controller = _get_tactical_controller()
+		if tactical_controller != null and tactical_controller.has_method("is_suppression_ignored_for_fireteam"):
+			ignored = bool(tactical_controller.call("is_suppression_ignored_for_fireteam", fireteam_id))
+	_suppression_ignored_by_key[key] = ignored
+	_suppression_tracker.step(key, clampf(leadership, 0.0, 1.0), stability, decay_factor, threshold_factor)
+
+
+## Fuehrer der Gruppe: der amtierende Fireteam-Fuehrer, sonst die Einheit mit der hoechsten Fuehrung (bei Gleichstand die kleinere ID).
+func _suppression_leader(members: Array):
+	var acting = null
+	var first = members[0] if not members.is_empty() else null
+	if first != null and _get_unit_team_id_for_diagnostics(first) == friendly_team_id:
+		acting = get_current_fireteam_lead_unit(_get_unit_fireteam_id(first))
+		if acting != null and members.has(acting):
+			return acting
+	var best = null
+	var best_value: float = -1.0
+	var best_id: String = ""
+	for member in members:
+		var value: float = float(member.call("get_leadership_skill")) if member.has_method("get_leadership_skill") else 0.5
+		var unit_id: String = _get_unit_id_for_diagnostics(member)
+		if best == null or value > best_value or (is_equal_approx(value, best_value) and unit_id < best_id):
+			best = member
+			best_value = value
+			best_id = unit_id
+	return best
+
+
+func _suppression_contact_stability(unit) -> float:
+	if unit != null and unit.has_method("get_character_profile_bundle"):
+		var axes: Dictionary = Dictionary(Dictionary(unit.call("get_character_profile_bundle")).get("behavior_axes", {}))
+		if axes.has("contact_stability"):
+			return clampf(float(axes["contact_stability"]), 0.0, 1.0)
+	return 0.5
+
+
+## Regel 7 (Nachbesserung 1): Trefferabzug und Deckungsboden je Stufe werden NICHT in den Laufzeitstatus der Einheit
+## geschrieben, sondern beim Lesen aus der aktuellen Stufe ihrer Gruppe aufgeschlagen (SimulationRoot._apply_damage_effect
+## fragt hier an). Neue Befehle koennen den Abzug so weder loeschen noch Altwerte zurueckbringen. Feuerstatus und Tempo
+## der Einheit bleiben unberuehrt.
+func get_suppression_combat_modifiers(unit) -> Dictionary:
+	var level: int = get_suppression_level_for_unit(unit)
+	if level <= 0:
+		return {}
+	return {
+		"hit_bonus": SUPPRESSION_MATH_SCRIPT.hit_bonus(_suppression_rules, level),
+		"cover_floor": float(SUPPRESSION_MATH_SCRIPT.cover_floor(_suppression_rules, level)),
+	}
+
+
+## Regel 5: die laufende Nummer der faelligen Schussgelegenheit der Einheit (zaehlt den ganzen Einsatz hoch, wird bei
+## Stufenwechsel nicht zurueckgesetzt). Gesperrte Gelegenheiten sind verbraucht. Je Schritt einmal gezaehlt.
+func _suppression_fire_slot_open(unit_id: String, unit) -> bool:
+	var memo: Dictionary = Dictionary(_suppression_slot_memo.get(unit_id, {}))
+	if not memo.is_empty() and int(memo["step"]) == _attack_step:
+		return bool(memo["allowed"])
+	var slot: int = int(_suppression_slot_count_by_unit_id.get(unit_id, 0)) + 1
+	_suppression_slot_count_by_unit_id[unit_id] = slot
+	var allowed: bool = SUPPRESSION_MATH_SCRIPT.fire_slot_allowed(_suppression_rules, get_suppression_level_for_unit(unit), slot)
+	_suppression_slot_memo[unit_id] = {"step": _attack_step, "allowed": allowed}
+	return allowed
+
+
+## Ueberwachungsschuesse unterliegen derselben Regel; gezaehlt wird je bereitem Mitglied und Schritt, solange eine Stufe gilt.
+func _suppression_overwatch_slot_open(unit, ready_snapshot: Dictionary) -> bool:
+	var level: int = get_suppression_level_for_unit(unit)
+	if level <= 0:
+		return true
+	var unit_id: String = _get_unit_id_for_diagnostics(unit)
+	if not bool(Dictionary(ready_snapshot.get(unit_id, {})).get("ready", true)):
+		return true
+	var slot: int = int(_suppression_overwatch_slot_by_unit_id.get(unit_id, 0)) + 1
+	_suppression_overwatch_slot_by_unit_id[unit_id] = slot
+	return SUPPRESSION_MATH_SCRIPT.fire_slot_allowed(_suppression_rules, level, slot)
+
+
+## Regel 8: Tempofaktor 0..1 fuer einen laufenden Befehl. "Zum Feind" = das Ziel des Befehls liegt naeher am naechsten
+## Gegner der Einheit als ihre jetzige Position; ohne Gegner oder ohne Ziel gilt "nicht zum Feind".
+func get_suppression_move_factor(unit, cmd: Dictionary) -> float:
+	if _suppression_tracker == null or not _suppression_tracker.any_active():
+		return 1.0
+	var level: int = get_suppression_level_for_unit(unit)
+	if level <= 0:
+		return 1.0
+	return SUPPRESSION_MATH_SCRIPT.move_factor(_suppression_rules, level, _suppression_move_is_toward_enemy(unit, cmd))
+
+
+## Bewegungen, deren Zweck Deckung oder Rueckzug ist, gelten nie als Vorruecken (beide Seiten): Befehlsart oder Quelle
+## retreat / seek_cover / fall_back / disengage, das Ausweichen der Gegner in Deckung (enemy_limbo_cover) und der
+## Deckungslauf bei Feindkontakt (contact_cover_decision = take_cover).
+func _suppression_move_is_cover_or_retreat(cmd: Dictionary) -> bool:
+	var command_type: String = String(cmd.get("command_type", "")).strip_edges().to_lower()
+	var source_type: String = String(cmd.get("source_command_type", "")).strip_edges().to_lower()
+	if command_type in SUPPRESSION_SAFE_MOVE_TYPES or source_type in SUPPRESSION_SAFE_MOVE_TYPES:
+		return true
+	return String(cmd.get("contact_cover_decision", "")).strip_edges().to_lower() == "take_cover"
+
+
+## Regel 8: "zum Feind hin" = das Ziel des Befehls liegt um MEHR als ein Feld (Hexfeld) naeher am naechsten lebenden Gegner
+## als die jetzige Position. Ohne Hexraster gilt eine Weltstrecke von einer Kachelbreite als Feld.
+func _suppression_move_is_toward_enemy(unit, cmd: Dictionary) -> bool:
+	if not cmd.has("target_position") or not (unit is Node2D):
+		return false
+	if _suppression_move_is_cover_or_retreat(cmd):
+		return false
+	var target_position: Vector2 = _coerce_vector2(cmd.get("target_position"), Vector2.INF)
+	if not target_position.is_finite():
+		return false
+	var own_position: Vector2 = _get_unit_world_position(unit)
+	var opponents: Array = _get_enemy_combat_units() if _get_unit_team_id_for_diagnostics(unit) == friendly_team_id else _get_friendly_combat_units()
+	var nearest_position: Vector2 = Vector2.INF
+	var nearest_distance: float = INF
+	for opponent in opponents:
+		var opponent_position: Vector2 = _get_unit_world_position(opponent)
+		var distance: float = own_position.distance_to(opponent_position)
+		if distance < nearest_distance:
+			nearest_distance = distance
+			nearest_position = opponent_position
+	if not nearest_position.is_finite():
+		return false
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry != null and terrain_registry.has_method("world_to_grid"):
+		var enemy_grid: Vector2i = terrain_registry.call("world_to_grid", nearest_position)
+		var now_cells: int = HEX_GRID_SCRIPT.distance(terrain_registry.call("world_to_grid", own_position), enemy_grid)
+		var then_cells: int = HEX_GRID_SCRIPT.distance(terrain_registry.call("world_to_grid", target_position), enemy_grid)
+		return then_cells < now_cells - 1
+	return target_position.distance_to(nearest_position) < nearest_distance - SUPPRESSION_ADVANCE_MARGIN_WORLD
