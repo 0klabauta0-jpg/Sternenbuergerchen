@@ -4678,6 +4678,13 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 		_last_mission_result["craft_loss"] = _book_craft_loss_rescue(_last_mission_result, casualty_rules)
 	if not other_craft_losses.is_empty() and not failed_extraction:
 		_last_mission_result["other_craft_losses"] = other_craft_losses.duplicate(true)
+	if not failed_extraction and _singleplayer_runtime != null and (craft_lost or not other_craft_losses.is_empty()):
+		# LC2i I5: Auftragsfracht in einem verlorenen Schiff (die C-Benit-Kiste): sie steht am Ladeort wieder bereit; die Nachbesprechung sagt es.
+		var lost_cargo: Array = []
+		var lost_ids: Array = [String(_active_singleplayer_identity.get("craft_id", ""))] if craft_lost else []
+		for other_loss in other_craft_losses: lost_ids.append(String(Dictionary(other_loss).get("craft_id", "")))
+		for lost_id in lost_ids: lost_cargo.append_array(Array(_singleplayer_runtime.call("lost_craft_cargo_names", lost_id)))
+		if not lost_cargo.is_empty(): _last_mission_result["cargo_lost"] = lost_cargo
 	if failed_extraction and bool(_last_mission_result.get("casualty_total_loss", false)):
 		# Task 5b: Notrettung. Der Malus wird jetzt mit dem Basisstand gesichert und beim Wiederherstellen angewendet.
 		var total_loss_penalty: Dictionary = _stage_total_loss_penalty(_last_mission_result)

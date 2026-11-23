@@ -16,6 +16,7 @@ func _run() -> void:
 	await _h4_save_sentence()
 	await _h5_story_steps()
 	await _h6_cargo()
+	await _h7_cargo_flow()
 	print("CAMPAIGN_CRAFT_LOSS_FEEDBACK passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
 
@@ -125,6 +126,17 @@ func _h5_story_steps() -> void:
 	_check(bool(crate.get("ok", false)) and bool(Dictionary(Dictionary(_runtime.get("_campaign").call("get_campaign_snapshot")).get("progress", {})).get("crate_loaded", false)), "H5: nach dem Verlust laesst sich die Kiste mit dem zweiten Schiff laden (%s)" % str(crate))
 	var home_services: Dictionary = Dictionary(Dictionary(_flow.call("get_singleplayer_snapshot")).get("home_services", {}))
 	_check(Array(home_services.get("lost_craft_ids", [])).has(_craft_id), "H5: die Anzeige weiss vom Verlust des Auftragsschiffs (%s)" % str(home_services.get("lost_craft_ids")))
+	# LC2i I5: Pilot anwerben ist an das Schiff der bestaetigten Rettung gebunden; ist das verloren, gilt jedes Schiff der Flotte (sonst Sackgasse).
+	var fake := GDScript.new()
+	fake.source_code = "extends RefCounted\nvar craft := \"\"\nfunc get_snapshot() -> Dictionary:\n\treturn {\"craft_id\": craft, \"phase\": \"victory\"}\n"
+	fake.reload()
+	var encounter: RefCounted = fake.new()
+	encounter.set("craft", _craft_id)
+	var real_encounter: Variant = _runtime.get("_space_encounter")
+	_runtime.set("_space_encounter", encounter)
+	_check(bool(_runtime.call("_has_verified_pilot_rescue", second)), "H5/I5: nach dem Verlust des Rettungsschiffs zaehlt die Rettung fuer das zweite Schiff")
+	_check(not bool(_runtime.call("_has_verified_pilot_rescue", "unbekannt")) and not bool(_runtime.call("_has_verified_pilot_rescue", "")), "H5/I5: ein Schiff ausserhalb der Flotte bleibt abgelehnt")
+	_runtime.set("_space_encounter", real_encounter)
 	await _close()
 
 ## H6: Der Frachtraum eines verlorenen Schiffs ist verloren (das Wrack wird spaeter geborgen - eigener Auftrag). Auftragsfracht (die C-Benit-Kiste)
@@ -150,8 +162,37 @@ func _h6_cargo() -> void:
 	for id in inventory:
 		if int(Dictionary(Dictionary(inventory[id]).get("items", {})).get("c_benit_crate", 0)) > 0: crate_anywhere = true
 	_check(not inventory.has(key) and not crate_anywhere, "H6: der Frachtraum des verlorenen Schiffs ist weg, samt Inhalt (Lager da: %s, Kiste irgendwo: %s)" % [str(inventory.has(key)), str(crate_anywhere)])
-	print("H6_BEFUND crate_loaded=", Dictionary(Dictionary(_runtime.get("_campaign").call("get_campaign_snapshot")).get("progress", {})).get("crate_loaded"), " (bleibt wahr, obwohl die Kiste mit dem Schiff verloren ist)")
+	# LC2i I5: Die Kiste ist mit dem Schiff verloren; der Lade-Merker geht zurueck, die Kiste steht am Ladeort wieder bereit.
+	_check(not bool(Dictionary(Dictionary(_runtime.get("_campaign").call("get_campaign_snapshot")).get("progress", {})).get("crate_loaded", true)), "H6/I5: der Lade-Merker ist zurueckgesetzt (crate_loaded false)")
 	await _close()
+
+## H7 (LC2i I5, echter Fluss): Kiste im Schiffslager des Einsatzschiffs, das Schiff wird abgeschossen (das zweite bleibt) -> Nachbesprechung sagt es,
+## der Merker ist zurueck, "Kiste laden" geht mit dem zweiten Schiff, die Kiste liegt dann in dessen Lager (Voraussetzung der Lieferung).
+func _h7_cargo_flow() -> void:
+	var s: Dictionary = await _begin_funded_sortie(500)
+	if s.is_empty(): return
+	var second := _inject_bought_ship()
+	var jobs: Dictionary = _runtime.get("_campaign").get("_jobs")
+	jobs["outpost_recovery"]["status"] = "completed"
+	jobs["outpost_recovery"]["craft_id"] = _craft_id
+	_runtime.get("_campaign").get("_progress")["crate_loaded"] = true
+	Dictionary(Dictionary(_runtime.get("_supply").get("_inventory"))["craft:" + _craft_id].items)["c_benit_crate"] = 1
+	_site(s, _craft_id)
+	s.driver.call("_resolve_combat", "aborted", "", "evacuation")
+	if not await _wait_released("H7: Einsatz wird freigegeben"): return
+	var result: Dictionary = Dictionary(_flow.get("_last_mission_result"))
+	_check(Array(result.get("cargo_lost", [])) == ["C-Benit-Kiste"], "H7: das Ergebnis meldet die verlorene Auftragsfracht (%s)" % str(result.get("cargo_lost")))
+	var line := "Auftragsfracht verloren: C-Benit-Kiste. Sie steht am Ladeort wieder bereit."
+	var screen: Node = _flow.call("_get_debrief_screen")
+	var shown: String = String(screen.get("_native_review_confirmation").text) if screen != null and screen.get("_native_review_confirmation") != null else ""
+	_check(DEBRIEF_SCRIPT.build_craft_loss_text(result).contains(line) and shown.contains(line), "H7: die Nachbesprechung nennt die Fracht (%s)" % shown.replace("\n", " | "))
+	_check(not bool(Dictionary(Dictionary(_runtime.get("_campaign").call("get_campaign_snapshot")).get("progress", {})).get("crate_loaded", true)), "H7: Lade-Merker zurueck")
+	_check(_fleet_ids() == [second], "H7: Aufbau: nur das zweite Schiff ist in der Flotte (%s)" % str(_fleet_ids()))
+	var crate: Dictionary = _runtime.call("request_operation", "campaign_load_crate", {"craft_id": second})
+	_check(bool(crate.get("ok", false)), "H7: die Kiste laesst sich mit dem zweiten Schiff wieder laden (%s)" % str(crate))
+	var container: Dictionary = Dictionary(Dictionary(_runtime.get("_supply").get_supply_snapshot().inventory).get("craft:" + second, {}))
+	_check(int(Dictionary(container.get("items", {})).get("c_benit_crate", 0)) == 1, "H7: die Kiste liegt im Lager des zweiten Schiffs (Voraussetzung der Lieferung)")
+	await _end_sortie()
 
 ## H4: Im Einsatz nach dem Abschuss lehnt das Speichern ab (LC2b); der Satz nennt das Schiff beim Namen (Speichern von Hand und Menue-Projektion).
 func _h4_save_sentence() -> void:

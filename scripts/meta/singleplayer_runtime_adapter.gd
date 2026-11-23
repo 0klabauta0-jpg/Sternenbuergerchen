@@ -676,6 +676,8 @@ func sync_crafts() -> void:
 ## equipment_kept: das Schiff hat Umbauten (Belege), die Ausruestungsverwaltung behaelt seinen Eintrag, damit der Komponentenverlauf stimmt.
 func retire_lost_craft(craft_id: String) -> Dictionary:
 	if _supply == null or craft_id.is_empty(): return {"ok": false, "reason": "supply_unavailable"}
+	# LC2i I5: Lag die Auftragsfracht (C-Benit-Kiste) im Schiffslager, steht sie nach dem Verlust wieder am Ladeort bereit: der Lade-Merker geht zurueck.
+	var cargo_lost: Array = lost_craft_cargo_names(craft_id)
 	_travel.unregister_craft(craft_id)
 	_pad_by_craft.erase(craft_id)
 	_departure_token_by_craft.erase(craft_id)
@@ -683,8 +685,20 @@ func retire_lost_craft(craft_id: String) -> Dictionary:
 	if _ship_equipment != null:
 		equipment_kept = not bool(_ship_equipment.unregister_unmodified_craft(craft_id).get("ok", false))
 	_supply.retire_lost_craft(craft_id, equipment_kept)
+	if _campaign_mode and not cargo_lost.is_empty():
+		_commit("singleplayer_campaign", "unload_crate", {}, "unload:" + craft_id, {"runtime_authorized": true})
 	sync_crafts()
-	return {"ok": true, "equipment_kept": equipment_kept}
+	return {"ok": true, "equipment_kept": equipment_kept, "cargo_lost": cargo_lost}
+
+## LC2i I5: Namen der Auftragsfracht, die im Schiffslager von craft_id liegt (heute nur die C-Benit-Kiste, solange sie geladen und nicht geliefert ist).
+func lost_craft_cargo_names(craft_id: String) -> Array:
+	var names: Array = []
+	if _supply == null or not _campaign_mode or craft_id.is_empty(): return names
+	var progress: Dictionary = Dictionary(Dictionary(_campaign.call("get_campaign_snapshot")).get("progress", {})) if _campaign != null else {}
+	var container: Dictionary = Dictionary(Dictionary(_supply.get_supply_snapshot().inventory).get("craft:" + craft_id, {}))
+	if bool(progress.get("crate_loaded", false)) and not bool(progress.get("crate_delivered", false)) and int(Dictionary(container.get("items", {})).get("c_benit_crate", 0)) >= 1:
+		names.append("C-Benit-Kiste")
+	return names
 
 func _home_pad_for(craft_id: String) -> String:
 	return String(_pad_by_craft.get(craft_id, ""))
@@ -3007,7 +3021,8 @@ func _has_verified_pilot_rescue(craft_id: String) -> bool:
 	# The authoritative read-only state retains the exact victorious craft.
 	if _space_encounter == null: return false
 	var encounter: Dictionary = _space_encounter.get_snapshot()
-	return not craft_id.is_empty() and String(encounter.get("craft_id", "")) == craft_id and String(encounter.get("phase", "")) == "victory"
+	# LC2i I5: Ging das Schiff der Rettung inzwischen verloren, gilt die Rettung fuer jedes Schiff der Flotte (wie Kiste laden), sonst stuende die Kampagne.
+	return String(encounter.get("phase", "")) == "victory" and _job_craft_accepts(String(encounter.get("craft_id", "")), craft_id)
 
 
 func show_polisa_cargo_delivery(craft_id: String, request_id: String) -> bool:

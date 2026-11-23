@@ -100,7 +100,7 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		"retry_failed_job": result = _retry_failed(payload)
 		"reopen_retreated_job": result = _reopen_retreated(payload)
 		"upload_job": result = _upload(payload, authority_context)
-		"claim_recruit", "load_crate", "deliver_crate", "build_pad": result = _progress_action(String(command.operation),payload,authority_context)
+		"claim_recruit", "load_crate", "unload_crate", "deliver_crate", "build_pad": result = _progress_action(String(command.operation),payload,authority_context)
 		_: result = _reject("unknown_operation", "Aktion unbekannt")
 	if bool(result.get("ok", false)):
 		result["request_id"] = request_id
@@ -278,6 +278,13 @@ func _progress_action(operation: String, payload: Dictionary, context: Dictionar
 			if String(Dictionary(_jobs.get("outpost_recovery",{})).get("status","")) != "completed":
 				return _reject("crate_not_ready","Zuerst den Außenposten sichern")
 			key = "crate_loaded"
+		"unload_crate":
+			# LC2i I5: Ging das Schiff mit der Auftragsfracht verloren, steht die Kiste wieder am Ladeort bereit (Merker zurueck; kein neuer Schluessel).
+			if not _progress.crate_loaded or bool(_progress.crate_delivered):
+				return {"ok":true,"changed":false}
+			_progress.crate_loaded = false
+			_revision += 1
+			return {"ok":true,"changed":true,"progress_key":"crate_loaded"}
 		"deliver_crate":
 			if not _progress.crate_loaded or String(Dictionary(_jobs.get("benit_delivery",{})).get("status","")) != "active":
 				return _reject("crate_not_loaded","Lieferauftrag aktivieren und C-Benit-Kiste mitbringen")

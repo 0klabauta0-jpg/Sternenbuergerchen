@@ -908,6 +908,10 @@ static func build_craft_loss_text(mission_result: Dictionary) -> String:
 		lines.append("Schiff verloren: %s" % ship_name)
 		var fee: int = int(loss.get("rescue_fee", 0))
 		if fee > 0: lines.append("Notrettung: −%d Credits" % fee)
+	# LC2i I5: Auftragsfracht im verlorenen Schiff steht am Ladeort wieder bereit.
+	if typeof(mission_result.get("cargo_lost")) == TYPE_ARRAY:
+		for cargo in Array(mission_result.get("cargo_lost")):
+			lines.append("Auftragsfracht verloren: %s. Sie steht am Ladeort wieder bereit." % String(cargo))
 	return "\n".join(lines)
 
 
