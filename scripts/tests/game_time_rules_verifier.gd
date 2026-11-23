@@ -310,7 +310,13 @@ func _run_hex_probe(ticks_per_frame: int, fractions: Array) -> Dictionary:
 			frame += 1
 	var exact: Vector2 = Dictionary(sim.call("get_hex_motion_projection", "a", 0.0)).get("position_world", Vector2.INF)
 	var halfway: Vector2 = Dictionary(sim.call("get_hex_motion_projection", "a", 0.5)).get("position_world", Vector2.INF)
-	var result: Dictionary = {"signal": _probe_signal_reads.duplicate(), "commands": actor.command_reads.duplicate(), "exact": exact, "halfway": halfway, "displayed": actor.global_position}
+	var displayed: Vector2 = actor.global_position
+	# Kosten der Projektion (nur Ausgabe, keine Pruefung): Mikrosekunden je Aufruf mit einer laufenden Einheit.
+	var cost_started: int = Time.get_ticks_usec()
+	for i in 2000:
+		sim.call("_project_hex_ground_actors", 0.0)
+	var project_usec: float = float(Time.get_ticks_usec() - cost_started) / 2000.0
+	var result: Dictionary = {"project_usec": project_usec, "signal": _probe_signal_reads.duplicate(), "commands": actor.command_reads.duplicate(), "exact": exact, "halfway": halfway, "displayed": displayed}
 	actor.free()
 	registry.free()
 	terrain.free()
@@ -323,6 +329,7 @@ func _test_t5_rules_read_tick_exact_positions() -> void:
 	var a: Dictionary = await _run_hex_probe(1, [0.0])
 	var b: Dictionary = await _run_hex_probe(1, [0.37, 0.81, 0.5])
 	var c: Dictionary = await _run_hex_probe(4, [0.5, 0.13, 0.9])
+	print("T5_KOSTEN Projektion je Aufruf, 1 laufende Einheit: A %.1f us, B %.1f us, C %.1f us" % [float(a.project_usec), float(b.project_usec), float(c.project_usec)])
 	_check(Array(a.commands).size() == 3 and Array(b.commands).size() == 3 and Array(c.commands).size() == 3, "T5 Aufbau: je Lauf drei Befehle angenommen (A %d, B %d, C %d)" % [Array(a.commands).size(), Array(b.commands).size(), Array(c.commands).size()])
 	_check(Array(a.signal).size() == 60 and Array(b.signal).size() == 60 and Array(c.signal).size() == 60, "T5 Aufbau: je Lauf 60 Tick-Rueckrufe")
 	_check(Vector2(a.exact).distance_to(Vector2(a.signal.back())) < 0.001, "T5 Aufbau: im Tick-Rueckruf steht die Einheit auf ihrem Tickstand")
