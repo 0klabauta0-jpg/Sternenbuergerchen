@@ -114,7 +114,7 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 	if String(leader.get("roster_role_category", "")) != "operator" or String(pilot.get("roster_role_category", "")) != "pilot" or not _positive_number(leader.get("skill_leadership", Dictionary(leader.get("skill_values", {})).get("leadership", 0))) or not _positive_number(pilot.get("dropship_piloting")):
 		return {"ok":false,"reason":"invalid_campaign_roles"}
 	var craft: Dictionary = payload.craft
-	if typeof(craft.get("definition")) != TYPE_DICTIONARY or String(craft.definition.get("craft_id", "")).is_empty() or typeof(craft.get("pilot_id")) != TYPE_STRING or not String(craft.pilot_id) in ([""] + ids) or craft.definition.get("craft_type") != "dropship":
+	if typeof(craft.get("definition")) != TYPE_DICTIONARY or String(craft.definition.get("craft_id", "")).is_empty() or typeof(craft.get("pilot_id")) != TYPE_STRING or not String(craft.pilot_id) in ([""] + ids) or (craft.definition.get("craft_type") != "dropship" and not _lost_dropship_recorded(payload)):
 		return {"ok":false,"reason":"invalid_campaign_craft"}
 	for field in ["staged_unit_ids", "staged_fireteam_ids", "fireteam_definitions"]:
 		if craft.has(field) and typeof(craft[field]) != TYPE_ARRAY:
@@ -297,6 +297,14 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 	var original_fleet_count := fleet_ids.size() + lost_ids.size() - Dictionary(station.ships).size()
 	if original_fleet_count not in [1,2] or bool(progress.get("recruited_pilot",false)) != (original_fleet_count == 2) or (original_fleet_count == 2 and not fleet_ids.has("campaign_buccaneer_01") and not lost_ids.has("campaign_buccaneer_01")): return {"ok":false,"reason":"checkpoint_fleet_progress_mismatch"}
 	return {"ok":true}
+## LC2f K1: Ein Stand, dessen Flotte nur noch aus Jaegern besteht, ist gueltig, wenn ein Verlustbeleg das fehlende Landungsschiff belegt
+## (Definition mit craft_type "dropship"). Ohne Schluessel "lost_craft" oder ohne solchen Beleg gilt die alte Pruefung unveraendert.
+static func _lost_dropship_recorded(payload: Dictionary) -> bool:
+	if typeof(payload.get("lost_craft")) != TYPE_ARRAY: return false
+	for lost: Variant in payload.lost_craft:
+		if typeof(lost) == TYPE_DICTIONARY and typeof(lost.get("definition")) == TYPE_DICTIONARY and lost.definition.get("craft_type") == "dropship" and String(lost.definition.get("craft_id", "")) == String(lost.get("craft_id", "x")):
+			return true
+	return false
 ## Gefallenenliste: Array aus Dictionaries mit nicht leerem String unit_id; die drei anderen Schluessel sind optional, aber Strings.
 static func _valid_fallen(value: Variant) -> bool:
 	if typeof(value) != TYPE_ARRAY: return false
