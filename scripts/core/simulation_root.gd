@@ -6235,7 +6235,13 @@ func _should_recompute_move_path(
 		return false
 
 	var now_msec: int = get_game_msec()
-	if int(_contact_path_recompute_ready_at_msec.get(unit_id, 0)) > now_msec:
+	var ready_at_msec: int = int(_contact_path_recompute_ready_at_msec.get(unit_id, 0))
+	# G5d: Eine Sperre kann nie weiter in der Zukunft liegen als ihr Intervall. Ist der Stempel weiter weg (Tickzaehler zurueck
+	# oder Stempel aus der anderen Uhr), beginnt die Sperre neu (wie beim weichen Wegpunkt-Abschluss im Controller).
+	if ready_at_msec > now_msec + CONTACT_PATH_RECOMPUTE_INTERVAL_MSEC:
+		_contact_path_recompute_ready_at_msec[unit_id] = now_msec + CONTACT_PATH_RECOMPUTE_INTERVAL_MSEC
+		return false
+	if ready_at_msec > now_msec:
 		return false
 
 	_contact_path_recompute_ready_at_msec[unit_id] = now_msec + CONTACT_PATH_RECOMPUTE_INTERVAL_MSEC
