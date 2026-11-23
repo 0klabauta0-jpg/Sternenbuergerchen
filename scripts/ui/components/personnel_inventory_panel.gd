@@ -352,8 +352,8 @@ func _carried_storage_title(data: Dictionary) -> String:
 	if not data.has("armor_chip_capacity"):
 		return backpack
 	var suit_capacity := int(data.armor_chip_capacity)
-	var suit_used := mini(suit_capacity, ITEMS.count_chips(data.items))
-	return "Rüstungsfach · %d/%d\n%s" % [suit_used, suit_capacity, backpack if capacity > 0 else "Kein Rucksack"]
+	var suit_used := ITEMS.compartment_used(data)
+	return "Rüstungsfach (%d/%d)\n%s" % [suit_used, suit_capacity, backpack if capacity > 0 else "Kein Rucksack"]
 
 func _refresh_bag_preview()->void:
 	_bag_heading.text = _carried_storage_title(_personal_storage)

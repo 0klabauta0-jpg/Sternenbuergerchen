@@ -31,6 +31,9 @@ func request_personnel_loadout_command(operation: String, payload: Dictionary) -
 			_personnel_loadout_owner.call("set_loadout", String(payload.get("unit_id", "")), Dictionary(payload.get("loadout", {})))
 		"set_slot":
 			_personnel_loadout_owner.call("set_slot", String(payload.get("unit_id", "")), String(payload.get("key", "")), String(payload.get("value", "")))
+	# Der Loadout-Besitzer kennt jetzt die (geladenen) Personen mit ihrer Ruestung: Fachgroesse abgleichen, Ueberschuss ins Lager (M2).
+	if operation in ["restore", "import_fireteam_loadouts", "reconcile_context", "set_loadout", "set_slot"] and _singleplayer_supply_owner != null and _singleplayer_supply_owner.has_method("sync_compartments_after_load"):
+		_singleplayer_supply_owner.call("sync_compartments_after_load")
 
 var _base_personnel_owner: Node
 var _skirmish_economy_owner: RefCounted
@@ -254,6 +257,13 @@ func configure_singleplayer_owners(campaign: RefCounted, supply: RefCounted, onb
 	_singleplayer_supply_owner = supply
 	_campaign_onboarding_owner = onboarding
 	_singleplayer_space_travel_owner = travel
+	# Die Fachgroesse im persoenlichen Behaelter folgt der getragenen Ruestung (M2); die Ausruestung gehoert dem Loadout-Besitzer.
+	if supply != null and supply.has_method("set_armor_provider"): supply.call("set_armor_provider", Callable(self, "_armor_of_person_for_supply"))
+
+## "" = Person oder Ausruestungsbesitzer unbekannt (dann bleibt die gespeicherte Fachgroesse).
+func _armor_of_person_for_supply(unit_id: String) -> String:
+	if _personnel_loadout_owner == null or not bool(_personnel_loadout_owner.call("has_unit", unit_id)): return ""
+	return String(Dictionary(_personnel_loadout_owner.call("get_loadout", unit_id)).get("armor", ""))
 
 func configure_departure_adapter(adapter: Node) -> Dictionary:
 	if not is_instance_valid(adapter) or not adapter.has_method("preview_departure") or not adapter.has_method("_built_home_pad_ids"): return {"ok":false, "reason":"invalid_adapter"}
