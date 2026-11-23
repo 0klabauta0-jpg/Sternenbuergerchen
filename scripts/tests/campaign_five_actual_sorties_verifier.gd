@@ -298,7 +298,23 @@ func _ammo_probe(mission: Node, phase: String) -> void:
 		# M4e: nur echte Zahlen zaehlen (reserve -1 = unbegrenzte Reserve); verbraucht = Magazin nicht voll oder weniger Magazine im Fach.
 		if int(before.reserve) >= 0 and reserve >= 0 and (reserve < int(before.reserve) or loaded < int(status.get("magazine_size", 0))): _ammo_consumed = true
 		print("FIVE_AMMO sortie=%d person=%s vorher=%d nachher=%d geladen=%d" % [_ammo_sortie, id, int(before.reserve), reserve, loaded])
+	if phase == "heimkehr": _ammo_enemy_line(driver, simulation)
 	if phase == "heimkehr" and _ammo_sortie == 1: _ammo_drain_test(driver, ids)
+
+## M6a: Gegner mit Munitionsbedarf je Einsatz: wie viele, wie viele davon leer (Einsatz-Vorrat aufgebraucht), Summe ihrer Schuesse. Nur Ausgabe, nicht in der Pruefsumme.
+func _ammo_enemy_line(driver: Node, simulation: Node) -> void:
+	var count := 0
+	var empty := 0
+	var shots := 0
+	for unit in simulation.get_unit_registry().get_all_units():
+		if not is_instance_valid(unit) or String(driver.call("_get_unit_team_id_for_diagnostics", unit)) == String(driver.get("friendly_team_id")): continue
+		var unit_id := String(unit.get_unit_id())
+		var status: Dictionary = driver.call("get_unit_ammo_status", unit_id)
+		if String(status.get("state", "none")) == "none": continue
+		count += 1
+		if String(status.get("state", "")) == "empty": empty += 1
+		shots += int(driver.call("_ammo_tracker").shots_fired(unit_id, String(driver.call("_ammo_weapon_id", unit))))
+	print("FIVE_AMMO_ENEMY sortie=%d einheiten=%d leer=%d schuss=%d" % [_ammo_sortie, count, empty, shots])
 
 ## M4e: Schuesse direkt ueber den Treiber (keine Zufallstreffer): die Person verschiesst Magazin und alle Fach-Magazine; jedes
 ## Nachladen zieht ein Magazin aus der Kampagnen-Versorgung, danach "Keine Munition" und kein weiterer Schuss. Die Heimkehr fuellt wieder auf.
