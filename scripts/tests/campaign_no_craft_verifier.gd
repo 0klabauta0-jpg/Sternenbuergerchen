@@ -65,13 +65,17 @@ func _n1_last_craft_lost() -> void:
 	var screen: Node = _flow.call("_get_debrief_screen")
 	var shown: String = String(screen.get("_native_review_confirmation").text) if screen != null and screen.get("_native_review_confirmation") != null else ""
 	_check(shown.contains("Das letzte Schiff ist verloren. Der Einsatz gilt als Totalverlust."), "N1: die Nachbesprechung nennt den Grund (%s)" % shown.replace("\n", " | "))
-	# LC2k K3: kein Rueckfalltext "Heimkehr nicht moeglich ... boardingfaehig" und keine Zeile "Notrettung · X Credits Rettungsgebuehr" (es gibt keine Notrettung).
-	_check(not shown.contains("Heimkehr nicht") and not shown.contains("boardingfaehig") and not shown.contains("Notrettung") and not shown.contains("Rettungsgebühr"), "N1: kein Rueckfalltext und keine Notrettungszeile in der Nachbesprechung (%s)" % shown.replace("\n", " | "))
+	# LC2l L1: kein Rueckfalltext "Heimkehr nicht moeglich ... boardingfaehig", aber die Zeile der Totalverlust-Strafe steht da, mit dem Betrag,
+	# der beim Ruecksprung wirklich gebucht wird (500 -> 100 = 400): der Spieler verliert die Credits nie ohne Hinweis.
+	var credits_before_continue: int = _credits()
+	_check(not shown.contains("Heimkehr nicht") and not shown.contains("boardingfaehig") and not shown.contains("laedt"), "N1: kein Rueckfalltext in der Nachbesprechung, \"lädt\" mit Umlaut (%s)" % shown.replace("\n", " | "))
+	_check(shown.contains("lädt") and shown.count("Notrettung · 400 Credits Rettungsgebühr") == 1, "N1: die Nachbesprechung zeigt die Strafe \"Notrettung · 400 Credits Rettungsgebühr\" einmal (%s)" % shown.replace("\n", " | "))
 	_flow.call("_check_bankruptcy")
 	await process_frame
 	_check(_pleite_screen() == null and not bool(_flow.call("is_campaign_bankrupt")), "N1: kein Pleite-Bildschirm")
 	if not await _press_continue(): return
 	_check(_fleet_ids() == [_craft_id] and _credits() == 100, "N1: nach dem Ruecksprung: Schiff da, Strafe wie beim Totalverlust, 500 -> 100 (%s / %d)" % [str(_fleet_ids()), _credits()])
+	_check(credits_before_continue - _credits() == 400, "N1: der gezeigte Betrag ist die gebuchte Differenz (%d -> %d)" % [credits_before_continue, _credits()])
 	_flow.call("_check_bankruptcy")
 	await process_frame
 	_check(_pleite_screen() == null, "N1: auch danach kein Pleite-Bildschirm")
