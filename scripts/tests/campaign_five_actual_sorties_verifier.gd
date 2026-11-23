@@ -433,6 +433,9 @@ func _run() -> void:
 		var base_before := int(base_items.get(_drain_class, 0))
 		# Die Besatzung sitzt nach der Landung an Bord: der Zug geht ueber den echten Bildschirmweg des Inventar-Fensters (request_operation), ohne Aussteigen.
 		var transfer := {"unit_id": _drain_person, "craft_id": _craft_id, "item_id": _drain_class, "amount": 1, "source_container_id": "base:homebase", "destination_container_id": "unit:%s:backpack" % _drain_person, "request_id": "m6b-handfill"}
+		# Vorbedingung des K1-Wegs: die Person ist wirklich AN BORD und das Schiff steht an der Heimatbasis gelandet (sonst wuerde der alte Weg gelten).
+		_check(String(_runtime.call("_aboard_status_craft", _drain_person)) == _craft_id, "M6b: vor dem Handauffuellen ist die Person an Bord ihres Schiffs")
+		_check(bool(_runtime.call("_craft_grounded_at_home", _craft_id)), "M6b: vor dem Handauffuellen steht das Schiff an der Heimatbasis gelandet")
 		var hand: Dictionary = _screen.call("request_operation", "inventory_transfer", transfer)
 		var base_after := int(Dictionary(Dictionary(Dictionary(_supply().get("inventory", {})).get("base:homebase", {})).get("items", {})).get(_drain_class, 0))
 		_check(bool(hand.get("ok", false)) and _bag_count(_drain_person, _drain_class) == 1 and base_after == base_before - 1, "M6b: von Hand 1 Magazin %s vom Basislager ins Fach (Fach %d, Lager %d -> %d, %s)" % [_drain_class, _bag_count(_drain_person, _drain_class), base_before, base_after, str(hand.get("reason", "ok"))])

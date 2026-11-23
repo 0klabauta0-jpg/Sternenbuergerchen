@@ -192,6 +192,14 @@ func _home_part() -> void:
 		"Schiff an der Basis, Einsatzuebergabe offen": _home_adapter(_sup("light"), "homebase", "grounded", {"craft_id": "ship"}),
 		"Person an Bord eines anderen Schiffs": _home_adapter(_sup("light"), "homebase", "grounded", {}, "aboard", "other"),
 	}
+	# An Bord von Schiff A (ship), fordert das Schiffslager von Schiff B (other) an: abgelehnt, nichts bewegt.
+	var other := _sup("light")
+	other.configure_inventory(["u1"], ["ship", "other"], true)
+	_give(other, "craft:other", "ammo_light", 2)
+	var a_adapter: Object = _home_adapter(other, "homebase", "grounded")
+	var from_b: Dictionary = Dictionary(a_adapter.call("request_operation", "inventory_transfer", {"unit_id": "u1", "craft_id": "other", "item_id": "ammo_light", "amount": 1, "source_container_id": "craft:other", "destination_container_id": BAG, "request_id": "k1-other-ship"}))
+	check(not bool(from_b.get("ok", true)) and _n(other, BAG, "ammo_light") == 0 and _n(other, "craft:other", "ammo_light") == 2, "K1: an Bord von Schiff A: Schiffslager von Schiff B abgelehnt (%s), nichts bewegt" % str(from_b.get("reason", "")))
+	a_adapter.free()
 	for label in cases:
 		var adapter: Object = cases[label]
 		var sup: RefCounted = adapter.get("_supply")

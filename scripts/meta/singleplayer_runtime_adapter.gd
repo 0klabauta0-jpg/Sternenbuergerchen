@@ -887,7 +887,10 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 	if operation in ["inventory_transfer","inventory_equip"]:
 		var unit_id := String(data.get("unit_id",""))
 		var context := _inventory_context(unit_id,String(data.get("craft_id","")))
-		if context.is_empty(): return _reject("inventory_access","Person muss an der Basis verfuegbar sein")
+		if context.is_empty():
+			# Person an Bord, Schiff nicht gelandet an der Heimatbasis: sagt, was fehlt.
+			if not _aboard_status_craft(unit_id).is_empty(): return _reject("inventory_access","Schiff muss an der Heimatbasis gelandet sein")
+			return _reject("inventory_access","Person muss an der Basis verfuegbar sein")
 		var result := _commit("singleplayer_supply",operation,data,request_id,context)
 		if bool(result.get("ok",false)) and operation=="inventory_equip" and not bool(result.get("replayed",false)):
 			if _base_personnel!=null and not bool(context.get("station_context", false)): _base_personnel.call("claim_manual_control",unit_id)
