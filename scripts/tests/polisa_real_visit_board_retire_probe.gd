@@ -18,6 +18,12 @@ class VisitController extends "res://scripts/tests/mission_tactical_sandbox_cont
 	func _find_mission_dropship_card_entry(id: String) -> Dictionary: return {"craft_id":id,"pilot_unit_id":fixture_pilots.get(id,"pilot")}
 	func _find_raw_mission_dropship_card_entry(id: String) -> Dictionary: return {"craft_id":id,"pilot_unit_id":fixture_pilots.get(id,"pilot")}
 	func _is_parked_campaign_dropship(_id: String) -> bool: return true
+	## Fixture-Eingabe: Das Einsteigen misst in Hex-Besuchen gegen den Zugangspunkt am Schiffsrumpf. Dessen Rumpfgeometrie
+	## (gebundenes ground_body_profile je Schiff) gibt es in dieser Attrappe nicht; der Zugangspunkt liegt hier am Feld (1,0).
+	func get_campaign_ground_ship_access(_id: String) -> Dictionary:
+		var simulation := get_node_or_null("../SimulationRoot")
+		if simulation == null or not simulation.has_method("get_hex_ground_terrain_registry"): return {"ok":false,"reason":"hex_ground_unavailable"}
+		return {"ok":true,"position":simulation.get_hex_ground_terrain_registry().grid_to_world(Vector2i(1,0))}
 	func _store_selected_mission_dropship_plan() -> void: pass
 	func _emit_planning_state_changed() -> void:
 		fixture_planning_notices+=1

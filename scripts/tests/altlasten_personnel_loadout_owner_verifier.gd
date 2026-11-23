@@ -46,7 +46,7 @@ func _run() -> void:
 	var result: Dictionary = _screen.call("request_operation", "inventory_equip", equip)
 	_check(bool(result.get("ok", false)), "Unassigned outside pilot equips finite inventory through the normal request")
 	_check(not _commit_observations.is_empty() and bool(_commit_observations[0]), "Committed signal observes both inventory and equipped loadout already committed")
-	equip["item_id"] = "rifle"
+	equip["item_id"] = "pistol"  # das Basislager enthaelt kein "rifle" mehr (nur pistol, ammo_light, ammo_rifle)
 	equip["request_id"] = "loadout-second"
 	_check(bool(_screen.call("request_operation", "inventory_equip", equip).get("ok", false)), "A second equipment swap succeeds")
 	var state: Dictionary = runtime.call("get_snapshot")
