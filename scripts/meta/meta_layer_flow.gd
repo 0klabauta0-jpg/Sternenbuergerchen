@@ -4608,6 +4608,12 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 		elif not casualty_rules.is_empty():
 			# Einschiffen ist durch: team_states (inkl. aboard/near_ship) entscheiden ueber Verluste.
 			casualty_resolution = _resolve_campaign_casualties(mission_result, casualty_rules, craft_lost)
+			# LC2f W1: Machte das Entfernen der Toten den Kader unspielbar, gilt der bestehende Totalverlust (nie "Tote bleiben im Kader").
+			if craft_lost and not bool(casualty_resolution.get("total_loss", false)):
+				var roster_problem: String = _craft_loss_roster_problem(casualty_resolution)
+				if not roster_problem.is_empty():
+					casualty_resolution["total_loss"] = true
+					casualty_resolution["total_loss_reason"] = roster_problem
 			if bool(casualty_resolution.get("total_loss", false)):
 				failed_extraction = true
 				_mark_campaign_total_loss(resolved_result, mission_result, {"ok": false, "reason": "crew_unavailable", "total_loss_reason": String(casualty_resolution.get("total_loss_reason", ""))})
@@ -4746,6 +4752,32 @@ func _retire_lost_craft(loss: Dictionary) -> void:
 	if _singleplayer_runtime != null:
 		equipment_kept = bool(Dictionary(_singleplayer_runtime.call("retire_lost_craft", craft_id)).get("equipment_kept", false))
 	_lost_craft_records.append({"craft_id": craft_id, "definition": definition, "ship_name": String(loss.get("ship_name", craft_id)), "outcome": String(loss.get("outcome", "crash")), "equipment_kept": equipment_kept})
+
+
+## LC2f W1: Wuerde das Entfernen der endgueltig Gefallenen (ohne Geschuetzte, wie _remove_campaign_fatalities) den Kader unspielbar machen
+## (kein Anfuehrer mehr, kein Pilot mehr, weniger als zwei Personen)? Gibt dann den Totalverlust-Grund ("no_leader_left", "no_pilot_left",
+## "roster_too_small") zurueck, sonst "". War der Kader schon vorher mangelhaft, bleibt es bei "" (wie in _remove_campaign_fatalities).
+func _craft_loss_roster_problem(casualty_resolution: Dictionary) -> String:
+	var dead_units: Dictionary = {}
+	for raw_id in PackedStringArray(casualty_resolution.get("fatality_unit_ids", PackedStringArray())):
+		var dead_id: String = String(raw_id).strip_edges()
+		if dead_id.is_empty() or dead_units.has(dead_id) or _is_campaign_person_protected(dead_id):
+			continue
+		for unit_variant in _all_team_units:
+			if typeof(unit_variant) == TYPE_DICTIONARY and String(Dictionary(unit_variant).get("unit_id", "")) == dead_id:
+				dead_units[dead_id] = true
+				break
+	if dead_units.is_empty() or not _campaign_roster_problems(_all_team_units).is_empty():
+		return ""
+	var problems: PackedStringArray = _campaign_roster_problems(_campaign_roster_without(dead_units))
+	if problems.is_empty():
+		return ""
+	var text: String = "; ".join(problems)
+	if text.contains("Platz 0"):
+		return "no_leader_left"
+	if text.contains("Platz 1"):
+		return "no_pilot_left"
+	return "roster_too_small"
 
 
 ## Gemeinsamer Totalverlust-Pfad (wie bisher bei nicht einsatzfaehiger Besatzung): Niederlage, kein Erfolg, Checkpoint-Retry.
