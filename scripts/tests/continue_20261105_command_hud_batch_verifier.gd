@@ -96,7 +96,7 @@ func _run() -> void:
 	var before_flush: Dictionary = _guard(controller)
 	var hidden_members := scene.get_node(MEMBER_ROW) as Control
 	var hidden_member_ids := _card_instance_ids(hidden_members)
-	_check(not hidden_members.is_visible_in_tree(), "A5 uses the visible portrait team cards while the legacy member strip is hidden")
+	_check(not hidden_members.is_visible_in_tree(), "A5 keeps the legacy member strip hidden (the portrait team card of a single selection is hidden as well since 5df2d3b6f)")
 	_owner_frame(controller, float(CONTROLLER.CARD_REFRESH_INTERVAL_SECONDS) + 0.001)
 	_check(_heavy_calls(_guard(controller)) == _heavy_calls(before_flush), "Periodic heavy due enqueues without a synchronous heavy surface traversal")
 	_check(_periodic_pending_keys(controller).size() == 4, "The coalesced command refresh retains all four pending presentation phases")
