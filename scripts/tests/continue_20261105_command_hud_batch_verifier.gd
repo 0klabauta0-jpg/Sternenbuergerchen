@@ -109,7 +109,11 @@ func _run() -> void:
 	_check(compact_order.text == "Auftrag: Bewegen" and compact_feedback.text == "Ausführung läuft", "The delayed full refresh retains the actual Move and latest GO state")
 	var status: Label = scene.get_node(TEAM_STATUS) as Label
 	_check(not status.text.is_empty() and status.text == String(controller.call("_build_fireteam_status_text")), "The flushed team status reads the currently committed Move state")
-	_check(int(flushed.get("mini_cards_apply_count", 0)) > int(before_flush.get("mini_cards_apply_count", 0)) and _visible_team_card_matches_owner(scene, controller, fireteam_id), "The visible portrait team card reads the committed Move and displays its current status")
+	# Seit 5df2d3b6f (10.11.) ist die Mini-Karte der einzeln gewaehlten Gruppe ausgeblendet; der Spieler liest den Befehlsstatus
+	# im A5-Auftragsfeld (Auftrag + Rueckmeldung); das muss SICHTBAR sein und den Befehl nennen. (Die Statuszeile der Gruppenkopfzeile ist in
+	# diesem Zustand nicht sichtbar; sie bleibt oben nur auf ihren Text geprueft.)
+	_check(compact_order.is_visible_in_tree() and compact_feedback.is_visible_in_tree() and compact_order.text == "Auftrag: Bewegen" and compact_feedback.text == "Ausführung läuft", "The selected group's committed Move status is visible to the player in the A5 order panel")
+	_check(int(flushed.get("mini_cards_apply_count", 0)) > int(before_flush.get("mini_cards_apply_count", 0)) and _visible_team_card_matches_owner(scene, controller, fireteam_id), "The (hidden) portrait team card still holds the committed Move status")
 	_check(int(flushed.get("selected_cards_apply_count", 0)) == int(before_flush.get("selected_cards_apply_count", 0)) and _card_instance_ids(hidden_members) == hidden_member_ids, "The same flush preserves hidden legacy member instances without rebuilding them")
 	for _step in range(3):
 		_owner_frame(controller, 0.2)
