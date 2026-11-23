@@ -14668,6 +14668,12 @@ func _refresh_mission_evacuation_button() -> void:
 			button.tooltip_text = "Only host authority can evacuate the shared mission."
 		_:
 			button.tooltip_text = "Evacuation unavailable: %s." % reason.replace("_", " ")
+	# LC2h: Ist das Einsatzschiff verloren, heisst EVAC Notrettung (mit Gebuehr) und der Hinweis ist deutsch.
+	button.text = "EVAC"
+	var loss_quote: Dictionary = _craft_loss_mission_craft_quote()
+	if not loss_quote.is_empty():
+		button.text = "Notrettung rufen (%d Credits)" % int(loss_quote.get("fee", 0))
+		button.tooltip_text = "Die Notrettung holt den Trupp von der Landezone ab." if bool(snapshot.get("eligible", false)) else "Der Trupp muss erst an der Landezone stehen."
 	META_UI_SKIN_SCRIPT.style_tactical_button(button, bool(snapshot.get("eligible", false)))
 
 
@@ -19867,6 +19873,7 @@ func report_ground_fire_vs_air(craft_id: String, status_snapshot: Dictionary, te
 	if not loss_text.is_empty():
 		texts = texts.duplicate()
 		texts.append(loss_text)
+		_refresh_mission_evacuation_button()
 	if not texts.is_empty():
 		_last_command_text = " ".join(PackedStringArray(texts))
 		_set_mission_dropship_card_feedback(craft_id, _last_command_text)
@@ -19885,6 +19892,16 @@ func _craft_loss_quote(craft_id: String) -> Dictionary:
 	var card_name: String = String(Dictionary(_find_mission_dropship_card_entry(craft_id)).get("display_name", "")).strip_edges()
 	if not card_name.is_empty(): quote["ship_name"] = card_name
 	return quote
+
+
+## LC2h: Auskunft ueber den Verlust des Einsatzschiffs der Kampagne (sonst {}): das erste verlorene Schiff, das die Kampagne als Einsatzschiff kennt.
+func _craft_loss_mission_craft_quote() -> Dictionary:
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	if simulation == null or not simulation.has_method("get_air_crash_sites"): return {}
+	for site in Array(simulation.call("get_air_crash_sites")):
+		var quote: Dictionary = _craft_loss_quote(String(Dictionary(site).get("craft_id", "")))
+		if bool(quote.get("is_mission_craft", false)): return quote
+	return {}
 
 
 ## LC2h: Der Meldetext zum Schiffsverlust: "<Schiff> ist verloren." und beim Einsatzschiff der Weg heim samt Gebuehr.
