@@ -49,6 +49,11 @@ func _run() -> void:
 	# Freeze only automatic scheduling of this UI/runtime owner. Its actual
 	# _process method is called below; SimulationRoot still gets real physics ticks.
 	controller.set_process(false)
+	# G5a: Die Befehlsausfuehrung haengt am Tick; fuer den eingefrorenen Eigner die Tick-Verbindung trennen (die
+	# Simulation tickt weiter). Die Ausfuehrung kommt dann nur aus _owner_frame.
+	var order_tick := Callable(controller, "_on_simulation_tick_for_orders")
+	if simulation.tick_processed.is_connected(order_tick):
+		simulation.tick_processed.disconnect(order_tick)
 	var manager: Node = scene.get_node("UpdateManager")
 	manager.set_process(false)
 	controller.call("_set_selected_fireteams", PackedStringArray([fireteam_id]), false)
@@ -88,9 +93,6 @@ func _run() -> void:
 	await process_frame
 	var units: Array = Array(controller.call("_get_fireteam_units", fireteam_id, true))
 	_check(_all_units_have_move(units), "Real SimulationRoot physics commits the public GO commands")
-	# G5a: Die Befehlsausfuehrung haengt am Tick. Ab hier steht der Eigner (wie vorher mit set_process(false)) still: keine
-	# weiteren echten Ticks, die Ausfuehrung kommt nur aus _owner_frame.
-	simulation.set_physics_process(false)
 	var before_flush: Dictionary = _guard(controller)
 	var hidden_members := scene.get_node(MEMBER_ROW) as Control
 	var hidden_member_ids := _card_instance_ids(hidden_members)
