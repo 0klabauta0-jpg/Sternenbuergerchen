@@ -400,6 +400,9 @@ func _ready() -> void:
 	_show_homebase()
 	# The new run's durable baseline must exist before boarding or accepting a
 	# job closes the home-checkpoint guard. The normal timed autosave follows.
+	# M4b: Startausstattung mit Magazinen einmal je Stand (neue Kampagne und alte Staende ohne Merker), noch vor dem ersten Speichern.
+	if is_campaign_start() and _singleplayer_runtime != null and _singleplayer_runtime.has_method("grant_ammo_start_if_missing"):
+		_singleplayer_runtime.call("grant_ammo_start_if_missing")
 	if is_campaign_start() and String(_game_start_request.get("action","new")) == "new":
 		set_meta("campaign_checkpoint_result", _campaign_start.save_home_checkpoint(self,_singleplayer_runtime,true))
 	_homecoming_forget_all() # new campaign / loaded state
@@ -9262,6 +9265,9 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 			return
 	var follow_arrival := _current_meta_view == "star_map" and _get_view_travel_craft_id() == craft_id
 	var returning_mission := get_mission_for_craft(craft_id)
+	var ammo_refill_ids: Array = _aboard_unit_ids_of_craft(craft_id).duplicate()  # M4b: wer mit diesem Schiff heimkehrt
+	var ammo_pilot := String(_assigned_aircraft_pilot_by_craft.get(craft_id, ""))
+	if not ammo_pilot.is_empty() and not ammo_refill_ids.has(ammo_pilot): ammo_refill_ids.append(ammo_pilot)
 	var release_legacy: bool = _active_mission != null and _active_mission == returning_mission and String(_active_mission.get_meta("location_id", "")).is_empty()
 	_homecoming_forget_craft(craft_id) # a later landing of the same craft replaces its note
 	_restore_returning_visit_membership(craft_id)
@@ -9279,7 +9285,19 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 	_homecoming_warned.clear()
 	if follow_arrival or release_legacy: _show_homebase(true)
 	_singleplayer_runtime.call("observe_campaign_progress")
+	_replenish_ammo_after_landing(craft_id, ammo_refill_ids)
 	_arm_landing_save()
+
+
+## M4b: Landung an der Heimatbasis: die Faecher der heimgekehrten Personen werden aus dem Basislager aufgefuellt (feste Reihenfolge,
+## soweit der Vorrat reicht); die Meldung geht ueber den Heimkehr-Meldeweg (_homecoming_warn_once) und liegt als Meta "ammo_refill_message".
+func _replenish_ammo_after_landing(craft_id: String, unit_ids: Array) -> void:
+	if not is_campaign_start() or _singleplayer_runtime == null or unit_ids.is_empty() or not _singleplayer_runtime.has_method("replenish_ammo"): return
+	var result: Dictionary = Dictionary(_singleplayer_runtime.call("replenish_ammo", unit_ids))
+	var text := String(result.get("message", ""))
+	if text.is_empty(): return
+	set_meta("ammo_refill_message", text)
+	_homecoming_warn_once(craft_id, "ammo", text)
 
 
 # The escape menu invokes the owning campaign saver, never the generic

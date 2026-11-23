@@ -66,6 +66,16 @@ static func effective_magazine_size(magazine_size: int, rules: Dictionary) -> in
 		return 0
 	return maxi(1, roundi(float(magazine_size) * magazine_scale(rules)))
 
+## Magazine, die zu Beginn einer Kampagne im Basislager liegen (M4b): {Gegenstand: Anzahl}, nur bekannte Magazinsorten.
+static func start_base_stock(rules: Dictionary) -> Dictionary:
+	var stock: Dictionary = {}
+	var configured: Variant = rules.get("start_base_stock", {})
+	if configured is Dictionary:
+		for item in configured:
+			if is_ammo_item(String(item), rules) and _is_count(configured[item]) and int(configured[item]) > 0:
+				stock[String(item)] = int(configured[item])
+	return stock
+
 static func is_ammo_item(item_id: String, rules: Dictionary) -> bool:
 	return Dictionary(rules.get("ammo_items", {})).has(item_id)
 

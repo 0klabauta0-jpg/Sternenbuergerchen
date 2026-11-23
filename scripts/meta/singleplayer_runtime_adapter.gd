@@ -2204,6 +2204,18 @@ func is_person_protected_from_death(unit_id: String) -> bool:
 		if typeof(pilots) == TYPE_DICTIONARY and Dictionary(pilots).values().has(unit_id): return true
 	return _polisa_market != null and String(_polisa_market.snapshot().get("recruiter_id", "")) == unit_id
 
+## M4b: Startausstattung mit Magazinen (Basislager + volle Faecher), einmal je Stand; true = jetzt gewaehrt (Kampagne, neu oder alt).
+func grant_ammo_start_if_missing() -> bool:
+	if not _campaign_mode: return false
+	var ids: Array = []
+	for unit in Array(_flow.get("_all_team_units")): ids.append(String(Dictionary(unit).get("unit_id", "")))
+	return bool(_supply.grant_ammo_start_if_missing(ids))
+
+## M4b: Faecher der heimgekehrten Personen aus dem Basislager auffuellen (feste Reihenfolge); Ergebnis mit "message".
+func replenish_ammo(unit_ids: Array) -> Dictionary:
+	if not _campaign_mode: return {"added": 0, "short": 0, "message": ""}
+	return Dictionary(_supply.fill_person_compartments(unit_ids, true))
+
 ## Rucksack und Ausruestung einer gefallenen Person verwerfen (Auftragsfracht siehe SingleplayerSupplyState.discard_person_equipment).
 func discard_person_equipment(unit_id: String) -> Dictionary:
 	if _supply == null: return _reject("supply_unavailable", "Versorgungsstand ist nicht bereit")
@@ -2845,6 +2857,7 @@ func _advance_polisa_recruitment() -> void:
 		_simulation.request_personnel_loadout_command("configure_roster", {"roster":[profile]})
 		if not already_configured:
 			_simulation.request_personnel_loadout_command("set_loadout", {"unit_id":String(pending.unit_id),"loadout":{"armor":profile.get("armor", "suit"),"weapon_1":profile.get("weapon_1", "pistol"),"weapon_2":profile.get("weapon_2", "none")}})
+		_supply.provision_new_person(String(pending.unit_id)) # M4b: neue Person kommt mit vollem Fach (sofern die Startausstattung des Standes gewaehrt ist)
 		var result := _commit("singleplayer_supply", "station_recruit_finalize", {"reservation_id":reservation_id}, "final:"+reservation_id, {"recruit_verify":Callable(self,"_verify_polisa_recruit_admitted")})
 		if result.get("ok", false): _polisa_recruit_pending.erase(reservation_id)
 

@@ -259,11 +259,18 @@ func configure_singleplayer_owners(campaign: RefCounted, supply: RefCounted, onb
 	_singleplayer_space_travel_owner = travel
 	# Die Fachgroesse im persoenlichen Behaelter folgt der getragenen Ruestung (M2); die Ausruestung gehoert dem Loadout-Besitzer.
 	if supply != null and supply.has_method("set_armor_provider"): supply.call("set_armor_provider", Callable(self, "_armor_of_person_for_supply"))
+	if supply != null and supply.has_method("set_weapon_provider"): supply.call("set_weapon_provider", Callable(self, "_weapons_of_person_for_supply"))
 
 ## "" = Person oder Ausruestungsbesitzer unbekannt (dann bleibt die gespeicherte Fachgroesse).
 func _armor_of_person_for_supply(unit_id: String) -> String:
 	if _personnel_loadout_owner == null or not bool(_personnel_loadout_owner.call("has_unit", unit_id)): return ""
 	return String(Dictionary(_personnel_loadout_owner.call("get_loadout", unit_id)).get("armor", ""))
+
+## Waffen der Person aus dem Loadout (M4b: Sorte der Magazine im Fach); leer = Person oder Besitzer unbekannt.
+func _weapons_of_person_for_supply(unit_id: String) -> Array:
+	if _personnel_loadout_owner == null or not bool(_personnel_loadout_owner.call("has_unit", unit_id)): return []
+	var loadout: Dictionary = Dictionary(_personnel_loadout_owner.call("get_loadout", unit_id))
+	return [String(loadout.get("weapon_1", "none")), String(loadout.get("weapon_2", "none"))]
 
 ## Reservemagazine einer Person fuer das Gefecht (M4a). Ohne Versorgung (Tests, Skirmish) hat niemand Reserve.
 func get_person_magazine_count(unit_id: String, ammo_class: String) -> int:

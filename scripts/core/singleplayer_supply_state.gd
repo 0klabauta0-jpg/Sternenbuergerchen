@@ -7,6 +7,7 @@ const SHIP_COMPONENTS = preload("res://scripts/mission/ship_equipment_catalog.gd
 const SPACE_COMPONENTS = preload("res://scripts/mission/space_component_catalog.gd")
 const RESEARCH = preload("res://scripts/mission/campaign_research_catalog.gd")
 const INVENTORY = preload("res://scripts/mission/inventory_transfer_contract.gd")
+const AMMO_WEAPONS = preload("res://scripts/core/weapon_data.gd")
 const MODULAR = preload("res://scripts/core/campaign_modular_plan.gd")
 const EMERGENCY_TANKER = preload("res://scripts/core/emergency_tanker_service.gd")
 var _inventory: Dictionary = {}
@@ -649,6 +650,8 @@ func export_state() -> Dictionary:
 	var exported: Dictionary = _export_state_base()
 	# Schulden (K): Restzeit bis zur naechsten Zinsbuchung, nur im Minus (additiver Schluessel; fehlt er, gilt die volle Periode).
 	if _credits < 0 and _debt_remaining >= 0.0: exported["debt_interest_remaining"] = _debt_remaining
+	# M4b: optionaler Merker (fehlt in alten Staenden: die Startausstattung mit Magazinen wird dann einmal nachgereicht).
+	if _ammo_start_granted: exported["ammo_start_granted"] = true
 	return exported
 
 func _export_state_base() -> Dictionary:
@@ -764,6 +767,7 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_research_snapshot_revision = -1
 	_open_tanker_cache_revision = -1
 	_revision = int(data.revision)
+	_ammo_start_granted = data.get("ammo_start_granted", false) == true
 	_station_purchase_cache_revision = -1
 	# Stand von vor M2 tragen Fachgroesse 1: aus der Ruestung neu bestimmen, solange nichts verschoben werden muss. Den Ueberschuss
 	# ins Lager bucht erst `sync_compartments_after_load`, wenn der Loadout-Besitzer die Personen kennt (nie den Stand ablehnen).
@@ -1110,6 +1114,79 @@ func take_person_magazine(unit_id: String, ammo_class: String) -> bool:
 		bag.items[ammo_class] = left
 	_revision += 1
 	return true
+
+## ---- Startausstattung und Auffuellen (M4b) ----
+## Waffen der Person (Kennungen); gesetzt vom SimulationRoot aus dem Loadout-Besitzer, ohne Auskunft bekommt niemand Magazine.
+var _weapon_provider: Callable = Callable()
+## Optionaler Merker im Stand: die Startausstattung mit Magazinen wurde gewaehrt (fehlt er, wird sie einmal nachgereicht).
+var _ammo_start_granted: bool = false
+
+func set_weapon_provider(provider: Callable) -> void:
+	_weapon_provider = provider
+
+## Magazinsorte der Person: die ihrer ersten Waffe mit Munitionsbedarf, sonst "".
+func _ammo_class_of_person(unit_id: String) -> String:
+	if not _weapon_provider.is_valid(): return ""
+	for weapon_id in Array(_weapon_provider.call(unit_id)):
+		var id := String(weapon_id)
+		if id.is_empty() or id == "none": continue
+		var weapon: Dictionary = AMMO_WEAPONS.get_weapon(id)
+		if String(weapon.get("ammo_class", "")) != "" and int(weapon.get("magazine_size", 0)) > 0: return String(weapon.ammo_class)
+	return ""
+
+## Fuellt das Ruestungsfach der Personen (feste Reihenfolge: nach Kennung sortiert) mit Magazinen der Sorte ihrer Waffe.
+## from_base=false: Startausstattung (die Magazine entstehen); true: aus dem Basislager, soweit der Vorrat reicht.
+## Ergebnis {"added": Magazine, "short": Personen, deren Fach nicht voll wurde, "message": Meldetext oder ""}.
+func fill_person_compartments(unit_ids: Array, from_base: bool) -> Dictionary:
+	_sync_compartments()
+	var ids: Array = unit_ids.duplicate()
+	ids.sort()
+	var base: Dictionary = _inventory.get("base:homebase", {})
+	var added := 0
+	var short := 0
+	for id in ids:
+		var key := "unit:" + String(id) + ":backpack"
+		if not _inventory.has(key) or not Dictionary(_inventory[key]).has("armor_chip_capacity"): continue
+		var item := _ammo_class_of_person(String(id))
+		if item.is_empty(): continue
+		var bag: Dictionary = _inventory[key]
+		var give := maxi(0, int(bag.armor_chip_capacity) - INVENTORY.count_ammo(bag.items))
+		if give <= 0: continue
+		if from_base: give = mini(give, int(Dictionary(base.get("items", {})).get(item, 0)))
+		while give > 0 and not _storage_accepts(bag, {item: give}): give -= 1
+		var wanted := maxi(0, int(bag.armor_chip_capacity) - INVENTORY.count_ammo(bag.items))
+		if give > 0:
+			bag.items[item] = int(bag.items.get(item, 0)) + give
+			if from_base:
+				base.items[item] = int(base.items[item]) - give
+				if int(base.items[item]) <= 0: base.items.erase(item)
+			added += give
+		if from_base and give < wanted: short += 1
+	if added > 0: _revision += 1
+	var parts: PackedStringArray = []
+	if from_base and added > 0: parts.append("Munition aufgefüllt: %d Magazine." % added)
+	if from_base and short > 0: parts.append("Munition knapp: %d Fächer blieben leer." % short)
+	return {"added": added, "short": short, "message": " ".join(parts)}
+
+## Einmal je Spielstand: 16 leichte und 8 Gewehr-Magazine ins Basislager (Zahlen: ammo_rules.json start_base_stock, soweit sie
+## ins Lager passen) und volle Faecher fuer die Personen. Gibt true zurueck, wenn jetzt gewaehrt wurde; mit dem Merker nie wieder.
+func grant_ammo_start_if_missing(unit_ids: Array) -> bool:
+	if _ammo_start_granted or not _inventory.has("base:homebase"): return false
+	var base: Dictionary = _inventory["base:homebase"]
+	var stock: Dictionary = INVENTORY.AMMO_RULES.start_base_stock(INVENTORY.ammo_rules())
+	for item in stock:
+		var amount := int(stock[item])
+		while amount > 0 and not _storage_accepts(base, {item: amount}): amount -= 1
+		if amount > 0: base.items[item] = int(base.items.get(item, 0)) + amount
+	fill_person_compartments(unit_ids, false)
+	_ammo_start_granted = true
+	_revision += 1
+	return true
+
+## Neue (angeworbene) Person: volles Fach, aber nur wenn die Startausstattung dieses Standes schon gewaehrt ist.
+func provision_new_person(unit_id: String) -> bool:
+	if not _ammo_start_granted: return false
+	return int(fill_person_compartments([unit_id], false).added) > 0
 
 ## Rucksack einer gefallenen Person: alles darin geht verloren (bleibt am Ort zurueck), ausser der Auftragsfracht
 ## (RESERVED_QUEST_ITEMS). Die kommt wie bei return_skirmish_person_equipment ins Basislager, damit kein Auftrag unloesbar wird;
