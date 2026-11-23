@@ -35,22 +35,37 @@ func _run() -> void:
 	controller.call("_set_selected_fireteams", PackedStringArray(["ft1"]), false)
 	# Ein heute wirklich ungueltiges Landefeld: Feld, dessen Landefläche blockiert ist (FIELD_LANDING.validate -> footprint_blocked).
 	var blocked_site: Vector2 = Vector2.INF
+	var blocked_grid: Vector2i = Vector2i.ZERO
 	var landing_registry: Node = controller.call("_get_terrain_registry")
 	for tile in map.get_tiles():
 		var checked: Dictionary = load("res://scripts/mission/field_landing_contract.gd").validate(landing_registry, tile.grid_position, [])
 		if not bool(checked.get("ok", false)) and String(checked.get("reason", "")) == "footprint_blocked":
 			blocked_site = tile.world_position
+			blocked_grid = tile.grid_position
 			break
 	_check(blocked_site.is_finite(), "Fixture finds a blocked (invalid) landing tile")
-	var blocked_screen: Vector2 = mission.get_node("Primary3DView").call("world_to_screen_position", blocked_site)
-	var pad_screen: Vector2 = mission.get_node("Primary3DView").call("world_to_screen_position", pad)
+	# Den Ablehnungsgrund festnageln: Das blockierte Feld muss im Bild liegen (sonst kaeme "NO TILE UNDER CURSOR"), und die Ablehnung
+	# muss die Meldung der Landepruefung (footprint_blocked) tragen - nicht irgendeine andere Ablehnung.
+	var view: Node = mission.get_node("Primary3DView")
+	view.call("focus_world_position", blocked_site)
+	var blocked_screen: Vector2 = view.call("world_to_screen_position", blocked_site)
+	var blocked_context: Dictionary = controller.call("_build_tile_context_from_screen_position", blocked_screen)
+	_check(not blocked_context.is_empty() and landing_registry.call("world_to_grid", Vector2(blocked_context.get("world_position", Vector2.INF))) == blocked_grid, "Fixture: the blocked tile is under the screen position (rejection cannot come from 'no tile under cursor')")
+	var expected_refusal: Dictionary = controller.call("_validate_campaign_field_lz", Vector2(blocked_context.get("world_position", blocked_site)))
+	_check(String(expected_refusal.get("reason", "")) == "footprint_blocked" and not String(expected_refusal.get("message", "")).is_empty(), "Fixture: the landing check refuses this tile with footprint_blocked and a player message")
 	controller.set("_last_command_text", "")
 	_check(not bool(controller.call("_place_lz_from_screen_position", blocked_screen)), "Normal screen LZ choice rejects a blocked landing tile")
-	_check(not String(controller.get("_last_command_text")).is_empty(), "Rejected LZ leaves concrete player feedback")
+	var refusal_text: String = String(controller.get("_last_command_text"))
+	_check(not refusal_text.is_empty() and refusal_text != "NO TILE UNDER CURSOR" and refusal_text == String(expected_refusal.get("message", "")), "Rejected LZ leaves the landing check's own reason as player feedback (got: %s)" % refusal_text)
 	controller.set("_lz_position", blocked_site)
 	controller.set("_has_lz_position", true)
+	controller.set("_last_command_text", "")
 	_check(not bool(controller.call("_try_start_drop_sequence", true)), "Runtime drop gate also rejects injected blocked LZ")
+	var gate_refusal: Dictionary = controller.call("_resolve_campaign_field_lz")
+	_check(String(gate_refusal.get("reason", "")) == "footprint_blocked" and String(controller.get("_drop_refusal_text")) == String(gate_refusal.get("message", "")) and not String(controller.get("_drop_refusal_text")).is_empty(), "Drop gate refuses because of the blocked landing area and tells the player so (got: %s)" % String(controller.get("_drop_refusal_text")))
 	controller.set("_has_lz_position", false)
+	view.call("focus_world_position", pad)
+	var pad_screen: Vector2 = view.call("world_to_screen_position", pad)
 	_check(bool(controller.call("_place_lz_from_screen_position", pad_screen)), "Normal screen LZ choice accepts authored landing pad")
 	_check(Vector2(controller.get("_lz_position")).is_equal_approx(pad), "Accepted LZ snaps to saved real return pad center")
 	controller.set("_lz_position", pad)
