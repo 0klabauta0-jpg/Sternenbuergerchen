@@ -6,6 +6,9 @@ const SUPPLY = preload("res://scripts/core/singleplayer_supply_state.gd")
 const OFFER_PATH := "res://data/singleplayer/trade_offers.json"
 const MARKET_PATH := "res://data/singleplayer/commodity_market.json"
 const BENIT := ["a_benit", "b_benit", "c_benit"]
+const PRESENTER = preload("res://scripts/meta/singleplayer_services_presenter.gd")
+var _ui_supply: RefCounted
+var _ui_location := "trade_outpost"
 var passed := 0
 var failed := 0
 var _seq := 0
@@ -29,6 +32,7 @@ func _run() -> void:
 	_save_part()
 	_old_state_part()
 	_skirmish_part()
+	await _ui_part()
 	print("COMMODITY_MARKET passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed else 0)
 
@@ -350,3 +354,81 @@ func _skirmish_part() -> void:
 	check(bool(_sell(s, "satellite_crash", "c_benit", 4).get("ok", false)), "Skirmish: C-Benit an der Absturzstelle verkauft")
 	check(s.get_credits() == c0 + 4 * (sell_price - buy_price) and int(_ship(s).get("c_benit", 0)) == 0, "Skirmish: Gewinn laut Datenpreisen (4 x %d)" % (sell_price - buy_price))
 	check(not bool(_sell(s, "trade_outpost", "c_benit", 1).get("ok", true)), "Skirmish: am Kaufort laesst sich dieselbe Ware nicht zurueckverkaufen")
+
+# ---------- Anzeige (D6): Haendlerfenster aus den Daten ----------
+
+func _ui_snapshot() -> Dictionary:
+	return {"mode": "campaign", "campaign": {"jobs": {}, "progress": {}}, "supply": _ui_supply.get_supply_snapshot(),
+		"crafts": [{"craft_id": "ship", "location_id": _ui_location, "busy": false}],
+		"location_view": {"location_id": _ui_location, "craft_id": "ship"},
+		"service_contexts_by_craft_id": {"ship": {"location_id": _ui_location, "craft_busy": false, "services": ["trade", "refuel"], "ground_service_verified": true}}}
+
+func _ui_cmd(operation: String, payload: Dictionary) -> Dictionary:
+	var data: Dictionary = payload.duplicate(true)
+	var rid: String = String(data.get("request_id", ""))
+	data.erase("request_id")
+	return _ui_supply.apply_command({"contract_category": "singleplayer_supply", "operation": operation, "payload": data, "request_id": rid}, {"location_id": _ui_location, "craft_busy": false, "craft_id": "ship"})
+
+func _btn(panel: Control, node_name: String) -> Button:
+	return panel.find_child(node_name, true, false) as Button
+
+func _shown(b: Button) -> bool:
+	return b != null and b.is_visible_in_tree()
+
+func _ui_part() -> void:
+	var m: Dictionary = _market_file().locations
+	_ui_supply = _sup()
+	_ui_location = "trade_outpost"
+	var panel: Control = PRESENTER.new()
+	root.add_child(panel)
+	panel.size = Vector2(340, 900)
+	panel.call("configure", Callable(self, "_ui_snapshot"), Callable(self, "_ui_cmd"))
+	for frame in range(4): await process_frame
+	panel.call("refresh")
+	var buy_a: Button = _btn(panel, "BuyMarket_a_benit")
+	var buy_b: Button = _btn(panel, "BuyMarket_b_benit")
+	var buy_c: Button = _btn(panel, "BuyMarket_c_benit")
+	var sell1: Button = _btn(panel, "SellBenit")
+	var sell2: Button = _btn(panel, "SellBenit2")
+	check(buy_a != null and sell1 != null and sell2 != null, "Anzeige: Kauf- und Verkaufsknoepfe der Warenboerse sind gebaut")
+	if buy_a == null or sell1 == null: return
+	var pa: int = int(m.trade_outpost.a_benit.sell_price)
+	var stock: int = int(m.trade_outpost.a_benit.stock)
+	check(_shown(buy_a) and _shown(buy_c) and not _shown(buy_b), "Anzeige Handelsaussenposten: Kaufknopf fuer A- und C-Benit, keiner fuer B-Benit")
+	check(buy_a.text.contains("%d Cr" % pa) and buy_a.text.contains("%d verfügbar" % stock), "Anzeige: Kaufknopf nennt Preis und Bestand aus der Datei (%s)" % buy_a.text)
+	var pb: int = int(m.trade_outpost.b_benit.buy_price)
+	check(_shown(sell1) and sell1.text.contains("B-Benit") and sell1.text.contains("%d Cr" % pb) and not _shown(sell2), "Anzeige Handelsaussenposten: ein Verkaufsknopf B-Benit mit Preis aus der Datei (%s)" % sell1.text)
+	check(sell1.disabled, "Anzeige: Verkaufsknopf ohne B-Benit im Schiff ist gesperrt")
+	var c0: int = _ui_supply.get_credits()
+	buy_a.pressed.emit()
+	check(int(_ship(_ui_supply).get("a_benit", 0)) == 1 and _ui_supply.get_credits() == c0 - pa, "Anzeige: Druck auf den Kaufknopf kauft ein Stueck (Ware im Schiff, Credits ab)")
+	check(buy_a.text.contains("%d verfügbar" % (stock - 1)), "Anzeige: der Bestand im Knopf sinkt (%s)" % buy_a.text)
+	_load_ship(_ui_supply, "b_benit", 1)
+	panel.call("refresh")
+	check(not sell1.disabled, "Anzeige: mit B-Benit im Schiff ist der Verkaufsknopf frei")
+	var c1: int = _ui_supply.get_credits()
+	sell1.pressed.emit()
+	check(_ui_supply.get_credits() == c1 + pb and int(_ship(_ui_supply).get("b_benit", 0)) == 0, "Anzeige: Verkaufsknopf verkauft zum Datenpreis")
+	# Ausverkauft: Knopf gesperrt, Grund steht als Text.
+	var left: int = int(_entry(_ui_supply, "trade_outpost", "a_benit").stock)
+	_buy(_ui_supply, "trade_outpost", "a_benit", left)
+	panel.call("refresh")
+	check(buy_a.disabled and buy_a.tooltip_text.contains("Ausverkauft"), "Anzeige: ausverkaufte Ware sperrt den Knopf mit Text (%s)" % buy_a.tooltip_text)
+	_ui_supply.replenish_market_stock()
+	panel.call("refresh")
+	check(not buy_a.disabled and buy_a.text.contains("%d verfügbar" % stock), "Anzeige: nach dem Auffuellen ist der Knopf wieder frei")
+	# Andere Zahlen in den Daten -> andere Anzeige (nichts im Text fest).
+	var alt: Dictionary = _market_file()
+	alt.locations.trade_outpost.a_benit.sell_price = 23
+	alt.locations.trade_outpost.b_benit.buy_price = 31
+	_ui_supply = _sup(alt)
+	panel.call("refresh")
+	check(buy_a.text.contains("23 Cr") and sell1.text.contains("31 Cr"), "Anzeige: geaenderte Datenpreise erscheinen im Fenster (%s | %s)" % [buy_a.text, sell1.text])
+	# Absturzstelle: A- und B-Benit zu kaufen, C-Benit zu verkaufen.
+	_ui_supply = _sup()
+	_ui_location = "satellite_crash"
+	panel.call("refresh")
+	check(_shown(buy_a) and _shown(buy_b) and not _shown(buy_c), "Anzeige Absturzstelle: Kaufknopf fuer A- und B-Benit, keiner fuer C-Benit")
+	check(_shown(sell1) and sell1.text.contains("C-Benit") and sell1.text.contains("%d Cr" % int(m.satellite_crash.c_benit.buy_price)) and not _shown(sell2), "Anzeige Absturzstelle: ein Verkaufsknopf C-Benit mit Datenpreis")
+	panel.queue_free()
+	await process_frame

@@ -2221,6 +2221,19 @@ func grant_ammo_start_if_missing() -> bool:
 	for unit in Array(_flow.get("_all_team_units")): ids.append(String(Dictionary(unit).get("unit_id", "")))
 	return bool(_supply.grant_ammo_start_if_missing(ids))
 
+## Handel H2: Ankaufspreise der Station Polisa fuer die Stationsanzeige: die Preise der Warenboerse (Benit) ueber den Handelsdaten (Erz, Bergungsgut).
+func _polisa_buy_orders(supply: Dictionary) -> Dictionary:
+	var orders: Dictionary = Dictionary(Dictionary(supply.get("commodity_buy_orders", {})).get("polisa", {})).duplicate()
+	var market: Dictionary = Dictionary(Dictionary(supply.get("market", {})).get("polisa", {}))
+	for item: Variant in market:
+		if Dictionary(market[item]).has("buy_price"): orders[item] = int(market[item].buy_price)
+	return orders
+
+## Handel H2 (D4): Heimlandung eines Spielerschiffs -> Marktbestaende der Benit-Warenboerse wieder voll (Kampagne und Skirmish). Liefert die Zahl nachgefuellter Stuecke.
+func replenish_market() -> int:
+	if _supply == null: return 0
+	return int(_supply.replenish_market_stock())
+
 ## M4b: Faecher der heimgekehrten Personen aus dem Basislager auffuellen (feste Reihenfolge); Ergebnis mit "message".
 func replenish_ammo(unit_ids: Array) -> Dictionary:
 	if not _campaign_mode: return {"added": 0, "short": 0, "message": ""}
@@ -2917,7 +2930,7 @@ func get_polisa_snapshot(snapshot: Dictionary = {}) -> Dictionary:
 		"fuel_capacity":float(supply.get("fuel_capacity", 0.0)),"fuel_price_per_unit":float(supply.get("fuel_price_per_unit", 0.0)),
 		"credits":int(supply.get("credits", 0)),"offers":offers,"stock":supply.get("stock_by_offer_id", {}),"inventory":supply.get("inventory", {}),
 		"people":people,"station_residents":station_residents,"blueprints":supply.get("blueprints", []),"require_blueprints":_campaign_mode,"revision":int(supply.get("revision", 0)),
-		"cargo_transfer":_cargo_transfer.get_snapshot(),"free_home_pad":_polisa_free_home_pad(),"home_pad_count":int(supply.get("station_home_pads", 2)),"campaign_mode":_campaign_mode,"buy_orders":Dictionary(supply.get("commodity_buy_orders", {})).get("polisa", {})}
+		"cargo_transfer":_cargo_transfer.get_snapshot(),"free_home_pad":_polisa_free_home_pad(),"home_pad_count":int(supply.get("station_home_pads", 2)),"campaign_mode":_campaign_mode,"buy_orders":_polisa_buy_orders(supply)}
 
 
 func _build_polisa_home_pad(count: int) -> Dictionary:
