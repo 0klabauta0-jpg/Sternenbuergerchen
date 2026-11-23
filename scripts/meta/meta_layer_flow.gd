@@ -4632,7 +4632,7 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 			else:
 				resolved_result["casualty_total_loss"] = false
 	# LC2i I1: Wuerde die Flotte nach dem Raeumen der verlorenen Schiffe leer sein, gilt der Einsatz als Totalverlust (Stand vor dem Einsatz,
-	# Totalverlust-Strafe, keine Notrettungsgebuehr dazu, kein Pleite-Bildschirm "no_craft").
+	# Totalverlust-Strafe (sie enthaelt die Rettungsgebuehr; keine zweite Gebuehr fuer den Schiffsverlust), kein Pleite-Bildschirm "no_craft").
 	var last_craft_lost: bool = craft_lost and _fleet_empty_after_losses(other_craft_losses + [String(_active_singleplayer_identity.get("craft_id", ""))])
 	if last_craft_lost and not failed_extraction:
 		failed_extraction = true
@@ -4789,7 +4789,7 @@ func _craft_loss_quote(craft_id: String) -> Dictionary:
 			var named: String = String(Dictionary(craft_variant).get("display_name", "")).strip_edges()
 			if not named.is_empty(): ship_name = named
 	var is_mission_craft: bool = craft_id == String(_active_singleplayer_identity.get("craft_id", ""))
-	# LC2i I1: Bleibt nach den bisher abgestuerzten Schiffen (und diesem) keines uebrig, ist es das letzte Schiff: Totalverlust, keine Notrettungsgebuehr.
+	# LC2i I1: Bleibt nach den bisher abgestuerzten Schiffen (und diesem) keines uebrig, ist es das letzte Schiff: Totalverlust (die Rettungsgebuehr steckt in der Totalverlust-Strafe, fee hier 0).
 	var lost_ids: Array = [craft_id]
 	var simulation: Node = _active_mission.get_node_or_null("SimulationRoot") if is_instance_valid(_active_mission) else null
 	if simulation != null and simulation.has_method("get_air_crash_sites"):
@@ -4980,8 +4980,8 @@ func _stage_total_loss_penalty(mission_result: Dictionary) -> Dictionary:
 
 
 ## Task 5b: Notrettung nach Totalverlust, Schritt 2 (beim Wiederherstellen des Basisstands, nach dem Aufbau der Laufzeit).
-## Gibt es die Zusatzdatei und bezieht sie sich auf genau den geladenen Stand, wird der Malus angewendet: Gebuehr (hoechstens das
-## Guthaben) ueber den Besitzer der Credits, leichte Verwundung mit der Regel "nie kuerzer, nie leichter", Moral der Beteiligten
+## Gibt es die Zusatzdatei und bezieht sie sich auf genau den geladenen Stand, wird der Malus angewendet: Gebuehr (voll gebucht, auch
+## ins Minus) ueber den Besitzer der Credits, leichte Verwundung mit der Regel "nie kuerzer, nie leichter", Moral der Beteiligten
 ## (auf 0..1 begrenzt). _ready schreibt den Basis-Checkpoint danach sofort und loescht DANACH die Zusatzdatei; der neu
 ## gespeicherte Stand hat eine andere Pruefsumme, eine nach einem Abbruch uebrige Zusatzdatei ist dann veraltet und wirkungslos.
 ## Veraltete oder unlesbare Zusatzdatei: push_warning, ohne Wirkung geloescht. Neue Kampagne: Zusatzdatei geloescht.

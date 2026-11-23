@@ -874,7 +874,7 @@ func _apply_player_readout_texts() -> void:
 	_native_review_confirmation.text = "Laut Einsatzbericht bereits übernommen." if confirmed else "Keine bestätigten Entwicklungsfolgen gemeldet."
 	var checkpoint_retry := bool(_mission_result.get("campaign_checkpoint_retry_required", false))
 	if checkpoint_retry:
-		_native_review_confirmation.text = "Heimkehr nicht moeglich: Pilot oder Besatzung nicht boardingfaehig. Fortsetzen laedt den letzten sicheren Basis-Checkpoint mit dessen Personal und Ressourcen; dieser Ausflug wird nicht gespeichert."
+		_native_review_confirmation.text = "Heimkehr nicht möglich: Pilot oder Besatzung nicht boardingfaehig. Fortsetzen lädt den letzten sicheren Basis-Checkpoint mit dessen Personal und Ressourcen; dieser Ausflug wird nicht gespeichert."
 		# LC2i I1: Das letzte Schiff ging verloren: der Grund steht allein (kein Rueckfalltext "Heimkehr nicht moeglich").
 		var last_craft_lost: bool = bool(_mission_result.get("last_craft_lost", false))
 		if last_craft_lost:

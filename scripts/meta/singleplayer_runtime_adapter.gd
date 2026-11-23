@@ -2135,11 +2135,6 @@ func export_campaign_checkpoint() -> Dictionary:
 func get_campaign_credits() -> int:
 	return _supply.get_credits() if _supply != null else 0
 
-## Task 5b: Rettungsgebuehr nach Totalverlust. Zieht hoechstens das vorhandene Guthaben ab (nie ins Minus).
-func charge_campaign_credits_capped(amount: int) -> Dictionary:
-	if _supply == null: return _reject("supply_unavailable", "Versorgungsstand ist nicht bereit")
-	return _supply.charge_credits_capped(amount)
-
 ## Abschnitt K: Rettungsgebuehr der Notrettung, voll gebucht (auch ins Minus und ueber den Kreditrahmen hinaus).
 func charge_campaign_rescue_fee(amount: int) -> Dictionary:
 	if _supply == null: return _reject("supply_unavailable", "Versorgungsstand ist nicht bereit")

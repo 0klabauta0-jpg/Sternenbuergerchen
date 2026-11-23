@@ -60,7 +60,7 @@ func _n1_last_craft_lost() -> void:
 	if not await _wait_released("N1: der Knopf beendet den Einsatz"): return
 	var result: Dictionary = Dictionary(_flow.get("_last_mission_result"))
 	_check(bool(result.get("casualty_total_loss", false)) and bool(result.get("campaign_checkpoint_retry_required", false)) and String(result.get("total_loss_reason", "")) == "last_craft_lost", "N1: Totalverlust mit Ruecksprung, Grund last_craft_lost (%s)" % str(result.get("total_loss_reason")))
-	_check(not result.has("craft_loss") and not result.has("other_craft_losses"), "N1: kein Schiffsverlust und keine Notrettungsgebuehr gebucht")
+	_check(not result.has("craft_loss") and not result.has("other_craft_losses"), "N1: kein Schiffsverlust-Beleg und keine Gebuehr fuer den Schiffsverlust (die Strafe ist die Totalverlust-Strafe)")
 	_check(_fleet_ids() == [_craft_id] and _lost_ids().is_empty(), "N1: die Flotte ist unveraendert, kein Verlustbeleg (%s / %s)" % [str(_fleet_ids()), str(_lost_ids())])
 	var screen: Node = _flow.call("_get_debrief_screen")
 	var shown: String = String(screen.get("_native_review_confirmation").text) if screen != null and screen.get("_native_review_confirmation") != null else ""

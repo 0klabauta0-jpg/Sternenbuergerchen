@@ -46,7 +46,6 @@ func _i3b_survivor_at_second_crash_site() -> void:
 	if not await _wait_released("I3b: Einsatz wird freigegeben"): return
 	var result: Dictionary = Dictionary(_flow.get("_last_mission_result"))
 	var loss: Dictionary = Dictionary(result.get("craft_loss", {}))
-	print("I3B_RESULT total_loss=", result.get("casualty_total_loss"), " reason=", result.get("total_loss_reason"), " fatal=", result.get("fatality_unit_ids"), " respawn=", result.get("respawn_unit_ids"), " loss=", loss, " fate=", _unit_fate(LEADER))
 	_check(not bool(result.get("casualty_total_loss", false)) and int(loss.get("rescue_fee", -1)) == 400 and _credits() == 100, "I3b: Notrettung 400, einmal gebucht, kein Totalverlust (%s / %d)" % [str(loss), _credits()])
 	_check(not _unit_is_dead(LEADER) and not PackedStringArray(result.get("fatality_unit_ids", PackedStringArray())).has(LEADER), "I3b: der Truppfuehrer an der Absturzstelle des zweiten Schiffs wird heimgeholt und lebt (%s)" % _unit_fate(LEADER))
 	_check(not PackedStringArray(result.get("respawn_unit_ids", PackedStringArray())).has(LEADER), "I3b: er bleibt nicht als Zurueckgelassener liegen")
@@ -284,7 +283,6 @@ func _trio_case(variant: String) -> void:
 	var result: Dictionary = Dictionary(_flow.get("_last_mission_result"))
 	var others: Array = Array(result.get("other_craft_losses", []))
 	var fee: int = int(Dictionary(others[0]).get("rescue_fee", 0)) if not others.is_empty() else -1
-	print("%s_RESULT outcome=%s result=%s total_loss=%s fee=%s credits=%d others=%s fate=%s base=%s/%s" % [tag, result.get("mission_outcome"), result.get("result"), result.get("casualty_total_loss"), fee, _credits(), str(others), _unit_fate(RECRUIT), states[RECRUIT].get("status"), states[RECRUIT].get("craft_id")])
 	_check(not bool(result.get("casualty_total_loss", false)) and not result.has("craft_loss") and others.size() == 1, tag + ": Einsatzschiff heil, nur das zweite Schiff verloren, kein Totalverlust")
 	var charged: bool = variant in ["left", "pair"]
 	_check((fee == 400 and _credits() == 100 and _loss_lines(result) == 1) if charged else (fee == 0 and _credits() == 500 and _loss_lines(result) == 0), tag + (": Gebuehr genau einmal 400, 500 -> 100, Zeile \"Notrettung: −400 Credits\" in der Nachbesprechung (%d / %d / Zeilen %d)" if charged else ": keine Gebuehr, 500 Credits, keine Notrettungszeile (%d / %d / Zeilen %d)") % [fee, _credits(), _loss_lines(result)])
@@ -293,7 +291,6 @@ func _trio_case(variant: String) -> void:
 	_check(String(states[RECRUIT].get("status", "")) != "aboard" and String(states[RECRUIT].get("craft_id", "x")).is_empty() and _aboard_ids(second).is_empty(), tag + ": sie ist an der Basis, nicht an Bord eines fehlenden Schiffs (%s / %s)" % [str(states[RECRUIT].get("status")), str(states[RECRUIT].get("craft_id"))])
 	if variant == "pair": _check(not _unit_is_dead(LEADER) and String(states[LEADER].get("status", "")) != "aboard" and String(states[LEADER].get("craft_id", "x")).is_empty(), tag + ": auch der Truppfuehrer lebt und ist an der Basis (%s / %s / %s)" % [_unit_fate(LEADER), str(states[LEADER].get("status")), str(states[LEADER].get("craft_id"))])
 	_check(_fleet_ids() == [_craft_id] and _lost_ids() == [second], tag + ": das zweite Schiff ist geraeumt und steht im Verlustbeleg (%s / %s)" % [str(_fleet_ids()), str(_lost_ids())])
-	print("%s_TEAM_STATES %s" % [tag, str(result.get("team_states"))])
 	# Die Heimkehr des Einsatzschiffs (Abheben, Rueckflug) ist nicht Gegenstand dieses Pruefers (wie S1 im Zweitschiff-Pruefer): das Schiff steht
 	# per frischem Reiseeigner wieder am Boden der Basis, danach darf nichts mehr "unterwegs" melden.
 	var travel: RefCounted = _runtime.get("_travel")
