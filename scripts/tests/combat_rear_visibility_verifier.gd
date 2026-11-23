@@ -252,6 +252,12 @@ func _test_hit_lifts_arc_for_both_sides() -> void:
 		# Das Fenster selbst ist abgelaufen: der 360-Grad-Sonderfall gilt nicht mehr.
 		_check(not f.driver._was_recently_hit_by(f.driver._resolve_unit_by_id(victim_id), f.driver._resolve_unit_by_id(shooter_id)), "%s: das Fenster ist abgelaufen" % tag)
 		_check(bool(after.get("visible", false)), "%s: nach dem Fenster sieht das Opfer den Schuetzen, weil es sich zu ihm gedreht hat (%s)" % [tag, after.get("reason", "")])
+		# FT-A 4e: Ein Opfer, das sich nicht dreht (so wie ein laufendes, dessen Wegrichtung gilt), steht nach dem Fenster wieder
+		# im Ruecken des Schuetzen: der 360-Grad-Sonderfall ist beendet, es gilt wieder outside_arc.
+		f.sim._hex_facing_pending.erase(victim_id)
+		f.sim._hex_ground_runtime.commit_facing(victim_id, 0)
+		var not_turned: Dictionary = _sees(f, victim_id)
+		_check(String(not_turned.get("reason", "")) == "outside_arc" and not bool(not_turned.get("visible", true)), "%s: ohne Drehung (Opfer laeuft) nach dem Fenster wieder outside_arc (%s)" % [tag, not_turned.get("reason", "")])
 		# Der Schuetze hatte nie einen Treffer erlitten: Er selbst sieht das Opfer vorne ohnehin (Blick Osten, Opfer im Osten bzw. Westen).
 		f.scope.free()
 

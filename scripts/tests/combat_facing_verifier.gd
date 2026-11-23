@@ -80,6 +80,9 @@ func _run() -> void:
 	_test_w1_crossfire()
 	_test_w2_group_key()
 	_test_w3_lookaround()
+	_test_k1_walking_drops_delayed_turn()
+	_test_k3_stamp_only_when_effective()
+	_test_k6_reset_and_k5_friendly_fire()
 	await process_frame
 	print("combat_facing_verifier passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -438,6 +441,78 @@ func _run_sequence() -> Array:
 		sequence.append([_face(f, "a"), _face(f, "b"), f.units.a.hp, f.units.b.hp])
 	f.scope.free()
 	return sequence
+
+
+# K1 (Nachbesserung 1, 4a): Eine verzoegerte Kampf-/Laermdrehung wird verworfen, wenn die Einheit beim Wirksamwerden laeuft.
+func _test_k1_walking_drops_delayed_turn() -> void:
+	var g := _fixture(_pair_specs("blue", "red", {"real": true}))
+	_ticks(g, 2)
+	g.sim.enqueue_command({"type": "move_to_position", "unit_id": "a", "team_id": "blue", "target_position": g.terrain.grid_to_world(Vector2i(20, 14)),
+		"move_speed_factor": 1.0, "command_token": "k1_walk", "requeue_until_target": true})
+	for step in range(30):
+		_tick(g)
+		if g.sim._hex_unit_is_walking("a"):
+			break
+	_check(g.sim._hex_unit_is_walking("a"), "K1: Einheit laeuft")
+	# Absicht, die vor dem Loslaufen eingereiht worden waere (passender Befehlsschluessel), wird hier direkt hinterlegt.
+	var order_key: String = JSON.stringify(g.sim._get_hex_facing_order(g.units.a))
+	g.sim._hex_facing_pending["a"] = {"direction": 0, "ready_tick": g.sim.tick_counter + 6, "priority": 20, "order_key": order_key}
+	var turned_to_zero := false
+	for step in range(20):
+		_tick(g)
+		if g.sim._hex_unit_is_walking("a") and _face(g, "a") == 0:
+			turned_to_zero = true
+	_check(not turned_to_zero, "K1: laufende Einheit wird von einer verzoegerten Kampfdrehung nicht mitten im Weg gedreht")
+	_check(not g.sim._hex_facing_pending.has("a"), "K1: die verzoegerte Absicht ist verworfen")
+	g.scope.free()
+
+
+# 4b: Der 30-Tick-Stempel (und der Bezugsgegner) gilt erst, wenn die Drehung wirksam wurde. Wird die Absicht verworfen
+# (hier: Befehlswechsel), darf der naechste Schuetze das Opfer sofort drehen.
+func _test_k3_stamp_only_when_effective() -> void:
+	var specs := _pair_specs("blue", "red", {}, {"aw": 0.2, "ini": 0.2, "cmd": HOLD})
+	specs.append({"id": "d", "team": "blue", "grid": _line(_line(Vector2i(20, 20), 0, 2), 2, 2), "facing": 5, "ft": "gruppe_d"})
+	var f := _fixture(specs)
+	_ticks(f, 2)
+	_shoot(f, "a", "b")
+	_ticks(f, 10)
+	f.units.b.command = COMMAND.new({"command_type": "hold_position", "source_command_type": "defend", "fire_status": "fire_at_will", "fire_rule": "free", "command_token": "anderer_befehl"})
+	_ticks(f, 35)
+	_check(_face(f, "b") == 0, "K3: die Drehung zu a wurde mit dem Befehlswechsel verworfen (%d)" % _face(f, "b"))
+	_shoot(f, "d", "b")
+	var expected: int = f.driver._facing_direction_toward(f.units.b, f.units.d)
+	_ticks(f, 60)
+	_check(expected >= 0 and _face(f, "b") == expected, "K3: der naechste Schuetze dreht b, obwohl die erste Drehung nie wirksam wurde (%d, erwartet %d)" % [_face(f, "b"), expected])
+	f.scope.free()
+
+
+# 4c Zustand wird bei Wiederherstellen geleert; 4d Feuer der eigenen Seite dreht niemanden.
+func _test_k6_reset_and_k5_friendly_fire() -> void:
+	var specs := _pair_specs("blue", "red", {}, {"aw": 1.0, "ini": 1.0})
+	var f := _fixture(specs)
+	_ticks(f, 2)
+	_shoot(f, "a", "b")
+	_ticks(f, 5)
+	_check(not f.driver._facing_target_by_unit.is_empty() and not f.driver._facing_last_turn_tick.is_empty(), "K6: Drehzustand ist gefuellt")
+	f.driver.restore_checkpoint_elapsed_time(0)
+	var empty := true
+	for name in ["_facing_target_by_unit", "_facing_last_turn_tick", "_facing_shot_at_tick", "_facing_alert_until", "_facing_search", "_facing_last_enemy_position"]:
+		if not Dictionary(f.driver.get(name)).is_empty():
+			empty = false
+	_check(empty, "K6: Wiederherstellen leert Stempel, Bezugsgegner, Alarm und Suche")
+	f.scope.free()
+	# Eigenfeuer: a (blau) schiesst auf c (blau); c und sein Kamerad m schauen nicht zum Eigenschuetzen.
+	var own := [
+		{"id": "a", "team": "blue", "grid": Vector2i(20, 20), "facing": 3, "ft": "ga"},
+		{"id": "c", "team": "blue", "grid": Vector2i(22, 20), "facing": 0, "ft": "gc", "aw": 1.0, "ini": 1.0},
+		{"id": "m", "team": "blue", "grid": Vector2i(24, 20), "facing": 0, "ft": "gc", "aw": 1.0, "ini": 1.0},
+	]
+	var g := _fixture(own)
+	_ticks(g, 2)
+	_shoot(g, "a", "c")
+	_ticks(g, 60)
+	_check(_face(g, "c") == 0 and _face(g, "m") == 0, "K5: Eigenfeuer dreht weder den Getroffenen noch seine Kameraden (c=%d m=%d)" % [_face(g, "c"), _face(g, "m")])
+	g.scope.free()
 
 
 ## Alarmiert die Einheit ohne Schuss (Kontakt gewesen), mit letzter bekannter Gegnerposition `grid`.

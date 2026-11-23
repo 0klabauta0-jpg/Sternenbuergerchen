@@ -3416,6 +3416,11 @@ func queue_hex_facing_intent(unit_id: String, direction: int, command_id: String
 	return {"ok":true,"replayed":false}
 
 
+## Wartet fuer die Einheit noch eine Drehabsicht auf ihr Wirksamwerden? (Nur lesend, fuer den Kampftreiber.)
+func has_hex_facing_intent_pending(unit_id: String) -> bool:
+	return _hex_facing_pending.has(unit_id)
+
+
 ## Laeuft die Einheit gerade (aktives Wegsegment oder zugesagte Folgeschritte)? Dann gewinnt die Wegrichtung.
 func _hex_unit_is_walking(unit_id: String) -> bool:
 	var state := get_hex_unit_state(unit_id)
@@ -3450,6 +3455,9 @@ func _commit_hex_facing_intents() -> void:
 		if int(intent["ready_tick"]) > tick_counter:
 			continue
 		_hex_facing_pending.erase(unit_id)
+		# Kampf-/Laermdrehungen (Prioritaet bis combat_reaction) gelten nicht mehr, wenn die Einheit beim Wirksamwerden laeuft.
+		if int(intent["priority"]) <= int(HEX_FACING_PRIORITIES["combat_reaction"]) and _hex_unit_is_walking(String(unit_id)):
+			continue
 		var unit = _resolve_known_unit_for_contract(unit_id)
 		if not is_instance_valid(unit) or String(intent["order_key"]) != JSON.stringify(_get_hex_facing_order(unit)):
 			continue

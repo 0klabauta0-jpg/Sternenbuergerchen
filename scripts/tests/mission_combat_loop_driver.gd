@@ -2101,6 +2101,7 @@ func _run_overwatch_and_attack_step(simulation_root: Node, profile_enabled: bool
 			_attack_excluded_unit_ids[String(member_id)] = true
 	_try_enqueue_attacks(simulation_root)
 	_attack_excluded_unit_ids = {}
+	_flush_combat_noise_facing()
 	_advance_combat_lookaround()
 	if profile_enabled:
 		profile_scopes["combat_fire_decision_usec"] = Time.get_ticks_usec() - scope_started_usec
@@ -2318,6 +2319,8 @@ const COMBAT_FACING_STALE_FUTURE_TICKS: int = 200
 ## unit_id -> Tick, ab dem die Drehung wirkt; Kind "noise" darf von einer eigenen Kampfreaktion ersetzt werden.
 var _facing_last_turn_tick: Dictionary = {}
 var _facing_last_turn_is_noise: Dictionary = {}
+## unit_id -> Richtung der noch nicht als wirksam bestaetigten Drehung.
+var _facing_last_turn_dir: Dictionary = {}
 ## unit_id -> {"target_id", "tick"}: auf wen die Einheit zuletzt geschossen hat.
 var _facing_target_by_unit: Dictionary = {}
 var _facing_shot_at_tick: Dictionary = {}
@@ -2357,7 +2360,46 @@ func _facing_direction_toward(unit, toward) -> int:
 
 
 ## Hat die Einheit ein eigenes Ziel, das sie gerade sieht (Schuss auf es innerhalb des Gedaechtnisses, Sicht ohne Abbruch)?
+## Klaert, ob die zuletzt eingereihte Drehung der Einheit wirksam wurde. Wurde sie verworfen (Befehlswechsel, Laufen,
+## nicht fit), gelten Stempel und der durch sie gesetzte Bezugsgegner nicht.
+func _facing_refresh_turn(unit_id: String) -> void:
+	if not _facing_last_turn_dir.has(unit_id):
+		return
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root == null or not simulation_root.has_method("has_hex_facing_intent_pending"):
+		return
+	if bool(simulation_root.call("has_hex_facing_intent_pending", unit_id)):
+		return
+	var expected: int = int(_facing_last_turn_dir[unit_id])
+	_facing_last_turn_dir.erase(unit_id)
+	var facing_now: int = int(Dictionary(simulation_root.call("get_hex_unit_state", unit_id)).get("facing_dir", -1))
+	var entry: Dictionary = Dictionary(_facing_target_by_unit.get(unit_id, {}))
+	if facing_now == expected:
+		if bool(entry.get("pending", false)):
+			entry["pending"] = false
+			_facing_target_by_unit[unit_id] = entry
+		return
+	_facing_last_turn_tick.erase(unit_id)
+	_facing_last_turn_is_noise.erase(unit_id)
+	if bool(entry.get("pending", false)):
+		_facing_target_by_unit.erase(unit_id)
+
+
+## Leert den Drehzustand (neuer Einsatz, Wiederherstellen eines Zwischenstands: der Tickzaehler kann zurueckspringen).
+func _reset_combat_facing_state() -> void:
+	_facing_last_turn_tick.clear()
+	_facing_last_turn_is_noise.clear()
+	_facing_last_turn_dir.clear()
+	_facing_target_by_unit.clear()
+	_facing_shot_at_tick.clear()
+	_facing_noise_shots.clear()
+	_facing_alert_until.clear()
+	_facing_last_enemy_position.clear()
+	_facing_search.clear()
+
+
 func _unit_has_visible_own_target(unit, unit_id: String, now: int) -> bool:
+	_facing_refresh_turn(unit_id)
 	# Bezugsgegner: das eigene Ziel oder der Schuetze, zu dem sich die Einheit zuletzt gedreht hat. Er haelt, solange sie ihn
 	# sieht; sieht sie ihn nicht mehr, noch eine eigene Schussperiode lang. Tot oder weg: frei.
 	var entry: Dictionary = Dictionary(_facing_target_by_unit.get(unit_id, {}))
@@ -2390,6 +2432,7 @@ func _queue_combat_facing(unit, toward, delay_ticks: int, reason: String, guard_
 	if simulation_root == null or not simulation_root.has_method("queue_hex_facing_intent"):
 		return false
 	var now: int = _combat_facing_now()
+	_facing_refresh_turn(unit_id)
 	# Hoechstens eine Drehung je 30 Ticks. Eine noch wartende Kameradendrehung darf die eigene Kampfreaktion ersetzen.
 	var last: int = int(_facing_last_turn_tick.get(unit_id, -1000000))
 	if last > now + 200:
@@ -2410,9 +2453,11 @@ func _queue_combat_facing(unit, toward, delay_ticks: int, reason: String, guard_
 		return false
 	_facing_last_turn_tick[unit_id] = ready_tick
 	_facing_last_turn_is_noise[unit_id] = reason == "noise_reaction"
+	_facing_last_turn_dir[unit_id] = direction
 	if guard_visible_target:
-		# Wer sich zu einem Schuetzen dreht, bleibt bei ihm (Bezugsgegner), bis er ihn eine Schussperiode lang nicht sieht.
-		_facing_target_by_unit[unit_id] = {"target_id": _unit_id_for_facing(toward), "tick": ready_tick, "seen": ready_tick}
+		# Wer sich zu einem Schuetzen dreht, bleibt bei ihm (Bezugsgegner), bis er ihn eine Schussperiode lang nicht sieht;
+		# "pending" bis die Drehung wirksam wurde.
+		_facing_target_by_unit[unit_id] = {"target_id": _unit_id_for_facing(toward), "tick": ready_tick, "seen": ready_tick, "pending": true}
 	return true
 
 
@@ -2426,6 +2471,10 @@ func _note_combat_facing_shot(attacker, target) -> void:
 		return
 	var now: int = _combat_facing_now()
 	_facing_target_by_unit[attacker_id] = {"target_id": target_id, "tick": now, "seen": now}
+	if _get_unit_team_id_for_diagnostics(attacker) == _get_unit_team_id_for_diagnostics(target):
+		# Feuer der eigenen Seite: der Schuetze schaut auf sein (verwechseltes) Ziel, sonst dreht sich niemand, kein Alarm.
+		_queue_combat_facing(attacker, target, 1, "combat_reaction", false)
+		return
 	_facing_shot_at_tick[target_id] = now
 	_mark_combat_alert(attacker, _facing_logical_position(target))
 	_mark_combat_alert(target, _facing_logical_position(attacker))
@@ -2573,6 +2622,7 @@ func _advance_combat_lookaround() -> void:
 		if bool(result.get("ok", false)) and not bool(result.get("replayed", false)) and not bool(result.get("unchanged", false)):
 			_facing_last_turn_tick[unit_id] = now + 1
 			_facing_last_turn_is_noise[unit_id] = true
+			_facing_last_turn_dir[unit_id] = direction
 
 
 func _record_contact_decision_diagnostics(reason: String, data: Dictionary = {}) -> void:
@@ -4740,6 +4790,7 @@ func restore_checkpoint_elapsed_time(elapsed_msec: int) -> Dictionary:
 	_enemy_reposition_ready_at_tick.clear()
 	_enemy_limbo_cover_ready_at_tick.clear()
 	_friendly_cover_ready_at_tick.clear()
+	_reset_combat_facing_state()
 	return {"ok":true}
 
 func _get_duration_seconds() -> float:
@@ -6389,6 +6440,7 @@ func reset_for_location_job(scenario_path: String) -> void:
 	_mission_result_condition_override=""; _resolved_without_seen_friendly=false
 	_has_seen_active_friendly_units=false; _mission_started_at_msec=Time.get_ticks_msec(); _checkpoint_elapsed_offset_msec=0
 	reset_suppression()
+	_reset_combat_facing_state()
 	configure_scenario_runtime_gates_from_file(scenario_path)
 
 
