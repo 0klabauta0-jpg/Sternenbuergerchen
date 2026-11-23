@@ -273,6 +273,10 @@ func _refresh_capacity() -> void:
 	if _flow.call("is_campaign_start") and Array(_layout.get("landing_pads",[])).size()>1:
 		_layout.landing_pads[1]["built"]=bool(_flow.get_meta("campaign_pad2_built",false))
 
+## Angebot fuer den Unterkunftskauf: auf Hex-Boden ein Wohncontainer je gepruefter Stellplatz.
+func get_housing_offer() -> Dictionary:
+	return {"container":_requires_hex_ground(), "sites":CAPACITY_LAYOUT.hex_container_site_count()}
+
 func _capacity_infrastructure() -> Dictionary:
 	var infrastructure: Dictionary = Dictionary(_flow.get_meta("skirmish_infrastructure", {})).duplicate(true)
 	if _flow.call("is_campaign_start"):

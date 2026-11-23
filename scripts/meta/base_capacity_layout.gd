@@ -4,6 +4,12 @@ extends RefCounted
 const NAV = preload("res://scripts/meta/base_interior_navigation.gd")
 const MODULAR_GEOMETRY = preload("res://scripts/meta/modular_base_geometry.gd")
 
+## Gepruefte Stellplaetze fuer Wohncontainer auf Hex-Boden (Teil B1). Ein Platz = ein Container.
+const HEX_CONTAINER_SITES: Array = []
+
+static func hex_container_site_count() -> int:
+	return HEX_CONTAINER_SITES.size()
+
 ## Campaign free field bunks are automatic roster aids, not built capacity.
 ## Paid expansions count only beds actually placed on reachable terrain.
 static func recruitment_bed_capacity(source: Dictionary, expanded: Dictionary, infrastructure: Dictionary) -> int:
