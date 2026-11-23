@@ -37,15 +37,21 @@ func _test_campaign_and_legacy(scenario_path: String, map_path: String, should_p
 	var second_ids: Array = _unit_ids(second_units)
 	var map = load("res://scripts/terrain/terrain_map_data.gd").load_from_file(map_path)
 	var first_lz: Vector2 = map.get_marker_position("spawn_alpha")
-	var second_lz: Vector2 = first_lz if should_park else first_lz + Vector2(96.0, 0.0)
+	# Altfall: Die festen Felder (spawn_alpha, +96) liegen am Kartenrand und tragen die Rumpffläche nicht (Hindernisse in 3 der 23 Rumpfzellen);
+	# das Spiel lehnt sie zu Recht mit footprint_blocked ab. Der Altfall nimmt daher zwei Felder, auf denen der Rumpf passt.
+	if not should_park: first_lz = _other_site(controller, map, first_lz, 0.0, 1024.0)
+	var second_lz: Vector2 = first_lz if should_park else _other_site(controller, map, first_lz)
 	var state: Dictionary = controller.call("get_planning_state")
-	state.merge({"mission_drop_source": "homebase_direct", "mission_drop_craft_id": "craft_a", "mission_drop_state": "waiting", "drop_ship_staged": true, "embarked_unit_ids": first_ids + second_ids, "deployed_unit_ids": [], "has_lz_position": true, "lz_position": first_lz, "selected_fireteams": [teams[0]], "mission_drop_cards": [_card("craft_a", String(teams[0]), first_ids, first_lz), _card("craft_b", String(teams[1]), second_ids, second_lz)]}, true)
+	state.merge({"mission_drop_source": "homebase_direct", "mission_drop_craft_id": "craft_a", "mission_drop_state": "waiting", "drop_ship_staged": true, "embarked_unit_ids": first_ids + second_ids, "deployed_unit_ids": [], "has_lz_position": true, "lz_position": first_lz, "selected_fireteams": [teams[0]], "mission_drop_cards": [_card("craft_a", String(teams[0]), first_ids, first_lz), _card_b(String(teams[1]), second_ids, second_lz, should_park)]}, true)
 	controller.call("set_planning_state", state)
 	controller.call("_select_mission_dropship_craft", "craft_a", false)
 	controller.call("_set_selected_fireteams", PackedStringArray([teams[0]]), false)
-	_check(bool(controller.call("_try_start_drop_sequence", true)), "First real craft starts map flight: " + str(should_park))
+	var started_first: bool = bool(controller.call("_try_start_drop_sequence", true))
+	_check(started_first, "First real craft starts map flight: " + str(should_park))
 	controller.call("_select_mission_dropship_craft", "craft_b", false)
 	controller.call("_set_selected_fireteams", PackedStringArray([teams[1]]), false)
+	controller.set("_lz_position", second_lz)
+	controller.set("_has_lz_position", true)
 	_check(bool(controller.call("_try_start_drop_sequence", true)) == not should_park, "Second craft respects actual pad capacity while legacy parallel flight remains free: " + str(should_park))
 	for tick in range(7):
 		controller.call("_update_drop_sequence", 30.0)
@@ -55,13 +61,14 @@ func _test_campaign_and_legacy(scenario_path: String, map_path: String, should_p
 	var deployed_before: Array = Array(Dictionary(controller.call("get_planning_state")).get("deployed_unit_ids", []))
 	if should_park:
 		_check(first.get("state") == "complete" and second.get("state") == "waiting", "Campaign craft stays landed while another waits for the single authored pad")
-		_check(Vector2(first.get("dropship_position", Vector2.ZERO)).is_equal_approx(first_lz), "Parked campaign craft retains its real authored pad position")
+		var first_landed: Vector2 = Vector2(first.get("dropship_position", Vector2.ZERO))
+		_check(first_landed.distance_to(first_lz) < 128.0, "Parked campaign craft retains its real landing position (free landing may shift it to a safe tile)")
 		_check(Array(first.get("embarked_unit_ids", [])).is_empty() and Array(second.get("embarked_unit_ids", [])) == second_ids and deployed_before.size() == first_ids.size(), "Only landed craft crew deploys; waiting payload is preserved")
 		_check(bool(controller.call("_can_request_mission_dropship_return", first)), "Actually parked craft exposes explicit return")
 		if String(first.get("state", "")) == "complete" and String(second.get("state", "")) == "waiting":
 			_check(bool(controller.call("_apply_selected_mission_dropship_return", "craft_a")), "Parked craft explicit return accepts")
 			var returning: Dictionary = _find_card(controller, "craft_a")
-			_check(returning.get("state") == "outbound" and Vector2(returning.get("dropship_position", Vector2.ZERO)).is_equal_approx(first_lz), "Return begins actual outbound at pad before meta transit")
+			_check(returning.get("state") == "outbound" and Vector2(returning.get("dropship_position", Vector2.ZERO)).is_equal_approx(first_landed), "Return begins actual outbound at pad before meta transit")
 			_check(_find_card(controller, "craft_b").get("state") == "waiting", "One return leaves the other craft independently waiting")
 			controller.call("_update_drop_sequence", 0.001)
 			_check(_find_card(controller, "craft_a").get("state") == "outbound", "No instantaneous return to homebase before visible flight")
@@ -69,7 +76,10 @@ func _test_campaign_and_legacy(scenario_path: String, map_path: String, should_p
 			_check(String(_find_card(controller, "craft_a").get("state", "")) == "to_homebase", "Only map-edge outbound completion requests meta return")
 			controller.call("_select_mission_dropship_craft", "craft_b", false)
 			controller.call("_set_selected_fireteams", PackedStringArray([teams[1]]), false)
-			_check(bool(controller.call("_try_start_drop_sequence", true)), "Waiting craft can use the pad after first craft clears outbound")
+			# Die abgesetzte Mannschaft steht noch am ersten Platz; das zweite Schiff landet daher auf einem anderen sicheren Feld.
+			controller.set("_lz_position", _other_site(controller, map, first_landed))
+			controller.set("_has_lz_position", true)
+			_check(bool(controller.call("_try_start_drop_sequence", true)), "Waiting craft can land on a free site after first craft clears outbound")
 			for tick in range(7):
 				controller.call("_update_drop_sequence", 30.0)
 				await physics_frame
@@ -83,7 +93,34 @@ func _test_campaign_and_legacy(scenario_path: String, map_path: String, should_p
 	await process_frame
 
 func _card(id: String, team: String, units: Array, lz: Vector2) -> Dictionary:
-	return {"craft_id": id, "display_name": id, "payload_source": "homebase_direct", "state": "waiting", "progress": 0.0, "passenger_count": units.size(), "embarked_unit_ids": units, "boarded_fireteam_ids": [team], "has_lz_position": true, "lz_position": lz, "approach_angle": "NW"}
+	return {"craft_id": id, "model_id": "cutlass", "display_name": id, "payload_source": "homebase_direct", "state": "waiting", "progress": 0.0, "passenger_count": units.size(), "embarked_unit_ids": units, "boarded_fireteam_ids": [team], "has_lz_position": true, "lz_position": lz, "approach_angle": "NW"}
+
+# Seit 45e1cb443 reserviert der gewaehlte Landeplatz eines wartenden Schiffs die Flaeche: Das zweite Schiff bekommt
+# seinen Platz (= den des ersten) erst beim eigenen Start, sonst blockiert es das erste.
+func _card_b(team: String, units: Array, lz: Vector2, park: bool) -> Dictionary:
+	var card: Dictionary = _card("craft_b", team, units, lz)
+	if park:
+		card["has_lz_position"] = false
+		card.erase("lz_position")
+	return card
+
+## Passt die ganze Rumpffläche des Schiffs (Zellen frei, eben, nicht von anderen Schiffen belegt) auf dieses Feld?
+func _hull_fits(controller: Node, position: Vector2) -> bool:
+	var card: Dictionary = _card("craft_a", "", [], position)
+	var projection: Dictionary = controller.call("_read_ground_ship_landing_projection", card, position, "NW")
+	var profile: Dictionary = load("res://scripts/mission/polisa_ground_body_profile.gd").from_projection(card, projection)
+	return bool(profile.get("ok", false)) and bool(controller.call("_check_ground_ship_landing_site", card, position, profile.profile).get("ok", false))
+
+func _other_site(controller: Node, map, near: Vector2, min_distance: float = 256.0, max_distance: float = 512.0) -> Vector2:
+	var registry: Node = controller.call("_get_terrain_registry")
+	var best: Vector2 = Vector2.INF
+	for tile in map.get_tiles():
+		var distance: float = tile.world_position.distance_to(near)
+		if distance >= min_distance and distance <= max_distance and (not best.is_finite() or distance < best.distance_to(near)) and bool(load("res://scripts/mission/field_landing_contract.gd").validate(registry, tile.grid_position, []).ok) and _hull_fits(controller, tile.world_position):
+			best = tile.world_position
+	if best.is_finite(): return best
+	_check(false, "Map offers a second safe landing site")
+	return near
 
 func _find_card(controller: Node, id: String) -> Dictionary:
 	for card in Array(Dictionary(controller.call("get_planning_state")).get("mission_drop_cards", [])):
