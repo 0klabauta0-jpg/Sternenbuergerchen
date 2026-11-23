@@ -152,6 +152,7 @@ func _run() -> void:
 	CADENCE.reset_config()
 	_test_t5_movement()
 	_test_t12_advance_margin()
+	_test_t13_level3_parity()
 	_test_t7_decay()
 	_test_t8_hit_and_cover()
 	_test_t9_read_time_modifiers()
@@ -365,6 +366,30 @@ func _test_t1_tracker() -> void:
 
 # ---- T2: Zeit in Ticks --------------------------------------------------------
 
+## Tick fuer Tick (1..180) nach drei Pistolentreffern; zwischen den Ticks vergehen `delay_msec` Wanduhr-Millisekunden.
+## Gibt die Ticks der Stufenwechsel zurueck.
+func _level_changes_with_delay(delay_msec: int) -> Array:
+	var f := _rig([
+		{"id": "own", "team": "blue", "grid": CENTER, "facing": 0},
+		{"id": "enemy", "team": "red", "grid": CENTER + HEX.DIRECTIONS[0], "facing": 3},
+	])
+	var key := _key(f, "enemy")
+	for i in range(3):
+		_call(f.driver, "note_suppression_shot", [f.units["enemy"], 18, true])
+	var changes: Array = []
+	var last := 0
+	for tick in range(1, 181):
+		_call(f.driver, "_advance_suppression", [tick])
+		if delay_msec > 0:
+			OS.delay_msec(delay_msec)
+		var level := int(_call_quiet(f.driver, "get_suppression_level", [key], 0))
+		if level != last:
+			changes.append(tick)
+			last = level
+	f.scope.free()
+	return changes
+
+
 func _test_t2_time() -> void:
 	var f := _rig([
 		{"id": "own", "team": "blue", "grid": CENTER, "facing": 0},
@@ -403,6 +428,11 @@ func _test_t2_time() -> void:
 	var before := int(_call_quiet(g.driver, "get_suppression_level", [_key(g, "enemy")], -1))
 	OS.delay_msec(1600)
 	_check(int(_call_quiet(g.driver, "get_suppression_level", [_key(g, "enemy")], -2)) == before and before == 2, "T2: 1,6 s Wanduhr ohne Tick aendern nichts (Stufe %d)" % before)
+	# Eine Wanduhr-Abhaengigkeit wuerde rot: dieselbe Tickfolge, einmal ohne und einmal mit 14 ms Wanduhr je Tick (2,5 s
+	# insgesamt, mehr als die alten 950 ms), ergibt exakt dieselben Stufenwechsel.
+	var fast_changes := _level_changes_with_delay(0)
+	var slow_changes := _level_changes_with_delay(14)
+	_check(fast_changes == [30, 90, 180] and slow_changes == fast_changes, "T2: Stufenwechsel exakt bei 30/90/180, unabhaengig von der Wanduhr (%s / %s)" % [str(fast_changes), str(slow_changes)])
 	var controller_source := FileAccess.get_file_as_string(CONTROLLER_PATH)
 	var from_index := controller_source.find("func _update_fireteam_suppression(")
 	var to_index := controller_source.find("\nfunc ", from_index + 10)
@@ -444,7 +474,9 @@ func _test_t3_both_sides() -> void:
 		_check(tick2 > 0 and tick3 > tick2, "T3: %s erreicht Stufe 2 und danach Stufe 3 innerhalb von 6 s" % side_name)
 		_check(tick2 > 0 and tick2 % 30 == 0 and tick3 % 30 == 0, "T3: %s wechselt nur an Schrittgrenzen" % side_name)
 		results.append([tick1, tick2, tick3])
-	_check(results[0][1] > 0 and results[1][1] > 0 and absi(int(results[0][1]) - int(results[1][1])) <= 60 and absi(int(results[0][2]) - int(results[1][2])) <= 90, "T3: gespiegelt gleiches Ergebnis (Gegner %s, eigene %s)" % [str(results[0]), str(results[1])])
+	# Gleiche Eingaben, gespiegelte Seiten: die Stufenwechsel fallen auf dieselben Ticks (ohne Toleranz).
+	_check(results[0][1] > 0 and results[0] == results[1], "T3: gespiegelt identische Stufenwechsel (Gegner %s, eigene %s)" % [str(results[0]), str(results[1])])
+	_check(_shots_by(enemy_side, "s0") + _shots_by(enemy_side, "s1") + _shots_by(enemy_side, "s2") == _shots_by(own_side, "s0") + _shots_by(own_side, "s1") + _shots_by(own_side, "s2"), "T3: gespiegelt gleich viele Schuesse")
 	enemy_side.scope.free()
 	own_side.scope.free()
 
@@ -613,6 +645,44 @@ func _test_t12_advance_margin() -> void:
 	var cover_run: float = f.sim._extract_move_speed_factor(enemy_cmd, enemy)
 	_check(advance == 0.0 and absf(cover_run - 0.6) < 0.001, "T12: Gegner Stufe 2: Vorruecken steht (%s), Ausweichen in Deckung laeuft mit 0,6 (%s)" % [str(advance), str(cover_run)])
 	f.scope.free()
+
+
+# ---- T13: Stufe 3 ist fuer beide Seiten gleich: kein Vorruecken, danach geht es weiter (Nachbesserung 1, Punkt 5) ----
+
+## Eine Gegnergruppe auf Stufe 3 rueckt mit demselben Befehl nicht vor, bis die Stufe unter 2 faellt, und laeuft dann mit
+## demselben Befehl weiter - genau wie ein eigenes Fireteam mit unterbrochenem Plan. Kein eigenes Plansystem fuer Gegner:
+## der Befehl bleibt bestehen, die Sperre kommt aus dem Tempofaktor (Stufe >= 2 zum Feind hin = 0).
+func _test_t13_level3_parity() -> void:
+	var results := {}
+	for side in ["blue", "red"]:
+		var other := "red" if side == "blue" else "blue"
+		var f := _rig([
+			{"id": "m", "team": side, "grid": CENTER, "facing": 0},
+			{"id": "x", "team": other, "grid": CENTER + HEX.DIRECTIONS[0] * 5, "facing": 3},
+		])
+		var unit: NPC = f.units["m"]
+		var cmd := _move_cmd(f, "m", CENTER + HEX.DIRECTIONS[0] * 3, -1.0)
+		_pin(f, "m", 3, 5.0)
+		var tick := 0
+		var blocked_until := -1
+		var first_free := -1
+		for step in range(1, 60):
+			tick += 30
+			_call(f.driver, "_advance_suppression", [tick])
+			var level := int(_call_quiet(f.driver, "get_suppression_level", [_key(f, "m")], 0))
+			var factor: float = f.sim._extract_move_speed_factor(cmd, unit)
+			if level >= 2:
+				if factor != 0.0:
+					_check(false, "T13 (%s): Stufe %d rueckt vor (%s)" % [side, level, str(factor)])
+				blocked_until = step
+			elif first_free < 0:
+				first_free = step
+				_check(factor > 0.0, "T13 (%s): unter Stufe 2 laeuft derselbe Befehl weiter (%s)" % [side, str(factor)])
+				break
+		_check(blocked_until > 0 and first_free > blocked_until, "T13 (%s): gesperrt bis Schritt %d, frei ab Schritt %d" % [side, blocked_until, first_free])
+		results[side] = [blocked_until, first_free]
+		f.scope.free()
+	_check(results["blue"] == results["red"], "T13: eigene und Gegnerseite gleich: %s / %s" % [str(results["blue"]), str(results["red"])])
 
 
 # ---- T7: Abklingen ------------------------------------------------------------
