@@ -1105,7 +1105,7 @@ func _was_recently_shot_by(observer, shooter) -> bool:
 ## Gruppe im Fenster beschossen hat, ebenfalls mindestens die eigene Waffenreichweite.
 func _get_detection_range_for(observer, target) -> float:
 	var detection_range: float = _get_effective_range(target)
-	if _uses_weapon_range_for_contact_detection(observer):
+	if _uses_weapon_range_for_contact_detection(observer) or _was_recently_shot_by(observer, target):
 		detection_range = maxf(detection_range, _get_weapon_attack_range(observer, target))
 	return detection_range
 
@@ -3754,6 +3754,13 @@ func _advance_return_fire_windows() -> void:
 			hit_keys_to_remove.append(hit_key)
 	for hit_key in hit_keys_to_remove:
 		_recent_hit_tick_by_shooter_and_group.erase(hit_key)
+	var shot_keys_to_remove: Array = []
+	for shot_key in _recent_shot_tick_by_shooter_and_group.keys():
+		var shot_age: int = _current_tick - int(_recent_shot_tick_by_shooter_and_group[shot_key])
+		if shot_age > RETURN_FIRE_WINDOW_CLEANUP_TICKS or shot_age < 0:
+			shot_keys_to_remove.append(shot_key)
+	for shot_key in shot_keys_to_remove:
+		_recent_shot_tick_by_shooter_and_group.erase(shot_key)
 
 
 func get_return_fire_window_snapshot() -> Dictionary:

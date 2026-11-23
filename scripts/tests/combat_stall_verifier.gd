@@ -9,6 +9,7 @@ func _run() -> void:
 	_test_b1_sees_uses_detection_range()
 	_test_b2_lookaround_continues()
 	_test_b3_own_target_beyond_detection()
+	_test_c_shooter_reveals_himself()
 	await process_frame
 	print("combat_stall_verifier passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -94,3 +95,61 @@ func _test_b3_own_target_beyond_detection() -> void:
 			break
 	_check(turned_tick >= 0, "B3: a dreht sich zum Schuetzen von hinten (Richtung %d, nach %d Ticks)" % [_face(f, "a"), turned_tick])
 	f.scope.free()
+
+
+## Ein getarnter Schuetze s drei Felder vor a (ausserhalb Kontakt- und Erkennungsreichweite, in Waffenreichweite von a).
+## variant: "shot_miss", "shot_hit", "no_shot", "blocked" (Sichtlinie durch ein Hindernis verdeckt), "expired" (nach dem Fenster).
+func _c_fixture(variant: String) -> Dictionary:
+	var a_grid := Vector2i(20, 20)
+	# awareness 0,5 wie im Einsatz: die Erkennung braucht einige Ticks (bei 1,0 waere sie sofort fertig und nie zu loeschen).
+	var f := _fixture([{"id": "a", "team": "blue", "grid": a_grid, "facing": 0, "cmd": HOLD, "hp": 400, "aw": 0.5},
+		{"id": "s", "team": "red", "grid": _line(a_grid, 0, 3), "facing": 3, "stealth": 0.5, "hp": 400}])
+	_set_ranges(f)
+	if variant == "blocked":
+		var wall := _line(a_grid, 0, 2)
+		f.terrain.register_tile(TILE.new({"tile_id": str(wall) + "_wall", "grid_position": wall, "world_position": f.terrain.grid_to_world(wall),
+			"explicit_hex_ramps": true, "blocks_los": true, "object_height": 3}))
+	_ticks(f, 3)
+	return f
+
+
+func _shots_by(f: Dictionary, shooter: String) -> int:
+	var count := 0
+	for result in f.results:
+		if String(Dictionary(result).get("attacker_unit_id", "")) == shooter:
+			count += 1
+	return count
+
+
+# C: Wer schiesst, verraet sich (R-C).
+func _test_c_shooter_reveals_himself() -> void:
+	for variant in ["shot_miss", "shot_hit", "no_shot", "blocked", "expired"]:
+		var tag := "C %s" % variant
+		var f := _c_fixture(variant)
+		var a = f.units.a
+		var s = f.units.s
+		var weapon_range: float = float(f.driver._get_weapon_attack_range(a, s))
+		var open_los := _visible(f, "a", "s", weapon_range)
+		_check(not bool(f.driver._has_valid_los(a, s)), "%s: vor dem Schuss erkennt a den Schuetzen nicht" % tag)
+		if variant == "blocked":
+			_check(not open_los, "%s: Ausgangslage Sichtlinie verdeckt" % tag)
+		else:
+			_check(open_los and not _visible(f, "a", "s", f.driver.contact_range), "%s: Ausgangslage s in Waffenreichweite sichtbar, ausserhalb der Kontaktreichweite" % tag)
+		if variant != "no_shot":
+			_shoot(f, "s", "a", variant == "shot_hit")
+			_tick(f)  # Schuss im Folgetick aufgeloest
+		if variant == "expired":
+			_ticks(f, int(f.driver._get_return_fire_window_ticks(a)) + 2)
+		var detected_now := bool(f.driver._has_valid_los(a, s))
+		var replies_before := _shots_by(f, "a")
+		var window: int = int(f.driver._get_return_fire_window_ticks(a))
+		for step in range(window):
+			_combat_tick(f)
+		var replies := _shots_by(f, "a") - replies_before
+		if variant in ["shot_miss", "shot_hit"]:
+			_check(detected_now, "%s: im Fenster erkennt a den Schuetzen" % tag)
+			_check(replies >= 1, "%s: a erwidert das Feuer im Fenster (%d Schuesse)" % [tag, replies])
+		else:
+			_check(not detected_now, "%s: a erkennt den Schuetzen nicht" % tag)
+			_check(replies == 0, "%s: a schiesst nicht (%d)" % [tag, replies])
+		f.scope.free()
