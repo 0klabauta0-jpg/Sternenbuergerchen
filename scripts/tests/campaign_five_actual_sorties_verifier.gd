@@ -33,8 +33,12 @@ func _wait(predicate: Callable, milliseconds: int, label: String) -> bool:
 		var deadline := Time.get_ticks_msec() + milliseconds
 		var next_trace := 0
 		while Time.get_ticks_msec() < deadline:
-			if bool(predicate.call()): return _check(true, label)
+			_snap_actors_to_tick()
+			var dbg_ok: bool = bool(predicate.call())
+			_dbg_poll(label, dbg_ok)
+			if dbg_ok: return _check(true, label)
 			if Time.get_ticks_msec() >= next_trace:
+				print("FIVE_DBG wall_probe combat tick=%d" % _dbg_tick())
 				_trace_actual_combat(label)
 				next_trace = Time.get_ticks_msec() + 5000
 			await physics_frame
@@ -48,9 +52,13 @@ func _wait(predicate: Callable, milliseconds: int, label: String) -> bool:
 		var progress: Dictionary = {}
 		var latest: Dictionary = {}
 		while Time.get_ticks_msec() < deadline:
-			if bool(predicate.call()): return _check(true, label)
+			_snap_actors_to_tick()
+			var dbg_ok2: bool = bool(predicate.call())
+			_dbg_poll(label, dbg_ok2)
+			if dbg_ok2: return _check(true, label)
 			var now := Time.get_ticks_msec()
 			if now >= next_trace:
+				print("FIVE_DBG wall_probe approach tick=%d" % _dbg_tick())
 				latest = _trace_actual_approach(label)
 				for actor: Dictionary in latest.get("actors", []):
 					var id := String(actor.id)
@@ -207,6 +215,21 @@ func _check(value: bool, label: String) -> bool:
 	var sim: Node = _dbg_active_simulation()
 	print("FIVE_DBG check scenario=%s tick=%d pf=%d fd=%d value=%s label=%s" % [_dbg_scenario(sim) if sim != null else "-", int(sim.call("get_tick")) if sim != null else -1, Engine.get_physics_frames(), Engine.get_frames_drawn(), str(value), label])
 	return super._check(value, label)
+## G5c (Ursache der Rest-Abweichung): SimulationRoot._process (simulation_root.gd ~4780) setzt die Knotenpositionen der Bodeneinheiten
+## je Bild auf Simulationsposition + Engine.get_physics_interpolation_fraction() (Darstellung, haengt vom Bildtakt/der Wanduhr ab).
+## Die Nutzungsabfrage (Mittelpunkt aus global_position) und die Naehe-Bedingungen des Pruefstands lesen diese Knotenpositionen.
+## Damit der Pruefstand nur auf dem Zustand des Ticks entscheidet, wird vor jeder Abfrage auf Bruchteil 0 (= Tickposition) zurueckgesetzt.
+func _snap_actors_to_tick() -> void:
+	var sim: Node = _dbg_active_simulation()
+	if sim != null and sim.has_method("_project_hex_ground_actors"):
+		sim.call("_project_hex_ground_actors", 0.0)
+func _dbg_tick() -> int:
+	var sim: Node = _dbg_active_simulation()
+	return int(sim.call("get_tick")) if sim != null else -1
+var _dbg_last_probe: String = ""
+func _dbg_poll(label: String, ok: bool) -> void:
+	var sim: Node = _dbg_active_simulation()
+	print("FIVE_DBG poll scenario=%s tick=%d pf=%d pr=%d ok=%s label=%s probe=%s" % [_dbg_scenario(sim) if sim != null else "-", _dbg_tick(), Engine.get_physics_frames(), Engine.get_process_frames(), str(ok), label, _dbg_last_probe])
 ## Je Tick: Position des Truppfuehrers (Knoten) und Truppmittelpunkt (wie ihn die Nutzungsabfrage verwendet), dazu Physik-/Bildzaehler.
 func _dbg_watch_position(tick: int, simulation: Node) -> void:
 	var actor = simulation.call("_resolve_known_unit_for_contract", "campaign_leader") if simulation.has_method("_resolve_known_unit_for_contract") else null
@@ -402,8 +425,10 @@ func _remaining_missions() -> void:
 			if not await _wait(func():
 				if PackedStringArray(mission.get_node("CombatLoopDriver").get_mission_scenario_runtime_gate_snapshot().get("completed_step_ids",[])).has("clear_outpost"):return true
 				var active_ground_members:=0
+				_dbg_last_probe = ""
 				for id in _crew_ids:
 					var actor=sim.call("_resolve_known_unit_for_contract",String(id))
+					if is_instance_valid(actor): _dbg_last_probe += "%s:%s:%s:%s " % [String(id), str(actor.global_position), str(actor.get_vital_state()), str(sim.get_hex_unit_state(String(id)).is_empty())]
 					if not is_instance_valid(actor) or sim.get_hex_unit_state(String(id)).is_empty() or String(actor.get_vital_state())!="fit":continue
 					active_ground_members+=1
 					if actor.global_position.distance_to(enemy_target)>640.0:return false
@@ -493,6 +518,7 @@ func _move_and_use(mission: Node, interaction: String, step: String, map_path: S
 		if not is_instance_valid(controller):
 			return false
 		var entry: Dictionary = _find_interaction(controller.call("get_mission_interaction_runtime_use_state_snapshot"), interaction)
+		_dbg_last_probe = "status=%s dist=%s reason=%s" % [str(entry.get("runtime_use_status", "")), str(entry.get("distance_world", "")), str(entry.get("runtime_use_reason", ""))]
 		return String(entry.get("runtime_use_status", "")) == "usable", 180000, interaction + " becomes usable after real simulated approach"):
 		_dump("approach_" + interaction)
 		return false
