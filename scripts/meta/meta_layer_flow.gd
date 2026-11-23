@@ -4625,6 +4625,15 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 				resolved_result["total_loss_reason"] = String(casualty_resolution.get("total_loss_reason", ""))
 			else:
 				resolved_result["casualty_total_loss"] = false
+	# LC2i I1: Wuerde die Flotte nach dem Raeumen der verlorenen Schiffe leer sein, gilt der Einsatz als Totalverlust (Stand vor dem Einsatz,
+	# Totalverlust-Strafe, keine Notrettungsgebuehr dazu, kein Pleite-Bildschirm "no_craft").
+	var last_craft_lost: bool = craft_lost and _fleet_empty_after_losses(other_craft_losses + [String(_active_singleplayer_identity.get("craft_id", ""))])
+	if last_craft_lost and not failed_extraction:
+		failed_extraction = true
+		_mark_campaign_total_loss(resolved_result, mission_result, {"ok": false, "reason": "last_craft_lost"})
+		if not casualty_rules.is_empty():
+			resolved_result["casualty_total_loss"] = true
+			resolved_result["total_loss_reason"] = "last_craft_lost"
 	if not failed_extraction and not craft_lost and _singleplayer_runtime != null and not _active_singleplayer_identity.is_empty():
 		var return_gate: Dictionary = _singleplayer_runtime.call("authorize_return", String(_active_singleplayer_identity.get("craft_id", "")))
 		if not bool(return_gate.get("ok", false)):
@@ -4651,6 +4660,8 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 		var casualty_driver: Node = _active_mission.get_node_or_null("CombatLoopDriver")
 		if casualty_driver != null and casualty_driver.has_method("clear_casualty_flags"):
 			casualty_driver.call("clear_casualty_flags")
+	if last_craft_lost:
+		_last_mission_result["last_craft_lost"] = true
 	if casualty_resolution.has("team_states"):
 		_last_mission_result["team_states"] = Array(casualty_resolution.get("team_states", [])).duplicate(true)
 	if not casualty_resolution.is_empty() and not failed_extraction:
@@ -4759,11 +4770,31 @@ func _craft_loss_quote(craft_id: String) -> Dictionary:
 			var named: String = String(Dictionary(craft_variant).get("display_name", "")).strip_edges()
 			if not named.is_empty(): ship_name = named
 	var is_mission_craft: bool = craft_id == String(_active_singleplayer_identity.get("craft_id", ""))
+	# LC2i I1: Bleibt nach den bisher abgestuerzten Schiffen (und diesem) keines uebrig, ist es das letzte Schiff: Totalverlust, keine Notrettungsgebuehr.
+	var lost_ids: Array = [craft_id]
+	var simulation: Node = _active_mission.get_node_or_null("SimulationRoot") if is_instance_valid(_active_mission) else null
+	if simulation != null and simulation.has_method("get_air_crash_sites"):
+		for site in Array(simulation.call("get_air_crash_sites")):
+			lost_ids.append(String(Dictionary(site).get("craft_id", "")).strip_edges())
+	var is_last_craft: bool = _fleet_empty_after_losses(lost_ids)
 	var rules: Dictionary = _get_campaign_casualty_rules()
 	var fee := 0
-	if is_mission_craft and not rules.is_empty() and _singleplayer_runtime != null:
+	if is_mission_craft and not is_last_craft and not rules.is_empty() and _singleplayer_runtime != null:
 		fee = _craft_loss_rescue_fee([], rules)
-	return {"ship_name": ship_name, "is_mission_craft": is_mission_craft, "fee": fee}
+	return {"ship_name": ship_name, "is_mission_craft": is_mission_craft, "fee": fee, "is_last_craft": is_last_craft}
+
+
+## LC2i I1: Ist die Flotte leer, wenn genau die Schiffe der Liste (craft_id-Texte oder Verlustbelege) verloren sind? Eine Flotte ohne Schiffe
+## gilt nicht als "leer nach dem Verlust" (dann greift der Pleite-Grund no_craft).
+func _fleet_empty_after_losses(lost: Array) -> bool:
+	var ids: Dictionary = {}
+	for entry in lost:
+		ids[String(Dictionary(entry).get("craft_id", "")).strip_edges() if typeof(entry) == TYPE_DICTIONARY else String(entry).strip_edges()] = true
+	if _homebase_aircraft_definitions.is_empty(): return false
+	for craft_variant in _homebase_aircraft_definitions:
+		if not ids.has(String(Dictionary(craft_variant).get("craft_id", "")).strip_edges()):
+			return false
+	return true
 
 
 ## LC2g W3: Verlustbelege fuer jedes abgeschossene Schiff dieses Einsatzes, das nicht das Einsatzschiff ist und noch in der Flotte steht

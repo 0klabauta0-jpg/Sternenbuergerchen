@@ -1899,7 +1899,8 @@ func get_mission_evacuation_snapshot() -> Dictionary:
 
 func request_selected_fireteam_evacuation() -> Dictionary:
 	var evacuation: Dictionary = get_mission_evacuation_snapshot()
-	if not bool(evacuation.get("eligible", false)):
+	# LC2i I1: Ist das letzte Schiff verloren, bricht der Knopf den Einsatz ab, ohne dass der Trupp an der Landezone stehen muss.
+	if not bool(evacuation.get("eligible", false)) and not bool(_craft_loss_mission_craft_quote().get("is_last_craft", false)):
 		var blocked_reason: String = String(evacuation.get("reason", "blocked"))
 		_last_command_text = "EVAC BLOCKED: %s" % blocked_reason.to_upper()
 		_update_ui()
@@ -14671,10 +14672,19 @@ func _refresh_mission_evacuation_button() -> void:
 	# LC2h: Ist das Einsatzschiff verloren, heisst EVAC Notrettung (mit Gebuehr) und der Hinweis ist deutsch.
 	button.text = "EVAC"
 	var loss_quote: Dictionary = _craft_loss_mission_craft_quote()
+	var button_enabled: bool = bool(snapshot.get("eligible", false))
 	if not loss_quote.is_empty():
 		button.text = "Notrettung rufen (%d Credits)" % int(loss_quote.get("fee", 0))
 		button.tooltip_text = "Die Notrettung holt den Trupp von der Landezone ab." if bool(snapshot.get("eligible", false)) else "Der Trupp muss erst an der Landezone stehen."
-	META_UI_SKIN_SCRIPT.style_tactical_button(button, bool(snapshot.get("eligible", false)))
+		if bool(loss_quote.get("is_last_craft", false)):
+			# LC2i I1: Das letzte Schiff ist verloren: keine Notrettung, der Einsatz endet als Totalverlust; sofort nutzbar (kein Marsch zur Landezone).
+			button.text = "Einsatz abbrechen (Totalverlust)"
+			button.tooltip_text = "Ohne Schiff ist der Einsatz verloren. Ihr kehrt zum Stand vor dem Einsatz zurück."
+			button.visible = true
+			var last_driver = _get_combat_loop_driver()
+			button_enabled = last_driver != null and last_driver.has_method("get_mission_evacuation_authority_snapshot") and bool(Dictionary(last_driver.call("get_mission_evacuation_authority_snapshot")).get("accepted", false))
+			button.disabled = not button_enabled
+	META_UI_SKIN_SCRIPT.style_tactical_button(button, button_enabled)
 
 
 func _on_mission_evacuation_pressed() -> void:
@@ -19908,6 +19918,9 @@ func _craft_loss_mission_craft_quote() -> Dictionary:
 func _craft_loss_notice(craft_id: String) -> String:
 	var quote: Dictionary = _craft_loss_quote(craft_id)
 	if quote.is_empty(): return ""
+	if bool(quote.get("is_last_craft", false)):
+		# LC2i I1: Das letzte Schiff: keine Notrettung, der Einsatz gilt als Totalverlust.
+		return "%s ist verloren – es war euer letztes Schiff. Der Einsatz gilt als Totalverlust." % String(quote.get("ship_name", craft_id))
 	var text := "%s ist verloren." % String(quote.get("ship_name", craft_id))
 	if bool(quote.get("is_mission_craft", false)):
 		text += " Bring den Trupp zur Landezone – dort holt euch die Notrettung ab (%d Credits)." % int(quote.get("fee", 0))

@@ -875,6 +875,9 @@ func _apply_player_readout_texts() -> void:
 	var checkpoint_retry := bool(_mission_result.get("campaign_checkpoint_retry_required", false))
 	if checkpoint_retry:
 		_native_review_confirmation.text = "Heimkehr nicht moeglich: Pilot oder Besatzung nicht boardingfaehig. Fortsetzen laedt den letzten sicheren Basis-Checkpoint mit dessen Personal und Ressourcen; dieser Ausflug wird nicht gespeichert."
+		# LC2i I1: Das letzte Schiff ging verloren: der Grund steht zuerst.
+		if bool(_mission_result.get("last_craft_lost", false)):
+			_native_review_confirmation.text = "Das letzte Schiff ist verloren. Der Einsatz gilt als Totalverlust.\n" + _native_review_confirmation.text
 		# Task 5b: Notrettung nach Totalverlust, nur aus dem Ergebnis gelesen.
 		if bool(_mission_result.get("casualty_total_loss", false)) and typeof(_mission_result.get("total_loss_penalty")) == TYPE_DICTIONARY:
 			_native_review_confirmation.text += "\nNotrettung · %d Credits Rettungsgebühr" % int(Dictionary(_mission_result.get("total_loss_penalty")).get("rescue_fee", 0))

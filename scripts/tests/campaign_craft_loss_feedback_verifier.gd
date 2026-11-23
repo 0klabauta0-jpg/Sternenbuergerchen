@@ -31,6 +31,7 @@ func _h1_message() -> void:
 	controller.call("report_ground_fire_vs_air", _craft_id, {}, ["Notlandung geglückt."])
 	_check(not String(controller.get("_last_command_text")).contains("Notrettung"), "H1: ohne Schiffsverlust keine Notrettungsmeldung (%s)" % String(controller.get("_last_command_text")))
 	var second := _inject_bought_ship()
+	_inject_bought_ship("2", "Drittschiff") # LC2i: bleibt als Reserve, damit beide Verluste nicht das letzte Schiff treffen
 	_site(s, _craft_id)
 	_site(s, second)
 	controller.call("report_ground_fire_vs_air", _craft_id, {}, ["Bruchlandung! %s ist verloren." % name])
@@ -51,6 +52,7 @@ func _h2_button() -> void:
 	if s.is_empty(): return
 	var controller: Node = s.controller
 	var second := _inject_bought_ship()
+	_inject_bought_ship("2", "Drittschiff") # LC2i: Reserve, damit der Verlust nicht das letzte Schiff trifft
 	controller.call("_refresh_mission_evacuation_button")
 	var button: Button = controller.call("_ensure_mission_evacuation_button")
 	if not _check(button != null, "H2: EVAC-Knopf ist da"): return
@@ -82,6 +84,7 @@ func _h3_debrief() -> void:
 	var s: Dictionary = await _begin_funded_sortie(500)
 	if s.is_empty(): return
 	var second := _inject_bought_ship()
+	_inject_bought_ship("2", "Drittschiff") # LC2i: Reserve, damit der Verlust nicht das letzte Schiff trifft
 	var first_name := _ship_name_of(s.controller, _craft_id)
 	_site(s, _craft_id)
 	_site(s, second, "explosion")

@@ -24,7 +24,33 @@ func _run() -> void:
 	print("CAMPAIGN_CRAFT_LOSS_FLOW passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
 
-func _lose_craft(s: Dictionary, outcome: String = "crash") -> void:
+const FIXTURE = preload("res://scripts/tests/campaign_craft_loss_fixture.gd")
+
+## Legt ein Kaufschiff in die laufende Kampagne (Flotte, Ort, Platz, Kaufbeleg); gibt seine Kennung zurueck.
+## LC2i: Seit das letzte Schiff zu verlieren ein Totalverlust ist, brauchen die Faelle "Schiff verloren, Notrettung, Weiterspielen" ein zweites Schiff.
+func _inject_bought_ship(tag: String = "1", display_name: String = "Zweitschiff") -> String:
+	var fx = FIXTURE.new()
+	var supply: Object = _runtime.get("_supply")
+	var offer: Dictionary = Dictionary(Dictionary(supply.get("_definitions")).get("offers", {})).get("polisa_ship_cutlass", {})
+	var requests: Dictionary = supply.get("_requests")
+	# Der Beleg nennt den Heimlandeplatz 1 (die Kampagne hat nur einen Platz; ein Platzbeleg braeuchte den Baufortschritt "zweites Pad").
+	var buy: Dictionary = fx.receipt("lc2g-buy-" + tag, "homebase_pad_01", int(offer.get("unit_price")))
+	requests["lc2g-buy-" + tag] = buy
+	var id := String(buy.result.craft_id)
+	var definition: Dictionary = Dictionary(Array(_flow.get("_homebase_aircraft_definitions"))[0]).duplicate(true)
+	definition["craft_id"] = id
+	definition["display_name"] = display_name
+	definition["model_id"] = String(offer.get("model_id", "cutlass"))
+	Array(_flow.get("_homebase_aircraft_definitions")).append(definition)
+	Dictionary(_flow.get("_aircraft_location_by_craft"))[id] = "homebase"
+	_runtime.call("sync_crafts")
+	return id
+
+var _spare: String = ""
+
+## Verliert das Einsatzschiff. Mit keep_spare (Standard) liegt vorher ein zweites Schiff in der Flotte (_spare), damit der Verlust kein Totalverlust ist.
+func _lose_craft(s: Dictionary, outcome: String = "crash", keep_spare: bool = true) -> void:
+	if keep_spare and _fleet_ids().size() == 1: _spare = _inject_bought_ship()
 	var sites: Array = s.simulation.get("_air_crash_sites")
 	sites.append({"craft_id": _craft_id, "model_id": "cutlass", "grid": Vector2i.ZERO, "outcome": outcome})
 
@@ -104,11 +130,11 @@ func _l5_save_after_loss() -> void:
 	var disk: Dictionary = _disk()
 	var lost_ids: Array = []
 	for entry in Array(disk.get("lost_craft", [])): lost_ids.append(String(Dictionary(entry).get("craft_id", "")))
-	_check(Array(disk.get("fleet", [1])).is_empty() and lost_ids == [_craft_id] and not Dictionary(Dictionary(disk.get("supply", {})).get("fuel_by_craft_id", {})).has(_craft_id), "L5/B1: Stand traegt leere Flotte, Verlustbeleg und keinen Treibstoff des Schiffs (%s)" % str(lost_ids))
+	_check(_disk_fleet_ids(disk) == [_spare] and lost_ids == [_craft_id] and not Dictionary(Dictionary(disk.get("supply", {})).get("fuel_by_craft_id", {})).has(_craft_id), "L5/B1: Stand traegt das zweite Schiff, den Verlustbeleg und keinen Treibstoff des verlorenen Schiffs (%s)" % str(lost_ids))
 	_check(_disk_credits() == 100, "L5/B1: Stand traegt das Guthaben nach der Notrettung (%d)" % _disk_credits())
 	await _close()
 	if not await _open_scene("campaign", "continue_home"): return
-	_check(_fleet_ids().is_empty() and _credits() == 100, "L5/B1: Laden: Flotte leer, Guthaben 100 (%s / %d)" % [str(_fleet_ids()), _credits()])
+	_check(_fleet_ids() == [_spare] and _credits() == 100, "L5/B1: Laden: nur das zweite Schiff, Guthaben 100 (%s / %d)" % [str(_fleet_ids()), _credits()])
 	var resaved: Dictionary = {}
 	await _wait(func():
 		resaved.clear()
@@ -162,6 +188,7 @@ func _c_full_path() -> void:
 	var mission: Node = s.mission
 	var controller: Node = s.controller
 	var sim: Node = s.simulation
+	_spare = _inject_bought_ship() # LC2i: das letzte Schiff zu verlieren waere ein Totalverlust; hier soll die Notrettung laufen
 	controller.call("_refresh_mission_dropship_panel")
 	var details: Button = mission.get_node_or_null("TacticalUI/MissionDropshipPanel/CompactCard/Contents/Header/DetailsButton")
 	if not _check(details != null and not details.disabled, "C: Details-Knopf der Schiffskarte ist da"): return
@@ -236,11 +263,16 @@ func _c_full_path() -> void:
 		saved.merge(Dictionary(_flow.call("request_campaign_save")))
 		return bool(saved.get("ok", false)), 60000, "C: Speichern nach Heimkehr gelingt")
 	var disk: Dictionary = _disk()
-	_check(Array(disk.get("fleet", [1])).is_empty() and Array(disk.get("lost_craft", [])).size() == 1 and _disk_credits() == 100, "C: Stand traegt leere Flotte, ein Verlustbeleg, Guthaben 100 (%d)" % _disk_credits())
+	_check(_disk_fleet_ids(disk) == [_spare] and Array(disk.get("lost_craft", [])).size() == 1 and _disk_credits() == 100, "C: Stand traegt das zweite Schiff, ein Verlustbeleg, Guthaben 100 (%d)" % _disk_credits())
 	await _close()
 	if not await _open_scene("campaign", "continue_home"): return
-	_check(_fleet_ids().is_empty() and _credits() == 100 and _pilot_down() and String(_roster_unit("campaign_leader").get("availability_status", "")) == "active", "C: Laden: Flotte leer, Guthaben 100, Pilot weiter in der Erholung, Anfuehrer einsatzbereit (%s / %d / %s / %s)" % [str(_fleet_ids()), _credits(), _unit_fate("campaign_pilot"), _unit_fate("campaign_leader")])
+	_check(_fleet_ids() == [_spare] and _credits() == 100 and _pilot_down() and String(_roster_unit("campaign_leader").get("availability_status", "")) == "active", "C: Laden: nur das zweite Schiff, Guthaben 100, Pilot weiter in der Erholung, Anfuehrer einsatzbereit (%s / %d / %s / %s)" % [str(_fleet_ids()), _credits(), _unit_fate("campaign_pilot"), _unit_fate("campaign_leader")])
 	await _close()
+
+func _disk_fleet_ids(disk: Dictionary) -> Array:
+	var ids: Array = []
+	for ship in Array(disk.get("fleet", [])): ids.append(String(Dictionary(Dictionary(ship).get("definition", {})).get("craft_id", "")))
+	return ids
 
 func _fleet_ids() -> Array:
 	var ids: Array = []
