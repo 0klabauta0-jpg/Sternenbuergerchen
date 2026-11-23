@@ -1181,8 +1181,8 @@ func fill_person_compartments(unit_ids: Array, from_base: bool) -> Dictionary:
 		if from_base and give < wanted: short += 1
 	if added > 0: _revision += 1
 	var parts: PackedStringArray = []
-	if from_base and added > 0: parts.append("Munition aufgefüllt: %d Magazine." % added)
-	var short_text := "Munition knapp: %d Fächer blieben leer." % short if from_base and short > 0 else ""
+	if from_base and added > 0: parts.append("Munition aufgefüllt: %d %s." % [added, "Magazin" if added == 1 else "Magazine"])
+	var short_text := ("Munition knapp: %d %s." % [short, "Fach blieb leer" if short == 1 else "Fächer blieben leer"]) if from_base and short > 0 else ""
 	if not short_text.is_empty(): parts.append(short_text)
 	return {"added": added, "short": short, "message": " ".join(parts), "short_message": short_text}
 
