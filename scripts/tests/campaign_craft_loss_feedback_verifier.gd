@@ -13,6 +13,7 @@ func _run() -> void:
 	await _h1_message()
 	await _h2_button()
 	await _h3_debrief()
+	await _h5_story_steps()
 	print("CAMPAIGN_CRAFT_LOSS_FEEDBACK passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
 
@@ -92,3 +93,31 @@ func _h3_debrief() -> void:
 	var shown: String = String(screen.get("_native_review_confirmation").text) if screen != null and screen.get("_native_review_confirmation") != null else ""
 	_check(shown.contains("Schiff verloren: %s" % first_name) and shown.contains("Notrettung: −400 Credits"), "H3: die Zeilen stehen in der Nachbesprechung (%s)" % shown.replace("\n", " | "))
 	await _end_sortie()
+
+## H5: Kiste laden und Anwerben sind an das Auftragsschiff gebunden; ist es verloren (Verlustbeleg), erfuellt jedes Schiff der Flotte den Schritt.
+func _h5_story_steps() -> void:
+	START.request_start(self, "campaign", "new")
+	_flow = FLOW.instantiate()
+	root.add_child(_flow)
+	current_scene = _flow
+	await process_frame
+	_runtime = _flow.get("_singleplayer_runtime")
+	if not _check(_runtime != null, "H5: Aufbau: Meta-Szene und Laufzeit"): return
+	var second := _inject_bought_ship()
+	# Aufbau: Auftrag 2 ist abgeschlossen und hat das Einsatzschiff als Auftragsschiff.
+	var jobs: Dictionary = _runtime.get("_campaign").get("_jobs")
+	jobs["outpost_recovery"]["status"] = "completed"
+	jobs["outpost_recovery"]["craft_id"] = _craft_id
+	var control: Dictionary = _runtime.call("request_operation", "campaign_recruit", {"craft_id": second})
+	_check(not bool(control.get("ok", false)) and String(control.get("reason", "")) == "recruit_craft_required", "H5: ohne Verlust verlangt Anwerben das Auftragsschiff (%s)" % str(control))
+	var crate_control: Dictionary = _runtime.call("request_operation", "campaign_load_crate", {"craft_id": second})
+	_check(not bool(crate_control.get("ok", false)) and String(crate_control.get("reason", "")) == "crate_not_here", "H5: ohne Verlust verlangt Kiste laden das Auftragsschiff (%s)" % str(crate_control))
+	_flow.call("_retire_lost_craft", {"craft_id": _craft_id, "ship_name": "Auftragsschiff", "outcome": "crash", "rescue_fee": 0})
+	_check(_fleet_ids() == [second], "H5: Aufbau: nur das zweite Schiff ist in der Flotte (%s)" % str(_fleet_ids()))
+	var recruit: Dictionary = _runtime.call("request_operation", "campaign_recruit", {"craft_id": second})
+	_check(String(recruit.get("reason", "")) != "recruit_craft_required", "H5: nach dem Verlust zaehlt fuers Anwerben jedes Schiff der Flotte (%s)" % str(recruit))
+	var crate: Dictionary = _runtime.call("request_operation", "campaign_load_crate", {"craft_id": second})
+	_check(bool(crate.get("ok", false)) and bool(Dictionary(Dictionary(_runtime.get("_campaign").call("get_campaign_snapshot")).get("progress", {})).get("crate_loaded", false)), "H5: nach dem Verlust laesst sich die Kiste mit dem zweiten Schiff laden (%s)" % str(crate))
+	var home_services: Dictionary = Dictionary(Dictionary(_flow.call("get_singleplayer_snapshot")).get("home_services", {}))
+	_check(Array(home_services.get("lost_craft_ids", [])).has(_craft_id), "H5: die Anzeige weiss vom Verlust des Auftragsschiffs (%s)" % str(home_services.get("lost_craft_ids")))
+	await _close()

@@ -2543,7 +2543,7 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 		var key := "recruited_pilot" if pilot else "recruited_outpost"
 		if bool(snapshot.progress.get(key,false)): return {"ok":true,"changed":false,"message":"Person bereits im Team"}
 		var job_craft := String(Dictionary(snapshot.jobs.get("buccaneer_rescue" if pilot else "outpost_recovery", {})).get("craft_id", ""))
-		if craft_id.is_empty() or craft_id != job_craft: return _reject("recruit_craft_required", "Das Schiff des zugehörigen Auftrags auswählen")
+		if not _job_craft_accepts(job_craft, craft_id): return _reject("recruit_craft_required", "Ein Schiff der Flotte auswählen" if _lost_craft_ids().has(job_craft) else "Das Schiff des zugehörigen Auftrags auswählen")
 		if pilot and not _has_verified_pilot_rescue(craft_id): return _reject("rescue_not_here", "Bestätigte Rettung dieses Schiffs fehlt")
 		var outpost_cleared := false
 		if not pilot:
@@ -2572,7 +2572,7 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 		if bool(snapshot.progress.crate_loaded): return {"ok":true,"changed":false}
 		if not _job_complete("outpost_recovery"): return _reject("crate_not_ready","Kiste zuerst am Außenposten bergen")
 		var job_craft := String(Dictionary(snapshot.jobs.get("outpost_recovery", {})).get("craft_id", ""))
-		if craft_id.is_empty() or craft_id != job_craft or String(_service_context(craft_id).get("location_id", "")) not in ["homebase", "trade_outpost"]: return _reject("crate_not_here","Auftragsschiff am gesicherten Außenposten oder nach Rückkehr auswählen")
+		if not _job_craft_accepts(job_craft, craft_id) or String(_service_context(craft_id).get("location_id", "")) not in ["homebase", "trade_outpost"]: return _reject("crate_not_here","Ein Schiff am gesicherten Außenposten oder nach Rückkehr auswählen" if _lost_craft_ids().has(job_craft) else "Auftragsschiff am gesicherten Außenposten oder nach Rückkehr auswählen")
 		var cargo := _campaign_cargo(craft_id,"c_benit_crate",1,"load:outpost_recovery")
 		if not bool(cargo.get("ok",false)): return cargo
 		return _commit("singleplayer_campaign","load_crate",{},"load:outpost_recovery",{"runtime_authorized":true})
@@ -2983,7 +2983,24 @@ func _home_services_snapshot() -> Dictionary:
 		if not _local_upload_container(id, job).is_empty(): local_jobs.append(id)
 		elif blocker.is_empty() and bool(job.get("home_upload", false)) and String(job.get("status", "")) in ["pending_upload", "active"]:
 			blocker = _upload_blocker_text(_find_campaign_chip_container("satellite_chip" if id == "satellite_recovery" else "outpost_chip", String(job.get("craft_id", ""))))
-	return {"workshop_available":_home_workshop_available(), "upload_job_ids":local_jobs, "upload_blocker":blocker, "all_at_home":_all_at_home()}
+	return {"workshop_available":_home_workshop_available(), "upload_job_ids":local_jobs, "upload_blocker":blocker, "all_at_home":_all_at_home(), "lost_craft_ids":_lost_craft_ids()}
+
+
+## LC2h H5: Kennungen der im Einsatz verlorenen Schiffe (Verlustbelege des Ablaufs).
+func _lost_craft_ids() -> Array:
+	var ids: Array = []
+	for record: Variant in Array(_flow.get("_lost_craft_records")):
+		ids.append(String(Dictionary(record).get("craft_id", "")))
+	return ids
+
+
+## LC2h H5: Erfuellt craft_id die Schiffsbindung eines Story-Schritts (Kiste laden, Anwerben)? Das Auftragsschiff immer; ist es verloren
+## (steht im Verlustbeleg), jedes Schiff der Flotte. Ob es am richtigen Ort steht, prueft der Aufrufer wie bisher.
+func _job_craft_accepts(job_craft: String, craft_id: String) -> bool:
+	if craft_id.is_empty(): return false
+	if craft_id == job_craft: return true
+	if job_craft.is_empty() or not _lost_craft_ids().has(job_craft): return false
+	return not Dictionary(_flow.call("_find_homebase_aircraft_definition", craft_id)).is_empty()
 
 func _has_verified_pilot_rescue(craft_id: String) -> bool:
 	# get_completed_result consumes its delivery flag before automatic recruitment.

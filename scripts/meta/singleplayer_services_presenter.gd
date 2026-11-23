@@ -455,7 +455,10 @@ func _refresh_campaign_actions(supply: Dictionary) -> void:
 	var local_uploads: Array = home_services.get("upload_job_ids", [])
 	var context: Dictionary = Dictionary(_snapshot.get("service_contexts_by_craft_id", {})).get(_selected_craft_id, {})
 	var job_craft := String(Dictionary(jobs.get("outpost_recovery", {})).get("craft_id", ""))
-	var at_outpost := String(context.get("location_id", "")) == "trade_outpost" and not _selected_craft_id.is_empty() and _selected_craft_id == job_craft
+	# LC2h H5: Ist das Auftragsschiff verloren (Verlustbeleg), genuegt "ein Schiff" der Flotte am richtigen Ort.
+	var job_craft_lost: bool = not job_craft.is_empty() and Array(home_services.get("lost_craft_ids", [])).has(job_craft)
+	var is_job_craft: bool = _selected_craft_id == job_craft or (job_craft_lost and not _selected_craft_id.is_empty())
+	var at_outpost := String(context.get("location_id", "")) == "trade_outpost" and not _selected_craft_id.is_empty() and is_job_craft
 	var has_chip := false
 	for job: Dictionary in jobs.values(): has_chip = has_chip or String(job.get("status","")) == "pending_upload"
 	has_chip = has_chip or not local_uploads.is_empty() or not String(home_services.get("upload_blocker", "")).is_empty()
@@ -473,7 +476,7 @@ func _refresh_campaign_actions(supply: Dictionary) -> void:
 				enabled = at_outpost
 			"campaign_load_crate":
 				show = show and String(Dictionary(jobs.get("outpost_recovery",{})).get("status","")) == "completed" and not bool(progress.get("crate_loaded",false))
-				enabled = at_outpost or (String(context.get("location_id", "")) == "homebase" and _selected_craft_id == job_craft)
+				enabled = at_outpost or (String(context.get("location_id", "")) == "homebase" and is_job_craft)
 			"campaign_build_pad":
 				show = show and bool(progress.get("recruited_pilot",false)) and not bool(progress.get("second_pad_built",false))
 				enabled = bool(home_services.get("all_at_home", false))
