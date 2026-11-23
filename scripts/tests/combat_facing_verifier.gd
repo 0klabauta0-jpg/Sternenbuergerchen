@@ -79,6 +79,7 @@ func _run() -> void:
 	_test_f8_deterministic()
 	_test_w1_crossfire()
 	_test_w2_group_key()
+	_test_w3_lookaround()
 	await process_frame
 	print("combat_facing_verifier passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -190,8 +191,7 @@ func _combat_tick(f: Dictionary) -> void:
 	_tick(f)
 	f.driver._advance_detection_timers()
 	if f.driver._should_run_combat_decision_tick(f.sim.tick_counter):
-		f.driver._attack_excluded_unit_ids = {}
-		f.driver._try_enqueue_attacks(f.sim)
+		f.driver._run_overwatch_and_attack_step(f.sim, false, {})
 
 
 func _ticks(f: Dictionary, count: int) -> void:
@@ -438,6 +438,88 @@ func _run_sequence() -> Array:
 		sequence.append([_face(f, "a"), _face(f, "b"), f.units.a.hp, f.units.b.hp])
 	f.scope.free()
 	return sequence
+
+
+## Alarmiert die Einheit ohne Schuss (Kontakt gewesen), mit letzter bekannter Gegnerposition `grid`.
+func _alert(f: Dictionary, id: String, grid: Vector2i) -> bool:
+	if not f.driver.has_method("_mark_combat_alert"):
+		return false
+	f.driver.call("_mark_combat_alert", f.units[id], f.terrain.grid_to_world(grid))
+	return true
+
+
+# W3: Umsehen nach Kontakt.
+func _test_w3_lookaround() -> void:
+	# (a) Der belegte Fall: Ruecken an Ruecken, beide stehen, niemand schiesst, die letzte bekannte Position fuehrt in die Irre.
+	var f := _fixture(_pair_specs("blue", "red", {"hp": 44, "cmd": HOLD}, {"hp": 44}))
+	_ticks(f, 3)
+	_check(_alert(f, "a", Vector2i(20, 18)) and _alert(f, "b", Vector2i(22, 22)), "W3a: beide alarmiert")
+	var turns := {"a": 0, "b": 0}
+	var last := {"a": _face(f, "a"), "b": _face(f, "b")}
+	var fight_started := false
+	var turns_before_fight := {"a": 0, "b": 0}
+	var mutual := false
+	for step in range(900):
+		_combat_tick(f)
+		for id in ["a", "b"]:
+			var now_face := _face(f, id)
+			if now_face != last[id]:
+				turns[id] += 1
+				last[id] = now_face
+		if not fight_started and (f.units.a.hp < 44 or f.units.b.hp < 44):
+			fight_started = true
+			turns_before_fight = turns.duplicate()
+		if _face(f, "a") == 0 and _face(f, "b") == 3:
+			mutual = true
+		if f.units.a.hp <= 0 or f.units.b.hp <= 0:
+			break
+	_check(fight_started, "W3a: das Gefecht beginnt ohne Schuss von aussen")
+	_check(turns_before_fight.a <= 6 and turns_before_fight.b <= 6, "W3a: hoechstens 6 Suchdrehungen je Einheit vor dem ersten Treffer (%s)" % str(turns_before_fight))
+	_check(f.units.a.hp <= 0 or f.units.b.hp <= 0, "W3a: das Gefecht laeuft bis zum Ausfall (a=%d b=%d)" % [f.units.a.hp, f.units.b.hp])
+	_check(mutual, "W3a: beide schauen sich zeitweise an")
+	f.scope.free()
+	# (b) Nicht alarmiert: dreht sich nie von selbst.
+	var g := _fixture(_pair_specs("blue", "red", {"cmd": HOLD}, {}))
+	var g_faces := [_face(g, "a"), _face(g, "b")]
+	for step in range(700):
+		_combat_tick(g)
+	_check(_face(g, "a") == g_faces[0] and _face(g, "b") == g_faces[1], "W3b: nicht alarmierte Einheiten drehen sich nicht von selbst")
+	g.scope.free()
+	# (c)+(d) Einzelne Einheit, Abstand der Suchdrehungen nach awareness, Ende nach der Alarmzeit.
+	for aw_case in [[1.0, 30], [0.5, 60], [0.0, 90]]:
+		var h := _fixture([{"id": "a", "team": "blue", "grid": Vector2i(20, 20), "facing": 3, "aw": aw_case[0], "cmd": HOLD}])
+		_ticks(h, 3)
+		_check(_alert(h, "a", Vector2i(18, 20)), "W3d: alarmiert")
+		var turn_ticks: Array = []
+		var prev := _face(h, "a")
+		for step in range(800):
+			_combat_tick(h)
+			if _face(h, "a") != prev:
+				prev = _face(h, "a")
+				turn_ticks.append(step)
+		var gaps_ok := turn_ticks.size() >= 3
+		for index in range(1, turn_ticks.size()):
+			var gap: int = turn_ticks[index] - turn_ticks[index - 1]
+			if abs(gap - int(aw_case[1])) > 6:
+				gaps_ok = false
+		_check(gaps_ok, "W3d awareness %s: Abstand der Suchdrehungen rund %d Ticks (%s)" % [str(aw_case[0]), aw_case[1], str(turn_ticks)])
+		_check(turn_ticks.size() <= 6, "W3c awareness %s: hoechstens 6 Suchdrehungen, dann endet die Suche (%d)" % [str(aw_case[0]), turn_ticks.size()])
+		_check(turn_ticks.is_empty() or turn_ticks[turn_ticks.size() - 1] < 600, "W3c awareness %s: nach 600 Ticks dreht nichts mehr" % str(aw_case[0]))
+		h.scope.free()
+	# (e) Zwei Durchlaeufe ergeben dieselbe Folge.
+	var runs: Array = []
+	for run in range(2):
+		var k := _fixture(_pair_specs("blue", "red", {"hp": 44, "cmd": HOLD}, {"hp": 44}))
+		_ticks(k, 3)
+		_alert(k, "a", Vector2i(20, 18))
+		_alert(k, "b", Vector2i(22, 22))
+		var sequence: Array = []
+		for step in range(500):
+			_combat_tick(k)
+			sequence.append([_face(k, "a"), _face(k, "b"), k.units.a.hp, k.units.b.hp])
+		runs.append(sequence)
+		k.scope.free()
+	_check(runs[0] == runs[1], "W3e: zwei Durchlaeufe ergeben dieselbe Folge")
 
 
 # W2: Gegnergruppe nur ueber group_id (Taktikprofil), verschiedene fireteam_id; Kamerad ausserhalb der Gruppe dreht nicht.

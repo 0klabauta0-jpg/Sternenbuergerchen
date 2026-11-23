@@ -2101,6 +2101,7 @@ func _run_overwatch_and_attack_step(simulation_root: Node, profile_enabled: bool
 			_attack_excluded_unit_ids[String(member_id)] = true
 	_try_enqueue_attacks(simulation_root)
 	_attack_excluded_unit_ids = {}
+	_advance_combat_lookaround()
 	if profile_enabled:
 		profile_scopes["combat_fire_decision_usec"] = Time.get_ticks_usec() - scope_started_usec
 		for fire_scope_name_variant in _combat_fire_decision_debug_scopes_usec.keys():
@@ -2426,6 +2427,8 @@ func _note_combat_facing_shot(attacker, target) -> void:
 	var now: int = _combat_facing_now()
 	_facing_target_by_unit[attacker_id] = {"target_id": target_id, "tick": now, "seen": now}
 	_facing_shot_at_tick[target_id] = now
+	_mark_combat_alert(attacker, _facing_logical_position(target))
+	_mark_combat_alert(target, _facing_logical_position(attacker))
 	_queue_combat_facing(attacker, target, 1, "combat_reaction", false)
 	_queue_combat_facing(target, attacker, _get_detection_delay_ticks(target), "combat_reaction", true)
 	_facing_noise_shots.append([attacker_id, target_id])
@@ -2460,6 +2463,116 @@ func _flush_combat_noise_facing() -> void:
 			if _attack_contact_ids.has(mate_id) or _unit_has_visible_own_target(mate, mate_id, now):
 				continue
 			_queue_combat_facing(mate, attacker, _get_detection_delay_ticks(mate) + COMBAT_FACING_NOISE_EXTRA_TICKS, "noise_reaction", true)
+
+
+## ---- Umsehen nach Kontakt (FT-A, W3) -------------------------------------------------------------------------------------
+## Eine stehende Einheit, die in den letzten 600 Ticks beschossen wurde oder geschossen hat ("alarmiert") und keinen Gegner
+## sieht, schaut zuerst zur letzten bekannten Gegnerposition, dann reihum (+1, -1, +2, -2, +3 um die Ausgangsrichtung), je
+## nach Aufmerksamkeit alle 30 bis 90 Ticks, bis sie einen Gegner sieht oder alle sechs Richtungen durch sind.
+## Rein rechnerisch (keine Zufallsquelle); gedreht wird ueber noise_reaction (niedrigste Prioritaet, nie gegen Laufende).
+const COMBAT_LOOKAROUND_ALERT_TICKS: int = 600
+const COMBAT_LOOKAROUND_OFFSETS: Array[int] = [1, -1, 2, -2, 3]
+var _facing_alert_until: Dictionary = {}
+var _facing_last_enemy_position: Dictionary = {}
+var _facing_search: Dictionary = {}
+
+
+## Alarmiert die Einheit; `enemy_position` ist die Position des Gegners beim Schusswechsel.
+func _mark_combat_alert(unit, enemy_position: Vector2) -> void:
+	var unit_id: String = _unit_id_for_facing(unit)
+	if unit_id.is_empty():
+		return
+	_facing_alert_until[unit_id] = _combat_facing_now() + COMBAT_LOOKAROUND_ALERT_TICKS
+	_facing_last_enemy_position[unit_id] = enemy_position
+	_facing_search.erase(unit_id)
+
+
+func _facing_logical_position(unit) -> Vector2:
+	var info: Dictionary = get_hex_sight_adapter().read_position(unit)
+	if bool(info.get("valid", false)):
+		return Vector2(info.get("position", Vector2.ZERO))
+	return _get_unit_world_position(unit)
+
+
+func _facing_direction_to_position(unit, to_position: Vector2) -> int:
+	var adapter = get_hex_sight_adapter()
+	if not adapter.is_active():
+		return -1
+	var from_position: Vector2 = _facing_logical_position(unit)
+	if from_position.distance_squared_to(to_position) <= 0.0001:
+		return -1
+	return int(adapter.world_angle_to_facing((to_position - from_position).angle()))
+
+
+func _facing_unit_is_walking(simulation_root, unit_id: String) -> bool:
+	var state: Dictionary = Dictionary(simulation_root.call("get_hex_unit_state", unit_id))
+	if state.is_empty():
+		return true
+	return bool(Dictionary(state.get("movement_state", {})).get("moving", false)) or bool(Dictionary(state.get("route_state", {})).get("has_commitments", false))
+
+
+func _facing_unit_sees_opponent(unit) -> bool:
+	var opponents: Array = _get_enemy_combat_units() if _get_unit_team_id_for_diagnostics(unit) == friendly_team_id else _get_friendly_combat_units()
+	for opponent in opponents:
+		if opponent == null or opponent == unit or not _unit_is_fit_for_facing(opponent):
+			continue
+		if bool(_query_current_visibility(unit, opponent, contact_range).get("visible", false)):
+			return true
+	return false
+
+
+## Einmal je Entscheidungsschritt (nach den Schuessen).
+func _advance_combat_lookaround() -> void:
+	if _facing_alert_until.is_empty():
+		return
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root == null or not simulation_root.has_method("queue_hex_facing_intent") or not get_hex_sight_adapter().is_active():
+		return
+	var now: int = _combat_facing_now()
+	var unit_ids: Array = _facing_alert_until.keys()
+	unit_ids.sort()
+	for unit_id in unit_ids:
+		var alert_until: int = int(_facing_alert_until[unit_id])
+		if now > alert_until or alert_until - COMBAT_LOOKAROUND_ALERT_TICKS > now + COMBAT_FACING_STALE_FUTURE_TICKS:
+			_facing_alert_until.erase(unit_id)
+			_facing_last_enemy_position.erase(unit_id)
+			_facing_search.erase(unit_id)
+			continue
+		var unit = _resolve_unit_by_id(String(unit_id))
+		if not _unit_is_fit_for_facing(unit) or _facing_unit_is_walking(simulation_root, String(unit_id)):
+			_facing_search.erase(unit_id)
+			continue
+		if _facing_unit_sees_opponent(unit):
+			_facing_search.erase(unit_id)
+			continue
+		var search: Dictionary = Dictionary(_facing_search.get(unit_id, {}))
+		var facing_now: int = int(Dictionary(simulation_root.call("get_hex_unit_state", unit_id)).get("facing_dir", 0))
+		if search.is_empty():
+			search = {"base": facing_now, "step": -1, "next": now}
+		var step: int = int(search["step"])
+		if step >= COMBAT_LOOKAROUND_OFFSETS.size() or now < int(search["next"]):
+			_facing_search[unit_id] = search
+			continue
+		if now < int(_facing_last_turn_tick.get(unit_id, -1000000)) + COMBAT_FACING_MIN_INTERVAL_TICKS:
+			_facing_search[unit_id] = search
+			continue
+		var awareness: float = clampf(float(unit.call("get_awareness")), 0.0, 1.0) if unit.has_method("get_awareness") else 0.5
+		var interval: int = 30 + int(round((1.0 - awareness) * 60.0))
+		var direction: int = -1
+		if step < 0:
+			direction = _facing_direction_to_position(unit, Vector2(_facing_last_enemy_position.get(unit_id, _facing_logical_position(unit))))
+		else:
+			direction = posmod(int(search["base"]) + COMBAT_LOOKAROUND_OFFSETS[step], 6)
+		search["step"] = step + 1
+		search["next"] = now + interval
+		_facing_search[unit_id] = search
+		if direction < 0 or direction == facing_now:
+			continue
+		_facing_serial += 1
+		var result: Dictionary = Dictionary(simulation_root.call("queue_hex_facing_intent", unit_id, direction, "look:%d:%d:%s" % [now, _facing_serial, unit_id], "noise_reaction", now + 1))
+		if bool(result.get("ok", false)) and not bool(result.get("replayed", false)) and not bool(result.get("unchanged", false)):
+			_facing_last_turn_tick[unit_id] = now + 1
+			_facing_last_turn_is_noise[unit_id] = true
 
 
 func _record_contact_decision_diagnostics(reason: String, data: Dictionary = {}) -> void:
