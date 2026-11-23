@@ -153,6 +153,7 @@ func _trace_fire_decision_units(label: String, mission: Node) -> void:
 			seen.append({"id":oid,"vital":other.get_vital_state(),"dist":snappedf(float(driver.call("_get_attack_distance", unit, other)),0.1),
 				"vis_contact_range":bool(Dictionary(driver.call("_query_current_visibility", unit, other, float(driver.get("contact_range")))).get("visible",false)),
 				"attack_range":snappedf(attack_range,0.1),"vis_attack_range":bool(Dictionary(driver.call("_query_current_visibility", unit, other, attack_range)).get("visible",false)),
+				"detect_range":snappedf(float(driver.call("_get_effective_range", other)),0.1),"target_stealth":other.call("get_stealth") if other.has_method("get_stealth") else null,
 				"los_detect":bool(driver.call("_has_valid_los", unit, other)),"attackable":bool(FIVE_TRACE_RESOLVER.call("is_target_attackable", unit, other, ctx)),
 				"detection":detection.get("%s:%s" % [id, oid], null)})
 		var row := {"tick":simulation.get_tick(),"id":id,"team":unit.get_team_id(),"grid":state.get("grid",null),"facing":state.get("facing_dir",null),
@@ -166,7 +167,9 @@ func _trace_fire_decision_units(label: String, mission: Node) -> void:
 			"warmed":warmed.has(id),"contact":contact_ids.has(id),"supp_level":int(driver.call("get_suppression_level_for_unit", unit)),"supp_slots":int(driver.call("get_suppression_slot_count", id)),
 			"alert_until":alert_until.get(id,null),"search":search.get(id,null),"facing_target":facing_target.get(id,null),"last_turn":last_turn.get(id,null),
 			"awareness":unit.call("get_awareness") if unit.has_method("get_awareness") else null,
-			"candidate_index":Dictionary(driver.get("_fire_candidate_target_ids_by_attacker_id")).get(id,null),"candidate_index_tick":driver.get("_fire_candidate_index_tick"),"opponents":seen}
+			"candidate_index":Dictionary(driver.get("_fire_candidate_target_ids_by_attacker_id")).get(id,null),"candidate_index_tick":driver.get("_fire_candidate_index_tick"),
+			"move_readout":"%s/%s" % [Dictionary(simulation.call("get_hex_movement_readout", id)).get("status",""), Dictionary(simulation.call("get_hex_movement_readout", id)).get("reason","")],
+			"contact_range":driver.get("contact_range"),"opponents":seen}
 		print("FIVE_FIRE_UNIT ", label, " ", str(row))
 	var diag: Dictionary = driver.call("get_contact_decision_diagnostics_snapshot")
 	print("FIVE_FIRE_DECISION ", label, " tick=", simulation.get_tick(), " reason=", diag.get("reason",""), " status=", diag.get("status",""), " decision_tick=", diag.get("tick",""), " next_attack_tick=", diag.get("next_attack_tick",""), " detection_pending=", diag.get("detection_pending_count",""), " candidate=", str(diag.get("candidate", diag.get("attacker_id",""))).left(400))
