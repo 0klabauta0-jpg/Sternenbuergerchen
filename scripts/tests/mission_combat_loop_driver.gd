@@ -2313,7 +2313,7 @@ func _enqueue_attack_for_pair(contact_pair: Dictionary, simulation_root: Node, p
 const COMBAT_FACING_MIN_INTERVAL_TICKS: int = 30
 const COMBAT_FACING_NOISE_EXTRA_TICKS: int = 30
 const COMBAT_FACING_BEING_SHOT_TICKS: int = 30
-const COMBAT_FACING_TARGET_MEMORY_TICKS: int = 120
+const COMBAT_FACING_STALE_FUTURE_TICKS: int = 200
 ## unit_id -> Tick, ab dem die Drehung wirkt; Kind "noise" darf von einer eigenen Kampfreaktion ersetzt werden.
 var _facing_last_turn_tick: Dictionary = {}
 var _facing_last_turn_is_noise: Dictionary = {}
@@ -2357,13 +2357,27 @@ func _facing_direction_toward(unit, toward) -> int:
 
 ## Hat die Einheit ein eigenes Ziel, das sie gerade sieht (Schuss auf es innerhalb des Gedaechtnisses, Sicht ohne Abbruch)?
 func _unit_has_visible_own_target(unit, unit_id: String, now: int) -> bool:
+	# Bezugsgegner: das eigene Ziel oder der Schuetze, zu dem sich die Einheit zuletzt gedreht hat. Er haelt, solange sie ihn
+	# sieht; sieht sie ihn nicht mehr, noch eine eigene Schussperiode lang. Tot oder weg: frei.
 	var entry: Dictionary = Dictionary(_facing_target_by_unit.get(unit_id, {}))
-	if entry.is_empty() or now - int(entry.get("tick", -1000000)) > COMBAT_FACING_TARGET_MEMORY_TICKS:
+	if entry.is_empty():
+		return false
+	if int(entry.get("seen", -1000000)) > now + COMBAT_FACING_STALE_FUTURE_TICKS:
+		_facing_target_by_unit.erase(unit_id)
 		return false
 	var own_target = _resolve_unit_by_id(String(entry.get("target_id", "")))
 	if not _unit_is_fit_for_facing(own_target):
+		_facing_target_by_unit.erase(unit_id)
 		return false
-	return bool(_query_current_visibility(unit, own_target, contact_range).get("visible", false))
+	if bool(_query_current_visibility(unit, own_target, contact_range).get("visible", false)):
+		entry["seen"] = now
+		_facing_target_by_unit[unit_id] = entry
+		return true
+	var period_ticks: int = ((_get_attack_period_milli(unit) + 999) / 1000) * COMBAT_DECISION_INTERVAL_TICKS
+	if now - int(entry.get("seen", -1000000)) < period_ticks:
+		return true
+	_facing_target_by_unit.erase(unit_id)
+	return false
 
 
 ## Reiht die Drehabsicht ein; false, wenn nichts eingereiht wurde (gesperrt, schon so gerichtet, zu frueh nach der letzten).
@@ -2395,6 +2409,9 @@ func _queue_combat_facing(unit, toward, delay_ticks: int, reason: String, guard_
 		return false
 	_facing_last_turn_tick[unit_id] = ready_tick
 	_facing_last_turn_is_noise[unit_id] = reason == "noise_reaction"
+	if guard_visible_target:
+		# Wer sich zu einem Schuetzen dreht, bleibt bei ihm (Bezugsgegner), bis er ihn eine Schussperiode lang nicht sieht.
+		_facing_target_by_unit[unit_id] = {"target_id": _unit_id_for_facing(toward), "tick": ready_tick, "seen": ready_tick}
 	return true
 
 
@@ -2407,7 +2424,7 @@ func _note_combat_facing_shot(attacker, target) -> void:
 	if attacker_id.is_empty() or target_id.is_empty():
 		return
 	var now: int = _combat_facing_now()
-	_facing_target_by_unit[attacker_id] = {"target_id": target_id, "tick": now}
+	_facing_target_by_unit[attacker_id] = {"target_id": target_id, "tick": now, "seen": now}
 	_facing_shot_at_tick[target_id] = now
 	_queue_combat_facing(attacker, target, 1, "combat_reaction", false)
 	_queue_combat_facing(target, attacker, _get_detection_delay_ticks(target), "combat_reaction", true)

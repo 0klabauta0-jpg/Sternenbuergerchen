@@ -77,6 +77,7 @@ func _run() -> void:
 	_test_f5_lock_rules()
 	_test_f6_no_flicker()
 	_test_f8_deterministic()
+	_test_w1_crossfire()
 	await process_frame
 	print("combat_facing_verifier passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -394,9 +395,16 @@ func _test_f6_no_flicker() -> void:
 	_ticks(f, 8)
 	_check(_face(f, "b") == 3, "F6: innerhalb von 30 Ticks keine zweite Drehung (%d)" % _face(f, "b"))
 	_ticks(f, 40)
+	# W1 (Nachbesserung 1): b sieht a noch, also bleibt b bei a, auch wenn d nach 30 Ticks schiesst (alt: dreht zu d).
 	_shoot(f, "d", "b")
 	_ticks(f, 4)
-	_check(_face(f, "b") == 1, "F6: nach 30 Ticks dreht ein neuer Schuetze (%d)" % _face(f, "b"))
+	_check(_face(f, "b") == 3, "F6: nach 30 Ticks bleibt b bei seinem Bezugsgegner a, solange er ihn sieht (%d)" % _face(f, "b"))
+	# Faellt a aus, ist der Bezugsgegner frei und der naechste Schuetze dreht b.
+	f.units.a.hp = 0
+	_ticks(f, 40)
+	_shoot(f, "d", "b")
+	_ticks(f, 4)
+	_check(_face(f, "b") == 1, "F6: ist a ausgefallen, dreht ein neuer Schuetze (%d)" % _face(f, "b"))
 	f.scope.free()
 	# Wer ein sichtbares Ziel hat und darauf schiesst, dreht sich nicht weg.
 	var g := _fixture(specs)
@@ -423,6 +431,54 @@ func _run_sequence() -> Array:
 		sequence.append([_face(f, "a"), _face(f, "b"), f.units.a.hp, f.units.b.hp])
 	f.scope.free()
 	return sequence
+
+
+# W1: Kreuzfeuer. v steht zwischen zwei Schuetzen aus entgegengesetzten Richtungen (a im Westen, d im Osten), schwach
+# (39 Ticks Verzug). v dreht sich einmal zum ersten Schuetzen, bleibt bei ihm, solange er ihn sieht, und schiesst.
+func _test_w1_crossfire() -> void:
+	for variant in [[false, true], [true, true], [false, false], [true, false]]:
+		var swap: bool = variant[0]
+		var loop: bool = variant[1]
+		var west := "blue" if not swap else "red"
+		var east := "red" if not swap else "blue"
+		var specs := [
+			{"id": "a", "team": west, "grid": Vector2i(18, 20), "facing": 0, "ft": "ga", "hp": 5000},
+			{"id": "d", "team": east, "grid": Vector2i(22, 20), "facing": 3, "ft": "gd", "hp": 5000},
+			{"id": "v", "team": west if swap else east, "grid": Vector2i(20, 20), "facing": 1, "ft": "gv", "aw": 0.2, "ini": 0.2, "hp": 5000, "cmd": HOLD},
+		]
+		# v steht auf der Seite von d (gegen a), d und v sind Freunde: fuer das Kreuzfeuer muessen a und d beide Gegner von v sein.
+		specs[2]["team"] = "red" if not swap else "blue"
+		specs[1]["team"] = "blue" if not swap else "red"
+		specs[0]["team"] = "blue" if not swap else "red"
+		# v ist dann Gegner beider (Team der Gegenseite); a und d teilen das Team, schiessen aber aus entgegengesetzten Richtungen.
+		var f := _fixture(specs)
+		_ticks(f, 3)
+		var changes := 0
+		var last := _face(f, "v")
+		var v_shots := 0
+		var queued := 0
+		var history := ""
+		var shooters := ["a", "d"]
+		for step in range(600):
+			if step % 80 == 0:
+				if _shoot(f, shooters[(step / 80) % 2], "v", true):
+					queued += 1
+			if loop:
+				_combat_tick(f)
+			else:
+				_tick(f)
+			var now_face := _face(f, "v")
+			if now_face != last:
+				changes += 1
+				history += "%d:%d " % [step, now_face]
+				last = now_face
+		for result in f.results:
+			if String(result.get("attacker_unit_id", "")) == "v":
+				v_shots += 1
+		_check(changes <= 1, "W1 swap=%s loop=%s: v dreht sich im Kreuzfeuer hoechstens einmal (%d Drehungen: %s, %d Schuesse eingereiht)" % [swap, loop, changes, history, queued])
+		if loop:
+			_check(v_shots >= 1, "W1 swap=%s: v gibt Schuesse ab (%d)" % [swap, v_shots])
+		f.scope.free()
 
 
 # F8: gleiche Tickfolge, gleiche Blickrichtungen.
