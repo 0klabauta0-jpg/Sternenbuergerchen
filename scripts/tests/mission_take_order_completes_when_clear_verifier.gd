@@ -234,7 +234,7 @@ func _test_take_on_empty_point_ends_only_near_target() -> void:
 	await _close_scene(scene)
 
 
-# Haltezeit und GO: the controller clock is stepped by hand (set_process(false) + _process(delta)) so the 2 s hold can be observed exactly.
+# Haltezeit und GO: the controller clock is stepped by hand (set_process(false) + the per-tick order entry with a 0.5 s step) so the 2 s hold can be observed exactly.
 func _test_hold_time_and_go_with_queued_waypoint() -> void:
 	var scene: Node = await _open_scene()
 	var controller: Node = _controller(scene)
@@ -246,14 +246,14 @@ func _test_hold_time_and_go_with_queued_waypoint() -> void:
 	controller.set_process(false)
 	_keep_enemies_down(scene)
 	_assert(_waypoint_active(scene, "take"), "Hold test: TAKE still active right after the last defender fell")
-	controller.call("_process", 0.5)
-	controller.call("_process", 0.5)
+	controller.call("_on_simulation_tick_for_orders", 0, 0.5)
+	controller.call("_on_simulation_tick_for_orders", 0, 0.5)
 	_assert(_waypoint_active(scene, "take"), "Hold test: after 1 s of clear area the TAKE is still active")
 	_assert(bool(controller.call("execute_selected_fireteam_orders")), "Hold test: GO before the hold time is over is accepted")
 	_assert(_waypoint_active(scene, "take") and not _waypoint_active(scene, "move"), "Hold test: that GO does not end the TAKE and starts no march")
-	controller.call("_process", 0.5)
+	controller.call("_on_simulation_tick_for_orders", 0, 0.5)
 	_assert(_waypoint_active(scene, "take"), "Hold test: after 1.5 s the TAKE is still active")
-	controller.call("_process", 0.5)
+	controller.call("_on_simulation_tick_for_orders", 0, 0.5)
 	_assert(not _waypoint_active(scene, "take") and _waypoint_active(scene, "move"), "Hold test: after more than 2 s the TAKE ended and the queued waypoint is active")
 	controller.set_process(true)
 	await _close_scene(scene)

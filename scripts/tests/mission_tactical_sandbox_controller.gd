@@ -629,6 +629,10 @@ var _periodic_hud_stale_deferred_skip_count: int = 0
 var _periodic_hud_manager_fallback_count: int = 0
 var _periodic_hud_last_request_external: bool = false
 var _fireteam_security_refresh_time_remaining: float = 0.0
+# G5a: Befehlsausfuehrung je Simulations-Tick. Zaehler und Treiber-Tick sind nur zum Pruefen (Tests).
+var _order_execution_step_count: int = 0
+var _order_step_driver_tick_seen: int = -1
+var _order_tick_order_checked: bool = false
 var _fireteam_security_visuals_pending: bool = false
 var _mission_visible_frame_timing_debug_enabled: bool = false
 var _process_review_identity: Dictionary = {}
@@ -798,6 +802,7 @@ func _ready() -> void:
 	_ensure_fireteam_movement_controller()
 	_ensure_fireteam_security_controller()
 	_connect_fire_rule_authority_signals()
+	call_deferred("_connect_order_tick_signal")
 	_get_comic_bubble_runtime_gate()
 	_ensure_order_visualizer()
 	_ensure_contact_map_overlay()
@@ -840,12 +845,9 @@ func _process(delta: float) -> void:
 		_drop_ship_cooldown_remaining = maxf(_drop_ship_cooldown_remaining - delta, 0.0)
 	_advance_network_dropship_pending(delta)
 	_update_drop_sequence(delta)
-	_update_fireteam_suppression(delta)
-	_update_leader_initiated_flanks()
-	_update_ad_hoc_execution(delta)
-	_update_active_phase_execution(delta)
-	_update_area_defense_execution(delta)
-	_update_area_attack_execution(delta)
+	# G5a: Mit tickender Simulation laufen die Befehle je Tick (_on_simulation_tick_for_orders); je Bild nur als Rueckfall.
+	if not _orders_run_on_simulation_tick():
+		_run_order_execution_step(delta)
 	_update_npc_thought_peek_visuals()
 	if profile_enabled:
 		scopes_usec["execution_updates_usec"] = Time.get_ticks_usec() - scope_started_usec
@@ -2362,6 +2364,85 @@ func _connect_fire_rule_authority_signals() -> void:
 	var result_callable := Callable(self, "_on_network_command_result_received")
 	if simulation_root.has_signal("network_command_result_received") and not simulation_root.is_connected("network_command_result_received", result_callable):
 		simulation_root.connect("network_command_result_received", result_callable)
+
+
+## G5a: Die Befehlsausfuehrung haengt am Simulations-Tick (tick_processed). Verbunden wird nach allen _ready-Aufrufen, damit der
+## Gefechtstreiber schon am Signal haengt und im selben Tick VOR den Befehlen rechnet (Signale laufen in Verbindungsreihenfolge).
+func _connect_order_tick_signal() -> void:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root == null or not simulation_root.has_signal("tick_processed"):
+		return
+	var own := Callable(self, "_on_simulation_tick_for_orders")
+	if not simulation_root.is_connected("tick_processed", own):
+		simulation_root.connect("tick_processed", own)
+	_ensure_order_tick_after_driver(simulation_root)
+
+
+## Setzt die eigene Verbindung hinter die des Gefechtstreibers, falls der Treiber erst spaeter angehaengt wurde.
+func _ensure_order_tick_after_driver(simulation_root: Node) -> void:
+	if _order_tick_order_checked:
+		return
+	var driver = _get_combat_loop_driver()
+	if driver == null:
+		return
+	var own := Callable(self, "_on_simulation_tick_for_orders")
+	var own_index: int = -1
+	var driver_index: int = -1
+	var index: int = 0
+	for connection in simulation_root.tick_processed.get_connections():
+		var callable: Callable = connection["callable"]
+		if callable == own:
+			own_index = index
+		elif callable.get_object() == driver:
+			driver_index = index
+		index += 1
+	if driver_index < 0 or own_index < 0:
+		return
+	_order_tick_order_checked = true
+	if own_index > driver_index:
+		return
+	simulation_root.disconnect("tick_processed", own)
+	simulation_root.connect("tick_processed", own)
+
+
+## Je Bild nur dann, wenn keine tickende Simulation da ist: kein SimulationRoot, noch nicht am Tick angeschlossen, oder
+## die Simulation ueberspringt lokale Ticks (Mitspieler ohne eigene Rechnung).
+func _orders_run_on_simulation_tick() -> bool:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root == null or not simulation_root.has_signal("tick_processed"):
+		return false
+	if bool(simulation_root.call("_should_skip_local_tick_processing")):
+		return false
+	return simulation_root.is_connected("tick_processed", Callable(self, "_on_simulation_tick_for_orders"))
+
+
+## Einstieg je Simulations-Tick. delta ist die Tick-Laenge der Simulation (Spielzeit, 1/60 s bei normalem Lauf), nie die
+## Bildzeit. delta_override nur fuer Tests, die einen grossen Zeitschritt in einem Aufruf brauchen.
+func _on_simulation_tick_for_orders(_tick: int, delta_override: float = -1.0) -> void:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root == null or bool(simulation_root.call("_should_skip_local_tick_processing")):
+		return
+	_ensure_order_tick_after_driver(simulation_root)
+	var delta: float = delta_override
+	if delta <= 0.0:
+		delta = float(simulation_root.call("get_last_tick_delta")) if simulation_root.has_method("get_last_tick_delta") else 0.0
+	if delta <= 0.0:
+		delta = 1.0 / float(maxi(Engine.physics_ticks_per_second, 1))
+	var driver = _get_combat_loop_driver()
+	var driver_tick: Variant = driver.get("_current_tick") if driver != null else null
+	_order_step_driver_tick_seen = int(driver_tick) if driver_tick != null else -1
+	_run_order_execution_step(delta)
+
+
+## Die sechs Ausfuehrungsschritte der Trupps, in fester Reihenfolge, genau einmal je Aufruf.
+func _run_order_execution_step(delta: float) -> void:
+	_order_execution_step_count += 1
+	_update_fireteam_suppression(delta)
+	_update_leader_initiated_flanks()
+	_update_ad_hoc_execution(delta)
+	_update_active_phase_execution(delta)
+	_update_area_defense_execution(delta)
+	_update_area_attack_execution(delta)
 
 
 func _on_air_support_ground_fired(event: Dictionary) -> void:

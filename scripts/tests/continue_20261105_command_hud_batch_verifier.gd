@@ -88,11 +88,14 @@ func _run() -> void:
 	await process_frame
 	var units: Array = Array(controller.call("_get_fireteam_units", fireteam_id, true))
 	_check(_all_units_have_move(units), "Real SimulationRoot physics commits the public GO commands")
+	# G5a: Die Befehlsausfuehrung haengt am Tick. Ab hier steht der Eigner (wie vorher mit set_process(false)) still: keine
+	# weiteren echten Ticks, die Ausfuehrung kommt nur aus _owner_frame.
+	simulation.set_physics_process(false)
 	var before_flush: Dictionary = _guard(controller)
 	var hidden_members := scene.get_node(MEMBER_ROW) as Control
 	var hidden_member_ids := _card_instance_ids(hidden_members)
 	_check(not hidden_members.is_visible_in_tree(), "A5 uses the visible portrait team cards while the legacy member strip is hidden")
-	controller.call("_process", float(CONTROLLER.CARD_REFRESH_INTERVAL_SECONDS) + 0.001)
+	_owner_frame(controller, float(CONTROLLER.CARD_REFRESH_INTERVAL_SECONDS) + 0.001)
 	_check(_heavy_calls(_guard(controller)) == _heavy_calls(before_flush), "Periodic heavy due enqueues without a synchronous heavy surface traversal")
 	_check(_periodic_pending_keys(controller).size() == 4, "The coalesced command refresh retains all four pending presentation phases")
 	var flush_render_frames: int = await _drain_periodic_hud(manager, controller)
@@ -107,10 +110,10 @@ func _run() -> void:
 	_check(int(flushed.get("mini_cards_apply_count", 0)) > int(before_flush.get("mini_cards_apply_count", 0)) and _visible_team_card_matches_owner(scene, controller, fireteam_id), "The visible portrait team card reads the committed Move and displays its current status")
 	_check(int(flushed.get("selected_cards_apply_count", 0)) == int(before_flush.get("selected_cards_apply_count", 0)) and _card_instance_ids(hidden_members) == hidden_member_ids, "The same flush preserves hidden legacy member instances without rebuilding them")
 	for _step in range(3):
-		controller.call("_process", 0.2)
+		_owner_frame(controller, 0.2)
 	var quiet: Dictionary = _guard(controller)
 	_check(_heavy_calls(quiet) == _heavy_calls(flushed) and not _pending(controller), "Quiescent light process steps schedule no repeated command full refresh")
-	controller.call("_process", float(CONTROLLER.RUNTIME_HUD_HEAVY_REFRESH_INTERVAL_SECONDS))
+	_owner_frame(controller, float(CONTROLLER.RUNTIME_HUD_HEAVY_REFRESH_INTERVAL_SECONDS))
 	_check(_heavy_calls(_guard(controller)) == _heavy_calls(quiet) and _periodic_pending_keys(controller).size() == 4, "Ordinary heavy cadence enqueues its unforced phases without synchronous work")
 	var periodic_render_frames: int = await _drain_periodic_hud(manager, controller)
 	_check(periodic_render_frames == 4 and _periodic_pending_keys(controller).is_empty(), "Ordinary periodic work completes before its unchanged-state guard is assessed")
@@ -124,7 +127,7 @@ func _run() -> void:
 	controller.call("_update_ui", true, false)
 	var interleave_after: Dictionary = _guard(controller)
 	_check(not _pending(controller) and int(interleave_after.get("craft_controls_apply_count", 0)) == int(interleave_before.get("craft_controls_apply_count", 0)) + 1, "A guarded full transport pass consumes the command force request instead of losing it")
-	controller.call("_process", float(CONTROLLER.CARD_REFRESH_INTERVAL_SECONDS) + 0.001)
+	_owner_frame(controller, float(CONTROLLER.CARD_REFRESH_INTERVAL_SECONDS) + 0.001)
 	_check(int(_guard(controller).get("craft_controls_apply_count", 0)) == int(interleave_after.get("craft_controls_apply_count", 0)), "Cadence after an interleaved full pass does not force the same command twice")
 	_test_details_are_current(scene, controller, simulation, fireteam_id, target + Vector2(64.0, 0.0))
 	print("COMMAND_HUD_BATCH_FACTS " + JSON.stringify({"cadence_seconds": CONTROLLER.CARD_REFRESH_INTERVAL_SECONDS, "before": before, "after_commands": after_commands, "before_flush": before_flush, "flushed": flushed, "quiet": quiet, "periodic": periodic, "flush_render_frames": flush_render_frames, "periodic_render_frames": periodic_render_frames, "synthetic_owner_process": true, "synthetic_manager_hud_drain": true, "actor_writes": false}))
@@ -173,6 +176,13 @@ func _test_details_are_current(scene: Node, controller: Node, simulation: Node, 
 	_check(_pending(controller) and _heavy_calls(_guard(controller)) == _heavy_calls(before_change), "Open details preserve command batching for subsequent input")
 	_check(text.text != old_text and text.text.contains("WAYPOINT TAKE") and text.text.contains(feedback.text), "Already open details immediately replace stale command text with the latest Take feedback")
 	details.hide()
+
+
+# G5a: Befehlsausfuehrung laeuft je Simulations-Tick, die Anzeige je Bild. Der Test treibt beide Eigner wie bisher in einem
+# Schritt an: erst die Befehlsausfuehrung mit dem Zeitschritt, dann das echte _process.
+func _owner_frame(controller: Node, delta: float) -> void:
+	controller.call("_on_simulation_tick_for_orders", 0, delta)
+	controller.call("_process", delta)
 
 
 func _guard(controller: Node) -> Dictionary:

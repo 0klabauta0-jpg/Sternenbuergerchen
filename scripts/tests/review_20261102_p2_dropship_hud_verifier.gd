@@ -56,6 +56,8 @@ func _run() -> void:
 	var first_ids: Array = _subtree_ids(first)
 	var scan_before: int = int(controller.get_mission_runtime_index_diagnostics().membership_scan_count)
 	for _refresh in range(6):
+		# G5a: die Befehlsausfuehrung laeuft je Simulations-Tick; der Test treibt sie wie bisher je 0,35-s-Schritt selbst an.
+		controller._on_simulation_tick_for_orders(0, 0.35)
 		controller._process(0.35)
 	var unchanged: Control = _find_card(panel, "alpha")
 	var unchanged_ids: Array = _subtree_ids(unchanged)
