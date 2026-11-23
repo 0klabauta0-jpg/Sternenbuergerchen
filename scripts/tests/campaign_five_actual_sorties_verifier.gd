@@ -113,7 +113,7 @@ func _trace_actual_combat(label: String) -> void:
 			continue
 		others.append({"id":id,"team":actor.get_team_id(),"position":actor.global_position,"vital":actor.get_vital_state(),"hp":actor.get_health(),"suppression_level":level,"ground":simulation.get_hex_unit_state(id)})
 	print("FIVE_COMBAT_TRACE ",var_to_str({"label":label,"msec":Time.get_ticks_msec(),"tick":simulation.get_tick(),"own_team":own_team,"own_status":own_status,"other_actors":others,"scenario":mission.get_node("CombatLoopDriver").get_mission_scenario_runtime_gate_snapshot(),"own_actor_count":Array(approach.get("actors",[])).size()}))
-	_trace_fire_decision_units(label, mission)
+	# FIVE_FIRE_UNIT/FIVE_FIRE_DECISION kommen seit G5b aus dem Tick-Signal (_on_trace_tick), nicht mehr aus diesem Wanduhr-Takt.
 
 
 ## Nur Ausgabe (Stillstand-Suche 23.11.2026): je Einheit beider Seiten alles, was fuer die Schussentscheidung zaehlt.
@@ -170,9 +170,36 @@ func _trace_fire_decision_units(label: String, mission: Node) -> void:
 			"candidate_index":Dictionary(driver.get("_fire_candidate_target_ids_by_attacker_id")).get(id,null),"candidate_index_tick":driver.get("_fire_candidate_index_tick"),
 			"move_readout":"%s/%s" % [Dictionary(simulation.call("get_hex_movement_readout", id)).get("status",""), Dictionary(simulation.call("get_hex_movement_readout", id)).get("reason","")],
 			"contact_range":driver.get("contact_range"),"opponents":seen}
-		print("FIVE_FIRE_UNIT ", label, " ", str(row))
+		_emit_trace_line("FIVE_FIRE_UNIT " + label + " " + str(row))
 	var diag: Dictionary = driver.call("get_contact_decision_diagnostics_snapshot")
-	print("FIVE_FIRE_DECISION ", label, " tick=", simulation.get_tick(), " reason=", diag.get("reason",""), " status=", diag.get("status",""), " decision_tick=", diag.get("tick",""), " next_attack_tick=", diag.get("next_attack_tick",""), " detection_pending=", diag.get("detection_pending_count",""), " candidate=", str(diag.get("candidate", diag.get("attacker_id",""))).left(400))
+	_emit_trace_line("FIVE_FIRE_DECISION " + label + " tick=" + str(simulation.get_tick()) + " reason=" + str(diag.get("reason","")) + " status=" + str(diag.get("status","")) + " decision_tick=" + str(diag.get("tick","")) + " next_attack_tick=" + str(diag.get("next_attack_tick","")) + " detection_pending=" + str(diag.get("detection_pending_count","")) + " candidate=" + str(diag.get("candidate", diag.get("attacker_id",""))).left(400))
+
+## G5b S3: Die Schussentscheidungs-Spur wird an festen Simulations-Ticks gezogen (Signal tick_processed, nicht je Bild und
+## nicht nach Wanduhr) und in eine Pruefsumme gefuettert. Zwei Laeufe mit gleichem Ablauf ergeben dieselbe Pruefsumme.
+const FIVE_TRACE_TICK_INTERVAL: int = 300
+var _trace_hash: HashingContext = null
+var _trace_line_count: int = 0
+func _emit_trace_line(line: String) -> void:
+	print(line)
+	if _trace_hash == null:
+		_trace_hash = HashingContext.new()
+		_trace_hash.start(HashingContext.HASH_SHA256)
+	_trace_hash.update((line + "\n").to_utf8_buffer())
+	_trace_line_count += 1
+func _install_tick_trace() -> void:
+	root.get_tree().node_added.connect(_on_trace_node_added)
+func _on_trace_node_added(node: Node) -> void:
+	if node.name == "SimulationRoot" and node.has_signal("tick_processed"):
+		node.connect("tick_processed", _on_trace_tick.bind(node))
+func _on_trace_tick(tick: int, simulation: Node) -> void:
+	if tick <= 0 or tick % FIVE_TRACE_TICK_INTERVAL != 0 or not is_instance_valid(simulation): return
+	var mission: Node = simulation.get_parent()
+	if mission == null or mission.get_node_or_null("UnitRegistry") == null: return
+	_trace_fire_decision_units("tick%d" % tick, mission)
+func _finish() -> void:
+	var digest: String = _trace_hash.finish().hex_encode() if _trace_hash != null else "none"
+	print("FIVE_TRACE_DIGEST=", digest, " lines=", _trace_line_count)
+	await super._finish()
 
 func _long_approach_is_progressing(observation: Dictionary, progress: Dictionary, now: int) -> bool:
 	var has_long_live_route := false
@@ -203,6 +230,7 @@ func _all_crew_deployed(controller: Node) -> bool:
 
 func _run() -> void:
 	Engine.time_scale=4.0
+	_install_tick_trace()
 	_configure_entry()
 	_flow=FLOW.instantiate(); root.add_child(_flow)
 	await process_frame
