@@ -1139,6 +1139,14 @@ func _unboard(id: String, craft: String, payload: Dictionary) -> Dictionary:
 	return {"ok":true}
 
 
+## LC2k K2: Wer ist an Bord (oder beim Einsteigen) dieses Schiffs gefuehrt? Nur lesen.
+func unit_ids_aboard_craft(craft:String)->Array:
+	var ids:Array=[]
+	for id in _states:
+		if String(_states[id].get("craft_id",""))==craft and String(_states[id].status) in ["aboard","boarding"]:ids.append(String(id))
+	return ids
+
+
 ## LC2e B1: Notrettung nach Schiffsverlust: wer noch an Bord des verlorenen Schiffs gefuehrt wird (Lebende, die heimgeholt wurden), steht danach an der
 ## Basis (am ersten Landeplatz, draussen). Das Schiff selbst hat keinen Ort mehr; der Aufrufer raeumt es erst danach aus der Flotte.
 func rescue_crew_from_lost_craft(craft:String)->Dictionary:
