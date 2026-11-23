@@ -881,11 +881,31 @@ func _apply_player_readout_texts() -> void:
 	var loot_text := build_loot_text(_mission_result)
 	if not loot_text.is_empty():
 		_native_review_confirmation.text += "\n" + loot_text
+	var craft_loss_text := build_craft_loss_text(_mission_result)
+	if not craft_loss_text.is_empty():
+		_native_review_confirmation.text += "\n" + craft_loss_text
 	for pair in [["ReturnToFOBButton", "Zur FOB"], ["ReturnToHomebaseButton", "Zur Heimatbasis"]]:
 		var button := vbox.get_node("ButtonRow/" + pair[0]) as Button
 		if not button.has_meta("debrief_original_text"):
 			button.set_meta("debrief_original_text", button.text)
 		button.text = "Letzten sicheren Checkpoint fortsetzen" if checkpoint_retry else pair[1]
+
+
+## LC2h: Verlorene Schiffe des Einsatzes (craft_loss: das Einsatzschiff, other_craft_losses: weitere) je eine Zeile; dazu die gebuchte Notrettung.
+static func build_craft_loss_text(mission_result: Dictionary) -> String:
+	var lines := PackedStringArray()
+	var losses: Array = []
+	if typeof(mission_result.get("craft_loss")) == TYPE_DICTIONARY and not Dictionary(mission_result.get("craft_loss")).is_empty():
+		losses.append(Dictionary(mission_result.get("craft_loss")))
+	if typeof(mission_result.get("other_craft_losses")) == TYPE_ARRAY:
+		for other in Array(mission_result.get("other_craft_losses")):
+			if typeof(other) == TYPE_DICTIONARY: losses.append(Dictionary(other))
+	for loss in losses:
+		var ship_name: String = String(loss.get("ship_name", loss.get("craft_id", ""))).strip_edges()
+		lines.append("Schiff verloren: %s" % ship_name)
+		var fee: int = int(loss.get("rescue_fee", 0))
+		if fee > 0: lines.append("Notrettung: −%d Credits" % fee)
+	return "\n".join(lines)
 
 
 ## Beute aus optionalen Ausruestungskisten (Feld loot_items des Abschlussergebnisses, vom Adapter gebucht); ohne Beute leer.

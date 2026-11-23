@@ -12,6 +12,7 @@ func _run() -> void:
 	_configure_entry()
 	await _h1_message()
 	await _h2_button()
+	await _h3_debrief()
 	print("CAMPAIGN_CRAFT_LOSS_FEEDBACK passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
 
@@ -69,4 +70,25 @@ func _h2_button() -> void:
 	_check(button.text == "Notrettung rufen (400 Credits)" and button.tooltip_text == "Die Notrettung holt den Trupp von der Landezone ab.", "H2: Knopf und Hinweis an der Landezone (%s / %s)" % [button.text, button.tooltip_text])
 	s.driver.call("_resolve_combat", "aborted", "", "evacuation")
 	if not await _wait_released("H2: Einsatz wird freigegeben"): return
+	await _end_sortie()
+
+const DEBRIEF_SCRIPT = preload("res://scripts/meta/debrief_screen.gd")
+
+func _h3_debrief() -> void:
+	_check(DEBRIEF_SCRIPT.build_craft_loss_text({"result": "victory"}) == "", "H3: ohne Schiffsverlust keine Zeile")
+	var s: Dictionary = await _begin_funded_sortie(500)
+	if s.is_empty(): return
+	var second := _inject_bought_ship()
+	var first_name := _ship_name_of(s.controller, _craft_id)
+	_site(s, _craft_id)
+	_site(s, second, "explosion")
+	s.driver.call("_resolve_combat", "aborted", "", "evacuation")
+	if not await _wait_released("H3: Einsatz wird freigegeben"): return
+	var result: Dictionary = Dictionary(_flow.get("_last_mission_result"))
+	var text: String = DEBRIEF_SCRIPT.build_craft_loss_text(result)
+	_check(text.contains("Schiff verloren: %s" % first_name) and text.contains("Notrettung: −400 Credits") and text.contains("Schiff verloren: Zweitschiff"), "H3: Zeilen je verlorenem Schiff und die gebuchte Gebuehr (%s)" % text.replace("\n", " | "))
+	_check(text.count("Notrettung") == 1, "H3: die Gebuehr steht einmal (nur das Einsatzschiff)")
+	var screen: Node = _flow.call("_get_debrief_screen")
+	var shown: String = String(screen.get("_native_review_confirmation").text) if screen != null and screen.get("_native_review_confirmation") != null else ""
+	_check(shown.contains("Schiff verloren: %s" % first_name) and shown.contains("Notrettung: −400 Credits"), "H3: die Zeilen stehen in der Nachbesprechung (%s)" % shown.replace("\n", " | "))
 	await _end_sortie()
