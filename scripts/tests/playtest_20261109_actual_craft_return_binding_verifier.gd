@@ -33,8 +33,24 @@ func _run() -> void:
 	controller.call("set_planning_state", state)
 	controller.call("_select_mission_dropship_craft", "actual_ship", false)
 	controller.call("_set_selected_fireteams", PackedStringArray(["ft1"]), false)
-	var remote_screen: Vector2 = mission.get_node("Primary3DView").call("world_to_screen_position", remote)
+	# Ein heute wirklich ungueltiges Landefeld: Feld, dessen Landefläche blockiert ist (FIELD_LANDING.validate -> footprint_blocked).
+	var blocked_site: Vector2 = Vector2.INF
+	var landing_registry: Node = controller.call("_get_terrain_registry")
+	for tile in map.get_tiles():
+		var checked: Dictionary = load("res://scripts/mission/field_landing_contract.gd").validate(landing_registry, tile.grid_position, [])
+		if not bool(checked.get("ok", false)) and String(checked.get("reason", "")) == "footprint_blocked":
+			blocked_site = tile.world_position
+			break
+	_check(blocked_site.is_finite(), "Fixture finds a blocked (invalid) landing tile")
+	var blocked_screen: Vector2 = mission.get_node("Primary3DView").call("world_to_screen_position", blocked_site)
 	var pad_screen: Vector2 = mission.get_node("Primary3DView").call("world_to_screen_position", pad)
+	controller.set("_last_command_text", "")
+	_check(not bool(controller.call("_place_lz_from_screen_position", blocked_screen)), "Normal screen LZ choice rejects a blocked landing tile")
+	_check(not String(controller.get("_last_command_text")).is_empty(), "Rejected LZ leaves concrete player feedback")
+	controller.set("_lz_position", blocked_site)
+	controller.set("_has_lz_position", true)
+	_check(not bool(controller.call("_try_start_drop_sequence", true)), "Runtime drop gate also rejects injected blocked LZ")
+	controller.set("_has_lz_position", false)
 	_check(bool(controller.call("_place_lz_from_screen_position", pad_screen)), "Normal screen LZ choice accepts authored landing pad")
 	_check(Vector2(controller.get("_lz_position")).is_equal_approx(pad), "Accepted LZ snaps to saved real return pad center")
 	controller.set("_lz_position", pad)
