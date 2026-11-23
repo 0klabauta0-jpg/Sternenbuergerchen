@@ -21,9 +21,11 @@ func _run() -> void:
 	if only.is_empty() or only == "k2a": await _k2a_aboard_returning_craft()
 	if only.is_empty() or only == "k2b": await _k2b_left_at_crash_site()
 	if only.is_empty() or only == "k2c": await _k2c_both_lost()
-	# LC2l L2/L3: dritte Person (echte Anwerbung) im zweiten Schiff; k2d bleibt an der Absturzstelle, k2e geht vorher an Bord, l3 Sieg.
+	# LC2l L2/L3, LC2m W1: dritte Person (echte Anwerbung) im zweiten Schiff, NICHT in der Besatzung des Einsatzschiffs; k2d steht abseits, k2e steht am
+	# Einsatzschiff, k2f: auch der Truppfuehrer sass im zweiten Schiff und steht am Einsatzschiff, die dritte Person abseits; l3 Sieg.
 	if only.is_empty() or only in ["k2d", "trio"]: await _trio_case("left")
-	if only.is_empty() or only in ["k2e", "trio"]: await _trio_case("aboard")
+	if only.is_empty() or only in ["k2e", "trio"]: await _trio_case("near")
+	if only.is_empty() or only in ["k2f", "trio"]: await _trio_case("pair")
 	if only.is_empty() or only in ["l3", "trio"]: await _trio_case("victory")
 	if only.is_empty(): await _i2_background_end_releases_instance()
 	print("CAMPAIGN_CRAFT_LOSS_CREW passed=%d failed=%d" % [_passed, _failed])
@@ -218,7 +220,7 @@ func _begin_trio_sortie(credits: int, tag: String) -> Dictionary:
 	return sortie
 
 func _trio_case(variant: String) -> void:
-	var tag := {"left": "K2d", "aboard": "K2e", "victory": "L3"}[variant] as String
+	var tag := {"left": "K2d", "near": "K2e", "pair": "K2f", "victory": "L3"}[variant] as String
 	var s: Dictionary = await _begin_trio_sortie(500, tag)
 	if s.is_empty():
 		_trio = false
@@ -230,31 +232,50 @@ func _trio_case(variant: String) -> void:
 		return
 	states[RECRUIT]["craft_id"] = second
 	states[RECRUIT]["status"] = "aboard"
+	# K2f: auch der Truppfuehrer wird an der Basis als Insasse des zweiten Schiffs gefuehrt (GESTELLT wie _k2_prepare).
+	var second_crew: Array = [LEADER, RECRUIT] if variant == "pair" else [RECRUIT]
+	if variant == "pair": _k2_prepare(s, second)
 	_site(s, second)
 	var site: Dictionary = Dictionary(Array(s.simulation.get("_air_crash_sites")).back())
 	s.controller.call("apply_air_crash", second, site, {RECRUIT: {"state": "unhurt"}}, [RECRUIT])
 	var occupants: Array = _flow.call("_lost_craft_occupant_ids", [{"craft_id": second}])
-	_check(occupants == [RECRUIT], tag + ": Insasse des verlorenen Schiffs laut Basisseite ist nur die dritte Person (%s)" % str(occupants))
+	occupants.sort()
+	var expected_occupants: Array = second_crew.duplicate()
+	expected_occupants.sort()
+	_check(occupants == expected_occupants, tag + ": Insassen des verlorenen Schiffs laut Basisseite (%s)" % str(occupants))
 	if not _seat_crew(s):
 		_trio = false
 		return
-	# GESTELLT: Die Besatzung des Einsatzschiffs ist die Besuchskennung des Schiffs (singleplayer_visit_identities.unit_ids) und umfasst die Person, weil sie
-	# im Einsatzschiff mitgeflogen ist; das Einsatzschiff wuerde sie als Besatzung einschiffen. Als Person des zweiten Schiffs gehoert sie nicht dazu:
-	# sie wird aus der Besatzung des Einsatzschiffs genommen. In der Gegenprobe bleibt sie darin und steht am Zugang des Einsatzschiffs.
-	if variant == "aboard":
-		if not _place_at(s.simulation, s.access, RECRUIT, Vector2.ZERO):
-			_trio = false
-			return
-	else:
-		var visits: Dictionary = s.mission.get_meta("singleplayer_visit_identities", {})
-		if not _check(visits.has(_craft_id), tag + ": Aufbau: Besuchskennung des Einsatzschiffs ist da"):
-			_trio = false
-			return
-		var crew_ids := PackedStringArray(Dictionary(visits[_craft_id]).get("unit_ids", []))
-		var at: int = crew_ids.find(RECRUIT)
-		_check(at >= 0, tag + ": Aufbau: die dritte Person gehoert zur Besatzung des Einsatzschiffs (%s)" % str(crew_ids))
+	# GESTELLT: Die Besatzung des Einsatzschiffs ist die Besuchskennung des Schiffs (singleplayer_visit_identities.unit_ids) und umfasst die Personen, weil sie
+	# im Einsatzschiff mitgeflogen sind; das Einsatzschiff wuerde sie als Besatzung einschiffen. Als Personen des zweiten Schiffs gehoeren sie nicht dazu:
+	# sie werden in allen Faellen aus der Besatzung des Einsatzschiffs genommen (LC2m: auch in der Gegenprobe K2e).
+	var visits: Dictionary = s.mission.get_meta("singleplayer_visit_identities", {})
+	if not _check(visits.has(_craft_id), tag + ": Aufbau: Besuchskennung des Einsatzschiffs ist da"):
+		_trio = false
+		return
+	var crew_ids := PackedStringArray(Dictionary(visits[_craft_id]).get("unit_ids", []))
+	for person in second_crew:
+		var at: int = crew_ids.find(person)
+		_check(at >= 0, tag + ": Aufbau: %s gehoerte zur Besatzung des Einsatzschiffs (%s)" % [person, str(crew_ids)])
 		if at >= 0: crew_ids.remove_at(at)
-		Dictionary(visits[_craft_id])["unit_ids"] = crew_ids
+	Dictionary(visits[_craft_id])["unit_ids"] = crew_ids
+	# Die dritte Person steht in K2e am Zugang des Einsatzschiffs, sonst drei Felder (270) davon entfernt; der Truppfuehrer steht am Zugang (_seat_crew).
+	if not _place_at(s.simulation, s.access, RECRUIT, Vector2.ZERO if variant == "near" else Vector2(270.0, 0.0)):
+		_trio = false
+		return
+	var measured: Dictionary = {}
+	for raw in Array(Dictionary(_flow.call("_build_mission_result", s.mission, {})).get("team_states", [])): measured[String(Dictionary(raw).get("unit_id", ""))] = raw
+	_check(bool(Dictionary(measured.get(RECRUIT, {})).get("near_ship", variant != "near")) == (variant == "near") and not bool(Dictionary(measured.get(RECRUIT, {})).get("aboard", true)), tag + ": Aufbau: die dritte Person ist %s und nicht an Bord (%s)" % ["am Einsatzschiff" if variant == "near" else "abseits", str(measured.get(RECRUIT, {}))])
+	if variant == "pair": _check(bool(Dictionary(measured.get(LEADER, {})).get("near_ship", false)) and not bool(Dictionary(measured.get(LEADER, {})).get("aboard", true)), tag + ": Aufbau: der Truppfuehrer steht am Einsatzschiff, nicht an Bord")
+	if variant != "victory":
+		# LC2m W1: die Ansage vor dem Abheben, gebaut von der Funktion, die den EVAC-Knopf beschriftet.
+		s.controller.call("_refresh_mission_evacuation_button")
+		var button: Button = s.controller.call("_ensure_mission_evacuation_button")
+		var away: bool = variant != "near"
+		var expected_text: String = "EVAC · Notrettung 400 Cr" if away else "EVAC"
+		_check(button != null and button.text == expected_text, tag + ": Knopf vor dem Abheben: \"%s\" (%s)" % [expected_text, button.text if button != null else "kein Knopf"])
+		if away: _check(button != null and button.tooltip_text == "1 Person des abgeschossenen Schiffs ist nicht am Schiff. Notrettung: 400 Credits.", tag + ": Tooltip nennt 1 Person und 400 Credits (%s)" % (button.tooltip_text if button != null else "-"))
+		else: _check(button != null and not button.tooltip_text.contains("Notrettung") and not button.text.contains("Notrettung"), tag + ": niemand abseits: kein Hinweis auf die Notrettung (%s)" % (button.tooltip_text if button != null else "-"))
 	if variant == "victory": s.driver.call("_resolve_combat", "victory", String(s.driver.get("friendly_team_id")))
 	else: s.driver.call("_resolve_combat", "aborted", "", "evacuation")
 	if not await _wait_released(tag + ": Einsatz wird freigegeben"):
@@ -265,11 +286,12 @@ func _trio_case(variant: String) -> void:
 	var fee: int = int(Dictionary(others[0]).get("rescue_fee", 0)) if not others.is_empty() else -1
 	print("%s_RESULT outcome=%s result=%s total_loss=%s fee=%s credits=%d others=%s fate=%s base=%s/%s" % [tag, result.get("mission_outcome"), result.get("result"), result.get("casualty_total_loss"), fee, _credits(), str(others), _unit_fate(RECRUIT), states[RECRUIT].get("status"), states[RECRUIT].get("craft_id")])
 	_check(not bool(result.get("casualty_total_loss", false)) and not result.has("craft_loss") and others.size() == 1, tag + ": Einsatzschiff heil, nur das zweite Schiff verloren, kein Totalverlust")
-	var charged: bool = variant == "left"
+	var charged: bool = variant in ["left", "pair"]
 	_check((fee == 400 and _credits() == 100 and _loss_lines(result) == 1) if charged else (fee == 0 and _credits() == 500 and _loss_lines(result) == 0), tag + (": Gebuehr genau einmal 400, 500 -> 100, Zeile \"Notrettung: −400 Credits\" in der Nachbesprechung (%d / %d / Zeilen %d)" if charged else ": keine Gebuehr, 500 Credits, keine Notrettungszeile (%d / %d / Zeilen %d)") % [fee, _credits(), _loss_lines(result)])
 	_check(DEBRIEF_SCRIPT.build_craft_loss_text(result).contains("Schiff verloren: Zweitschiff"), tag + ": das zweite Schiff steht in der Verlustzeile der Nachbesprechung")
 	_check(not _unit_is_dead(RECRUIT) and not PackedStringArray(result.get("fatality_unit_ids", PackedStringArray())).has(RECRUIT), tag + ": die dritte Person lebt (%s)" % _unit_fate(RECRUIT))
 	_check(String(states[RECRUIT].get("status", "")) != "aboard" and String(states[RECRUIT].get("craft_id", "x")).is_empty() and _aboard_ids(second).is_empty(), tag + ": sie ist an der Basis, nicht an Bord eines fehlenden Schiffs (%s / %s)" % [str(states[RECRUIT].get("status")), str(states[RECRUIT].get("craft_id"))])
+	if variant == "pair": _check(not _unit_is_dead(LEADER) and String(states[LEADER].get("status", "")) != "aboard" and String(states[LEADER].get("craft_id", "x")).is_empty(), tag + ": auch der Truppfuehrer lebt und ist an der Basis (%s / %s / %s)" % [_unit_fate(LEADER), str(states[LEADER].get("status")), str(states[LEADER].get("craft_id"))])
 	_check(_fleet_ids() == [_craft_id] and _lost_ids() == [second], tag + ": das zweite Schiff ist geraeumt und steht im Verlustbeleg (%s / %s)" % [str(_fleet_ids()), str(_lost_ids())])
 	print("%s_TEAM_STATES %s" % [tag, str(result.get("team_states"))])
 	# Die Heimkehr des Einsatzschiffs (Abheben, Rueckflug) ist nicht Gegenstand dieses Pruefers (wie S1 im Zweitschiff-Pruefer): das Schiff steht

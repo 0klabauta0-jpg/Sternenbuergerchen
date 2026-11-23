@@ -14817,6 +14817,21 @@ func _refresh_mission_evacuation_button() -> void:
 			var last_driver = _get_combat_loop_driver()
 			button_enabled = last_driver != null and last_driver.has_method("get_mission_evacuation_authority_snapshot") and bool(Dictionary(last_driver.call("get_mission_evacuation_authority_snapshot")).get("accepted", false))
 			button.disabled = not button_enabled
+	else:
+		# LC2m W1: Einsatzschiff heil, aber Insassen eines abgeschossenen zweiten Schiffs stehen weder an Bord noch am Schiff: die Gebuehr vor dem Abheben nennen.
+		var stranded_quote: Dictionary = {}
+		var crash_simulation: Node = get_node_or_null("../SimulationRoot")
+		if crash_simulation != null and crash_simulation.has_method("get_air_crash_sites"):
+			for site in Array(crash_simulation.call("get_air_crash_sites")):
+				var site_quote: Dictionary = _craft_loss_quote(String(Dictionary(site).get("craft_id", "")))
+				if int(site_quote.get("stranded_count", 0)) > 0:
+					stranded_quote = site_quote
+					break
+		var stranded_count: int = int(stranded_quote.get("stranded_count", 0))
+		if stranded_count > 0:
+			var stranded_fee: int = int(stranded_quote.get("stranded_fee", 0))
+			button.text = "EVAC · Notrettung %d Cr" % stranded_fee
+			button.tooltip_text = ("1 Person des abgeschossenen Schiffs ist nicht am Schiff. Notrettung: %d Credits." % stranded_fee) if stranded_count == 1 else ("%d Personen des abgeschossenen Schiffs sind nicht am Schiff. Notrettung: %d Credits." % [stranded_count, stranded_fee])
 	META_UI_SKIN_SCRIPT.style_tactical_button(button, button_enabled)
 
 

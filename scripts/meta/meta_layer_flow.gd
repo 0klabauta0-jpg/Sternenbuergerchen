@@ -4780,6 +4780,7 @@ func crash_save_detail() -> String:
 
 ## LC2h: Auskunft fuer den laufenden Einsatz ueber ein verlorenes Schiff: {"ship_name", "is_mission_craft", "fee"}. fee = Gebuehr, die die
 ## Notrettung buchen wird (heutiges Guthaben; die Buchung folgt nach dem Einsatz), nur fuers Einsatzschiff, sonst 0. Leer ausserhalb der Kampagne.
+## LC2m W1: Fuer ein anderes verlorenes Schiff (nicht das letzte) zusaetzlich "stranded_count"/"stranded_fee" aus _stranded_rescue_quote.
 func _craft_loss_quote(craft_id: String) -> Dictionary:
 	if not is_campaign_start() or _active_mission == null: return {}
 	var ship_name := craft_id
@@ -4799,7 +4800,25 @@ func _craft_loss_quote(craft_id: String) -> Dictionary:
 	var fee := 0
 	if is_mission_craft and not is_last_craft and not rules.is_empty() and _singleplayer_runtime != null:
 		fee = _craft_loss_rescue_fee([], rules)
-	return {"ship_name": ship_name, "is_mission_craft": is_mission_craft, "fee": fee, "is_last_craft": is_last_craft}
+	var quote: Dictionary = {"ship_name": ship_name, "is_mission_craft": is_mission_craft, "fee": fee, "is_last_craft": is_last_craft}
+	if not is_mission_craft and not is_last_craft:
+		# LC2m W1: Ansage vor dem Abheben fuer Insassen verlorener zweiter Schiffe (Daten; den Text baut der EVAC-Knopf).
+		quote.merge(_stranded_rescue_quote())
+	return quote
+
+
+## LC2m W1: Wie viele Insassen verlorener zweiter Schiffe stehen JETZT weder an Bord noch am Einsatzschiff, und welche Gebuehr wuerde
+## _book_stranded_rescue_fee beim Abflug dafuer buchen: {"stranded_count", "stranded_fee"} (0/0, wenn niemand abseits steht). Misst wie das Einsatzende.
+func _stranded_rescue_quote() -> Dictionary:
+	var quote: Dictionary = {"stranded_count": 0, "stranded_fee": 0}
+	if not is_campaign_start() or not is_instance_valid(_active_mission) or _singleplayer_runtime == null: return quote
+	var others: Array = _other_craft_losses_of_mission()
+	var rules: Dictionary = _get_campaign_casualty_rules()
+	if others.is_empty() or rules.is_empty(): return quote
+	var team_states: Array = Array(_build_mission_result(_active_mission, {}).get("team_states", []))
+	var stranded: Array = _stranded_lost_craft_occupants(team_states, _lost_craft_occupant_ids(others))
+	if stranded.is_empty(): return quote
+	return {"stranded_count": stranded.size(), "stranded_fee": _craft_loss_rescue_fee(team_states, rules)}
 
 
 ## LC2i I1: Ist die Flotte leer, wenn genau die Schiffe der Liste (craft_id-Texte oder Verlustbelege) verloren sind? Eine Flotte ohne Schiffe
@@ -5033,12 +5052,13 @@ func _lost_craft_occupant_ids(losses: Array) -> Array:
 
 ## LC2k K2: Von den Insassen verlorener Schiffe die, die leben und am Einsatzende NICHT an Bord eines heimkehrenden Schiffs sind (team_states.aboard
 ## falsch): sie holt die Notrettung heim, dafuer faellt die Gebuehr an. Tote (killed_in_crash, verblutet) bleiben aussen vor.
+## LC2m W1 (Uebergang, bis fremde Trupps echt zusteigen koennen): Wer am Einsatzschiff steht (team_states.near_ship), gilt als mitgenommen, keine Gebuehr.
 func _stranded_lost_craft_occupants(team_states: Array, occupant_ids: Array) -> Array:
 	var stranded: Array = []
 	for raw in team_states:
 		var state: Dictionary = raw
 		var unit_id := String(state.get("unit_id", ""))
-		if not occupant_ids.has(unit_id) or bool(state.get("aboard", false)) or bool(state.get("killed_in_crash", false)): continue
+		if not occupant_ids.has(unit_id) or bool(state.get("aboard", false)) or bool(state.get("near_ship", false)) or bool(state.get("killed_in_crash", false)): continue
 		var vital := String(state.get("vital_state", "fit"))
 		if (vital == "fit" and float(state.get("health_points", 1.0)) > 0.0) or vital == "down": stranded.append(unit_id)
 	return stranded
