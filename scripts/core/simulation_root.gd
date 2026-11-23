@@ -4872,6 +4872,11 @@ func get_last_tick_delta() -> float:
 	return _last_tick_delta
 
 
+## Spielzeit in Millisekunden (G5b): Simulations-Ticks zu 1/60 s, ganzzahlig. Spielregeln rechnen damit statt mit der Wanduhr.
+func get_game_msec() -> int:
+	return int(tick_counter) * 1000 / 60
+
+
 func _should_skip_local_tick_processing() -> bool:
 	if not is_server_authoritative:
 		return false
@@ -6170,7 +6175,7 @@ func _should_recompute_move_path(
 	var current_final_waypoint: Vector2 = _coerce_vector2(existing_path[-1], target_position)
 	var current_final_grid: Vector2i = terrain_registry.call("world_to_grid", current_final_waypoint)
 	if current_final_grid != target_grid:
-		_contact_path_recompute_ready_at_msec[unit_id] = Time.get_ticks_msec() + CONTACT_PATH_RECOMPUTE_INTERVAL_MSEC
+		_contact_path_recompute_ready_at_msec[unit_id] = get_game_msec() + CONTACT_PATH_RECOMPUTE_INTERVAL_MSEC
 		return true
 
 	var current_grid: Vector2i = terrain_registry.call("world_to_grid", current_position)
@@ -6178,7 +6183,7 @@ func _should_recompute_move_path(
 		_contact_path_recompute_ready_at_msec.erase(unit_id)
 		return false
 
-	var now_msec: int = Time.get_ticks_msec()
+	var now_msec: int = get_game_msec()
 	if int(_contact_path_recompute_ready_at_msec.get(unit_id, 0)) > now_msec:
 		return false
 

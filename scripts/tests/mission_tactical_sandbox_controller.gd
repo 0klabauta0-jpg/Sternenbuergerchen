@@ -2416,6 +2416,15 @@ func _orders_run_on_simulation_tick() -> bool:
 	return simulation_root.is_connected("tick_processed", Callable(self, "_on_simulation_tick_for_orders"))
 
 
+## Spielzeit in Millisekunden (G5b): Ticks der Simulation zu 1/60 s, mindestens 1 (0 gilt in den Zustaenden als "nicht gesetzt").
+## Ohne Simulation oder wenn sie lokal nicht tickt (Mitspieler) faellt sie auf die Wanduhr zurueck.
+func _game_now_msec() -> int:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root != null and simulation_root.has_method("get_game_msec") and not bool(simulation_root.call("_should_skip_local_tick_processing")):
+		return maxi(int(simulation_root.call("get_game_msec")), 1)
+	return Time.get_ticks_msec()
+
+
 ## Einstieg je Simulations-Tick. delta ist die Tick-Laenge der Simulation (Spielzeit, 1/60 s bei normalem Lauf), nie die
 ## Bildzeit. delta_override nur fuer Tests, die einen grossen Zeitschritt in einem Aufruf brauchen.
 func _on_simulation_tick_for_orders(_tick: int, delta_override: float = -1.0) -> void:
@@ -2938,7 +2947,7 @@ func _apply_authoritative_fireteam_intent(command: Dictionary) -> bool:
 		"waypoint_index": 0,
 		"hold_elapsed": 0.0,
 		"resolved_target_position": target_position,
-		"started_msec": Time.get_ticks_msec(),
+		"started_msec": _game_now_msec(),
 		"execution_owner": "standalone_network_intent",
 		"standalone_network_intent": true,
 	}
@@ -33246,7 +33255,12 @@ func _is_phase_waypoint_soft_completion_allowed(execution_state: Dictionary) -> 
 	var started_msec: int = int(execution_state.get("started_msec", 0))
 	if started_msec <= 0:
 		return false
-	return Time.get_ticks_msec() - started_msec >= PHASE_WAYPOINT_SOFT_RELEASE_MIN_MSEC
+	var now_msec: int = _game_now_msec()
+	if started_msec > now_msec:
+		# Stempel aus einer anderen Uhr (alter Spielstand mit Wanduhr, zurueckgesprungener Tickzaehler): Wartezeit neu beginnen.
+		execution_state["started_msec"] = now_msec
+		return false
+	return now_msec - started_msec >= PHASE_WAYPOINT_SOFT_RELEASE_MIN_MSEC
 
 
 func _is_movement_state_on_final_waypoint_stage(resolved_target_position: Vector2, movement_state: Dictionary) -> bool:
@@ -34853,7 +34867,7 @@ func _activate_next_waypoint_for_plan(plan, fireteam_id: String, waypoint_index:
 		"waypoint_index": waypoint_index,
 		"hold_elapsed": 0.0,
 		"resolved_target_position": resolved_target_position,
-		"started_msec": Time.get_ticks_msec(),
+		"started_msec": _game_now_msec(),
 	}
 	if String(Dictionary(waypoint.metadata).get("source", "")) == "mission_interaction_use_intent":
 		var interaction_state: Dictionary = _phase_execution_by_fireteam[fireteam_id]
