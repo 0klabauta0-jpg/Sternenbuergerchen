@@ -281,10 +281,15 @@ func _ammo_probe(mission: Node, phase: String) -> void:
 	if phase == "abflug":
 		_ammo_sortie += 1
 		_ammo_departure = {}
-		_check(bool(simulation.call("person_has_magazine_store", "campaign_leader")), "M4d: Einsatz %d: Kampagnen-Schalter des Magazinvorrats im laufenden Einsatz wahr" % _ammo_sortie)
+		# M6a-Nachbesserung F3: die QUELLE muss die Kampagnen-Versorgung sein (person_has_magazine_store zaehlt seit M6a auch den Einsatz-Vorrat).
+		_check(String(simulation.call("get_person_magazine_source", "campaign_leader")) == "campaign", "M4d: Einsatz %d: Kampagnen-Schalter des Magazinvorrats im laufenden Einsatz wahr (Quelle 'campaign')" % _ammo_sortie)
 	var ids: Array = _crew_ids.duplicate()
 	if not ids.has(_pilot_id): ids.append(_pilot_id)
 	for id in ids:
+		# Jede Person mit Behaelter in der Kampagnen-Versorgung bekommt ihren Vorrat dort, nie aus dem Einsatz-Vorrat.
+		if bool(_runtime.get("_supply").call("person_has_magazine_store", String(id))):
+			_check(String(simulation.call("get_person_magazine_source", String(id))) == "campaign", "M6a: Einsatz %d: %s hat einen Behaelter in der Versorgung, Quelle 'campaign' (ist '%s')" % [_ammo_sortie, id, String(simulation.call("get_person_magazine_source", String(id)))])
+		var from_campaign: bool = String(simulation.call("get_person_magazine_source", String(id))) == "campaign"
 		var status: Dictionary = driver.call("get_unit_ammo_status", String(id))
 		if String(status.get("state", "none")) == "none": continue
 		var reserve := int(status.get("reserve", -1))
@@ -296,7 +301,8 @@ func _ammo_probe(mission: Node, phase: String) -> void:
 		var before: Dictionary = _ammo_departure[String(id)]
 		_ammo_probe_count += 1
 		# M4e: nur echte Zahlen zaehlen (reserve -1 = unbegrenzte Reserve); verbraucht = Magazin nicht voll oder weniger Magazine im Fach.
-		if int(before.reserve) >= 0 and reserve >= 0 and (reserve < int(before.reserve) or loaded < int(status.get("magazine_size", 0))): _ammo_consumed = true
+		# M6a-Nachbesserung F3: nur der Verbrauch aus der KAMPAGNEN-Versorgung zaehlt (Personen im Einsatz-Vorrat haben nie reserve -1).
+		if from_campaign and int(before.reserve) >= 0 and reserve >= 0 and (reserve < int(before.reserve) or loaded < int(status.get("magazine_size", 0))): _ammo_consumed = true
 		print("FIVE_AMMO sortie=%d person=%s vorher=%d nachher=%d geladen=%d" % [_ammo_sortie, id, int(before.reserve), reserve, loaded])
 	if phase == "heimkehr": _ammo_enemy_line(driver, simulation)
 	if phase == "heimkehr" and _ammo_sortie == 1: _ammo_drain_test(driver, ids)
@@ -318,12 +324,16 @@ func _ammo_enemy_line(driver: Node, simulation: Node) -> void:
 
 ## M4e: Schuesse direkt ueber den Treiber (keine Zufallstreffer): die Person verschiesst Magazin und alle Fach-Magazine; jedes
 ## Nachladen zieht ein Magazin aus der Kampagnen-Versorgung, danach "Keine Munition" und kein weiterer Schuss. Die Heimkehr fuellt wieder auf.
+var _ammo_drained_campaign := 0
 var _drain_person := ""
 var _drain_class := ""
 func _ammo_drain_test(driver: Node, ids: Array) -> void:
 	for id in ids:
 		var status: Dictionary = driver.call("get_unit_ammo_status", String(id))
 		if String(status.get("state", "none")) == "none" or int(status.get("reserve", -1)) < 0: continue
+		# M6a-Nachbesserung F3: der Verschiess-Test gilt der Kampagnen-Versorgung; Personen im Einsatz-Vorrat gehoeren nicht hierher.
+		if String(driver.get_node("../SimulationRoot").call("get_person_magazine_source", String(id))) != "campaign": continue
+		_ammo_drained_campaign += 1
 		var unit = driver.call("_resolve_unit_by_id", String(id))
 		var weapon := String(driver.call("_ammo_weapon_id", unit))
 		var ammo_class := String(Dictionary(driver.call("_ammo_tracker").weapon_info(weapon)).get("ammo_class", ""))
@@ -597,6 +607,7 @@ func _remaining_missions() -> void:
 	_check(_return_number == _expected_physical_return_count(), "%d actual sorties completed their physical home return in this run" % _expected_physical_return_count())
 	# M4d P2: ueber alle Einsaetze muss mindestens eine bewaffnete Person Munition verbraucht haben (sonst waere die Reserve unbegrenzt).
 	_check(_ammo_probe_count >= 1 and _ammo_consumed, "M4d: ueber %d Einsaetze hat mindestens eine bewaffnete Person mit ECHTEM Magazinvorrat (>= 0) Munition verbraucht (Magazin nicht mehr voll oder weniger Magazine im Fach)" % _ammo_sortie)
+	_check(_ammo_drained_campaign >= 1, "M6a: der Verschiess-Test lief fuer mindestens eine Person mit Quelle 'campaign' (%d)" % _ammo_drained_campaign)
 
 
 # Launch/abort/resume/arrival use the current shared playtest helper.

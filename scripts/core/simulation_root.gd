@@ -299,6 +299,13 @@ func _exit_tree() -> void:
 func person_has_magazine_store(unit_id: String) -> bool:
 	return _campaign_has_magazine_store(unit_id) or _mission_ammo.has_unit(unit_id)
 
+## M6a (Nachbesserung): Woher kommt der Vorrat der Person? "campaign" = Kampagnen-Versorgung (eigener Behaelter), "mission" =
+## Einsatz-Vorrat, "" = noch keiner. person_has_magazine_store zaehlt beide Quellen; Pruefer, die den Kampagnen-Weg meinen, fragen hier.
+func get_person_magazine_source(unit_id: String) -> String:
+	if _campaign_has_magazine_store(unit_id): return "campaign"
+	if _mission_ammo.has_unit(unit_id): return "mission"
+	return ""
+
 ## Zieht ein Reservemagazin ab (Nachladen); nur der Host fuehrt das Gefecht, also auch nur er bucht den Verbrauch.
 func take_person_magazine(unit_id: String, ammo_class: String) -> bool:
 	if not _campaign_has_magazine_store(unit_id): return _mission_ammo.take(unit_id, ammo_class)

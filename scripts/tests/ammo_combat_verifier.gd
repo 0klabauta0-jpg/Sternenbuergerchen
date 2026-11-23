@@ -55,6 +55,7 @@ func _run() -> void:
 	_test_r1_respawn_returns_fresh()
 	_test_r2_respawn_keeps_campaign_compartment()
 	_test_h1_main_weapon_gets_the_reserve()
+	_test_s1_source_of_the_store()
 	await process_frame
 	print("AMMO_COMBAT passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -541,3 +542,21 @@ func _test_h1_main_weapon_gets_the_reserve() -> void:
 	var rc := _run_until_empty(c, "own")
 	_check(int(rc.shots) == 6 * PISTOL_MAG, "H1: Hauptwaffe ohne Munition: die aktive Pistole bekommt den Vorrat (%d Schuesse)" % int(rc.shots))
 	c.scope.free()
+
+
+## S1 (M6a Nachbesserung F3): Die Simulation sagt, WOHER der Vorrat einer Person kommt: "campaign" (Kampagnen-Versorgung, eigener Behaelter),
+## "mission" (Einsatz-Vorrat: Gegner, Personen ohne Kampagnen-Vorrat) oder "" (noch keiner). Damit faellt eine Kampagnen-Person, die
+## faelschlich im Einsatz-Vorrat landet, auf (person_has_magazine_store zaehlt beide Quellen und merkt das nicht).
+func _test_s1_source_of_the_store() -> void:
+	var f := _ammo_rig(_duel("pistol", "pistol"), {})
+	_check(String(f.sim.get_person_magazine_source("own")) == "campaign", "S1: eigene Person mit Behaelter im Kampagnenmodus: Quelle 'campaign'")
+	_check(String(f.sim.get_person_magazine_source("enemy")) == "", "S1: Gegner vor dem ersten Bedarf: noch keine Quelle")
+	_run_until_shots(f, "enemy", PISTOL_MAG + 1)
+	_check(String(f.sim.get_person_magazine_source("enemy")) == "mission" and int(f.sim.get_person_magazine_count("enemy", "ammo_light")) == 4, "S1: Gegner nach dem ersten Nachladen: Quelle 'mission' (Treiber-Anschluss legt den Einsatz-Vorrat an: 5 Magazine, eines davon eingelegt)")
+	_check(String(f.sim.get_person_magazine_source("own")) == "campaign", "S1: die eigene Person bleibt bei 'campaign' (kein Einsatz-Vorrat neben der Versorgung)")
+	f.scope.free()
+	var g := _ammo_rig(_duel("pistol", "none"), {})
+	g.sup.set_campaign_magazine_mode(false)
+	_run_until_shots(g, "own", PISTOL_MAG + 1)
+	_check(String(g.sim.get_person_magazine_source("own")) == "mission", "S1: ohne Kampagnenmodus faellt die Person in den Einsatz-Vorrat: Quelle 'mission'")
+	g.scope.free()
