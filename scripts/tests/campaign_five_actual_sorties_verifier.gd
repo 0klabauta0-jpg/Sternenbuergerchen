@@ -113,6 +113,63 @@ func _trace_actual_combat(label: String) -> void:
 			continue
 		others.append({"id":id,"team":actor.get_team_id(),"position":actor.global_position,"vital":actor.get_vital_state(),"hp":actor.get_health(),"suppression_level":level,"ground":simulation.get_hex_unit_state(id)})
 	print("FIVE_COMBAT_TRACE ",var_to_str({"label":label,"msec":Time.get_ticks_msec(),"tick":simulation.get_tick(),"own_team":own_team,"own_status":own_status,"other_actors":others,"scenario":mission.get_node("CombatLoopDriver").get_mission_scenario_runtime_gate_snapshot(),"own_actor_count":Array(approach.get("actors",[])).size()}))
+	_trace_fire_decision_units(label, mission)
+
+
+## Nur Ausgabe (Stillstand-Suche 23.11.2026): je Einheit beider Seiten alles, was fuer die Schussentscheidung zaehlt.
+## Liest nur; ruft keine Entscheidung (_combat_attack_phase, Slot-Zaehler) auf.
+const FIVE_TRACE_RESOLVER: GDScript = preload("res://scripts/tactical/combat_fire_decision_resolver.gd")
+const FIVE_TRACE_CADENCE: GDScript = preload("res://scripts/combat/combat_cadence.gd")
+func _trace_fire_decision_units(label: String, mission: Node) -> void:
+	var driver: Node = mission.get_node_or_null("CombatLoopDriver")
+	var simulation: Node = mission.get_node_or_null("SimulationRoot")
+	if driver == null or simulation == null or not driver.has_method("_build_fire_decision_context"): return
+	var ctx: Dictionary = driver.call("_build_fire_decision_context", {})
+	var attack_step: int = int(driver.get("_attack_step"))
+	var detection: Dictionary = driver.get("_detection_progress")
+	var warmed: Dictionary = driver.get("_attack_warmed_ids")
+	var contact_ids: Dictionary = driver.get("_attack_contact_ids")
+	var alert_until: Dictionary = driver.get("_facing_alert_until")
+	var search: Dictionary = driver.get("_facing_search")
+	var facing_target: Dictionary = driver.get("_facing_target_by_unit")
+	var last_turn: Dictionary = driver.get("_facing_last_turn_tick")
+	var units: Array = []
+	for actor: Node in mission.get_node("UnitRegistry").get_all_units():
+		if is_instance_valid(actor) and actor.has_method("get_team_id") and actor.has_method("get_vital_state") and not String(actor.get_team_id()).is_empty(): units.append(actor)
+	for unit: Node in units:
+		var id := String(unit.get_unit_id())
+		var state: Dictionary = simulation.get_hex_unit_state(id)
+		var command = unit.call("get_current_unit_command") if unit.has_method("get_current_unit_command") else null
+		var cmd := {}
+		if command != null and command.has_method("get"):
+			for key in ["command_type","source_command_type","fire_rule","fire_status","status"]: cmd[key] = command.get(key)
+		var runtime = unit.call("get_runtime_status") if unit.has_method("get_runtime_status") else null
+		var period: int = int(driver.call("_get_attack_period_milli", unit))
+		var seen: Array = []
+		for other: Node in units:
+			if other == unit or String(other.get_team_id()) == String(unit.get_team_id()): continue
+			var oid := String(other.get_unit_id())
+			var attack_range: float = float(FIVE_TRACE_RESOLVER.call("_get_effective_attack_range", unit, other, ctx))
+			seen.append({"id":oid,"vital":other.get_vital_state(),"dist":snappedf(float(driver.call("_get_attack_distance", unit, other)),0.1),
+				"vis_contact_range":bool(Dictionary(driver.call("_query_current_visibility", unit, other, float(driver.get("contact_range")))).get("visible",false)),
+				"attack_range":snappedf(attack_range,0.1),"vis_attack_range":bool(Dictionary(driver.call("_query_current_visibility", unit, other, attack_range)).get("visible",false)),
+				"los_detect":bool(driver.call("_has_valid_los", unit, other)),"attackable":bool(FIVE_TRACE_RESOLVER.call("is_target_attackable", unit, other, ctx)),
+				"detection":detection.get("%s:%s" % [id, oid], null)})
+		var row := {"tick":simulation.get_tick(),"id":id,"team":unit.get_team_id(),"grid":state.get("grid",null),"facing":state.get("facing_dir",null),
+			"moving":Dictionary(state.get("movement_state",{})).get("moving",null),"route":Dictionary(state.get("route_state",{})).get("has_commitments",null),
+			"vital":unit.get_vital_state(),"hp":unit.get_health() if unit.has_method("get_health") else null,"cmd":cmd,
+			"runtime":String(runtime.get("status")) if runtime != null and runtime.has_method("get") else str(runtime),
+			"unit_fire_status":unit.call("get_fire_status") if unit.has_method("get_fire_status") else null,
+			"seek":bool(FIVE_TRACE_RESOLVER.call("_can_unit_seek_target", unit)),"can_attack_readout":bool(FIVE_TRACE_RESOLVER.call("can_unit_attack_for_readout", unit, ctx)),
+			"weapon":FIVE_TRACE_RESOLVER.call("get_unit_active_weapon_id", unit),"period_milli":period,"attack_step":attack_step,
+			"steps_until_due":int(FIVE_TRACE_CADENCE.call("steps_until_due", attack_step, period)),"window_steps":int(driver.call("_get_detection_window_steps", unit)),
+			"warmed":warmed.has(id),"contact":contact_ids.has(id),"supp_level":int(driver.call("get_suppression_level_for_unit", unit)),"supp_slots":int(driver.call("get_suppression_slot_count", id)),
+			"alert_until":alert_until.get(id,null),"search":search.get(id,null),"facing_target":facing_target.get(id,null),"last_turn":last_turn.get(id,null),
+			"awareness":unit.call("get_awareness") if unit.has_method("get_awareness") else null,
+			"candidate_index":Dictionary(driver.get("_fire_candidate_target_ids_by_attacker_id")).get(id,null),"candidate_index_tick":driver.get("_fire_candidate_index_tick"),"opponents":seen}
+		print("FIVE_FIRE_UNIT ", label, " ", str(row))
+	var diag: Dictionary = driver.call("get_contact_decision_diagnostics_snapshot")
+	print("FIVE_FIRE_DECISION ", label, " tick=", simulation.get_tick(), " reason=", diag.get("reason",""), " status=", diag.get("status",""), " decision_tick=", diag.get("tick",""), " next_attack_tick=", diag.get("next_attack_tick",""), " detection_pending=", diag.get("detection_pending_count",""), " candidate=", str(diag.get("candidate", diag.get("attacker_id",""))).left(400))
 
 func _long_approach_is_progressing(observation: Dictionary, progress: Dictionary, now: int) -> bool:
 	var has_long_live_route := false
