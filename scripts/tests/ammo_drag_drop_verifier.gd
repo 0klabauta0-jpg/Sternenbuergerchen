@@ -47,8 +47,25 @@ class FakeAdapter extends "res://scripts/meta/singleplayer_runtime_adapter.gd":
 	func _commit(category: String, operation: String, payload: Dictionary, request_id: String, context: Dictionary = {}) -> Dictionary:
 		return _supply.apply_command({"contract_category": category, "operation": operation, "payload": payload, "request_id": request_id}, context)
 
+## K1: Besatzung an Bord eines Schiffs an der Heimatbasis. Der echte Adapter mit Attrappen fuer Personal, Reise und Ablauf.
+class FakePersonnel extends Node:
+	var status := "aboard"
+	var craft := "ship"
+	func get_snapshot() -> Dictionary: return {"units": [{"unit_id": "u1", "status": status, "craft_id": craft}]}
+class FakeTravel extends RefCounted:
+	var phase := "grounded"
+	func get_snapshot(_craft: String = "") -> Dictionary: return {"routes": {"ship": {"phase": phase}}}
+class FakeHomeFlow extends Node:
+	var _aircraft_location_by_craft := {"ship": "homebase"}
+	var pending := {}
+	func _find_pending_mission_craft_transfer(_craft: String) -> Dictionary: return pending
+	func get_mission_for_craft(_craft: String) -> Node: return null
+class HomeAdapter extends FakeAdapter:
+	func _service_context(_craft_id: String) -> Dictionary: return {"ground_service_verified": true} if _craft_grounded_at_home(_craft_id) else {}
+
 func _run() -> void:
 	_stack_part()
+	_home_part()
 	_field_part()
 	_hint_part()
 	_hint_b5()
@@ -133,6 +150,52 @@ func _stack_part() -> void:
 	var rifle_stack := _n(w, BASE, "rifle") # Startlager hat schon 2: der Stapel ist 4
 	var rifles: Dictionary = _drag(w, BASE, "rifle", SHIP)
 	check(rifle_stack == 4 and int(rifles.amount) == 4 and _n(w, SHIP, "rifle") == 4 and _n(w, BASE, "rifle") == 0, "B2: auch andere Gegenstaende: der ganze Stapel (4 Gewehre) in einem Zug ins Schiffslager (%s)" % str(rifles))
+
+# ---------- K1 ----------
+
+func _home_adapter(s: RefCounted, location: String, phase: String, pending: Dictionary = {}, status: String = "aboard", craft: String = "ship") -> Object:
+	var flow := FakeHomeFlow.new()
+	flow._aircraft_location_by_craft = {"ship": location}
+	flow.pending = pending
+	var travel := FakeTravel.new()
+	travel.phase = phase
+	var personnel := FakePersonnel.new()
+	personnel.status = status
+	personnel.craft = craft
+	var adapter := HomeAdapter.new()
+	adapter.set("_flow", flow)
+	adapter.set("_travel", travel)
+	adapter.set("_base_personnel", personnel)
+	adapter.set("_supply", s)
+	adapter.set("_simulation", Node.new())
+	return adapter
+
+func _home_part() -> void:
+	# Person an Bord, Schiff gelandet an der Heimatbasis: Basislager -> Fach (1 Magazin) und Basislager -> Schiffslager gehen ueber das Fenster.
+	var s := _sup("light")
+	_give(s, BASE, "ammo_light", 4)
+	var landed: Object = _home_adapter(s, "homebase", "grounded")
+	var context: Dictionary = landed.call("get_inventory_context", "u1", "ship")
+	check(Array(context.get("accessible_containers", [])).has(BASE) and Array(context.get("accessible_containers", [])).has(BAG) and Array(context.get("accessible_containers", [])).has(SHIP), "K1: Person an Bord, Schiff gelandet: Basislager, Fach und Schiffslager erreichbar (%s)" % str(context.get("accessible_containers")))
+	var fill: Dictionary = _drag(s, BASE, "ammo_light", BAG, true, [], landed)
+	check(int(fill.amount) == 1 and bool(fill.result.get("ok", false)) and _n(s, BAG, "ammo_light") == 1 and _n(s, BASE, "ammo_light") == 3, "K1: an Bord: 1 Magazin Basislager -> Fach (%s)" % str(fill.result.get("reason", "ok")))
+	var ship: Dictionary = _drag(s, BASE, "ammo_light", SHIP, false, [], landed)
+	check(bool(ship.result.get("ok", false)) and _n(s, SHIP, "ammo_light") == 3, "K1: an Bord: Basislager -> Schiffslager (%s)" % str(ship.result.get("reason", "ok")))
+	landed.free()
+	# Gegenfaelle: nichts bewegt sich, Ablehnung "inventory_access".
+	var cases := {
+		"Schiff nicht an der Basis (im Einsatz)": _home_adapter(_sup("light"), "mission", "grounded"),
+		"Schiff an der Basis, aber im Start-/Landeablauf": _home_adapter(_sup("light"), "homebase", "landing"),
+		"Schiff an der Basis, Einsatzuebergabe offen": _home_adapter(_sup("light"), "homebase", "grounded", {"craft_id": "ship"}),
+		"Person an Bord eines anderen Schiffs": _home_adapter(_sup("light"), "homebase", "grounded", {}, "aboard", "other"),
+	}
+	for label in cases:
+		var adapter: Object = cases[label]
+		var sup: RefCounted = adapter.get("_supply")
+		_give(sup, BASE, "ammo_light", 2)
+		var denied: Dictionary = _drag(sup, BASE, "ammo_light", BAG, true, [], adapter)
+		check(not bool(denied.result.get("ok", true)) and String(denied.result.get("reason", "")) == "inventory_access" and _n(sup, BAG, "ammo_light") == 0, "K1: %s: abgelehnt (%s), nichts bewegt" % [label, str(denied.result.get("reason", ""))])
+		adapter.free()
 
 # ---------- B4 ----------
 

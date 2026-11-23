@@ -431,24 +431,9 @@ func _run() -> void:
 		_check(_bag_count(_drain_person, _drain_class) == 0, "M6b: Heimkehr fuellt das leergeschossene Fach NICHT mehr auf (%d Magazine)" % _bag_count(_drain_person, _drain_class))
 		var base_items: Dictionary = Dictionary(Dictionary(Dictionary(_supply().get("inventory", {})).get("base:homebase", {})).get("items", {}))
 		var base_before := int(base_items.get(_drain_class, 0))
-		# Die Person muss erst an der Basis angekommen sein (Zugriff "Person muss an der Basis verfuegbar sein"): wiederholen, bis der Zugriff gilt.
-		var holder := {"result": {}}
+		# Die Besatzung sitzt nach der Landung an Bord: der Zug geht ueber den echten Bildschirmweg des Inventar-Fensters (request_operation), ohne Aussteigen.
 		var transfer := {"unit_id": _drain_person, "craft_id": _craft_id, "item_id": _drain_class, "amount": 1, "source_container_id": "base:homebase", "destination_container_id": "unit:%s:backpack" % _drain_person, "request_id": "m6b-handfill"}
-		# Die Besatzung sitzt nach der Landung noch an Bord ("aboard"); das Fenster lehnt dann ab ("Person muss an der Basis verfuegbar sein", siehe Bericht).
-		# Deshalb geht der Zug hier ueber den Versorgungsbefehl selbst (derselbe Befehl `inventory_transfer`, Zugriff Lager/Fach), nicht ueber den Bildschirmweg.
-		var screen_try: Dictionary = _screen.call("request_operation", "inventory_transfer", transfer)
-		print("M6B_SCREEN_PATH ", screen_try.get("reason", "ok"))
-		holder.result = _runtime.get("_supply").call("apply_command", {"contract_category": "singleplayer_supply", "operation": "inventory_transfer", "payload": transfer, "request_id": "m6b-handfill-supply"}, {"accessible_containers": ["base:homebase", "unit:%s:backpack" % _drain_person]})
-		var hand: Dictionary = Dictionary(holder.result)
-		if false:
-			var diag := ""
-			for entry in Array(_screen.call("get_operations_snapshot", false).get("roster", [])):
-				if String(Dictionary(entry).get("id", "")) == _drain_person: diag += "roster busy=%s can_edit=%s " % [str(Dictionary(entry).get("busy")), str(Dictionary(entry).get("can_edit"))]
-			var base_node: Node = _runtime.call("get_base_personnel_runtime")
-			if base_node != null:
-				for actor in Array(base_node.call("get_snapshot").get("units", [])):
-					if String(Dictionary(actor).get("unit_id", "")) == _drain_person: diag += "base status=%s action=%s" % [str(Dictionary(actor).get("status")), str(Dictionary(actor).get("action"))]
-			print("M6B_DIAG ", diag, " location=", Dictionary(_flow.get("_aircraft_location_by_craft")).get(_craft_id, ""))
+		var hand: Dictionary = _screen.call("request_operation", "inventory_transfer", transfer)
 		var base_after := int(Dictionary(Dictionary(Dictionary(_supply().get("inventory", {})).get("base:homebase", {})).get("items", {})).get(_drain_class, 0))
 		_check(bool(hand.get("ok", false)) and _bag_count(_drain_person, _drain_class) == 1 and base_after == base_before - 1, "M6b: von Hand 1 Magazin %s vom Basislager ins Fach (Fach %d, Lager %d -> %d, %s)" % [_drain_class, _bag_count(_drain_person, _drain_class), base_before, base_after, str(hand.get("reason", "ok"))])
 	_flow.call("_show_homebase")

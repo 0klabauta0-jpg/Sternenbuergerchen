@@ -2303,6 +2303,14 @@ func _reject(reason: String, message: String) -> Dictionary:
 func _inventory_context(unit_id: String, craft_id: String) -> Dictionary:
 	var field:=_field_inventory_context(unit_id,craft_id)
 	if not field.is_empty(): return field
+	# Besatzung an Bord eines Schiffs, das an der Heimatbasis gelandet steht (nicht unterwegs, nicht im Start-/Landeablauf, nicht im Einsatz):
+	# fuer das Inventar-Fenster erreichbar wie eine Person an der Basis, ohne Aussteigen.
+	var aboard := _aboard_status_craft(unit_id)
+	if not aboard.is_empty():
+		if not _craft_grounded_at_home(aboard): return {}
+		var aboard_access: Array = ["base:homebase","unit:"+unit_id+":backpack"]
+		if craft_id==aboard and not _service_context(craft_id).is_empty(): aboard_access.append("craft:"+craft_id)
+		return {"accessible_containers":aboard_access,"unit_id":unit_id}
 	var snapshot: Dictionary = _screen.call("get_operations_snapshot",false)
 	var unit: Dictionary = {}
 	for entry in Array(snapshot.get("roster",[])):
@@ -2317,6 +2325,14 @@ func _inventory_context(unit_id: String, craft_id: String) -> Dictionary:
 	var access: Array = ["base:homebase","unit:"+unit_id+":backpack"]
 	if not craft_id.is_empty() and String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id,""))=="homebase" and not _service_context(craft_id).is_empty(): access.append("craft:"+craft_id)
 	return {"accessible_containers":access,"unit_id":unit_id}
+
+## Schiff, auf dem die Person laut Personalstand an Bord ist ("" wenn sie nicht an Bord ist).
+func _aboard_status_craft(unit_id: String) -> String:
+	if _base_personnel==null: return ""
+	for actor in Array(_base_personnel.get_snapshot().get("units",[])):
+		if String(actor.get("unit_id",""))==unit_id:
+			return String(actor.get("craft_id","")) if String(actor.get("status",""))=="aboard" else ""
+	return ""
 
 func get_world_checkpoint_guard() -> Dictionary:
 	if not bool(_cargo_transfer.get_snapshot().get("checkpoint_safe",true)):return _reject("cargo_transfer_active","Speichern wartet auf den Frachttransfer oder seinen Abbruch")
