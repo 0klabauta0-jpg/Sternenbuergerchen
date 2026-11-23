@@ -46,6 +46,36 @@ static func compartment_capacity(armor_id: String, rules: Dictionary) -> int:
 		return int(by_armor[armor_id])
 	return int(rules.get("default_compartment_capacity", 0))
 
+## Faktor auf reload_ticks der Waffe fuer die Nachladezeit im Gefecht (M4a); ohne Eintrag 6, nie unter 1.
+const DEFAULT_RELOAD_SCALE := 6
+
+static func reload_scale(rules: Dictionary) -> int:
+	var value: Variant = rules.get("reload_scale", DEFAULT_RELOAD_SCALE)
+	return maxi(1, int(value)) if _is_number(value) else DEFAULT_RELOAD_SCALE
+
+## Faktor auf magazine_size der Waffe fuer die wirksame Magazingroesse im Gefecht (M4b); ohne Eintrag (oder 0, negativ, keine Zahl) 2.0.
+const DEFAULT_MAGAZINE_SCALE := 2.0
+
+static func magazine_scale(rules: Dictionary) -> float:
+	var value: Variant = rules.get("magazine_scale", DEFAULT_MAGAZINE_SCALE)
+	return float(value) if _is_number(value) and float(value) > 0.0 else DEFAULT_MAGAZINE_SCALE  # M4c: 0 oder negativ -> Vorgabe
+
+## Wirksame Magazingroesse: magazine_size x magazine_scale, gerundet, mindestens 1 (0 bleibt 0 = kein Munitionsbedarf).
+static func effective_magazine_size(magazine_size: int, rules: Dictionary) -> int:
+	if magazine_size <= 0:
+		return 0
+	return maxi(1, roundi(float(magazine_size) * magazine_scale(rules)))
+
+## Magazine, die zu Beginn einer Kampagne im Basislager liegen (M4b): {Gegenstand: Anzahl}, nur bekannte Magazinsorten.
+static func start_base_stock(rules: Dictionary) -> Dictionary:
+	var stock: Dictionary = {}
+	var configured: Variant = rules.get("start_base_stock", {})
+	if configured is Dictionary:
+		for item in configured:
+			if is_ammo_item(String(item), rules) and _is_count(configured[item]) and int(configured[item]) > 0:
+				stock[String(item)] = int(configured[item])
+	return stock
+
 static func is_ammo_item(item_id: String, rules: Dictionary) -> bool:
 	return Dictionary(rules.get("ammo_items", {})).has(item_id)
 

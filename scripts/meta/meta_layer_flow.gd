@@ -400,6 +400,9 @@ func _ready() -> void:
 	_show_homebase()
 	# The new run's durable baseline must exist before boarding or accepting a
 	# job closes the home-checkpoint guard. The normal timed autosave follows.
+	# M4b: Startausstattung mit Magazinen einmal je Stand (neue Kampagne und alte Staende ohne Merker), noch vor dem ersten Speichern.
+	if is_campaign_start() and _singleplayer_runtime != null and _singleplayer_runtime.has_method("grant_ammo_start_if_missing"):
+		_singleplayer_runtime.call("grant_ammo_start_if_missing")
 	if is_campaign_start() and String(_game_start_request.get("action","new")) == "new":
 		set_meta("campaign_checkpoint_result", _campaign_start.save_home_checkpoint(self,_singleplayer_runtime,true))
 	_homecoming_forget_all() # new campaign / loaded state
@@ -4049,7 +4052,8 @@ func _on_homebase_mission_start_requested() -> void:
 			return
 		_homecoming_forget_craft(requested_direct_craft_id) # the craft left the base for the star map
 		_last_mission_result.clear()
-		_report_launch_save(Dictionary(launch.get("pre_launch_save", {}))) # Speichern, erster Teil, Fix-Runde 1 (W1): der Spieler erfaehrt, was mit dem Speichern vor dem Abheben geschah
+		# Speichern, erster Teil, Fix-Runde 1 (W1): der Spieler erfaehrt, was mit dem Speichern vor dem Abheben geschah; M4c (W2/W4): dieselbe Zeile nennt "Munition knapp", wenn beim Abflug Magazine fehlten
+		_report_launch_save(Dictionary(launch.get("pre_launch_save", {})), String(launch.get("ammo_message", "")))
 		_show_star_map()
 		return
 	if payload_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
@@ -9266,8 +9270,15 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 	_homecoming_forget_craft(craft_id) # a later landing of the same craft replaces its note
 	_restore_returning_visit_membership(craft_id)
 	_aircraft_location_by_craft[craft_id] = "homebase"
+	# M4b/M4e: wer mit diesem Schiff heimkehrt. Erst NACH dem Setzen des Heimatortes lesen: vorher gelten die Mitfliegenden im
+	# Personalbestand als "away" (_unit_is_home), und nur der Pilot haette sein Fach aufgefuellt bekommen.
+	var ammo_refill_ids: Array = _aboard_unit_ids_of_craft(craft_id).duplicate()
+	var ammo_pilot := String(_assigned_aircraft_pilot_by_craft.get(craft_id, ""))
+	if not ammo_pilot.is_empty() and not ammo_refill_ids.has(ammo_pilot): ammo_refill_ids.append(ammo_pilot)
 	_admit_unplaced_aboard_crew(craft_id)
 	_remove_pending_mission_craft_transfer(craft_id)
+	for ammo_late_id in _aboard_unit_ids_of_craft(craft_id): # erst jetzt ist auch ein ausstehender Transfer des Schiffs entfernt
+		if not ammo_refill_ids.has(ammo_late_id): ammo_refill_ids.append(ammo_late_id)
 	# Ein Rueckzug ohne Ausfaelle (Regel 8) hat keinen Debrief, der die Ortsinstanz freigibt. Bleibt sie fokussiert, gilt das Schiff
 	# nicht als zu Hause (Heim-Speicherpunkt und Wiederoeffnen sind gesperrt): Mit der Heimkehr des letzten Schiffs wird sie freigegeben.
 	if release_legacy:
@@ -9279,7 +9290,20 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 	_homecoming_warned.clear()
 	if follow_arrival or release_legacy: _show_homebase(true)
 	_singleplayer_runtime.call("observe_campaign_progress")
+	_replenish_ammo_after_landing(craft_id, ammo_refill_ids)
 	_arm_landing_save()
+
+
+## M4b: Landung an der Heimatbasis: die Faecher der heimgekehrten Personen werden aus dem Basislager aufgefuellt (feste Reihenfolge,
+## soweit der Vorrat reicht); die Meldung geht ueber den Heimkehr-Meldeweg (_homecoming_warn_once) und liegt als Meta "ammo_refill_message".
+func _replenish_ammo_after_landing(craft_id: String, unit_ids: Array) -> void:
+	if not is_campaign_start() or _singleplayer_runtime == null or unit_ids.is_empty() or not _singleplayer_runtime.has_method("replenish_ammo"): return
+	var result: Dictionary = Dictionary(_singleplayer_runtime.call("replenish_ammo", unit_ids))
+	var text := String(result.get("message", ""))
+	if text.is_empty(): return
+	set_meta("ammo_refill_message", text)
+	_ammo_landing_note = text if _ammo_landing_note.is_empty() else _ammo_landing_note + " " + text  # M4c (W4): sichtbar im Hinweis der Landungs-Speicherung
+	_homecoming_warn_once(craft_id, "ammo", text)
 
 
 # The escape menu invokes the owning campaign saver, never the generic
@@ -9342,6 +9366,8 @@ var _save_toast: Node = null
 ## Fix-Runde 1 (W1): die Heimlandung hat ein Speichern angespannt und der Spieler hat noch keinen Ausgang gesehen / welchen Grund er zuletzt gelesen hat.
 var _landing_feedback_open: bool = false
 var _landing_told_reason: String = ""
+## M4c (W4): Auffuell-Meldung der Heimkehr; haengt am Hinweis der Landungs-Speicherung ("Gespeichert. Munition aufgefüllt: ...").
+var _ammo_landing_note: String = ""
 
 func _completed_campaign_job_count() -> int:
 	if _singleplayer_runtime == null: return -1
@@ -9374,6 +9400,7 @@ func _reset_completion_save_baseline() -> void:
 	_completion_save_warned = false
 	_landing_feedback_open = false
 	_landing_told_reason = ""
+	_ammo_landing_note = ""
 	_save_wish.clear() # Ein vorgemerkter Wunsch verfaellt beim Laden und beim Kampagnenstart.
 
 
@@ -9409,9 +9436,11 @@ func _poll_completion_save() -> void:
 		if wish_open:
 			# Ein Schreibvorgang erledigt Wunsch und Abschluss/Landung zugleich.
 			_save_wish.clear()
-			_show_save_feedback(String(result.get("message", "Kampagne gespeichert.")))
+			_show_save_feedback(String(result.get("message", "Kampagne gespeichert.")) + ("" if _ammo_landing_note.is_empty() else " " + _ammo_landing_note))
 		elif _landing_feedback_open:
-			_show_save_feedback("Gespeichert.") # Fix-Runde 1 (W1): die automatische Speicherung nach der Landung sagt, dass sie geklappt hat
+			# Fix-Runde 1 (W1): die automatische Speicherung nach der Landung sagt, dass sie geklappt hat; M4c (W4): mit der Auffuell-Meldung, falls es eine gibt
+			_show_save_feedback("Gespeichert." if _ammo_landing_note.is_empty() else "Gespeichert. " + _ammo_landing_note)
+		_ammo_landing_note = ""
 		_landing_feedback_open = false
 		_landing_told_reason = ""
 		return
@@ -9483,17 +9512,20 @@ func request_player_save() -> Dictionary:
 
 ## Fix-Runde 1 (W1): Meldung zum Speichern vor dem Abheben von der Basis (Antwort von _save_before_launch, leer = nichts versucht, etwa in der
 ## Gefechtsprobe). Gelungen: "Gespeichert."; sonst "Vor dem Abheben nicht gespeichert: <Satz des Grundes>". Das Schiff startet in beiden Faellen.
-func _report_launch_save(saved: Dictionary) -> void:
-	if saved.is_empty(): return
+func _report_launch_save(saved: Dictionary, ammo_note: String = "") -> void:
+	var tail := "" if ammo_note.is_empty() else " " + ammo_note  # M4c: "Munition knapp: ..." beim Abflug, in derselben Zeile
+	if saved.is_empty():
+		if not tail.is_empty(): _show_save_feedback(ammo_note)
+		return
 	if bool(saved.get("ok", false)):
-		_show_save_feedback("Gespeichert.")
+		_show_save_feedback("Gespeichert." + tail)
 		return
 	var reason := String(saved.get("reason", ""))
 	var detail := String(saved.get("detail", ""))
 	var sentence := String(saved.get("message", ""))
 	if sentence.is_empty() or reason == "launch_during_mission":
 		sentence = load("res://scripts/meta/campaign_save_projection.gd").blocked_text(reason, detail)
-	_show_save_feedback("Vor dem Abheben nicht gespeichert: " + sentence)
+	_show_save_feedback("Vor dem Abheben nicht gespeichert: " + sentence + tail)
 
 
 ## Der gemerkte Speicherwunsch (leer = keiner); nur lesen.

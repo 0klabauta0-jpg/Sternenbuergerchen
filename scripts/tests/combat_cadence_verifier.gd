@@ -231,6 +231,13 @@ func _terrain_patch(radius: int) -> Node:
 	return terrain
 
 
+## Saeule fuer Ableitungen (ammo_combat_verifier): welcher Treiber gebaut wird.
+func _make_driver():
+	var driver := QuietDriver.new()
+	driver.ammo_enabled = false  # Dieser Pruefer zaehlt Takt-Schuesse ueber viele Schritte; die Munition prueft ammo_combat_verifier.
+	return driver
+
+
 ## spec: {id, team, grid, facing, weapon, hp, initiative, hit_multiplier}. Reihenfolge der Liste = Anlegereihenfolge.
 func _rig(specs: Array, seed_value: int = 7) -> Dictionary:
 	var scope := Node.new()
@@ -257,7 +264,7 @@ func _rig(specs: Array, seed_value: int = 7) -> Dictionary:
 	cache.name = "VisibilityCache"
 	scope.add_child(cache)
 	cache.begin_tick(1)
-	var driver := QuietDriver.new()
+	var driver = _make_driver()
 	driver.name = "CombatLoopDriver"
 	driver.friendly_team_id = "blue"
 	driver.contact_range = 1000.0
