@@ -5059,7 +5059,10 @@ func _book_stranded_rescue_fee(mission_result: Dictionary, rules: Dictionary, ot
 ## Verluste des laufenden Einsatzes aus den team_states (Task 1 Resolver). Nur nach erfolgreichem Einschiffen aufrufen.
 func _resolve_campaign_casualties(mission_result: Dictionary, rules: Dictionary, craft_lost: bool = false, lost_occupant_ids: Array = []) -> Dictionary:
 	var measured: Dictionary = _build_mission_result(_active_mission, mission_result)
-	var rescued_ids: Array = [] if craft_lost else _stranded_lost_craft_occupants(Array(measured.get("team_states", [])), lost_occupant_ids)
+	# LC2l L3: Bei einem Sieg mit heilem Einsatzschiff sammelt der Spieler die Leute am Feld selbst ein: keine Notrettung, keine Gebuehr fuer
+	# Insassen eines verlorenen zweiten Schiffs (wie vor LC2k fuer Liegende bei "won"). Die Gebuehr gilt nur ohne Sieg (Rueckzug/EVAC).
+	var victory: bool = String(mission_result.get("mission_outcome", "")) == "won"
+	var rescued_ids: Array = [] if (craft_lost or victory) else _stranded_lost_craft_occupants(Array(measured.get("team_states", [])), lost_occupant_ids)
 	var craft_id: String = String(_active_singleplayer_identity.get("craft_id", ""))
 	var pilot_unit_id: String = String(_assigned_aircraft_pilot_by_craft.get(craft_id, _mission_planning_state.get("mission_drop_pilot_unit_id", ""))).strip_edges()
 	# Respawn (R3): Die Grenze je Person kommt aus den Einstellungen und gilt fuer diesen ganzen Einsatz (Grenze 0 = wie bisher).
