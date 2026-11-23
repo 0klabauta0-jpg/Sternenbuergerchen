@@ -72,7 +72,11 @@ func _run() -> void:
   _check(prep.get("ok",false),"fresh lifecycle candidate prepares")
   if prep.get("ok",false):
    var checked: Dictionary = owner.validate_restore(prep.prepared)
+   # FT-0b Regel 11: Unterdrueckung steht nicht im Speicherstand; der echte Wiederherstellweg leert sie.
+   driver.get_suppression_tracker().set_state("enemy:probe", 3.0, 2)
+   driver.get_suppression_tracker().set_state("own:a", 5.0, 3)
    if checked.get("ok",false): owner._publish_restore(prep.prepared)
+   _check(driver.get_suppression_level("enemy:probe")==0 and driver.get_suppression_level("own:a")==0,"restore clears suppression of both sides")
    _check(checked.get("ok",false) and rig.sim.tick_counter==saved.tick and abs(driver._get_duration_seconds()-900.0)<0.2,"tick, RNG and elapsed clock publish")
  rig.scene.free()
  done()
