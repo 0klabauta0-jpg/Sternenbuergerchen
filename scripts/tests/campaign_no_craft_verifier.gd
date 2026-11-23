@@ -12,7 +12,6 @@ const TEXT_NO_CRAFT: String = "Kein Schiff mehr: Ohne Schiff kommst du nicht meh
 
 func _run() -> void:
 	_configure_entry()
-	_bankruptcy_off = false # hier soll die Pleite-Pruefung laufen
 	_rules_part()
 	await _n1_last_craft_lost()
 	await _n2_other_craft_remains()
@@ -48,7 +47,11 @@ func _n1_last_craft_lost() -> void:
 	_lose_craft(s, "crash", false)
 	controller.call("report_ground_fire_vs_air", _craft_id, {}, ["Bruchlandung! %s ist verloren." % ship_name])
 	var text := String(controller.get("_last_command_text"))
-	_check(text.contains("%s ist verloren – es war euer letztes Schiff. Der Einsatz gilt als Totalverlust." % ship_name) and not text.contains("Notrettung") and not text.contains("Credits"), "N1: die Meldung nennt den Totalverlust, keine Notrettung (%s)" % text)
+	# LC2k K3: "ist verloren" steht nur einmal (die Absturzmeldung sagt es schon); danach nur noch "Es war euer letztes Schiff. ..."
+	_check(text.contains("%s ist verloren. Es war euer letztes Schiff. Der Einsatz gilt als Totalverlust." % ship_name) and text.count("ist verloren") == 1 and not text.contains("Notrettung") and not text.contains("Credits"), "N1: die Meldung nennt den Totalverlust, keine Notrettung, ohne Wiederholung (%s)" % text)
+	controller.call("report_ground_fire_vs_air", _craft_id, {}, ["%s explodiert." % ship_name])
+	var exploded := String(controller.get("_last_command_text"))
+	_check(exploded.contains("%s explodiert. %s ist verloren – es war euer letztes Schiff." % [ship_name, ship_name]), "N1: bei einer Explosion fehlt \"ist verloren\" in der Absturzmeldung, dann steht es im Satz (%s)" % exploded)
 	var button: Button = controller.call("_ensure_mission_evacuation_button")
 	_check(button != null and button.visible and not button.disabled and button.text == "Einsatz abbrechen (Totalverlust)", "N1: Knopf 'Einsatz abbrechen (Totalverlust)', sofort nutzbar (%s)" % (button.text if button != null else "-"))
 	_check(button != null and button.tooltip_text == "Ohne Schiff ist der Einsatz verloren. Ihr kehrt zum Stand vor dem Einsatz zurück.", "N1: Hinweis zum Knopf (%s)" % (button.tooltip_text if button != null else "-"))
@@ -62,6 +65,8 @@ func _n1_last_craft_lost() -> void:
 	var screen: Node = _flow.call("_get_debrief_screen")
 	var shown: String = String(screen.get("_native_review_confirmation").text) if screen != null and screen.get("_native_review_confirmation") != null else ""
 	_check(shown.contains("Das letzte Schiff ist verloren. Der Einsatz gilt als Totalverlust."), "N1: die Nachbesprechung nennt den Grund (%s)" % shown.replace("\n", " | "))
+	# LC2k K3: kein Rueckfalltext "Heimkehr nicht moeglich ... boardingfaehig" und keine Zeile "Notrettung · X Credits Rettungsgebuehr" (es gibt keine Notrettung).
+	_check(not shown.contains("Heimkehr nicht") and not shown.contains("boardingfaehig") and not shown.contains("Notrettung") and not shown.contains("Rettungsgebühr"), "N1: kein Rueckfalltext und keine Notrettungszeile in der Nachbesprechung (%s)" % shown.replace("\n", " | "))
 	_flow.call("_check_bankruptcy")
 	await process_frame
 	_check(_pleite_screen() == null and not bool(_flow.call("is_campaign_bankrupt")), "N1: kein Pleite-Bildschirm")

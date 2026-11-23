@@ -44,6 +44,10 @@ func _h1_message() -> void:
 	controller.call("report_ground_fire_vs_air", second, {}, ["Bruchlandung! Zweitschiff ist verloren."])
 	text = String(controller.get("_last_command_text"))
 	_check(text.contains("Zweitschiff ist verloren.") and not text.contains("Landezone") and not text.contains("Credits"), "H1: beim zweiten Schiff nur der erste Satz (%s)" % text)
+	_check(text.count("ist verloren") == 1, "H1/K3: beim zweiten Schiff steht 'ist verloren' nur einmal (%s)" % text)
+	controller.call("report_ground_fire_vs_air", second, {}, ["Zweitschiff explodiert."])
+	# Der Schiffsname im Satz kommt aus der Flottenauskunft (hier "Dropship"), der der Absturzmeldung aus dem Ereignis; geprueft wird, dass "ist verloren" genau einmal steht.
+	_check(String(controller.get("_last_command_text")).begins_with("Zweitschiff explodiert.") and String(controller.get("_last_command_text")).count("ist verloren") == 1, "H1/K3: bei einer Explosion steht der Satz 'ist verloren' genau einmal (%s)" % String(controller.get("_last_command_text")))
 	s.driver.call("_resolve_combat", "aborted", "", "evacuation")
 	if not await _wait_released("H1: Einsatz wird freigegeben"): return
 	var loss: Dictionary = Dictionary(Dictionary(_flow.get("_last_mission_result")).get("craft_loss", {}))
@@ -211,6 +215,8 @@ func _h4_save_sentence() -> void:
 	var sentence: String = projection_script.blocked_text("mission_lifecycle_unsupported", "lost:" + name)
 	_check(sentence.contains("%s ist abgestürzt" % name) and not sentence.contains("ein abgestürztes Schiff"), "H4: der Speichersatz nennt das Schiff (%s)" % sentence)
 	_check(String(projection_script.blocked_text("mission_lifecycle_unsupported", "")).contains("ein abgestürztes Schiff"), "H4: ohne Namen bleibt der bisherige Satz")
+	var plural: String = projection_script.blocked_text("mission_lifecycle_unsupported", "lost:Alpha|Beta")
+	_check(plural.contains("Alpha und Beta sind abgestürzt") and not plural.contains("ist abgestürzt"), "H4/K3: bei mehreren Schiffen 'sind abgestürzt' (%s)" % plural)
 	var refused: Dictionary = _flow.call("request_campaign_save")
 	if String(refused.get("reason", "")) == "mission_lifecycle_unsupported":
 		_check(String(refused.get("message", "")).contains("%s ist abgestürzt" % name), "H4: die echte Ablehnung nennt das Schiff (%s)" % String(refused.get("message", "")))

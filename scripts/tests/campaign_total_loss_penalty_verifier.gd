@@ -12,8 +12,6 @@ extends "res://scripts/tests/campaign_casualty_departure_verifier.gd"
 ## P8 Debrief: Zeile "Notrettung · <Betrag> Credits Rettungsgebuehr" nur mit total_loss_penalty.
 ## Einzeln starten: Umgebungsvariable T5B_ONLY (zum Beispiel "P4" oder "P1,P7") oder Kommandozeilenargument nach "--"; ohne Angabe laufen alle.
 
-## LC2g: Schaltet die Pleite-Pruefung der Meta-Szene ab (leere Flotte waere sonst Kampagnenende); campaign_no_craft_verifier setzt es auf false.
-var _bankruptcy_off := false # LC2i I4: seit dem Totalverlust-Weg fuers letzte Schiff erzeugt kein Pruefer mehr eine leere Flotte; Schalter nur noch bei Bedarf
 const LEADER := "campaign_leader"
 const PILOT := "campaign_pilot"
 const DEBRIEF_RETURN_BUTTON := "DebriefScreen/Panel/Margin/VBox/ButtonRow/ReturnToHomebaseButton"
@@ -67,7 +65,6 @@ func _wants(selected: Array, tags: Array) -> bool:
 func _open_scene(mode: String, action: String) -> bool:
 	START.request_start(self, mode, action)
 	_flow = FLOW.instantiate()
-	if _bankruptcy_off: _flow.set_meta("campaign_bankruptcy_check_off", true) # LC2g: leere Flotte ist jetzt Pleite; diese Pruefer pruefen Speichern/Laden
 	root.add_child(_flow)
 	current_scene = _flow
 	await process_frame
@@ -163,7 +160,6 @@ func _press_continue() -> bool:
 func _begin_funded_sortie(credits: int) -> Dictionary:
 	START.request_start(self, "campaign", "new")
 	_flow = FLOW.instantiate()
-	if _bankruptcy_off: _flow.set_meta("campaign_bankruptcy_check_off", true)
 	root.add_child(_flow)
 	current_scene = _flow
 	await process_frame

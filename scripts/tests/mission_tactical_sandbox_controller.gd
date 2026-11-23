@@ -20014,7 +20014,7 @@ func report_ground_fire_vs_air(craft_id: String, status_snapshot: Dictionary, te
 	if not status_snapshot.is_empty() and _air_asset_status != null and String(_air_asset_status.asset_id) == craft_id:
 		_air_asset_status = AIR_ASSET_STATUS_SCRIPT.call("from_dict", status_snapshot)
 	# LC2h: Ist das Schiff verloren, sagt die Meldung dem Spieler, was nun gilt (nur in der Kampagne; sonst gibt es keine Auskunft).
-	var loss_text: String = _craft_loss_notice(craft_id)
+	var loss_text: String = _craft_loss_notice(craft_id, texts)
 	if not loss_text.is_empty():
 		texts = texts.duplicate()
 		texts.append(loss_text)
@@ -20050,16 +20050,21 @@ func _craft_loss_mission_craft_quote() -> Dictionary:
 
 
 ## LC2h: Der Meldetext zum Schiffsverlust: "<Schiff> ist verloren." und beim Einsatzschiff der Weg heim samt Gebuehr.
-func _craft_loss_notice(craft_id: String) -> String:
+func _craft_loss_notice(craft_id: String, texts: Array = []) -> String:
 	var quote: Dictionary = _craft_loss_quote(craft_id)
 	if quote.is_empty(): return ""
+	# LC2k K3: Steht "ist verloren" schon in der Absturzmeldung ("Bruchlandung! X ist verloren."), wird es nicht wiederholt (bei "X explodiert." fehlt es).
+	var said_lost := false
+	for text in texts:
+		if String(text).contains("ist verloren"): said_lost = true
 	if bool(quote.get("is_last_craft", false)):
 		# LC2i I1: Das letzte Schiff: keine Notrettung, der Einsatz gilt als Totalverlust.
+		if said_lost: return "Es war euer letztes Schiff. Der Einsatz gilt als Totalverlust."
 		return "%s ist verloren – es war euer letztes Schiff. Der Einsatz gilt als Totalverlust." % String(quote.get("ship_name", craft_id))
 	if bool(quote.get("is_mission_craft", false)):
 		# LC2i I6: "<Schiff> ist verloren." steht schon in der Absturzmeldung; hier folgt nur der Weg heim (keine Wiederholung).
 		return "Bring den Trupp zur Landezone – dort holt euch die Notrettung ab (%d Credits)." % int(quote.get("fee", 0))
-	return "%s ist verloren." % String(quote.get("ship_name", craft_id))
+	return "" if said_lost else "%s ist verloren." % String(quote.get("ship_name", craft_id))
 
 
 ## LC2b: Das Schiff ist durch Bodenbeschuss abgestuerzt oder explodiert (SimulationRoot.resolve_air_shootdown); es ist aus dem Einsatz.

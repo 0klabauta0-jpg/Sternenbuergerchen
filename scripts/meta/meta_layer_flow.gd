@@ -5942,9 +5942,6 @@ func _tick_debt_interest(delta: float) -> void:
 func _check_bankruptcy() -> void:
 	if _bankrupt or not is_campaign_start() or not is_instance_valid(_singleplayer_runtime):
 		return
-	# LC2g: Meta campaign_bankruptcy_check_off (nur Pruefer): Staende mit leerer Flotte (Schiffsverlust-Pruefer) sollen ohne Pleite-Bildschirm speicher- und ladbar bleiben.
-	if bool(get_meta("campaign_bankruptcy_check_off", false)):
-		return
 	if _campaign_ground_mission_running():
 		return
 	if _campaign_start != null and bool(_campaign_start.get("active_restore_in_progress")):
