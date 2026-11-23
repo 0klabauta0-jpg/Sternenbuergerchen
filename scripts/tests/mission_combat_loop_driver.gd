@@ -11,6 +11,11 @@ const COMBAT_CADENCE_SCRIPT: GDScript = preload("res://scripts/combat/combat_cad
 const COMBAT_DECISION_INTERVAL_TICKS: int = COMBAT_CADENCE_SCRIPT.DECISION_INTERVAL_TICKS
 const SUPPRESSION_MATH_SCRIPT: GDScript = preload("res://scripts/tactical/suppression_math.gd")
 const SUPPRESSION_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/suppression_tracker.gd")
+const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
+## Befehlsart oder Quelle, deren Zweck Deckung oder Rueckzug ist: nie als Vorruecken gesperrt.
+const SUPPRESSION_SAFE_MOVE_TYPES: PackedStringArray = ["retreat", "seek_cover", "fall_back", "disengage", "enemy_limbo_cover"]
+## Ohne Hexraster: eine Kachelbreite in Weltpunkten gilt als ein Feld Spielraum.
+const SUPPRESSION_ADVANCE_MARGIN_WORLD: float = 64.0
 const CONTACT_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/contact_tracker.gd")
 const FLANK_VULNERABILITY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/flank_vulnerability_resolver.gd")
 const MEDIC_SUPPORT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/medic_support_resolver.gd")
@@ -181,7 +186,7 @@ var _attack_period_cache: Dictionary = {}
 # muss der Eintrag der Einheit hier verworfen werden, sonst bleibt ihr Takt still veraltet.
 var _attack_initiative_cache: Dictionary = {}
 # Unterdrueckung (FT-0b), fluechtig, nicht gespeichert: Wert und Stufe je Gruppe, laufende Nummer der Schussgelegenheit je
-# Einheit, Wirkung auf die Einheiten (Basiswerte zum Zurueckstellen).
+# Einheit. Die Wirkung (Treffer-Abzug, Deckungsboden, Tempo) wird beim Lesen aus der Stufe aufgeschlagen, nicht gespeichert.
 var _suppression_rules: Dictionary = SUPPRESSION_MATH_SCRIPT.load_rules()
 var _suppression_tracker = SUPPRESSION_TRACKER_SCRIPT.new(_suppression_rules)
 var _suppression_last_step_tick: int = -1
@@ -190,9 +195,8 @@ var _suppression_slot_memo: Dictionary = {}
 var _suppression_overwatch_slot_by_unit_id: Dictionary = {}
 var _suppression_ignored_by_key: Dictionary = {}
 var _suppression_key_by_instance: Dictionary = {}
-var _suppression_applied_by_instance: Dictionary = {}
-var _suppression_baseline_by_instance: Dictionary = {}
 var _suppression_movement_provider: Callable = Callable()
+var _suppression_combat_provider: Callable = Callable()
 var _last_contact_pair: Dictionary = {}
 var _last_event_text: String = "Combat waiting"
 var _mission_started_at_msec: int = 0
@@ -347,6 +351,8 @@ func _exit_tree() -> void:
 		simulation_root.call("clear_network_command_preflight_validator", Callable(self, "_validate_network_interaction_command_preflight"))
 	if simulation_root != null and _suppression_movement_provider.is_valid() and simulation_root.has_method("clear_movement_suppression_provider"):
 		simulation_root.call("clear_movement_suppression_provider", _suppression_movement_provider)
+	if simulation_root != null and _suppression_combat_provider.is_valid() and simulation_root.has_method("clear_combat_suppression_provider"):
+		simulation_root.call("clear_combat_suppression_provider", _suppression_combat_provider)
 
 
 func is_combat_finished() -> bool:
@@ -1726,6 +1732,9 @@ func _on_tick_processed(tick: int) -> void:
 		if _try_recover_premature_startup_resolution():
 			pass
 		else:
+			# FT-0b N1: Die Unterdrueckung klingt auch nach Gefechtsende normal ab (gleicher Schritt wie im Gefecht, kein
+			# hartes Zuruecksetzen); sonst bleiben Tempo, Plan und GO-Erholung bis zum naechsten Einsatz gesperrt.
+			_advance_suppression(tick)
 			_update_status_label("resolved")
 			_sync_objective_countdown_state()
 			if profile_enabled:
@@ -6517,13 +6526,15 @@ func reset_suppression() -> void:
 	_suppression_ignored_by_key.clear()
 	_suppression_key_by_instance.clear()
 	_suppression_last_step_tick = -1
-	_restore_suppression_effects()
 
 
 func register_suppression_movement_provider(simulation_root) -> void:
 	if simulation_root != null and simulation_root.has_method("set_movement_suppression_provider"):
 		_suppression_movement_provider = Callable(self, "get_suppression_move_factor")
 		simulation_root.call("set_movement_suppression_provider", _suppression_movement_provider)
+	if simulation_root != null and simulation_root.has_method("set_combat_suppression_provider"):
+		_suppression_combat_provider = Callable(self, "get_suppression_combat_modifiers")
+		simulation_root.call("set_combat_suppression_provider", _suppression_combat_provider)
 
 
 ## Jeder aufgeloeste Schuss zaehlt fuer die Gruppe des ZIELS: Treffer mit dem angerichteten Schaden, Fehlschuss mit dem
@@ -6556,7 +6567,7 @@ func _advance_suppression(tick: int) -> bool:
 	_suppression_last_step_tick = tick
 	_suppression_key_by_instance.clear()
 	var has_groups: bool = not _suppression_tracker.group_keys().is_empty()
-	if not has_groups and _suppression_applied_by_instance.is_empty():
+	if not has_groups:
 		return true
 	var members_by_key: Dictionary = {}
 	for unit in _get_friendly_combat_units() + _get_enemy_combat_units():
@@ -6572,7 +6583,6 @@ func _advance_suppression(tick: int) -> bool:
 			_suppression_ignored_by_key.erase(key)
 			continue
 		_step_suppression_group(key, members)
-	_apply_suppression_effects(members_by_key)
 	return true
 
 
@@ -6628,68 +6638,18 @@ func _suppression_contact_stability(unit) -> float:
 	return 0.5
 
 
-## Trefferabzug und Deckungsboden je Stufe ueber die Laufzeitwerte der Einheit (wie bisher attack_bonus und cover_score);
-## Feuerstatus und Tempo der Einheit bleiben unberuehrt. Wer seine Gruppe verloren hat oder bei Stufe 0 steht, bekommt die Basiswerte zurueck.
-func _apply_suppression_effects(members_by_key: Dictionary) -> void:
-	for key in members_by_key.keys():
-		var level: int = 0 if bool(_suppression_ignored_by_key.get(key, false)) else _suppression_tracker.level_of(String(key))
-		for unit in members_by_key[key]:
-			var instance_id: int = unit.get_instance_id()
-			var applied: int = int(_suppression_applied_by_instance.get(instance_id, 0))
-			if applied != level:
-				_apply_suppression_to_unit(unit, level)
-
-
-func _apply_suppression_to_unit(unit, level: int) -> void:
-	var instance_id: int = unit.get_instance_id()
-	if not unit.has_method("get_runtime_status") or not unit.has_method("set_runtime_status"):
-		return
-	var runtime_status = unit.call("get_runtime_status")
-	if runtime_status == null:
-		return
-	var base: Dictionary = Dictionary(_suppression_baseline_by_instance.get(instance_id, {}))
-	if base.is_empty():
-		if level <= 0:
-			_suppression_applied_by_instance.erase(instance_id)
-			return
-		base = {"attack_bonus": float(runtime_status.attack_bonus), "cover_score": float(runtime_status.cover_score)}
-		_suppression_baseline_by_instance[instance_id] = base
-	var next_attack_bonus: float = float(base["attack_bonus"])
-	var next_cover_score: float = float(base["cover_score"])
-	if level > 0:
-		next_attack_bonus += SUPPRESSION_MATH_SCRIPT.hit_bonus(_suppression_rules, level)
-		next_cover_score = maxf(next_cover_score, float(SUPPRESSION_MATH_SCRIPT.cover_floor(_suppression_rules, level)))
-	unit.call(
-		"set_runtime_status",
-		String(runtime_status.status),
-		String(runtime_status.active_command_type),
-		int(runtime_status.priority),
-		String(runtime_status.fire_status),
-		String(runtime_status.source_command_type),
-		float(runtime_status.move_speed_factor),
-		next_cover_score,
-		next_attack_bonus,
-		int(runtime_status.phase),
-		runtime_status.target_position,
-		String(runtime_status.movement_posture),
-		String(runtime_status.weapon_posture),
-		String(runtime_status.posture_policy_id),
-		float(runtime_status.sight_range_factor),
-		float(runtime_status.get("aim_readiness_percent"))
-	)
-	if level > 0:
-		_suppression_applied_by_instance[instance_id] = level
-	else:
-		_suppression_applied_by_instance.erase(instance_id)
-		_suppression_baseline_by_instance.erase(instance_id)
-
-
-func _restore_suppression_effects() -> void:
-	for unit in _get_friendly_combat_units() + _get_enemy_combat_units():
-		if _suppression_applied_by_instance.has(unit.get_instance_id()):
-			_apply_suppression_to_unit(unit, 0)
-	_suppression_applied_by_instance.clear()
-	_suppression_baseline_by_instance.clear()
+## Regel 7 (Nachbesserung 1): Trefferabzug und Deckungsboden je Stufe werden NICHT in den Laufzeitstatus der Einheit
+## geschrieben, sondern beim Lesen aus der aktuellen Stufe ihrer Gruppe aufgeschlagen (SimulationRoot._apply_damage_effect
+## fragt hier an). Neue Befehle koennen den Abzug so weder loeschen noch Altwerte zurueckbringen. Feuerstatus und Tempo
+## der Einheit bleiben unberuehrt.
+func get_suppression_combat_modifiers(unit) -> Dictionary:
+	var level: int = get_suppression_level_for_unit(unit)
+	if level <= 0:
+		return {}
+	return {
+		"hit_bonus": SUPPRESSION_MATH_SCRIPT.hit_bonus(_suppression_rules, level),
+		"cover_floor": float(SUPPRESSION_MATH_SCRIPT.cover_floor(_suppression_rules, level)),
+	}
 
 
 ## Regel 5: die laufende Nummer der faelligen Schussgelegenheit der Einheit (zaehlt den ganzen Einsatz hoch, wird bei
@@ -6729,8 +6689,23 @@ func get_suppression_move_factor(unit, cmd: Dictionary) -> float:
 	return SUPPRESSION_MATH_SCRIPT.move_factor(_suppression_rules, level, _suppression_move_is_toward_enemy(unit, cmd))
 
 
+## Bewegungen, deren Zweck Deckung oder Rueckzug ist, gelten nie als Vorruecken (beide Seiten): Befehlsart oder Quelle
+## retreat / seek_cover / fall_back / disengage, das Ausweichen der Gegner in Deckung (enemy_limbo_cover) und der
+## Deckungslauf bei Feindkontakt (contact_cover_decision = take_cover).
+func _suppression_move_is_cover_or_retreat(cmd: Dictionary) -> bool:
+	var command_type: String = String(cmd.get("command_type", "")).strip_edges().to_lower()
+	var source_type: String = String(cmd.get("source_command_type", "")).strip_edges().to_lower()
+	if command_type in SUPPRESSION_SAFE_MOVE_TYPES or source_type in SUPPRESSION_SAFE_MOVE_TYPES:
+		return true
+	return String(cmd.get("contact_cover_decision", "")).strip_edges().to_lower() == "take_cover"
+
+
+## Regel 8: "zum Feind hin" = das Ziel des Befehls liegt um MEHR als ein Feld (Hexfeld) naeher am naechsten lebenden Gegner
+## als die jetzige Position. Ohne Hexraster gilt eine Weltstrecke von einer Kachelbreite als Feld.
 func _suppression_move_is_toward_enemy(unit, cmd: Dictionary) -> bool:
 	if not cmd.has("target_position") or not (unit is Node2D):
+		return false
+	if _suppression_move_is_cover_or_retreat(cmd):
 		return false
 	var target_position: Vector2 = _coerce_vector2(cmd.get("target_position"), Vector2.INF)
 	if not target_position.is_finite():
@@ -6747,4 +6722,10 @@ func _suppression_move_is_toward_enemy(unit, cmd: Dictionary) -> bool:
 			nearest_position = opponent_position
 	if not nearest_position.is_finite():
 		return false
-	return target_position.distance_to(nearest_position) < nearest_distance
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry != null and terrain_registry.has_method("world_to_grid"):
+		var enemy_grid: Vector2i = terrain_registry.call("world_to_grid", nearest_position)
+		var now_cells: int = HEX_GRID_SCRIPT.distance(terrain_registry.call("world_to_grid", own_position), enemy_grid)
+		var then_cells: int = HEX_GRID_SCRIPT.distance(terrain_registry.call("world_to_grid", target_position), enemy_grid)
+		return then_cells < now_cells - 1
+	return target_position.distance_to(nearest_position) < nearest_distance - SUPPRESSION_ADVANCE_MARGIN_WORLD

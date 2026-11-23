@@ -101,11 +101,18 @@ func _trace_actual_combat(label: String) -> void:
 	if not _crew_ids.is_empty():
 		var leader: Node = mission.get_node("UnitRegistry").get_unit(_crew_ids[0])
 		if is_instance_valid(leader): own_team = String(leader.get_team_id())
+	var driver: Node = mission.get_node("CombatLoopDriver")
+	var own_status: Array = []
 	for actor: Node in mission.get_node("UnitRegistry").get_all_units():
-		if not is_instance_valid(actor) or not actor.has_method("get_team_id") or String(actor.get_team_id()) == own_team: continue
+		if not is_instance_valid(actor) or not actor.has_method("get_team_id"): continue
 		var id := String(actor.get_unit_id())
-		others.append({"id":id,"team":actor.get_team_id(),"position":actor.global_position,"vital":actor.get_vital_state(),"hp":actor.get_health(),"ground":simulation.get_hex_unit_state(id)})
-	print("FIVE_COMBAT_TRACE ",var_to_str({"label":label,"msec":Time.get_ticks_msec(),"tick":simulation.get_tick(),"own_team":own_team,"other_actors":others,"scenario":mission.get_node("CombatLoopDriver").get_mission_scenario_runtime_gate_snapshot(),"own_actor_count":Array(approach.get("actors",[])).size()}))
+		# FT-0b: Stufe der Unterdrueckung je Einheit (0..3) in der Spur, damit "hoechste Stufe je Seite" lesbar ist.
+		var level: int = int(driver.call("get_suppression_level_for_unit", actor)) if driver.has_method("get_suppression_level_for_unit") else -1
+		if String(actor.get_team_id()) == own_team:
+			own_status.append({"id":id,"hp":actor.get_health(),"suppression_level":level})
+			continue
+		others.append({"id":id,"team":actor.get_team_id(),"position":actor.global_position,"vital":actor.get_vital_state(),"hp":actor.get_health(),"suppression_level":level,"ground":simulation.get_hex_unit_state(id)})
+	print("FIVE_COMBAT_TRACE ",var_to_str({"label":label,"msec":Time.get_ticks_msec(),"tick":simulation.get_tick(),"own_team":own_team,"own_status":own_status,"other_actors":others,"scenario":mission.get_node("CombatLoopDriver").get_mission_scenario_runtime_gate_snapshot(),"own_actor_count":Array(approach.get("actors",[])).size()}))
 
 func _long_approach_is_progressing(observation: Dictionary, progress: Dictionary, now: int) -> bool:
 	var has_long_live_route := false

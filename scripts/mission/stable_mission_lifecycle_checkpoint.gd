@@ -124,6 +124,8 @@ func _publish_restore(handle: RefCounted) -> void:
 	for field in COOLDOWN_FIELDS: driver.set(field, Dictionary(record.data.get("combat_cooldowns",{}).get(field,{})).duplicate(true))
 	driver.restore_casualty_state(record.data.get("casualty_flags", {"was_downed_unit_ids":[]}), record.casualty_ids)
 	driver.restore_checkpoint_elapsed_time(record.elapsed)
+	# FT-0b Regel 11: Unterdrueckung steht nicht im Speicherstand; nach dem Wiederherstellen beginnt sie leer.
+	if driver.has_method("reset_suppression"): driver.reset_suppression()
 
 func _integer(value: Variant, minimum: int, maximum: int) -> bool:
 	return typeof(value) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(value)) and floor(float(value))==float(value) and float(value)>=minimum and float(value)<=maximum

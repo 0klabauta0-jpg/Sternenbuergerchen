@@ -151,9 +151,14 @@ func _run() -> void:
 	_test_t4_fire()
 	CADENCE.reset_config()
 	_test_t5_movement()
+	_test_t12_advance_margin()
+	_test_t13_level3_parity()
 	_test_t7_decay()
 	_test_t8_hit_and_cover()
+	_test_t9_read_time_modifiers()
 	await _test_t6_plan()
+	await _test_t10_planning_sync()
+	await _test_t14_after_combat_end()
 	CADENCE.reset_config()
 	await process_frame
 	print("suppression_combat_verifier passed=%d failed=%d" % [passed, failed])
@@ -362,6 +367,30 @@ func _test_t1_tracker() -> void:
 
 # ---- T2: Zeit in Ticks --------------------------------------------------------
 
+## Tick fuer Tick (1..180) nach drei Pistolentreffern; zwischen den Ticks vergehen `delay_msec` Wanduhr-Millisekunden.
+## Gibt die Ticks der Stufenwechsel zurueck.
+func _level_changes_with_delay(delay_msec: int) -> Array:
+	var f := _rig([
+		{"id": "own", "team": "blue", "grid": CENTER, "facing": 0},
+		{"id": "enemy", "team": "red", "grid": CENTER + HEX.DIRECTIONS[0], "facing": 3},
+	])
+	var key := _key(f, "enemy")
+	for i in range(3):
+		_call(f.driver, "note_suppression_shot", [f.units["enemy"], 18, true])
+	var changes: Array = []
+	var last := 0
+	for tick in range(1, 181):
+		_call(f.driver, "_advance_suppression", [tick])
+		if delay_msec > 0:
+			OS.delay_msec(delay_msec)
+		var level := int(_call_quiet(f.driver, "get_suppression_level", [key], 0))
+		if level != last:
+			changes.append(tick)
+			last = level
+	f.scope.free()
+	return changes
+
+
 func _test_t2_time() -> void:
 	var f := _rig([
 		{"id": "own", "team": "blue", "grid": CENTER, "facing": 0},
@@ -400,6 +429,11 @@ func _test_t2_time() -> void:
 	var before := int(_call_quiet(g.driver, "get_suppression_level", [_key(g, "enemy")], -1))
 	OS.delay_msec(1600)
 	_check(int(_call_quiet(g.driver, "get_suppression_level", [_key(g, "enemy")], -2)) == before and before == 2, "T2: 1,6 s Wanduhr ohne Tick aendern nichts (Stufe %d)" % before)
+	# Eine Wanduhr-Abhaengigkeit wuerde rot: dieselbe Tickfolge, einmal ohne und einmal mit 14 ms Wanduhr je Tick (2,5 s
+	# insgesamt, mehr als die alten 950 ms), ergibt exakt dieselben Stufenwechsel.
+	var fast_changes := _level_changes_with_delay(0)
+	var slow_changes := _level_changes_with_delay(14)
+	_check(fast_changes == [30, 90, 180] and slow_changes == fast_changes, "T2: Stufenwechsel exakt bei 30/90/180, unabhaengig von der Wanduhr (%s / %s)" % [str(fast_changes), str(slow_changes)])
 	var controller_source := FileAccess.get_file_as_string(CONTROLLER_PATH)
 	var from_index := controller_source.find("func _update_fireteam_suppression(")
 	var to_index := controller_source.find("\nfunc ", from_index + 10)
@@ -441,7 +475,9 @@ func _test_t3_both_sides() -> void:
 		_check(tick2 > 0 and tick3 > tick2, "T3: %s erreicht Stufe 2 und danach Stufe 3 innerhalb von 6 s" % side_name)
 		_check(tick2 > 0 and tick2 % 30 == 0 and tick3 % 30 == 0, "T3: %s wechselt nur an Schrittgrenzen" % side_name)
 		results.append([tick1, tick2, tick3])
-	_check(results[0][1] > 0 and results[1][1] > 0 and absi(int(results[0][1]) - int(results[1][1])) <= 60 and absi(int(results[0][2]) - int(results[1][2])) <= 90, "T3: gespiegelt gleiches Ergebnis (Gegner %s, eigene %s)" % [str(results[0]), str(results[1])])
+	# Gleiche Eingaben, gespiegelte Seiten: die Stufenwechsel fallen auf dieselben Ticks (ohne Toleranz).
+	_check(results[0][1] > 0 and results[0] == results[1], "T3: gespiegelt identische Stufenwechsel (Gegner %s, eigene %s)" % [str(results[0]), str(results[1])])
+	_check(_shots_by(enemy_side, "s0") + _shots_by(enemy_side, "s1") + _shots_by(enemy_side, "s2") == _shots_by(own_side, "s0") + _shots_by(own_side, "s1") + _shots_by(own_side, "s2"), "T3: gespiegelt gleich viele Schuesse")
 	enemy_side.scope.free()
 	own_side.scope.free()
 
@@ -520,7 +556,8 @@ func _test_t5_movement() -> void:
 	]
 	var f := _rig(specs)
 	_check(_has(f.sim, "set_movement_suppression_provider"), "T5: SimulationRoot nimmt einen Tempo-Lieferanten fuer die Unterdrueckung an")
-	var toward := CENTER + HEX.DIRECTIONS[0]
+	# "Zum Feind hin" heisst: das Ziel liegt um MEHR als ein Feld naeher am naechsten Gegner (Nachbesserung 1, W3).
+	var toward := CENTER + HEX.DIRECTIONS[0] * 2
 	var away := CENTER - HEX.DIRECTIONS[0]
 	var own: NPC = f.units["own"]
 	var enemy: NPC = f.units["enemy"]
@@ -542,7 +579,7 @@ func _test_t5_movement() -> void:
 	_pin(f, "own", 0, 0.0)
 	for level in range(1, 4):
 		_pin(f, "enemy", level, 5.0)
-		var e_toward: float = f.sim._extract_move_speed_factor(_move_cmd(f, "enemy", CENTER + HEX.DIRECTIONS[0] * 3, 1.0), enemy)
+		var e_toward: float = f.sim._extract_move_speed_factor(_move_cmd(f, "enemy", CENTER + HEX.DIRECTIONS[0] * 2, 1.0), enemy)
 		var e_away: float = f.sim._extract_move_speed_factor(_move_cmd(f, "enemy", CENTER + HEX.DIRECTIONS[0] * 5, 1.0), enemy)
 		var want_away: float = [0.8, 0.6, 0.35][level - 1]
 		var want_toward: float = [0.8, 0.0, 0.0][level - 1]
@@ -553,6 +590,100 @@ func _test_t5_movement() -> void:
 	var no_enemy: float = f.sim._extract_move_speed_factor(_move_cmd(f, "own", toward, 1.0), own)
 	_check(absf(no_enemy - 0.6) < 0.001, "T5: ohne bekannten Gegner gilt Stufe 2 mit 0,6 (%s)" % str(no_enemy))
 	f.scope.free()
+
+
+# ---- T12: Vorruecken mit Spielraum, Deckung und Rueckzug nie gesperrt (Nachbesserung 1, W3) --------------
+
+func _test_t12_advance_margin() -> void:
+	var specs: Array = [
+		{"id": "own", "team": "blue", "grid": CENTER, "facing": 0},
+		{"id": "enemy", "team": "red", "grid": CENTER + HEX.DIRECTIONS[0] * 4, "facing": 3},
+	]
+	var f := _rig(specs)
+	var own: NPC = f.units["own"]
+	var enemy: NPC = f.units["enemy"]
+	var d0: Vector2i = HEX.DIRECTIONS[0]
+	var enemy_grid := CENTER + d0 * 4
+	# Ein Deckungsfeld seitlich, hoechstens ein Feld naeher am Gegner als jetzt.
+	var side_cell := Vector2i(-999, -999)
+	for direction in HEX.DIRECTIONS:
+		var cell: Vector2i = CENTER + direction
+		if HEX.distance(cell, enemy_grid) == HEX.distance(CENTER, enemy_grid):
+			side_cell = cell
+	var one_closer: Vector2i = CENTER + d0
+	var two_closer: Vector2i = CENTER + d0 * 2
+	_check(side_cell != Vector2i(-999, -999), "T12: Vorbereitung: ein seitliches Feld gleich weit vom Gegner gefunden")
+	for level in [2, 3]:
+		var want_slow: float = [0.0, 0.0, 0.6, 0.35][level]
+		_reset_tracker(f)
+		_pin(f, "own", level, 5.0)
+		var side: float = f.sim._extract_move_speed_factor(_move_cmd(f, "own", side_cell, -1.0), own)
+		var near: float = f.sim._extract_move_speed_factor(_move_cmd(f, "own", one_closer, -1.0), own)
+		var far: float = f.sim._extract_move_speed_factor(_move_cmd(f, "own", two_closer, -1.0), own)
+		_check(absf(side - want_slow) < 0.001, "T12: Stufe %d: Deckungsziel seitlich laeuft mit %s (%s)" % [level, str(want_slow), str(side)])
+		_check(absf(near - want_slow) < 0.001, "T12: Stufe %d: ein Feld naeher am Gegner zaehlt noch nicht als Vorruecken (%s)" % [level, str(near)])
+		_check(far == 0.0, "T12: Stufe %d: Vorruecken um zwei Felder steht (%s)" % [level, str(far)])
+		# Deckung und Rueckzug sind nie gesperrt, auch wenn das Ziel naeher am Gegner liegt.
+		for purpose in [
+			{"command_type": "seek_cover"},
+			{"command_type": "retreat"},
+			{"source_command_type": "retreat"},
+			{"source_command_type": "fall_back"},
+			{"source_command_type": "disengage"},
+			{"contact_cover_decision": "take_cover"},
+		]:
+			var cmd := _move_cmd(f, "own", two_closer, -1.0)
+			for k in purpose.keys():
+				cmd[k] = purpose[k]
+			var factor: float = f.sim._extract_move_speed_factor(cmd, own)
+			_check(absf(factor - want_slow) < 0.001, "T12: eigene Einheit Stufe %d, %s: laeuft mit %s (%s)" % [level, str(purpose), str(want_slow), str(factor)])
+	# Gegner: Ausweichen in Deckung (enemy_limbo_cover) ist nie gesperrt, echtes Vorruecken schon.
+	_reset_tracker(f)
+	_pin(f, "enemy", 2, 3.0)
+	var enemy_cmd := _move_cmd(f, "enemy", CENTER + d0 * 2, -1.0)
+	var advance: float = f.sim._extract_move_speed_factor(enemy_cmd, enemy)
+	enemy_cmd["source_command_type"] = "enemy_limbo_cover"
+	var cover_run: float = f.sim._extract_move_speed_factor(enemy_cmd, enemy)
+	_check(advance == 0.0 and absf(cover_run - 0.6) < 0.001, "T12: Gegner Stufe 2: Vorruecken steht (%s), Ausweichen in Deckung laeuft mit 0,6 (%s)" % [str(advance), str(cover_run)])
+	f.scope.free()
+
+
+# ---- T13: Stufe 3 ist fuer beide Seiten gleich: kein Vorruecken, danach geht es weiter (Nachbesserung 1, Punkt 5) ----
+
+## Eine Gegnergruppe auf Stufe 3 rueckt mit demselben Befehl nicht vor, bis die Stufe unter 2 faellt, und laeuft dann mit
+## demselben Befehl weiter - genau wie ein eigenes Fireteam mit unterbrochenem Plan. Kein eigenes Plansystem fuer Gegner:
+## der Befehl bleibt bestehen, die Sperre kommt aus dem Tempofaktor (Stufe >= 2 zum Feind hin = 0).
+func _test_t13_level3_parity() -> void:
+	var results := {}
+	for side in ["blue", "red"]:
+		var other := "red" if side == "blue" else "blue"
+		var f := _rig([
+			{"id": "m", "team": side, "grid": CENTER, "facing": 0},
+			{"id": "x", "team": other, "grid": CENTER + HEX.DIRECTIONS[0] * 5, "facing": 3},
+		])
+		var unit: NPC = f.units["m"]
+		var cmd := _move_cmd(f, "m", CENTER + HEX.DIRECTIONS[0] * 3, -1.0)
+		_pin(f, "m", 3, 5.0)
+		var tick := 0
+		var blocked_until := -1
+		var first_free := -1
+		for step in range(1, 60):
+			tick += 30
+			_call(f.driver, "_advance_suppression", [tick])
+			var level := int(_call_quiet(f.driver, "get_suppression_level", [_key(f, "m")], 0))
+			var factor: float = f.sim._extract_move_speed_factor(cmd, unit)
+			if level >= 2:
+				if factor != 0.0:
+					_check(false, "T13 (%s): Stufe %d rueckt vor (%s)" % [side, level, str(factor)])
+				blocked_until = step
+			elif first_free < 0:
+				first_free = step
+				_check(factor > 0.0, "T13 (%s): unter Stufe 2 laeuft derselbe Befehl weiter (%s)" % [side, str(factor)])
+				break
+		_check(blocked_until > 0 and first_free > blocked_until, "T13 (%s): gesperrt bis Schritt %d, frei ab Schritt %d" % [side, blocked_until, first_free])
+		results[side] = [blocked_until, first_free]
+		f.scope.free()
+	_check(results["blue"] == results["red"], "T13: eigene und Gegnerseite gleich: %s / %s" % [str(results["blue"]), str(results["red"])])
 
 
 # ---- T7: Abklingen ------------------------------------------------------------
@@ -583,7 +714,10 @@ func _test_t7_decay() -> void:
 		_call(f.driver, "_advance_suppression", [tick])
 		var key := _key(f, "m1")
 		_check(int(_call_quiet(f.driver, "get_suppression_level", [key], 0)) == 3, "T7 (%s): Stufe 3 nach dem Feuerstoss" % side)
-		_check(not _snapshot_units(f, ["m0", "m1", "m2"], 0.05, 10.0), "T7 (%s): unter Stufe 3 sind Trefferabzug und Deckungsboden gesetzt" % side)
+		# Nachbesserung 1 (W1): nichts wird in den Laufzeitstatus geschrieben; der Abzug kommt beim Lesen aus der Stufe.
+		_check(_snapshot_units(f, ["m0", "m1", "m2"], 0.05, 10.0), "T7 (%s): unter Stufe 3 bleiben die Laufzeitwerte der Einheiten unberuehrt" % side)
+		var mods: Dictionary = Dictionary(_call_quiet(f.driver, "get_suppression_combat_modifiers", [f.units["m1"]], {}))
+		_check(absf(float(mods.get("hit_bonus", 0.0)) + 0.15) < 0.001 and absf(float(mods.get("cover_floor", 0.0)) - 24.0) < 0.001, "T7 (%s): unter Stufe 3 liefert der Treiber -0,15 Treffer und Deckungsboden 24 (%s)" % [side, str(mods)])
 		# Der Fuehrer faellt aus, waehrend die Gruppe niedergehalten ist.
 		f.units["m0"].hp = 0
 		var steps := 0
@@ -667,6 +801,203 @@ func _test_t8_hit_and_cover() -> void:
 			var expected_cover: float = 10.0 if level == 1 else 24.0
 			_check(absf(float(covered.get("target_cover_score", -1.0)) - expected_cover) < 0.01, "T8: Ziel %s unter Stufe %d hat Deckung %s (%s)" % [target_id, level, str(expected_cover), str(covered.get("target_cover_score", -1.0))])
 		f.scope.free()
+
+
+# ---- T9: Abzug beim Lesen (Nachbesserung 1, W1) -------------------------------
+
+func _resolve_shot_with(f: Dictionary, attacker_id: String, target_id: String, roll: float, hit_chance: float) -> Dictionary:
+	var captured: Array = []
+	var capture := func(result: Dictionary) -> void: captured.append(result)
+	f.sim.damage_effect_resolved.connect(capture)
+	var attacker: NPC = f.units[attacker_id]
+	f.sim._apply_damage_effect({"effect_type": "damage", "unit_id": target_id, "attacker_unit_id": attacker_id, "attacker_team_id": attacker.team_id, "damage": 18, "hit_chance": hit_chance, "roll_override": roll, "weapon_id": "pistol"})
+	f.sim.damage_effect_resolved.disconnect(capture)
+	return captured[0] if not captured.is_empty() else {}
+
+
+## Ein neuer Befehl schreibt neue Werte in den Laufzeitstatus (so macht es assign_unit_command).
+func _new_command_values(unit: NPC, bonus: float, cover: float) -> void:
+	unit.rs.attack_bonus = bonus
+	unit.rs.cover_score = cover
+
+
+func _test_t9_read_time_modifiers() -> void:
+	var tick := 0
+	for pair in [["own", "enemy"], ["enemy", "own"]]:
+		var shooter_id: String = pair[0]
+		var target_id: String = pair[1]
+		var shooter: NPC
+		var target: NPC
+		var f := _rig([
+			{"id": "own", "team": "blue", "grid": CENTER, "facing": 0, "base_cover": 10.0, "base_attack_bonus": 0.05},
+			{"id": "enemy", "team": "red", "grid": CENTER + HEX.DIRECTIONS[0], "facing": 3, "base_cover": 10.0, "base_attack_bonus": 0.05},
+		])
+		shooter = f.units[shooter_id]
+		target = f.units[target_id]
+		# (a) Ein neuer Befehl waehrend Stufe 2 nimmt den Abzug nicht weg.
+		_pin(f, shooter_id, 2, 3.0)
+		tick += 30
+		_call(f.driver, "_advance_suppression", [tick])
+		_new_command_values(shooter, 0.07, 12.0)
+		var suppressed := _resolve_shot_with(f, shooter_id, target_id, 0.99, 0.5)
+		_reset_tracker(f)
+		tick += 30
+		_call(f.driver, "_advance_suppression", [tick])
+		_new_command_values(shooter, 0.07, 12.0)
+		var plain := _resolve_shot_with(f, shooter_id, target_id, 0.99, 0.5)
+		var diff := float(suppressed.get("hit_chance_resolved", -9.0)) - float(plain.get("hit_chance_resolved", -9.0))
+		_check(not suppressed.is_empty() and absf(diff + 0.10) < 0.002, "T9a: %s: nach einem neuen Befehl gilt unter Stufe 2 weiter -0,10 Trefferchance (%s)" % [shooter_id, str(diff)])
+		_pin(f, target_id, 2, 3.0)
+		tick += 30
+		_call(f.driver, "_advance_suppression", [tick])
+		_new_command_values(target, 0.0, 12.0)
+		var covered := _resolve_shot_with(f, shooter_id, target_id, 0.99, 0.5)
+		_check(absf(float(covered.get("target_cover_score", -1.0)) - 24.0) < 0.01, "T9a: %s: nach einem neuen Befehl gilt unter Stufe 2 weiter der Deckungsboden 24 (%s)" % [target_id, str(covered.get("target_cover_score", -1.0))])
+		# (b) Faellt die Stufe auf 0, bleiben die Werte des inzwischen neuen Befehls; nichts Altes wird zurueckgeschrieben.
+		_reset_tracker(f)
+		_pin(f, shooter_id, 2, 3.0)
+		tick += 30
+		_call(f.driver, "_advance_suppression", [tick])
+		_new_command_values(shooter, 0.08, 40.0)
+		_reset_tracker(f)
+		tick += 30
+		_call(f.driver, "_advance_suppression", [tick])
+		_check(is_equal_approx(shooter.rs.attack_bonus, 0.08) and is_equal_approx(shooter.rs.cover_score, 40.0), "T9b: %s: nach dem Abklingen stehen die Werte des neuen Befehls (%s/%s)" % [shooter_id, str(shooter.rs.attack_bonus), str(shooter.rs.cover_score)])
+		f.scope.free()
+		# (c) Schaden bei Treffer mit und ohne Unterdrueckung gleich.
+		var g := _rig([
+			{"id": "own", "team": "blue", "grid": CENTER, "facing": 0, "base_cover": 10.0, "base_attack_bonus": 0.05},
+			{"id": "enemy", "team": "red", "grid": CENTER + HEX.DIRECTIONS[0], "facing": 3, "base_cover": 10.0, "base_attack_bonus": 0.05},
+		])
+		var clean := _resolve_shot_with(g, shooter_id, target_id, 0.0, 1.0)
+		_pin(g, shooter_id, 3, 5.0)
+		tick += 30
+		_call(g.driver, "_advance_suppression", [tick])
+		var pressed := _resolve_shot_with(g, shooter_id, target_id, 0.0, 1.0)
+		_check(not clean.is_empty() and int(clean.get("damage_resolved", -1)) > 0 and int(clean.get("damage_resolved", -1)) == int(pressed.get("damage_resolved", -2)), "T9c: %s: Schaden bei Treffer mit und ohne Stufe 3 gleich (%s/%s)" % [shooter_id, str(clean.get("damage_resolved", -1)), str(pressed.get("damage_resolved", -2))])
+		g.scope.free()
+
+
+# ---- T10: Planabgleich im Gefecht (Nachbesserung 1, W2) ----------------------
+
+## Ein Planabgleich (set_planning_state) mitten im Gefecht loescht weder die Stufen beider Seiten noch die Vormerkung der
+## Unterbrechung; der unterbrochene Plan wird nach dem Abklingen fortgesetzt.
+func _test_t10_planning_sync() -> void:
+	var scene = load(SCENE_PATH).instantiate()
+	root.add_child(scene)
+	for _index in range(10):
+		await process_frame
+	var controller = scene.get_node("TacticalController")
+	var driver = scene.get_node("CombatLoopDriver")
+	var sim = scene.get_node("SimulationRoot")
+	sim.set_physics_process(false)
+	sim.set_process(false)
+	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
+	controller.call("_create_waypoints_for_selected_fireteams", Vector2(240.0, 170.0))
+	controller.call("advance_to_next_phase")
+	var unit_alpha = scene.get_node("UnitAlpha")
+	var key := String(_call_quiet(driver, "suppression_group_key", [unit_alpha], ""))
+	var tick := 40020
+	for i in range(60):
+		_call(driver, "note_suppression_shot", [unit_alpha, 18, true])
+		tick += 30
+		_call(driver, "_advance_suppression", [tick])
+		controller.call("_update_fireteam_suppression", 0.016)
+		if int(_call_quiet(driver, "get_suppression_level", [key], 0)) >= 3:
+			break
+	var tracker = _call_quiet(driver, "get_suppression_tracker")
+	if tracker != null:
+		tracker.set_state("enemy:probe", 3.0, 2)
+	_check(int(_call_quiet(driver, "get_suppression_level", [key], 0)) >= 3, "T10: eigenes Fireteam steht vor dem Planabgleich auf Stufe 3")
+	_check(_first_waypoint_status(controller.call("get_order_plans_snapshot"), "blue") == "interrupted", "T10: der Plan ist unterbrochen")
+	controller.call("set_planning_state", {})
+	_check(int(_call_quiet(driver, "get_suppression_level", [key], 0)) >= 3, "T10: ein Planabgleich laesst die Stufe des eigenen Fireteams stehen")
+	_check(int(_call_quiet(driver, "get_suppression_level", ["enemy:probe"], 0)) == 2, "T10: ein Planabgleich laesst die Stufe der Gegnergruppe stehen")
+	_check(bool(controller.get("_suppression_interrupt_pending_by_fireteam").get("blue", false)), "T10: die Vormerkung der Unterbrechung bleibt nach dem Planabgleich")
+	controller.call("_update_fireteam_suppression", 0.016)
+	_check(int(_call_quiet(driver, "get_suppression_level", [key], 0)) >= 3, "T10: auch ein Bild danach steht die Stufe noch")
+	# Feuer hoert auf; nach dem Abklingen unter Stufe 2 wird der Plan fortgesetzt.
+	var resumed := false
+	for i in range(80):
+		tick += 30
+		_call(driver, "_advance_suppression", [tick])
+		controller.call("_update_fireteam_suppression", 0.016)
+		if int(_call_quiet(driver, "get_suppression_level", [key], 0)) < 2:
+			resumed = not bool(controller.get("_suppression_interrupt_pending_by_fireteam").get("blue", false))
+			break
+	_check(resumed, "T10: nach dem Abklingen wird fortgesetzt, auch wenn dazwischen ein Planabgleich lief")
+	_check(_first_waypoint_status(controller.call("get_order_plans_snapshot"), "blue") != "interrupted", "T10: kein Plan bleibt auf interrupted stehen")
+	scene.queue_free()
+	await process_frame
+
+
+# ---- T14: Gefechtsende (Nachbesserung 2, N1) ---------------------------------
+
+## Nach dem Gefechtsende laeuft der Unterdrueckungs-Schritt weiter (ueber den echten _on_tick_processed): der Wert klingt
+## normal ab, die Stufe faellt, Tempo, Plan und GO-Erholung werden wieder frei. Kein hartes Zuruecksetzen.
+func _test_t14_after_combat_end() -> void:
+	var scene = load(SCENE_PATH).instantiate()
+	root.add_child(scene)
+	for _index in range(10):
+		await process_frame
+	var controller = scene.get_node("TacticalController")
+	var driver = scene.get_node("CombatLoopDriver")
+	var sim = scene.get_node("SimulationRoot")
+	sim.set_physics_process(false)
+	sim.set_process(false)
+	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
+	controller.call("_create_waypoints_for_selected_fireteams", Vector2(240.0, 170.0))
+	controller.call("advance_to_next_phase")
+	var unit_alpha = scene.get_node("UnitAlpha")
+	var key := String(_call_quiet(driver, "suppression_group_key", [unit_alpha], ""))
+	var tick := 50040
+	for i in range(60):
+		_call(driver, "note_suppression_shot", [unit_alpha, 18, true])
+		tick += 30
+		_call(driver, "_advance_suppression", [tick])
+		controller.call("_update_fireteam_suppression", 0.016)
+		if int(_call_quiet(driver, "get_suppression_level", [key], 0)) >= 3:
+			break
+	var tracker = _call_quiet(driver, "get_suppression_tracker")
+	if tracker != null:
+		tracker.set_state("enemy:probe", 5.0, 3)
+	_check(int(_call_quiet(driver, "get_suppression_level", [key], 0)) >= 3, "T14: eigenes Fireteam steht bei Gefechtsende auf Stufe 3")
+	_check(_first_waypoint_status(controller.call("get_order_plans_snapshot"), "blue") == "interrupted", "T14: der Plan ist unterbrochen")
+	driver.set("_combat_finished", true)
+	var cmd := {"command_type": "move_to_position", "target_position": unit_alpha.global_position + Vector2(400.0, 0.0)}
+	var steps := 0
+	while steps < 80:
+		tick += 30
+		driver.call("_on_tick_processed", tick)
+		controller.call("_update_fireteam_suppression", 0.016)
+		steps += 1
+		if int(_call_quiet(driver, "get_suppression_level", [key], 0)) == 0:
+			break
+	_check(bool(driver.get("_combat_finished")), "T14: das Gefecht ist weiter beendet (kein Neustart durch den Test)")
+	_check(int(_call_quiet(driver, "get_suppression_level", [key], 0)) == 0 and steps < 80, "T14: nach Gefechtsende faellt die Stufe nach endlich vielen Schritten auf 0 (%d Schritte)" % steps)
+	_check(absf(float(_call_quiet(driver, "get_suppression_move_factor", [unit_alpha, cmd], 0.0)) - 1.0) < 0.001, "T14: der Tempofaktor ist wieder 1,0")
+	_check(not bool(controller.get("_suppression_interrupt_pending_by_fireteam").get("blue", false)), "T14: die Vormerkung der Unterbrechung ist erledigt")
+	_check(_first_waypoint_status(controller.call("get_order_plans_snapshot"), "blue") != "interrupted", "T14: der Plan ist fortgesetzt")
+	_check(not bool(controller.call("_is_fireteam_go_recovery_blocked", "blue")), "T14: GO-Erholung ist wieder frei")
+	# Gegnergruppe: dieselbe Abklingzeit nach Gefechtsende (Sonde ohne Mitglieder wird vergessen, daher eine echte Gruppe).
+	scene.queue_free()
+	await process_frame
+	var f := _rig([
+		{"id": "own", "team": "blue", "grid": CENTER, "facing": 0},
+		{"id": "enemy", "team": "red", "grid": CENTER + HEX.DIRECTIONS[0] * 3, "facing": 3},
+	])
+	f.driver.set("_combat_finished", true)
+	_pin(f, "enemy", 3, 5.0)
+	var ekey := _key(f, "enemy")
+	var etick := 60000
+	var esteps := 0
+	while esteps < 80 and int(_call_quiet(f.driver, "get_suppression_level", [ekey], 0)) > 0:
+		etick += 30
+		f.driver.call("_on_tick_processed", etick)
+		esteps += 1
+	_check(int(_call_quiet(f.driver, "get_suppression_level", [ekey], 0)) == 0 and esteps < 80, "T14: Gegnergruppe faellt nach Gefechtsende auf 0 (%d Schritte)" % esteps)
+	_check(esteps >= 3, "T14: das Abklingen laeuft normal ueber mehrere Schritte, kein Zuruecksetzen auf einen Schlag (%d)" % esteps)
+	f.scope.free()
 
 
 # ---- T6: Plan -----------------------------------------------------------------

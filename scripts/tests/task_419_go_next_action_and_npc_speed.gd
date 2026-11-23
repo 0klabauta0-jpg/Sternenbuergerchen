@@ -54,25 +54,40 @@ func _test_go_recovery_decision_reads_plan_interrupts() -> void:
 	_assert(bool(controller.call("_has_go_recovery_action_for_fireteam", "drill")), "GO sees Return-to-Plan as executable recovery")
 	_assert(not bool(controller.call("_is_fireteam_go_recovery_blocked", "drill")), "Low suppression does not block GO recovery")
 
+	# FT-0b: drei Stufen. GO-Erholung ist ab Stufe 2 (Niedergehalten) gesperrt, passend zur automatischen Fortsetzung unter
+	# Stufe 2; Stufe 1 (Unter Feuer) sperrt nicht. Gleiche Aussage wie task_473.
 	controller.set("_suppression_state_by_fireteam", {
 		"drill": {
-			"value": 2.0,
-			"threshold": 2.0,
-			"is_suppressed": false,
-			"is_heavily_suppressed": false,
-		},
-	})
-	_assert(bool(controller.call("_is_fireteam_go_recovery_blocked", "drill")), "GO recovery blocks at the suppression threshold")
-
-	controller.set("_suppression_state_by_fireteam", {
-		"drill": {
-			"value": 0.0,
-			"threshold": 2.0,
+			"value": 1.2,
+			"threshold": 2.5,
+			"level": 1,
 			"is_suppressed": true,
 			"is_heavily_suppressed": false,
 		},
 	})
-	_assert(bool(controller.call("_is_fireteam_go_recovery_blocked", "drill")), "Suppressed flag blocks forced GO recovery")
+	_assert(not bool(controller.call("_is_fireteam_go_recovery_blocked", "drill")), "Level 1 (under fire) does not block GO recovery")
+
+	controller.set("_suppression_state_by_fireteam", {
+		"drill": {
+			"value": 2.6,
+			"threshold": 4.0,
+			"level": 2,
+			"is_suppressed": true,
+			"is_heavily_suppressed": false,
+		},
+	})
+	_assert(bool(controller.call("_is_fireteam_go_recovery_blocked", "drill")), "GO recovery blocks from level 2 (pinned down)")
+
+	controller.set("_suppression_state_by_fireteam", {
+		"drill": {
+			"value": 4.5,
+			"threshold": 4.0,
+			"level": 3,
+			"is_suppressed": true,
+			"is_heavily_suppressed": false,
+		},
+	})
+	_assert(bool(controller.call("_is_fireteam_go_recovery_blocked", "drill")), "Level 3 (nailed down) blocks forced GO recovery")
 	controller.free()
 
 

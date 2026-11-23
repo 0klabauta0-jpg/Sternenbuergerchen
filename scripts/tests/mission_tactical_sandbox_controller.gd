@@ -1364,7 +1364,8 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		_area_defense_execution_by_fireteam.clear()
 		_area_attack_execution_by_fireteam.clear()
 		_active_coordination_by_id.clear()
-		_initialize_fireteam_suppression_state()
+		# Unterdrueckung bleibt beim Planabgleich im Einsatz stehen (Stufen, Vormerkung); nur fehlende Eintraege anlegen.
+		_ensure_fireteam_suppression_state_entries()
 	if not selected_tile_state_provided:
 		_ensure_default_tile_selection(false)
 	else:
@@ -5117,9 +5118,9 @@ func _is_fireteam_go_recovery_blocked(fireteam_id: String) -> bool:
 	var suppression_state: Dictionary = Dictionary(_suppression_state_by_fireteam.get(normalized_fireteam_id, {}))
 	if suppression_state.is_empty():
 		return false
-	var suppression_value: float = maxf(float(suppression_state.get("value", 0.0)), 0.0)
-	var suppression_threshold: float = maxf(float(suppression_state.get("threshold", 1.0)), 1.0)
-	return bool(suppression_state.get("is_heavily_suppressed", false)) or suppression_value >= suppression_threshold * 1.8
+	# FT-0b: gesperrt ab Stufe 2 (Niedergehalten) - passend dazu, dass der Plan erst unter Stufe 2 automatisch weiterlaeuft.
+	var suppression_level: int = int(suppression_state.get("level", 0))
+	return suppression_level >= 2 or bool(suppression_state.get("is_heavily_suppressed", false))
 
 
 func _refresh_ad_hoc_panel_visibility() -> void:
@@ -21134,15 +21135,24 @@ func _get_suppression_rules() -> Dictionary:
 	return _suppression_rules_cache
 
 
-## Der Wert lebt nur im Lauf (nicht im Speicherstand): beim Start, beim Laden eines Zwischenstands und beim Missionsneustart leer.
+## Der Wert lebt nur im Lauf (nicht im Speicherstand): beim Start und beim Missionsneustart leer (das Laden eines
+## Zwischenstands leert den Treiber ueber stable_mission_lifecycle_checkpoint). NICHT bei einem Planabgleich im laufenden Einsatz.
 func _initialize_fireteam_suppression_state() -> void:
 	_suppression_state_by_fireteam.clear()
 	_suppression_interrupt_pending_by_fireteam.clear()
 	var combat_driver = _get_combat_loop_driver()
 	if combat_driver != null and combat_driver.has_method("reset_suppression"):
 		combat_driver.call("reset_suppression")
+	_ensure_fireteam_suppression_state_entries()
+
+
+## Legt fehlende Eintraege der Fireteams an und laesst vorhandene (Stufe, Vormerkung der Planunterbrechung) und den Treiber
+## unberuehrt. Fuer den Planabgleich im Einsatz und fuer spaeter hinzukommende Fireteams.
+func _ensure_fireteam_suppression_state_entries() -> void:
 	for fireteam_id in _get_available_fireteam_ids():
 		var normalized_fireteam_id: String = String(fireteam_id).strip_edges().to_lower()
+		if _suppression_state_by_fireteam.has(normalized_fireteam_id):
+			continue
 		_suppression_state_by_fireteam[normalized_fireteam_id] = {
 			"value": 0.0,
 			"threshold": 1.0,
@@ -21162,7 +21172,7 @@ func _update_fireteam_suppression(_delta: float) -> void:
 	if preview_mode:
 		return
 	if _suppression_state_by_fireteam.is_empty():
-		_initialize_fireteam_suppression_state()
+		_ensure_fireteam_suppression_state_entries()
 	var combat_driver = _get_combat_loop_driver()
 	if combat_driver == null or not combat_driver.has_method("get_suppression_snapshot"):
 		return
