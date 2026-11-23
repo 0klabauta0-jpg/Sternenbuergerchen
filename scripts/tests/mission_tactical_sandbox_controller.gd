@@ -19862,10 +19862,39 @@ func apply_air_asset_threat(context: Dictionary = {}, options: Dictionary = {}) 
 func report_ground_fire_vs_air(craft_id: String, status_snapshot: Dictionary, texts: Array) -> void:
 	if not status_snapshot.is_empty() and _air_asset_status != null and String(_air_asset_status.asset_id) == craft_id:
 		_air_asset_status = AIR_ASSET_STATUS_SCRIPT.call("from_dict", status_snapshot)
+	# LC2h: Ist das Schiff verloren, sagt die Meldung dem Spieler, was nun gilt (nur in der Kampagne; sonst gibt es keine Auskunft).
+	var loss_text: String = _craft_loss_notice(craft_id)
+	if not loss_text.is_empty():
+		texts = texts.duplicate()
+		texts.append(loss_text)
 	if not texts.is_empty():
 		_last_command_text = " ".join(PackedStringArray(texts))
 		_set_mission_dropship_card_feedback(craft_id, _last_command_text)
 	_refresh_mission_dropship_panel()
+
+
+## LC2h: Auskunft der Kampagne ueber ein verlorenes Schiff ({ship_name, is_mission_craft, fee}) oder {} (kein Verlust, keine Kampagne).
+func _craft_loss_quote(craft_id: String) -> Dictionary:
+	if not _is_air_craft_crashed(craft_id): return {}
+	var owner_node: Node = get_parent()
+	if owner_node == null or not owner_node.has_meta("campaign_craft_loss_quote"): return {}
+	var provider: Variant = owner_node.get_meta("campaign_craft_loss_quote")
+	if not (provider is Callable) or not Callable(provider).is_valid(): return {}
+	var quote: Dictionary = Dictionary(Callable(provider).call(craft_id))
+	if quote.is_empty(): return {}
+	var card_name: String = String(Dictionary(_find_mission_dropship_card_entry(craft_id)).get("display_name", "")).strip_edges()
+	if not card_name.is_empty(): quote["ship_name"] = card_name
+	return quote
+
+
+## LC2h: Der Meldetext zum Schiffsverlust: "<Schiff> ist verloren." und beim Einsatzschiff der Weg heim samt Gebuehr.
+func _craft_loss_notice(craft_id: String) -> String:
+	var quote: Dictionary = _craft_loss_quote(craft_id)
+	if quote.is_empty(): return ""
+	var text := "%s ist verloren." % String(quote.get("ship_name", craft_id))
+	if bool(quote.get("is_mission_craft", false)):
+		text += " Bring den Trupp zur Landezone – dort holt euch die Notrettung ab (%d Credits)." % int(quote.get("fee", 0))
+	return text
 
 
 ## LC2b: Das Schiff ist durch Bodenbeschuss abgestuerzt oder explodiert (SimulationRoot.resolve_air_shootdown); es ist aus dem Einsatz.

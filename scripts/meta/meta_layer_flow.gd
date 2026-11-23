@@ -4344,6 +4344,8 @@ func _start_mission(prepared_map = null, prepared_cache: RefCounted = null) -> v
 	_configure_mission_instance(mission_instance, _selected_unit_ids, _selected_fireteam_ids, false, prepared_map, prepared_cache)
 	mission_host.add_child(mission_instance)
 	_active_mission = mission_instance
+	# LC2h: Der Einsatz fragt hier nach Schiffsname und Notrettungsgebuehr, wenn ein Schiff verloren geht (Meldung, EVAC-Knopf).
+	mission_instance.set_meta("campaign_craft_loss_quote", Callable(self, "_craft_loss_quote"))
 	_bind_context_overlay_signals()
 	if not location_id.is_empty():
 		mission_instance.set_meta("location_id",location_id)
@@ -4714,9 +4716,7 @@ func _book_craft_loss_rescue(mission_result: Dictionary, rules: Dictionary) -> D
 	var ship_name: String = String(card.get("display_name", "")).strip_edges()
 	var fee := 0
 	if not rules.is_empty() and _singleplayer_runtime != null:
-		var credits: int = int(_singleplayer_runtime.call("get_campaign_credits"))
-		var penalty: Dictionary = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("build_total_loss_penalty", Array(mission_result.get("team_states", [])), credits, rules))
-		fee = maxi(int(penalty.get("rescue_fee", 0)), 0)
+		fee = _craft_loss_rescue_fee(Array(mission_result.get("team_states", [])), rules)
 		if fee > 0:
 			# LC2d A5: Das Ergebnis der Abbuchung wird geprueft; scheitert sie, steht im Beleg keine Gebuehr, die nie gebucht wurde.
 			var charged: Dictionary = Dictionary(_singleplayer_runtime.call("charge_campaign_rescue_fee", fee))
@@ -4724,6 +4724,30 @@ func _book_craft_loss_rescue(mission_result: Dictionary, rules: Dictionary) -> D
 				push_warning("Notrettung: Gebuehr %d nicht gebucht (%s)" % [fee, String(charged.get("reason", ""))])
 				fee = 0
 	return {"craft_id": craft_id, "ship_name": ship_name if not ship_name.is_empty() else craft_id, "outcome": outcome, "rescue_fee": fee}
+
+
+## LC2h: Die Rettungsgebuehr nach Schiffsverlust (eine Rechnung fuer Buchung und Ansage): Anteil am heutigen Guthaben, mindestens die Mindestgebuehr.
+func _craft_loss_rescue_fee(team_states: Array, rules: Dictionary) -> int:
+	var credits: int = int(_singleplayer_runtime.call("get_campaign_credits"))
+	var penalty: Dictionary = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("build_total_loss_penalty", team_states, credits, rules))
+	return maxi(int(penalty.get("rescue_fee", 0)), 0)
+
+
+## LC2h: Auskunft fuer den laufenden Einsatz ueber ein verlorenes Schiff: {"ship_name", "is_mission_craft", "fee"}. fee = Gebuehr, die die
+## Notrettung buchen wird (heutiges Guthaben; die Buchung folgt nach dem Einsatz), nur fuers Einsatzschiff, sonst 0. Leer ausserhalb der Kampagne.
+func _craft_loss_quote(craft_id: String) -> Dictionary:
+	if not is_campaign_start() or _active_mission == null: return {}
+	var ship_name := craft_id
+	for craft_variant in _homebase_aircraft_definitions:
+		if String(Dictionary(craft_variant).get("craft_id", "")).strip_edges() == craft_id:
+			var named: String = String(Dictionary(craft_variant).get("display_name", "")).strip_edges()
+			if not named.is_empty(): ship_name = named
+	var is_mission_craft: bool = craft_id == String(_active_singleplayer_identity.get("craft_id", ""))
+	var rules: Dictionary = _get_campaign_casualty_rules()
+	var fee := 0
+	if is_mission_craft and not rules.is_empty() and _singleplayer_runtime != null:
+		fee = _craft_loss_rescue_fee([], rules)
+	return {"ship_name": ship_name, "is_mission_craft": is_mission_craft, "fee": fee}
 
 
 ## LC2g W3: Verlustbelege fuer jedes abgeschossene Schiff dieses Einsatzes, das nicht das Einsatzschiff ist und noch in der Flotte steht
