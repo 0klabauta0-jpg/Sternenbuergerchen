@@ -1787,6 +1787,8 @@ func _save_before_launch() -> Dictionary:
 
 func launch_to_moon_orbit(craft_id: String) -> Dictionary:
 	var pre_launch_save: Dictionary = _save_before_launch()
+	# M4d: Mitfliegende VOR dem Abflug lesen; danach steht ihr Status auf "away" und die Bordliste ist leer.
+	var ammo_crew: Array = Array(_flow.call("_aboard_unit_ids_of_craft", craft_id)).duplicate() if _flow != null else []
 	var request_id := _request_id("orbit-launch", {})
 	var result: Dictionary = _simulation.commit_singleplayer_space_launch(self, craft_id, request_id)
 	if result.get("ok", false):
@@ -1796,7 +1798,7 @@ func launch_to_moon_orbit(craft_id: String) -> Dictionary:
 		_flow.call("_refresh_homebase_screen")
 		if not result.get("replayed", false): call_deferred("_publish_space_launch_event", request_id)
 		# M4c (W2): der Abflug von der Heimatbasis ist bestaetigt -> die Faecher der Mitfliegenden aus dem Basislager auffuellen.
-		var ammo_departure: Dictionary = {} if result.get("replayed", false) else replenish_ammo_for_departure(craft_id)
+		var ammo_departure: Dictionary = {} if result.get("replayed", false) else replenish_ammo_for_departure(craft_id, ammo_crew)
 		var travel: Dictionary = Dictionary(result.travel_result)
 		if not String(ammo_departure.get("short_message", "")).is_empty():
 			travel = travel.duplicate()
@@ -2225,9 +2227,9 @@ func replenish_ammo(unit_ids: Array) -> Dictionary:
 ## M4c (W2): Faecher der mitfliegenden Personen (an Bord des Schiffs plus zugeteilter Pilot) beim bestaetigten Abflug von der
 ## Heimatbasis aus dem Basislager auffuellen; dieselbe Funktion und Reihenfolge wie bei der Heimkehr. Wiederholbar (ergaenzt nur Fehlendes).
 ## Aufgerufen von launch_to_moon_orbit (der einzigen verbindlichen Abflugstelle von der Heimatbasis), nie beim Oeffnen eines Dialogs.
-func replenish_ammo_for_departure(craft_id: String) -> Dictionary:
+func replenish_ammo_for_departure(craft_id: String, crew_ids: Array = []) -> Dictionary:
 	if not _campaign_mode or _flow == null or _supply == null: return {"added": 0, "short": 0, "message": "", "short_message": ""}
-	var ids: Array = Array(_flow.call("_aboard_unit_ids_of_craft", craft_id)).duplicate()
+	var ids: Array = crew_ids.duplicate() if not crew_ids.is_empty() else Array(_flow.call("_aboard_unit_ids_of_craft", craft_id)).duplicate()
 	var pilot := String(Dictionary(_flow.get("_assigned_aircraft_pilot_by_craft")).get(craft_id, ""))
 	if not pilot.is_empty() and not ids.has(pilot): ids.append(pilot)
 	return Dictionary(_supply.fill_person_compartments(ids, true))

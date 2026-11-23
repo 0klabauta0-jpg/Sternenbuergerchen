@@ -121,7 +121,7 @@ func _homecoming_part() -> void:
 	plural.grant_ammo_start_if_missing(["p1", "p5"])
 	for i in 3: plural.take_person_magazine("p1", "ammo_light")
 	for i in 7: plural.take_person_magazine("p5", "ammo_light")
-	_base(plural).items.erase("ammo_light")
+	check(plural.apply_command({"contract_category": "singleplayer_supply", "operation": "inventory_transfer", "payload": {"source_container_id": BASE, "destination_container_id": "station:polisa:lift", "item_id": "ammo_light", "amount": _n(_base(plural), "ammo_light")}, "request_id": "m4d:empty"}, {"accessible_containers": [BASE, "station:polisa:lift"]}).get("ok", false), "Aufbau: Lager ohne leichte Magazine")
 	var none_left: Dictionary = plural.fill_person_compartments(["p1", "p5"], true)
 	check(int(none_left.get("short", -1)) == 2 and String(none_left.get("short_message", "")) == "Munition knapp: 2 Fächer blieben leer.", "Knapp, zwei Fächer: Mehrzahl im Wortlaut (%s)" % str(none_left.get("short_message")))
 	var ready := _sup(["p1"])
