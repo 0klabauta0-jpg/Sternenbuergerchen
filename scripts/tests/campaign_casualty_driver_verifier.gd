@@ -83,8 +83,8 @@ func _make_stub(source: String) -> Node:
 
 
 func _age_down_state(driver, unit_id: String, seconds: float) -> void:
-	var started: Dictionary = driver.get("_down_state_started_msec_by_unit_id")
-	started[unit_id] = Time.get_ticks_msec() - int(seconds * 1000.0)
+	var started: Dictionary = driver.get("_down_state_started_tick_by_unit_id")
+	started[unit_id] = int(driver.get("_current_tick")) - int(seconds * 60.0) # Spielzeit: 60 Ticks je Sekunde
 
 
 func _bleedout_effects(sim) -> int:
@@ -207,7 +207,7 @@ func _case_unconnected_unit_heal_resets_window() -> void:
 	_age_down_state(driver, FRIEND_ID, 5.0)
 	_check(friend.call("apply_heal", 10, {}), "unconnected: heal inside window accepted")
 	driver.call("_queue_bleedout_for_downed_friendly", env.sim)
-	var started: Dictionary = driver.get("_down_state_started_msec_by_unit_id")
+	var started: Dictionary = driver.get("_down_state_started_tick_by_unit_id")
 	_check(not started.has(FRIEND_ID), "unconnected: tick clears the linger timestamp of a revived unit")
 	friend.call("apply_damage", 1000, {})
 	driver.call("_queue_bleedout_for_downed_friendly", env.sim)

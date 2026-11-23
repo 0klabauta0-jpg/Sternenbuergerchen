@@ -7,13 +7,17 @@ const SECURITY_MODE_360: String = "360"
 const SECURITY_MODE_DIRECTIONAL: String = "directional"
 const DIRECTIONAL_ARC_WIDTH: float = PI * 0.7
 const DEFENSE_SCAN_HALF_ANGLE: float = 0.27925268
-const DEFENSE_SCAN_CYCLE_MSEC: int = 2600
+# Zeiten zaehlen in Spiel-Ticks (Physik-Tick des SimulationRoot, normal 60 je Sekunde), nicht in Wanduhr-ms.
+const DEFENSE_SCAN_CYCLE_TICKS: int = 156 # vorher 2600 ms
+const DEFENSE_SCAN_MEMBER_PHASE_TICKS: int = 25 # vorher 419 ms Versatz je Mitglied
 const DIRECTIONAL_FRONT_PAIR_OFFSET: float = 0.13962634
 const DIRECTIONAL_FLANK_OFFSET: float = 1.04719755
-const MIN_SHIFT_DELAY_MSEC: int = 250
-const MAX_SHIFT_DELAY_MSEC: int = 1200
+const MIN_SHIFT_DELAY_TICKS: int = 15 # vorher 250 ms
+const MAX_SHIFT_DELAY_TICKS: int = 72 # vorher 1200 ms
 
 var _state_by_fireteam: Dictionary = {}
+## Letzter bekannter Spiel-Tick. Der Aufrufer reicht ihn in area_context["current_tick"] mit; fehlt er, vergeht keine Zeit.
+var _last_tick: int = 0
 
 
 func reset_fireteam(fireteam_id: String) -> void:
@@ -136,36 +140,37 @@ func update_fireteam_state(
 	var direction_angle: float = float(previous_state.get("direction_angle", _extract_security_direction_angle(behavior_profile_dict, area_context)))
 	if movement_security_active:
 		direction_angle = _extract_movement_direction_angle(movement_state, direction_angle)
-	var now_msec: int = Time.get_ticks_msec()
+	var now_tick: int = int(area_context.get("current_tick", _last_tick))
+	_last_tick = now_tick
 	if previous_state.is_empty() and typeof(threat_position) == TYPE_VECTOR2:
 		direction_angle = (Vector2(threat_position) - anchor_position).angle()
 	var pending_angle: Variant = previous_state.get("pending_direction_angle", null)
-	var pending_ready_at_msec: int = int(previous_state.get("pending_shift_ready_at_msec", 0))
+	var pending_ready_at_tick: int = int(previous_state.get("pending_shift_ready_at_tick", 0))
 	if mode == SECURITY_MODE_DIRECTIONAL and typeof(threat_position) == TYPE_VECTOR2:
 		var desired_angle: float = (Vector2(threat_position) - anchor_position).angle()
 		if _angle_within_sector(desired_angle, direction_angle, DIRECTIONAL_ARC_WIDTH):
 			direction_angle = desired_angle
 			pending_angle = null
-			pending_ready_at_msec = 0
+			pending_ready_at_tick = 0
 		else:
 			if leadership > 0.7:
 				direction_angle = desired_angle
 				pending_angle = null
-				pending_ready_at_msec = 0
+				pending_ready_at_tick = 0
 			elif leadership >= 0.4:
 				if typeof(pending_angle) != TYPE_FLOAT or absf(float(pending_angle) - desired_angle) > 0.01:
 					pending_angle = desired_angle
-					pending_ready_at_msec = now_msec + _build_shift_delay_msec(leadership)
-				elif now_msec >= pending_ready_at_msec:
+					pending_ready_at_tick = now_tick + _build_shift_delay_ticks(leadership)
+				elif now_tick >= pending_ready_at_tick:
 					direction_angle = desired_angle
 					pending_angle = null
-					pending_ready_at_msec = 0
+					pending_ready_at_tick = 0
 	else:
 		pending_angle = null
-		pending_ready_at_msec = 0
+		pending_ready_at_tick = 0
 		if typeof(threat_position) == TYPE_VECTOR2:
 			direction_angle = (Vector2(threat_position) - anchor_position).angle()
-	var member_assignments: Array = _build_member_assignments(fit_members, mode, direction_angle, security_radius_world, now_msec)
+	var member_assignments: Array = _build_member_assignments(fit_members, mode, direction_angle, security_radius_world, now_tick)
 	var defense_ready: bool = _is_defense_ready(command_type, movement_state, suppression_state, ad_hoc_order, fit_members)
 	var overwatch_ready: bool = _is_overwatch_ready(command_type, movement_state, suppression_state, ad_hoc_order, fit_members)
 	var state: Dictionary = {
@@ -174,7 +179,7 @@ func update_fireteam_state(
 		"anchor_position": anchor_position,
 		"direction_angle": direction_angle,
 		"pending_direction_angle": pending_angle,
-		"pending_shift_ready_at_msec": pending_ready_at_msec,
+		"pending_shift_ready_at_tick": pending_ready_at_tick,
 		"leader_unit_id": String(leader.call("get_unit_id")) if leader != null and leader.has_method("get_unit_id") else "",
 		"command_type": command_type,
 		"main_threat_position": Vector2(threat_position) if typeof(threat_position) == TYPE_VECTOR2 else null,
@@ -346,7 +351,7 @@ func _normalize_security_mode(value: Variant) -> String:
 			return ""
 
 
-func _build_member_assignments(fit_members: Array, security_mode: String, direction_angle: float, security_radius_world: float = 0.0, now_msec: int = 0) -> Array:
+func _build_member_assignments(fit_members: Array, security_mode: String, direction_angle: float, security_radius_world: float = 0.0, now_tick: int = 0) -> Array:
 	var assignments: Array = []
 	if fit_members.is_empty():
 		return assignments
@@ -355,7 +360,7 @@ func _build_member_assignments(fit_members: Array, security_mode: String, direct
 		for index in range(fit_members.size()):
 			var member: Dictionary = fit_members[index]
 			var base_angle: float = _resolve_360_member_angle(index, fit_members.size(), direction_angle, sector_width)
-			var scan_offset: float = _build_defense_scan_offset(index, now_msec)
+			var scan_offset: float = _build_defense_scan_offset(index, now_tick)
 			assignments.append({
 				"unit_id": String(member.get("unit_id", "")),
 				"base_angle": base_angle,
@@ -371,7 +376,7 @@ func _build_member_assignments(fit_members: Array, security_mode: String, direct
 		var member: Dictionary = fit_members[index]
 		var assignment_offset: Dictionary = _resolve_directional_assignment_offset(index, member_count)
 		var base_angle: float = wrapf(direction_angle + float(assignment_offset.get("offset", 0.0)), -PI, PI)
-		var scan_offset: float = _build_defense_scan_offset(index, now_msec)
+		var scan_offset: float = _build_defense_scan_offset(index, now_tick)
 		assignments.append({
 			"unit_id": String(member.get("unit_id", "")),
 			"base_angle": base_angle,
@@ -437,10 +442,10 @@ func _resolve_directional_assignment_offset(index: int, member_count: int) -> Di
 			return {"offset": side * DIRECTIONAL_FLANK_OFFSET, "coverage_role": "flank_extra"}
 
 
-func _build_defense_scan_offset(index: int, now_msec: int) -> float:
-	if DEFENSE_SCAN_CYCLE_MSEC <= 0:
+func _build_defense_scan_offset(index: int, now_tick: int) -> float:
+	if DEFENSE_SCAN_CYCLE_TICKS <= 0:
 		return 0.0
-	var phase: float = fposmod(float(now_msec + (index * 419)), float(DEFENSE_SCAN_CYCLE_MSEC)) / float(DEFENSE_SCAN_CYCLE_MSEC)
+	var phase: float = fposmod(float(now_tick + (index * DEFENSE_SCAN_MEMBER_PHASE_TICKS)), float(DEFENSE_SCAN_CYCLE_TICKS)) / float(DEFENSE_SCAN_CYCLE_TICKS)
 	return sin(phase * TAU) * DEFENSE_SCAN_HALF_ANGLE
 
 
@@ -526,9 +531,9 @@ func _extract_security_direction_angle(behavior_profile_dict: Dictionary, area_c
 	return float(metadata.get("security_direction_angle", 0.0))
 
 
-func _build_shift_delay_msec(leadership: float) -> int:
+func _build_shift_delay_ticks(leadership: float) -> int:
 	var t: float = clampf((leadership - 0.4) / 0.3, 0.0, 1.0)
-	return int(roundi(lerpf(float(MAX_SHIFT_DELAY_MSEC), float(MIN_SHIFT_DELAY_MSEC), t)))
+	return int(roundi(lerpf(float(MAX_SHIFT_DELAY_TICKS), float(MIN_SHIFT_DELAY_TICKS), t)))
 
 
 func _angle_within_sector(target_angle: float, center_angle: float, arc_width: float) -> bool:
