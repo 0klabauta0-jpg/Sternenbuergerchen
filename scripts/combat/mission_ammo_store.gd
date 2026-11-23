@@ -28,6 +28,11 @@ func start_count(armor_id: String) -> int:
 	return AMMO_RULES.compartment_capacity(armor, _rules)
 
 
+## Vergisst den Vorrat der Einheit (Respawn): beim naechsten Bedarf bekommt sie wieder die volle Startmenge.
+func forget(unit_id: String) -> void:
+	_units.erase(unit_id)
+
+
 func has_unit(unit_id: String) -> bool:
 	return _units.has(unit_id)
 

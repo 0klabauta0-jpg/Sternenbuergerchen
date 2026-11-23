@@ -34,6 +34,18 @@ func reset() -> void:
 	_shots.clear()
 
 
+## M6a (Nachbesserung): Eine wiederbelebte Einheit kommt als frische Verstaerkung zurueck: alle Magazine dieser Einheit werden
+## vergessen (beim naechsten Bedarf ist das eingelegte Magazin voll, ein laufendes Nachladen ist abgebrochen), ihre Schusszaehler auch.
+func reset_unit(unit_id: String) -> void:
+	var prefix: String = unit_id + "|"
+	for key in _entries.keys():
+		if String(key).begins_with(prefix):
+			_entries.erase(key)
+	for key in _shots.keys():
+		if String(key).begins_with(prefix):
+			_shots.erase(key)
+
+
 func weapon_info(weapon_id: String) -> Dictionary:
 	# Keine Angriffswaffe (leere Kennung, z. B. Medictool): kein Munitionsbedarf; die Waffendaten wuerden hier auf die Pistole zurueckfallen.
 	var weapon: Dictionary = {}

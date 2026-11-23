@@ -2311,6 +2311,17 @@ func get_unit_ammo_text(unit_id: String) -> String:
 	return String(_ammo_tracker().status_text(unit_id, _ammo_weapon_id(unit), _current_tick, _ammo_unit_unlimited(unit)))
 
 
+## M6a (Nachbesserung): Wiederbelebt kommt eine Einheit (gleiche Kennung, gleicher Knoten) als frische Verstaerkung zurueck:
+## geladenes Magazin voll, Nachladen abgebrochen, und mit Einsatz-Vorrat wieder die volle Startmenge. Ein Kampagnen-Vorrat
+## (echte Magazine im Fach) bleibt, wie er ist: nichts aus dem Nichts.
+func _ammo_respawn_unit(unit_id: String) -> void:
+	if _ammo_state != null:
+		_ammo_state.reset_unit(unit_id)
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root != null and simulation_root.has_method("forget_mission_ammo"):
+		simulation_root.call("forget_mission_ammo", unit_id)
+
+
 func reset_ammo() -> void:
 	if _ammo_state != null:
 		_ammo_state.reset()
@@ -4591,6 +4602,7 @@ func _on_unit_respawn_completed(unit_id: String) -> void:
 	_clear_down_state_linger(unit_id)
 	_attack_warmed_ids.erase(unit_id)  # n2: gleiche ID, neuer Anlauf fuer die Erkennung
 	_attack_contact_ids.erase(unit_id)
+	_ammo_respawn_unit(unit_id)
 	_set_event_text("%s RESPAWN READY" % unit_id)
 	_broadcast_remote_event("%s RESPAWN READY" % unit_id, unit_id, RESPAWN_EVENT_COLOR, 1.6, "RESPAWN READY")
 

@@ -323,6 +323,11 @@ func ensure_mission_ammo(unit_id: String, armor_id: String, ammo_class: String) 
 func reset_mission_ammo() -> void:
 	_mission_ammo.reset()
 
+## Wiederbelebte Einheit (Respawn): der Einsatz-Vorrat ist vergessen und wird beim naechsten Bedarf wieder voll angelegt.
+## Ein Kampagnen-Vorrat (echte Magazine im Fach) wird nie angefasst.
+func forget_mission_ammo(unit_id: String) -> void:
+	_mission_ammo.forget(unit_id)
+
 func get_mission_ammo_snapshot() -> Dictionary:
 	return _mission_ammo.snapshot()
 

@@ -52,6 +52,8 @@ func _run() -> void:
 	_test_n3_ground_fire_vs_air_costs_ammo()
 	_test_n4_outside_campaign_unlimited()
 	_test_n5_magazine_scale_fallback()
+	_test_r1_respawn_returns_fresh()
+	_test_r2_respawn_keeps_campaign_compartment()
 	await process_frame
 	print("AMMO_COMBAT passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -477,3 +479,40 @@ func _test_n5_magazine_scale_fallback() -> void:
 	_check(is_equal_approx(rules.magazine_scale({"magazine_scale": "x"}), 2.0) and is_equal_approx(rules.magazine_scale({}), 2.0), "N5: fehlend oder keine Zahl -> 2.0")
 	_check(is_equal_approx(rules.magazine_scale({"magazine_scale": 1.0}), 1.0), "N5: gueltiger Wert 1.0 bleibt")
 	_check(rules.effective_magazine_size(12, {"magazine_scale": 0}) == 24, "N5: Pistole bei magazine_scale 0 wirksam 24, nicht 1")
+
+
+## R1 (M6a Nachbesserung F1): Wer leer stirbt, kommt wiederbelebt (gleiche Kennung, gleicher Knoten) als frische Verstaerkung zurueck:
+## geladenes Magazin voll, Nachladen abgebrochen, Einsatz-Vorrat wieder die volle Startmenge (mittel = 5 Magazine). Echter Weg: der Rueckruf des Treibers.
+func _test_r1_respawn_returns_fresh() -> void:
+	var f := _rig(_duel("pistol", "none"))
+	var r := _run_until_empty(f, "own")
+	_check(int(r.shots) == 6 * PISTOL_MAG and String(_status(f, "own").get("state", "")) == "empty", "R1: Vorbedingung: die Einheit hat sich leergeschossen (%d Schuesse)" % int(r.shots))
+	f.driver._on_unit_respawn_completed("own")
+	var st := _status(f, "own")
+	_check(String(st.get("state", "")) == "ready" and int(st.get("rounds", 0)) == PISTOL_MAG and int(st.get("reserve", -1)) == 5, "R1: nach dem Respawn Magazin voll (24) und Vorrat wieder 5 (%s)" % str(st))
+	_check(String(f.driver.get_unit_ammo_text("own")) != "Keine Munition", "R1: Anzeige nach dem Respawn ohne 'Keine Munition' (%s)" % String(f.driver.get_unit_ammo_text("own")))
+	var before := _shots_by(f, "own")
+	var r2 := _run_until_empty(f, "own")
+	_check(int(r2.shots) - before == 6 * PISTOL_MAG, "R1: sie schiesst wieder die volle Startmenge (sechs Magazine = %d Schuesse), ist %d" % [6 * PISTOL_MAG, int(r2.shots) - before])
+	# Mitten im Nachladen gestorben: das Nachladen ist nach dem Respawn abgebrochen, das Magazin sofort voll.
+	f.driver._on_unit_respawn_completed("own")
+	_run_until_shots(f, "own", _shots_by(f, "own") + PISTOL_MAG)
+	var mid := _status(f, "own")
+	_check(String(mid.get("state", "")) == "reloading", "R1: Vorbedingung: nach dem 24. Schuss laedt die Einheit nach (%s)" % str(mid))
+	f.driver._on_unit_respawn_completed("own")
+	var fresh := _status(f, "own")
+	_check(String(fresh.get("state", "")) == "ready" and int(fresh.get("rounds", 0)) == PISTOL_MAG and int(fresh.get("reload_ticks_left", -1)) == 0, "R1: Nachladen abgebrochen, Magazin voll (%s)" % str(fresh))
+	f.scope.free()
+
+
+## R2 (M6a Nachbesserung F1): Mit Kampagnen-Vorrat (echte Magazine im Fach) wird nur das geladene Magazin gefuellt; das Fach bleibt, wie es ist.
+func _test_r2_respawn_keeps_campaign_compartment() -> void:
+	var f := _ammo_rig(_duel("pistol", "none"), {"own": {"ammo_light": 3}})
+	_run_until_shots(f, "own", PISTOL_MAG + 3)
+	var bag_before := _bag_count(f, "own", "ammo_light")
+	_check(bag_before == 2, "R2: Vorbedingung: ein Magazin ist ins Gewehr gewandert, im Fach bleiben 2 (%d)" % bag_before)
+	f.driver._on_unit_respawn_completed("own")
+	var st := _status(f, "own")
+	_check(String(st.get("state", "")) == "ready" and int(st.get("rounds", 0)) == PISTOL_MAG, "R2: nach dem Respawn Magazin voll (%s)" % str(st))
+	_check(_bag_count(f, "own", "ammo_light") == bag_before and int(f.sim.get_person_magazine_count("own", "ammo_light")) == bag_before, "R2: das Fach bleibt unveraendert (nichts aus dem Nichts, nichts verloren)")
+	f.scope.free()
