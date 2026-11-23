@@ -191,7 +191,46 @@ func _install_tick_trace() -> void:
 func _on_trace_node_added(node: Node) -> void:
 	if node.name == "SimulationRoot" and node.has_signal("tick_processed"):
 		node.connect("tick_processed", _on_trace_tick.bind(node))
+## G5c: Messzeilen mit Praefix FIVE_DBG. Sie laufen ueber print, NICHT ueber _emit_trace_line, und gehen nicht in die Pruefsumme ein.
+var _dbg_last_cmd: Dictionary = {}
+func _dbg_scenario(simulation: Node) -> String:
+	var mission: Node = simulation.get_parent() if is_instance_valid(simulation) else null
+	if mission == null: return "?"
+	var identity: Dictionary = mission.get_meta("singleplayer_mission_identity", {})
+	return String(identity.get("scenario_id", "?"))
+func _dbg_active_simulation() -> Node:
+	if not is_instance_valid(_flow): return null
+	var mission = _flow.get("_active_mission")
+	if mission == null or not is_instance_valid(mission): return null
+	return mission.get_node_or_null("SimulationRoot")
+func _check(value: bool, label: String) -> bool:
+	var sim: Node = _dbg_active_simulation()
+	print("FIVE_DBG check scenario=%s tick=%d pf=%d fd=%d value=%s label=%s" % [_dbg_scenario(sim) if sim != null else "-", int(sim.call("get_tick")) if sim != null else -1, Engine.get_physics_frames(), Engine.get_frames_drawn(), str(value), label])
+	return super._check(value, label)
+## Je Tick: Position des Truppfuehrers (Knoten) und Truppmittelpunkt (wie ihn die Nutzungsabfrage verwendet), dazu Physik-/Bildzaehler.
+func _dbg_watch_position(tick: int, simulation: Node) -> void:
+	var actor = simulation.call("_resolve_known_unit_for_contract", "campaign_leader") if simulation.has_method("_resolve_known_unit_for_contract") else null
+	if actor == null or not is_instance_valid(actor) or not (actor is Node2D): return
+	var controller: Node = simulation.get_parent().get_node_or_null("TacticalController")
+	var mean = controller.call("_resolve_fireteam_ground_use_position", _team_id) if controller != null and controller.has_method("_resolve_fireteam_ground_use_position") else null
+	print("FIVE_DBG pos scenario=%s tick=%d pf=%d fd=%d leader=%s mean=%s" % [_dbg_scenario(simulation), tick, Engine.get_physics_frames(), Engine.get_frames_drawn(), str((actor as Node2D).global_position), str(mean)])
+func _dbg_watch_leader(tick: int, simulation: Node) -> void:
+	if not simulation.has_method("_resolve_known_unit_for_contract"): return
+	var actor = simulation.call("_resolve_known_unit_for_contract", "campaign_leader")
+	if actor == null or not is_instance_valid(actor): return
+	var command = actor.call("get_current_unit_command") if actor.has_method("get_current_unit_command") else null
+	var text := "none"
+	if command != null and command.has_method("get"):
+		text = "%s/%s/%s/%s" % [str(command.get("command_type")), str(command.get("source_command_type")), str(command.get("status")), str(command.get("command_token"))]
+	var key: int = simulation.get_instance_id()
+	if String(_dbg_last_cmd.get(key, "")) == text: return
+	_dbg_last_cmd[key] = text
+	var state: Dictionary = simulation.get_hex_unit_state("campaign_leader")
+	print("FIVE_DBG leader_cmd scenario=%s tick=%d cmd=%s grid=%s" % [_dbg_scenario(simulation), tick, text, str(state.get("grid", null))])
 func _on_trace_tick(tick: int, simulation: Node) -> void:
+	if is_instance_valid(simulation):
+		_dbg_watch_leader(tick, simulation)
+		_dbg_watch_position(tick, simulation)
 	if tick <= 0 or tick % FIVE_TRACE_TICK_INTERVAL != 0 or not is_instance_valid(simulation): return
 	var mission: Node = simulation.get_parent()
 	if mission == null or mission.get_node_or_null("UnitRegistry") == null: return
