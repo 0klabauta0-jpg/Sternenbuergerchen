@@ -55,10 +55,13 @@ func _run() -> void:
 	check(people._states.campaign_leader.status=="outside" and people.get_actor("campaign_leader").position==standing,"disabled person stays where player left them")
 	var gear: Dictionary=screen.call("request_operation","loadout",{"unit_id":"campaign_leader","key":"weapon_1","value":"pistol"})
 	check(gear.get("ok",false),"manual equipment remains usable")
-	var saved: Dictionary=flow.get("_campaign_start").call("save_home_checkpoint",flow,runtime)
-	check(saved.get("ok",false),"safe campaign save includes new personal setting")
+	# Der Hex-Stand wird nur gespeichert, wenn niemand mehr unterwegs ist (der Pilot geht noch zu seinem Ziel).
+	deadline=Time.get_ticks_msec()+60000
+	while Time.get_ticks_msec()<deadline and people.get_snapshot().units.any(func(person:Dictionary):return person.status=="moving"): await process_frame
+	var saved: Dictionary=flow.get("_campaign_start").call("save_home_checkpoint",flow,runtime,true)
+	check(saved.get("ok",false),"safe campaign save includes new personal setting (%s)"%str(saved.get("reason","")))
 	var checkpoint: Dictionary=load("res://scripts/meta/campaign_checkpoint_store.gd").load_checkpoint()
-	check(checkpoint.get("ok",false) and checkpoint.payload.base_personnel.units.campaign_leader.auto_rest_enabled==false,"serialized checkbox survives checkpoint validation")
+	check(checkpoint.get("ok",false) and checkpoint.payload.hex_tactical.base_personnel.units.campaign_leader.auto_rest_enabled==false,"serialized checkbox survives checkpoint validation")
 	flow.queue_free(); await process_frame
 	load("res://scripts/meta/game_start_contract.gd").request_start(self,"campaign","continue")
 	var resumed: Node=load("res://scenes/meta/meta_layer_test.tscn").instantiate(); root.add_child(resumed); await process_frame

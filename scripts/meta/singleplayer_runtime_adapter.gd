@@ -259,6 +259,7 @@ func configure(flow: Node, screen: Control) -> void:
 			_simulation.set_physics_process(not bool(_flow.get("_campaign_start").get("active_restore_in_progress")))
 	if _campaign_mode and is_instance_valid(_base_personnel):
 		_base_personnel.reconcile_restored_ship_overlap(Dictionary(_flow.get("_campaign_start").get("checkpoint")))
+		_base_personnel.reconcile_restored_hex_footprint()
 	if _screen.has_method("configure_singleplayer_bridge"):
 		_screen.call("configure_singleplayer_bridge", get_snapshot, request_operation)
 	var catalog: Array = [] if _campaign_mode else Array(_flow.get("_mission_catalog")).duplicate(true)

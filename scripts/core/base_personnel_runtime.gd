@@ -82,6 +82,37 @@ func reconcile_restored_ship_overlap(checkpoint:Dictionary)->void:
 				if delta<distance:distance=delta;best=candidate
 		if best.is_finite():actor.position=best
 
+## Hex-Boden, nach dem Laden: Wer ausserhalb eines Bettes in der Sperrmaske steht (alter Stand, dessen Alt-Gebaeude
+## jetzt auf Stellplatz 1 steht), wird auf die naechste freie, begehbare Zelle ausserhalb der Maske gesetzt.
+func reconcile_restored_hex_footprint()->void:
+	if not _requires_hex_ground() or _navigation_graph==null or not _sim.is_hex_ground_runtime_active():return
+	_refresh_home_craft_blockers()
+	var mask:Dictionary=get_ground_ship_blocked_cells()
+	if not mask.get("ok",false):return
+	var blocked:={}
+	for cell in mask.blocked_cells:blocked[cell]=true
+	var moved:=false
+	for id in _states:
+		if String(_states[id].get("status",""))!="outside" or not _unit_is_home(String(id)) or not _sim._hex_ground_runtime.has_unit(String(id)):continue
+		var here:Vector2i=_sim._hex_ground_runtime.get_unit_grid(String(id))
+		if not blocked.has(here):continue
+		var snapshot:Dictionary=_sim.get_hex_ground_planning_snapshot()
+		var seen:={here:true};var frontier:Array[Vector2i]=[here];var target:=here;var found:=false
+		for ring in range(30):
+			var next:Array[Vector2i]=[]
+			for cell:Vector2i in frontier:
+				for direction:Vector2i in load("res://scripts/terrain/hex_grid.gd").DIRECTIONS:
+					var neighbor:=cell+direction
+					if seen.has(neighbor) or not _terrain.is_walkable(neighbor):continue
+					seen[neighbor]=true;next.append(neighbor)
+					if not found and not blocked.has(neighbor) and not snapshot.occupant_by_grid.has(neighbor) and not snapshot.admission_slots_by_grid.has(neighbor):found=true;target=neighbor
+			if found:break
+			frontier=next
+		if not found:continue
+		var result:Dictionary=_sim._hex_ground_runtime.relocate_unit(String(id),target,_sim.get_hex_ground_revision())
+		if result.get("ok",false):moved=true
+	if moved:_sim._project_hex_ground_actors(0.0)
+
 func preview_home_craft_arrival(craft:Dictionary,pad_id:String)->Dictionary:
 	var pad:=_find_layout("landing_pads",pad_id)
 	var body:Dictionary=HOME_CRAFT_FOOTPRINT.rect_for_craft(craft,pad)
