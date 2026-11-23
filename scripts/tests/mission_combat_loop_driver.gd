@@ -2254,7 +2254,8 @@ func _ammo_take_reserve(unit_id: String, ammo_class: String) -> bool:
 
 
 ## M6a: Beim ersten Bedarf bekommt die Einheit ohne Kampagnen-Vorrat ihren Einsatz-Vorrat: Fach nach Ruestung, Sorte der
-## Waffe, fuer die sie zuerst Reserve braucht (die eingelegte, also in der Regel Waffe 1). Der Root ignoriert Personen mit Kampagnen-Vorrat.
+## HAUPTWAFFE (Waffe 1, wenn sie Munition braucht; sonst der Waffe, fuer die gerade Reserve gefragt wird = die aktive). Die
+## Zweitwaffe hat nur ihr geladenes Magazin. Der Root ignoriert Personen mit Kampagnen-Vorrat.
 func _ammo_ensure_mission_store(simulation_root, unit_id: String, ammo_class: String) -> void:
 	if not simulation_root.has_method("ensure_mission_ammo"):
 		return
@@ -2262,7 +2263,12 @@ func _ammo_ensure_mission_store(simulation_root, unit_id: String, ammo_class: St
 	if unit == null or not is_instance_valid(unit):
 		return
 	var armor_id: String = String(unit.call("get_armor_id")) if unit.has_method("get_armor_id") else ""
-	simulation_root.call("ensure_mission_ammo", unit_id, armor_id, ammo_class)
+	var store_class: String = ammo_class
+	if unit.has_method("get_weapon_1_id"):
+		var main_info: Dictionary = _ammo_tracker().weapon_info(String(unit.call("get_weapon_1_id")))
+		if bool(main_info.needs_ammo):
+			store_class = String(main_info.ammo_class)
+	simulation_root.call("ensure_mission_ammo", unit_id, armor_id, store_class)
 
 
 ## M6a: Jede Einheit rechnet mit endlichem Vorrat (Gegner, NPCs, Skirmish, Host). Unbegrenzt bleibt nur, wo es keinen

@@ -54,6 +54,7 @@ func _run() -> void:
 	_test_n5_magazine_scale_fallback()
 	_test_r1_respawn_returns_fresh()
 	_test_r2_respawn_keeps_campaign_compartment()
+	_test_h1_main_weapon_gets_the_reserve()
 	await process_frame
 	print("AMMO_COMBAT passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -516,3 +517,27 @@ func _test_r2_respawn_keeps_campaign_compartment() -> void:
 	_check(String(st.get("state", "")) == "ready" and int(st.get("rounds", 0)) == PISTOL_MAG, "R2: nach dem Respawn Magazin voll (%s)" % str(st))
 	_check(_bag_count(f, "own", "ammo_light") == bag_before and int(f.sim.get_person_magazine_count("own", "ammo_light")) == bag_before, "R2: das Fach bleibt unveraendert (nichts aus dem Nichts, nichts verloren)")
 	f.scope.free()
+
+
+## H1 (M6a Nachbesserung F2, Entscheidung des Auftraggebers): Die Hauptwaffe (Waffe 1) hat Vorrang. Der Einsatz-Vorrat hat die Sorte
+## der Hauptwaffe, die Zweitwaffe hat nur ihr geladenes Magazin. Gewehr als Hauptwaffe, Pistole als Zweitwaffe: alle Reserve ist
+## Gewehrmagazine - auch wenn zuerst die Pistole schiesst; die Pistole ist nach ihrem Magazin leer.
+func _test_h1_main_weapon_gets_the_reserve() -> void:
+	var rifle_mag: int = int(f_info_size("rifle"))
+	var a := _rig(_duel("rifle", "none", {"weapon_1": "rifle"}))
+	var ra := _run_until_empty(a, "own")
+	_check(int(ra.shots) == 6 * rifle_mag, "H1: Gewehr als Hauptwaffe: geladenes Magazin + 5 Gewehrmagazine = %d Schuesse, ist %d" % [6 * rifle_mag, int(ra.shots)])
+	_check(String(a.driver.get_unit_ammo_text("own")) == "Keine Munition", "H1: danach 'Keine Munition'")
+	a.scope.free()
+	var b := _rig(_duel("pistol", "none", {"weapon_1": "rifle"}))
+	var st := _status(b, "own")
+	_check(int(st.get("reserve", -1)) == 0, "H1: mit der Pistole (Zweitwaffe aktiv) ist die Reserve 0 - der Vorrat ist Gewehrmagazine (%s)" % str(st))
+	_check(int(b.sim.get_person_magazine_count("own", "ammo_rifle")) == 5 and int(b.sim.get_person_magazine_count("own", "ammo_light")) == 0, "H1: Vorrat = 5 Gewehrmagazine, keine Pistolenmagazine")
+	var rb := _run_until_empty(b, "own")
+	_check(int(rb.shots) == PISTOL_MAG and String(_status(b, "own").get("state", "")) == "empty", "H1: die Pistole schiesst nur ihr geladenes Magazin (%d Schuesse), dann leer" % int(rb.shots))
+	b.scope.free()
+	# Hauptwaffe ohne Munitionsbedarf: die aktive Waffe bestimmt die Sorte (wie bisher).
+	var c := _rig(_duel("pistol", "none", {"weapon_1": "none"}))
+	var rc := _run_until_empty(c, "own")
+	_check(int(rc.shots) == 6 * PISTOL_MAG, "H1: Hauptwaffe ohne Munition: die aktive Pistole bekommt den Vorrat (%d Schuesse)" % int(rc.shots))
+	c.scope.free()
