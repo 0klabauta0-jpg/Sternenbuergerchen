@@ -10,6 +10,7 @@ func _run() -> void:
 	_test_b2_lookaround_continues()
 	_test_b3_own_target_beyond_detection()
 	_test_c_shooter_reveals_himself()
+	_test_d_search_ends_toward_last_position()
 	await process_frame
 	print("combat_stall_verifier passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -152,4 +153,28 @@ func _test_c_shooter_reveals_himself() -> void:
 		else:
 			_check(not detected_now, "%s: a erkennt den Schuetzen nicht" % tag)
 			_check(replies == 0, "%s: a schiesst nicht (%d)" % [tag, replies])
+		f.scope.free()
+
+
+# D: Eine erfolglose Suche endet nicht mit dem Ruecken zur Front (R-D): nach der letzten Suchdrehung einmal zurueck zur
+# Richtung der letzten bekannten Gegnerposition, ohne bekannte Position zur Blickrichtung vor der Suche.
+func _test_d_search_ends_toward_last_position() -> void:
+	for with_position in [true, false]:
+		var tag := "D %s" % ("letzte Position" if with_position else "ohne Position")
+		var a_grid := Vector2i(20, 20)
+		var f := _fixture([{"id": "a", "team": "blue", "grid": a_grid, "facing": 3, "aw": 1.0, "cmd": HOLD}])
+		_ticks(f, 3)
+		_check(_alert(f, "a", _line(a_grid, 1, 3)), "%s: alarmiert" % tag)
+		if not with_position:
+			f.driver._facing_last_enemy_position.erase("a")
+		var turns := 0
+		var prev := _face(f, "a")
+		for step in range(800):
+			_combat_tick(f)
+			if _face(f, "a") != prev:
+				prev = _face(f, "a")
+				turns += 1
+		var expected := 1 if with_position else 3
+		_check(_face(f, "a") == expected, "%s: Endrichtung %d (erwartet %d) nach %d Drehungen" % [tag, _face(f, "a"), expected, turns])
+		_check(turns <= 7, "%s: hoechstens sechs Suchdrehungen plus eine Rueckdrehung (%d)" % [tag, turns])
 		f.scope.free()

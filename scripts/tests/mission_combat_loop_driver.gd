@@ -2645,7 +2645,8 @@ func _advance_combat_lookaround() -> void:
 		if search.is_empty():
 			search = {"base": facing_now, "step": -1, "next": now}
 		var step: int = int(search["step"])
-		if step >= COMBAT_LOOKAROUND_OFFSETS.size() or now < int(search["next"]):
+		# R-D: nach der letzten Suchrichtung noch ein Schritt (Rueckdrehung), dann Ende.
+		if step > COMBAT_LOOKAROUND_OFFSETS.size() or now < int(search["next"]):
 			_facing_search[unit_id] = search
 			continue
 		if now < int(_facing_last_turn_tick.get(unit_id, -1000000)) + COMBAT_FACING_MIN_INTERVAL_TICKS:
@@ -2656,6 +2657,12 @@ func _advance_combat_lookaround() -> void:
 		var direction: int = -1
 		if step < 0:
 			direction = _facing_direction_to_position(unit, Vector2(_facing_last_enemy_position.get(unit_id, _facing_logical_position(unit))))
+		elif step == COMBAT_LOOKAROUND_OFFSETS.size():
+			# R-D: erfolglose Suche endet nicht mit dem Ruecken zur Front: zurueck zur Richtung der letzten bekannten
+			# Gegnerposition, gibt es keine, zur Blickrichtung vor der Suche.
+			direction = _facing_direction_to_position(unit, Vector2(_facing_last_enemy_position.get(unit_id, _facing_logical_position(unit))))
+			if direction < 0:
+				direction = int(search["base"])
 		else:
 			direction = posmod(int(search["base"]) + COMBAT_LOOKAROUND_OFFSETS[step], 6)
 		search["step"] = step + 1
