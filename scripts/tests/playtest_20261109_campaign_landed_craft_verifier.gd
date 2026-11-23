@@ -37,7 +37,9 @@ func _test_campaign_and_legacy(scenario_path: String, map_path: String, should_p
 	var second_ids: Array = _unit_ids(second_units)
 	var map = load("res://scripts/terrain/terrain_map_data.gd").load_from_file(map_path)
 	var first_lz: Vector2 = map.get_marker_position("spawn_alpha")
-	if not should_park: first_lz = _other_site(controller, map, first_lz)
+	# Altfall: Die festen Felder (spawn_alpha, +96) liegen am Kartenrand und tragen die Rumpffläche nicht (Hindernisse in 3 der 23 Rumpfzellen);
+	# das Spiel lehnt sie zu Recht mit footprint_blocked ab. Der Altfall nimmt daher zwei Felder, auf denen der Rumpf passt.
+	if not should_park: first_lz = _other_site(controller, map, first_lz, 0.0, 1024.0)
 	var second_lz: Vector2 = first_lz if should_park else _other_site(controller, map, first_lz)
 	var state: Dictionary = controller.call("get_planning_state")
 	state.merge({"mission_drop_source": "homebase_direct", "mission_drop_craft_id": "craft_a", "mission_drop_state": "waiting", "drop_ship_staged": true, "embarked_unit_ids": first_ids + second_ids, "deployed_unit_ids": [], "has_lz_position": true, "lz_position": first_lz, "selected_fireteams": [teams[0]], "mission_drop_cards": [_card("craft_a", String(teams[0]), first_ids, first_lz), _card_b(String(teams[1]), second_ids, second_lz, should_park)]}, true)
@@ -102,12 +104,21 @@ func _card_b(team: String, units: Array, lz: Vector2, park: bool) -> Dictionary:
 		card.erase("lz_position")
 	return card
 
-func _other_site(controller: Node, map, near: Vector2) -> Vector2:
+## Passt die ganze Rumpffläche des Schiffs (Zellen frei, eben, nicht von anderen Schiffen belegt) auf dieses Feld?
+func _hull_fits(controller: Node, position: Vector2) -> bool:
+	var card: Dictionary = _card("craft_a", "", [], position)
+	var projection: Dictionary = controller.call("_read_ground_ship_landing_projection", card, position, "NW")
+	var profile: Dictionary = load("res://scripts/mission/polisa_ground_body_profile.gd").from_projection(card, projection)
+	return bool(profile.get("ok", false)) and bool(controller.call("_check_ground_ship_landing_site", card, position, profile.profile).get("ok", false))
+
+func _other_site(controller: Node, map, near: Vector2, min_distance: float = 256.0, max_distance: float = 512.0) -> Vector2:
 	var registry: Node = controller.call("_get_terrain_registry")
+	var best: Vector2 = Vector2.INF
 	for tile in map.get_tiles():
 		var distance: float = tile.world_position.distance_to(near)
-		if distance >= 256.0 and distance <= 512.0 and bool(load("res://scripts/mission/field_landing_contract.gd").validate(registry, tile.grid_position, []).ok):
-			return tile.world_position
+		if distance >= min_distance and distance <= max_distance and (not best.is_finite() or distance < best.distance_to(near)) and bool(load("res://scripts/mission/field_landing_contract.gd").validate(registry, tile.grid_position, []).ok) and _hull_fits(controller, tile.world_position):
+			best = tile.world_position
+	if best.is_finite(): return best
 	_check(false, "Map offers a second safe landing site")
 	return near
 
