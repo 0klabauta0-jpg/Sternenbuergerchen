@@ -2,8 +2,9 @@ extends RefCounted
 ## M6a: Einsatz-Vorrat an Reservemagazinen fuer Einheiten OHNE Kampagnen-Vorrat (Gegner, NPCs, Skirmish, Mehrspieler-Host).
 ## Reine Daten, keine Szene: je Einheit die Zahl der Reservemagazine je Magazinsorte. Beim ersten Bedarf (ensure) bekommt die
 ## Einheit so viele Magazine, wie das Fach ihrer Ruestung fasst (data/combat/ammo_rules.json, unbekannte Ruestung wie "medium"),
-## in der Sorte ihrer ersten Waffe mit Munition. Das geladene Magazin kommt zusaetzlich aus combat_ammo.gd (voll zu Beginn).
-## Der Vorrat gehoert zum Einsatz: reset() leert ihn (Start, Neustart); er steht nur im Einsatz-Checkpoint (snapshot/restore).
+## in der Sorte ihrer Hauptwaffe (Waffe 1; braucht sie keine Munition, die aktive Waffe). Das geladene Magazin kommt zusaetzlich aus combat_ammo.gd (voll zu Beginn).
+## Der Vorrat gehoert zum Einsatz: reset() leert ihn (Start, Neustart), forget() einzelne Einheiten (Respawn). Er steht in keinem Checkpoint
+## und im Speicherstand nicht; snapshot/restore sind vorbereitet, aber nirgends angeschlossen (Fortsetzen mitten im Einsatz: alle wieder voll).
 
 const AMMO_RULES = preload("res://scripts/core/ammo_rules.gd")
 const FALLBACK_ARMOR := "medium"

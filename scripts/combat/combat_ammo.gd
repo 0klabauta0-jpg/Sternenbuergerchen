@@ -3,7 +3,7 @@ extends RefCounted
 ## (Schuss, leer, Nachladen) stehen in ammo_rules.gd, die Zahlen in den Waffendaten und in data/combat/ammo_rules.json.
 ## Ein Schuss = eine Patrone. Ist das Magazin leer, wird das naechste Reservemagazin der Person abgezogen und es wird
 ## reload_ticks x reload_scale Ticks nachgeladen (ohne Schuss); ohne Reservemagazin bleibt die Einheit ohne Munition.
-## Gegner ("unlimited") laden ohne Abzug nach. Der Zustand gehoert dem Einsatz: nichts davon steht im Speicherstand.
+## "unlimited" (nur ohne Simulationswurzel oder bei Mitspielern, die nicht selbst rechnen) laedt ohne Abzug nach. Der Zustand gehoert dem Einsatz: nichts davon steht im Speicherstand.
 ## Kein Zufall, nur Tickzaehler: gleiche Tickfolge ergibt gleichen Verbrauch.
 
 const AMMO_RULES = preload("res://scripts/core/ammo_rules.gd")

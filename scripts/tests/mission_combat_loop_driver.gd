@@ -2223,7 +2223,7 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 ## ---- Munition (M4a) --------------------------------------------------------------------------------------------------
 ## Ein Schuss kostet eine Patrone des eingelegten Magazins (Normalschuss und Ueberwachung, Treffer wie Fehlschuss); ist es
 ## leer, wird aus den Reservemagazinen der Person nachgeladen (Pause), ohne Reserve schiesst die Einheit nicht. Gegner laden
-## nach, haben aber unbegrenzt Reserve. Der Zustand gehoert dem Einsatz (reset_suppression leert ihn), steht nicht im Speicherstand.
+## nach, haben aber (M6a) wie alle einen endlichen Einsatz-Vorrat. Der Zustand gehoert dem Einsatz (reset_suppression leert ihn), steht nicht im Speicherstand.
 var _ammo_state = null
 ## Nur fuer Pruefer, die Takt oder Unterdrueckung ueber viele Schuesse zaehlen (nicht die Munition): false = alle Waffen ohne Munitionsbedarf.
 var ammo_enabled: bool = true
@@ -2271,13 +2271,15 @@ func _ammo_ensure_mission_store(simulation_root, unit_id: String, ammo_class: St
 	simulation_root.call("ensure_mission_ammo", unit_id, armor_id, store_class)
 
 
-## M6a: Jede Einheit rechnet mit endlichem Vorrat (Gegner, NPCs, Skirmish, Host). Unbegrenzt bleibt nur, wo es keinen
-## Vorrat geben kann: ohne Simulationswurzel (Pruefer ohne Szene).
+## M6a: Jede Einheit, die dieser Treiber selbst rechnet, hat einen endlichen Vorrat (Gegner, NPCs, Skirmish, Host). Unbegrenzt
+## (= keine Reserve-Zahl in der Anzeige, kein Vorrat angelegt) bleibt, wo es keinen Vorrat geben kann: ohne Simulationswurzel
+## (Pruefer ohne Szene) und bei Mitspielern, deren Treiber das Gefecht nicht selbst rechnet (der Host fuehrt den Vorrat; ihre Zahl
+## kommt erst mit dem Netzabgleich).
 func _ammo_unit_unlimited(unit) -> bool:
 	var simulation_root = get_node_or_null(simulation_root_path)
 	if simulation_root == null or not simulation_root.has_method("person_has_magazine_store") or unit == null or not unit.has_method("get_unit_id"):
 		return true
-	return false
+	return not _should_run_local_combat(simulation_root)
 
 
 func _ammo_weapon_id(unit) -> String:

@@ -272,14 +272,14 @@ func _weapons_of_person_for_supply(unit_id: String) -> Array:
 	var loadout: Dictionary = Dictionary(_personnel_loadout_owner.call("get_loadout", unit_id))
 	return [String(loadout.get("weapon_1", "none")), String(loadout.get("weapon_2", "none"))]
 
-## Reservemagazine einer Person fuer das Gefecht (M4a). Ohne Versorgung (Tests, Skirmish) hat niemand Reserve.
+## Reservemagazine einer Person fuer das Gefecht (M4a). Ohne Kampagnen-Vorrat gilt der Einsatz-Vorrat (M6a).
 func get_person_magazine_count(unit_id: String, ammo_class: String) -> int:
 	if not _campaign_has_magazine_store(unit_id): return _mission_ammo.count(unit_id, ammo_class)
 	return int(_magazine_owner().call("person_magazine_count", unit_id, ammo_class))
 
 ## M4e: Der Root einer Einsatzszene bekommt die Kampagnen-Versorgung NICHT als Besitzer (kein Lager, keine Beute, kein Handel),
 ## sondern nur diesen schmalen Verweis fuer die drei Munitionsabfragen unten. Gesetzt vom Adapter beim Binden des Einsatzes an die
-## Kampagne (Neustart, Fortsetzen mitten im Einsatz), geloest beim Abbau der Szene; ohne Kampagne bleibt er leer (unbegrenzte Reserve).
+## Kampagne (Neustart, Fortsetzen mitten im Einsatz), geloest beim Abbau der Szene; ohne Kampagne bleibt er leer (dann gilt der Einsatz-Vorrat, M6a).
 var _mission_magazine_supply: RefCounted
 
 func bind_mission_magazine_supply(supply: RefCounted) -> void:
