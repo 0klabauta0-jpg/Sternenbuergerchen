@@ -216,6 +216,8 @@ func _part_e_source_contract() -> void:
 	var crew_at := landing.find("_aboard_unit_ids_of_craft(craft_id)")
 	var stepped_off_at := landing.find("_admit_unplaced_aboard_crew(craft_id)")
 	_check(crew_at > 0 and stepped_off_at > crew_at, "E: die Besatzung wird gelesen, bevor sie aussteigt")
+	var home_set_at := landing.find("_aircraft_location_by_craft[craft_id] = \"homebase\"")
+	_check(home_set_at > 0 and crew_at > home_set_at, "E: M4e: die Besatzung wird erst gelesen, nachdem der Heimatort gesetzt ist (vorher gilt sie im Personalbestand als abwesend)")
 	var launch := _between(adapter_src, "func launch_to_moon_orbit(", "\nfunc _publish_space_launch_event")
 	var commit_at := launch.find("commit_singleplayer_space_launch")
 	var depart_fill_at := launch.find("replenish_ammo_for_departure(craft_id")

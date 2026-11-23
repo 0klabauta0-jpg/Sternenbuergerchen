@@ -9266,15 +9266,19 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 			return
 	var follow_arrival := _current_meta_view == "star_map" and _get_view_travel_craft_id() == craft_id
 	var returning_mission := get_mission_for_craft(craft_id)
-	var ammo_refill_ids: Array = _aboard_unit_ids_of_craft(craft_id).duplicate()  # M4b: wer mit diesem Schiff heimkehrt
-	var ammo_pilot := String(_assigned_aircraft_pilot_by_craft.get(craft_id, ""))
-	if not ammo_pilot.is_empty() and not ammo_refill_ids.has(ammo_pilot): ammo_refill_ids.append(ammo_pilot)
 	var release_legacy: bool = _active_mission != null and _active_mission == returning_mission and String(_active_mission.get_meta("location_id", "")).is_empty()
 	_homecoming_forget_craft(craft_id) # a later landing of the same craft replaces its note
 	_restore_returning_visit_membership(craft_id)
 	_aircraft_location_by_craft[craft_id] = "homebase"
+	# M4b/M4e: wer mit diesem Schiff heimkehrt. Erst NACH dem Setzen des Heimatortes lesen: vorher gelten die Mitfliegenden im
+	# Personalbestand als "away" (_unit_is_home), und nur der Pilot haette sein Fach aufgefuellt bekommen.
+	var ammo_refill_ids: Array = _aboard_unit_ids_of_craft(craft_id).duplicate()
+	var ammo_pilot := String(_assigned_aircraft_pilot_by_craft.get(craft_id, ""))
+	if not ammo_pilot.is_empty() and not ammo_refill_ids.has(ammo_pilot): ammo_refill_ids.append(ammo_pilot)
 	_admit_unplaced_aboard_crew(craft_id)
 	_remove_pending_mission_craft_transfer(craft_id)
+	for ammo_late_id in _aboard_unit_ids_of_craft(craft_id): # erst jetzt ist auch ein ausstehender Transfer des Schiffs entfernt
+		if not ammo_refill_ids.has(ammo_late_id): ammo_refill_ids.append(ammo_late_id)
 	# Ein Rueckzug ohne Ausfaelle (Regel 8) hat keinen Debrief, der die Ortsinstanz freigibt. Bleibt sie fokussiert, gilt das Schiff
 	# nicht als zu Hause (Heim-Speicherpunkt und Wiederoeffnen sind gesperrt): Mit der Heimkehr des letzten Schiffs wird sie freigegeben.
 	if release_legacy:
