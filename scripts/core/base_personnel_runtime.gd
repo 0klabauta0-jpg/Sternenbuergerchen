@@ -1139,6 +1139,49 @@ func _unboard(id: String, craft: String, payload: Dictionary) -> Dictionary:
 	return {"ok":true}
 
 
+## LC2e B1: Notrettung nach Schiffsverlust: wer noch an Bord des verlorenen Schiffs gefuehrt wird (Lebende, die heimgeholt wurden), steht danach an der
+## Basis (am ersten Landeplatz, draussen). Das Schiff selbst hat keinen Ort mehr; der Aufrufer raeumt es erst danach aus der Flotte.
+func rescue_crew_from_lost_craft(craft:String)->Dictionary:
+	var rescued:=PackedStringArray()
+	for id in _states:
+		if String(_states[id].get("craft_id",""))==craft and String(_states[id].status) in ["aboard","boarding"]:rescued.append(String(id))
+	if rescued.is_empty():return {"ok":true,"rescued":[]}
+	if not _requires_hex_ground():
+		for id in rescued:
+			_cancel(id,false)
+			get_actor(id).position=_pad_world("")
+		_board_groups.erase(craft)
+		state_changed.emit()
+		return {"ok":true,"rescued":Array(rescued)}
+	if not _sim.is_hex_ground_runtime_active():return _reject("hex_ground_unavailable","Bodenplaetze sind noch nicht bereit")
+	var aboard:=PackedStringArray()
+	for id in rescued:
+		if _sim.get_hex_unit_state(id).is_empty():aboard.append(id)
+	var admission_id:=""
+	if not aboard.is_empty():
+		# Das verlorene Schiff ist nirgends "zu Hause": die Bodenzulassung verlangt "an Bord, daheim". Wer abgeholt wurde, gehoert ab jetzt keinem Schiff
+		# mehr (craft_id leer = daheim); scheitert die Zulassung, bekommen alle ihr Schiff zurueck.
+		for id in aboard:_states[id].craft_id=""
+		var ticket:Dictionary=_sim.prepare_base_ground_deployment(self,aboard,_terrain.world_to_grid(_pad_world("")))
+		if not ticket.ok:
+			for id in aboard:_states[id].craft_id=craft
+			return ticket
+		admission_id=String(ticket.admission_id)
+		var committed:Dictionary=_sim.commit_base_ground_deployment(self,admission_id,false)
+		if not committed.ok:
+			_sim.cancel_hex_ground_deployment(admission_id,"base_deployment_changed")
+			for id in aboard:_states[id].craft_id=craft
+			return committed
+	for id in rescued:_cancel(id,false)
+	_board_groups.erase(craft)
+	_sim.call("_publish_base_ground_actors",rescued)
+	for id in rescued:
+		var returned:=get_actor(id)
+		if is_instance_valid(returned) and not _sim.get_hex_unit_state(id).is_empty():returned.visible=true
+	state_changed.emit()
+	return {"ok":true,"rescued":Array(rescued)}
+
+
 func _unboard_hex(id:String,craft:String,payload:Dictionary)->Dictionary:
 	if not _sim.is_hex_ground_runtime_active():return _reject("hex_ground_unavailable","Bodenplaetze sind noch nicht bereit")
 	var owner_lifetime:WeakRef=weakref(self)

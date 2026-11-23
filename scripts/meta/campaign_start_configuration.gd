@@ -101,6 +101,9 @@ func configure(flow: Node, request: Dictionary) -> void:
 	if active_restore_in_progress and active_pending.has("home_hex_tactical"):
 		locations[String(active_pending.identity.craft_id)] = "mission"
 	flow.set("_homebase_aircraft_definitions", fleet_definitions)
+	# LC2e B1: Verlustbelege verlorener Schiffe (alte Staende haben den Schluessel nicht); bei leerer Flotte gibt es kein Bootstrap-Schiff.
+	flow.set("_lost_craft_records", Array(checkpoint.get("lost_craft", [])).duplicate(true))
+	if fleet_definitions.is_empty(): craft_id = ""
 	flow.set("_assigned_aircraft_pilot_by_craft", pilots)
 	flow.set("_aircraft_location_by_craft", locations)
 	flow.set("_homebase_staged_unit_ids", staged_units)
@@ -215,7 +218,8 @@ func get_home_checkpoint_guard(flow: Node, runtime: Node) -> Dictionary:
 		if not Array(flow.get(field)).is_empty():
 			return {"ok": false, "reason": "preparation_in_progress"}
 	var crafts: Array = flow.get("_homebase_aircraft_definitions")
-	if crafts.is_empty():
+	# LC2e B1: Eine leere Flotte ist nur nach einem Schiffsverlust erlaubt (Verlustbeleg vorhanden).
+	if crafts.is_empty() and _lost_records(flow).is_empty():
 		return {"ok": false, "reason": "campaign_craft_count"}
 	for ship: Dictionary in crafts:
 		var ship_location := String(Dictionary(flow.get("_aircraft_location_by_craft")).get(String(ship.craft_id),""))
@@ -223,18 +227,27 @@ func get_home_checkpoint_guard(flow: Node, runtime: Node) -> Dictionary:
 			return {"ok":false,"reason":"away_from_checkpoint","detail":"flight" if ship_location == "starmap" else "place"}
 	return {"ok":true}
 
+## LC2e B1: Verlustbelege verlorener Schiffe aus der Meta-Szene ([] ohne den Schluessel, etwa bei Pruefattrappen).
+func _lost_records(flow: Node) -> Array:
+	var value: Variant = flow.get("_lost_craft_records")
+	return Array(value) if value is Array else []
+
 func capture_home_checkpoint(flow: Node, runtime: Node) -> Dictionary:
 	var guard := get_home_checkpoint_guard(flow, runtime)
 	if not guard.get("ok", false): return guard
 	var crafts: Array = flow.get("_homebase_aircraft_definitions")
-	var id: String = String(crafts[0].craft_id)
+	var lost_records: Array = _lost_records(flow)
+	# LC2e B1: Bei leerer Flotte traegt "craft" (Pflichtschluessel aelterer Pruefungen) die Definition des zuletzt verlorenen Schiffs.
+	var primary: Dictionary = Dictionary(crafts[0]) if not crafts.is_empty() else Dictionary(Dictionary(lost_records[lost_records.size() - 1]).get("definition", {}))
+	var id: String = String(primary.get("craft_id", ""))
 	var payload: Dictionary = runtime.call("export_campaign_checkpoint")
 	if payload.is_empty():
 		return {"ok": false, "reason": "runtime_unavailable"}
 	payload["campaign_run_id"] = campaign_run_id
 	payload["roster"] = Array(flow.get("_all_team_units")).duplicate(true)
+	if not lost_records.is_empty(): payload["lost_craft"] = lost_records.duplicate(true)
 	payload["craft"] = {
-		"definition": Dictionary(crafts[0]).duplicate(true),
+		"definition": primary.duplicate(true),
 		"pilot_id": String(Dictionary(flow.get("_assigned_aircraft_pilot_by_craft")).get(id, "")),
 		"staged_unit_ids": Array(flow.get("_homebase_staged_unit_ids")),
 		"staged_fireteam_ids": Array(flow.get("_homebase_staged_fireteam_ids")),

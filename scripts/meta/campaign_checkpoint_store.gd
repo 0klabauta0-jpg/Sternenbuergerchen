@@ -220,21 +220,36 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 	var station: Dictionary = supply.validate_station_receipts(payload.supply.requests)
 	if not station.get("ok", false): return station
 	if int(station.capacity) > 2 and not bool(payload.campaign.get("progress", {}).get("second_pad_built", false)): return {"ok":false,"reason":"checkpoint_pad_progress_mismatch"}
-	if typeof(fleet) != TYPE_ARRAY or fleet.is_empty() or fleet.size() > int(station.capacity): return {"ok":false,"reason":"invalid_campaign_fleet"}
+	# LC2e B1: Verlustbelege durch Absturz verlorener Schiffe (optional; alte Staende haben den Schluessel nicht). Jeder Beleg traegt Kennung
+	# und Definition; eine Kennung steht nie zugleich in der Flotte und im Beleg, und die Flotte darf nur mit Beleg leer sein.
+	var lost_ids: Array = []
+	var lost_equipment_definitions: Array = []
+	if payload.has("lost_craft"):
+		if typeof(payload.lost_craft) != TYPE_ARRAY: return {"ok":false,"reason":"invalid_lost_craft"}
+		for lost: Variant in payload.lost_craft:
+			if typeof(lost) != TYPE_DICTIONARY or typeof(lost.get("craft_id")) != TYPE_STRING or String(lost.craft_id).is_empty() or lost_ids.has(lost.craft_id) or typeof(lost.get("definition")) != TYPE_DICTIONARY or String(lost.definition.get("craft_id", "")) != String(lost.craft_id):
+				return {"ok":false,"reason":"invalid_lost_craft"}
+			for field in ["ship_name", "outcome"]:
+				if lost.has(field) and typeof(lost[field]) != TYPE_STRING: return {"ok":false,"reason":"invalid_lost_craft"}
+			if lost.has("equipment_kept") and typeof(lost.equipment_kept) != TYPE_BOOL: return {"ok":false,"reason":"invalid_lost_craft"}
+			lost_ids.append(lost.craft_id)
+			if bool(lost.get("equipment_kept", false)): lost_equipment_definitions.append(lost.definition)
+	if typeof(fleet) != TYPE_ARRAY or (fleet.is_empty() and lost_ids.is_empty()) or fleet.size() > int(station.capacity): return {"ok":false,"reason":"invalid_campaign_fleet"}
 	var fleet_ids: Array = []
 	for ship in fleet:
 		if typeof(ship) != TYPE_DICTIONARY or typeof(ship.get("definition")) != TYPE_DICTIONARY: return {"ok":false,"reason":"invalid_campaign_fleet"}
 		var ship_id := String(ship.definition.get("craft_id",""))
-		if ship_id.is_empty() or fleet_ids.has(ship_id) or String(ship.get("pilot_id","")) not in ([""]+ids) or String(ship.get("location","homebase")) not in ["homebase","waiting_pad"]: return {"ok":false,"reason":"invalid_campaign_fleet"}
+		if ship_id.is_empty() or fleet_ids.has(ship_id) or lost_ids.has(ship_id) or String(ship.get("pilot_id","")) not in ([""]+ids) or String(ship.get("location","homebase")) not in ["homebase","waiting_pad"]: return {"ok":false,"reason":"invalid_campaign_fleet"}
 		if ship_id.begins_with("polisa_"):
 			var purchased: Dictionary = station.ships.get(ship_id, {})
 			if purchased.is_empty() or String(ship.definition.get("model_id", "")) != String(purchased.model_id) or String(ship.definition.get("craft_type", "")) != String(purchased.craft_type): return {"ok":false,"reason":"checkpoint_unverified_station_ship"}
 		fleet_ids.append(ship_id)
 	for purchased_id: String in station.ships:
-		if not fleet_ids.has(purchased_id): return {"ok":false,"reason":"checkpoint_missing_purchased_ship"}
+		if not fleet_ids.has(purchased_id) and not lost_ids.has(purchased_id): return {"ok":false,"reason":"checkpoint_missing_purchased_ship"}
 	var equipment = load("res://scripts/core/singleplayer_ship_equipment_state.gd").new()
 	var equipment_definitions: Array = []
 	for ship: Dictionary in fleet: equipment_definitions.append(ship.definition)
+	equipment_definitions.append_array(lost_equipment_definitions)
 	var equipment_validation: Dictionary
 	if payload.has("ship_equipment"):
 		if typeof(payload.ship_equipment) != TYPE_DICTIONARY: return {"ok":false,"reason":"invalid_equipment_state"}
@@ -242,7 +257,13 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 	else:
 		equipment_validation = equipment.validate_legacy(equipment_definitions, payload.supply.requests, payload.supply.get("inventory", {}))
 	if not equipment_validation.get("ok", false): return equipment_validation
-	if String(fleet[0].definition.get("craft_id","")) != String(craft.definition.craft_id) or JSON.stringify(fleet[0].definition,"",true) != JSON.stringify(craft.definition,"",true) or String(fleet[0].get("pilot_id","")) != String(craft.pilot_id): return {"ok":false,"reason":"checkpoint_primary_craft_mismatch"}
+	if fleet.is_empty():
+		# LC2e B1: leere Flotte nach Schiffsverlust: "craft" ist ein verlorenes Schiff (Kennung und Definition aus dem Verlustbeleg), ohne Pilot.
+		var lost_primary_ok := false
+		for lost: Dictionary in payload.lost_craft:
+			if String(lost.craft_id) == String(craft.definition.craft_id) and JSON.stringify(lost.definition,"",true) == JSON.stringify(craft.definition,"",true): lost_primary_ok = true
+		if not lost_primary_ok or not String(craft.pilot_id).is_empty(): return {"ok":false,"reason":"checkpoint_primary_craft_mismatch"}
+	elif String(fleet[0].definition.get("craft_id","")) != String(craft.definition.craft_id) or JSON.stringify(fleet[0].definition,"",true) != JSON.stringify(craft.definition,"",true) or String(fleet[0].get("pilot_id","")) != String(craft.pilot_id): return {"ok":false,"reason":"checkpoint_primary_craft_mismatch"}
 	if payload.has("location_resources"):
 		if typeof(payload.location_resources) != TYPE_DICTIONARY: return {"ok":false,"reason":"invalid_resource_checkpoint"}
 		var resources: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/location_resources.json"))
@@ -272,8 +293,9 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 		if not payload.campaign.completion_receipts.has(String(sequence[index])+":completed"): return {"ok":false,"reason":"checkpoint_progress_mismatch"}
 	var progress: Dictionary = payload.campaign.get("progress",{})
 	if ids.has("campaign_outpost_recruit") != bool(progress.get("recruited_outpost",false)) or ids.has("campaign_rescue_pilot") != bool(progress.get("recruited_pilot",false)): return {"ok":false,"reason":"checkpoint_roster_progress_mismatch"}
-	var original_fleet_count := fleet_ids.size() - Dictionary(station.ships).size()
-	if original_fleet_count not in [1,2] or bool(progress.get("recruited_pilot",false)) != (original_fleet_count == 2) or (original_fleet_count == 2 and not fleet_ids.has("campaign_buccaneer_01")): return {"ok":false,"reason":"checkpoint_fleet_progress_mismatch"}
+	# LC2e B1: verlorene Schiffe zaehlen zu den urspruenglichen bzw. gekauften Schiffen; ohne Verlustbelege bleibt die Rechnung unveraendert.
+	var original_fleet_count := fleet_ids.size() + lost_ids.size() - Dictionary(station.ships).size()
+	if original_fleet_count not in [1,2] or bool(progress.get("recruited_pilot",false)) != (original_fleet_count == 2) or (original_fleet_count == 2 and not fleet_ids.has("campaign_buccaneer_01") and not lost_ids.has("campaign_buccaneer_01")): return {"ok":false,"reason":"checkpoint_fleet_progress_mismatch"}
 	return {"ok":true}
 ## Gefallenenliste: Array aus Dictionaries mit nicht leerem String unit_id; die drei anderen Schluessel sind optional, aber Strings.
 static func _valid_fallen(value: Variant) -> bool:

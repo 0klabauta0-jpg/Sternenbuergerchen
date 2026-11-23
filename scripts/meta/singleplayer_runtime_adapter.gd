@@ -208,7 +208,11 @@ func configure(flow: Node, screen: Control) -> void:
 				push_error("Invalid Polisa recruitment market checkpoint")
 				return
 			if checkpoint.has("ship_equipment"):
-				var equipment_restore: Dictionary = _ship_equipment.restore_state(checkpoint.ship_equipment, Array(_flow.get("_homebase_aircraft_definitions")), checkpoint.supply.requests, checkpoint.supply.get("inventory", {}))
+				# LC2e B1: Verlorene Schiffe mit Umbauten bleiben in der Ausruestungsverwaltung (Verlustbeleg traegt die Definition).
+				var equipment_definitions: Array = Array(_flow.get("_homebase_aircraft_definitions")).duplicate()
+				for lost: Variant in Array(checkpoint.get("lost_craft", [])):
+					if typeof(lost) == TYPE_DICTIONARY and bool(lost.get("equipment_kept", false)) and typeof(lost.get("definition")) == TYPE_DICTIONARY: equipment_definitions.append(lost.definition)
+				var equipment_restore: Dictionary = _ship_equipment.restore_state(checkpoint.ship_equipment, equipment_definitions, checkpoint.supply.requests, checkpoint.supply.get("inventory", {}))
 				if not equipment_restore.get("ok", false):
 					push_error("Invalid Warp equipment checkpoint")
 					return
@@ -665,6 +669,21 @@ func sync_crafts() -> void:
 
 	if _base_personnel != null: _base_personnel.call("_refresh_capacity")
 	sync_space_wings()
+
+## LC2e B1: Ein durch Absturz verlorenes Schiff verlaesst alle Besitzer: Reisezustand, Landeplatz, Treibstoff/Schiffslager, Ausruestung.
+## Die Flotte (Definition, Pilot, Ort) raeumt der Aufrufer (MetaLayerFlow) vorher. Danach meldet all_grounded() wieder wahr, wenn kein anderes Schiff unterwegs ist.
+## equipment_kept: das Schiff hat Umbauten (Belege), die Ausruestungsverwaltung behaelt seinen Eintrag, damit der Komponentenverlauf stimmt.
+func retire_lost_craft(craft_id: String) -> Dictionary:
+	if _supply == null or craft_id.is_empty(): return {"ok": false, "reason": "supply_unavailable"}
+	_travel.unregister_craft(craft_id)
+	_pad_by_craft.erase(craft_id)
+	_departure_token_by_craft.erase(craft_id)
+	var equipment_kept := false
+	if _ship_equipment != null:
+		equipment_kept = not bool(_ship_equipment.unregister_unmodified_craft(craft_id).get("ok", false))
+	_supply.retire_lost_craft(craft_id, equipment_kept)
+	sync_crafts()
+	return {"ok": true, "equipment_kept": equipment_kept}
 
 func _home_pad_for(craft_id: String) -> String:
 	return String(_pad_by_craft.get(craft_id, ""))

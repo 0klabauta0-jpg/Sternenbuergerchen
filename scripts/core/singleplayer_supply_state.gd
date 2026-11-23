@@ -963,6 +963,23 @@ func remove_skirmish_craft(craft_id: String) -> void:
 	_revision += 1
 
 
+## LC2e B1: Ein durch Absturz verlorenes Schiff verlaesst den Versorgungsstand: Treibstoff und Schiffslager gehen mit dem Schiff verloren.
+## Liegen im Schiffslager Schiffskomponenten (oder wird die Ausruestung des Schiffs weitergefuehrt), bleibt das Lager stehen, damit die
+## Komponentenbilanz des Standes aufgeht; Treibstoff verschwindet immer. Gibt an, ob das Lager erhalten blieb.
+func retire_lost_craft(craft_id: String, keep_container: bool = false) -> Dictionary:
+	_fuel_by_craft_id.erase(craft_id)
+	var key := "craft:" + craft_id
+	var kept := keep_container
+	if _inventory.has(key) and not kept:
+		for item_id in Dictionary(Dictionary(_inventory[key]).get("items", {})).keys():
+			if int(Dictionary(_inventory[key].items)[item_id]) > 0 and (SHIP_COMPONENTS.known(String(item_id)) or SPACE_COMPONENTS.known(String(item_id))):
+				kept = true
+	if _inventory.has(key) and not kept:
+		_inventory.erase(key)
+	_revision += 1
+	return {"ok": true, "container_kept": kept}
+
+
 func return_skirmish_person_equipment(unit_id: String, loadout: Dictionary) -> Dictionary:
 	var storage: Dictionary = _inventory["base:homebase"]
 	var bag_key := "unit:" + unit_id + ":backpack"

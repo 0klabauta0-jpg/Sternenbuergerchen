@@ -77,14 +77,42 @@ func _l5_save_after_loss() -> void:
 	var s: Dictionary = await _begin_funded_sortie(500)
 	if s.is_empty(): return
 	_lose_craft(s)
-	s.driver.call("_resolve_combat", "victory", String(s.driver.get("friendly_team_id")))
+	# Abbruch (Evakuieren): der Auftrag wird wieder geoeffnet; ein "Sieg" ohne abgeschlossenes Ziel liesse den Auftrag aktiv und das Speichern gesperrt.
+	s.driver.call("_resolve_combat", "aborted", "", "evacuation")
 	if not await _wait_released("L5: Einsatz wird freigegeben"): return
-	# OFFEN (nicht gezaehlt, im Bericht genannt): Das verlorene Schiff verlaesst die Flotte noch nicht. Es bleibt als "am Einsatzort" gefuehrt, der
-	# Basisstand ist dadurch gesperrt (world_active); ein Laden fuehrt auf den Stand vor dem Einsatz zurueck. Sobald die Flotte das Schiff
-	# verliert (Verlustbeleg), wird aus dieser Ausgabe eine Pruefung: speichern gelingt, Laden behaelt Guthaben und Verlust.
-	var saved: Dictionary = _flow.call("request_campaign_save")
-	print("L5_OPEN save_after_loss ok=", saved.get("ok"), " reason=", saved.get("reason"), " credits=", _credits())
+	# LC2e B1: Das verlorene Schiff verlaesst die Flotte dauerhaft (hier das einzige Schiff: leere Flotte). Der Basisstand ist wieder
+	# schreibbar; Speichern und Laden behalten Guthaben (Notrettung gebucht), Verlustbeleg und die leere Flotte.
+	_check(not _fleet_ids().has(_craft_id), "L5/B1: das verlorene Schiff ist nicht mehr in der Flotte (%s)" % str(_fleet_ids()))
+	_check(not Dictionary(_flow.get("_aircraft_location_by_craft")).has(_craft_id) and not Dictionary(_flow.get("_assigned_aircraft_pilot_by_craft")).has(_craft_id), "L5/B1: kein Ort und keine Pilotenzuordnung mehr fuer das verlorene Schiff")
+	var guard: Dictionary = _runtime.call("get_world_checkpoint_guard")
+	_check(bool(guard.get("ok", false)), "L5/B1: Basisspeicherstand wieder schreibbar (%s)" % str(guard.get("reason", "")))
+	_check(bool(Dictionary(_flow.get_meta("campaign_lost_craft_rescue_result", {})).get("ok", false)), "L5/B1: die Notrettung hat die Lebenden an die Basis gestellt (%s)" % str(_flow.get_meta("campaign_lost_craft_rescue_result", {})))
+	# Die Heimgeholten laufen noch kurz; die Spielstandpruefung wartet ("Speichern wartet auf die Bewegung"), danach gelingt das Speichern.
+	var saved: Dictionary = {}
+	var saved_ok: bool = await _wait(func():
+		saved.clear()
+		saved.merge(Dictionary(_flow.call("request_campaign_save")))
+		return bool(saved.get("ok", false)), 60000, "L5/B1: Speichern nach Schiffsverlust und Heimkehr gelingt")
+	if not saved_ok: print("L5_SAVE_LAST ", saved)
+	var disk: Dictionary = _disk()
+	var lost_ids: Array = []
+	for entry in Array(disk.get("lost_craft", [])): lost_ids.append(String(Dictionary(entry).get("craft_id", "")))
+	_check(Array(disk.get("fleet", [1])).is_empty() and lost_ids == [_craft_id] and not Dictionary(Dictionary(disk.get("supply", {})).get("fuel_by_craft_id", {})).has(_craft_id), "L5/B1: Stand traegt leere Flotte, Verlustbeleg und keinen Treibstoff des Schiffs (%s)" % str(lost_ids))
+	_check(_disk_credits() == 100, "L5/B1: Stand traegt das Guthaben nach der Notrettung (%d)" % _disk_credits())
 	await _close()
+	if not await _open_scene("campaign", "continue_home"): return
+	_check(_fleet_ids().is_empty() and _credits() == 100, "L5/B1: Laden: Flotte leer, Guthaben 100 (%s / %d)" % [str(_fleet_ids()), _credits()])
+	var resaved: Dictionary = {}
+	await _wait(func():
+		resaved.clear()
+		resaved.merge(Dictionary(_flow.call("request_campaign_save")))
+		return bool(resaved.get("ok", false)), 60000, "L5/B1: nach dem Laden ist wieder Speichern moeglich")
+	await _close()
+
+func _fleet_ids() -> Array:
+	var ids: Array = []
+	for definition in Array(_flow.get("_homebase_aircraft_definitions")): ids.append(String(Dictionary(definition).get("craft_id", "")))
+	return ids
 
 func _l4_no_loss() -> void:
 	var s: Dictionary = await _begin_funded_sortie(500)

@@ -206,6 +206,8 @@ var _assigned_aircraft_pilot_by_craft: Dictionary = {}
 var _aircraft_location_by_craft: Dictionary = {}
 var _selected_aircraft_cargo_by_craft: Dictionary = {}
 var _loaded_aircraft_cargo_by_craft: Dictionary = {}
+## LC2e B1: Verlustbelege durch Absturz verlorener Schiffe ({craft_id, definition, ship_name, outcome, equipment_kept}); additiv im Basisstand ("lost_craft").
+var _lost_craft_records: Array = []
 var _pending_homebase_team_transfers: Array = []
 var _pending_homebase_pilot_transfers: Array = []
 var _pending_homebase_cargo_loads: Array = []
@@ -4659,6 +4661,8 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 		debrief_screen.set_mission_result(_last_mission_result)
 
 	_release_active_mission()
+	if craft_lost and not failed_extraction:
+		_retire_lost_craft(Dictionary(_last_mission_result.get("craft_loss", {})))
 	var drop_source := _get_mission_drop_source()
 	_mission_planning_state = DEFAULT_MISSION_PLANNING_STATE.duplicate(true)
 	_mission_planning_state["mission_drop_source"] = drop_source
@@ -4697,6 +4701,41 @@ func _book_craft_loss_rescue(mission_result: Dictionary, rules: Dictionary) -> D
 				push_warning("Notrettung: Gebuehr %d nicht gebucht (%s)" % [fee, String(charged.get("reason", ""))])
 				fee = 0
 	return {"craft_id": craft_id, "ship_name": ship_name if not ship_name.is_empty() else craft_id, "outcome": outcome, "rescue_fee": fee}
+
+
+## LC2e B1: Das durch Absturz verlorene Schiff verlaesst die Flotte dauerhaft: Definition, Pilotenzuordnung, Ort, Fracht-Auswahl, Reisezustand,
+## Landeplatz, Treibstoff/Schiffslager, Ausruestung (Adapter). Ein Verlustbeleg bleibt (Basisstand, Schluessel "lost_craft"). Danach meldet der
+## Basisspeicherstand wieder "grounded"; die Flotte darf leer sein. Genau einmal je Einsatz (Aufruf hinter _on_mission_combat_resolved).
+func _retire_lost_craft(loss: Dictionary) -> void:
+	var craft_id: String = String(loss.get("craft_id", "")).strip_edges()
+	if craft_id.is_empty(): return
+	var definition: Dictionary = {}
+	var remaining: Array = []
+	for craft_variant in _homebase_aircraft_definitions:
+		if String(Dictionary(craft_variant).get("craft_id", "")).strip_edges() == craft_id:
+			definition = Dictionary(craft_variant).duplicate(true)
+		else:
+			remaining.append(craft_variant)
+	if definition.is_empty(): return
+	# Die Notrettung hat die Lebenden heimgeholt: sie stehen an der Basis, nicht mehr an Bord des verlorenen Schiffs; dessen Trupp-Zuladung entfaellt.
+	var base_personnel: Node = _singleplayer_runtime.call("get_base_personnel_runtime") if _singleplayer_runtime != null else null
+	if base_personnel != null and base_personnel.has_method("rescue_crew_from_lost_craft"):
+		set_meta("campaign_lost_craft_rescue_result", Dictionary(base_personnel.call("rescue_crew_from_lost_craft", craft_id)).duplicate(true))
+	var homebase_screen: Node = _get_homebase_screen()
+	if homebase_screen != null and homebase_screen.has_method("_get_homebase_direct_payload_fireteam_ids_for_craft_raw"):
+		for team_id in Array(homebase_screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw", craft_id)).duplicate():
+			homebase_screen.call("_remove_homebase_direct_payload_fireteam", String(team_id), craft_id)
+	_homebase_aircraft_definitions = remaining
+	_aircraft_location_by_craft.erase(craft_id)
+	_assigned_aircraft_pilot_by_craft.erase(craft_id)
+	_selected_aircraft_cargo_by_craft.erase(craft_id)
+	_loaded_aircraft_cargo_by_craft.erase(craft_id)
+	_craft_location_runtime.erase(craft_id)
+	_air_asset_recovery_by_craft.erase(craft_id)
+	var equipment_kept := false
+	if _singleplayer_runtime != null:
+		equipment_kept = bool(Dictionary(_singleplayer_runtime.call("retire_lost_craft", craft_id)).get("equipment_kept", false))
+	_lost_craft_records.append({"craft_id": craft_id, "definition": definition, "ship_name": String(loss.get("ship_name", craft_id)), "outcome": String(loss.get("outcome", "crash")), "equipment_kept": equipment_kept})
 
 
 ## Gemeinsamer Totalverlust-Pfad (wie bisher bei nicht einsatzfaehiger Besatzung): Niederlage, kein Erfolg, Checkpoint-Retry.
