@@ -904,6 +904,9 @@ func _inventory_transfer(payload: Dictionary, context: Dictionary) -> Dictionary
 	var destination: Dictionary = _inventory[target]
 	var fits := INVENTORY.has_space(destination, item, amount) if destination.has("armor_chip_capacity") else INVENTORY.used(to) + amount <= int(destination.capacity)
 	if not fits:
+		# M6b (B5): Magazin, Fach voll, kein Rucksack getragen -> der Hinweis nennt den Ausweg.
+		if destination.has("armor_chip_capacity") and int(destination.capacity) <= 0 and INVENTORY.AMMO_RULES.is_ammo_item(item, INVENTORY.ammo_rules()) and INVENTORY.compartment_used(destination) >= int(destination.armor_chip_capacity):
+			return _reject("container_full", "Fach voll – mit einem Rucksack passen mehr Magazine hinein.")
 		return _reject("container_full", "Kein freier Platz im Zielcontainer")
 	from[item]=int(from[item])-amount
 	if from[item]==0: from.erase(item)
