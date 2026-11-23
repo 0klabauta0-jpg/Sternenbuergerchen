@@ -41,6 +41,7 @@ func _run_tests() -> void:
 	await _test_t1_soft_waypoint_completion()
 	_test_t2_contact_path_recompute_lock()
 	await _test_t3_mission_duration()
+	await _test_t4_controller_timers_follow_ticks()
 	print("GAME_TIME_RULES passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed > 0 else 0)
 
@@ -153,3 +154,41 @@ func _test_t3_mission_duration() -> void:
 	var after_180: float = float(driver.call("_get_duration_seconds"))
 	_check(absf(after_180 - 8.0) < 0.02, "T3 180 Ticks + 5 s Versatz = 8,00 s (ist %.3f)" % after_180)
 	await _close_scene(scene)
+
+
+func _geti(node: Node, property: String) -> int:
+	var value: Variant = node.get(property)
+	return int(value) if value != null else -1
+
+
+## Ein Durchlauf: 120 Ticks von Hand, ein Bild je frame_ticks Ticks. Die Bildzeit (0,5 s je Bild) hat mit der Spielzeit nichts
+## zu tun und darf die Zeitgeber nicht antreiben.
+func _play_timers(frame_ticks: int) -> Dictionary:
+	var scene: Node = await _open_scene()
+	var sim: Node = scene.get_node("SimulationRoot")
+	var controller: Node = scene.get_node("TacticalController")
+	var refresh_before: int = _geti(controller, "_fireteam_security_refresh_count")
+	controller.set("_drop_ship_cooldown_remaining", 10.0)
+	controller.set("_selected_team_boarding_requests", {"gt_probe": {"craft_id": "gt_none", "elapsed": 0.0, "poll": 99.0}})
+	for tick in range(1, 121):
+		sim._physics_process(TICK)
+		if tick % frame_ticks == 0:
+			controller.call("_process", 0.5)
+	var requests: Dictionary = controller.get("_selected_team_boarding_requests")
+	var result: Dictionary = {
+		"refreshes": _geti(controller, "_fireteam_security_refresh_count") - refresh_before,
+		"cooldown": float(controller.get("_drop_ship_cooldown_remaining")),
+		"boarding": float(Dictionary(requests.get("gt_probe", {})).get("elapsed", -1.0)),
+	}
+	controller.set("_selected_team_boarding_requests", {})
+	await _close_scene(scene)
+	return result
+
+
+func _test_t4_controller_timers_follow_ticks() -> void:
+	var a: Dictionary = await _play_timers(1)
+	var b: Dictionary = await _play_timers(4)
+	print("T4 A ", a, " B ", b)
+	_check(int(a.refreshes) == 10 and int(b.refreshes) == 10, "T4 Sicherungs-Auffrischung genau einmal je 12 Ticks: 120 Ticks = 10 (A %d, B %d)" % [int(a.refreshes), int(b.refreshes)])
+	_check(absf(float(a.cooldown) - 9.0) < 0.01 and absf(float(b.cooldown) - 9.0) < 0.01, "T4 Abkuehlzeit des Truppschiffs sinkt nach 120 Ticks um 2 s (A %.3f, B %.3f)" % [float(a.cooldown), float(b.cooldown)])
+	_check(absf(float(a.boarding) - 2.0) < 0.01 and absf(float(b.boarding) - 2.0) < 0.01, "T4 Einsteige-Anfrage zaehlt 120 Ticks = 2 s (A %.3f, B %.3f)" % [float(a.boarding), float(b.boarding)])
