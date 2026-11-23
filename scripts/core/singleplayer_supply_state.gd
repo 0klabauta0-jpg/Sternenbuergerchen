@@ -20,6 +20,8 @@ var _modular_plan_cache: Dictionary = {}
 var _modular_plan_cache_revision := -1
 
 const DATA_PATH := "res://data/singleplayer/trade_offers.json"
+const MARKET_PATH := "res://data/singleplayer/commodity_market.json"
+const MARKET_OFFER_PREFIX := "market:"
 const CAMPAIGN_RECIPES:Dictionary={"light_armor":{"item":"armor_light","cost":20},"mining_tool":{"item":"mining_tool","cost":30},"assault_rifle":{"item":"rifle","cost":60}}
 
 static func get_campaign_recipe(blueprint_id:String)->Dictionary:
@@ -32,6 +34,11 @@ var _debt_remaining: float = -1.0
 var _item_quantities: Dictionary = {}
 var _fuel_by_craft_id: Dictionary = {}
 var _stock_by_offer_id: Dictionary = {}
+## Handel H2: Benit-Warenboerse (data/singleplayer/commodity_market.json). _market: Ort -> Ware -> {sell_price, stock, buy_price};
+## _market_stock: "Ort:Ware" -> aktueller Bestand der Verkaufswaren. Eigener Block, nicht Teil von _definitions und _stock_by_offer_id
+## (alte Staende ohne ihn laden mit vollem Bestand).
+var _market: Dictionary = {}
+var _market_stock: Dictionary = {}
 var _requests: Dictionary = {}
 var _reward_receipts: Dictionary = {}
 var _research_receipts: Dictionary = {}
@@ -53,6 +60,12 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 	if typeof(raw) != TYPE_DICTIONARY:
 		return _reject("invalid_supply_data", "Versorgungsdaten fehlen")
 	var data: Dictionary = Dictionary(raw).duplicate(true)
+	# Handel H2: die Warenboerse kommt aus ihrer Datei; eine Testkopie darf sie unter "commodity_market" mitgeben (gehoert nicht in _definitions).
+	var market_raw: Variant = data.get("commodity_market", null)
+	data.erase("commodity_market")
+	if market_raw == null: market_raw = JSON.parse_string(FileAccess.get_file_as_string(MARKET_PATH)) if FileAccess.file_exists(MARKET_PATH) else {"locations": {}}
+	var parsed_market: Dictionary = _parse_market(market_raw)
+	if not parsed_market.get("ok", false): return _reject("invalid_supply_data", String(parsed_market.get("message", "Warenboerse ungueltig")))
 	if not _valid_nonnegative_number(data.get("initial_credits")) or not _valid_nonnegative_number(data.get("initial_fuel")) or not _valid_nonnegative_number(data.get("fuel_capacity")) or not _valid_nonnegative_number(data.get("fuel_price_per_unit")):
 		return _reject("invalid_supply_data", "Ungueltige Versorgungswerte")
 	if float(data.initial_fuel) > float(data.fuel_capacity) or float(data.fuel_capacity) <= 0.0 or float(data.fuel_price_per_unit) <= 0.0:
@@ -109,6 +122,8 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 	_revision = 0
 	for offer_id in Dictionary(data.get("offers", {})):
 		_stock_by_offer_id[String(offer_id)] = int(data.offers[offer_id].stock)
+	_market = parsed_market.market
+	_market_stock = _full_market_stock()
 	for craft in crafts:
 		register_craft(String(craft.get("craft_id", craft.get("id", ""))) if typeof(craft) == TYPE_DICTIONARY else String(craft))
 	return {"ok": true}
@@ -125,7 +140,7 @@ func register_craft(craft_id: String, initial_fuel: float = -1.0) -> bool:
 	return true
 
 func get_supply_snapshot() -> Dictionary:
-	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "emergency_fuel": Dictionary(_definitions.get("emergency_fuel", {})).duplicate(true), "debt": Dictionary(_definitions.get("debt", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory_view(), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "station_home_pads": get_station_home_pads()}
+	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "emergency_fuel": Dictionary(_definitions.get("emergency_fuel", {})).duplicate(true), "debt": Dictionary(_definitions.get("debt", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory_view(), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "market": get_market_snapshot(), "station_home_pads": get_station_home_pads()}
 
 func get_research_snapshot() -> Dictionary:
 	if _research_snapshot_revision != _revision:
@@ -199,6 +214,7 @@ func get_purchase_receipt(request_id: String) -> Dictionary:
 func _buy(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var location_id: String = String(context.get("location_id", ""))
 	var offer_id: String = String(payload.get("offer_id", ""))
+	if offer_id.begins_with(MARKET_OFFER_PREFIX): return _buy_market(offer_id, payload, context)
 	var offer: Dictionary = Dictionary(Dictionary(_definitions.get("offers", {})).get(offer_id, {}))
 	if offer.is_empty():
 		return _reject("unknown_offer", "Angebot unbekannt")
@@ -652,6 +668,8 @@ func export_state() -> Dictionary:
 	if _credits < 0 and _debt_remaining >= 0.0: exported["debt_interest_remaining"] = _debt_remaining
 	# M4b: optionaler Merker (fehlt in alten Staenden: die Startausstattung mit Magazinen wird dann einmal nachgereicht).
 	if _ammo_start_granted: exported["ammo_start_granted"] = true
+	# Handel H2: Marktbestaende (additiver Schluessel; fehlt er, laedt der Stand mit vollem Bestand).
+	if not _market_stock.is_empty(): exported["market_stock"] = _market_stock.duplicate()
 	return exported
 
 func _export_state_base() -> Dictionary:
@@ -740,7 +758,18 @@ func restore_state(data: Dictionary) -> Dictionary:
 	if typeof(resources)!=TYPE_DICTIONARY: return _reject("invalid_resources","Ortsressourcen ungueltig")
 	for place in resources:
 		if not fresh._location_resources.has(place) or typeof(resources[place])!=TYPE_DICTIONARY or not fresh._location_resources[place].restore_state(resources[place]): return _reject("invalid_resources","Ortsressourcen ungueltig")
+	# Handel H2: Marktbestaende sind optional (alter Stand: voller Bestand); gespeichert darf nie mehr sein als der Datenwert.
+	var market_saved: Variant = data.get("market_stock", {})
+	var market_full: Dictionary = fresh._full_market_stock()
+	if typeof(market_saved) != TYPE_DICTIONARY: return _reject("invalid_stock", "Marktbestand ungueltig")
+	for market_key: Variant in market_saved:
+		if market_full.has(market_key) and (not _valid_nonnegative_integer(market_saved[market_key]) or int(market_saved[market_key]) > int(market_full[market_key])):
+			return _reject("invalid_stock", "Marktbestand ungueltig")
 	_reset_route_fuel_preparation()
+	_market = fresh._market.duplicate(true)
+	_market_stock = market_full.duplicate()
+	for market_key: Variant in market_saved:
+		if market_full.has(market_key): _market_stock[market_key] = int(market_saved[market_key])
 	_location_resources=fresh._location_resources
 	_definitions = fresh._definitions.duplicate(true)
 	_credits = int(data.credits)
@@ -1563,10 +1592,102 @@ func _valid_campaign_bed_requests(requests: Dictionary) -> bool:
 	return true
 
 ## Ankaufpreis des Haendlers am Ort (0 = kauft nicht). Die eine Preisquelle fuer _sell und get_sellable_proceeds.
+## Handel H2: Preise stehen in data/singleplayer/commodity_market.json (buy_price); danach gilt der Block commodity_buy_orders
+## der Handelsdaten (Polisa: Erz, Bergungsgut). Kein Preis steht fest im Code. Was ein Haendler selbst verkauft, kauft er nie.
 func _commodity_price(location: String, item: String) -> int:
-	var wanted := "c_benit" if location == "satellite_crash" else "b_benit"
-	var orders: Dictionary = Dictionary(_definitions.get("commodity_buy_orders", {})).get(location, {wanted: 15})
+	var entry: Dictionary = Dictionary(Dictionary(_market.get(location, {})).get(item, {}))
+	if entry.has("sell_price"): return 0
+	if entry.has("buy_price"): return int(entry.buy_price)
+	var orders: Dictionary = Dictionary(Dictionary(_definitions.get("commodity_buy_orders", {})).get(location, {}))
 	return int(orders.get(item, 0))
+
+## Prueft die Warenboerse und liefert {ok, market} mit ganzzahligen Preisen/Bestaenden; Fehler -> {ok:false, message}.
+func _parse_market(raw: Variant) -> Dictionary:
+	var out: Dictionary = {}
+	if typeof(raw) != TYPE_DICTIONARY: return {"ok": false, "message": "Warenboerse fehlt"}
+	var locations: Variant = Dictionary(raw).get("locations", {})
+	if typeof(locations) != TYPE_DICTIONARY: return {"ok": false, "message": "Warenboerse: Orte fehlen"}
+	for loc: Variant in locations:
+		if typeof(locations[loc]) != TYPE_DICTIONARY: return {"ok": false, "message": "Warenboerse: Ort ungueltig"}
+		var items: Dictionary = {}
+		for item: Variant in locations[loc]:
+			var e: Variant = locations[loc][item]
+			if typeof(e) != TYPE_DICTIONARY or String(item).is_empty(): return {"ok": false, "message": "Warenboerse: Ware ungueltig"}
+			var clean: Dictionary = {}
+			if e.has("sell_price"):
+				if not _valid_positive_integer(e.sell_price) or not _valid_nonnegative_integer(e.get("stock")): return {"ok": false, "message": "Warenboerse: Verkaufspreis oder Bestand ungueltig"}
+				clean["sell_price"] = int(e.sell_price)
+				clean["stock"] = int(e.stock)
+			if e.has("buy_price"):
+				if e.has("sell_price") or not _valid_positive_integer(e.buy_price): return {"ok": false, "message": "Warenboerse: Ankaufspreis ungueltig oder Ware wird zugleich verkauft"}
+				clean["buy_price"] = int(e.buy_price)
+			items[String(item)] = clean
+		out[String(loc)] = items
+	return {"ok": true, "market": out}
+
+func _market_key(location: String, item: String) -> String:
+	return location + ":" + item
+
+## Voller Bestand aller Verkaufswaren laut Daten.
+func _full_market_stock() -> Dictionary:
+	var stock: Dictionary = {}
+	for loc: String in _market:
+		for item: String in Dictionary(_market[loc]):
+			if Dictionary(_market[loc][item]).has("sell_price"): stock[_market_key(loc, item)] = int(_market[loc][item].stock)
+	return stock
+
+## Warenboerse fuer Anzeige und Tests: Ort -> Ware -> {sell_price, stock, buy_price} (nur die vorhandenen Schluessel).
+func get_market_snapshot() -> Dictionary:
+	var out: Dictionary = {}
+	for loc: String in _market:
+		var items: Dictionary = {}
+		for item: String in Dictionary(_market[loc]):
+			var e: Dictionary = Dictionary(_market[loc][item]).duplicate()
+			if e.has("sell_price"): e["stock"] = int(_market_stock.get(_market_key(loc, item), 0))
+			items[item] = e
+		out[loc] = items
+	return out
+
+## Handel H2 (D4): sobald ein Schiff des Spielers an der Heimatbasis gelandet ist, steht jeder Marktbestand wieder auf dem Datenwert.
+## Nur die Warenboerse; andere Angebote (stock_by_offer_id) bleiben. Liefert die Zahl nachgefuellter Stuecke.
+func replenish_market_stock() -> int:
+	var full: Dictionary = _full_market_stock()
+	var added := 0
+	for key: String in full:
+		var missing: int = int(full[key]) - int(_market_stock.get(key, 0))
+		if missing > 0: added += missing
+	if added > 0:
+		_market_stock = full
+		_revision += 1
+	return added
+
+## Kauf bei der Warenboerse (Angebotskennung "market:<Ort>:<Ware>"): gleicher Warenweg wie _buy (Frachtaufzug oder Schiffslager).
+func _buy_market(offer_id: String, payload: Dictionary, context: Dictionary) -> Dictionary:
+	var parts: PackedStringArray = offer_id.split(":")
+	if parts.size() != 3: return _reject("unknown_offer", "Angebot unbekannt")
+	var location_id: String = String(context.get("location_id", ""))
+	var item_id: String = parts[2]
+	var entry: Dictionary = Dictionary(Dictionary(_market.get(parts[1], {})).get(item_id, {}))
+	if not entry.has("sell_price"): return _reject("unknown_offer", "Angebot unbekannt")
+	if bool(context.get("craft_busy", true)): return _reject("craft_busy", "Handel erst nach der Landung am Serviceort")
+	if parts[1] != location_id or not _has_service(location_id, "trade"): return _reject("trade_unavailable", "Handel nur am Handelsservice")
+	if not _valid_positive_integer(payload.get("quantity")): return _reject("invalid_quantity", "Menge muss eine positive ganze Zahl sein")
+	var quantity: int = int(payload.quantity)
+	var key: String = _market_key(location_id, item_id)
+	if quantity > int(_market_stock.get(key, 0)): return _reject("insufficient_stock", "Angebotsmenge reicht nicht")
+	var price: int = int(entry.sell_price)
+	if quantity > _credits / price: return _reject("insufficient_credits", "Credits reichen nicht")
+	var destination := String(context.get("cargo_lift_container_id", "station:polisa:lift")) if location_id in ["polisa", "trade_outpost"] and bool(context.get("cargo_lift_delivery", false)) else "craft:" + String(context.get("craft_id", ""))
+	var purchased_items: Dictionary = _item_quantities
+	if not _inventory.is_empty():
+		if not _inventory.has(destination): return _reject("inventory_access", "Lieferziel fehlt")
+		purchased_items = _inventory[destination].items
+		if INVENTORY.used(purchased_items) + quantity > int(_inventory[destination].capacity): return _reject("container_full", "Schiffsfracht ist voll")
+	_credits -= quantity * price
+	_market_stock[key] = int(_market_stock[key]) - quantity
+	purchased_items[item_id] = int(purchased_items.get(item_id, 0)) + quantity
+	_revision += 1
+	return {"ok": true, "item_id": item_id, "quantity": quantity, "cost": quantity * price, "container_id": destination if not _inventory.is_empty() else "base:homebase", "message": "Kauf bestaetigt"}
 
 ## Abschnitt P (Pleite, W1): was die Waren in den genannten Lagern (Schiffslager "craft:<id>", Frachtaufzug) beim Haendler am Ort
 ## zusammen braechten, mit den Regeln von _sell (Handelsdienst am Ort, Preis > 0, keine Auftragsgegenstaende). Nur lesend.
