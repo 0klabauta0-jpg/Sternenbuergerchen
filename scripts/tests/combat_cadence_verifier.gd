@@ -36,6 +36,9 @@ class NPC extends Node2D:
 	var awareness := 1.0
 	func get_awareness() -> float: return awareness
 	func get_active_weapon_id() -> String: return active_weapon_id
+	## M6a (Nachbesserung F2): Hauptwaffe der Einheit; leer = nicht gesetzt (der Treiber nimmt dann die aktive Waffe).
+	var weapon_1_id := ""
+	func get_weapon_1_id() -> String: return weapon_1_id
 	func get_current_unit_command(): return command
 	func get_stealth() -> float: return 0.0
 	func get_discipline() -> float: return 0.0
@@ -280,6 +283,7 @@ func _rig(specs: Array, seed_value: int = 7) -> Dictionary:
 		npc.unit_id = String(spec.id)
 		npc.team_id = String(spec.team)
 		npc.active_weapon_id = String(spec.get("weapon", "pistol"))
+		npc.weapon_1_id = String(spec.get("weapon_1", ""))
 		npc.hp = int(spec.get("hp", 100000))
 		npc.initiative = float(spec.get("initiative", -1.0))
 		npc.hit_multiplier = float(spec.get("hit_multiplier", -1.0))

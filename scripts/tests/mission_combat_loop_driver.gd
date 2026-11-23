@@ -2223,7 +2223,7 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 ## ---- Munition (M4a) --------------------------------------------------------------------------------------------------
 ## Ein Schuss kostet eine Patrone des eingelegten Magazins (Normalschuss und Ueberwachung, Treffer wie Fehlschuss); ist es
 ## leer, wird aus den Reservemagazinen der Person nachgeladen (Pause), ohne Reserve schiesst die Einheit nicht. Gegner laden
-## nach, haben aber unbegrenzt Reserve. Der Zustand gehoert dem Einsatz (reset_suppression leert ihn), steht nicht im Speicherstand.
+## nach, haben aber (M6a) wie alle einen endlichen Einsatz-Vorrat. Der Zustand gehoert dem Einsatz (reset_suppression leert ihn), steht nicht im Speicherstand.
 var _ammo_state = null
 ## Nur fuer Pruefer, die Takt oder Unterdrueckung ueber viele Schuesse zaehlen (nicht die Munition): false = alle Waffen ohne Munitionsbedarf.
 var ammo_enabled: bool = true
@@ -2241,6 +2241,7 @@ func _ammo_reserve_count(unit_id: String, ammo_class: String) -> int:
 	var simulation_root = get_node_or_null(simulation_root_path)
 	if simulation_root == null or not simulation_root.has_method("get_person_magazine_count"):
 		return 0
+	_ammo_ensure_mission_store(simulation_root, unit_id, ammo_class)
 	return int(simulation_root.call("get_person_magazine_count", unit_id, ammo_class))
 
 
@@ -2248,17 +2249,37 @@ func _ammo_take_reserve(unit_id: String, ammo_class: String) -> bool:
 	var simulation_root = get_node_or_null(simulation_root_path)
 	if simulation_root == null or not simulation_root.has_method("take_person_magazine"):
 		return false
+	_ammo_ensure_mission_store(simulation_root, unit_id, ammo_class)
 	return bool(simulation_root.call("take_person_magazine", unit_id, ammo_class))
 
 
-## Unbegrenzte Reserve (laedt nach, geht nie leer aus): Gegner, und befreundete Einheiten ohne eigenen Bestand (kein Behaelter).
+## M6a: Beim ersten Bedarf bekommt die Einheit ohne Kampagnen-Vorrat ihren Einsatz-Vorrat: Fach nach Ruestung, Sorte der
+## HAUPTWAFFE (Waffe 1, wenn sie Munition braucht; sonst der Waffe, fuer die gerade Reserve gefragt wird = die aktive). Die
+## Zweitwaffe hat nur ihr geladenes Magazin. Der Root ignoriert Personen mit Kampagnen-Vorrat.
+func _ammo_ensure_mission_store(simulation_root, unit_id: String, ammo_class: String) -> void:
+	if not simulation_root.has_method("ensure_mission_ammo"):
+		return
+	var unit = _resolve_unit_by_id(unit_id)
+	if unit == null or not is_instance_valid(unit):
+		return
+	var armor_id: String = String(unit.call("get_armor_id")) if unit.has_method("get_armor_id") else ""
+	var store_class: String = ammo_class
+	if unit.has_method("get_weapon_1_id"):
+		var main_info: Dictionary = _ammo_tracker().weapon_info(String(unit.call("get_weapon_1_id")))
+		if bool(main_info.needs_ammo):
+			store_class = String(main_info.ammo_class)
+	simulation_root.call("ensure_mission_ammo", unit_id, armor_id, store_class)
+
+
+## M6a: Jede Einheit, die dieser Treiber selbst rechnet, hat einen endlichen Vorrat (Gegner, NPCs, Skirmish, Host). Unbegrenzt
+## (= keine Reserve-Zahl in der Anzeige, kein Vorrat angelegt) bleibt, wo es keinen Vorrat geben kann: ohne Simulationswurzel
+## (Pruefer ohne Szene) und bei Mitspielern, deren Treiber das Gefecht nicht selbst rechnet (der Host fuehrt den Vorrat; ihre Zahl
+## kommt erst mit dem Netzabgleich).
 func _ammo_unit_unlimited(unit) -> bool:
-	if _get_unit_team_id_for_diagnostics(unit) != friendly_team_id:
-		return true
 	var simulation_root = get_node_or_null(simulation_root_path)
 	if simulation_root == null or not simulation_root.has_method("person_has_magazine_store") or unit == null or not unit.has_method("get_unit_id"):
 		return true
-	return not bool(simulation_root.call("person_has_magazine_store", String(unit.call("get_unit_id"))))
+	return not _should_run_local_combat(simulation_root)
 
 
 func _ammo_weapon_id(unit) -> String:
@@ -2298,9 +2319,24 @@ func get_unit_ammo_text(unit_id: String) -> String:
 	return String(_ammo_tracker().status_text(unit_id, _ammo_weapon_id(unit), _current_tick, _ammo_unit_unlimited(unit)))
 
 
+## M6a (Nachbesserung): Wiederbelebt kommt eine Einheit (gleiche Kennung, gleicher Knoten) als frische Verstaerkung zurueck:
+## geladenes Magazin voll, Nachladen abgebrochen, und mit Einsatz-Vorrat wieder die volle Startmenge. Ein Kampagnen-Vorrat
+## (echte Magazine im Fach) bleibt, wie er ist: nichts aus dem Nichts.
+func _ammo_respawn_unit(unit_id: String) -> void:
+	if _ammo_state != null:
+		_ammo_state.reset_unit(unit_id)
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root != null and simulation_root.has_method("forget_mission_ammo"):
+		simulation_root.call("forget_mission_ammo", unit_id)
+
+
 func reset_ammo() -> void:
 	if _ammo_state != null:
 		_ammo_state.reset()
+	# M6a: der Einsatz-Vorrat gehoert zum Einsatz und wird mit ihm geleert (Start, Neustart, Zwischenstand geladen).
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root != null and simulation_root.has_method("reset_mission_ammo"):
+		simulation_root.call("reset_mission_ammo")
 
 
 ## Rueckruf des Aufloesers (nur fuer find_contact_pairs): 0 = dran, 1 = nur Anlauf (suchen, Erfassung starten),
@@ -4574,6 +4610,7 @@ func _on_unit_respawn_completed(unit_id: String) -> void:
 	_clear_down_state_linger(unit_id)
 	_attack_warmed_ids.erase(unit_id)  # n2: gleiche ID, neuer Anlauf fuer die Erkennung
 	_attack_contact_ids.erase(unit_id)
+	_ammo_respawn_unit(unit_id)
 	_set_event_text("%s RESPAWN READY" % unit_id)
 	_broadcast_remote_event("%s RESPAWN READY" % unit_id, unit_id, RESPAWN_EVENT_COLOR, 1.6, "RESPAWN READY")
 

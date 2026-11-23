@@ -3,7 +3,7 @@ extends RefCounted
 ## (Schuss, leer, Nachladen) stehen in ammo_rules.gd, die Zahlen in den Waffendaten und in data/combat/ammo_rules.json.
 ## Ein Schuss = eine Patrone. Ist das Magazin leer, wird das naechste Reservemagazin der Person abgezogen und es wird
 ## reload_ticks x reload_scale Ticks nachgeladen (ohne Schuss); ohne Reservemagazin bleibt die Einheit ohne Munition.
-## Gegner ("unlimited") laden ohne Abzug nach. Der Zustand gehoert dem Einsatz: nichts davon steht im Speicherstand.
+## "unlimited" (nur ohne Simulationswurzel oder bei Mitspielern, die nicht selbst rechnen) laedt ohne Abzug nach. Der Zustand gehoert dem Einsatz: nichts davon steht im Speicherstand.
 ## Kein Zufall, nur Tickzaehler: gleiche Tickfolge ergibt gleichen Verbrauch.
 
 const AMMO_RULES = preload("res://scripts/core/ammo_rules.gd")
@@ -32,6 +32,18 @@ func _init() -> void:
 func reset() -> void:
 	_entries.clear()
 	_shots.clear()
+
+
+## M6a (Nachbesserung): Eine wiederbelebte Einheit kommt als frische Verstaerkung zurueck: alle Magazine dieser Einheit werden
+## vergessen (beim naechsten Bedarf ist das eingelegte Magazin voll, ein laufendes Nachladen ist abgebrochen), ihre Schusszaehler auch.
+func reset_unit(unit_id: String) -> void:
+	var prefix: String = unit_id + "|"
+	for key in _entries.keys():
+		if String(key).begins_with(prefix):
+			_entries.erase(key)
+	for key in _shots.keys():
+		if String(key).begins_with(prefix):
+			_shots.erase(key)
 
 
 func weapon_info(weapon_id: String) -> Dictionary:

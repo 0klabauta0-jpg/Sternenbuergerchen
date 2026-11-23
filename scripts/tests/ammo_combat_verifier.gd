@@ -1,7 +1,7 @@
 extends "res://scripts/tests/combat_cadence_verifier.gd"
 ## M4a (23.11.2026): Munition im Bodengefecht. Jeder Schuss kostet eine Patrone aus dem eingelegten Magazin, ein leeres
 ## Magazin wird automatisch aus dem Bestand der Person nachgeladen (reload_ticks x reload_scale Ticks Pause), wer nichts mehr
-## hat, schiesst nicht. Gegner laden nach, haben aber unbegrenzt Reserve. Echter Treiber und echte Versorgung wie
+## hat, schiesst nicht. Gegner laden nach und haben (M6a) einen endlichen Einsatz-Vorrat. Echter Treiber und echte Versorgung wie
 ## combat_cadence_verifier (dessen Aufbau _rig/_run_ticks benutzt wird); Pistole: 12 Schuss, 30 Ticks x 6 = 180 Ticks Nachladen.
 ## Schlusszeile: AMMO_COMBAT passed=N failed=M
 
@@ -40,18 +40,23 @@ func _run() -> void:
 	_test_a1_no_reserve()
 	_test_a2_reserve_reload()
 	_test_a3_hit_miss_and_suppression()
-	_test_a4_enemy_reloads_never_empty()
+	_test_a4_enemy_reloads_then_runs_empty()
 	_test_a5_no_ammo_weapon()
 	_test_a6_second_source_and_wrong_class()
 	_test_a7_stock_after_mission()
 	_test_a8_determinism()
 	_test_a9_texts()
 	_test_overwatch_costs_a_round()
-	_test_n1_unit_without_container_is_unlimited()
+	_test_n1_unit_without_container_uses_mission_store()
 	_test_n2_note_shot_of_non_firing_shooter()
 	_test_n3_ground_fire_vs_air_costs_ammo()
-	_test_n4_outside_campaign_unlimited()
+	_test_n4_outside_campaign_uses_mission_store()
 	_test_n5_magazine_scale_fallback()
+	_test_r1_respawn_returns_fresh()
+	_test_r2_respawn_keeps_campaign_compartment()
+	_test_h1_main_weapon_gets_the_reserve()
+	_test_s1_source_of_the_store()
+	_test_m1_client_shows_no_reserve()
 	await process_frame
 	print("AMMO_COMBAT passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -223,13 +228,24 @@ func _test_a3_hit_miss_and_suppression() -> void:
 	g.scope.free()
 
 
-## A4: Der Gegner laedt nach (mit Pause), geht aber nie leer aus.
-func _test_a4_enemy_reloads_never_empty() -> void:
-	var f := _ammo_rig(_duel("none", "pistol"), {})
+## M6a (vorher: "Gegner unbegrenzt"): Jemand ohne Kampagnen-Vorrat rechnet mit dem Einsatz-Vorrat: geladenes Magazin + Fach nach
+## Ruestung (mittel = 5 Magazine), danach "Keine Munition" und kein Schuss mehr. Laeuft bis leer (hoechstens `limit` Schritte zu 3 Ticks).
+func _run_until_empty(f: Dictionary, unit_id: String, limit: int = 6000) -> Dictionary:
 	var states := {}
-	for i in range(500):
+	var guard := 0
+	while guard < limit and String(_status(f, unit_id).get("state", "")) != "empty":
 		_run_ticks(f, 3)
-		states[String(_status(f, "enemy").get("state", ""))] = true
+		states[String(_status(f, unit_id).get("state", ""))] = true
+		guard += 1
+	var shots_at_empty := _shots_by(f, unit_id)
+	_run_ticks(f, 600)
+	return {"states": states, "shots": shots_at_empty, "shots_later": _shots_by(f, unit_id)}
+
+
+## A4 (M6a): Der Gegner (mittlere Ruestung) schiesst das geladene Magazin + 5 Reservemagazine, laedt dazwischen mit Pause nach und ist danach leer.
+func _test_a4_enemy_reloads_then_runs_empty() -> void:
+	var f := _ammo_rig(_duel("none", "pistol"), {})
+	var r := _run_until_empty(f, "enemy")
 	var ticks := _shot_ticks(f, "enemy")
 	var max_gap := 0
 	var small_gaps := true
@@ -238,11 +254,13 @@ func _test_a4_enemy_reloads_never_empty() -> void:
 		max_gap = maxi(max_gap, gap)
 		if gap < PISTOL_RELOAD and gap > 20:
 			small_gaps = false
-	_check(ticks.size() > 2 * PISTOL_MAG, "A4: der Gegner schiesst weit mehr als zwei Magazine (%d)" % ticks.size())
+	_check(int(r.shots) == 6 * PISTOL_MAG, "A4: der Gegner schiesst genau sechs Magazine (1 geladen + 5 Reserve = %d), ist %d" % [6 * PISTOL_MAG, int(r.shots)])
 	_check(max_gap >= PISTOL_RELOAD and max_gap <= PISTOL_RELOAD + 12, "A4: zwischen den Magazinen liegt die Nachladepause von 180 Ticks (groesste Luecke %d)" % max_gap)
 	_check(small_gaps, "A4: sonst nur der normale Takt")
-	_check(states.has("reloading") and not states.has("empty"), "A4: er laedt nach und ist nie ohne Munition (%s)" % str(states.keys()))
-	_check(String(f.driver.get_unit_ammo_text("enemy")) != "Keine Munition", "A4: Anzeige nie 'Keine Munition'")
+	_check(Dictionary(r.states).has("reloading") and String(_status(f, "enemy").get("state", "")) == "empty", "A4: er laedt nach und ist am Ende ohne Munition (%s)" % str(Dictionary(r.states).keys()))
+	_check(String(f.driver.get_unit_ammo_text("enemy")) == "Keine Munition", "A4: Anzeige 'Keine Munition'")
+	_check(int(r.shots_later) == int(r.shots), "A4: leer = kein Schuss mehr (%d -> %d)" % [int(r.shots), int(r.shots_later)])
+	_check(int(f.sim.get_person_magazine_count("enemy", "ammo_light")) == 0, "A4: Einsatz-Vorrat des Gegners 0")
 	f.scope.free()
 
 
@@ -333,29 +351,27 @@ func _test_a9_texts() -> void:
 	f.scope.free()
 
 
-## N1 (M4a Nachbesserung): Eine befreundete Einheit OHNE eigenen Behaelter (kein Bestand) hat unbegrenzte Reserve wie ein Gegner:
-## sie laedt nach und geht nie leer aus. (Mit Behaelter und ohne Reserve geht sie leer, siehe A1.)
-func _test_n1_unit_without_container_is_unlimited() -> void:
+## N1 (M4a Nachbesserung, M6a umgestellt): Eine befreundete Einheit OHNE eigenen Behaelter (kein Bestand) rechnet mit dem Einsatz-Vorrat
+## wie ein Gegner: sie laedt nach (mit Pause) und geht nach der Startmenge leer aus. (Mit Behaelter und ohne Reserve geht sie schon nach dem ersten Magazin leer, siehe A1.)
+func _test_n1_unit_without_container_uses_mission_store() -> void:
 	var f := _ammo_rig(_duel("pistol", "none"), {})
 	_check(f.sup._inventory.has("unit:own:backpack"), "N1: Vorbedingung: die Person hat im Aufbau einen Behaelter")
 	f.sup._inventory.erase("unit:own:backpack")
-	var states := {}
-	for i in range(500):
-		_run_ticks(f, 3)
-		states[String(_status(f, "own").get("state", ""))] = true
-	var ticks := _shot_ticks(f, "own")
-	var max_gap := 0
-	for i in range(1, ticks.size()):
-		max_gap = maxi(max_gap, int(ticks[i]) - int(ticks[i - 1]))
-	_check(ticks.size() > 2 * PISTOL_MAG, "N1: ohne Behaelter schiesst die Einheit weit mehr als zwei Magazine (%d)" % ticks.size())
-	_check(max_gap >= PISTOL_RELOAD and max_gap <= PISTOL_RELOAD + 12, "N1: zwischen den Magazinen liegt die Nachladepause (groesste Luecke %d)" % max_gap)
-	_check(states.has("reloading") and not states.has("empty"), "N1: sie laedt nach und ist nie ohne Munition (%s)" % str(states.keys()))
-	_check(int(_status(f, "own").get("reserve", 0)) == -1 and String(f.driver.get_unit_ammo_text("own")) != "Keine Munition", "N1: Reserve unbegrenzt, Anzeige nie 'Keine Munition'")
+	var r := _run_until_empty(f, "own")
+	var n1_ticks := _shot_ticks(f, "own")
+	var n1_gap := 0
+	for i in range(1, n1_ticks.size()):
+		n1_gap = maxi(n1_gap, int(n1_ticks[i]) - int(n1_ticks[i - 1]))
+	_check(n1_gap >= PISTOL_RELOAD and n1_gap <= PISTOL_RELOAD + 12, "N1: zwischen den Magazinen liegt die Nachladepause von 180 Ticks (groesste Luecke %d)" % n1_gap)
+	_check(int(r.shots) == 6 * PISTOL_MAG, "N1 (M6a): ohne Behaelter gilt der Einsatz-Vorrat nach Ruestung (mittel): sechs Magazine = %d Schuesse, ist %d" % [6 * PISTOL_MAG, int(r.shots)])
+	_check(Dictionary(r.states).has("reloading") and String(_status(f, "own").get("state", "")) == "empty", "N1 (M6a): sie laedt nach und ist danach ohne Munition (%s)" % str(Dictionary(r.states).keys()))
+	_check(int(_status(f, "own").get("reserve", -1)) == 0 and String(f.driver.get_unit_ammo_text("own")) == "Keine Munition", "N1 (M6a): Reserve 0 und Anzeige 'Keine Munition'")
+	_check(int(r.shots_later) == int(r.shots), "N1 (M6a): leer = kein Schuss mehr")
 	f.scope.free()
-	# Ganz ohne Versorgung (kein Besitzer gesetzt) ebenso.
+	# Ganz ohne Versorgung (kein Besitzer gesetzt): ebenso der Einsatz-Vorrat der Simulation.
 	var g := _rig(_duel("pistol", "none"))
-	_run_ticks(g, 1500)
-	_check(_shots_by(g, "own") > 2 * PISTOL_MAG and String(_status(g, "own").get("state", "")) != "empty", "N1: ohne Versorgung ebenfalls unbegrenzt (%d Schuesse)" % _shots_by(g, "own"))
+	var rg := _run_until_empty(g, "own")
+	_check(int(rg.shots) == 6 * PISTOL_MAG and String(_status(g, "own").get("state", "")) == "empty", "N1 (M6a): ohne Versorgung ebenfalls endlich: %d Schuesse, dann leer" % int(rg.shots))
 	g.scope.free()
 
 
@@ -384,7 +400,7 @@ func _test_n2_note_shot_of_non_firing_shooter() -> void:
 
 
 ## N3 (M4a Nachbesserung): Bodenfeuer gegen Schiffe (Raketenwerfer, Schienenkanone) kostet Munition und beachtet Nachladen.
-## Baustein-Ebene mit der echten Munitionsfuehrung; Gegner haben unbegrenzte Reserve, aber die Nachladepause gilt.
+## Baustein-Ebene mit der echten Munitionsfuehrung; der Baustein selbst kennt "unlimited" noch (Pruefer ohne Szene, Mitspieler), die Nachladepause gilt auch dann.
 func _test_n3_ground_fire_vs_air_costs_ammo() -> void:
 	var tracker = COMBAT_AMMO.new()
 	tracker.reserve_count = func(_u: String, _c: String) -> int: return 0
@@ -446,19 +462,15 @@ func _test_overwatch_costs_a_round() -> void:
 ## N4 (M4c W1): Ausserhalb der Kampagne zaehlt der Magazinvorrat der Person nicht. Eine Person MIT Behaelter, aber ohne
 ## Magazine, schiesst im Skirmish (Kampagnenmodus aus) nach dem ersten Magazin weiter (nachladen ja, nie leer); im
 ## Kampagnenmodus bleibt sie nach dem ersten Magazin bei "Keine Munition" (A1).
-func _test_n4_outside_campaign_unlimited() -> void:
+func _test_n4_outside_campaign_uses_mission_store() -> void:
 	var f := _ammo_rig(_duel("pistol", "none"), {})
 	f.sup.set_campaign_magazine_mode(false)
 	_check(f.sup._inventory.has("unit:own:backpack"), "N4: Vorbedingung: die Person hat einen Behaelter ohne Magazine")
-	_check(not bool(f.sim.person_has_magazine_store("own")), "N4: ausserhalb der Kampagne gibt es keinen zaehlenden Magazinvorrat")
-	var states := {}
-	for i in range(500):
-		_run_ticks(f, 3)
-		states[String(_status(f, "own").get("state", ""))] = true
-	var shots := _shots_by(f, "own")
-	_check(shots > 2 * PISTOL_MAG, "N4: ohne Kampagne schiesst sie weit mehr als zwei Magazine (%d)" % shots)
-	_check(states.has("reloading") and not states.has("empty"), "N4: sie laedt nach (Magazingroesse und Pause gelten) und geht nie leer (%s)" % str(states.keys()))
-	_check(String(f.driver.get_unit_ammo_text("own")) != "Keine Munition", "N4: Anzeige nie 'Keine Munition'")
+	_check(not bool(f.sim.person_has_magazine_store("own")), "N4: ausserhalb der Kampagne gibt es (vor dem ersten Bedarf) keinen Kampagnen-Magazinvorrat")
+	var r := _run_until_empty(f, "own")
+	_check(int(r.shots) == 6 * PISTOL_MAG, "N4 (M6a): ohne Kampagne: Fach nach Ruestung (mittel): sechs Magazine = %d Schuesse, ist %d" % [6 * PISTOL_MAG, int(r.shots)])
+	_check(Dictionary(r.states).has("reloading") and String(_status(f, "own").get("state", "")) == "empty", "N4 (M6a): sie laedt nach (Magazingroesse und Pause gelten) und ist danach leer (%s)" % str(Dictionary(r.states).keys()))
+	_check(String(f.driver.get_unit_ammo_text("own")) == "Keine Munition" and int(r.shots_later) == int(r.shots), "N4 (M6a): Anzeige 'Keine Munition', danach kein Schuss mehr")
 	f.scope.free()
 	var c := _ammo_rig(_duel("pistol", "none"), {})
 	_check(bool(c.sim.person_has_magazine_store("own")), "N4: im Kampagnenmodus zaehlt der Vorrat der Person")
@@ -475,3 +487,101 @@ func _test_n5_magazine_scale_fallback() -> void:
 	_check(is_equal_approx(rules.magazine_scale({"magazine_scale": "x"}), 2.0) and is_equal_approx(rules.magazine_scale({}), 2.0), "N5: fehlend oder keine Zahl -> 2.0")
 	_check(is_equal_approx(rules.magazine_scale({"magazine_scale": 1.0}), 1.0), "N5: gueltiger Wert 1.0 bleibt")
 	_check(rules.effective_magazine_size(12, {"magazine_scale": 0}) == 24, "N5: Pistole bei magazine_scale 0 wirksam 24, nicht 1")
+
+
+## R1 (M6a Nachbesserung F1): Wer leer stirbt, kommt wiederbelebt (gleiche Kennung, gleicher Knoten) als frische Verstaerkung zurueck:
+## geladenes Magazin voll, Nachladen abgebrochen, Einsatz-Vorrat wieder die volle Startmenge (mittel = 5 Magazine). Echter Weg: der Rueckruf des Treibers.
+func _test_r1_respawn_returns_fresh() -> void:
+	var f := _rig(_duel("pistol", "none"))
+	var r := _run_until_empty(f, "own")
+	_check(int(r.shots) == 6 * PISTOL_MAG and String(_status(f, "own").get("state", "")) == "empty", "R1: Vorbedingung: die Einheit hat sich leergeschossen (%d Schuesse)" % int(r.shots))
+	f.driver._on_unit_respawn_completed("own")
+	var st := _status(f, "own")
+	_check(String(st.get("state", "")) == "ready" and int(st.get("rounds", 0)) == PISTOL_MAG and int(st.get("reserve", -1)) == 5, "R1: nach dem Respawn Magazin voll (24) und Vorrat wieder 5 (%s)" % str(st))
+	_check(String(f.driver.get_unit_ammo_text("own")) != "Keine Munition", "R1: Anzeige nach dem Respawn ohne 'Keine Munition' (%s)" % String(f.driver.get_unit_ammo_text("own")))
+	var before := _shots_by(f, "own")
+	var r2 := _run_until_empty(f, "own")
+	_check(int(r2.shots) - before == 6 * PISTOL_MAG, "R1: sie schiesst wieder die volle Startmenge (sechs Magazine = %d Schuesse), ist %d" % [6 * PISTOL_MAG, int(r2.shots) - before])
+	# Mitten im Nachladen gestorben: das Nachladen ist nach dem Respawn abgebrochen, das Magazin sofort voll.
+	f.driver._on_unit_respawn_completed("own")
+	_run_until_shots(f, "own", _shots_by(f, "own") + PISTOL_MAG)
+	var mid := _status(f, "own")
+	_check(String(mid.get("state", "")) == "reloading", "R1: Vorbedingung: nach dem 24. Schuss laedt die Einheit nach (%s)" % str(mid))
+	f.driver._on_unit_respawn_completed("own")
+	var fresh := _status(f, "own")
+	_check(String(fresh.get("state", "")) == "ready" and int(fresh.get("rounds", 0)) == PISTOL_MAG and int(fresh.get("reload_ticks_left", -1)) == 0, "R1: Nachladen abgebrochen, Magazin voll (%s)" % str(fresh))
+	f.scope.free()
+
+
+## R2 (M6a Nachbesserung F1): Mit Kampagnen-Vorrat (echte Magazine im Fach) wird nur das geladene Magazin gefuellt; das Fach bleibt, wie es ist.
+func _test_r2_respawn_keeps_campaign_compartment() -> void:
+	var f := _ammo_rig(_duel("pistol", "none"), {"own": {"ammo_light": 3}})
+	_run_until_shots(f, "own", PISTOL_MAG + 3)
+	var bag_before := _bag_count(f, "own", "ammo_light")
+	_check(bag_before == 2, "R2: Vorbedingung: ein Magazin ist ins Gewehr gewandert, im Fach bleiben 2 (%d)" % bag_before)
+	f.driver._on_unit_respawn_completed("own")
+	var st := _status(f, "own")
+	_check(String(st.get("state", "")) == "ready" and int(st.get("rounds", 0)) == PISTOL_MAG, "R2: nach dem Respawn Magazin voll (%s)" % str(st))
+	_check(_bag_count(f, "own", "ammo_light") == bag_before and int(f.sim.get_person_magazine_count("own", "ammo_light")) == bag_before, "R2: das Fach bleibt unveraendert (nichts aus dem Nichts, nichts verloren)")
+	f.scope.free()
+
+
+## H1 (M6a Nachbesserung F2, Entscheidung des Auftraggebers): Die Hauptwaffe (Waffe 1) hat Vorrang. Der Einsatz-Vorrat hat die Sorte
+## der Hauptwaffe, die Zweitwaffe hat nur ihr geladenes Magazin. Gewehr als Hauptwaffe, Pistole als Zweitwaffe: alle Reserve ist
+## Gewehrmagazine - auch wenn zuerst die Pistole schiesst; die Pistole ist nach ihrem Magazin leer.
+func _test_h1_main_weapon_gets_the_reserve() -> void:
+	var rifle_mag: int = int(f_info_size("rifle"))
+	var a := _rig(_duel("rifle", "none", {"weapon_1": "rifle"}))
+	var ra := _run_until_empty(a, "own")
+	_check(int(ra.shots) == 6 * rifle_mag, "H1: Gewehr als Hauptwaffe: geladenes Magazin + 5 Gewehrmagazine = %d Schuesse, ist %d" % [6 * rifle_mag, int(ra.shots)])
+	_check(String(a.driver.get_unit_ammo_text("own")) == "Keine Munition", "H1: danach 'Keine Munition'")
+	a.scope.free()
+	var b := _rig(_duel("pistol", "none", {"weapon_1": "rifle"}))
+	var st := _status(b, "own")
+	_check(int(st.get("reserve", -1)) == 0, "H1: mit der Pistole (Zweitwaffe aktiv) ist die Reserve 0 - der Vorrat ist Gewehrmagazine (%s)" % str(st))
+	_check(int(b.sim.get_person_magazine_count("own", "ammo_rifle")) == 5 and int(b.sim.get_person_magazine_count("own", "ammo_light")) == 0, "H1: Vorrat = 5 Gewehrmagazine, keine Pistolenmagazine")
+	var rb := _run_until_empty(b, "own")
+	_check(int(rb.shots) == PISTOL_MAG and String(_status(b, "own").get("state", "")) == "empty", "H1: die Pistole schiesst nur ihr geladenes Magazin (%d Schuesse), dann leer" % int(rb.shots))
+	b.scope.free()
+	# Hauptwaffe ohne Munitionsbedarf: die aktive Waffe bestimmt die Sorte (wie bisher).
+	var c := _rig(_duel("pistol", "none", {"weapon_1": "none"}))
+	var rc := _run_until_empty(c, "own")
+	_check(int(rc.shots) == 6 * PISTOL_MAG, "H1: Hauptwaffe ohne Munition: die aktive Pistole bekommt den Vorrat (%d Schuesse)" % int(rc.shots))
+	c.scope.free()
+
+
+## S1 (M6a Nachbesserung F3): Die Simulation sagt, WOHER der Vorrat einer Person kommt: "campaign" (Kampagnen-Versorgung, eigener Behaelter),
+## "mission" (Einsatz-Vorrat: Gegner, Personen ohne Kampagnen-Vorrat) oder "" (noch keiner). Damit faellt eine Kampagnen-Person, die
+## faelschlich im Einsatz-Vorrat landet, auf (person_has_magazine_store zaehlt beide Quellen und merkt das nicht).
+func _test_s1_source_of_the_store() -> void:
+	var f := _ammo_rig(_duel("pistol", "pistol"), {})
+	_check(String(f.sim.get_person_magazine_source("own")) == "campaign", "S1: eigene Person mit Behaelter im Kampagnenmodus: Quelle 'campaign'")
+	_check(String(f.sim.get_person_magazine_source("enemy")) == "", "S1: Gegner vor dem ersten Bedarf: noch keine Quelle")
+	_run_until_shots(f, "enemy", PISTOL_MAG + 1)
+	_check(String(f.sim.get_person_magazine_source("enemy")) == "mission" and int(f.sim.get_person_magazine_count("enemy", "ammo_light")) == 4, "S1: Gegner nach dem ersten Nachladen: Quelle 'mission' (Treiber-Anschluss legt den Einsatz-Vorrat an: 5 Magazine, eines davon eingelegt)")
+	_check(String(f.sim.get_person_magazine_source("own")) == "campaign", "S1: die eigene Person bleibt bei 'campaign' (kein Einsatz-Vorrat neben der Versorgung)")
+	f.scope.free()
+	var g := _ammo_rig(_duel("pistol", "none"), {})
+	g.sup.set_campaign_magazine_mode(false)
+	_run_until_shots(g, "own", PISTOL_MAG + 1)
+	_check(String(g.sim.get_person_magazine_source("own")) == "mission", "S1: ohne Kampagnenmodus faellt die Person in den Einsatz-Vorrat: Quelle 'mission'")
+	g.scope.free()
+
+
+## M1 (M6a Nachbesserung F4): Ein Mitspieler (Client), dessen Treiber nicht selbst rechnet, zeigt keine Reserve-Zahl ("Mun. 24/24" wie
+## vor M6a, kein "+5"), solange der Netzabgleich sie nicht liefert, und legt auch keinen Einsatz-Vorrat an. Der Host zeigt "+5".
+func _test_m1_client_shows_no_reserve() -> void:
+	var h := _rig(_duel("pistol", "none"))
+	_check(String(h.driver.get_unit_ammo_text("own")) == "Mun. 24/24 +5", "M1: Host zeigt die Reserve (%s)" % String(h.driver.get_unit_ammo_text("own")))
+	h.scope.free()
+	var f := _rig(_duel("pistol", "none"))
+	f.sim.is_server_authoritative = true
+	var peer := ENetMultiplayerPeer.new()
+	var err: int = peer.create_client("127.0.0.1", 45871)
+	f.driver.multiplayer.multiplayer_peer = peer
+	_check(err == OK and not bool(f.driver._should_run_local_combat(f.sim)), "M1: Vorbedingung: der Treiber rechnet als Mitspieler nicht selbst (create_client=%d)" % err)
+	_check(String(f.driver.get_unit_ammo_text("own")) == "Mun. 24/24", "M1: Mitspieler zeigt nur das geladene Magazin, keine Reserve (%s)" % String(f.driver.get_unit_ammo_text("own")))
+	_check(int(_status(f, "own").get("reserve", 0)) == -1 and String(f.sim.get_person_magazine_source("own")) == "", "M1: Mitspieler legt keinen Einsatz-Vorrat an")
+	f.driver.multiplayer.multiplayer_peer = null
+	peer.close()
+	f.scope.free()

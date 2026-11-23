@@ -272,15 +272,14 @@ func _weapons_of_person_for_supply(unit_id: String) -> Array:
 	var loadout: Dictionary = Dictionary(_personnel_loadout_owner.call("get_loadout", unit_id))
 	return [String(loadout.get("weapon_1", "none")), String(loadout.get("weapon_2", "none"))]
 
-## Reservemagazine einer Person fuer das Gefecht (M4a). Ohne Versorgung (Tests, Skirmish) hat niemand Reserve.
+## Reservemagazine einer Person fuer das Gefecht (M4a). Ohne Kampagnen-Vorrat gilt der Einsatz-Vorrat (M6a).
 func get_person_magazine_count(unit_id: String, ammo_class: String) -> int:
-	var store: RefCounted = _magazine_owner()
-	if store == null or not store.has_method("person_magazine_count"): return 0
-	return int(store.call("person_magazine_count", unit_id, ammo_class))
+	if not _campaign_has_magazine_store(unit_id): return _mission_ammo.count(unit_id, ammo_class)
+	return int(_magazine_owner().call("person_magazine_count", unit_id, ammo_class))
 
 ## M4e: Der Root einer Einsatzszene bekommt die Kampagnen-Versorgung NICHT als Besitzer (kein Lager, keine Beute, kein Handel),
 ## sondern nur diesen schmalen Verweis fuer die drei Munitionsabfragen unten. Gesetzt vom Adapter beim Binden des Einsatzes an die
-## Kampagne (Neustart, Fortsetzen mitten im Einsatz), geloest beim Abbau der Szene; ohne Kampagne bleibt er leer (unbegrenzte Reserve).
+## Kampagne (Neustart, Fortsetzen mitten im Einsatz), geloest beim Abbau der Szene; ohne Kampagne bleibt er leer (dann gilt der Einsatz-Vorrat, M6a).
 var _mission_magazine_supply: RefCounted
 
 func bind_mission_magazine_supply(supply: RefCounted) -> void:
@@ -295,19 +294,52 @@ func _magazine_owner() -> RefCounted:
 func _exit_tree() -> void:
 	_mission_magazine_supply = null
 
-## Fuehrt das Spiel fuer die Person einen Bestand (eigener Behaelter)? Ohne Versorgung (Tests, Skirmish) und fuer Personen ohne
-## Behaelter und ausserhalb der Kampagne (M4c: Skirmish, Mehrspieler): nein; sie gelten im Gefecht als unbegrenzt versorgt
-## (laden nach, gehen nie leer aus), wie die Gegner.
+## Fuehrt das Spiel fuer die Person einen Bestand? Kampagnen-Vorrat (eigener Behaelter) oder, seit M6a, Einsatz-Vorrat
+## (Gegner, NPCs, Skirmish, Host); ohne beides (noch nie Bedarf gehabt) nein.
 func person_has_magazine_store(unit_id: String) -> bool:
-	var store: RefCounted = _magazine_owner()
-	if store == null or not store.has_method("person_has_magazine_store"): return false
-	return bool(store.call("person_has_magazine_store", unit_id))
+	return _campaign_has_magazine_store(unit_id) or _mission_ammo.has_unit(unit_id)
+
+## M6a (Nachbesserung): Woher kommt der Vorrat der Person? "campaign" = Kampagnen-Versorgung (eigener Behaelter), "mission" =
+## Einsatz-Vorrat, "" = noch keiner. person_has_magazine_store zaehlt beide Quellen; Pruefer, die den Kampagnen-Weg meinen, fragen hier.
+func get_person_magazine_source(unit_id: String) -> String:
+	if _campaign_has_magazine_store(unit_id): return "campaign"
+	if _mission_ammo.has_unit(unit_id): return "mission"
+	return ""
 
 ## Zieht ein Reservemagazin ab (Nachladen); nur der Host fuehrt das Gefecht, also auch nur er bucht den Verbrauch.
 func take_person_magazine(unit_id: String, ammo_class: String) -> bool:
+	if not _campaign_has_magazine_store(unit_id): return _mission_ammo.take(unit_id, ammo_class)
 	var store: RefCounted = _magazine_owner()
-	if store == null or not store.has_method("take_person_magazine"): return false
+	if not store.has_method("take_person_magazine"): return false
 	return bool(store.call("take_person_magazine", unit_id, ammo_class))
+
+## M6a: Einsatz-Vorrat fuer alle ohne Kampagnen-Vorrat (Gegner, NPCs, Skirmish, Mehrspieler-Host). Hat die Person einen
+## Kampagnen-Vorrat, gilt der (die drei Abfragen oben und hier); sonst dieser Vorrat. Leer beim Start und Neustart des Einsatzes.
+const MISSION_AMMO_STORE_SCRIPT = preload("res://scripts/combat/mission_ammo_store.gd")
+var _mission_ammo: RefCounted = MISSION_AMMO_STORE_SCRIPT.new()
+
+func _campaign_has_magazine_store(unit_id: String) -> bool:
+	var store: RefCounted = _magazine_owner()
+	return store != null and store.has_method("person_has_magazine_store") and bool(store.call("person_has_magazine_store", unit_id))
+
+## Legt beim ersten Bedarf den Einsatz-Vorrat der Einheit an (Fach nach Ruestung, Sorte der ersten Waffe); Personen mit Kampagnen-Vorrat bleiben unberuehrt.
+func ensure_mission_ammo(unit_id: String, armor_id: String, ammo_class: String) -> void:
+	if _campaign_has_magazine_store(unit_id): return
+	_mission_ammo.ensure(unit_id, armor_id, ammo_class)
+
+func reset_mission_ammo() -> void:
+	_mission_ammo.reset()
+
+## Wiederbelebte Einheit (Respawn): der Einsatz-Vorrat ist vergessen und wird beim naechsten Bedarf wieder voll angelegt.
+## Ein Kampagnen-Vorrat (echte Magazine im Fach) wird nie angefasst.
+func forget_mission_ammo(unit_id: String) -> void:
+	_mission_ammo.forget(unit_id)
+
+func get_mission_ammo_snapshot() -> Dictionary:
+	return _mission_ammo.snapshot()
+
+func restore_mission_ammo(data: Dictionary) -> bool:
+	return _mission_ammo.restore(data)
 
 func configure_departure_adapter(adapter: Node) -> Dictionary:
 	if not is_instance_valid(adapter) or not adapter.has_method("preview_departure") or not adapter.has_method("_built_home_pad_ids"): return {"ok":false, "reason":"invalid_adapter"}
