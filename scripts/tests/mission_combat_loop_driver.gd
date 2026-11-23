@@ -2266,7 +2266,11 @@ func _ammo_unit_can_fire(unit_id: String, unit) -> bool:
 func _ammo_note_shot(unit) -> void:
 	if unit == null or not is_instance_valid(unit) or not unit.has_method("get_unit_id"):
 		return
-	_ammo_tracker().note_shot(String(unit.call("get_unit_id")), _ammo_weapon_id(unit), _current_tick, _ammo_unit_unlimited(unit))
+	var unit_id: String = String(unit.call("get_unit_id"))
+	var weapon_id: String = _ammo_weapon_id(unit)
+	if String(_ammo_tracker().note_shot(unit_id, weapon_id, _current_tick, _ammo_unit_unlimited(unit))) == "empty":
+		# Einmal je Einheit und Magazin im Protokoll: wer ist wann ohne Munition, nach wie vielen Schuessen.
+		print("AMMO_EMPTY unit=%s weapon=%s tick=%d shots=%d" % [unit_id, weapon_id, _current_tick, int(_ammo_tracker().shots_fired(unit_id, weapon_id))])
 
 
 ## Munitionszustand einer Einheit (nur lesen): {"state": none|ready|reloading|empty, rounds, magazine_size, reserve, reload_ticks_left}.

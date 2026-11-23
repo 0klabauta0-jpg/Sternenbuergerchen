@@ -19,6 +19,8 @@ var weapon_lookup: Callable = Callable()
 var _reload_scale: int = AMMO_RULES.DEFAULT_RELOAD_SCALE
 ## "unit_id|weapon_id" -> {"state": {rounds, reload_ticks_left}, "last": Tick der letzten Fortschreibung}
 var _entries: Dictionary = {}
+## "unit_id|weapon_id" -> abgegebene Schuesse im Einsatz (nur Zaehler, kein Einfluss auf die Regeln)
+var _shots: Dictionary = {}
 
 
 func _init() -> void:
@@ -27,6 +29,7 @@ func _init() -> void:
 
 func reset() -> void:
 	_entries.clear()
+	_shots.clear()
 
 
 func weapon_info(weapon_id: String) -> Dictionary:
@@ -57,17 +60,29 @@ func can_fire(unit_id: String, weapon_id: String, tick: int, unlimited: bool) ->
 
 
 ## Bucht einen abgegebenen Schuss (Normalschuss oder Ueberwachung): eine Patrone weniger; wird das Magazin leer, beginnt das Nachladen.
-func note_shot(unit_id: String, weapon_id: String, tick: int, unlimited: bool) -> void:
+## Gibt "empty" zurueck, wenn die Einheit mit diesem Schuss ganz ohne Munition dasteht (leer, keine Reserve), sonst "".
+func note_shot(unit_id: String, weapon_id: String, tick: int, unlimited: bool) -> String:
 	var info: Dictionary = weapon_info(weapon_id)
 	if not bool(info.needs_ammo):
-		return
+		return ""
 	var state: Dictionary = _update(unit_id, weapon_id, tick, unlimited, info)
 	if not AMMO_RULES.can_fire(state, true):
-		return
+		return ""
 	state = AMMO_RULES.after_shot(state)
+	var result := ""
 	if AMMO_RULES.needs_reload(state):
 		state = _begin_reload_if_possible(unit_id, state, unlimited, info)
-	_entries[_key(unit_id, weapon_id)]["state"] = state
+		if AMMO_RULES.needs_reload(state):
+			result = "empty"
+	var key: String = _key(unit_id, weapon_id)
+	_entries[key]["state"] = state
+	_shots[key] = int(_shots.get(key, 0)) + 1
+	return result
+
+
+## Schuesse, die die Einheit mit dieser Waffe in diesem Einsatz abgegeben hat.
+func shots_fired(unit_id: String, weapon_id: String) -> int:
+	return int(_shots.get(_key(unit_id, weapon_id), 0))
 
 
 ## Nur lesen (Anzeige, Tests): {"state": none|ready|reloading|empty, rounds, magazine_size, reserve (-1 = unbegrenzt), reload_ticks_left}.
