@@ -4733,6 +4733,22 @@ func _craft_loss_rescue_fee(team_states: Array, rules: Dictionary) -> int:
 	return maxi(int(penalty.get("rescue_fee", 0)), 0)
 
 
+## LC2h H4: Detail fuer den Speichersatz, wenn im laufenden Einsatz Schiffe abgestuerzt sind: "lost:<Name>|<Name>" (sonst "").
+func crash_save_detail() -> String:
+	var simulation: Node = _active_mission.get_node_or_null("SimulationRoot") if is_instance_valid(_active_mission) else null
+	if simulation == null or not simulation.has_method("get_air_crash_sites"): return ""
+	var controller: Node = _active_mission.get_node_or_null("TacticalController")
+	var names: Array = []
+	for site in Array(simulation.call("get_air_crash_sites")):
+		var craft_id: String = String(Dictionary(site).get("craft_id", ""))
+		var ship_name: String = String(Dictionary(_craft_loss_quote(craft_id)).get("ship_name", craft_id))
+		if controller != null and controller.has_method("_find_mission_dropship_card_entry"):
+			var card_name: String = String(Dictionary(controller.call("_find_mission_dropship_card_entry", craft_id)).get("display_name", "")).strip_edges()
+			if not card_name.is_empty(): ship_name = card_name
+		if not craft_id.is_empty() and not names.has(ship_name): names.append(ship_name)
+	return "lost:" + "|".join(PackedStringArray(names)) if not names.is_empty() else ""
+
+
 ## LC2h: Auskunft fuer den laufenden Einsatz ueber ein verlorenes Schiff: {"ship_name", "is_mission_craft", "fee"}. fee = Gebuehr, die die
 ## Notrettung buchen wird (heutiges Guthaben; die Buchung folgt nach dem Einsatz), nur fuers Einsatzschiff, sonst 0. Leer ausserhalb der Kampagne.
 func _craft_loss_quote(craft_id: String) -> Dictionary:
@@ -9615,6 +9631,7 @@ func request_campaign_save() -> Dictionary:
 		var reason := String(result.get("reason",""))
 		# Speichern, erster Teil / 21.11.: der Satz nennt Grund und Zeitpunkt; "home" trennt den Basis-Satz vom Einsatz-Satz.
 		var detail := String(result.get("detail", "")) if result.has("detail") else ("" if is_instance_valid(_active_mission) else "home")
+		if reason == "mission_lifecycle_unsupported" and detail.is_empty(): detail = crash_save_detail()
 		result["message"] = load("res://scripts/meta/campaign_save_projection.gd").blocked_text(reason, detail)
 	return result
 

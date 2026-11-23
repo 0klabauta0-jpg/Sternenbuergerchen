@@ -13,7 +13,9 @@ func _run() -> void:
 	await _h1_message()
 	await _h2_button()
 	await _h3_debrief()
+	await _h4_save_sentence()
 	await _h5_story_steps()
+	await _h6_cargo()
 	print("CAMPAIGN_CRAFT_LOSS_FEEDBACK passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
 
@@ -121,3 +123,55 @@ func _h5_story_steps() -> void:
 	var home_services: Dictionary = Dictionary(Dictionary(_flow.call("get_singleplayer_snapshot")).get("home_services", {}))
 	_check(Array(home_services.get("lost_craft_ids", [])).has(_craft_id), "H5: die Anzeige weiss vom Verlust des Auftragsschiffs (%s)" % str(home_services.get("lost_craft_ids")))
 	await _close()
+
+## H6: Der Frachtraum eines verlorenen Schiffs ist verloren (das Wrack wird spaeter geborgen - eigener Auftrag). Auftragsfracht (die C-Benit-Kiste)
+## geht damit auch verloren; BEFUND (siehe Bericht): die Kampagne merkt es nicht, crate_loaded bleibt wahr.
+func _h6_cargo() -> void:
+	START.request_start(self, "campaign", "new")
+	_flow = FLOW.instantiate()
+	root.add_child(_flow)
+	current_scene = _flow
+	await process_frame
+	_runtime = _flow.get("_singleplayer_runtime")
+	if not _check(_runtime != null, "H6: Aufbau: Meta-Szene und Laufzeit"): return
+	var second := _inject_bought_ship()
+	var inventory: Dictionary = _runtime.get("_supply").get("_inventory")
+	var key := "craft:" + second
+	if not _check(inventory.has(key), "H6: Aufbau: das zweite Schiff hat einen Frachtraum (%s)" % str(inventory.keys())): return
+	_runtime.get("_campaign").get("_progress")["crate_loaded"] = true
+	Dictionary(inventory[key].items)["c_benit_crate"] = 1
+	Dictionary(inventory[key].items)["fuel_can"] = 1
+	_flow.call("_retire_lost_craft", {"craft_id": second, "ship_name": "Zweitschiff", "outcome": "crash", "rescue_fee": 0})
+	inventory = _runtime.get("_supply").get("_inventory")
+	var crate_anywhere := false
+	for id in inventory:
+		if int(Dictionary(Dictionary(inventory[id]).get("items", {})).get("c_benit_crate", 0)) > 0: crate_anywhere = true
+	_check(not inventory.has(key) and not crate_anywhere, "H6: der Frachtraum des verlorenen Schiffs ist weg, samt Inhalt (Lager da: %s, Kiste irgendwo: %s)" % [str(inventory.has(key)), str(crate_anywhere)])
+	print("H6_BEFUND crate_loaded=", Dictionary(Dictionary(_runtime.get("_campaign").call("get_campaign_snapshot")).get("progress", {})).get("crate_loaded"), " (bleibt wahr, obwohl die Kiste mit dem Schiff verloren ist)")
+	await _close()
+
+## H4: Im Einsatz nach dem Abschuss lehnt das Speichern ab (LC2b); der Satz nennt das Schiff beim Namen (Speichern von Hand und Menue-Projektion).
+func _h4_save_sentence() -> void:
+	var s: Dictionary = await _begin_funded_sortie(500)
+	if s.is_empty(): return
+	var name := _ship_name_of(s.controller, _craft_id)
+	var before: Dictionary = _flow.call("request_campaign_save")
+	_check(not String(before.get("message", "")).contains("abgestürzt"), "H4: ohne Absturz kein Absturzsatz (%s)" % str(before.get("message", "")))
+	_site(s, _craft_id)
+	# Der Grund mission_lifecycle_unsupported kommt erst, wenn die Befehlswarteschlange leer ist (davor "wartet auf laufende Befehle", in diesem
+	# Aufbau ohne Takt nie); deshalb: Detail und Satz getrennt pruefen, und sobald die echte Ablehnung der Absturzgrund ist, muss sie den Namen tragen.
+	_check(String(_flow.call("crash_save_detail")) == "lost:" + name, "H4: Detail fuer den Speichersatz nennt das Schiff (%s)" % String(_flow.call("crash_save_detail")))
+	var projection_script = load("res://scripts/meta/campaign_save_projection.gd")
+	var sentence: String = projection_script.blocked_text("mission_lifecycle_unsupported", "lost:" + name)
+	_check(sentence.contains("%s ist abgestürzt" % name) and not sentence.contains("ein abgestürztes Schiff"), "H4: der Speichersatz nennt das Schiff (%s)" % sentence)
+	_check(String(projection_script.blocked_text("mission_lifecycle_unsupported", "")).contains("ein abgestürztes Schiff"), "H4: ohne Namen bleibt der bisherige Satz")
+	var refused: Dictionary = _flow.call("request_campaign_save")
+	if String(refused.get("reason", "")) == "mission_lifecycle_unsupported":
+		_check(String(refused.get("message", "")).contains("%s ist abgestürzt" % name), "H4: die echte Ablehnung nennt das Schiff (%s)" % String(refused.get("message", "")))
+	var projection: Dictionary = Dictionary(_flow.get("_campaign_start").call("get_save_projection", _flow, _runtime))
+	if String(projection.get("save_blocked_reason", "")) == "mission_lifecycle_unsupported":
+		_check(String(projection.get("save_blocked_text", "")).contains("%s ist abgestürzt" % name), "H4: die Projektion fuer das Menue nennt das Schiff (%s)" % String(projection.get("save_blocked_text", "")))
+	print("H4_REAL reason=", refused.get("reason"), " projection_reason=", projection.get("save_blocked_reason"))
+	s.driver.call("_resolve_combat", "aborted", "", "evacuation")
+	if not await _wait_released("H4: Einsatz wird freigegeben"): return
+	await _end_sortie()

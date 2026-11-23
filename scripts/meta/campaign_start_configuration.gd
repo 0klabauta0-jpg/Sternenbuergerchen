@@ -357,7 +357,9 @@ func get_save_projection(flow: Node, runtime: Node) -> Dictionary:
 		captured = capture_home_checkpoint(flow, runtime)
 	result.can_save = bool(captured.get("ok", false))
 	result.save_blocked_reason = String(captured.get("reason", ""))
-	result.save_blocked_text = projection.blocked_text(result.save_blocked_reason, String(captured.get("detail", "") if captured.has("detail") else ("" if active else "home")))
+	var blocked_detail := String(captured.get("detail", "") if captured.has("detail") else ("" if active else "home"))
+	if active and result.save_blocked_reason == "mission_lifecycle_unsupported" and blocked_detail.is_empty() and flow.has_method("crash_save_detail"): blocked_detail = String(flow.call("crash_save_detail"))
+	result.save_blocked_text = projection.blocked_text(result.save_blocked_reason, blocked_detail)
 	var expected_kind := "mission" if active else "home"
 	var stored: Dictionary = saved.active if active else saved.home
 	result.has_unsaved_progress = not result.can_save or result.kind != expected_kind or not projection.equivalent(Dictionary(captured.get("payload", {})), Dictionary(stored.get("payload", {})), active)
