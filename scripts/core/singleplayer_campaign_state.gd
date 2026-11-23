@@ -8,6 +8,8 @@ const COMMANDS: GDScript = preload("res://scripts/mission/singleplayer_campaign_
 
 ## Missionsende mit result "aborted" und einer dieser win_condition_type-Kennungen ist ein Rueckzug, kein Fehlschlag.
 const RETREAT_WIN_CONDITIONS: Array = ["evacuation", "departure"]
+## Handel H1: Ort -> Szenario des friedlichen Besuchs nach abgeschlossenem Story-Auftrag.
+const OPEN_OUTPOSTS_PATH := "res://data/singleplayer/open_outposts.json"
 
 var _locations: Dictionary = {}
 var _jobs: Dictionary = {}
@@ -145,6 +147,20 @@ func validate_location_visit(location_id: String, retry_allowed: bool = false) -
 		# Ein gesperrt gelisteter Auftrag oeffnet seinen Ort nicht.
 		if String(_jobs[id].location_id) == location_id and bool(availability[id].visible) and not bool(availability[id].shown_as_locked): return {"ok":true}
 	return _reject("tutorial_locked", "Zuerst den vorherigen Kampagnenauftrag abschließen und Chips zuhause hochladen")
+
+## Handel H1: Szenario des freien (friedlichen) Besuchs eines Ortes, dessen Story-Auftrag abgeschlossen ist; "" = der Ort ist noch
+## an seinen Auftrag gebunden (oder hat keinen Besuch). Story-Auftrag = der Auftrag am Ort, dessen Szenario das Ortsszenario ist
+## (satellite_recovery an der Absturzstelle, outpost_recovery am Handelsaussenposten). Nur in der Kampagne (erzwungene Reihenfolge);
+## die Zuordnung steht in data/singleplayer/open_outposts.json. Nur lesend, aendert keinen Zustand.
+func open_visit_scenario_id(location_id: String) -> String:
+	if not _enforce_sequence or not _locations.has(location_id): return ""
+	var visits: Variant = JSON.parse_string(FileAccess.get_file_as_string(OPEN_OUTPOSTS_PATH)) if FileAccess.file_exists(OPEN_OUTPOSTS_PATH) else {}
+	if typeof(visits) != TYPE_DICTIONARY or not Dictionary(visits).has(location_id): return ""
+	var story_scenario := String(_locations[location_id].get("scenario_file_path", "")).get_file().get_basename()
+	for id: String in _jobs:
+		if String(_jobs[id].location_id) == location_id and String(_jobs[id].scenario_id) == story_scenario and String(_jobs[id].status) == "completed":
+			return String(Dictionary(visits)[location_id])
+	return ""
 
 func _accept(payload: Dictionary) -> Dictionary:
 	var job_id := String(payload.get("job_id", ""))
