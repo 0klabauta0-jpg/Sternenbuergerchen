@@ -1102,6 +1102,11 @@ func person_magazine_count(unit_id: String, ammo_class: String) -> int:
 	var bag: Dictionary = _inventory.get("unit:" + unit_id + ":backpack", {})
 	return maxi(0, int(Dictionary(bag.get("items", {})).get(ammo_class, 0)))
 
+## Hat die Person einen eigenen Behaelter (Fach und Rucksack)? Ohne ihn fuehrt das Spiel keinen Bestand fuer sie: im Gefecht
+## gilt sie dann wie ein Gegner als unbegrenzt versorgt (M4a Nachbesserung).
+func person_has_container(unit_id: String) -> bool:
+	return _inventory.has("unit:" + unit_id + ":backpack")
+
 ## Zieht ein Reservemagazin der Sorte ab (Nachladen im Gefecht); false, wenn die Person keines traegt. Das Magazin ist verbraucht.
 func take_person_magazine(unit_id: String, ammo_class: String) -> bool:
 	var bag: Dictionary = _inventory.get("unit:" + unit_id + ":backpack", {})

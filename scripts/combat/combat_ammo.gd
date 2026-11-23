@@ -64,13 +64,16 @@ func can_fire(unit_id: String, weapon_id: String, tick: int, unlimited: bool) ->
 
 ## Bucht einen abgegebenen Schuss (Normalschuss oder Ueberwachung): eine Patrone weniger; wird das Magazin leer, beginnt das Nachladen.
 ## Gibt "empty" zurueck, wenn die Einheit mit diesem Schuss ganz ohne Munition dasteht (leer, keine Reserve), sonst "".
+## Ein Schuss einer Einheit, die gar nicht schiessen darf (laedt nach, leer), ist ein Fehlerfall: "not_firing" und eine Warnung
+## mit Einheit und Waffe; gebucht wird er nicht. Die Aufrufer fragen vorher can_fire.
 func note_shot(unit_id: String, weapon_id: String, tick: int, unlimited: bool) -> String:
 	var info: Dictionary = weapon_info(weapon_id)
 	if not bool(info.needs_ammo):
 		return ""
 	var state: Dictionary = _update(unit_id, weapon_id, tick, unlimited, info)
 	if not AMMO_RULES.can_fire(state, true):
-		return ""
+		push_warning("CombatAmmo: Schuss gebucht, obwohl die Einheit nicht schiessen darf (unit=%s weapon=%s tick=%d)" % [unit_id, weapon_id, tick])
+		return "not_firing"
 	state = AMMO_RULES.after_shot(state)
 	var result := ""
 	if AMMO_RULES.needs_reload(state):

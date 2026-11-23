@@ -2248,8 +2248,14 @@ func _ammo_take_reserve(unit_id: String, ammo_class: String) -> bool:
 	return bool(simulation_root.call("take_person_magazine", unit_id, ammo_class))
 
 
+## Unbegrenzte Reserve (laedt nach, geht nie leer aus): Gegner, und befreundete Einheiten ohne eigenen Bestand (kein Behaelter).
 func _ammo_unit_unlimited(unit) -> bool:
-	return _get_unit_team_id_for_diagnostics(unit) != friendly_team_id
+	if _get_unit_team_id_for_diagnostics(unit) != friendly_team_id:
+		return true
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root == null or not simulation_root.has_method("person_has_magazine_store") or unit == null or not unit.has_method("get_unit_id"):
+		return true
+	return not bool(simulation_root.call("person_has_magazine_store", String(unit.call("get_unit_id"))))
 
 
 func _ammo_weapon_id(unit) -> String:
@@ -2268,8 +2274,8 @@ func _ammo_note_shot(unit) -> void:
 		return
 	var unit_id: String = String(unit.call("get_unit_id"))
 	var weapon_id: String = _ammo_weapon_id(unit)
-	if String(_ammo_tracker().note_shot(unit_id, weapon_id, _current_tick, _ammo_unit_unlimited(unit))) == "empty":
-		# Einmal je Einheit und Magazin im Protokoll: wer ist wann ohne Munition, nach wie vielen Schuessen.
+	if String(_ammo_tracker().note_shot(unit_id, weapon_id, _current_tick, _ammo_unit_unlimited(unit))) == "empty" and OS.is_debug_build():
+		# Einmal je Einheit und Magazin im Protokoll (nur Test-/Debug-Laeufe): wer ist wann ohne Munition, nach wie vielen Schuessen.
 		print("AMMO_EMPTY unit=%s weapon=%s tick=%d shots=%d" % [unit_id, weapon_id, _current_tick, int(_ammo_tracker().shots_fired(unit_id, weapon_id))])
 
 

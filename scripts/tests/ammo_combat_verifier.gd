@@ -7,6 +7,8 @@ extends "res://scripts/tests/combat_cadence_verifier.gd"
 
 const SUPPLY = preload("res://scripts/core/singleplayer_supply_state.gd")
 const WEAPONS = preload("res://scripts/core/weapon_data.gd")
+const COMBAT_AMMO = preload("res://scripts/combat/combat_ammo.gd")
+const GFA = preload("res://scripts/combat/ground_fire_vs_air.gd")
 const OFFER_PATH := "res://data/singleplayer/trade_offers.json"
 const BASE := "base:homebase"
 const SCALE := 6
@@ -45,6 +47,9 @@ func _run() -> void:
 	_test_a8_determinism()
 	_test_a9_texts()
 	_test_overwatch_costs_a_round()
+	_test_n1_unit_without_container_is_unlimited()
+	_test_n2_note_shot_of_non_firing_shooter()
+	_test_n3_ground_fire_vs_air_costs_ammo()
 	await process_frame
 	print("AMMO_COMBAT passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -323,6 +328,106 @@ func _test_a9_texts() -> void:
 	_check(String(f.driver.get_unit_ammo_text("own")) == "Keine Munition", "A9: ohne Munition 'Keine Munition' (%s)" % f.driver.get_unit_ammo_text("own"))
 	_check(String(f.driver.get_unit_ammo_text("enemy")) == "", "A9: Waffe ohne Munitionsbedarf zeigt nichts")
 	f.scope.free()
+
+
+## N1 (M4a Nachbesserung): Eine befreundete Einheit OHNE eigenen Behaelter (kein Bestand) hat unbegrenzte Reserve wie ein Gegner:
+## sie laedt nach und geht nie leer aus. (Mit Behaelter und ohne Reserve geht sie leer, siehe A1.)
+func _test_n1_unit_without_container_is_unlimited() -> void:
+	var f := _ammo_rig(_duel("pistol", "none"), {})
+	_check(f.sup._inventory.has("unit:own:backpack"), "N1: Vorbedingung: die Person hat im Aufbau einen Behaelter")
+	f.sup._inventory.erase("unit:own:backpack")
+	var states := {}
+	for i in range(500):
+		_run_ticks(f, 3)
+		states[String(_status(f, "own").get("state", ""))] = true
+	var ticks := _shot_ticks(f, "own")
+	var max_gap := 0
+	for i in range(1, ticks.size()):
+		max_gap = maxi(max_gap, int(ticks[i]) - int(ticks[i - 1]))
+	_check(ticks.size() > 2 * PISTOL_MAG, "N1: ohne Behaelter schiesst die Einheit weit mehr als zwei Magazine (%d)" % ticks.size())
+	_check(max_gap >= PISTOL_RELOAD and max_gap <= PISTOL_RELOAD + 12, "N1: zwischen den Magazinen liegt die Nachladepause (groesste Luecke %d)" % max_gap)
+	_check(states.has("reloading") and not states.has("empty"), "N1: sie laedt nach und ist nie ohne Munition (%s)" % str(states.keys()))
+	_check(int(_status(f, "own").get("reserve", 0)) == -1 and String(f.driver.get_unit_ammo_text("own")) != "Keine Munition", "N1: Reserve unbegrenzt, Anzeige nie 'Keine Munition'")
+	f.scope.free()
+	# Ganz ohne Versorgung (kein Besitzer gesetzt) ebenso.
+	var g := _rig(_duel("pistol", "none"))
+	_run_ticks(g, 1500)
+	_check(_shots_by(g, "own") > 2 * PISTOL_MAG and String(_status(g, "own").get("state", "")) != "empty", "N1: ohne Versorgung ebenfalls unbegrenzt (%d Schuesse)" % _shots_by(g, "own"))
+	g.scope.free()
+
+
+## N2 (M4a Nachbesserung): Ein Schuss einer Einheit, die gar nicht schiessen darf (laedt nach / leer), ist ein Fehlerfall:
+## note_shot gibt "not_firing" zurueck (und warnt mit Einheit und Waffe), er gelingt nie stillschweigend.
+func _test_n2_note_shot_of_non_firing_shooter() -> void:
+	var t = COMBAT_AMMO.new()
+	t.reserve_count = func(_u: String, _c: String) -> int: return 1
+	t.take_reserve = func(_u: String, _c: String) -> bool: return true
+	var last := ""
+	for i in range(PISTOL_MAG):
+		last = String(t.note_shot("u", "pistol", 0, false))
+	_check(last == "" and int(t.shots_fired("u", "pistol")) == PISTOL_MAG, "N2: erlaubte Schuesse liefern '' und werden gezaehlt (%s, %d)" % [last, t.shots_fired("u", "pistol")])
+	var during := String(t.note_shot("u", "pistol", 0, false))
+	_check(during == "not_firing", "N2: waehrend des Nachladens gibt note_shot 'not_firing' zurueck (%s)" % during)
+	_check(int(t.shots_fired("u", "pistol")) == PISTOL_MAG, "N2: der abgelehnte Schuss wird nicht gezaehlt")
+	var u := COMBAT_AMMO.new()
+	u.reserve_count = func(_x: String, _c: String) -> int: return 0
+	u.take_reserve = func(_x: String, _c: String) -> bool: return false
+	var end := ""
+	for i in range(PISTOL_MAG):
+		end = String(u.note_shot("v", "pistol", 0, false))
+	_check(end == "empty", "N2: der letzte Schuss ohne Reserve meldet 'empty' (%s)" % end)
+	_check(String(u.note_shot("v", "pistol", 5, false)) == "not_firing", "N2: ohne Munition ist ein weiterer Schuss 'not_firing'")
+	_check(String(u.note_shot("w", "none", 5, false)) == "", "N2: Waffe ohne Munitionsbedarf ist kein Fehlerfall")
+
+
+## N3 (M4a Nachbesserung): Bodenfeuer gegen Schiffe (Raketenwerfer, Schienenkanone) kostet Munition und beachtet Nachladen.
+## Baustein-Ebene mit der echten Munitionsfuehrung; Gegner haben unbegrenzte Reserve, aber die Nachladepause gilt.
+func _test_n3_ground_fire_vs_air_costs_ammo() -> void:
+	var tracker = COMBAT_AMMO.new()
+	tracker.reserve_count = func(_u: String, _c: String) -> int: return 0
+	tracker.take_reserve = func(_u: String, _c: String) -> bool: return false
+	var unit := {"id": "g1", "weapon": "rocket_launcher"}
+	var rolls := [0]
+	var tick_now := [0]
+	var shot_ticks: Array = []
+	var gfa = GFA.new()
+	var roll_fn := func() -> float:
+		rolls[0] += 1
+		return 0.99
+	var ctx_base := {
+		"id_of": func(u) -> String: return String(u.id),
+		"weapon_of": func(u) -> String: return String(u.weapon),
+		"is_fit": func(_u) -> bool: return true,
+		"has_ground_contact": func(_u) -> bool: return false,
+		"sees": func(_u, _t) -> Dictionary: return {"visible": true, "range_tiles": 6.0},
+		"roll": roll_fn,
+		"ammo_can_fire": func(u) -> bool: return bool(tracker.can_fire(String(u.id), String(u.weapon), tick_now[0], true)),
+		"ammo_note_shot": func(u) -> void: tracker.note_shot(String(u.id), String(u.weapon), tick_now[0], true),
+	}
+	var tick := 100
+	var first := true
+	while tick < 100 + 1500:
+		tick_now[0] = tick
+		var ctx: Dictionary = ctx_base.duplicate()
+		ctx["tick"] = tick
+		ctx["shooters"] = [unit]
+		ctx["targets"] = [{"craft_id": "cutlass", "display_name": "Cutlass", "pilot_skill": 0.5, "position": Vector2(10, 10), "cell": Vector2i.ZERO,
+			"status": {"asset_id": "cutlass", "asset_type": "dropship", "state": "intact" if first else "locked", "integrity": 1000, "max_integrity": 1000}}]
+		first = false
+		var result: Dictionary = gfa.step(ctx)
+		for e in result.events:
+			if String(e.type) == "shot":
+				shot_ticks.append(tick)
+		tick += 10
+	var lock := GFA.lock_ticks("rocket_launcher")
+	var mag: int = int(tracker.status("g1", "rocket_launcher", tick, true).magazine_size)
+	_check(mag == 2, "N3: Raketenwerfer fasst wirksam 2 Schuss (%d)" % mag)
+	_check(shot_ticks.size() == 4, "N3: in 1500 Ticks nur 4 statt 6 Raketen (Nachladepause nach dem zweiten Schuss): %s" % str(shot_ticks))
+	_check(rolls[0] == shot_ticks.size(), "N3: kein Wurf ohne Schuss (%d Wuerfe, %d Schuesse)" % [rolls[0], shot_ticks.size()])
+	if shot_ticks.size() >= 3:
+		_check(int(shot_ticks[2]) - int(shot_ticks[1]) >= 450, "N3: zwischen Schuss 2 und 3 liegt die Nachladepause von 450 Ticks (%d)" % (int(shot_ticks[2]) - int(shot_ticks[1])))
+	_check(int(tracker.shots_fired("g1", "rocket_launcher")) == shot_ticks.size(), "N3: jeder Schuss ist gebucht (%d)" % tracker.shots_fired("g1", "rocket_launcher"))
+	_check(lock == 240, "N3: Aufschaltzeit unveraendert 240 Ticks")
 
 
 ## Ein Ueberwachungsschuss kostet ebenfalls eine Patrone.
