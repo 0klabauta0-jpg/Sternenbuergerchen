@@ -190,5 +190,5 @@ func _test_t4_controller_timers_follow_ticks() -> void:
 	var b: Dictionary = await _play_timers(4)
 	print("T4 A ", a, " B ", b)
 	_check(int(a.refreshes) == 10 and int(b.refreshes) == 10, "T4 Sicherungs-Auffrischung genau einmal je 12 Ticks: 120 Ticks = 10 (A %d, B %d)" % [int(a.refreshes), int(b.refreshes)])
-	_check(absf(float(a.cooldown) - 9.0) < 0.01 and absf(float(b.cooldown) - 9.0) < 0.01, "T4 Abkuehlzeit des Truppschiffs sinkt nach 120 Ticks um 2 s (A %.3f, B %.3f)" % [float(a.cooldown), float(b.cooldown)])
+	_check(absf(float(a.cooldown) - 8.0) < 0.01 and absf(float(b.cooldown) - 8.0) < 0.01, "T4 Abkuehlzeit des Truppschiffs sinkt nach 120 Ticks um 2 s (A %.3f, B %.3f)" % [float(a.cooldown), float(b.cooldown)])
 	_check(absf(float(a.boarding) - 2.0) < 0.01 and absf(float(b.boarding) - 2.0) < 0.01, "T4 Einsteige-Anfrage zaehlt 120 Ticks = 2 s (A %.3f, B %.3f)" % [float(a.boarding), float(b.boarding)])

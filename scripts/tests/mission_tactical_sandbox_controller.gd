@@ -353,6 +353,9 @@ const SUPPRESS_FIRE_PREVIEW_RADIUS_WORLD: float = 148.0
 const CARD_REFRESH_INTERVAL_SECONDS: float = 0.35
 const RUNTIME_HUD_HEAVY_REFRESH_INTERVAL_SECONDS: float = 1.0
 const FIRETEAM_SECURITY_REFRESH_INTERVAL_SECONDS: float = 0.20
+const FIRETEAM_SECURITY_REFRESH_TICKS: int = 12 # G5b: 0,20 s Spielzeit in Ticks (je Tick-Pfad)
+var _fireteam_security_refresh_ticks: int = 0
+var _fireteam_security_refresh_count: int = 0
 const AREA_ORDER_PREVIEW_REFRESH_MSEC: int = 80
 const AREA_ORDER_PREVIEW_SIGNATURE_STEP: float = 8.0
 const UNIT_SELECTION_PICK_RADIUS: float = 34.0
@@ -833,7 +836,11 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_ensure_plan_mode_switch()
-	_advance_campaign_extraction(delta)
+	# G5b: Mit tickender Simulation laufen Einsteigen, Abkuehlzeit, Absetzfolge, Phasenstart und Sicherungs-Auffrischung je
+	# Tick (_run_game_time_steps); je Bild nur als Rueckfall, nie beides.
+	var on_sim_tick: bool = _orders_run_on_simulation_tick()
+	if not on_sim_tick:
+		_advance_campaign_extraction(delta)
 	_advance_direct_unit_control(delta)
 	var profile_enabled: bool = _mission_visible_frame_timing_debug_enabled
 	var frame_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
@@ -841,12 +848,13 @@ func _process(delta: float) -> void:
 	var scope_started_usec: int = 0
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
-	if _drop_ship_cooldown_remaining > 0.0:
+	if not on_sim_tick and _drop_ship_cooldown_remaining > 0.0:
 		_drop_ship_cooldown_remaining = maxf(_drop_ship_cooldown_remaining - delta, 0.0)
 	_advance_network_dropship_pending(delta)
-	_update_drop_sequence(delta)
+	if not on_sim_tick:
+		_update_drop_sequence(delta)
 	# G5a: Mit tickender Simulation laufen die Befehle je Tick (_on_simulation_tick_for_orders); je Bild nur als Rueckfall.
-	if not _orders_run_on_simulation_tick():
+	if not on_sim_tick:
 		_run_order_execution_step(delta)
 	_update_npc_thought_peek_visuals()
 	if profile_enabled:
@@ -854,14 +862,17 @@ func _process(delta: float) -> void:
 		scope_started_usec = Time.get_ticks_usec()
 	if _prune_fireteamleader_feedback_bubbles():
 		_refresh_order_visuals()
-	_flush_pending_drop_runtime_phase_starts()
+	if not on_sim_tick:
+		_flush_pending_drop_runtime_phase_starts()
 	_refresh_fireteam_runtime_ui_if_pending()
 	if not _default_fireteam_selection_initialized:
 		_ensure_default_fireteam_selection()
-	_fireteam_security_refresh_time_remaining -= delta
-	if _fireteam_security_refresh_time_remaining <= 0.0:
-		_fireteam_security_refresh_time_remaining = FIRETEAM_SECURITY_REFRESH_INTERVAL_SECONDS
-		refresh_fireteam_security_state()
+	if not on_sim_tick:
+		_fireteam_security_refresh_time_remaining -= delta
+		if _fireteam_security_refresh_time_remaining <= 0.0:
+			_fireteam_security_refresh_time_remaining = FIRETEAM_SECURITY_REFRESH_INTERVAL_SECONDS
+			_fireteam_security_refresh_count += 1
+			refresh_fireteam_security_state()
 	if profile_enabled:
 		scopes_usec["feedback_and_security_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scopes_usec["hud_light_usec"] = scopes_usec["feedback_and_security_usec"]
@@ -2440,7 +2451,18 @@ func _on_simulation_tick_for_orders(_tick: int, delta_override: float = -1.0) ->
 	var driver = _get_combat_loop_driver()
 	var driver_tick: Variant = driver.get("_current_tick") if driver != null else null
 	_order_step_driver_tick_seen = int(driver_tick) if driver_tick != null else -1
+	_advance_campaign_extraction(delta)
+	if _drop_ship_cooldown_remaining > 0.0:
+		_drop_ship_cooldown_remaining = maxf(_drop_ship_cooldown_remaining - delta, 0.0)
+	_update_drop_sequence(delta)
 	_run_order_execution_step(delta)
+	_flush_pending_drop_runtime_phase_starts()
+	# Sicherungs-Auffrischung (Blickrichtung wirkt im Gefecht): alle 12 Ticks = 0,2 s Spielzeit.
+	_fireteam_security_refresh_ticks += 1
+	if _fireteam_security_refresh_ticks >= FIRETEAM_SECURITY_REFRESH_TICKS:
+		_fireteam_security_refresh_ticks = 0
+		_fireteam_security_refresh_count += 1
+		refresh_fireteam_security_state()
 
 
 ## Die sechs Ausfuehrungsschritte der Trupps, in fester Reihenfolge, genau einmal je Aufruf.
