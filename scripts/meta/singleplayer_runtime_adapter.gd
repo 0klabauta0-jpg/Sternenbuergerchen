@@ -141,6 +141,8 @@ var _recruit_candidate_signature := ""
 var _recruit_candidates: Array = []
 var _resource_owners: Dictionary = {}
 var _campaign_mode := false
+## M6b (B3): offenes Skirmish (Preset-Start). Es teilt mit der Kampagne den Magazinvorrat in der Versorgung (Fach, Startausstattung, Drag and Drop).
+var _skirmish_mode := false
 var _space_route_requested := false
 var _local_warp_arrival_enabled := false
 ## Enabled only after the local-flight checkpoint join supports safe resume.
@@ -165,7 +167,8 @@ func configure(flow: Node, screen: Control) -> void:
 	_travel.configure()
 	_space_encounter = load("res://scripts/core/campaign_space_encounter.gd").new()
 	_campaign_mode = bool(_flow.call("is_campaign_start"))
-	_supply.set_campaign_magazine_mode(_campaign_mode)  # M4c: Magazinvorrat der Person zaehlt nur in der Kampagne
+	_skirmish_mode = not _campaign_mode and _flow.has_meta("skirmish_preset_id")
+	_supply.set_campaign_magazine_mode(_campaign_mode or _skirmish_mode)  # M4c/M6b: Magazinvorrat der Person zaehlt in Kampagne und Skirmish
 	if _campaign_mode:
 		_onboarding = load("res://scripts/core/campaign_onboarding_state.gd").new()
 		_onboarding.configure()
@@ -233,7 +236,7 @@ func configure(flow: Node, screen: Control) -> void:
 	var inventory_crafts: Array = []
 	for unit in Array(_flow.get("_all_team_units")): inventory_units.append(String(unit.get("unit_id","")))
 	for craft in Array(_flow.get("_homebase_aircraft_definitions")): inventory_crafts.append(String(craft.get("craft_id","")))
-	_supply.configure_inventory(inventory_units, inventory_crafts, _campaign_mode or _skirmish_economy != null)
+	_supply.configure_inventory(inventory_units, inventory_crafts, _campaign_mode or _skirmish_mode or _skirmish_economy != null)
 	if _campaign_mode and Dictionary(_flow.get("_campaign_start").get("checkpoint")).is_empty():
 		_supply.call("configure_start_inventory","campaign")
 	if _flow.has_meta("skirmish_preset_id") and not _flow.has_meta("skirmish_restore_payload"):
@@ -648,7 +651,7 @@ func sync_crafts() -> void:
 			_departure_token_by_craft.erase(craft_id)
 	var inventory_units: Array=[]
 	for unit in Array(_flow.get("_all_team_units")): inventory_units.append(String(unit.get("unit_id","")))
-	_supply.configure_inventory(inventory_units, actual.keys(), _campaign_mode or _skirmish_economy != null)
+	_supply.configure_inventory(inventory_units, actual.keys(), _campaign_mode or _skirmish_mode or _skirmish_economy != null)
 	for craft_id in actual:
 		_supply.register_craft(String(craft_id))
 		_travel.register_craft(String(craft_id))
@@ -679,7 +682,7 @@ func bind_mission_air_support(mission: Node) -> Dictionary:
 	var mission_root: Node = mission.get_node_or_null("SimulationRoot")
 	if mission_root == null or _simulation == null: return {"ok":false, "reason":"runtime_unavailable"}
 	# M4e: nur in der Kampagne zaehlt der Magazinvorrat der Person auch im Einsatz (schmaler Verweis, kein Besitzerwechsel).
-	if _campaign_mode and _supply != null and mission_root.has_method("bind_mission_magazine_supply"): mission_root.call("bind_mission_magazine_supply", _supply)
+	if (_campaign_mode or _skirmish_mode) and _supply != null and mission_root.has_method("bind_mission_magazine_supply"): mission_root.call("bind_mission_magazine_supply", _supply)
 	return mission_root.bind_air_support_source(_simulation, self, String(mission.get_meta("location_id", "")))
 
 func get_campaign_entry_feedback() -> Dictionary:
@@ -2216,7 +2219,7 @@ func is_person_protected_from_death(unit_id: String) -> bool:
 
 ## M4b: Startausstattung mit Magazinen (Basislager + volle Faecher), einmal je Stand; true = jetzt gewaehrt (Kampagne, neu oder alt).
 func grant_ammo_start_if_missing() -> bool:
-	if not _campaign_mode: return false
+	if not (_campaign_mode or _skirmish_mode): return false
 	var ids: Array = []
 	for unit in Array(_flow.get("_all_team_units")): ids.append(String(Dictionary(unit).get("unit_id", "")))
 	return bool(_supply.grant_ammo_start_if_missing(ids))

@@ -401,7 +401,7 @@ func _ready() -> void:
 	# The new run's durable baseline must exist before boarding or accepting a
 	# job closes the home-checkpoint guard. The normal timed autosave follows.
 	# M4b: Startausstattung mit Magazinen einmal je Stand (neue Kampagne und alte Staende ohne Merker), noch vor dem ersten Speichern.
-	if is_campaign_start() and _singleplayer_runtime != null and _singleplayer_runtime.has_method("grant_ammo_start_if_missing"):
+	if (is_campaign_start() or has_meta("skirmish_preset_id")) and _singleplayer_runtime != null and _singleplayer_runtime.has_method("grant_ammo_start_if_missing"):  # M6b: auch im Skirmish
 		_singleplayer_runtime.call("grant_ammo_start_if_missing")
 	if is_campaign_start() and String(_game_start_request.get("action","new")) == "new":
 		set_meta("campaign_checkpoint_result", _campaign_start.save_home_checkpoint(self,_singleplayer_runtime,true))
