@@ -774,7 +774,8 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_sync_compartments(false)
 	return {"ok":true}
 
-func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: bool = false) -> void:
+## `bag_capacity` >= 0: Rucksackplaetze fuer neue Personen trotz Fach (Skirmish behaelt die 12); -1 = Kampagnenregel (0).
+func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: bool = false, bag_capacity: int = -1) -> void:
 	if not _inventory.has("station:trade_outpost:lift"):
 		_inventory["station:trade_outpost:lift"]={"capacity":256,"items":{}}
 	if not _inventory.has("station:polisa:lift"):
@@ -789,7 +790,7 @@ func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: 
 	for id in unit_ids:
 		var key := "unit:"+String(id)+":backpack"
 		if not _inventory.has(key):
-			_inventory[key] = {"capacity": 0 if campaign_personnel else INVENTORY.BACKPACK_CAPACITY, "items": {}}
+			_inventory[key] = {"capacity": bag_capacity if bag_capacity >= 0 else (0 if campaign_personnel else INVENTORY.BACKPACK_CAPACITY), "items": {}}
 			if campaign_personnel:
 				_inventory[key].armor_chip_capacity = INVENTORY.ARMOR_CHIP_CAPACITY
 		elif campaign_personnel and not _inventory[key].has("armor_chip_capacity"):

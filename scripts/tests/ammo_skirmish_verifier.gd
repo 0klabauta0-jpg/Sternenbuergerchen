@@ -31,6 +31,7 @@ func _run() -> void:
 		quit(2)
 		return
 	await _start_part()
+	await _recruit_part()
 	_source_part()
 	print("AMMO_SKIRMISH passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
@@ -40,6 +41,35 @@ func _base_n(sup: RefCounted, item: String) -> int:
 
 func _bag(sup: RefCounted, id: String) -> Dictionary:
 	return Dictionary(sup.get("_inventory").get("unit:%s:backpack" % id, {}))
+
+## W3: Im Punkte-Skirmish Angeworbene bekommen dieselbe Erstausstattung des Fachs wie die Startleute.
+func _recruit_part() -> void:
+	# Basisstart mit freiem Budget: keine Startleute, die Anwerbung ist der einzige Weg zu Personen.
+	START.request_start(self, "skirmish", "new", "", {"budget": 1000, "people": [], "ships": [], "base_setup": true})
+	var flow: Node = FLOW.instantiate()
+	root.add_child(flow)
+	await process_frame
+	flow.call("_show_homebase")
+	var runtime: Node = flow.get("_singleplayer_runtime")
+	if not _check(runtime != null, "W3: Punkte-Skirmish hat eine Laufzeit"):
+		flow.queue_free()
+		return
+	var sup: RefCounted = runtime.get("_supply")
+	var known := {}
+	for unit in Array(flow.get("_all_team_units")): known[String(Dictionary(unit).get("unit_id", ""))] = true
+	_check(bool(Dictionary(sup.export_state()).get("ammo_start_granted", false)), "W3: Startausstattung im Punkte-Skirmish gewaehrt")
+	var hired: Dictionary = runtime.call("request_operation", "skirmish_person", {"role": "operator", "experience": "junior", "armor": "light", "weapon": "rifle", "candidate_index": 0})
+	_check(bool(hired.get("ok", false)), "W3: Anwerbung im Punkte-Skirmish gelingt (%s)" % str(hired.get("reason", "ok")))
+	var new_id := ""
+	for unit in Array(flow.get("_all_team_units")):
+		if not known.has(String(Dictionary(unit).get("unit_id", ""))): new_id = String(Dictionary(unit).get("unit_id", ""))
+	if not _check(not new_id.is_empty(), "W3: die neue Person steht im Kader"):
+		flow.queue_free()
+		return
+	var bag: Dictionary = _bag(sup, new_id)
+	var cap := int(bag.get("armor_chip_capacity", 0))
+	_check(cap > 0 and int(Dictionary(bag.get("items", {})).get("ammo_rifle", 0)) == cap, "W3: die angeworbene Person hat ein volles Fach Gewehr-Magazine (Fach %d, drin %d)" % [cap, int(Dictionary(bag.get("items", {})).get("ammo_rifle", 0))])
+	flow.queue_free()
 
 func _start_part() -> void:
 	START.request_start(self, "skirmish", "new", "early")
@@ -67,6 +97,10 @@ func _start_part() -> void:
 		if not bool(sup.call("person_has_magazine_store", String(id))): all_store = false
 	_check(all_full, "B3: jede Person hat ein volles Fach Gewehr-Magazine (Hauptwaffe Sturmgewehr)")
 	_check(all_store, "B3: jede Person fuehrt einen Magazinvorrat in der Versorgung")
+	var all_bag_12 := true
+	for id in ids:
+		if int(_bag(sup, String(id)).get("capacity", -1)) != 12: all_bag_12 = false
+	_check(all_bag_12, "W4: der Rucksack bleibt im Skirmish bei 12 Plaetzen, das Fach nach Ruestung kommt dazu")
 	var leader := String(ids[0])
 	var before := int(Dictionary(_bag(sup, leader).items).get("ammo_rifle", 0))
 	# Verbrauch im Einsatz: der SimulationRoot des Einsatzes ist an die Versorgung gebunden -> Quelle "campaign".

@@ -236,7 +236,7 @@ func configure(flow: Node, screen: Control) -> void:
 	var inventory_crafts: Array = []
 	for unit in Array(_flow.get("_all_team_units")): inventory_units.append(String(unit.get("unit_id","")))
 	for craft in Array(_flow.get("_homebase_aircraft_definitions")): inventory_crafts.append(String(craft.get("craft_id","")))
-	_supply.configure_inventory(inventory_units, inventory_crafts, _campaign_mode or _skirmish_mode or _skirmish_economy != null)
+	_supply.configure_inventory(inventory_units, inventory_crafts, _campaign_mode or _skirmish_mode or _skirmish_economy != null, _skirmish_bag_capacity())
 	if _campaign_mode and Dictionary(_flow.get("_campaign_start").get("checkpoint")).is_empty():
 		_supply.call("configure_start_inventory","campaign")
 	if _flow.has_meta("skirmish_preset_id") and not _flow.has_meta("skirmish_restore_payload"):
@@ -651,7 +651,7 @@ func sync_crafts() -> void:
 			_departure_token_by_craft.erase(craft_id)
 	var inventory_units: Array=[]
 	for unit in Array(_flow.get("_all_team_units")): inventory_units.append(String(unit.get("unit_id","")))
-	_supply.configure_inventory(inventory_units, actual.keys(), _campaign_mode or _skirmish_mode or _skirmish_economy != null)
+	_supply.configure_inventory(inventory_units, actual.keys(), _campaign_mode or _skirmish_mode or _skirmish_economy != null, _skirmish_bag_capacity())
 	for craft_id in actual:
 		_supply.register_craft(String(craft_id))
 		_travel.register_craft(String(craft_id))
@@ -964,6 +964,9 @@ func _apply_skirmish_transaction(operation: String, payload: Dictionary) -> Dict
 				_simulation.request_personnel_loadout_command("configure_roster", {"roster": [person]})
 				_simulation.request_personnel_loadout_command("set_loadout", {"unit_id": person.unit_id,
 					"loadout": {"armor": person.armor, "weapon_1": person.weapon_1, "weapon_2": person.weapon_2}})
+				# W3: wie die Startleute - einmaliges volles Fach (nur wenn die Startausstattung des Standes gewaehrt ist).
+				_supply.configure_inventory([String(person.unit_id)], [], true, _skirmish_bag_capacity())
+				_supply.provision_new_person(String(person.unit_id))
 				result["message"] = "%s rekrutiert" % String(person.display_name)
 			return result
 		"dismiss":
@@ -2325,6 +2328,12 @@ func _inventory_context(unit_id: String, craft_id: String) -> Dictionary:
 	var access: Array = ["base:homebase","unit:"+unit_id+":backpack"]
 	if not craft_id.is_empty() and String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id,""))=="homebase" and not _service_context(craft_id).is_empty(): access.append("craft:"+craft_id)
 	return {"accessible_containers":access,"unit_id":unit_id}
+
+## Rucksackplaetze im Skirmish der Voreinstellungen: wie vor M6b (12); das Munitionsfach nach Ruestung kommt dazu.
+## Kampagne und Punkte-Skirmish (mit Wirtschaft) behalten ihre Regel (-1 = 0 Plaetze).
+func _skirmish_bag_capacity() -> int:
+	if _skirmish_mode and _skirmish_economy == null: return int(load("res://scripts/mission/inventory_transfer_contract.gd").BACKPACK_CAPACITY)
+	return -1
 
 ## Schiff, auf dem die Person laut Personalstand an Bord ist ("" wenn sie nicht an Bord ist).
 func _aboard_status_craft(unit_id: String) -> String:
