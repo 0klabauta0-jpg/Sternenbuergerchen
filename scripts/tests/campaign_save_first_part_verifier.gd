@@ -47,6 +47,12 @@ func _fp_successes() -> int:
 	return int(_flow.get_meta("campaign_save_successes", 0))
 
 ## Wie oft der Flow eine Zeile am Bildschirmrand gezeigt hat (Meta campaign_save_feedback_count, gesetzt von _show_save_feedback).
+## M6b: schneidet den Munitionshinweis des Abflugs ab (" Munition knapp: n Fach/Fächer leer."), falls er an der Zeile haengt.
+func _fp_without_ammo_note(text: String) -> String:
+	var at := text.find(" Munition knapp: ")
+	if at >= 0 and text.ends_with(" leer."): return text.substr(0, at)
+	return text
+
 func _fp_feedback_count() -> int:
 	return int(_flow.get_meta("campaign_save_feedback_count", 0))
 
@@ -153,7 +159,8 @@ func _fp_d() -> void:
 	_check(bool(launch_save.get("ok", false)), "D: vor dem Abheben wurde gespeichert (%s)" % [launch_save])
 	_check(_fp_attempts() - attempts_before == 1, "D: genau ein Speicherversuch beim Abheben (+%d)" % (_fp_attempts() - attempts_before))
 	# Fix-Runde 1 (W1): auch das Abhebe-Speichern meldet sich: kurze Zeile "Gespeichert.".
-	_check(String(_flow.get_meta("campaign_save_feedback", "")) == "Gespeichert." and _fp_feedback_count() == 1, "D W1: nach dem gelungenen Abhebe-Speichern steht genau einmal die Zeile 'Gespeichert.' (%s, %d)" % [_flow.get_meta("campaign_save_feedback", ""), _fp_feedback_count()])
+	# M6b: der Abflug haengt "Munition knapp: n Fach/Fächer leer." an dieselbe Zeile, wenn Mitfliegende leere Faecher haben (kein Auffuellen mehr).
+	_check(_fp_without_ammo_note(String(_flow.get_meta("campaign_save_feedback", ""))) == "Gespeichert." and _fp_feedback_count() == 1, "D W1: nach dem gelungenen Abhebe-Speichern steht genau einmal die Zeile 'Gespeichert.' (%s, %d)" % [_flow.get_meta("campaign_save_feedback", ""), _fp_feedback_count()])
 	_check(_fp_disk_chips() > chips_on_disk, "D: die Platte enthaelt die Ausruestung (Chips %d gegen %d)" % [_fp_disk_chips(), chips_on_disk])
 	# Das Programm "stirbt": die Kampagne wird ohne Speichern verlassen.
 	await _end_sortie()
@@ -264,10 +271,10 @@ func _fp_h() -> void:
 	_check(not bool(refused.get("ok", true)) and String(refused.get("reason", "")) == "active_restore_pending", "H: das Speichern vor dem Abheben wurde abgelehnt (%s)" % [refused])
 	_check(String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(_craft_id, "")) == "starmap", "H: das Schiff ist trotzdem abgehoben")
 	var expected: String = "Vor dem Abheben nicht gespeichert: " + FP_PROJECTION.blocked_text("active_restore_pending")
-	_check(String(_flow.get_meta("campaign_save_feedback", "")) == expected, "H W1: der Spieler liest den Grund: '%s' (ist: '%s')" % [expected, _flow.get_meta("campaign_save_feedback", "")])
+	_check(_fp_without_ammo_note(String(_flow.get_meta("campaign_save_feedback", ""))) == expected, "H W1: der Spieler liest den Grund: '%s' (ist: '%s')" % [expected, _flow.get_meta("campaign_save_feedback", "")])
 	_check(_fp_feedback_count() == count_before + 1, "H W1: genau eine Zeile (+%d)" % (_fp_feedback_count() - count_before))
 	var toast: Node = _flow.get_node_or_null("CampaignSaveToast")
-	_check(toast != null and bool(toast.call("is_showing")) and String(toast.call("get_text")) == expected, "H W1: die Zeile steht am Bildschirmrand")
+	_check(toast != null and bool(toast.call("is_showing")) and _fp_without_ammo_note(String(toast.call("get_text"))) == expected, "H W1: die Zeile steht am Bildschirmrand")
 	_check(_fp_disk_text() == disk_before, "H: der vorige gueltige Stand auf der Platte blieb unberuehrt")
 	# Zweites Schiff hebt ab, waehrend das erste unterwegs ist: das erste fliegt jetzt wirklich; das Speichern vor dem Abheben des zweiten ist ein
 	# Aufruf derselben Funktion, die launch_to_moon_orbit am Anfang ruft. (Ein echtes zweites Schiff braucht das Fuenf-Auftraege-Fixture von
