@@ -2443,13 +2443,14 @@ func _flush_combat_noise_facing() -> void:
 		var target = _resolve_unit_by_id(String(shot[1]))
 		if not _unit_is_fit_for_facing(attacker) or target == null:
 			continue
-		var group_id: String = _get_unit_fireteam_id(target)
+		# Gruppe wie bei der Unterdrueckung: eigene Seite je Fireteam, Gegner je group_id des Taktikprofils.
+		var group_id: String = suppression_group_key(target)
 		if group_id.is_empty():
 			continue
 		var target_is_friendly: bool = _get_unit_team_id_for_diagnostics(target) == friendly_team_id
 		var mates: Array = _get_friendly_combat_units() if target_is_friendly else _get_enemy_combat_units()
 		for mate in mates:
-			if mate == null or mate == target or mate == attacker or _get_unit_fireteam_id(mate) != group_id:
+			if mate == null or mate == target or mate == attacker or suppression_group_key(mate) != group_id:
 				continue
 			var mate_id: String = _unit_id_for_facing(mate)
 			if mate_id.is_empty() or not _unit_is_fit_for_facing(mate):

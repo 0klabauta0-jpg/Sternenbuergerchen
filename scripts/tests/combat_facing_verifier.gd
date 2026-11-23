@@ -78,6 +78,7 @@ func _run() -> void:
 	_test_f6_no_flicker()
 	_test_f8_deterministic()
 	_test_w1_crossfire()
+	_test_w2_group_key()
 	await process_frame
 	print("combat_facing_verifier passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -155,6 +156,8 @@ func _fixture(specs: Array) -> Dictionary:
 			var cmd = spec.get("cmd", null)
 			if cmd != null:
 				fake.command = COMMAND.new(cmd)
+			if spec.has("group_id"):
+				fake.set_meta("enemy_tactics_config", {"group_id": String(spec.group_id)})
 			npc = fake
 		npc.name = String(spec.id)
 		npc.position = terrain.grid_to_world(spec.grid)
@@ -329,7 +332,9 @@ func _test_f4_comrades() -> void:
 		_ticks(g, 2)
 		_shoot(g, "a", "b")
 		_ticks(g, 80)
-		_check(_face(g, "m") == 0, tag + ": Kamerad mit Sicherungsauftrag dreht sich nicht (%d)" % _face(g, "m"))
+		# W2 (Nachbesserung 1, ersetzt "Kamerad mit Sicherungsauftrag dreht sich nicht"): ein stehender Kamerad mit hold/defend
+		# und ohne sichtbares Ziel dreht sich mit.
+		_check(_face(g, "m") == 3, tag + ": stehender Kamerad mit hold/defend ohne Ziel dreht sich mit (%d)" % _face(g, "m"))
 		g.scope.free()
 		# Kamerad mit eigenem sichtbaren Ziel: m steht bei c (gleiche Seite wie a, rechts von m) und schiesst darauf.
 		var specs := _mate_specs(side, {})
@@ -350,10 +355,10 @@ func _test_f4_comrades() -> void:
 func _test_f5_lock_rules() -> void:
 	var f := _fixture(_pair_specs("blue", "red", {"cmd": HOLD}))
 	_ticks(f, 2)
+	var noise: Dictionary = f.sim.queue_hex_facing_intent("a", 1, "f5_noise", "noise_reaction")
+	_check(bool(noise.get("ok", false)), "F5/W2: noise_reaction ist fuer stehende Einheit mit hold/defend erlaubt (%s)" % str(noise))
 	var result: Dictionary = f.sim.queue_hex_facing_intent("a", 0, "f5_standing", "combat_reaction")
 	_check(bool(result.get("ok", false)), "F5: stehende Einheit mit defend/hold darf combat_reaction (%s)" % str(result))
-	var noise: Dictionary = f.sim.queue_hex_facing_intent("a", 1, "f5_noise", "noise_reaction")
-	_check(not bool(noise.get("ok", false)) and String(noise.get("reason", "")) == "assignment_locks_facing", "F5: noise_reaction bleibt fuer Sicherungsauftrag gesperrt (%s)" % str(noise))
 	f.scope.free()
 	var g := _fixture(_pair_specs("blue", "red", {"real": true}))
 	_ticks(g, 2)
@@ -370,6 +375,8 @@ func _test_f5_lock_rules() -> void:
 	_check(walks, "F5: Einheit laeuft")
 	var walking: Dictionary = g.sim.queue_hex_facing_intent("a", 0, "f5_walking", "combat_reaction")
 	_check(not bool(walking.get("ok", false)) and String(walking.get("reason", "")) == "assignment_locks_facing", "F5: laufende Einheit dreht sich nicht (%s)" % str(walking))
+	var walking_noise: Dictionary = g.sim.queue_hex_facing_intent("a", 0, "f5_walking_noise", "noise_reaction")
+	_check(not bool(walking_noise.get("ok", false)) and String(walking_noise.get("reason", "")) == "assignment_locks_facing", "F5/W2: auch noise_reaction ist fuer Laufende gesperrt (%s)" % str(walking_noise))
 	g.scope.free()
 	# Treiberweg: stehende Einheit mit defend dreht sich bei Beschuss.
 	var h := _fixture(_pair_specs("blue", "red", {}, {"cmd": HOLD, "aw": 1.0, "ini": 1.0}))
@@ -431,6 +438,23 @@ func _run_sequence() -> Array:
 		sequence.append([_face(f, "a"), _face(f, "b"), f.units.a.hp, f.units.b.hp])
 	f.scope.free()
 	return sequence
+
+
+# W2: Gegnergruppe nur ueber group_id (Taktikprofil), verschiedene fireteam_id; Kamerad ausserhalb der Gruppe dreht nicht.
+func _test_w2_group_key() -> void:
+	for same_group in [true, false]:
+		var specs := _pair_specs("blue", "red", {}, {"ft": "x1", "group_id": "wache"})
+		specs.append({"id": "m", "team": "red", "grid": _line(Vector2i(20, 20), 0, 4), "facing": 0, "ft": "x2",
+			"group_id": "wache" if same_group else "andere", "aw": 1.0, "ini": 1.0})
+		var f := _fixture(specs)
+		_ticks(f, 2)
+		_shoot(f, "a", "b")
+		_ticks(f, 40)
+		if same_group:
+			_check(_face(f, "m") == 3, "W2: Gegner-Kamerad nur ueber group_id dreht sich mit (%d)" % _face(f, "m"))
+		else:
+			_check(_face(f, "m") == 0, "W2: Gegner einer anderen group_id dreht sich nicht (%d)" % _face(f, "m"))
+		f.scope.free()
 
 
 # W1: Kreuzfeuer. v steht zwischen zwei Schuetzen aus entgegengesetzten Richtungen (a im Westen, d im Osten), schwach
