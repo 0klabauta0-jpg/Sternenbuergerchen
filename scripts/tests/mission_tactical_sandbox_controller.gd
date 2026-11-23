@@ -663,6 +663,12 @@ var _hex_ship_footprint_raster_jobs:=0
 var _hex_ship_footprint_cache_hits:=0
 var _drop_sequence_timer: float = 0.0
 var _drop_sequence_position: Vector2 = Vector2.ZERO
+# G5d: Darstellung des Absetzschiffs zwischen den Ticks. Die Regel-Lage (_drop_sequence_position) wird je Tick fortgeschrieben;
+# fuer die Anzeige wird zwischen dem Stand VOR dem letzten Tick und dem Stand danach interpoliert. Regeln lesen nie diese Lage.
+var _drop_sequence_prev_position: Vector2 = Vector2.ZERO
+var _drop_sequence_tick_position: Vector2 = Vector2.INF
+var _drop_sequence_step_limit: float = 0.0
+var _drop_sequence_last_presented: Vector2 = Vector2.INF
 var _drop_sequence_fireteam_name: String = "ALL"
 var _drop_sequence_visual_only: bool = false
 var _drop_sequence_circle_reason: String = "" # root refusal reason behind the sentence below (kept for diagnosis and tests)
@@ -853,6 +859,8 @@ func _process(delta: float) -> void:
 	_advance_network_dropship_pending(delta)
 	if not on_sim_tick:
 		_update_drop_sequence(delta)
+	else:
+		_present_drop_sequence_interpolated()
 	# G5a: Mit tickender Simulation laufen die Befehle je Tick (_on_simulation_tick_for_orders); je Bild nur als Rueckfall.
 	if not on_sim_tick:
 		_run_order_execution_step(delta)
@@ -16264,7 +16272,9 @@ func _refresh_world_overlays() -> void:
 	var primary_has_live_drop_state: bool = not _mission_drop_state.is_empty()
 	var primary_has_live_drop_sequence: bool = not _drop_sequence_phase.is_empty()
 	var dropship_position: Vector2 = _drop_sequence_position if primary_has_live_drop_sequence else _get_drop_staging_position()
-	var dropship_visuals: Array = _build_mission_dropship_visual_entries(primary_has_live_drop_state or primary_has_live_drop_sequence, dropship_position)
+	# G5d: Bild und Marke zeigen die zwischen den Ticks interpolierte Lage; Schnappschuss/Netz und Regeln bleiben bei der Tick-Lage.
+	var shown_dropship_position: Vector2 = get_drop_sequence_display_position(Engine.get_physics_interpolation_fraction()) if primary_has_live_drop_sequence else dropship_position
+	var dropship_visuals: Array = _build_mission_dropship_visual_entries(primary_has_live_drop_state or primary_has_live_drop_sequence, shown_dropship_position)
 	var dropship_visible: bool = not dropship_visuals.is_empty()
 	var primary_dropship_position: Vector2 = dropship_position
 	var primary_dropship_target: Vector2 = _get_primary_dropship_target_position(primary_dropship_position)
@@ -16302,7 +16312,7 @@ func _refresh_world_overlays() -> void:
 				"lz_position": _lz_position,
 				"lz_label": _build_mission_dropship_lz_name(_mission_drop_craft_id, _mission_drop_display_name, _get_mission_dropship_card_order_number(_mission_drop_craft_id)) if _has_lz_position else "",
 				"dropship_visible": dropship_visible,
-				"dropship_position": primary_dropship_position,
+				"dropship_position": shown_dropship_position if primary_has_live_drop_sequence else primary_dropship_position,
 				"dropship_target_position": primary_dropship_target,
 				"dropship_visuals": dropship_visuals,
 				"dropship_texture": _get_mission_dropship_texture(),
@@ -16328,7 +16338,7 @@ func _refresh_world_overlays() -> void:
 			var sprite := dropship_marker.get_node_or_null("Sprite") as Sprite2D
 			dropship_marker.visible = true
 			if has_live_drop_sequence and (_drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_LANDED or _drop_sequence_phase == DROP_SEQUENCE_UNLOADING or _drop_sequence_phase == DROP_SEQUENCE_COMPLETE or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND):
-				dropship_marker.global_position = _drop_sequence_position
+				dropship_marker.global_position = shown_dropship_position
 			elif not _has_lz_position:
 				dropship_marker.global_position = _get_drop_staging_position()
 			else:
@@ -36718,8 +36728,39 @@ func _embark_units_for_drop(units: Array) -> void:
 
 func _update_drop_sequence(delta: float) -> void:
 	_advance_mission_dropship_runtime_feedback_timer(delta)
+	# G5d: Stand vor diesem Schritt merken (Anzeige interpoliert von hier zum Stand danach). Waehrend des Schritts gilt die
+	# Anzeige-Lage als "nicht fortgeschrieben" (_drop_sequence_tick_position ungleich Regel-Lage) und zeigt direkt die Regel-Lage.
+	_drop_sequence_prev_position = _drop_sequence_position
 	_update_primary_drop_sequence(delta)
+	_drop_sequence_tick_position = _drop_sequence_position
+	_drop_sequence_step_limit = DROP_SHIP_SPEED * delta * 1.05 + 0.5
 	_update_parallel_drop_sequences(delta)
+
+
+## G5d: Lage des Absetzschiffs fuer die ANZEIGE. fraction 0 = Stand vor dem letzten Tick, 1 = Stand nach dem letzten Tick.
+## Direkt die Regel-Lage (kein Interpolieren) bei: Rueckfall ohne tickende Simulation (je Bild fortgeschrieben), Sprung (Position
+## wurde ausserhalb des Tick-Schritts gesetzt, z. B. Start/Laden/Neustart, oder der Schritt war groesser als die Fluggeschwindigkeit
+## erlaubt, z. B. Phasenwechsel mit Versatz).
+func get_drop_sequence_display_position(fraction: float) -> Vector2:
+	if not _orders_run_on_simulation_tick():
+		return _drop_sequence_position
+	if not _drop_sequence_tick_position.is_finite() or not _drop_sequence_position.is_equal_approx(_drop_sequence_tick_position):
+		return _drop_sequence_position
+	if _drop_sequence_prev_position.distance_to(_drop_sequence_position) > _drop_sequence_step_limit:
+		return _drop_sequence_position
+	return _drop_sequence_prev_position.lerp(_drop_sequence_position, clampf(fraction, 0.0, 1.0))
+
+
+## G5d: Je Bild, solange das Schiff fliegt: Marke und Schiffsbild auf die interpolierte Lage setzen (nur Darstellung).
+func _present_drop_sequence_interpolated() -> void:
+	if _drop_sequence_phase != DROP_SEQUENCE_INBOUND and _drop_sequence_phase != DROP_SEQUENCE_OUTBOUND:
+		_drop_sequence_last_presented = Vector2.INF
+		return
+	var shown: Vector2 = get_drop_sequence_display_position(Engine.get_physics_interpolation_fraction())
+	if shown.is_equal_approx(_drop_sequence_last_presented):
+		return
+	_drop_sequence_last_presented = shown
+	_refresh_world_overlays()
 
 
 func _update_primary_drop_sequence(delta: float) -> void:

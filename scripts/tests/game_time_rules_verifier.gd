@@ -47,6 +47,7 @@ func _run_tests() -> void:
 	await _test_t3_mission_duration()
 	await _test_t4_controller_timers_follow_ticks()
 	await _test_t5_rules_read_tick_exact_positions()
+	await _test_t6_dropship_display_interpolation()
 	print("GAME_TIME_RULES passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed > 0 else 0)
 
@@ -142,6 +143,10 @@ func _test_t2_contact_path_recompute_lock() -> void:
 	_check(not bool(sim.call("_should_recompute_move_path", cmd, unit, same_path, Vector2.ZERO, target, terrain)), "T2 Nach 35 Ticks (583 ms) noch gesperrt")
 	sim.set("tick_counter", 136)
 	_check(bool(sim.call("_should_recompute_move_path", cmd, unit, same_path, Vector2.ZERO, target, terrain)), "T2 Nach 36 Ticks (600 ms) wieder frei")
+	# G5d: Stempel weit in der Zukunft (Tickzaehler zurueckgesetzt): Sperre beginnt neu (600 ms = 36 Ticks ab jetzt), haelt nicht lange.
+	locked["stub_unit"] = int(sim.call("get_game_msec")) + 5000
+	_check(not bool(sim.call("_should_recompute_move_path", cmd, unit, same_path, Vector2.ZERO, target, terrain)), "T2 Stempel weit in der Zukunft: Sperre beginnt neu (gesperrt)")
+	_check(int(locked.get("stub_unit", -1)) - int(sim.call("get_game_msec")) == 600, "T2 Stempel weit in der Zukunft: neuer Stempel ist jetzt + 600 ms (Differenz %d)" % (int(locked.get("stub_unit", -1)) - int(sim.call("get_game_msec"))))
 	unit.free()
 	sim.free()
 
@@ -324,3 +329,70 @@ func _test_t5_rules_read_tick_exact_positions() -> void:
 	_check(Array(a.signal) == Array(b.signal) and Array(a.signal) == Array(c.signal), "T5 Im Tick-Rueckruf gelesene Lage ist bei 1 Bild je Tick, 1 Bild je 4 Ticks und anderen Bruchteilen gleich")
 	_check(Array(a.commands) == Array(b.commands) and Array(a.commands) == Array(c.commands), "T5 Beim Befehlsannehmen mitten im Tick gelesene Lage ist bei allen Bildtakten gleich (A %s, B %s, C %s)" % [str(a.commands), str(b.commands), str(c.commands)])
 	_check(Vector2(c.halfway).distance_to(Vector2(c.exact)) > 0.001 and Vector2(c.displayed).distance_to(Vector2(c.exact)) > 0.001, "T5 Die Anzeige zwischen den Ticks bleibt interpoliert (Bildlage %s, Tickstand %s)" % [str(c.displayed), str(c.exact)])
+
+
+## G5d: Absetzschiff - Regel je Tick, Anzeige zwischen den Ticks interpoliert.
+func _setup_flying_ship(controller: Node, constants: Dictionary) -> void:
+	controller.set("_drop_sequence_phase", String(constants["DROP_SEQUENCE_INBOUND"]))
+	controller.set("_drop_sequence_visual_only", true)
+	controller.set("_drop_sequence_position", Vector2(0.0, 0.0))
+	controller.set("_drop_sequence_lz_position", Vector2(700.0, 0.0))
+	controller.set("_drop_sequence_tick_position", Vector2.INF)
+
+
+## Ein Lauf: Schiff fliegt zur Landezone, ein Bild je frame_ticks Ticks. Liefert den Tick des Phasenwechsels und die Regel-Lage dort.
+func _play_ship(frame_ticks: int) -> Dictionary:
+	var scene: Node = await _open_scene()
+	var sim: Node = scene.get_node("SimulationRoot")
+	var controller: Node = scene.get_node("TacticalController")
+	var constants: Dictionary = controller.get_script().get_script_constant_map()
+	_setup_flying_ship(controller, constants)
+	var change_tick: int = -1
+	var change_position: Vector2 = Vector2.INF
+	for tick in range(1, 80):
+		sim._physics_process(TICK)
+		if change_tick < 0 and String(controller.get("_drop_sequence_phase")) != String(constants["DROP_SEQUENCE_INBOUND"]):
+			change_tick = tick
+			change_position = controller.get("_drop_sequence_position")
+		if tick % frame_ticks == 0:
+			controller.call("_process", 0.5)
+	var result: Dictionary = {"tick": change_tick, "position": change_position, "phase": String(controller.get("_drop_sequence_phase"))}
+	await _close_scene(scene)
+	return result
+
+func _test_t6_dropship_display_interpolation() -> void:
+	var scene: Node = await _open_scene()
+	var sim: Node = scene.get_node("SimulationRoot")
+	var controller: Node = scene.get_node("TacticalController")
+	var constants: Dictionary = controller.get_script().get_script_constant_map()
+	_check(controller.has_method("get_drop_sequence_display_position"), "T6 Aufbau: der Controller hat die Anzeige-Lage des Absetzschiffs")
+	if not controller.has_method("get_drop_sequence_display_position"):
+		await _close_scene(scene)
+		return
+	_setup_flying_ship(controller, constants)
+	_step(sim, 5)
+	var before: Vector2 = controller.get("_drop_sequence_position")
+	_step(sim, 1)
+	var after: Vector2 = controller.get("_drop_sequence_position")
+	_check(after.x > before.x + 1.0, "T6 Aufbau: die Regel-Lage rueckt je Tick vor (%s -> %s)" % [str(before), str(after)])
+	var d0: Vector2 = controller.call("get_drop_sequence_display_position", 0.0)
+	var d5: Vector2 = controller.call("get_drop_sequence_display_position", 0.5)
+	var d1: Vector2 = controller.call("get_drop_sequence_display_position", 1.0)
+	_check(d0.is_equal_approx(before) and d5.is_equal_approx(before.lerp(after, 0.5)) and d1.is_equal_approx(after), "T6a Anzeige-Lage bei Bruchteil 0 / 0,5 / 1 = voriger Stand / Mitte / aktueller Stand (%s, %s, %s)" % [str(d0), str(d5), str(d1)])
+	_check(after.is_equal_approx(controller.get("_drop_sequence_position")), "T6a Das Lesen der Anzeige-Lage aendert die Regel-Lage nicht")
+	controller.set("_drop_sequence_position", Vector2(3000.0, 2000.0))
+	var jump: Vector2 = controller.call("get_drop_sequence_display_position", 0.5)
+	_check(jump.is_equal_approx(Vector2(3000.0, 2000.0)), "T6c Nach einem Sprung (Position ausserhalb des Tick-Schritts gesetzt) keine Zwischenlage (%s)" % str(jump))
+	_step(sim, 1)
+	controller.set("_drop_sequence_prev_position", Vector2(-5000.0, 0.0))
+	var big_step: Vector2 = controller.call("get_drop_sequence_display_position", 0.5)
+	_check(big_step.is_equal_approx(controller.get("_drop_sequence_position")), "T6c Ein Schritt groesser als die Fluggeschwindigkeit erlaubt wird nicht interpoliert (%s)" % str(big_step))
+	sim.disconnect("tick_processed", Callable(controller, "_on_simulation_tick_for_orders"))
+	controller.set("_drop_sequence_prev_position", Vector2.ZERO)
+	var fallback: Vector2 = controller.call("get_drop_sequence_display_position", 0.5)
+	_check(fallback.is_equal_approx(controller.get("_drop_sequence_position")), "T6 Ohne tickende Simulation (Rueckfall) bleibt die Anzeige-Lage die je Bild fortgeschriebene Regel-Lage")
+	await _close_scene(scene)
+	var a: Dictionary = await _play_ship(1)
+	var b: Dictionary = await _play_ship(4)
+	print("T6 A ", a, " B ", b)
+	_check(int(a.tick) > 0 and int(a.tick) == int(b.tick) and Vector2(a.position).is_equal_approx(Vector2(b.position)) and String(a.phase) == String(b.phase), "T6b Regel-Lage und Tick des Phasenwechsels sind bei 1 Bild je Tick und 1 Bild je 4 Ticks gleich (A Tick %d, B Tick %d)" % [int(a.tick), int(b.tick)])
