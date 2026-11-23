@@ -2241,6 +2241,7 @@ func _ammo_reserve_count(unit_id: String, ammo_class: String) -> int:
 	var simulation_root = get_node_or_null(simulation_root_path)
 	if simulation_root == null or not simulation_root.has_method("get_person_magazine_count"):
 		return 0
+	_ammo_ensure_mission_store(simulation_root, unit_id, ammo_class)
 	return int(simulation_root.call("get_person_magazine_count", unit_id, ammo_class))
 
 
@@ -2248,17 +2249,29 @@ func _ammo_take_reserve(unit_id: String, ammo_class: String) -> bool:
 	var simulation_root = get_node_or_null(simulation_root_path)
 	if simulation_root == null or not simulation_root.has_method("take_person_magazine"):
 		return false
+	_ammo_ensure_mission_store(simulation_root, unit_id, ammo_class)
 	return bool(simulation_root.call("take_person_magazine", unit_id, ammo_class))
 
 
-## Unbegrenzte Reserve (laedt nach, geht nie leer aus): Gegner, und befreundete Einheiten ohne eigenen Bestand (kein Behaelter).
+## M6a: Beim ersten Bedarf bekommt die Einheit ohne Kampagnen-Vorrat ihren Einsatz-Vorrat: Fach nach Ruestung, Sorte der
+## Waffe, fuer die sie zuerst Reserve braucht (die eingelegte, also in der Regel Waffe 1). Der Root ignoriert Personen mit Kampagnen-Vorrat.
+func _ammo_ensure_mission_store(simulation_root, unit_id: String, ammo_class: String) -> void:
+	if not simulation_root.has_method("ensure_mission_ammo"):
+		return
+	var unit = _resolve_unit_by_id(unit_id)
+	if unit == null or not is_instance_valid(unit):
+		return
+	var armor_id: String = String(unit.call("get_armor_id")) if unit.has_method("get_armor_id") else ""
+	simulation_root.call("ensure_mission_ammo", unit_id, armor_id, ammo_class)
+
+
+## M6a: Jede Einheit rechnet mit endlichem Vorrat (Gegner, NPCs, Skirmish, Host). Unbegrenzt bleibt nur, wo es keinen
+## Vorrat geben kann: ohne Simulationswurzel (Pruefer ohne Szene).
 func _ammo_unit_unlimited(unit) -> bool:
-	if _get_unit_team_id_for_diagnostics(unit) != friendly_team_id:
-		return true
 	var simulation_root = get_node_or_null(simulation_root_path)
 	if simulation_root == null or not simulation_root.has_method("person_has_magazine_store") or unit == null or not unit.has_method("get_unit_id"):
 		return true
-	return not bool(simulation_root.call("person_has_magazine_store", String(unit.call("get_unit_id"))))
+	return false
 
 
 func _ammo_weapon_id(unit) -> String:
@@ -2301,6 +2314,10 @@ func get_unit_ammo_text(unit_id: String) -> String:
 func reset_ammo() -> void:
 	if _ammo_state != null:
 		_ammo_state.reset()
+	# M6a: der Einsatz-Vorrat gehoert zum Einsatz und wird mit ihm geleert (Start, Neustart, Zwischenstand geladen).
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root != null and simulation_root.has_method("reset_mission_ammo"):
+		simulation_root.call("reset_mission_ammo")
 
 
 ## Rueckruf des Aufloesers (nur fuer find_contact_pairs): 0 = dran, 1 = nur Anlauf (suchen, Erfassung starten),
