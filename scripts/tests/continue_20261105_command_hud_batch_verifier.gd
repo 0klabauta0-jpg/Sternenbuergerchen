@@ -180,10 +180,10 @@ func _test_details_are_current(scene: Node, controller: Node, simulation: Node, 
 	details.hide()
 
 
-# G5a: Befehlsausfuehrung laeuft je Simulations-Tick, die Anzeige je Bild. Der Test treibt beide Eigner wie bisher in einem
-# Schritt an: erst die Befehlsausfuehrung mit dem Zeitschritt, dann das echte _process.
+# G5d: Ein Eignerbild ist genau ein _process. Die Tick-Verbindung ist hier getrennt, also fuehrt _process die Befehle selbst aus
+# (Rueckfall) - der Tick-Einstieg wird NICHT zusaetzlich gerufen (sonst liefe alles doppelt).
 func _owner_frame(controller: Node, delta: float) -> void:
-	controller.call("_on_simulation_tick_for_orders", 0, delta)
+	# Die Tick-Verbindung ist in dieser Vorrichtung getrennt; _process ist damit schon der volle Rueckfall (nie beides).
 	controller.call("_process", delta)
 
 
