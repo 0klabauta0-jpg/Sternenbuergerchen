@@ -39,6 +39,8 @@ func _wait_homebase()->bool:
  if not await super._wait_homebase():return false
  _check(not carrier_id.is_empty() and int(_supply().inventory["unit:"+carrier_id+":backpack"].items.get("satellite_chip",0))==1,"lead retains the recovered item through real return and sleeping")
  _check(_chip_count()==1,"successful return adds no second legacy cargo chip")
+ # Der Basis-Autosave auf Hex-Boden ist gedrosselt (_hex_save_throttled): der Stand auf der Platte kann hinter dem Rueckflug zurueckliegen, daher ausdrueckliches Speichern.
+ _flow.get("_campaign_start").call("save_home_checkpoint",_flow,_runtime,true)
  var saved:Dictionary=STORE.load_checkpoint()
  _check(saved.get("ok",false),"carried quest chip checkpoint remains loadable")
  if saved.get("ok",false):
