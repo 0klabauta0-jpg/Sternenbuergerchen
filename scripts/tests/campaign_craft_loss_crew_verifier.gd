@@ -21,6 +21,10 @@ func _run() -> void:
 	if only.is_empty() or only == "k2a": await _k2a_aboard_returning_craft()
 	if only.is_empty() or only == "k2b": await _k2b_left_at_crash_site()
 	if only.is_empty() or only == "k2c": await _k2c_both_lost()
+	# LC2l L2/L3: dritte Person (echte Anwerbung) im zweiten Schiff; k2d bleibt an der Absturzstelle, k2e geht vorher an Bord, l3 Sieg.
+	if only.is_empty() or only in ["k2d", "trio"]: await _trio_case("left")
+	if only.is_empty() or only in ["k2e", "trio"]: await _trio_case("aboard")
+	if only.is_empty() or only in ["l3", "trio"]: await _trio_case("victory")
 	if only.is_empty(): await _i2_background_end_releases_instance()
 	print("CAMPAIGN_CRAFT_LOSS_CREW passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
@@ -156,6 +160,133 @@ func _k2c_both_lost() -> void:
 	_check(int(loss.get("rescue_fee", -1)) == 400 and _credits() == 100 and _loss_lines(result) == 1, "K2c: Gebuehr genau einmal (%s / %d / Zeilen %d)" % [str(loss), _credits(), _loss_lines(result)])
 	_check(_fleet_ids() == [third] and not _unit_is_dead(LEADER), "K2c: beide Schiffe geraeumt, die Reserve bleibt, der Truppfuehrer lebt (%s)" % str(_fleet_ids()))
 	await _end_sortie()
+
+## LC2l L2/L3: der echte Fall mit DREI Personen. ECHT: die dritte Person ist die angeworbene "campaign_outpost_recruit" (Befehl claim_recruit, Kader,
+## Basis-Personal, Feuertrupp ft1); sie wird mit Truppfuehrer und Pilot wirklich eingeschifft, fliegt im Einsatzschiff mit, landet, steht im Einsatz
+## als echte Einheit; das Einsatzende laeuft durch den echten Fluss (_on_mission_combat_resolved, der neue elif-Zweig). GESTELLT: (1) das zweite Schiff
+## ist ein Kaufschiff (_inject_bought_ship) und ist nie geflogen; (2) die Basisseite fuehrt die Person als "an Bord des zweiten Schiffs" (wie _k2_prepare),
+## obwohl sie physisch im Einsatzschiff mitgeflogen ist; (3) der Absturz des zweiten Schiffs ist eine von Hand angehaengte Absturzstelle (_site) und
+## apply_air_crash setzt die Person dort unversehrt ab.
+const RECRUIT := "campaign_outpost_recruit"
+var _trio := false
+
+func _base_crew_ready() -> bool:
+	if not _trio: return super()
+	var personnel: Node = _runtime.call("get_base_personnel_runtime")
+	if personnel == null or not bool(personnel.call("is_pilot_aboard", _craft_id)): return false
+	var people: Array = personnel.call("get_snapshot").get("units", [])
+	return people.size() == 3 and people.all(func(person: Dictionary): return String(person.status) == "aboard" and String(person.craft_id) == _craft_id) and bool(_screen.call("_has_homebase_direct_launch_payload_for_craft", _craft_id))
+
+## Wie _begin_funded_sortie, aber mit der angeworbenen dritten Person im Feuertrupp.
+func _begin_trio_sortie(credits: int, tag: String) -> Dictionary:
+	START.request_start(self, "campaign", "new")
+	_flow = FLOW.instantiate()
+	root.add_child(_flow)
+	current_scene = _flow
+	await process_frame
+	_screen = _flow.get_node("HomebaseScreen")
+	_runtime = _flow.get("_singleplayer_runtime")
+	_set_credits(credits)
+	if not _save_base(tag + ": Einsatz-Aufbau"): return {}
+	if not await _prepare_initial_base(): return {}
+	# Anwerbung wie im Adapter (campaign_recruit, singleplayer_runtime_adapter.gd ~2600-2612), ohne das Tor "Aussenposten gesichert" (das waere ein
+	# zweiter echter Einsatz): derselbe Flussbaustein register_campaign_recruit mit dem geladenen Einsatzschiff als Nutzlast, derselbe Befehl claim_recruit.
+	var profile: Dictionary = Dictionary(Array(load("res://scripts/meta/campaign_start_configuration.gd").new().call("_initial_roster"))[0]).duplicate(true)
+	profile.merge({"unit_id": RECRUIT, "display_name": "Robin Seidel", "fireteam_id": "ft1", "armor": "light", "armor_id": "light", "weapon_1": "pistol", "weapon_1_id": "pistol", "weapon_2": "none", "weapon_2_id": "none"}, true)
+	# GESTELLT: der Auftrag outpost_recovery gilt als gewonnen (wie im Kistenpruefer), sonst lehnt claim_recruit mit recruit_not_ready ab.
+	var outpost_job: Dictionary = Dictionary(Dictionary(_runtime.get("_campaign").get("_jobs"))["outpost_recovery"])
+	var outpost_status_before = outpost_job.get("status")
+	outpost_job["status"] = "completed"
+	var registered: Dictionary = Dictionary(_flow.call("register_campaign_recruit", profile, {}, _craft_id))
+	var claimed: Dictionary = Dictionary(_runtime.call("_commit", "singleplayer_campaign", "claim_recruit", {"kind": "outpost"}, "lc2l:%s:recruit" % tag, {"runtime_authorized": true, "outpost_cleared": true}))
+	# Der Auftrag steht danach wieder, wie er war (sonst lehnt das Speichern die Auftragsreihenfolge ab: invalid_job_order).
+	outpost_job["status"] = outpost_status_before
+	if not _check(bool(registered.get("ok", false)) and bool(claimed.get("ok", false)), tag + ": Aufbau: Aussenposten-Person angeworben (%s | %s)" % [str(registered), str(claimed)]): return {}
+	_trio = true
+	_crew_ids = [LEADER, RECRUIT]
+	_pilot_id = PILOT
+	_check(_screen.call("request_operation", "accept_job", {"job_id": "satellite_recovery"}).get("ok", false), tag + ": Auftrag angenommen")
+	_check(_screen.call("request_operation", "select_destination", {"location_id": "satellite_crash", "job_id": "satellite_recovery"}).get("ok", false), tag + ": Ziel gewaehlt")
+	if not await _launch_and_land("satellite_recovery", "res://maps/satellite_crash_site.json"): return {}
+	var mission: Node = _flow.get("_active_mission")
+	var controller: Node = mission.get_node("TacticalController")
+	var sortie: Dictionary = {
+		"mission": mission, "controller": controller, "driver": mission.get_node("CombatLoopDriver"), "simulation": mission.get_node("SimulationRoot"),
+		"leader": controller.call("_get_campaign_sortie_unit", LEADER), "pilot": controller.call("_get_campaign_sortie_unit", PILOT),
+		"recruit": controller.call("_get_campaign_sortie_unit", RECRUIT), "access": controller.call("get_campaign_ground_ship_access", _craft_id)}
+	if not _check(sortie.leader != null and sortie.pilot != null and sortie.recruit != null and bool(sortie.access.get("ok", false)), tag + ": drei echte Einheiten im Einsatz und der Schiffszugang ist da"): return {}
+	return sortie
+
+func _trio_case(variant: String) -> void:
+	var tag := {"left": "K2d", "aboard": "K2e", "victory": "L3"}[variant] as String
+	var s: Dictionary = await _begin_trio_sortie(500, tag)
+	if s.is_empty():
+		_trio = false
+		return
+	var second := _inject_bought_ship()
+	var states: Dictionary = _runtime.call("get_base_personnel_runtime").get("_states")
+	if not _check(states.has(RECRUIT) and String(states[RECRUIT].get("craft_id", "")) == _craft_id, tag + ": Aufbau: die dritte Person ist an der Basis im Einsatzschiff eingeschifft (%s)" % str(states.get(RECRUIT, {}).get("craft_id", "-"))):
+		_trio = false
+		return
+	states[RECRUIT]["craft_id"] = second
+	states[RECRUIT]["status"] = "aboard"
+	_site(s, second)
+	var site: Dictionary = Dictionary(Array(s.simulation.get("_air_crash_sites")).back())
+	s.controller.call("apply_air_crash", second, site, {RECRUIT: {"state": "unhurt"}}, [RECRUIT])
+	var occupants: Array = _flow.call("_lost_craft_occupant_ids", [{"craft_id": second}])
+	_check(occupants == [RECRUIT], tag + ": Insasse des verlorenen Schiffs laut Basisseite ist nur die dritte Person (%s)" % str(occupants))
+	if not _seat_crew(s):
+		_trio = false
+		return
+	# GESTELLT: Die Besatzung des Einsatzschiffs ist die Besuchskennung des Schiffs (singleplayer_visit_identities.unit_ids) und umfasst die Person, weil sie
+	# im Einsatzschiff mitgeflogen ist; das Einsatzschiff wuerde sie als Besatzung einschiffen. Als Person des zweiten Schiffs gehoert sie nicht dazu:
+	# sie wird aus der Besatzung des Einsatzschiffs genommen. In der Gegenprobe bleibt sie darin und steht am Zugang des Einsatzschiffs.
+	if variant == "aboard":
+		if not _place_at(s.simulation, s.access, RECRUIT, Vector2.ZERO):
+			_trio = false
+			return
+	else:
+		var visits: Dictionary = s.mission.get_meta("singleplayer_visit_identities", {})
+		if not _check(visits.has(_craft_id), tag + ": Aufbau: Besuchskennung des Einsatzschiffs ist da"):
+			_trio = false
+			return
+		var crew_ids := PackedStringArray(Dictionary(visits[_craft_id]).get("unit_ids", []))
+		var at: int = crew_ids.find(RECRUIT)
+		_check(at >= 0, tag + ": Aufbau: die dritte Person gehoert zur Besatzung des Einsatzschiffs (%s)" % str(crew_ids))
+		if at >= 0: crew_ids.remove_at(at)
+		Dictionary(visits[_craft_id])["unit_ids"] = crew_ids
+	if variant == "victory": s.driver.call("_resolve_combat", "victory", String(s.driver.get("friendly_team_id")))
+	else: s.driver.call("_resolve_combat", "aborted", "", "evacuation")
+	if not await _wait_released(tag + ": Einsatz wird freigegeben"):
+		_trio = false
+		return
+	var result: Dictionary = Dictionary(_flow.get("_last_mission_result"))
+	var others: Array = Array(result.get("other_craft_losses", []))
+	var fee: int = int(Dictionary(others[0]).get("rescue_fee", 0)) if not others.is_empty() else -1
+	print("%s_RESULT outcome=%s result=%s total_loss=%s fee=%s credits=%d others=%s fate=%s base=%s/%s" % [tag, result.get("mission_outcome"), result.get("result"), result.get("casualty_total_loss"), fee, _credits(), str(others), _unit_fate(RECRUIT), states[RECRUIT].get("status"), states[RECRUIT].get("craft_id")])
+	_check(not bool(result.get("casualty_total_loss", false)) and not result.has("craft_loss") and others.size() == 1, tag + ": Einsatzschiff heil, nur das zweite Schiff verloren, kein Totalverlust")
+	var charged: bool = variant == "left"
+	_check((fee == 400 and _credits() == 100 and _loss_lines(result) == 1) if charged else (fee == 0 and _credits() == 500 and _loss_lines(result) == 0), tag + (": Gebuehr genau einmal 400, 500 -> 100, Zeile \"Notrettung: −400 Credits\" in der Nachbesprechung (%d / %d / Zeilen %d)" if charged else ": keine Gebuehr, 500 Credits, keine Notrettungszeile (%d / %d / Zeilen %d)") % [fee, _credits(), _loss_lines(result)])
+	_check(DEBRIEF_SCRIPT.build_craft_loss_text(result).contains("Schiff verloren: Zweitschiff"), tag + ": das zweite Schiff steht in der Verlustzeile der Nachbesprechung")
+	_check(not _unit_is_dead(RECRUIT) and not PackedStringArray(result.get("fatality_unit_ids", PackedStringArray())).has(RECRUIT), tag + ": die dritte Person lebt (%s)" % _unit_fate(RECRUIT))
+	_check(String(states[RECRUIT].get("status", "")) != "aboard" and String(states[RECRUIT].get("craft_id", "x")).is_empty() and _aboard_ids(second).is_empty(), tag + ": sie ist an der Basis, nicht an Bord eines fehlenden Schiffs (%s / %s)" % [str(states[RECRUIT].get("status")), str(states[RECRUIT].get("craft_id"))])
+	_check(_fleet_ids() == [_craft_id] and _lost_ids() == [second], tag + ": das zweite Schiff ist geraeumt und steht im Verlustbeleg (%s / %s)" % [str(_fleet_ids()), str(_lost_ids())])
+	print("%s_TEAM_STATES %s" % [tag, str(result.get("team_states"))])
+	# Die Heimkehr des Einsatzschiffs (Abheben, Rueckflug) ist nicht Gegenstand dieses Pruefers (wie S1 im Zweitschiff-Pruefer): das Schiff steht
+	# per frischem Reiseeigner wieder am Boden der Basis, danach darf nichts mehr "unterwegs" melden.
+	var travel: RefCounted = _runtime.get("_travel")
+	travel.call("unregister_craft", _craft_id)
+	travel.call("register_craft", _craft_id)
+	Dictionary(_flow.get("_aircraft_location_by_craft"))[_craft_id] = "homebase"
+	Dictionary(_flow.get("_craft_location_runtime")).erase(_craft_id)
+	# Speichern: Ein echtes Speichern geht in diesem Aufbau nicht (die von Hand angeworbene Person ohne gewonnenen Auftrag outpost_recovery ist fuer die
+	# Speicherpruefung ein ungueltiger Stand: invalid_progress / invalid_job_order / invalid_job_state), das waere ein Mangel des Aufbaus, nicht des Zweigs.
+	# Geprueft wird deshalb die Sperre der Basis: nichts ist mehr unterwegs, kein Schiff "an Bord eines fehlenden Schiffs" (S1-Muster), und das Speichern
+	# nach Schiffsverlust ohne dritte Person ist in I2/S1 echt geprueft.
+	var guard: Dictionary = _runtime.call("get_world_checkpoint_guard")
+	_check(bool(guard.get("ok", false)), tag + ": keine Sperre durch den Einsatz, Basis waere speicherbar (%s)" % str(guard.get("reason", "")))
+	_trio = false
+	await _close()
 
 func _i2_background_end_releases_instance() -> void:
 	var s: Dictionary = await _begin_funded_sortie(500)
