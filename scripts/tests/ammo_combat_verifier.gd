@@ -50,6 +50,8 @@ func _run() -> void:
 	_test_n1_unit_without_container_is_unlimited()
 	_test_n2_note_shot_of_non_firing_shooter()
 	_test_n3_ground_fire_vs_air_costs_ammo()
+	_test_n4_outside_campaign_unlimited()
+	_test_n5_magazine_scale_fallback()
 	await process_frame
 	print("AMMO_COMBAT passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -69,6 +71,7 @@ func _make_supply(unit_ids: Array) -> RefCounted:
 	s.configure([], data)
 	s.register_craft("ship", 5.0)
 	s.configure_inventory(unit_ids, ["ship"], true)
+	s.set_campaign_magazine_mode(true)  # M4c: der Magazinvorrat zaehlt nur im Kampagnenmodus
 	s.set_armor_provider(func(_id: String) -> String: return "heavy")
 	return s
 
@@ -438,3 +441,37 @@ func _test_overwatch_costs_a_round() -> void:
 	var consumed: int = PISTOL_MAG - int(_status(f, "own").get("rounds", PISTOL_MAG))
 	_check(consumed == _shots_by(f, "own") + 1, "Ueberwachung: Normalschuesse + 1 Ueberwachungsschuss = verbrauchte Patronen (%d verbraucht, %d normale)" % [consumed, _shots_by(f, "own")])
 	f.scope.free()
+
+
+## N4 (M4c W1): Ausserhalb der Kampagne zaehlt der Magazinvorrat der Person nicht. Eine Person MIT Behaelter, aber ohne
+## Magazine, schiesst im Skirmish (Kampagnenmodus aus) nach dem ersten Magazin weiter (nachladen ja, nie leer); im
+## Kampagnenmodus bleibt sie nach dem ersten Magazin bei "Keine Munition" (A1).
+func _test_n4_outside_campaign_unlimited() -> void:
+	var f := _ammo_rig(_duel("pistol", "none"), {})
+	f.sup.set_campaign_magazine_mode(false)
+	_check(f.sup._inventory.has("unit:own:backpack"), "N4: Vorbedingung: die Person hat einen Behaelter ohne Magazine")
+	_check(not bool(f.sim.person_has_magazine_store("own")), "N4: ausserhalb der Kampagne gibt es keinen zaehlenden Magazinvorrat")
+	var states := {}
+	for i in range(500):
+		_run_ticks(f, 3)
+		states[String(_status(f, "own").get("state", ""))] = true
+	var shots := _shots_by(f, "own")
+	_check(shots > 2 * PISTOL_MAG, "N4: ohne Kampagne schiesst sie weit mehr als zwei Magazine (%d)" % shots)
+	_check(states.has("reloading") and not states.has("empty"), "N4: sie laedt nach (Magazingroesse und Pause gelten) und geht nie leer (%s)" % str(states.keys()))
+	_check(String(f.driver.get_unit_ammo_text("own")) != "Keine Munition", "N4: Anzeige nie 'Keine Munition'")
+	f.scope.free()
+	var c := _ammo_rig(_duel("pistol", "none"), {})
+	_check(bool(c.sim.person_has_magazine_store("own")), "N4: im Kampagnenmodus zaehlt der Vorrat der Person")
+	_run_ticks(c, 600)
+	_check(_shots_by(c, "own") == PISTOL_MAG and String(c.driver.get_unit_ammo_text("own")) == "Keine Munition", "N4: im Kampagnenmodus nach einem Magazin 'Keine Munition' (%d)" % _shots_by(c, "own"))
+	c.scope.free()
+
+
+## N5 (M4c K1): magazine_scale 0 oder negativ (oder keine Zahl) gilt nicht als 0.1, sondern wie fehlend als Vorgabe 2.0.
+func _test_n5_magazine_scale_fallback() -> void:
+	var rules = preload("res://scripts/core/ammo_rules.gd")
+	_check(is_equal_approx(rules.magazine_scale({"magazine_scale": 0}), 2.0), "N5: magazine_scale 0 -> 2.0")
+	_check(is_equal_approx(rules.magazine_scale({"magazine_scale": -1.5}), 2.0), "N5: magazine_scale negativ -> 2.0")
+	_check(is_equal_approx(rules.magazine_scale({"magazine_scale": "x"}), 2.0) and is_equal_approx(rules.magazine_scale({}), 2.0), "N5: fehlend oder keine Zahl -> 2.0")
+	_check(is_equal_approx(rules.magazine_scale({"magazine_scale": 1.0}), 1.0), "N5: gueltiger Wert 1.0 bleibt")
+	_check(rules.effective_magazine_size(12, {"magazine_scale": 0}) == 24, "N5: Pistole bei magazine_scale 0 wirksam 24, nicht 1")

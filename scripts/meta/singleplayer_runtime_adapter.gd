@@ -165,6 +165,7 @@ func configure(flow: Node, screen: Control) -> void:
 	_travel.configure()
 	_space_encounter = load("res://scripts/core/campaign_space_encounter.gd").new()
 	_campaign_mode = bool(_flow.call("is_campaign_start"))
+	_supply.set_campaign_magazine_mode(_campaign_mode)  # M4c: Magazinvorrat der Person zaehlt nur in der Kampagne
 	if _campaign_mode:
 		_onboarding = load("res://scripts/core/campaign_onboarding_state.gd").new()
 		_onboarding.configure()

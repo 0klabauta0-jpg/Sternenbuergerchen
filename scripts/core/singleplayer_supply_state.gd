@@ -1107,6 +1107,18 @@ func person_magazine_count(unit_id: String, ammo_class: String) -> int:
 func person_has_container(unit_id: String) -> bool:
 	return _inventory.has("unit:" + unit_id + ":backpack")
 
+## Kampagnenmodus der Munition (nicht gespeichert, vom Adapter je Lauf gesetzt): NUR dort zaehlt der Magazinvorrat der Person.
+## Ausserhalb (Skirmish, Mehrspieler, Testlagen ohne Kampagnenstand) gibt es weder Startausstattung noch Auffuellen, also
+## haben alle Einheiten unbegrenzte Reserve wie die Gegner (nachladen muessen sie weiter, die Magazingroesse gilt weiter).
+var _campaign_magazine_mode: bool = false
+
+func set_campaign_magazine_mode(active: bool) -> void:
+	_campaign_magazine_mode = active
+
+## Fuehrt das Spiel fuer die Person einen Magazinvorrat, der im Gefecht zaehlt? Nur im Kampagnenmodus und mit eigenem Behaelter.
+func person_has_magazine_store(unit_id: String) -> bool:
+	return _campaign_magazine_mode and person_has_container(unit_id)
+
 ## Zieht ein Reservemagazin der Sorte ab (Nachladen im Gefecht); false, wenn die Person keines traegt. Das Magazin ist verbraucht.
 func take_person_magazine(unit_id: String, ammo_class: String) -> bool:
 	var bag: Dictionary = _inventory.get("unit:" + unit_id + ":backpack", {})

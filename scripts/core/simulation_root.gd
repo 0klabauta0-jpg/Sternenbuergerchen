@@ -278,10 +278,11 @@ func get_person_magazine_count(unit_id: String, ammo_class: String) -> int:
 	return int(_singleplayer_supply_owner.call("person_magazine_count", unit_id, ammo_class))
 
 ## Fuehrt das Spiel fuer die Person einen Bestand (eigener Behaelter)? Ohne Versorgung (Tests, Skirmish) und fuer Personen ohne
-## Behaelter: nein; sie gelten im Gefecht als unbegrenzt versorgt (laden nach, gehen nie leer aus), wie die Gegner.
+## Behaelter und ausserhalb der Kampagne (M4c: Skirmish, Mehrspieler): nein; sie gelten im Gefecht als unbegrenzt versorgt
+## (laden nach, gehen nie leer aus), wie die Gegner.
 func person_has_magazine_store(unit_id: String) -> bool:
-	if _singleplayer_supply_owner == null or not _singleplayer_supply_owner.has_method("person_has_container"): return false
-	return bool(_singleplayer_supply_owner.call("person_has_container", unit_id))
+	if _singleplayer_supply_owner == null or not _singleplayer_supply_owner.has_method("person_has_magazine_store"): return false
+	return bool(_singleplayer_supply_owner.call("person_has_magazine_store", unit_id))
 
 ## Zieht ein Reservemagazin ab (Nachladen); nur der Host fuehrt das Gefecht, also auch nur er bucht den Verbrauch.
 func take_person_magazine(unit_id: String, ammo_class: String) -> bool:

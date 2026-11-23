@@ -53,12 +53,12 @@ static func reload_scale(rules: Dictionary) -> int:
 	var value: Variant = rules.get("reload_scale", DEFAULT_RELOAD_SCALE)
 	return maxi(1, int(value)) if _is_number(value) else DEFAULT_RELOAD_SCALE
 
-## Faktor auf magazine_size der Waffe fuer die wirksame Magazingroesse im Gefecht (M4b); ohne Eintrag 2.0, nie unter 0.1.
+## Faktor auf magazine_size der Waffe fuer die wirksame Magazingroesse im Gefecht (M4b); ohne Eintrag (oder 0, negativ, keine Zahl) 2.0.
 const DEFAULT_MAGAZINE_SCALE := 2.0
 
 static func magazine_scale(rules: Dictionary) -> float:
 	var value: Variant = rules.get("magazine_scale", DEFAULT_MAGAZINE_SCALE)
-	return maxf(0.1, float(value)) if _is_number(value) else DEFAULT_MAGAZINE_SCALE
+	return float(value) if _is_number(value) and float(value) > 0.0 else DEFAULT_MAGAZINE_SCALE  # M4c: 0 oder negativ -> Vorgabe
 
 ## Wirksame Magazingroesse: magazine_size x magazine_scale, gerundet, mindestens 1 (0 bleibt 0 = kein Munitionsbedarf).
 static func effective_magazine_size(magazine_size: int, rules: Dictionary) -> int:
