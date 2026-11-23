@@ -332,7 +332,9 @@ func _fall_2_treibstoff() -> bool:
 	# Die Meldung nennt benoetigte und vorhandene Menge (Auftrag 21.11.); der Hinweis zum Auftanken kommt erst mit dem Tankdienst (spaetere Abschnitte).
 	_check(stop_text.contains("Benötigt") and stop_text.contains("vorhanden"), "Fall 2: die Meldung nennt benoetigte und vorhandene Menge (beobachtet: \"%s\")" % stop_text)
 	var fuel_after_stop := _fuel_now()
-	_check(is_equal_approx(fuel_after_stop, fuel - 2.0), "Fall 2: gebucht ist nur das angenommene Abheben (2), der abgelehnte Sprung bucht nichts (vorher %s, nachher %s)" % [str(fuel), str(fuel_after_stop)])
+	# Die Abhebekosten stehen je Route in den Daten (leg_fuel_costs); die Erreichbarkeitsanzeige nennt sie als needed_next der ersten Etappe (hier Heimat>Satellit: 1).
+	var launch_cost: float = float(satellite_reach.get("needed_next", 2.0))
+	_check(is_equal_approx(fuel_after_stop, fuel - launch_cost), "Fall 2: gebucht ist nur das angenommene Abheben (%s laut Erreichbarkeit), der abgelehnte Sprung bucht nichts (vorher %s, nachher %s)" % [str(launch_cost), str(fuel), str(fuel_after_stop)])
 	# 2.2b: Steht das Schiff nach dem Stopp irgendwo im Weltraum? Dann muss es von dort heim.
 	if bool(Dictionary(low.start).get("ok", false)):
 		print("K2_FALL2_STOPPED_IN_SPACE phase=%s orbit=%s" % [String(_space().get("phase", "")), String(_space().get("orbit_id", ""))])
