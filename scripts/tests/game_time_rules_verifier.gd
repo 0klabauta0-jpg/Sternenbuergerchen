@@ -1,0 +1,155 @@
+extends SceneTree
+## G5b: Spielregeln rechnen in Spielzeit (Simulations-Ticks, 1 Tick = 1/60 s), nicht nach Wanduhr oder Bildzeit.
+## Echter Controller, echte SimulationRoot, echter Gefechtstreiber (mission_reactivity_test.tscn); die Ticks setzt der Test
+## von Hand (sim._physics_process), die Bilder ebenfalls (controller._process). Zwischen den Ticks wird nie gewartet.
+const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
+const SIMULATION_ROOT_SCRIPT: GDScript = preload("res://scripts/core/simulation_root.gd")
+const FIRETEAM_ID: String = "blue"
+const TICK: float = 1.0 / 60.0
+const ENEMY_NODES: Array[String] = ["EnemyDelta", "EnemyEcho"]
+
+var _passed: int = 0
+var _failed: int = 0
+
+
+class StubTerrain:
+	extends RefCounted
+
+	func world_to_grid(world_pos: Vector2) -> Vector2i:
+		return Vector2i(roundi(world_pos.x / 32.0), roundi(world_pos.y / 32.0))
+
+	func is_walkable(_grid_pos: Vector2i) -> bool:
+		return true
+
+
+class StubUnit:
+	extends Node
+
+	func get_unit_id() -> String:
+		return "stub_unit"
+
+	func is_in_contact() -> bool:
+		return true
+
+
+func _init() -> void:
+	call_deferred("_run_tests")
+
+
+func _run_tests() -> void:
+	print("=== game_time_rules_verifier ===")
+	await _test_t1_soft_waypoint_completion()
+	_test_t2_contact_path_recompute_lock()
+	await _test_t3_mission_duration()
+	print("GAME_TIME_RULES passed=%d failed=%d" % [_passed, _failed])
+	quit(1 if _failed > 0 else 0)
+
+
+func _check(ok: bool, label: String) -> void:
+	if ok:
+		_passed += 1
+		print("PASS: ", label)
+	else:
+		_failed += 1
+		print("FAIL: ", label)
+
+
+func _open_scene() -> Node:
+	var scene: Node = MISSION_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	# Sofort anhalten, bevor ein echter Physik-Tick oder ein echtes Bild laeuft: ab hier setzt nur der Test die Zeit.
+	scene.get_node("SimulationRoot").set_physics_process(false)
+	scene.get_node("TacticalController").set_process(false)
+	for i in 10:
+		await process_frame
+	return scene
+
+
+func _close_scene(scene: Node) -> void:
+	scene.queue_free()
+	for i in 3:
+		await process_frame
+
+
+func _step(sim: Node, ticks: int) -> void:
+	for i in ticks:
+		sim._physics_process(TICK)
+
+
+func _keep_enemies_down(scene: Node) -> void:
+	for node_name in ENEMY_NODES:
+		var enemy: Node = scene.get_node(node_name)
+		if String(enemy.call("get_vital_state")) == "fit":
+			enemy.call("apply_damage", 9999)
+
+
+func _start_take(scene: Node) -> bool:
+	var controller: Node = scene.get_node("TacticalController")
+	var target: Vector2 = scene.get_node("EnemyDelta").global_position
+	controller.call("_set_selected_fireteams", PackedStringArray([FIRETEAM_ID]), false)
+	controller.call("set_selected_fireteams_tactical_stance", "aggressive")
+	if not bool(controller.call("issue_right_click_command_for_test", target, "take", false)):
+		return false
+	return bool(controller.call("execute_selected_fireteam_orders"))
+
+
+## Weicher Wegpunkt-Abschluss: 2500 ms Spielzeit = 150 Ticks, auch wenn die Ticks ohne Wartezeit durchlaufen.
+func _test_t1_soft_waypoint_completion() -> void:
+	var scene: Node = await _open_scene()
+	var sim: Node = scene.get_node("SimulationRoot")
+	var controller: Node = scene.get_node("TacticalController")
+	_check(controller.has_method("_game_now_msec"), "T1 Aufbau: der Controller hat die Spielzeit-Hilfsfunktion _game_now_msec")
+	_step(sim, 1)
+	var started: int = int(controller.call("_game_now_msec")) if controller.has_method("_game_now_msec") else Time.get_ticks_msec()
+	var state: Dictionary = {"started_msec": started}
+	_step(sim, 149)
+	_check(not bool(controller.call("_is_phase_waypoint_soft_completion_allowed", state)), "T1 Nach 149 Ticks ist der weiche Abschluss noch nicht erlaubt")
+	_step(sim, 1)
+	_check(bool(controller.call("_is_phase_waypoint_soft_completion_allowed", state)), "T1 Nach 150 Ticks (2,5 s Spielzeit) ist der weiche Abschluss erlaubt")
+	_keep_enemies_down(scene)
+	_check(_start_take(scene), "T1 Aufbau: TAKE gestartet")
+	var execution: Dictionary = Dictionary(Dictionary(controller.get("_phase_execution_by_fireteam")).get(FIRETEAM_ID, {}))
+	var real_started: int = int(execution.get("started_msec", -1))
+	_step(sim, 3)
+	var elapsed_msec: int = int(controller.call("_game_now_msec")) - real_started if controller.has_method("_game_now_msec") else -1
+	_check(real_started > 0 and elapsed_msec == 50, "T1 started_msec des echten Befehlsstands ist Spielzeit: 3 Ticks spaeter 50 ms (ist %d)" % elapsed_msec)
+	await _close_scene(scene)
+
+
+## Wegneuberechnung bei Feindkontakt: Sperre 600 ms Spielzeit = 36 Ticks, nicht Wanduhr.
+func _test_t2_contact_path_recompute_lock() -> void:
+	var sim: Node = SIMULATION_ROOT_SCRIPT.new()
+	var unit: Node = StubUnit.new()
+	var terrain := StubTerrain.new()
+	sim.set("tick_counter", 100)
+	var cmd: Dictionary = {"requeue_until_target": true}
+	var far_path: Array = [Vector2(640.0, 0.0)]
+	var same_path: Array = [Vector2(128.0, 0.0)]
+	var target: Vector2 = Vector2(128.0, 0.0)
+	var first: bool = bool(sim.call("_should_recompute_move_path", cmd, unit, far_path, Vector2.ZERO, target, terrain))
+	_check(first, "T2 Aufbau: abweichendes Wegziel loest die Neuberechnung aus")
+	var locked: Dictionary = sim.get("_contact_path_recompute_ready_at_msec")
+	var now_msec: int = int(sim.call("get_game_msec")) if sim.has_method("get_game_msec") else -1
+	_check(now_msec >= 0 and int(locked.get("stub_unit", -1)) - now_msec == 600, "T2 Sperre endet 600 ms Spielzeit nach dem Auslosen (Differenz %d)" % (int(locked.get("stub_unit", -1)) - now_msec))
+	_check(not bool(sim.call("_should_recompute_move_path", cmd, unit, same_path, Vector2.ZERO, target, terrain)), "T2 Im selben Tick ist die Neuberechnung gesperrt")
+	sim.set("tick_counter", 135)
+	_check(not bool(sim.call("_should_recompute_move_path", cmd, unit, same_path, Vector2.ZERO, target, terrain)), "T2 Nach 35 Ticks (583 ms) noch gesperrt")
+	sim.set("tick_counter", 136)
+	_check(bool(sim.call("_should_recompute_move_path", cmd, unit, same_path, Vector2.ZERO, target, terrain)), "T2 Nach 36 Ticks (600 ms) wieder frei")
+	unit.free()
+	sim.free()
+
+
+## Einsatzdauer: N Ticks = N/60 s plus gespeicherter Versatz.
+func _test_t3_mission_duration() -> void:
+	var scene: Node = await _open_scene()
+	var sim: Node = scene.get_node("SimulationRoot")
+	var driver: Node = scene.get_node("CombatLoopDriver")
+	_check(bool(Dictionary(driver.call("restore_checkpoint_elapsed_time", 5000)).get("ok", false)), "T3 Aufbau: Versatz 5000 ms gesetzt")
+	_step(sim, 120)
+	var after_120: float = float(driver.call("_get_duration_seconds"))
+	_check(absf(after_120 - 7.0) < 0.02, "T3 120 Ticks + 5 s Versatz = 7,00 s (ist %.3f)" % after_120)
+	_step(sim, 60)
+	var after_180: float = float(driver.call("_get_duration_seconds"))
+	_check(absf(after_180 - 8.0) < 0.02, "T3 180 Ticks + 5 s Versatz = 8,00 s (ist %.3f)" % after_180)
+	await _close_scene(scene)
