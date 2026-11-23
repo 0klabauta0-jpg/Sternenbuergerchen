@@ -158,6 +158,7 @@ func _run() -> void:
 	_test_t9_read_time_modifiers()
 	await _test_t6_plan()
 	await _test_t10_planning_sync()
+	await _test_t14_after_combat_end()
 	CADENCE.reset_config()
 	await process_frame
 	print("suppression_combat_verifier passed=%d failed=%d" % [passed, failed])
@@ -928,6 +929,75 @@ func _test_t10_planning_sync() -> void:
 	_check(_first_waypoint_status(controller.call("get_order_plans_snapshot"), "blue") != "interrupted", "T10: kein Plan bleibt auf interrupted stehen")
 	scene.queue_free()
 	await process_frame
+
+
+# ---- T14: Gefechtsende (Nachbesserung 2, N1) ---------------------------------
+
+## Nach dem Gefechtsende laeuft der Unterdrueckungs-Schritt weiter (ueber den echten _on_tick_processed): der Wert klingt
+## normal ab, die Stufe faellt, Tempo, Plan und GO-Erholung werden wieder frei. Kein hartes Zuruecksetzen.
+func _test_t14_after_combat_end() -> void:
+	var scene = load(SCENE_PATH).instantiate()
+	root.add_child(scene)
+	for _index in range(10):
+		await process_frame
+	var controller = scene.get_node("TacticalController")
+	var driver = scene.get_node("CombatLoopDriver")
+	var sim = scene.get_node("SimulationRoot")
+	sim.set_physics_process(false)
+	sim.set_process(false)
+	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
+	controller.call("_create_waypoints_for_selected_fireteams", Vector2(240.0, 170.0))
+	controller.call("advance_to_next_phase")
+	var unit_alpha = scene.get_node("UnitAlpha")
+	var key := String(_call_quiet(driver, "suppression_group_key", [unit_alpha], ""))
+	var tick := 50040
+	for i in range(60):
+		_call(driver, "note_suppression_shot", [unit_alpha, 18, true])
+		tick += 30
+		_call(driver, "_advance_suppression", [tick])
+		controller.call("_update_fireteam_suppression", 0.016)
+		if int(_call_quiet(driver, "get_suppression_level", [key], 0)) >= 3:
+			break
+	var tracker = _call_quiet(driver, "get_suppression_tracker")
+	if tracker != null:
+		tracker.set_state("enemy:probe", 5.0, 3)
+	_check(int(_call_quiet(driver, "get_suppression_level", [key], 0)) >= 3, "T14: eigenes Fireteam steht bei Gefechtsende auf Stufe 3")
+	_check(_first_waypoint_status(controller.call("get_order_plans_snapshot"), "blue") == "interrupted", "T14: der Plan ist unterbrochen")
+	driver.set("_combat_finished", true)
+	var cmd := {"command_type": "move_to_position", "target_position": unit_alpha.global_position + Vector2(400.0, 0.0)}
+	var steps := 0
+	while steps < 80:
+		tick += 30
+		driver.call("_on_tick_processed", tick)
+		controller.call("_update_fireteam_suppression", 0.016)
+		steps += 1
+		if int(_call_quiet(driver, "get_suppression_level", [key], 0)) == 0:
+			break
+	_check(bool(driver.get("_combat_finished")), "T14: das Gefecht ist weiter beendet (kein Neustart durch den Test)")
+	_check(int(_call_quiet(driver, "get_suppression_level", [key], 0)) == 0 and steps < 80, "T14: nach Gefechtsende faellt die Stufe nach endlich vielen Schritten auf 0 (%d Schritte)" % steps)
+	_check(absf(float(_call_quiet(driver, "get_suppression_move_factor", [unit_alpha, cmd], 0.0)) - 1.0) < 0.001, "T14: der Tempofaktor ist wieder 1,0")
+	_check(not bool(controller.get("_suppression_interrupt_pending_by_fireteam").get("blue", false)), "T14: die Vormerkung der Unterbrechung ist erledigt")
+	_check(_first_waypoint_status(controller.call("get_order_plans_snapshot"), "blue") != "interrupted", "T14: der Plan ist fortgesetzt")
+	_check(not bool(controller.call("_is_fireteam_go_recovery_blocked", "blue")), "T14: GO-Erholung ist wieder frei")
+	# Gegnergruppe: dieselbe Abklingzeit nach Gefechtsende (Sonde ohne Mitglieder wird vergessen, daher eine echte Gruppe).
+	scene.queue_free()
+	await process_frame
+	var f := _rig([
+		{"id": "own", "team": "blue", "grid": CENTER, "facing": 0},
+		{"id": "enemy", "team": "red", "grid": CENTER + HEX.DIRECTIONS[0] * 3, "facing": 3},
+	])
+	f.driver.set("_combat_finished", true)
+	_pin(f, "enemy", 3, 5.0)
+	var ekey := _key(f, "enemy")
+	var etick := 60000
+	var esteps := 0
+	while esteps < 80 and int(_call_quiet(f.driver, "get_suppression_level", [ekey], 0)) > 0:
+		etick += 30
+		f.driver.call("_on_tick_processed", etick)
+		esteps += 1
+	_check(int(_call_quiet(f.driver, "get_suppression_level", [ekey], 0)) == 0 and esteps < 80, "T14: Gegnergruppe faellt nach Gefechtsende auf 0 (%d Schritte)" % esteps)
+	_check(esteps >= 3, "T14: das Abklingen laeuft normal ueber mehrere Schritte, kein Zuruecksetzen auf einen Schlag (%d)" % esteps)
+	f.scope.free()
 
 
 # ---- T6: Plan -----------------------------------------------------------------

@@ -1729,6 +1729,9 @@ func _on_tick_processed(tick: int) -> void:
 		if _try_recover_premature_startup_resolution():
 			pass
 		else:
+			# FT-0b N1: Die Unterdrueckung klingt auch nach Gefechtsende normal ab (gleicher Schritt wie im Gefecht, kein
+			# hartes Zuruecksetzen); sonst bleiben Tempo, Plan und GO-Erholung bis zum naechsten Einsatz gesperrt.
+			_advance_suppression(tick)
 			_update_status_label("resolved")
 			_sync_objective_countdown_state()
 			if profile_enabled:
