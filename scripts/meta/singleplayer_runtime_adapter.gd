@@ -678,6 +678,8 @@ func bind_mission_air_support(mission: Node) -> Dictionary:
 	if not is_instance_valid(_flow) or not is_instance_valid(mission) or _flow.call("get_active_mission") != mission or not _flow.is_ancestor_of(mission): return {"ok":false, "reason":"mission_context_changed"}
 	var mission_root: Node = mission.get_node_or_null("SimulationRoot")
 	if mission_root == null or _simulation == null: return {"ok":false, "reason":"runtime_unavailable"}
+	# M4e: nur in der Kampagne zaehlt der Magazinvorrat der Person auch im Einsatz (schmaler Verweis, kein Besitzerwechsel).
+	if _campaign_mode and _supply != null and mission_root.has_method("bind_mission_magazine_supply"): mission_root.call("bind_mission_magazine_supply", _supply)
 	return mission_root.bind_air_support_source(_simulation, self, String(mission.get_meta("location_id", "")))
 
 func get_campaign_entry_feedback() -> Dictionary:
