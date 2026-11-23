@@ -4852,6 +4852,10 @@ func _physics_process(delta: float) -> void:
 		_advance_space_flights(delta, tick_counter)
 	_advance_air_support_orders(delta)
 	is_processing_tick = true
+	# G5d: _process schiebt die Knoten je Bild um einen bildtaktabhaengigen Bruchteil vor (nur Darstellung). Alle Regeln dieses
+	# Ticks (Befehle, Effekte, Abstand, Zielnahme) sollen den exakten Tickstand lesen: Bruchteil 0.0 ist der Stand, den der
+	# vorige Tick hinterlassen hat (dieselbe Projektion wie nach der Bewegung unten).
+	_project_hex_ground_actors(0.0)
 	_hex_boundary_facing.clear()
 	_begin_navigation_budget_tick()
 	_advance_hex_ground_tick()
@@ -4906,6 +4910,9 @@ func _physics_process(delta: float) -> void:
 		profile_scopes["snapshot_broadcast_usec"] = Time.get_ticks_usec() - scope_started_usec
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
+	# G5d: Rueckrufe von tick_processed (Gefechtstreiber, Befehlsausfuehrung, Zeitgeber) lesen den exakten Tickstand, auch wenn
+	# Effekte oder Abstandspruefung nach der Bewegung etwas verschoben haben.
+	_project_hex_ground_actors(0.0)
 	tick_processed.emit(tick_counter)
 	if profile_enabled:
 		profile_scopes["tick_signal_emit_usec"] = Time.get_ticks_usec() - scope_started_usec
@@ -4914,6 +4921,11 @@ func _physics_process(delta: float) -> void:
 
 func get_last_tick_delta() -> float:
 	return _last_tick_delta
+
+
+## Spielzeit in Millisekunden (G5b): Simulations-Ticks zu 1/60 s, ganzzahlig. Spielregeln rechnen damit statt mit der Wanduhr.
+func get_game_msec() -> int:
+	return int(tick_counter) * 1000 / 60
 
 
 func _should_skip_local_tick_processing() -> bool:
@@ -6214,7 +6226,7 @@ func _should_recompute_move_path(
 	var current_final_waypoint: Vector2 = _coerce_vector2(existing_path[-1], target_position)
 	var current_final_grid: Vector2i = terrain_registry.call("world_to_grid", current_final_waypoint)
 	if current_final_grid != target_grid:
-		_contact_path_recompute_ready_at_msec[unit_id] = Time.get_ticks_msec() + CONTACT_PATH_RECOMPUTE_INTERVAL_MSEC
+		_contact_path_recompute_ready_at_msec[unit_id] = get_game_msec() + CONTACT_PATH_RECOMPUTE_INTERVAL_MSEC
 		return true
 
 	var current_grid: Vector2i = terrain_registry.call("world_to_grid", current_position)
@@ -6222,8 +6234,14 @@ func _should_recompute_move_path(
 		_contact_path_recompute_ready_at_msec.erase(unit_id)
 		return false
 
-	var now_msec: int = Time.get_ticks_msec()
-	if int(_contact_path_recompute_ready_at_msec.get(unit_id, 0)) > now_msec:
+	var now_msec: int = get_game_msec()
+	var ready_at_msec: int = int(_contact_path_recompute_ready_at_msec.get(unit_id, 0))
+	# G5d: Eine Sperre kann nie weiter in der Zukunft liegen als ihr Intervall. Ist der Stempel weiter weg (Tickzaehler zurueck
+	# oder Stempel aus der anderen Uhr), beginnt die Sperre neu (wie beim weichen Wegpunkt-Abschluss im Controller).
+	if ready_at_msec > now_msec + CONTACT_PATH_RECOMPUTE_INTERVAL_MSEC:
+		_contact_path_recompute_ready_at_msec[unit_id] = now_msec + CONTACT_PATH_RECOMPUTE_INTERVAL_MSEC
+		return false
+	if ready_at_msec > now_msec:
 		return false
 
 	_contact_path_recompute_ready_at_msec[unit_id] = now_msec + CONTACT_PATH_RECOMPUTE_INTERVAL_MSEC

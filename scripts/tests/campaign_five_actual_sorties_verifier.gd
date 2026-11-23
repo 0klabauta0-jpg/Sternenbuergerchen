@@ -33,8 +33,12 @@ func _wait(predicate: Callable, milliseconds: int, label: String) -> bool:
 		var deadline := Time.get_ticks_msec() + milliseconds
 		var next_trace := 0
 		while Time.get_ticks_msec() < deadline:
-			if bool(predicate.call()): return _check(true, label)
+			_snap_actors_to_tick()
+			var dbg_ok: bool = bool(predicate.call())
+			_dbg_poll(label, dbg_ok)
+			if dbg_ok: return _check(true, label)
 			if Time.get_ticks_msec() >= next_trace:
+				print("FIVE_DBG wall_probe combat tick=%d" % _dbg_tick())
 				_trace_actual_combat(label)
 				next_trace = Time.get_ticks_msec() + 5000
 			await physics_frame
@@ -48,9 +52,13 @@ func _wait(predicate: Callable, milliseconds: int, label: String) -> bool:
 		var progress: Dictionary = {}
 		var latest: Dictionary = {}
 		while Time.get_ticks_msec() < deadline:
-			if bool(predicate.call()): return _check(true, label)
+			_snap_actors_to_tick()
+			var dbg_ok2: bool = bool(predicate.call())
+			_dbg_poll(label, dbg_ok2)
+			if dbg_ok2: return _check(true, label)
 			var now := Time.get_ticks_msec()
 			if now >= next_trace:
+				print("FIVE_DBG wall_probe approach tick=%d" % _dbg_tick())
 				latest = _trace_actual_approach(label)
 				for actor: Dictionary in latest.get("actors", []):
 					var id := String(actor.id)
@@ -113,7 +121,7 @@ func _trace_actual_combat(label: String) -> void:
 			continue
 		others.append({"id":id,"team":actor.get_team_id(),"position":actor.global_position,"vital":actor.get_vital_state(),"hp":actor.get_health(),"suppression_level":level,"ground":simulation.get_hex_unit_state(id)})
 	print("FIVE_COMBAT_TRACE ",var_to_str({"label":label,"msec":Time.get_ticks_msec(),"tick":simulation.get_tick(),"own_team":own_team,"own_status":own_status,"other_actors":others,"scenario":mission.get_node("CombatLoopDriver").get_mission_scenario_runtime_gate_snapshot(),"own_actor_count":Array(approach.get("actors",[])).size()}))
-	_trace_fire_decision_units(label, mission)
+	# FIVE_FIRE_UNIT/FIVE_FIRE_DECISION kommen seit G5b aus dem Tick-Signal (_on_trace_tick), nicht mehr aus diesem Wanduhr-Takt.
 
 
 ## Nur Ausgabe (Stillstand-Suche 23.11.2026): je Einheit beider Seiten alles, was fuer die Schussentscheidung zaehlt.
@@ -170,9 +178,95 @@ func _trace_fire_decision_units(label: String, mission: Node) -> void:
 			"candidate_index":Dictionary(driver.get("_fire_candidate_target_ids_by_attacker_id")).get(id,null),"candidate_index_tick":driver.get("_fire_candidate_index_tick"),
 			"move_readout":"%s/%s" % [Dictionary(simulation.call("get_hex_movement_readout", id)).get("status",""), Dictionary(simulation.call("get_hex_movement_readout", id)).get("reason","")],
 			"contact_range":driver.get("contact_range"),"opponents":seen}
-		print("FIVE_FIRE_UNIT ", label, " ", str(row))
+		_emit_trace_line("FIVE_FIRE_UNIT " + label + " " + str(row))
 	var diag: Dictionary = driver.call("get_contact_decision_diagnostics_snapshot")
-	print("FIVE_FIRE_DECISION ", label, " tick=", simulation.get_tick(), " reason=", diag.get("reason",""), " status=", diag.get("status",""), " decision_tick=", diag.get("tick",""), " next_attack_tick=", diag.get("next_attack_tick",""), " detection_pending=", diag.get("detection_pending_count",""), " candidate=", str(diag.get("candidate", diag.get("attacker_id",""))).left(400))
+	_emit_trace_line("FIVE_FIRE_DECISION " + label + " tick=" + str(simulation.get_tick()) + " reason=" + str(diag.get("reason","")) + " status=" + str(diag.get("status","")) + " decision_tick=" + str(diag.get("tick","")) + " next_attack_tick=" + str(diag.get("next_attack_tick","")) + " detection_pending=" + str(diag.get("detection_pending_count","")) + " candidate=" + str(diag.get("candidate", diag.get("attacker_id",""))).left(400))
+
+## G5b S3: Die Schussentscheidungs-Spur wird an festen Simulations-Ticks gezogen (Signal tick_processed, nicht je Bild und
+## nicht nach Wanduhr) und in eine Pruefsumme gefuettert. Zwei Laeufe mit gleichem Ablauf ergeben dieselbe Pruefsumme.
+const FIVE_TRACE_TICK_INTERVAL: int = 300
+var _trace_hash: HashingContext = null
+var _trace_line_count: int = 0
+func _emit_trace_line(line: String) -> void:
+	print(line)
+	if _trace_hash == null:
+		_trace_hash = HashingContext.new()
+		_trace_hash.start(HashingContext.HASH_SHA256)
+	_trace_hash.update((line + "\n").to_utf8_buffer())
+	_trace_line_count += 1
+func _install_tick_trace() -> void:
+	root.get_tree().node_added.connect(_on_trace_node_added)
+func _on_trace_node_added(node: Node) -> void:
+	if node.name == "SimulationRoot" and node.has_signal("tick_processed"):
+		node.connect("tick_processed", _on_trace_tick.bind(node))
+## G5c: Messzeilen mit Praefix FIVE_DBG. Sie laufen ueber print, NICHT ueber _emit_trace_line, und gehen nicht in die Pruefsumme ein.
+var _dbg_last_cmd: Dictionary = {}
+func _dbg_scenario(simulation: Node) -> String:
+	var mission: Node = simulation.get_parent() if is_instance_valid(simulation) else null
+	if mission == null: return "?"
+	var identity: Dictionary = mission.get_meta("singleplayer_mission_identity", {})
+	return String(identity.get("scenario_id", "?"))
+func _dbg_active_simulation() -> Node:
+	if not is_instance_valid(_flow): return null
+	var mission = _flow.get("_active_mission")
+	if mission == null or not is_instance_valid(mission): return null
+	return mission.get_node_or_null("SimulationRoot")
+func _check(value: bool, label: String) -> bool:
+	var sim: Node = _dbg_active_simulation()
+	print("FIVE_DBG check scenario=%s tick=%d pf=%d fd=%d value=%s label=%s" % [_dbg_scenario(sim) if sim != null else "-", int(sim.call("get_tick")) if sim != null else -1, Engine.get_physics_frames(), Engine.get_frames_drawn(), str(value), label])
+	return super._check(value, label)
+## G5c (Ursache der Rest-Abweichung): SimulationRoot._process (simulation_root.gd ~4780) setzt die Knotenpositionen der Bodeneinheiten
+## je Bild auf Simulationsposition + Engine.get_physics_interpolation_fraction() (Darstellung, haengt vom Bildtakt/der Wanduhr ab).
+## Die Nutzungsabfrage (Mittelpunkt aus global_position) und die Naehe-Bedingungen des Pruefstands lesen diese Knotenpositionen.
+## Damit der Pruefstand nur auf dem Zustand des Ticks entscheidet, wird vor jeder Abfrage auf Bruchteil 0 (= Tickposition) zurueckgesetzt.
+func _snap_actors_to_tick() -> void:
+	var sim: Node = _dbg_active_simulation()
+	if sim != null and sim.has_method("_project_hex_ground_actors"):
+		sim.call("_project_hex_ground_actors", 0.0)
+func _dbg_tick() -> int:
+	var sim: Node = _dbg_active_simulation()
+	return int(sim.call("get_tick")) if sim != null else -1
+var _dbg_last_probe: String = ""
+func _dbg_poll(label: String, ok: bool) -> void:
+	var sim: Node = _dbg_active_simulation()
+	print("FIVE_DBG poll scenario=%s tick=%d pf=%d pr=%d ok=%s label=%s probe=%s" % [_dbg_scenario(sim) if sim != null else "-", _dbg_tick(), Engine.get_physics_frames(), Engine.get_process_frames(), str(ok), label, _dbg_last_probe])
+## Je Tick: Position des Truppfuehrers (Knoten) und Truppmittelpunkt (wie ihn die Nutzungsabfrage verwendet), dazu Physik-/Bildzaehler.
+func _dbg_watch_position(tick: int, simulation: Node) -> void:
+	var actor = simulation.call("_resolve_known_unit_for_contract", "campaign_leader") if simulation.has_method("_resolve_known_unit_for_contract") else null
+	if actor == null or not is_instance_valid(actor) or not (actor is Node2D): return
+	var controller: Node = simulation.get_parent().get_node_or_null("TacticalController")
+	var mean = controller.call("_resolve_fireteam_ground_use_position", _team_id) if controller != null and controller.has_method("_resolve_fireteam_ground_use_position") else null
+	print("FIVE_DBG pos scenario=%s tick=%d pf=%d fd=%d leader=%s mean=%s" % [_dbg_scenario(simulation), tick, Engine.get_physics_frames(), Engine.get_frames_drawn(), str((actor as Node2D).global_position), str(mean)])
+func _dbg_watch_leader(tick: int, simulation: Node) -> void:
+	if not simulation.has_method("_resolve_known_unit_for_contract"): return
+	var actor = simulation.call("_resolve_known_unit_for_contract", "campaign_leader")
+	if actor == null or not is_instance_valid(actor): return
+	var command = actor.call("get_current_unit_command") if actor.has_method("get_current_unit_command") else null
+	var text := "none"
+	if command != null and command.has_method("get"):
+		text = "%s/%s/%s/%s" % [str(command.get("command_type")), str(command.get("source_command_type")), str(command.get("status")), str(command.get("command_token"))]
+	var key: int = simulation.get_instance_id()
+	if String(_dbg_last_cmd.get(key, "")) == text: return
+	_dbg_last_cmd[key] = text
+	var state: Dictionary = simulation.get_hex_unit_state("campaign_leader")
+	print("FIVE_DBG leader_cmd scenario=%s tick=%d cmd=%s grid=%s" % [_dbg_scenario(simulation), tick, text, str(state.get("grid", null))])
+## G5c: Eine abgeschlossene Mission (Rueckkehr ans Schiff geschafft) laeuft als Simulation noch eine von Wanduhr/Bildtakt
+## abhaengige Zeit weiter, bis der Ablauf sie freigibt. Ihre Ticks gehen deshalb ab dem Abschluss nicht mehr in die Spur
+## und die Pruefsumme ein (Abschluss = Ende von _move_and_use fuer "ship_return", also ein tickfester Zeitpunkt).
+var _trace_closed_simulations: Dictionary = {}
+func _on_trace_tick(tick: int, simulation: Node) -> void:
+	if is_instance_valid(simulation):
+		_dbg_watch_leader(tick, simulation)
+		_dbg_watch_position(tick, simulation)
+		if _trace_closed_simulations.has(simulation.get_instance_id()): return
+	if tick <= 0 or tick % FIVE_TRACE_TICK_INTERVAL != 0 or not is_instance_valid(simulation): return
+	var mission: Node = simulation.get_parent()
+	if mission == null or mission.get_node_or_null("UnitRegistry") == null: return
+	_trace_fire_decision_units("tick%d" % tick, mission)
+func _finish() -> void:
+	var digest: String = _trace_hash.finish().hex_encode() if _trace_hash != null else "none"
+	print("FIVE_TRACE_DIGEST=", digest, " lines=", _trace_line_count)
+	await super._finish()
 
 ## M4d P2: Munitionsmessung je Einsatz. "abflug" (nach dem Auffuellen beim Abflug) und "heimkehr" (Ende des Gefechts, vor dem
 ## Auffuellen an der Heimatbasis) lesen je bewaffneter Person Magazine im Fach und Schuss im Magazin; im Einsatz muss der Schalter wahr sein.
@@ -275,6 +369,7 @@ func _all_crew_deployed(controller: Node) -> bool:
 
 func _run() -> void:
 	Engine.time_scale=4.0
+	_install_tick_trace()
 	_configure_entry()
 	_flow=FLOW.instantiate(); root.add_child(_flow)
 	await process_frame
@@ -411,8 +506,10 @@ func _remaining_missions() -> void:
 			if not await _wait(func():
 				if PackedStringArray(mission.get_node("CombatLoopDriver").get_mission_scenario_runtime_gate_snapshot().get("completed_step_ids",[])).has("clear_outpost"):return true
 				var active_ground_members:=0
+				_dbg_last_probe = ""
 				for id in _crew_ids:
 					var actor=sim.call("_resolve_known_unit_for_contract",String(id))
+					if is_instance_valid(actor): _dbg_last_probe += "%s:%s:%s:%s " % [String(id), str(actor.global_position), str(actor.get_vital_state()), str(sim.get_hex_unit_state(String(id)).is_empty())]
 					if not is_instance_valid(actor) or sim.get_hex_unit_state(String(id)).is_empty() or String(actor.get_vital_state())!="fit":continue
 					active_ground_members+=1
 					if actor.global_position.distance_to(enemy_target)>640.0:return false
@@ -505,6 +602,7 @@ func _move_and_use(mission: Node, interaction: String, step: String, map_path: S
 		if not is_instance_valid(controller):
 			return false
 		var entry: Dictionary = _find_interaction(controller.call("get_mission_interaction_runtime_use_state_snapshot"), interaction)
+		_dbg_last_probe = "status=%s dist=%s reason=%s" % [str(entry.get("runtime_use_status", "")), str(entry.get("distance_world", "")), str(entry.get("runtime_use_reason", ""))]
 		return String(entry.get("runtime_use_status", "")) == "usable", 180000, interaction + " becomes usable after real simulated approach"):
 		_dump("approach_" + interaction)
 		return false
@@ -522,6 +620,11 @@ func _move_and_use(mission: Node, interaction: String, step: String, map_path: S
 		return step == "return_to_ship" and String(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}).get("status", "")) == "completed", 45000, interaction + " actual timed Use commits required runtime step"):
 		_dump("use_execution_" + interaction)
 		return false
+	if interaction == "ship_return" and is_instance_valid(mission):
+		var closed_simulation: Node = mission.get_node_or_null("SimulationRoot")
+		if closed_simulation != null:
+			_trace_closed_simulations[closed_simulation.get_instance_id()] = true
+			print("FIVE_DBG trace_closed tick=%d" % int(closed_simulation.call("get_tick")))
 	return true
 
 

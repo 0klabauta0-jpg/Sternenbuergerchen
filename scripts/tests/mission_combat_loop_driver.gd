@@ -322,11 +322,14 @@ func _ready() -> void:
 	else:
 		call_deferred("_finish_readability_setup")
 	if mission_timer_started_at_msec != 0:
-		_mission_started_at_msec = mission_timer_started_at_msec
+		# Der Stempel kommt als Wanduhr von aussen (Meta-Ebene); in die Spielzeit des Treibers umrechnen.
+		_mission_started_at_msec = _game_now_msec() - (Time.get_ticks_msec() - mission_timer_started_at_msec)
+		if _mission_started_at_msec == 0:
+			_mission_started_at_msec = -1
 	elif preview_mode:
 		_mission_started_at_msec = 0
 	else:
-		_mission_started_at_msec = Time.get_ticks_msec()
+		_mission_started_at_msec = _game_now_msec()
 
 	if _runs_local_authority:
 		_sync_objective_countdown_state()
@@ -3112,7 +3115,7 @@ func _build_mission_scenario_runtime_gate_context() -> Dictionary:
 			cargo_state = bridged_cargo_state
 		cargo_hold_seconds = maxf(float(_mission_cargo_touchdown_snapshot.get("hold_seconds", cargo_hold_seconds)), 0.0)
 	return {
-		"now_msec": Time.get_ticks_msec(),
+		"now_msec": _game_now_msec(),
 		"objective_status": _get_objective_status(),
 		"friendly_team_id": friendly_team_id,
 		"enemy_group_fit_counts": _build_enemy_group_fit_counts(),
@@ -4935,7 +4938,7 @@ func _get_enemy_team_id() -> String:
 # Only a validated checkpoint transaction may call this before mission ticks resume.
 func restore_checkpoint_elapsed_time(elapsed_msec: int) -> Dictionary:
 	if elapsed_msec < 0 or elapsed_msec > 2678400000: return {"ok":false, "reason":"invalid_mission_elapsed"}
-	_mission_started_at_msec = maxi(Time.get_ticks_msec(), 1)
+	_mission_started_at_msec = maxi(_game_now_msec(), 1)
 	_checkpoint_elapsed_offset_msec = elapsed_msec
 	# Der Tickzaehler kann beim Laden zurueckspringen: Abkuehl-Eintraege aus dem alten Lauf verwerfen.
 	_enemy_reposition_ready_at_tick.clear()
@@ -4948,7 +4951,16 @@ func _get_duration_seconds() -> float:
 	if _mission_started_at_msec == 0:
 		return 0.0
 
-	return maxf(float(Time.get_ticks_msec() - _mission_started_at_msec + _checkpoint_elapsed_offset_msec) / 1000.0, 0.0)
+	return maxf(float(_game_now_msec() - _mission_started_at_msec + _checkpoint_elapsed_offset_msec) / 1000.0, 0.0)
+
+
+## Spielzeit in Millisekunden (G5b): Ticks der Simulation zu 1/60 s. Ohne lokal rechnende Simulation die Wanduhr.
+func _game_now_msec() -> int:
+	if _runs_local_authority:
+		var simulation_root = get_node_or_null(simulation_root_path)
+		if simulation_root != null and simulation_root.has_method("get_game_msec"):
+			return maxi(int(simulation_root.call("get_game_msec")), 1)
+	return Time.get_ticks_msec()
 
 
 func get_remaining_time_limit_seconds() -> float:
@@ -6592,7 +6604,7 @@ func reset_for_location_job(scenario_path: String) -> void:
 	# Reset only job execution, never the retained world, its units or Supply.
 	_combat_finished=false; _winning_team_id=""; _mission_result.clear()
 	_mission_result_condition_override=""; _resolved_without_seen_friendly=false
-	_has_seen_active_friendly_units=false; _mission_started_at_msec=Time.get_ticks_msec(); _checkpoint_elapsed_offset_msec=0
+	_has_seen_active_friendly_units=false; _mission_started_at_msec=_game_now_msec(); _checkpoint_elapsed_offset_msec=0
 	reset_suppression()
 	_reset_combat_facing_state()
 	configure_scenario_runtime_gates_from_file(scenario_path)

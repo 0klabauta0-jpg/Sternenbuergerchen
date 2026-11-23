@@ -353,6 +353,9 @@ const SUPPRESS_FIRE_PREVIEW_RADIUS_WORLD: float = 148.0
 const CARD_REFRESH_INTERVAL_SECONDS: float = 0.35
 const RUNTIME_HUD_HEAVY_REFRESH_INTERVAL_SECONDS: float = 1.0
 const FIRETEAM_SECURITY_REFRESH_INTERVAL_SECONDS: float = 0.20
+const FIRETEAM_SECURITY_REFRESH_TICKS: int = 12 # G5b: 0,20 s Spielzeit in Ticks (je Tick-Pfad)
+var _fireteam_security_refresh_ticks: int = 0
+var _fireteam_security_refresh_count: int = 0
 const AREA_ORDER_PREVIEW_REFRESH_MSEC: int = 80
 const AREA_ORDER_PREVIEW_SIGNATURE_STEP: float = 8.0
 const UNIT_SELECTION_PICK_RADIUS: float = 34.0
@@ -629,6 +632,10 @@ var _periodic_hud_stale_deferred_skip_count: int = 0
 var _periodic_hud_manager_fallback_count: int = 0
 var _periodic_hud_last_request_external: bool = false
 var _fireteam_security_refresh_time_remaining: float = 0.0
+# G5a: Befehlsausfuehrung je Simulations-Tick. Zaehler und Treiber-Tick sind nur zum Pruefen (Tests).
+var _order_execution_step_count: int = 0
+var _order_step_driver_tick_seen: int = -1
+var _order_tick_order_checked: bool = false
 var _fireteam_security_visuals_pending: bool = false
 var _mission_visible_frame_timing_debug_enabled: bool = false
 var _process_review_identity: Dictionary = {}
@@ -656,6 +663,12 @@ var _hex_ship_footprint_raster_jobs:=0
 var _hex_ship_footprint_cache_hits:=0
 var _drop_sequence_timer: float = 0.0
 var _drop_sequence_position: Vector2 = Vector2.ZERO
+# G5d: Darstellung des Absetzschiffs zwischen den Ticks. Die Regel-Lage (_drop_sequence_position) wird je Tick fortgeschrieben;
+# fuer die Anzeige wird zwischen dem Stand VOR dem letzten Tick und dem Stand danach interpoliert. Regeln lesen nie diese Lage.
+var _drop_sequence_prev_position: Vector2 = Vector2.ZERO
+var _drop_sequence_tick_position: Vector2 = Vector2.INF
+var _drop_sequence_step_limit: float = 0.0
+var _drop_sequence_last_presented: Vector2 = Vector2.INF
 var _drop_sequence_fireteam_name: String = "ALL"
 var _drop_sequence_visual_only: bool = false
 var _drop_sequence_circle_reason: String = "" # root refusal reason behind the sentence below (kept for diagnosis and tests)
@@ -798,6 +811,7 @@ func _ready() -> void:
 	_ensure_fireteam_movement_controller()
 	_ensure_fireteam_security_controller()
 	_connect_fire_rule_authority_signals()
+	call_deferred("_connect_order_tick_signal")
 	_get_comic_bubble_runtime_gate()
 	_ensure_order_visualizer()
 	_ensure_contact_map_overlay()
@@ -828,7 +842,11 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_ensure_plan_mode_switch()
-	_advance_campaign_extraction(delta)
+	# G5b: Mit tickender Simulation laufen Einsteigen, Abkuehlzeit, Absetzfolge, Phasenstart und Sicherungs-Auffrischung je
+	# Tick (_run_game_time_steps); je Bild nur als Rueckfall, nie beides.
+	var on_sim_tick: bool = _orders_run_on_simulation_tick()
+	if not on_sim_tick:
+		_advance_campaign_extraction(delta)
 	_advance_direct_unit_control(delta)
 	var profile_enabled: bool = _mission_visible_frame_timing_debug_enabled
 	var frame_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
@@ -836,30 +854,33 @@ func _process(delta: float) -> void:
 	var scope_started_usec: int = 0
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
-	if _drop_ship_cooldown_remaining > 0.0:
+	if not on_sim_tick and _drop_ship_cooldown_remaining > 0.0:
 		_drop_ship_cooldown_remaining = maxf(_drop_ship_cooldown_remaining - delta, 0.0)
 	_advance_network_dropship_pending(delta)
-	_update_drop_sequence(delta)
-	_update_fireteam_suppression(delta)
-	_update_leader_initiated_flanks()
-	_update_ad_hoc_execution(delta)
-	_update_active_phase_execution(delta)
-	_update_area_defense_execution(delta)
-	_update_area_attack_execution(delta)
+	if not on_sim_tick:
+		_update_drop_sequence(delta)
+	else:
+		_present_drop_sequence_interpolated()
+	# G5a: Mit tickender Simulation laufen die Befehle je Tick (_on_simulation_tick_for_orders); je Bild nur als Rueckfall.
+	if not on_sim_tick:
+		_run_order_execution_step(delta)
 	_update_npc_thought_peek_visuals()
 	if profile_enabled:
 		scopes_usec["execution_updates_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
 	if _prune_fireteamleader_feedback_bubbles():
 		_refresh_order_visuals()
-	_flush_pending_drop_runtime_phase_starts()
+	if not on_sim_tick:
+		_flush_pending_drop_runtime_phase_starts()
 	_refresh_fireteam_runtime_ui_if_pending()
 	if not _default_fireteam_selection_initialized:
 		_ensure_default_fireteam_selection()
-	_fireteam_security_refresh_time_remaining -= delta
-	if _fireteam_security_refresh_time_remaining <= 0.0:
-		_fireteam_security_refresh_time_remaining = FIRETEAM_SECURITY_REFRESH_INTERVAL_SECONDS
-		refresh_fireteam_security_state()
+	if not on_sim_tick:
+		_fireteam_security_refresh_time_remaining -= delta
+		if _fireteam_security_refresh_time_remaining <= 0.0:
+			_fireteam_security_refresh_time_remaining = FIRETEAM_SECURITY_REFRESH_INTERVAL_SECONDS
+			_fireteam_security_refresh_count += 1
+			refresh_fireteam_security_state()
 	if profile_enabled:
 		scopes_usec["feedback_and_security_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scopes_usec["hud_light_usec"] = scopes_usec["feedback_and_security_usec"]
@@ -2365,6 +2386,105 @@ func _connect_fire_rule_authority_signals() -> void:
 		simulation_root.connect("network_command_result_received", result_callable)
 
 
+## G5a: Die Befehlsausfuehrung haengt am Simulations-Tick (tick_processed). Verbunden wird nach allen _ready-Aufrufen, damit der
+## Gefechtstreiber schon am Signal haengt und im selben Tick VOR den Befehlen rechnet (Signale laufen in Verbindungsreihenfolge).
+func _connect_order_tick_signal() -> void:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root == null or not simulation_root.has_signal("tick_processed"):
+		return
+	var own := Callable(self, "_on_simulation_tick_for_orders")
+	if not simulation_root.is_connected("tick_processed", own):
+		simulation_root.connect("tick_processed", own)
+	_ensure_order_tick_after_driver(simulation_root)
+
+
+## Setzt die eigene Verbindung hinter die des Gefechtstreibers, falls der Treiber erst spaeter angehaengt wurde.
+func _ensure_order_tick_after_driver(simulation_root: Node) -> void:
+	if _order_tick_order_checked:
+		return
+	var driver = _get_combat_loop_driver()
+	if driver == null:
+		return
+	var own := Callable(self, "_on_simulation_tick_for_orders")
+	var own_index: int = -1
+	var driver_index: int = -1
+	var index: int = 0
+	for connection in simulation_root.tick_processed.get_connections():
+		var callable: Callable = connection["callable"]
+		if callable == own:
+			own_index = index
+		elif callable.get_object() == driver:
+			driver_index = index
+		index += 1
+	if driver_index < 0 or own_index < 0:
+		return
+	_order_tick_order_checked = true
+	if own_index > driver_index:
+		return
+	simulation_root.disconnect("tick_processed", own)
+	simulation_root.connect("tick_processed", own)
+
+
+## Je Bild nur dann, wenn keine tickende Simulation da ist: kein SimulationRoot, noch nicht am Tick angeschlossen, oder
+## die Simulation ueberspringt lokale Ticks (Mitspieler ohne eigene Rechnung).
+func _orders_run_on_simulation_tick() -> bool:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root == null or not simulation_root.has_signal("tick_processed"):
+		return false
+	if bool(simulation_root.call("_should_skip_local_tick_processing")):
+		return false
+	return simulation_root.is_connected("tick_processed", Callable(self, "_on_simulation_tick_for_orders"))
+
+
+## Spielzeit in Millisekunden (G5b): Ticks der Simulation zu 1/60 s, mindestens 1 (0 gilt in den Zustaenden als "nicht gesetzt").
+## Ohne Simulation oder wenn sie lokal nicht tickt (Mitspieler) faellt sie auf die Wanduhr zurueck.
+func _game_now_msec() -> int:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root != null and simulation_root.has_method("get_game_msec") and not bool(simulation_root.call("_should_skip_local_tick_processing")):
+		return maxi(int(simulation_root.call("get_game_msec")), 1)
+	return Time.get_ticks_msec()
+
+
+## Einstieg je Simulations-Tick. delta ist die Tick-Laenge der Simulation (Spielzeit, 1/60 s bei normalem Lauf), nie die
+## Bildzeit. delta_override nur fuer Tests, die einen grossen Zeitschritt in einem Aufruf brauchen.
+func _on_simulation_tick_for_orders(_tick: int, delta_override: float = -1.0) -> void:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root == null or bool(simulation_root.call("_should_skip_local_tick_processing")):
+		return
+	_ensure_order_tick_after_driver(simulation_root)
+	var delta: float = delta_override
+	if delta <= 0.0:
+		delta = float(simulation_root.call("get_last_tick_delta")) if simulation_root.has_method("get_last_tick_delta") else 0.0
+	if delta <= 0.0:
+		delta = 1.0 / float(maxi(Engine.physics_ticks_per_second, 1))
+	var driver = _get_combat_loop_driver()
+	var driver_tick: Variant = driver.get("_current_tick") if driver != null else null
+	_order_step_driver_tick_seen = int(driver_tick) if driver_tick != null else -1
+	_advance_campaign_extraction(delta)
+	if _drop_ship_cooldown_remaining > 0.0:
+		_drop_ship_cooldown_remaining = maxf(_drop_ship_cooldown_remaining - delta, 0.0)
+	_update_drop_sequence(delta)
+	_run_order_execution_step(delta)
+	_flush_pending_drop_runtime_phase_starts()
+	# Sicherungs-Auffrischung (Blickrichtung wirkt im Gefecht): alle 12 Ticks = 0,2 s Spielzeit.
+	_fireteam_security_refresh_ticks += 1
+	if _fireteam_security_refresh_ticks >= FIRETEAM_SECURITY_REFRESH_TICKS:
+		_fireteam_security_refresh_ticks = 0
+		_fireteam_security_refresh_count += 1
+		refresh_fireteam_security_state()
+
+
+## Die sechs Ausfuehrungsschritte der Trupps, in fester Reihenfolge, genau einmal je Aufruf.
+func _run_order_execution_step(delta: float) -> void:
+	_order_execution_step_count += 1
+	_update_fireteam_suppression(delta)
+	_update_leader_initiated_flanks()
+	_update_ad_hoc_execution(delta)
+	_update_active_phase_execution(delta)
+	_update_area_defense_execution(delta)
+	_update_area_attack_execution(delta)
+
+
 func _on_air_support_ground_fired(event: Dictionary) -> void:
 	var view: Node = _get_primary_3d_view()
 	if is_instance_valid(view) and view.has_method("show_air_support_laser"):
@@ -2858,7 +2978,7 @@ func _apply_authoritative_fireteam_intent(command: Dictionary) -> bool:
 		"waypoint_index": 0,
 		"hold_elapsed": 0.0,
 		"resolved_target_position": target_position,
-		"started_msec": Time.get_ticks_msec(),
+		"started_msec": _game_now_msec(),
 		"execution_owner": "standalone_network_intent",
 		"standalone_network_intent": true,
 	}
@@ -16171,7 +16291,9 @@ func _refresh_world_overlays() -> void:
 	var primary_has_live_drop_state: bool = not _mission_drop_state.is_empty()
 	var primary_has_live_drop_sequence: bool = not _drop_sequence_phase.is_empty()
 	var dropship_position: Vector2 = _drop_sequence_position if primary_has_live_drop_sequence else _get_drop_staging_position()
-	var dropship_visuals: Array = _build_mission_dropship_visual_entries(primary_has_live_drop_state or primary_has_live_drop_sequence, dropship_position)
+	# G5d: Bild und Marke zeigen die zwischen den Ticks interpolierte Lage; Schnappschuss/Netz und Regeln bleiben bei der Tick-Lage.
+	var shown_dropship_position: Vector2 = get_drop_sequence_display_position(Engine.get_physics_interpolation_fraction()) if primary_has_live_drop_sequence else dropship_position
+	var dropship_visuals: Array = _build_mission_dropship_visual_entries(primary_has_live_drop_state or primary_has_live_drop_sequence, shown_dropship_position)
 	var dropship_visible: bool = not dropship_visuals.is_empty()
 	var primary_dropship_position: Vector2 = dropship_position
 	var primary_dropship_target: Vector2 = _get_primary_dropship_target_position(primary_dropship_position)
@@ -16209,7 +16331,7 @@ func _refresh_world_overlays() -> void:
 				"lz_position": _lz_position,
 				"lz_label": _build_mission_dropship_lz_name(_mission_drop_craft_id, _mission_drop_display_name, _get_mission_dropship_card_order_number(_mission_drop_craft_id)) if _has_lz_position else "",
 				"dropship_visible": dropship_visible,
-				"dropship_position": primary_dropship_position,
+				"dropship_position": shown_dropship_position if primary_has_live_drop_sequence else primary_dropship_position,
 				"dropship_target_position": primary_dropship_target,
 				"dropship_visuals": dropship_visuals,
 				"dropship_texture": _get_mission_dropship_texture(),
@@ -16235,7 +16357,7 @@ func _refresh_world_overlays() -> void:
 			var sprite := dropship_marker.get_node_or_null("Sprite") as Sprite2D
 			dropship_marker.visible = true
 			if has_live_drop_sequence and (_drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_LANDED or _drop_sequence_phase == DROP_SEQUENCE_UNLOADING or _drop_sequence_phase == DROP_SEQUENCE_COMPLETE or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND):
-				dropship_marker.global_position = _drop_sequence_position
+				dropship_marker.global_position = shown_dropship_position
 			elif not _has_lz_position:
 				dropship_marker.global_position = _get_drop_staging_position()
 			else:
@@ -33455,7 +33577,12 @@ func _is_phase_waypoint_soft_completion_allowed(execution_state: Dictionary) -> 
 	var started_msec: int = int(execution_state.get("started_msec", 0))
 	if started_msec <= 0:
 		return false
-	return Time.get_ticks_msec() - started_msec >= PHASE_WAYPOINT_SOFT_RELEASE_MIN_MSEC
+	var now_msec: int = _game_now_msec()
+	if started_msec > now_msec:
+		# Stempel aus einer anderen Uhr (alter Spielstand mit Wanduhr, zurueckgesprungener Tickzaehler): Wartezeit neu beginnen.
+		execution_state["started_msec"] = now_msec
+		return false
+	return now_msec - started_msec >= PHASE_WAYPOINT_SOFT_RELEASE_MIN_MSEC
 
 
 func _is_movement_state_on_final_waypoint_stage(resolved_target_position: Vector2, movement_state: Dictionary) -> bool:
@@ -35062,7 +35189,7 @@ func _activate_next_waypoint_for_plan(plan, fireteam_id: String, waypoint_index:
 		"waypoint_index": waypoint_index,
 		"hold_elapsed": 0.0,
 		"resolved_target_position": resolved_target_position,
-		"started_msec": Time.get_ticks_msec(),
+		"started_msec": _game_now_msec(),
 	}
 	if String(Dictionary(waypoint.metadata).get("source", "")) == "mission_interaction_use_intent":
 		var interaction_state: Dictionary = _phase_execution_by_fireteam[fireteam_id]
@@ -36878,8 +37005,39 @@ func _embark_units_for_drop(units: Array) -> void:
 
 func _update_drop_sequence(delta: float) -> void:
 	_advance_mission_dropship_runtime_feedback_timer(delta)
+	# G5d: Stand vor diesem Schritt merken (Anzeige interpoliert von hier zum Stand danach). Waehrend des Schritts gilt die
+	# Anzeige-Lage als "nicht fortgeschrieben" (_drop_sequence_tick_position ungleich Regel-Lage) und zeigt direkt die Regel-Lage.
+	_drop_sequence_prev_position = _drop_sequence_position
 	_update_primary_drop_sequence(delta)
+	_drop_sequence_tick_position = _drop_sequence_position
+	_drop_sequence_step_limit = DROP_SHIP_SPEED * delta * 1.05 + 0.5
 	_update_parallel_drop_sequences(delta)
+
+
+## G5d: Lage des Absetzschiffs fuer die ANZEIGE. fraction 0 = Stand vor dem letzten Tick, 1 = Stand nach dem letzten Tick.
+## Direkt die Regel-Lage (kein Interpolieren) bei: Rueckfall ohne tickende Simulation (je Bild fortgeschrieben), Sprung (Position
+## wurde ausserhalb des Tick-Schritts gesetzt, z. B. Start/Laden/Neustart, oder der Schritt war groesser als die Fluggeschwindigkeit
+## erlaubt, z. B. Phasenwechsel mit Versatz).
+func get_drop_sequence_display_position(fraction: float) -> Vector2:
+	if not _orders_run_on_simulation_tick():
+		return _drop_sequence_position
+	if not _drop_sequence_tick_position.is_finite() or not _drop_sequence_position.is_equal_approx(_drop_sequence_tick_position):
+		return _drop_sequence_position
+	if _drop_sequence_prev_position.distance_to(_drop_sequence_position) > _drop_sequence_step_limit:
+		return _drop_sequence_position
+	return _drop_sequence_prev_position.lerp(_drop_sequence_position, clampf(fraction, 0.0, 1.0))
+
+
+## G5d: Je Bild, solange das Schiff fliegt: Marke und Schiffsbild auf die interpolierte Lage setzen (nur Darstellung).
+func _present_drop_sequence_interpolated() -> void:
+	if _drop_sequence_phase != DROP_SEQUENCE_INBOUND and _drop_sequence_phase != DROP_SEQUENCE_OUTBOUND:
+		_drop_sequence_last_presented = Vector2.INF
+		return
+	var shown: Vector2 = get_drop_sequence_display_position(Engine.get_physics_interpolation_fraction())
+	if shown.is_equal_approx(_drop_sequence_last_presented):
+		return
+	_drop_sequence_last_presented = shown
+	_refresh_world_overlays()
 
 
 func _update_primary_drop_sequence(delta: float) -> void:

@@ -1462,7 +1462,7 @@ func _test_mission_time_limit_resolves_defeat() -> void:
 	root.add_child(scene)
 	for _frame in range(8):
 		await process_frame
-	combat_driver.set("_mission_started_at_msec", Time.get_ticks_msec() - 2500)
+	combat_driver.set("_mission_started_at_msec", int(combat_driver.call("_game_now_msec")) - 2500)
 	combat_driver.call("_update_combat_resolution")
 	var mission_result: Dictionary = Dictionary(combat_driver.call("get_mission_result"))
 	_assert(String(mission_result.get("result", "")) == "defeat", "Mission time limit resolves the mission as a defeat once the timer expires")

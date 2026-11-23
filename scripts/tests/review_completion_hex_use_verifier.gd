@@ -113,7 +113,7 @@ func _test_local_waypoint_types()->void:
 		if kind=="computer":
 			var resume:Dictionary=controller._phase_execution_by_fireteam["ft1"]
 			resume["hex_coordination_resume"]=true;resume["interaction_stop_pending"]=true;resume["hold_elapsed"]=2.0
-			controller._update_active_phase_execution(0.1)
+			controller._on_simulation_tick_for_orders(int(rig.sim.tick_counter),0.1)
 			var resumed:Dictionary=controller._phase_execution_by_fireteam["ft1"]
 			_check(not resumed.has("interaction_stop_pending") and not resumed.has("interaction_arrival_receipt") and resumed.hold_elapsed==0.0,"explicit coordination resume invalidates the superseded pending stop and timer")
 		var first_hold_tick:=-1
@@ -141,7 +141,7 @@ func _test_local_waypoint_types()->void:
 					_check(not movement._are_current_targets_reached(wrong_target,records,rig.sim),"%s actual Root arrival rejects a different target" % kind)
 					var wrong_token:=stage.duplicate(true);wrong_token.command_revision=int(stage.command_revision)+1
 					_check(not movement._are_current_targets_reached(wrong_token,records,rig.sim),"%s actual Root arrival rejects a different stage token" % kind)
-			controller._update_active_phase_execution(0.1)
+			controller._on_simulation_tick_for_orders(int(rig.sim.tick_counter))
 			var execution:Dictionary=controller._phase_execution_by_fireteam.get("ft1",{})
 			receipt_seen=receipt_seen or execution.has("interaction_arrival_receipt")
 			if first_hold_tick<0 and float(execution.get("hold_elapsed",0.0))>0.0:first_hold_tick=tick
