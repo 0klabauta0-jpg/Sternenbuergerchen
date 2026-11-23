@@ -4,7 +4,7 @@ extends "res://scripts/tests/campaign_craft_loss_flow_verifier.gd"
 ## (a) Landungsschiff verloren, Buccaneer bleibt: Laden steht an der Basis mit der Buccaneer, Beleg da, Speichern danach moeglich.
 ## (b) Kaufschiff verloren, neues gekauft: beide Belege richtig, das neue Schiff hat seinen Landeplatz, das verlorene bekommt keinen.
 ## (c) Rueckfallweg der Notrettung (fallback:true): Speichern und Laden gelingen, niemand ist an Bord eines fehlenden Schiffs.
-const FIXTURE = preload("res://scripts/tests/campaign_craft_loss_fixture.gd")
+## (FIXTURE kommt seit LC2i vom Flow-Pruefer.)
 
 func _run() -> void:
 	_configure_entry()

@@ -39,6 +39,8 @@ func _h1_message() -> void:
 	var text := String(controller.get("_last_command_text"))
 	var expected := "%s ist verloren. Bring den Trupp zur Landezone – dort holt euch die Notrettung ab (400 Credits)." % name
 	_check(text.contains(expected), "H1: Meldung mit Schiffsname und Betrag (%s)" % text)
+	_check(text.count("ist verloren") == 1, "H1/I6: 'ist verloren' steht beim Einsatzschiff nur einmal (%s)" % text)
+	_check(text.ends_with("Bring den Trupp zur Landezone – dort holt euch die Notrettung ab (400 Credits)."), "H1/I6: der neue Satz beginnt ohne Wiederholung (%s)" % text)
 	controller.call("report_ground_fire_vs_air", second, {}, ["Bruchlandung! Zweitschiff ist verloren."])
 	text = String(controller.get("_last_command_text"))
 	_check(text.contains("Zweitschiff ist verloren.") and not text.contains("Landezone") and not text.contains("Credits"), "H1: beim zweiten Schiff nur der erste Satz (%s)" % text)

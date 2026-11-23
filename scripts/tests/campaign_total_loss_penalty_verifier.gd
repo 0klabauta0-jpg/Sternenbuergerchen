@@ -13,7 +13,7 @@ extends "res://scripts/tests/campaign_casualty_departure_verifier.gd"
 ## Einzeln starten: Umgebungsvariable T5B_ONLY (zum Beispiel "P4" oder "P1,P7") oder Kommandozeilenargument nach "--"; ohne Angabe laufen alle.
 
 ## LC2g: Schaltet die Pleite-Pruefung der Meta-Szene ab (leere Flotte waere sonst Kampagnenende); campaign_no_craft_verifier setzt es auf false.
-var _bankruptcy_off := true
+var _bankruptcy_off := false # LC2i I4: seit dem Totalverlust-Weg fuers letzte Schiff erzeugt kein Pruefer mehr eine leere Flotte; Schalter nur noch bei Bedarf
 const LEADER := "campaign_leader"
 const PILOT := "campaign_pilot"
 const DEBRIEF_RETURN_BUTTON := "DebriefScreen/Panel/Margin/VBox/ButtonRow/ReturnToHomebaseButton"

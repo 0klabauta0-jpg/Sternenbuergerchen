@@ -19921,10 +19921,10 @@ func _craft_loss_notice(craft_id: String) -> String:
 	if bool(quote.get("is_last_craft", false)):
 		# LC2i I1: Das letzte Schiff: keine Notrettung, der Einsatz gilt als Totalverlust.
 		return "%s ist verloren – es war euer letztes Schiff. Der Einsatz gilt als Totalverlust." % String(quote.get("ship_name", craft_id))
-	var text := "%s ist verloren." % String(quote.get("ship_name", craft_id))
 	if bool(quote.get("is_mission_craft", false)):
-		text += " Bring den Trupp zur Landezone – dort holt euch die Notrettung ab (%d Credits)." % int(quote.get("fee", 0))
-	return text
+		# LC2i I6: "<Schiff> ist verloren." steht schon in der Absturzmeldung; hier folgt nur der Weg heim (keine Wiederholung).
+		return "Bring den Trupp zur Landezone – dort holt euch die Notrettung ab (%d Credits)." % int(quote.get("fee", 0))
+	return "%s ist verloren." % String(quote.get("ship_name", craft_id))
 
 
 ## LC2b: Das Schiff ist durch Bodenbeschuss abgestuerzt oder explodiert (SimulationRoot.resolve_air_shootdown); es ist aus dem Einsatz.
