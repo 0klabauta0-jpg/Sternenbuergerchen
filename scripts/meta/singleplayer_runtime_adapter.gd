@@ -2619,9 +2619,11 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 		if not _job_complete("outpost_recovery"): return _reject("crate_not_ready","Kiste zuerst am Außenposten bergen")
 		var job_craft := String(Dictionary(snapshot.jobs.get("outpost_recovery", {})).get("craft_id", ""))
 		if not _job_craft_accepts(job_craft, craft_id) or String(_service_context(craft_id).get("location_id", "")) not in ["homebase", "trade_outpost"]: return _reject("crate_not_here","Ein Schiff am gesicherten Außenposten oder nach Rückkehr auswählen" if _lost_craft_ids().has(job_craft) else "Auftragsschiff am gesicherten Außenposten oder nach Rückkehr auswählen")
-		var cargo := _campaign_cargo(craft_id,"c_benit_crate",1,"load:outpost_recovery")
+		# LC2k K1: Nach einem Verlust der Kiste ist das Laden eine eigene Buchung (Kennung mit Verlustzaehler), sonst meldet die Versorgung request_id_conflict.
+		var load_id := "load:outpost_recovery" + ("" if int(_campaign.call("crate_loss_count")) == 0 else ":" + str(int(_campaign.call("crate_loss_count"))))
+		var cargo := _campaign_cargo(craft_id,"c_benit_crate",1,load_id)
 		if not bool(cargo.get("ok",false)): return cargo
-		return _commit("singleplayer_campaign","load_crate",{},"load:outpost_recovery",{"runtime_authorized":true})
+		return _commit("singleplayer_campaign","load_crate",{},load_id,{"runtime_authorized":true})
 	return _reject("delivery_requires_use","C-Benit am Handelsposten über die Weltinteraktion abgeben")
 
 func get_location_resource_stock(location_id: String) -> RefCounted:

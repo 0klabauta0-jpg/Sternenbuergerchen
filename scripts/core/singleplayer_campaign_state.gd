@@ -74,6 +74,15 @@ func get_campaign_snapshot() -> Dictionary:
 		snapshot.jobs[id]["locked"] = _enforce_sequence and not prior.is_empty() and String(Dictionary(_jobs.get(prior,{})).get("status","")) != "completed"
 	return snapshot
 
+## LC2k K1: Wie oft ist die Auftragskiste schon mit ihrem Schiff verloren gegangen? Abgeleitet aus den vorhandenen Belegen ("unload:<Schiff>"),
+## kein eigener Schluessel im Spielstand. Das erneute Laden haengt die Zahl an seine Anfrage-Kennung (je Verlust eine eigene Buchung).
+func crate_loss_count() -> int:
+	var count := 0
+	for request_id in _requests:
+		if String(request_id).begins_with("unload:") and bool(Dictionary(Dictionary(_requests[request_id]).get("result", {})).get("changed", false)):
+			count += 1
+	return count
+
 func get_completion_receipt(completion_id: String) -> Dictionary:
 	return Dictionary(_completion_receipts.get(completion_id, {})).duplicate(true)
 
