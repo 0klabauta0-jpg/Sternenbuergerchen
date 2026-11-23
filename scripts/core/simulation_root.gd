@@ -2422,6 +2422,7 @@ var _accepted_network_dropship_command_id_order: Array = []
 var _network_command_dedupe_hit_count: int = 0
 var _network_command_preflight_validator: Callable = Callable()
 var _movement_suppression_provider: Callable = Callable()
+var _combat_suppression_provider: Callable = Callable()
 var _multiplayer_snapshot_context: Dictionary = {}
 var _authoritative_fire_rules_by_fireteam: Dictionary = {}
 var _air_asset_status_by_id: Dictionary = {}
@@ -4077,6 +4078,23 @@ func set_movement_suppression_provider(provider: Callable) -> void:
 func clear_movement_suppression_provider(provider: Callable = Callable()) -> void:
 	if not provider.is_valid() or _movement_suppression_provider == provider:
 		_movement_suppression_provider = Callable()
+
+
+## Unterdrueckung (FT-0b): Lieferant fuer {"hit_bonus", "cover_floor"} je Einheit, aus der aktuellen Stufe ihrer Gruppe.
+## Wird beim Lesen aufgeschlagen (Trefferchance des Schuetzen, Deckung des Ziels); nichts davon steht im Laufzeitstatus.
+func set_combat_suppression_provider(provider: Callable) -> void:
+	_combat_suppression_provider = provider
+
+
+func clear_combat_suppression_provider(provider: Callable = Callable()) -> void:
+	if not provider.is_valid() or _combat_suppression_provider == provider:
+		_combat_suppression_provider = Callable()
+
+
+func _get_combat_suppression_modifiers(unit) -> Dictionary:
+	if unit == null or not _combat_suppression_provider.is_valid():
+		return {}
+	return Dictionary(_combat_suppression_provider.call(unit))
 
 
 func get_authoritative_fire_rule_state(fireteam_id: String) -> Dictionary:
@@ -7187,6 +7205,10 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 	var target_cover_score: float = _extract_effective_cover_score(unit)
 	if effect.has("target_cover_override"):
 		target_cover_score = clampf(_extract_float(effect.get("target_cover_override", target_cover_score), target_cover_score), 0.0, 80.0)
+	# Unterdrueckung (FT-0b): Treffer-Abzug des Schuetzen und Deckungsboden des Ziels werden hier beim Lesen aus der aktuellen
+	# Stufe der Gruppe aufgeschlagen; im Laufzeitstatus der Einheiten steht davon nichts. Der Abzug senkt nur die Trefferchance.
+	var attacker_suppression_hit_bonus: float = float(_get_combat_suppression_modifiers(attacker_unit).get("hit_bonus", 0.0))
+	target_cover_score = maxf(target_cover_score, float(_get_combat_suppression_modifiers(unit).get("cover_floor", 0.0)))
 	var attacker_attack_bonus: float = _extract_unit_attack_bonus(attacker_unit)
 	var attacker_cover_score: float = _extract_unit_cover_score(attacker_unit)
 	var target_cover_ratio: float = _normalize_cover_score_for_combat(target_cover_score)
@@ -7196,6 +7218,7 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 	hit_chance = clampf(
 		hit_chance
 		+ attacker_attack_bonus
+		+ attacker_suppression_hit_bonus
 		+ attacker_hit_modifier
 		+ height_modifier
 		+ range_band_modifier

@@ -153,6 +153,7 @@ func _run() -> void:
 	_test_t5_movement()
 	_test_t7_decay()
 	_test_t8_hit_and_cover()
+	_test_t9_read_time_modifiers()
 	await _test_t6_plan()
 	CADENCE.reset_config()
 	await process_frame
@@ -583,7 +584,10 @@ func _test_t7_decay() -> void:
 		_call(f.driver, "_advance_suppression", [tick])
 		var key := _key(f, "m1")
 		_check(int(_call_quiet(f.driver, "get_suppression_level", [key], 0)) == 3, "T7 (%s): Stufe 3 nach dem Feuerstoss" % side)
-		_check(not _snapshot_units(f, ["m0", "m1", "m2"], 0.05, 10.0), "T7 (%s): unter Stufe 3 sind Trefferabzug und Deckungsboden gesetzt" % side)
+		# Nachbesserung 1 (W1): nichts wird in den Laufzeitstatus geschrieben; der Abzug kommt beim Lesen aus der Stufe.
+		_check(_snapshot_units(f, ["m0", "m1", "m2"], 0.05, 10.0), "T7 (%s): unter Stufe 3 bleiben die Laufzeitwerte der Einheiten unberuehrt" % side)
+		var mods: Dictionary = Dictionary(_call_quiet(f.driver, "get_suppression_combat_modifiers", [f.units["m1"]], {}))
+		_check(absf(float(mods.get("hit_bonus", 0.0)) + 0.15) < 0.001 and absf(float(mods.get("cover_floor", 0.0)) - 24.0) < 0.001, "T7 (%s): unter Stufe 3 liefert der Treiber -0,15 Treffer und Deckungsboden 24 (%s)" % [side, str(mods)])
 		# Der Fuehrer faellt aus, waehrend die Gruppe niedergehalten ist.
 		f.units["m0"].hp = 0
 		var steps := 0
@@ -667,6 +671,81 @@ func _test_t8_hit_and_cover() -> void:
 			var expected_cover: float = 10.0 if level == 1 else 24.0
 			_check(absf(float(covered.get("target_cover_score", -1.0)) - expected_cover) < 0.01, "T8: Ziel %s unter Stufe %d hat Deckung %s (%s)" % [target_id, level, str(expected_cover), str(covered.get("target_cover_score", -1.0))])
 		f.scope.free()
+
+
+# ---- T9: Abzug beim Lesen (Nachbesserung 1, W1) -------------------------------
+
+func _resolve_shot_with(f: Dictionary, attacker_id: String, target_id: String, roll: float, hit_chance: float) -> Dictionary:
+	var captured: Array = []
+	var capture := func(result: Dictionary) -> void: captured.append(result)
+	f.sim.damage_effect_resolved.connect(capture)
+	var attacker: NPC = f.units[attacker_id]
+	f.sim._apply_damage_effect({"effect_type": "damage", "unit_id": target_id, "attacker_unit_id": attacker_id, "attacker_team_id": attacker.team_id, "damage": 18, "hit_chance": hit_chance, "roll_override": roll, "weapon_id": "pistol"})
+	f.sim.damage_effect_resolved.disconnect(capture)
+	return captured[0] if not captured.is_empty() else {}
+
+
+## Ein neuer Befehl schreibt neue Werte in den Laufzeitstatus (so macht es assign_unit_command).
+func _new_command_values(unit: NPC, bonus: float, cover: float) -> void:
+	unit.rs.attack_bonus = bonus
+	unit.rs.cover_score = cover
+
+
+func _test_t9_read_time_modifiers() -> void:
+	var tick := 0
+	for pair in [["own", "enemy"], ["enemy", "own"]]:
+		var shooter_id: String = pair[0]
+		var target_id: String = pair[1]
+		var shooter: NPC
+		var target: NPC
+		var f := _rig([
+			{"id": "own", "team": "blue", "grid": CENTER, "facing": 0, "base_cover": 10.0, "base_attack_bonus": 0.05},
+			{"id": "enemy", "team": "red", "grid": CENTER + HEX.DIRECTIONS[0], "facing": 3, "base_cover": 10.0, "base_attack_bonus": 0.05},
+		])
+		shooter = f.units[shooter_id]
+		target = f.units[target_id]
+		# (a) Ein neuer Befehl waehrend Stufe 2 nimmt den Abzug nicht weg.
+		_pin(f, shooter_id, 2, 3.0)
+		tick += 30
+		_call(f.driver, "_advance_suppression", [tick])
+		_new_command_values(shooter, 0.07, 12.0)
+		var suppressed := _resolve_shot_with(f, shooter_id, target_id, 0.99, 0.5)
+		_reset_tracker(f)
+		tick += 30
+		_call(f.driver, "_advance_suppression", [tick])
+		_new_command_values(shooter, 0.07, 12.0)
+		var plain := _resolve_shot_with(f, shooter_id, target_id, 0.99, 0.5)
+		var diff := float(suppressed.get("hit_chance_resolved", -9.0)) - float(plain.get("hit_chance_resolved", -9.0))
+		_check(not suppressed.is_empty() and absf(diff + 0.10) < 0.002, "T9a: %s: nach einem neuen Befehl gilt unter Stufe 2 weiter -0,10 Trefferchance (%s)" % [shooter_id, str(diff)])
+		_pin(f, target_id, 2, 3.0)
+		tick += 30
+		_call(f.driver, "_advance_suppression", [tick])
+		_new_command_values(target, 0.0, 12.0)
+		var covered := _resolve_shot_with(f, shooter_id, target_id, 0.99, 0.5)
+		_check(absf(float(covered.get("target_cover_score", -1.0)) - 24.0) < 0.01, "T9a: %s: nach einem neuen Befehl gilt unter Stufe 2 weiter der Deckungsboden 24 (%s)" % [target_id, str(covered.get("target_cover_score", -1.0))])
+		# (b) Faellt die Stufe auf 0, bleiben die Werte des inzwischen neuen Befehls; nichts Altes wird zurueckgeschrieben.
+		_reset_tracker(f)
+		_pin(f, shooter_id, 2, 3.0)
+		tick += 30
+		_call(f.driver, "_advance_suppression", [tick])
+		_new_command_values(shooter, 0.08, 40.0)
+		_reset_tracker(f)
+		tick += 30
+		_call(f.driver, "_advance_suppression", [tick])
+		_check(is_equal_approx(shooter.rs.attack_bonus, 0.08) and is_equal_approx(shooter.rs.cover_score, 40.0), "T9b: %s: nach dem Abklingen stehen die Werte des neuen Befehls (%s/%s)" % [shooter_id, str(shooter.rs.attack_bonus), str(shooter.rs.cover_score)])
+		f.scope.free()
+		# (c) Schaden bei Treffer mit und ohne Unterdrueckung gleich.
+		var g := _rig([
+			{"id": "own", "team": "blue", "grid": CENTER, "facing": 0, "base_cover": 10.0, "base_attack_bonus": 0.05},
+			{"id": "enemy", "team": "red", "grid": CENTER + HEX.DIRECTIONS[0], "facing": 3, "base_cover": 10.0, "base_attack_bonus": 0.05},
+		])
+		var clean := _resolve_shot_with(g, shooter_id, target_id, 0.0, 1.0)
+		_pin(g, shooter_id, 3, 5.0)
+		tick += 30
+		_call(g.driver, "_advance_suppression", [tick])
+		var pressed := _resolve_shot_with(g, shooter_id, target_id, 0.0, 1.0)
+		_check(not clean.is_empty() and int(clean.get("damage_resolved", -1)) > 0 and int(clean.get("damage_resolved", -1)) == int(pressed.get("damage_resolved", -2)), "T9c: %s: Schaden bei Treffer mit und ohne Stufe 3 gleich (%s/%s)" % [shooter_id, str(clean.get("damage_resolved", -1)), str(pressed.get("damage_resolved", -2))])
+		g.scope.free()
 
 
 # ---- T6: Plan -----------------------------------------------------------------
