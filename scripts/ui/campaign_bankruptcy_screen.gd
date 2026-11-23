@@ -10,6 +10,7 @@ const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui
 const TITLE_TEXT := "Pleite"
 const MESSAGE_TANKER_REFUSED := "Der Nottankdienst liefert nicht mehr auf Kredit, und kein Schiff kann mehr starten."
 const MESSAGE_NO_FUEL_NO_MONEY := "Kein Schiff kann mehr starten: Der Tank ist leer, und das Geld reicht nicht zum Tanken."
+const MESSAGE_NO_CRAFT := "Kein Schiff mehr: Ohne Schiff kommst du nicht mehr von der Basis weg."
 const NEW_CAMPAIGN_HINT := "Der vorhandene Kampagnenstand wird durch eine neue Kampagne ersetzt. Noch einmal drücken, um zu bestätigen."
 
 var _message_label: Label
@@ -88,10 +89,10 @@ func _ready() -> void:
 func set_debt_text(text: String) -> void:
 	if _debt_label != null: _debt_label.text = text
 
-## Der Satz richtet sich nach dem Grund aus der Pleite-Rechnung (cause): "tanker_refused" oder sonst Tank leer und Geld reicht nicht.
+## Der Satz richtet sich nach dem Grund aus der Pleite-Rechnung (cause): "no_craft" (leere Flotte), "tanker_refused" oder sonst Tank leer und Geld reicht nicht.
 func set_cause(cause: String) -> void:
 	if _message_label != null:
-		_message_label.text = MESSAGE_TANKER_REFUSED if cause == "tanker_refused" else MESSAGE_NO_FUEL_NO_MONEY
+		_message_label.text = MESSAGE_NO_CRAFT if cause == "no_craft" else (MESSAGE_TANKER_REFUSED if cause == "tanker_refused" else MESSAGE_NO_FUEL_NO_MONEY)
 
 ## Sperrt die drei Knoepfe (waehrend des Szenenwechsels) oder gibt sie wieder frei.
 func set_buttons_disabled(disabled: bool) -> void:

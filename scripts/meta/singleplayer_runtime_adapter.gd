@@ -2156,7 +2156,9 @@ func get_bankruptcy_check() -> Dictionary:
 		if status.is_empty(): continue
 		status["tanker_order_open"] = ordered.has(craft_id)
 		states.append(status)
-	var verdict: Dictionary = rules.is_bankrupt(credits, limit, states)
+	# LC2g: Nur eine wirklich leere Flotte ist "kein Schiff mehr" (Pleite mit cause no_craft); Schiffe ohne Treibstoffzustand zaehlen nicht als leer.
+	var fleet_empty: bool = Array(_flow.get("_homebase_aircraft_definitions")).is_empty()
+	var verdict: Dictionary = rules.is_bankrupt(credits, limit, states) if (not states.is_empty() or fleet_empty) else {"bankrupt": false, "reason": "no_craft"}
 	var reachable := credits
 	if bool(verdict.get("bankrupt", false)):
 		reachable += _bankruptcy_sellable_proceeds(craft_ids)
@@ -2171,7 +2173,8 @@ func get_bankruptcy_check() -> Dictionary:
 			status["tanker_available"] = bool(offer.get("ok", false))
 			status["tanker_refused"] = String(offer.get("reason", "")) == "debt_limit_reached" # Grund fuer den Satz auf dem Bildschirm
 			states.append(status)
-		verdict = rules.is_bankrupt(reachable, limit, states)
+		if not states.is_empty() or fleet_empty:
+			verdict = rules.is_bankrupt(reachable, limit, states)
 	result.merge(verdict, true)
 	result["credits"] = credits
 	result["reachable_credits"] = reachable
