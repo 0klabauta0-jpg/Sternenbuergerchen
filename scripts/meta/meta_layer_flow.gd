@@ -210,6 +210,8 @@ var _mission_catalog: Array = HOMEBASE_MISSION_CATALOG.duplicate(true)
 var _selected_mission_id: String = SINGLEPLAYER_RELEASE_DEFAULT_MISSION_ID
 var _selected_mission_map_path: String = DEFAULT_META_MAP_PATH
 var _homebase_aircraft_definitions: Array = []
+## LC2i I2: Nach einem Schiffsverlust im Einsatz gibt _run_location_callback die Ortsinstanz frei, wenn der Hintergrund-Rueckweg sie wieder festhaelt.
+var _release_location_after_craft_loss: bool = false
 var _pending_campaign_mission_result: Dictionary = {}
 var _assigned_aircraft_pilot_by_craft: Dictionary = {}
 var _aircraft_location_by_craft: Dictionary = {}
@@ -4634,6 +4636,8 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 		if not casualty_rules.is_empty():
 			resolved_result["casualty_total_loss"] = true
 			resolved_result["total_loss_reason"] = "last_craft_lost"
+	# LC2i I2: Nach einem Schiffsverlust landet nichts mehr, das die Ortsinstanz freigaebe wie eine Heimlandung; _run_location_callback holt das nach.
+	_release_location_after_craft_loss = (craft_lost or not other_craft_losses.is_empty()) and not failed_extraction
 	if not failed_extraction and not craft_lost and _singleplayer_runtime != null and not _active_singleplayer_identity.is_empty():
 		var return_gate: Dictionary = _singleplayer_runtime.call("authorize_return", String(_active_singleplayer_identity.get("craft_id", "")))
 		if not bool(return_gate.get("ok", false)):
@@ -10317,10 +10321,16 @@ func _run_location_callback(instance: Node, callback: Callable, payload: Diction
 	var old_view:=_current_meta_view
 	var focused: bool=instance==_active_mission and old_view=="mission"
 	_enter_location_context(instance)
+	_release_location_after_craft_loss = false
 	callback.call(payload)
 	_remember_location(instance)
 	if not focused:
 		_restore_location_view_context(previous, old_view, instance)
+	if _release_location_after_craft_loss:
+		# LC2i I2: Hintergrund-Ende nach Schiffsverlust: die Rueckstellung hat _active_mission wieder auf die Instanz gesetzt; ohne Heimlandung
+		# wuerde sie nie freigegeben (Speichern bliebe mit away_from_checkpoint gesperrt). Derselbe Weg wie nach einer Heimlandung.
+		_release_location_after_craft_loss = false
+		_release_location_for_waiting_retreat(instance)
 	_location_callback_active=false
 
 func _admit_existing_location(instance: Node) -> void:
