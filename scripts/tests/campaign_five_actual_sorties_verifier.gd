@@ -174,6 +174,78 @@ func _trace_fire_decision_units(label: String, mission: Node) -> void:
 	var diag: Dictionary = driver.call("get_contact_decision_diagnostics_snapshot")
 	print("FIVE_FIRE_DECISION ", label, " tick=", simulation.get_tick(), " reason=", diag.get("reason",""), " status=", diag.get("status",""), " decision_tick=", diag.get("tick",""), " next_attack_tick=", diag.get("next_attack_tick",""), " detection_pending=", diag.get("detection_pending_count",""), " candidate=", str(diag.get("candidate", diag.get("attacker_id",""))).left(400))
 
+## M4d P2: Munitionsmessung je Einsatz. "abflug" (nach dem Auffuellen beim Abflug) und "heimkehr" (Ende des Gefechts, vor dem
+## Auffuellen an der Heimatbasis) lesen je bewaffneter Person Magazine im Fach und Schuss im Magazin; im Einsatz muss der Schalter wahr sein.
+var _ammo_sortie := 0
+var _ammo_probe_count := 0
+var _ammo_consumed := false
+var _ammo_departure := {}
+func _ammo_probe(mission: Node, phase: String) -> void:
+	var driver: Node = mission.get_node_or_null("CombatLoopDriver")
+	var simulation: Node = mission.get_node_or_null("SimulationRoot")
+	if driver == null or simulation == null or not driver.has_method("get_unit_ammo_status"): return
+	if phase == "abflug":
+		_ammo_sortie += 1
+		_ammo_departure = {}
+		_check(bool(simulation.call("person_has_magazine_store", "campaign_leader")), "M4d: Einsatz %d: Kampagnen-Schalter des Magazinvorrats im laufenden Einsatz wahr" % _ammo_sortie)
+	var ids: Array = _crew_ids.duplicate()
+	if not ids.has(_pilot_id): ids.append(_pilot_id)
+	for id in ids:
+		var status: Dictionary = driver.call("get_unit_ammo_status", String(id))
+		if String(status.get("state", "none")) == "none": continue
+		var reserve := int(status.get("reserve", -1))
+		var loaded := int(status.get("rounds", 0))
+		if phase == "abflug":
+			_ammo_departure[String(id)] = {"reserve": reserve, "rounds": loaded}
+			continue
+		if not _ammo_departure.has(String(id)): continue
+		var before: Dictionary = _ammo_departure[String(id)]
+		_ammo_probe_count += 1
+		# M4e: nur echte Zahlen zaehlen (reserve -1 = unbegrenzte Reserve); verbraucht = Magazin nicht voll oder weniger Magazine im Fach.
+		if int(before.reserve) >= 0 and reserve >= 0 and (reserve < int(before.reserve) or loaded < int(status.get("magazine_size", 0))): _ammo_consumed = true
+		print("FIVE_AMMO sortie=%d person=%s vorher=%d nachher=%d geladen=%d" % [_ammo_sortie, id, int(before.reserve), reserve, loaded])
+	if phase == "heimkehr" and _ammo_sortie == 1: _ammo_drain_test(driver, ids)
+
+## M4e: Schuesse direkt ueber den Treiber (keine Zufallstreffer): die Person verschiesst Magazin und alle Fach-Magazine; jedes
+## Nachladen zieht ein Magazin aus der Kampagnen-Versorgung, danach "Keine Munition" und kein weiterer Schuss. Die Heimkehr fuellt wieder auf.
+var _drain_person := ""
+var _drain_class := ""
+func _ammo_drain_test(driver: Node, ids: Array) -> void:
+	for id in ids:
+		var status: Dictionary = driver.call("get_unit_ammo_status", String(id))
+		if String(status.get("state", "none")) == "none" or int(status.get("reserve", -1)) < 0: continue
+		var unit = driver.call("_resolve_unit_by_id", String(id))
+		var weapon := String(driver.call("_ammo_weapon_id", unit))
+		var ammo_class := String(Dictionary(driver.call("_ammo_tracker").weapon_info(weapon)).get("ammo_class", ""))
+		var expected := int(status.rounds) + int(status.magazine_size) * int(status.reserve)
+		var bag_before := _bag_count(String(id), ammo_class)
+		var shots := 0
+		var tick := int(driver.get("_current_tick"))
+		for i in 20000:
+			tick += 1
+			driver.set("_current_tick", tick)
+			if bool(driver.call("_ammo_unit_can_fire", String(id), unit)):
+				driver.call("_ammo_note_shot", unit)
+				shots += 1
+			elif String(Dictionary(driver.call("get_unit_ammo_status", String(id))).get("state", "")) == "empty": break
+		var after: Dictionary = driver.call("get_unit_ammo_status", String(id))
+		_check(bag_before == int(status.reserve), "M4e: Fach der Person in der Kampagnen-Versorgung (%d) = Vorrat im Einsatz (%d)" % [bag_before, int(status.reserve)])
+		_check(shots == expected, "M4e: %s verschiesst Magazin und alle Fach-Magazine direkt ueber den Treiber (%d Schuss, erwartet %d)" % [id, shots, expected])
+		_check(String(after.state) == "empty" and int(after.reserve) == 0, "M4e: danach keine Munition und kein Magazin im Fach: %s" % str(after))
+		_check(String(driver.call("get_unit_ammo_text", String(id))) == "Keine Munition", "M4e: Anzeige Keine Munition")
+		_check(_bag_count(String(id), ammo_class) == 0, "M4e: verbrauchte Magazine fehlen in der Kampagnen-Versorgung (vorher %d, jetzt %d)" % [bag_before, _bag_count(String(id), ammo_class)])
+		tick += 1000
+		driver.set("_current_tick", tick)
+		_check(not bool(driver.call("_ammo_unit_can_fire", String(id), unit)), "M4e: ohne Munition kein weiterer Schuss")
+		_drain_person = String(id)
+		_drain_class = ammo_class
+		return
+	_check(false, "M4e: keine bewaffnete Person mit echtem Magazinvorrat fuer den Verschiess-Test gefunden")
+
+func _bag_count(person: String, ammo_class: String) -> int:
+	var bag: Dictionary = Dictionary(Dictionary(_supply().get("inventory", {})).get("unit:%s:backpack" % person, {}))
+	return int(Dictionary(bag.get("items", {})).get(ammo_class, 0))
+
 func _long_approach_is_progressing(observation: Dictionary, progress: Dictionary, now: int) -> bool:
 	var has_long_live_route := false
 	var actors: Array = observation.get("actors", [])
@@ -226,11 +298,14 @@ func _run() -> void:
 	var mission: Node=_flow.get("_active_mission")
 	var controller: Node=mission.get_node("TacticalController")
 	controller.call("_set_selected_fireteams",PackedStringArray([_team_id]),false)
+	_ammo_probe(mission,"abflug")
 	if not await _move_and_use(mission,"satellite_data","secure_satellite","res://maps/satellite_crash_site.json"): await _finish(); return
+	_ammo_probe(mission,"heimkehr")
 	if not await _move_and_use(mission,"ship_return","return_to_ship","res://maps/satellite_crash_site.json"): await _finish(); return
 	_check(await _wait(func(): return String(_campaign().jobs.satellite_recovery.status)=="pending_upload",10000,"real chip recovered awaits upload"),"pending status")
 	_check(int(_supply().credits)==int(before.credits),"no reward before physical home upload")
 	if not await _wait_homebase(): await _finish(); return
+	if not _drain_person.is_empty(): _check(_bag_count(_drain_person, _drain_class) > 0, "M4e: Heimkehr fuellt das leergeschossene Fach aus dem Lager wieder auf (%d Magazine)" % _bag_count(_drain_person, _drain_class))
 	_flow.call("_show_homebase")
 	var result: Dictionary=_runtime.call("request_operation","campaign_upload",{"job_id":"satellite_recovery"})
 	print("UPLOAD_RESULT ",result)
@@ -297,6 +372,7 @@ func _remaining_missions() -> void:
 		var mission:Node=_flow.get("_active_mission")
 		var controller:Node=mission.get_node("TacticalController")
 		controller.call("_set_selected_fireteams",PackedStringArray([_team_id]),false)
+		_ammo_probe(mission,"abflug")
 		if job!="benit_delivery":
 			# Protect the assigned pilot through the same real movement/boarding
 			# owner before committing the ground squad to a long combat route.
@@ -358,6 +434,7 @@ func _remaining_missions() -> void:
 			if not await _move_and_use(mission,"trade_service","deliver_benit",map_path):return
 		else:
 			if not await _move_and_use(mission,"outpost_chip","secure_outpost_chip",map_path):return
+		_ammo_probe(mission,"heimkehr")
 		if not await _move_and_use(mission,"ship_return","return_to_ship",map_path):return
 		if not await _wait_homebase():return
 		_flow.call("_show_homebase")
@@ -405,6 +482,8 @@ func _remaining_missions() -> void:
 	_check(PackedStringArray(_screen.call("_get_member_unit_ids_for_fireteam",_team_id)).has("campaign_outpost_recruit"),"actual Continue preserves recruited ground squad membership")
 	_check(String(Dictionary(_flow.get("_assigned_aircraft_pilot_by_craft")).get("campaign_buccaneer_01",""))=="campaign_rescue_pilot" and not PackedStringArray(_screen.call("_get_member_unit_ids_for_fireteam",_team_id)).has("campaign_rescue_pilot"),"actual Continue keeps rescued fighter pilot separate from ground squad")
 	_check(_return_number == _expected_physical_return_count(), "%d actual sorties completed their physical home return in this run" % _expected_physical_return_count())
+	# M4d P2: ueber alle Einsaetze muss mindestens eine bewaffnete Person Munition verbraucht haben (sonst waere die Reserve unbegrenzt).
+	_check(_ammo_probe_count >= 1 and _ammo_consumed, "M4d: ueber %d Einsaetze hat mindestens eine bewaffnete Person mit ECHTEM Magazinvorrat (>= 0) Munition verbraucht (Magazin nicht mehr voll oder weniger Magazine im Fach)" % _ammo_sortie)
 
 
 # Launch/abort/resume/arrival use the current shared playtest helper.

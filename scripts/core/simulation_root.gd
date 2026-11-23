@@ -259,11 +259,55 @@ func configure_singleplayer_owners(campaign: RefCounted, supply: RefCounted, onb
 	_singleplayer_space_travel_owner = travel
 	# Die Fachgroesse im persoenlichen Behaelter folgt der getragenen Ruestung (M2); die Ausruestung gehoert dem Loadout-Besitzer.
 	if supply != null and supply.has_method("set_armor_provider"): supply.call("set_armor_provider", Callable(self, "_armor_of_person_for_supply"))
+	if supply != null and supply.has_method("set_weapon_provider"): supply.call("set_weapon_provider", Callable(self, "_weapons_of_person_for_supply"))
 
 ## "" = Person oder Ausruestungsbesitzer unbekannt (dann bleibt die gespeicherte Fachgroesse).
 func _armor_of_person_for_supply(unit_id: String) -> String:
 	if _personnel_loadout_owner == null or not bool(_personnel_loadout_owner.call("has_unit", unit_id)): return ""
 	return String(Dictionary(_personnel_loadout_owner.call("get_loadout", unit_id)).get("armor", ""))
+
+## Waffen der Person aus dem Loadout (M4b: Sorte der Magazine im Fach); leer = Person oder Besitzer unbekannt.
+func _weapons_of_person_for_supply(unit_id: String) -> Array:
+	if _personnel_loadout_owner == null or not bool(_personnel_loadout_owner.call("has_unit", unit_id)): return []
+	var loadout: Dictionary = Dictionary(_personnel_loadout_owner.call("get_loadout", unit_id))
+	return [String(loadout.get("weapon_1", "none")), String(loadout.get("weapon_2", "none"))]
+
+## Reservemagazine einer Person fuer das Gefecht (M4a). Ohne Versorgung (Tests, Skirmish) hat niemand Reserve.
+func get_person_magazine_count(unit_id: String, ammo_class: String) -> int:
+	var store: RefCounted = _magazine_owner()
+	if store == null or not store.has_method("person_magazine_count"): return 0
+	return int(store.call("person_magazine_count", unit_id, ammo_class))
+
+## M4e: Der Root einer Einsatzszene bekommt die Kampagnen-Versorgung NICHT als Besitzer (kein Lager, keine Beute, kein Handel),
+## sondern nur diesen schmalen Verweis fuer die drei Munitionsabfragen unten. Gesetzt vom Adapter beim Binden des Einsatzes an die
+## Kampagne (Neustart, Fortsetzen mitten im Einsatz), geloest beim Abbau der Szene; ohne Kampagne bleibt er leer (unbegrenzte Reserve).
+var _mission_magazine_supply: RefCounted
+
+func bind_mission_magazine_supply(supply: RefCounted) -> void:
+	_mission_magazine_supply = supply
+
+func release_mission_magazine_supply() -> void:
+	_mission_magazine_supply = null
+
+func _magazine_owner() -> RefCounted:
+	return _singleplayer_supply_owner if _singleplayer_supply_owner != null else _mission_magazine_supply
+
+func _exit_tree() -> void:
+	_mission_magazine_supply = null
+
+## Fuehrt das Spiel fuer die Person einen Bestand (eigener Behaelter)? Ohne Versorgung (Tests, Skirmish) und fuer Personen ohne
+## Behaelter und ausserhalb der Kampagne (M4c: Skirmish, Mehrspieler): nein; sie gelten im Gefecht als unbegrenzt versorgt
+## (laden nach, gehen nie leer aus), wie die Gegner.
+func person_has_magazine_store(unit_id: String) -> bool:
+	var store: RefCounted = _magazine_owner()
+	if store == null or not store.has_method("person_has_magazine_store"): return false
+	return bool(store.call("person_has_magazine_store", unit_id))
+
+## Zieht ein Reservemagazin ab (Nachladen); nur der Host fuehrt das Gefecht, also auch nur er bucht den Verbrauch.
+func take_person_magazine(unit_id: String, ammo_class: String) -> bool:
+	var store: RefCounted = _magazine_owner()
+	if store == null or not store.has_method("take_person_magazine"): return false
+	return bool(store.call("take_person_magazine", unit_id, ammo_class))
 
 func configure_departure_adapter(adapter: Node) -> Dictionary:
 	if not is_instance_valid(adapter) or not adapter.has_method("preview_departure") or not adapter.has_method("_built_home_pad_ids"): return {"ok":false, "reason":"invalid_adapter"}

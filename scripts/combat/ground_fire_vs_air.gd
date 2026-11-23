@@ -147,6 +147,9 @@ func step(ctx: Dictionary) -> Dictionary:
 	var has_ground_contact: Callable = ctx.get("has_ground_contact", Callable())
 	var sees: Callable = ctx.get("sees", Callable())
 	var roll: Callable = ctx.get("roll", Callable())
+	# Optional: Munition. ammo_can_fire(unit)->bool vor dem Schuss, ammo_note_shot(unit) fuer den abgegebenen Schuss.
+	var ammo_can_fire: Callable = ctx.get("ammo_can_fire", Callable())
+	var ammo_note_shot: Callable = ctx.get("ammo_note_shot", Callable())
 	if not (id_of.is_valid() and weapon_of.is_valid() and is_fit.is_valid() and has_ground_contact.is_valid() and sees.is_valid() and roll.is_valid()):
 		return out
 	for target_variant in targets:
@@ -220,6 +223,10 @@ func step(ctx: Dictionary) -> Dictionary:
 						last_effect = Dictionary(rewarn.get("simulation_effect", {})).duplicate(true)
 						changed = true
 				continue
+			# Munition (M4a Nachbesserung): nachladend oder leer schiesst die Einheit nicht; die Aufschaltung bleibt stehen, der
+			# Schuss kommt, sobald das Magazin wieder bereit ist. Kein Wurf, kein neuer Lauf der Aufschaltzeit.
+			if ammo_can_fire.is_valid() and not bool(ammo_can_fire.call(unit)):
+				continue
 			var risk: float = float(probe.get("risk", 0.0))
 			var chance: float = hit_chance(weapon_id, float(target.get("pilot_skill", 0.5)))
 			# Neue Aufschaltung nach jedem Schuss: hoechstens ein Schuss je Aufschaltzeit.
@@ -228,6 +235,8 @@ func step(ctx: Dictionary) -> Dictionary:
 			# er verschiebt dessen Streuung, gewollt (E8). Genau ein Schritt je Schuss, keiner ohne Schuss.
 			var drawn: float = float(roll.call())
 			var hit: bool = drawn < chance
+			if ammo_note_shot.is_valid():
+				ammo_note_shot.call(unit)
 			var event: Dictionary = {"type": "shot", "craft_id": craft_id, "attacker_id": unit_id, "weapon_id": weapon_id, "tick": tick,
 				"risk": risk, "evasion": evasion_for(float(target.get("pilot_skill", 0.5))), "chance": chance, "roll": drawn, "hit": hit, "damage": 0}
 			if hit:
@@ -297,6 +306,8 @@ func advance(driver: Node, root: Node, controller: Node, tick: int) -> Dictionar
 		"has_ground_contact": Callable(self, "_has_ground_contact"),
 		"sees": Callable(self, "_sees"),
 		"roll": Callable(root, "draw_air_ground_roll"),
+		"ammo_can_fire": Callable(self, "_ammo_can_fire"),
+		"ammo_note_shot": Callable(self, "_ammo_note_shot"),
 	}
 	var result: Dictionary = step(ctx) if can_step else {"events": [], "messages": [], "updates": {}, "cease": _cease_pending.keys()}
 	_driver = null
@@ -347,6 +358,18 @@ func advance(driver: Node, root: Node, controller: Node, tick: int) -> Dictionar
 
 static func _is_terminal(status: Dictionary) -> bool:
 	return bool(AIR_ASSET_STATUS_SCRIPT.call("is_terminal_state", String(status.get("state", ""))))
+
+
+## Munition des Gefechts-Drivers (M4a Nachbesserung): Raketenwerfer und Schienenkanone laden nach wie am Boden.
+func _ammo_can_fire(unit) -> bool:
+	if _driver == null or not _driver.has_method("_ammo_unit_can_fire"):
+		return true
+	return bool(_driver.call("_ammo_unit_can_fire", _unit_id_of(unit), unit))
+
+
+func _ammo_note_shot(unit) -> void:
+	if _driver != null and _driver.has_method("_ammo_note_shot"):
+		_driver.call("_ammo_note_shot", unit)
 
 
 func _unit_id_of(unit) -> String:

@@ -8,6 +8,7 @@ const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tac
 const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
 const LOCAL_AVOIDANCE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/local_avoidance_resolver.gd")
 const COMBAT_CADENCE_SCRIPT: GDScript = preload("res://scripts/combat/combat_cadence.gd")
+const COMBAT_AMMO_SCRIPT: GDScript = preload("res://scripts/combat/combat_ammo.gd")
 const COMBAT_DECISION_INTERVAL_TICKS: int = COMBAT_CADENCE_SCRIPT.DECISION_INTERVAL_TICKS
 const SUPPRESSION_MATH_SCRIPT: GDScript = preload("res://scripts/tactical/suppression_math.gd")
 const SUPPRESSION_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/suppression_tracker.gd")
@@ -2130,6 +2131,9 @@ func _advance_ground_fire_vs_air(simulation_root: Node) -> void:
 func _run_overwatch_and_attack_step(simulation_root: Node, profile_enabled: bool, profile_scopes: Dictionary) -> void:
 	var scope_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var overwatch_shots: Array = _try_enqueue_overwatch(simulation_root)
+	for ammo_shot_variant in overwatch_shots:
+		if typeof(ammo_shot_variant) == TYPE_DICTIONARY:
+			_ammo_note_shot(_resolve_unit_by_id(String(Dictionary(ammo_shot_variant).get("attacker_unit_id", ""))))
 	if profile_enabled:
 		profile_scopes["overwatch_security_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
@@ -2213,6 +2217,89 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	_flush_combat_noise_facing()
 
 
+## ---- Munition (M4a) --------------------------------------------------------------------------------------------------
+## Ein Schuss kostet eine Patrone des eingelegten Magazins (Normalschuss und Ueberwachung, Treffer wie Fehlschuss); ist es
+## leer, wird aus den Reservemagazinen der Person nachgeladen (Pause), ohne Reserve schiesst die Einheit nicht. Gegner laden
+## nach, haben aber unbegrenzt Reserve. Der Zustand gehoert dem Einsatz (reset_suppression leert ihn), steht nicht im Speicherstand.
+var _ammo_state = null
+## Nur fuer Pruefer, die Takt oder Unterdrueckung ueber viele Schuesse zaehlen (nicht die Munition): false = alle Waffen ohne Munitionsbedarf.
+var ammo_enabled: bool = true
+
+
+func _ammo_tracker():
+	if _ammo_state == null:
+		_ammo_state = COMBAT_AMMO_SCRIPT.new()
+		_ammo_state.reserve_count = Callable(self, "_ammo_reserve_count")
+		_ammo_state.take_reserve = Callable(self, "_ammo_take_reserve")
+	return _ammo_state
+
+
+func _ammo_reserve_count(unit_id: String, ammo_class: String) -> int:
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root == null or not simulation_root.has_method("get_person_magazine_count"):
+		return 0
+	return int(simulation_root.call("get_person_magazine_count", unit_id, ammo_class))
+
+
+func _ammo_take_reserve(unit_id: String, ammo_class: String) -> bool:
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root == null or not simulation_root.has_method("take_person_magazine"):
+		return false
+	return bool(simulation_root.call("take_person_magazine", unit_id, ammo_class))
+
+
+## Unbegrenzte Reserve (laedt nach, geht nie leer aus): Gegner, und befreundete Einheiten ohne eigenen Bestand (kein Behaelter).
+func _ammo_unit_unlimited(unit) -> bool:
+	if _get_unit_team_id_for_diagnostics(unit) != friendly_team_id:
+		return true
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root == null or not simulation_root.has_method("person_has_magazine_store") or unit == null or not unit.has_method("get_unit_id"):
+		return true
+	return not bool(simulation_root.call("person_has_magazine_store", String(unit.call("get_unit_id"))))
+
+
+func _ammo_weapon_id(unit) -> String:
+	if not ammo_enabled:
+		return ""
+	return String(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("get_unit_active_weapon_id", unit))
+
+
+## Darf die Einheit jetzt schiessen (Munition)? Nein beim Nachladen und ganz ohne Munition; die Gelegenheit ist dann verbraucht.
+func _ammo_unit_can_fire(unit_id: String, unit) -> bool:
+	return bool(_ammo_tracker().can_fire(unit_id, _ammo_weapon_id(unit), _current_tick, _ammo_unit_unlimited(unit)))
+
+
+func _ammo_note_shot(unit) -> void:
+	if unit == null or not is_instance_valid(unit) or not unit.has_method("get_unit_id"):
+		return
+	var unit_id: String = String(unit.call("get_unit_id"))
+	var weapon_id: String = _ammo_weapon_id(unit)
+	if String(_ammo_tracker().note_shot(unit_id, weapon_id, _current_tick, _ammo_unit_unlimited(unit))) == "empty" and OS.is_debug_build():
+		# Einmal je Einheit und Magazin im Protokoll (nur Test-/Debug-Laeufe): wer ist wann ohne Munition, nach wie vielen Schuessen.
+		print("AMMO_EMPTY unit=%s weapon=%s tick=%d shots=%d" % [unit_id, weapon_id, _current_tick, int(_ammo_tracker().shots_fired(unit_id, weapon_id))])
+
+
+## Munitionszustand einer Einheit (nur lesen): {"state": none|ready|reloading|empty, rounds, magazine_size, reserve, reload_ticks_left}.
+func get_unit_ammo_status(unit_id: String) -> Dictionary:
+	var unit = _resolve_unit_by_id(unit_id)
+	if unit == null:
+		return {"state": "none", "rounds": 0, "magazine_size": 0, "reserve": -1, "reload_ticks_left": 0}
+	return Dictionary(_ammo_tracker().status(unit_id, _ammo_weapon_id(unit), _current_tick, _ammo_unit_unlimited(unit)))
+
+
+## Kurzer Text fuer die Einheitenkarte: "Mun. 9/12 +2", "lädt nach", "Keine Munition" (leer, wenn die Waffe keine Munition braucht).
+func get_unit_ammo_text(unit_id: String) -> String:
+	var unit = _resolve_unit_by_id(unit_id)
+	if unit == null:
+		return ""
+	return String(_ammo_tracker().status_text(unit_id, _ammo_weapon_id(unit), _current_tick, _ammo_unit_unlimited(unit)))
+
+
+func reset_ammo() -> void:
+	if _ammo_state != null:
+		_ammo_state.reset()
+
+
 ## Rueckruf des Aufloesers (nur fuer find_contact_pairs): 0 = dran, 1 = nur Anlauf (suchen, Erfassung starten),
 ## 2 = nichts tun. Billig: Waffe und Initiative je Einheit gemerkt, keine Kopie des Profils je Aufruf.
 func _combat_attack_phase(unit) -> int:
@@ -2225,6 +2312,11 @@ func _combat_attack_phase(unit) -> int:
 	if COMBAT_CADENCE_SCRIPT.is_due(_attack_step, period):
 		if not _suppression_fire_slot_open(unit_id, unit):
 			# Unterdrueckung: die Gelegenheit ist verbraucht (keine Zielsuche, kein Wurf, kein Nachholen).
+			if _attack_contact_ids.has(unit_id):
+				_attack_contact_next[unit_id] = true
+			return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.ATTACK_PHASE_SKIP
+		if not _ammo_unit_can_fire(unit_id, unit):
+			# Nachladen oder keine Munition: ebenso verbraucht (keine Zielsuche, kein Wurf, kein Nachholen), und es kostet nichts.
 			if _attack_contact_ids.has(unit_id):
 				_attack_contact_next[unit_id] = true
 			return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.ATTACK_PHASE_SKIP
@@ -2327,6 +2419,7 @@ func _enqueue_attack_for_pair(contact_pair: Dictionary, simulation_root: Node, p
 		damage_effect["fire_event_id"] = fire_event_id
 		_refresh_tactical_combat_visuals()
 	simulation_root.call("enqueue_effect", damage_effect)
+	_ammo_note_shot(attacker)
 	# K1r: ein Normalschuss sperrt dasselbe Mitglied fuer die Ueberwachung eine Periode lang.
 	if _overwatch_controller != null and _overwatch_controller.has_method("note_member_fired"):
 		_overwatch_controller.call("note_member_fired", attacker_id, _current_tick + ((_get_attack_period_milli(attacker) + 999) / 1000) * COMBAT_DECISION_INTERVAL_TICKS)
@@ -6328,6 +6421,9 @@ func _try_enqueue_overwatch(simulation_root: Node) -> Array:
 			continue
 		if not _suppression_overwatch_slot_open(friendly, overwatch_ready_snapshot):
 			continue
+		# M4a: wer nachlaedt oder keine Munition hat, gibt keinen Ueberwachungsschuss ab (ein Mitglied in der Sperrzeit bleibt unberuehrt).
+		if bool(Dictionary(overwatch_ready_snapshot.get(_get_unit_id_for_diagnostics(friendly), {})).get("ready", true)) and not _ammo_unit_can_fire(_get_unit_id_for_diagnostics(friendly), friendly):
+			continue
 		var fireteam_id: String = String(friendly.call("get_fireteam_id")).strip_edges().to_lower()
 		if fireteam_id.is_empty():
 			continue
@@ -6566,6 +6662,7 @@ func get_suppression_slot_count(unit_id: String) -> int:
 
 ## Nichts davon steht im Speicherstand: beim Laden eines Zwischenstands und beim Missionsneustart leeren.
 func reset_suppression() -> void:
+	reset_ammo()  # M4a: neuer Einsatz bzw. Zwischenstand geladen: jedes eingelegte Magazin ist wieder voll
 	if _suppression_tracker == null:
 		return
 	_suppression_tracker.reset()

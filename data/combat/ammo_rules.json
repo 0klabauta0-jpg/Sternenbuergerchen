@@ -1,6 +1,9 @@
 {
 	"compartment_capacity_by_armor": {"suit": 1, "light": 3, "medium": 5, "heavy": 7},
 	"default_compartment_capacity": 1,
+	"reload_scale": 6,
+	"magazine_scale": 2.0,
+	"start_base_stock": {"ammo_light": 16, "ammo_rifle": 8},
 	"ammo_items": {
 		"ammo_light": "Magazin leicht",
 		"ammo_rifle": "Magazin Gewehr",
