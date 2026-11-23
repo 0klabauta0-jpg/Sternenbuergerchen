@@ -8,6 +8,7 @@ const MENU_ICONS=preload("res://scripts/ui/menu_equipment_icons.gd")
 const BADGES=preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 const COPY=preload("res://scripts/meta/character_sheet_copy.gd")
 const PORTRAITS=preload("res://scripts/meta/portrait_identity_catalog.gd")
+const FAR_SHIP_HINT := "Schiffsfracht nur in der Nähe des Schiffs erreichbar."
 const PORTRAIT_SIZE := Vector2(112, 140)
 const MODEL_HEIGHT := 500.0
 # PC density, user decision 14.11.2026 (home base P6): body slots and storage tiles.
@@ -178,9 +179,12 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 		if id=="base:homebase":header.text=header.text.replace("Basislager","Basislager · frei");header.tooltip_text="Freier Lagerbestand. Getragene Gegenstände stehen ausschließlich an der Person und werden hier nicht mitgezählt."
 		SKIN.label(header,15)
 		var allowed: bool=accessible.has(id)
-		if not equipment_allowed and id!="unit:"+_unit_id+":backpack" and not allowed:box.hide()
+		# M6b (B4): im Einsatz bleibt die Schiffsfracht auch ausser Reichweite sichtbar, mit dem Hinweis statt des Bestands.
+		var far_ship: bool = not equipment_allowed and not allowed and craft_id != "" and id == "craft:" + craft_id
+		if not equipment_allowed and id!="unit:"+_unit_id+":backpack" and not allowed and not far_ship:box.hide()
 		if not allowed:
-			var locked:=Label.new(); locked.text="Hier nicht erreichbar"; body.add_child(locked)
+			var locked:=Label.new(); locked.text=FAR_SHIP_HINT if far_ship else "Hier nicht erreichbar"; locked.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; body.add_child(locked)
+			if far_ship: data={"items":{}}  # statt der Schiffsfracht nur der Hinweis
 		else:
 			_target.add_item(spec[1]); _target.set_item_metadata(_target.item_count-1,id)
 		var grid:=GridContainer.new(); grid.columns=2; body.add_child(grid)
@@ -192,7 +196,7 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 			if id.begins_with("unit:"):
 				button.name="BackpackItem_"+String(item)+"_List";button.text="" if button.icon != null else String(LABELS.get(item,item));button.custom_minimum_size=Vector2(64,64);button.add_theme_constant_override("icon_max_width",52);button.tooltip_text="%s × %d"%[String(LABELS.get(item,item)),int(data.items[item])]
 			button.pressed.connect(func(): _selection={"source_container_id":id,"item_id":item}; _selected.text=String(LABELS.get(item,item))+" · "+String(spec[1]))
-		if Dictionary(data.get("items",{})).is_empty():
+		if Dictionary(data.get("items",{})).is_empty() and not far_ship:
 			var empty:=Label.new(); empty.text="Leer · Gegenstand hierher ziehen"; empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; body.add_child(empty)
 	_transfer.disabled=accessible.is_empty(); _equip.disabled=accessible.is_empty() or not equipment_allowed
 	_remove_armor.visible = equipment_allowed and String(loadout.get("armor", "suit")) != "suit"
