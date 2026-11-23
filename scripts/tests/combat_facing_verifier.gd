@@ -39,7 +39,8 @@ class NPC extends Node2D:
 	func get_active_weapon_id() -> String: return active_weapon_id
 	func get_current_unit_command(): return command
 	func get_character_profile_bundle() -> Dictionary: return {"behavior_axes": {"initiative": initiative}} if initiative >= 0.0 else {}
-	func get_stealth() -> float: return 0.0
+	var stealth := 0.0
+	func get_stealth() -> float: return stealth
 	func get_discipline() -> float: return 0.0
 	func get_fire_status() -> String: return String(command.get("fire_status")) if command != null else "fire_at_will"
 	func show_event_text(_text: String, _color: Color, _duration: float) -> void: pass
@@ -156,6 +157,7 @@ func _fixture(specs: Array) -> Dictionary:
 			fake.awareness = float(spec.get("aw", 1.0))
 			fake.initiative = float(spec.get("ini", -1.0))
 			fake.hp = int(spec.get("hp", 100))
+			fake.stealth = float(spec.get("stealth", 0.0))
 			fake.active_weapon_id = String(spec.get("weapon", "pistol"))
 			var cmd = spec.get("cmd", null)
 			if cmd != null:

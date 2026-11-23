@@ -222,6 +222,10 @@ var _recent_incoming_fire_tick_by_fireteam: Dictionary = {}
 ## Regel D (Sicht): wer wen getroffen hat. Schluessel "<Schuetze>><Gruppe des Opfers>" -> Tick des Treffers;
 ## die Gruppe ist die Fireteam des Opfers (sonst die Einheit selbst). Gilt fuer beide Seiten gleich.
 var _recent_hit_tick_by_shooter_and_group: Dictionary = {}
+## R-C "Wer schiesst, verraet sich": letzter Schuss (Treffer ODER Fehlschuss) je "schuetze>gruppe"; im selben Fenster wie
+## oben gilt fuer den Beschossenen und seine Gruppe gegenueber genau diesem Schuetzen die eigene Waffenreichweite als
+## Erkennungsreichweite (Sichtlinie und Verdeckung unveraendert, Sichtbogen weiter nur nach Treffern).
+var _recent_shot_tick_by_shooter_and_group: Dictionary = {}
 var _misidentification_cooldown: Dictionary = {}
 var _medic_support_cooldown: Dictionary = {}
 var _medic_support_move_ready_tick: Dictionary = {}
@@ -1063,7 +1067,7 @@ func _visibility_group_key(unit) -> String:
 
 
 func _record_incoming_hit_for_visibility(result: Dictionary) -> void:
-	if not bool(result.get("hit", false)) or bool(result.get("friendly_fire", false)):
+	if bool(result.get("friendly_fire", false)):
 		return
 	var shooter_id: String = String(result.get("attacker_unit_id", "")).strip_edges()
 	var victim_id: String = String(result.get("target_unit_id", result.get("unit_id", ""))).strip_edges()
@@ -1072,7 +1076,38 @@ func _record_incoming_hit_for_visibility(result: Dictionary) -> void:
 	var group_key: String = _visibility_group_key(_resolve_unit_by_id(victim_id))
 	if group_key.is_empty():
 		return
+	# R-C: jeder aufgeloeste Schuss (Treffer und Fehlschuss) verraet den Schuetzen.
+	_recent_shot_tick_by_shooter_and_group["%s>%s" % [shooter_id, group_key]] = _current_tick
+	if not bool(result.get("hit", false)):
+		return
 	_recent_hit_tick_by_shooter_and_group["%s>%s" % [shooter_id, group_key]] = _current_tick
+
+
+## R-C: hat `shooter` die Gruppe von `observer` innerhalb des Rueckfeuerfensters beschossen (Treffer oder Fehlschuss)?
+func _was_recently_shot_by(observer, shooter) -> bool:
+	if _recent_shot_tick_by_shooter_and_group.is_empty():
+		return false
+	if observer == null or shooter == null or not shooter.has_method("get_unit_id"):
+		return false
+	var group_key: String = _visibility_group_key(observer)
+	if group_key.is_empty():
+		return false
+	var key: String = "%s>%s" % [String(shooter.call("get_unit_id")).strip_edges(), group_key]
+	if not _recent_shot_tick_by_shooter_and_group.has(key):
+		return false
+	var shot_tick: int = int(_recent_shot_tick_by_shooter_and_group[key])
+	return shot_tick <= _current_tick and _current_tick - shot_tick <= _get_return_fire_window_ticks(observer)
+
+
+## R-B/R-C: die eine Reichweite, in der `observer` den Gegner `target` erkennen kann. Gilt fuer die Erkennung
+## (_has_valid_los) und fuer alle "sieht einen Gegner"-Abfragen des Dreh- und Umsehcodes: Kontaktreichweite abzueglich
+## Tarnung, beim Angriffsbefehl (engage) mindestens die Waffenreichweite, gegenueber einem Schuetzen, der die eigene
+## Gruppe im Fenster beschossen hat, ebenfalls mindestens die eigene Waffenreichweite.
+func _get_detection_range_for(observer, target) -> float:
+	var detection_range: float = _get_effective_range(target)
+	if _uses_weapon_range_for_contact_detection(observer):
+		detection_range = maxf(detection_range, _get_weapon_attack_range(observer, target))
+	return detection_range
 
 
 func _was_recently_hit_by(observer, shooter) -> bool:
@@ -2421,7 +2456,8 @@ func _unit_has_visible_own_target(unit, unit_id: String, now: int) -> bool:
 	if not _unit_is_fit_for_facing(own_target):
 		_facing_target_by_unit.erase(unit_id)
 		return false
-	if bool(_query_current_visibility(unit, own_target, contact_range).get("visible", false)):
+	# R-B: "sieht" = in Erkennungsreichweite (gemeinsame Hilfsfunktion mit der Erkennung), nicht die volle Kontaktreichweite.
+	if bool(_query_current_visibility(unit, own_target, _get_detection_range_for(unit, own_target)).get("visible", false)):
 		entry["seen"] = now
 		_facing_target_by_unit[unit_id] = entry
 		return true
@@ -2574,7 +2610,8 @@ func _facing_unit_sees_opponent(unit) -> bool:
 	for opponent in opponents:
 		if opponent == null or opponent == unit or not _unit_is_fit_for_facing(opponent):
 			continue
-		if bool(_query_current_visibility(unit, opponent, contact_range).get("visible", false)):
+		# R-B: dieselbe Reichweite wie die Erkennung, sonst endet die Suche bei einem nie erkennbaren Gegner.
+		if bool(_query_current_visibility(unit, opponent, _get_detection_range_for(unit, opponent)).get("visible", false)):
 			return true
 	return false
 
@@ -3818,9 +3855,7 @@ func _has_valid_los(attacker, target) -> bool:
 	if not target.has_method("get_vital_state") or String(target.call("get_vital_state")) != "fit":
 		return false
 
-	var los_range: float = _get_effective_range(target)
-	if _uses_weapon_range_for_contact_detection(attacker):
-		los_range = maxf(los_range, _get_weapon_attack_range(attacker, target))
+	var los_range: float = _get_detection_range_for(attacker, target)
 	var logical: Dictionary = _query_current_visibility(attacker,target,los_range)
 	if bool(logical.get("handled",false)):
 		return bool(logical.get("visible",false))
