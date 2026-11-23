@@ -128,6 +128,10 @@ func _recruit_part() -> void:
 	s.configure_inventory(["p4"], [], true)
 	check(bool(s.provision_new_person("p4")), "Neue Person: wird ausgestattet")
 	check(_n(_bag(s, "p4"), "ammo_light") == 1, "Neue Person p4 (Raumanzug + Pistole) kommt mit vollem Fach (1 Magazin)")
+	# M4c (K2): wiederholter Aufruf (etwa ein zweiter Durchlauf der Anwerbeschleife) schafft keine Magazine aus dem Nichts.
+	check(not bool(s.provision_new_person("p4")) and _n(_bag(s, "p4"), "ammo_light") == 1, "Neue Person: zweiter Aufruf aendert nichts (1 Magazin)")
+	s.take_person_magazine("p4", "ammo_light")
+	check(bool(s.provision_new_person("p4")) and _n(_bag(s, "p4"), "ammo_light") == 1, "Neue Person: fehlt das Magazin wirklich, wird nur das Fehlende ergaenzt")
 	var fresh := _sup(["p1"])
 	fresh.configure_inventory(["p4"], [], true)
 	check(not bool(fresh.provision_new_person("p4")) and _n(_bag(fresh, "p4"), "ammo_light") == 0, "Ohne gewaehrte Startausstattung (alter Stand) bekommt eine neue Person noch nichts")

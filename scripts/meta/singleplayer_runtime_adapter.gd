@@ -1795,7 +1795,12 @@ func launch_to_moon_orbit(craft_id: String) -> Dictionary:
 		# edit pilot or payload using the old homebase transport projection.
 		_flow.call("_refresh_homebase_screen")
 		if not result.get("replayed", false): call_deferred("_publish_space_launch_event", request_id)
+		# M4c (W2): der Abflug von der Heimatbasis ist bestaetigt -> die Faecher der Mitfliegenden aus dem Basislager auffuellen.
+		var ammo_departure: Dictionary = {} if result.get("replayed", false) else replenish_ammo_for_departure(craft_id)
 		var travel: Dictionary = Dictionary(result.travel_result)
+		if not String(ammo_departure.get("short_message", "")).is_empty():
+			travel = travel.duplicate()
+			travel["ammo_message"] = String(ammo_departure.short_message)
 		if not pre_launch_save.is_empty():
 			travel = travel.duplicate()
 			travel["pre_launch_save"] = pre_launch_save
@@ -2216,6 +2221,16 @@ func grant_ammo_start_if_missing() -> bool:
 func replenish_ammo(unit_ids: Array) -> Dictionary:
 	if not _campaign_mode: return {"added": 0, "short": 0, "message": ""}
 	return Dictionary(_supply.fill_person_compartments(unit_ids, true))
+
+## M4c (W2): Faecher der mitfliegenden Personen (an Bord des Schiffs plus zugeteilter Pilot) beim bestaetigten Abflug von der
+## Heimatbasis aus dem Basislager auffuellen; dieselbe Funktion und Reihenfolge wie bei der Heimkehr. Wiederholbar (ergaenzt nur Fehlendes).
+## Aufgerufen von launch_to_moon_orbit (der einzigen verbindlichen Abflugstelle von der Heimatbasis), nie beim Oeffnen eines Dialogs.
+func replenish_ammo_for_departure(craft_id: String) -> Dictionary:
+	if not _campaign_mode or _flow == null or _supply == null: return {"added": 0, "short": 0, "message": "", "short_message": ""}
+	var ids: Array = Array(_flow.call("_aboard_unit_ids_of_craft", craft_id)).duplicate()
+	var pilot := String(Dictionary(_flow.get("_assigned_aircraft_pilot_by_craft")).get(craft_id, ""))
+	if not pilot.is_empty() and not ids.has(pilot): ids.append(pilot)
+	return Dictionary(_supply.fill_person_compartments(ids, true))
 
 ## Rucksack und Ausruestung einer gefallenen Person verwerfen (Auftragsfracht siehe SingleplayerSupplyState.discard_person_equipment).
 func discard_person_equipment(unit_id: String) -> Dictionary:
@@ -2858,9 +2873,12 @@ func _advance_polisa_recruitment() -> void:
 		_simulation.request_personnel_loadout_command("configure_roster", {"roster":[profile]})
 		if not already_configured:
 			_simulation.request_personnel_loadout_command("set_loadout", {"unit_id":String(pending.unit_id),"loadout":{"armor":profile.get("armor", "suit"),"weapon_1":profile.get("weapon_1", "pistol"),"weapon_2":profile.get("weapon_2", "none")}})
-		_supply.provision_new_person(String(pending.unit_id)) # M4b: neue Person kommt mit vollem Fach (sofern die Startausstattung des Standes gewaehrt ist)
 		var result := _commit("singleplayer_supply", "station_recruit_finalize", {"reservation_id":reservation_id}, "final:"+reservation_id, {"recruit_verify":Callable(self,"_verify_polisa_recruit_admitted")})
-		if result.get("ok", false): _polisa_recruit_pending.erase(reservation_id)
+		if result.get("ok", false):
+			_polisa_recruit_pending.erase(reservation_id)
+			# M4b/M4c (K2): neue Person kommt mit vollem Fach (sofern die Startausstattung des Standes gewaehrt ist) - genau einmal und erst
+			# nach abgeschlossener Anwerbung, nicht bei jedem Wiederholungsdurchlauf der Schleife (sonst Magazine aus dem Nichts).
+			_supply.provision_new_person(String(pending.unit_id))
 
 func get_polisa_snapshot(snapshot: Dictionary = {}) -> Dictionary:
 	if snapshot.is_empty(): snapshot = get_snapshot()

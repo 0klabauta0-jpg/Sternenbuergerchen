@@ -1182,8 +1182,9 @@ func fill_person_compartments(unit_ids: Array, from_base: bool) -> Dictionary:
 	if added > 0: _revision += 1
 	var parts: PackedStringArray = []
 	if from_base and added > 0: parts.append("Munition aufgefüllt: %d Magazine." % added)
-	if from_base and short > 0: parts.append("Munition knapp: %d Fächer blieben leer." % short)
-	return {"added": added, "short": short, "message": " ".join(parts)}
+	var short_text := "Munition knapp: %d Fächer blieben leer." % short if from_base and short > 0 else ""
+	if not short_text.is_empty(): parts.append(short_text)
+	return {"added": added, "short": short, "message": " ".join(parts), "short_message": short_text}
 
 ## Einmal je Spielstand: 16 leichte und 8 Gewehr-Magazine ins Basislager (Zahlen: ammo_rules.json start_base_stock, soweit sie
 ## ins Lager passen) und volle Faecher fuer die Personen. Gibt true zurueck, wenn jetzt gewaehrt wurde; mit dem Merker nie wieder.

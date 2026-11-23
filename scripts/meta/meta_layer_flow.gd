@@ -4052,7 +4052,8 @@ func _on_homebase_mission_start_requested() -> void:
 			return
 		_homecoming_forget_craft(requested_direct_craft_id) # the craft left the base for the star map
 		_last_mission_result.clear()
-		_report_launch_save(Dictionary(launch.get("pre_launch_save", {}))) # Speichern, erster Teil, Fix-Runde 1 (W1): der Spieler erfaehrt, was mit dem Speichern vor dem Abheben geschah
+		# Speichern, erster Teil, Fix-Runde 1 (W1): der Spieler erfaehrt, was mit dem Speichern vor dem Abheben geschah; M4c (W2/W4): dieselbe Zeile nennt "Munition knapp", wenn beim Abflug Magazine fehlten
+		_report_launch_save(Dictionary(launch.get("pre_launch_save", {})), String(launch.get("ammo_message", "")))
 		_show_star_map()
 		return
 	if payload_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
@@ -9297,6 +9298,7 @@ func _replenish_ammo_after_landing(craft_id: String, unit_ids: Array) -> void:
 	var text := String(result.get("message", ""))
 	if text.is_empty(): return
 	set_meta("ammo_refill_message", text)
+	_ammo_landing_note = text if _ammo_landing_note.is_empty() else _ammo_landing_note + " " + text  # M4c (W4): sichtbar im Hinweis der Landungs-Speicherung
 	_homecoming_warn_once(craft_id, "ammo", text)
 
 
@@ -9360,6 +9362,8 @@ var _save_toast: Node = null
 ## Fix-Runde 1 (W1): die Heimlandung hat ein Speichern angespannt und der Spieler hat noch keinen Ausgang gesehen / welchen Grund er zuletzt gelesen hat.
 var _landing_feedback_open: bool = false
 var _landing_told_reason: String = ""
+## M4c (W4): Auffuell-Meldung der Heimkehr; haengt am Hinweis der Landungs-Speicherung ("Gespeichert. Munition aufgefüllt: ...").
+var _ammo_landing_note: String = ""
 
 func _completed_campaign_job_count() -> int:
 	if _singleplayer_runtime == null: return -1
@@ -9392,6 +9396,7 @@ func _reset_completion_save_baseline() -> void:
 	_completion_save_warned = false
 	_landing_feedback_open = false
 	_landing_told_reason = ""
+	_ammo_landing_note = ""
 	_save_wish.clear() # Ein vorgemerkter Wunsch verfaellt beim Laden und beim Kampagnenstart.
 
 
@@ -9427,9 +9432,11 @@ func _poll_completion_save() -> void:
 		if wish_open:
 			# Ein Schreibvorgang erledigt Wunsch und Abschluss/Landung zugleich.
 			_save_wish.clear()
-			_show_save_feedback(String(result.get("message", "Kampagne gespeichert.")))
+			_show_save_feedback(String(result.get("message", "Kampagne gespeichert.")) + ("" if _ammo_landing_note.is_empty() else " " + _ammo_landing_note))
 		elif _landing_feedback_open:
-			_show_save_feedback("Gespeichert.") # Fix-Runde 1 (W1): die automatische Speicherung nach der Landung sagt, dass sie geklappt hat
+			# Fix-Runde 1 (W1): die automatische Speicherung nach der Landung sagt, dass sie geklappt hat; M4c (W4): mit der Auffuell-Meldung, falls es eine gibt
+			_show_save_feedback("Gespeichert." if _ammo_landing_note.is_empty() else "Gespeichert. " + _ammo_landing_note)
+		_ammo_landing_note = ""
 		_landing_feedback_open = false
 		_landing_told_reason = ""
 		return
@@ -9501,17 +9508,20 @@ func request_player_save() -> Dictionary:
 
 ## Fix-Runde 1 (W1): Meldung zum Speichern vor dem Abheben von der Basis (Antwort von _save_before_launch, leer = nichts versucht, etwa in der
 ## Gefechtsprobe). Gelungen: "Gespeichert."; sonst "Vor dem Abheben nicht gespeichert: <Satz des Grundes>". Das Schiff startet in beiden Faellen.
-func _report_launch_save(saved: Dictionary) -> void:
-	if saved.is_empty(): return
+func _report_launch_save(saved: Dictionary, ammo_note: String = "") -> void:
+	var tail := "" if ammo_note.is_empty() else " " + ammo_note  # M4c: "Munition knapp: ..." beim Abflug, in derselben Zeile
+	if saved.is_empty():
+		if not tail.is_empty(): _show_save_feedback(ammo_note)
+		return
 	if bool(saved.get("ok", false)):
-		_show_save_feedback("Gespeichert.")
+		_show_save_feedback("Gespeichert." + tail)
 		return
 	var reason := String(saved.get("reason", ""))
 	var detail := String(saved.get("detail", ""))
 	var sentence := String(saved.get("message", ""))
 	if sentence.is_empty() or reason == "launch_during_mission":
 		sentence = load("res://scripts/meta/campaign_save_projection.gd").blocked_text(reason, detail)
-	_show_save_feedback("Vor dem Abheben nicht gespeichert: " + sentence)
+	_show_save_feedback("Vor dem Abheben nicht gespeichert: " + sentence + tail)
 
 
 ## Der gemerkte Speicherwunsch (leer = keiner); nur lesen.
