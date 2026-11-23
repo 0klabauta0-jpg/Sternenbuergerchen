@@ -248,7 +248,7 @@ func _force_first_engagement_decision(controller: Node, combat_driver: Node, sim
 		detection_progress["%s:%s" % [enemy_id, friendly_id]] = 0
 	combat_driver.set("_detection_progress", detection_progress)
 	combat_driver.set("_current_tick", 120)
-	combat_driver.set("_next_attack_tick", 0)
+	combat_driver.call("align_to_common_decision_step_for_test")
 	if combat_driver.has_method("_try_enqueue_attacks"):
 		combat_driver.call("_try_enqueue_attacks", simulation_root)
 

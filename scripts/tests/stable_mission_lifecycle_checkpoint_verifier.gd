@@ -23,6 +23,18 @@ func _run() -> void:
  var owner = script.new()
  var saved: Dictionary = JSON.parse_string(JSON.stringify(owner.export_state(rig.sim,driver)))
  _check(saved.get("ok",false),"stable legacy lifecycle captures")
+ # Gefechtstakt: neue Staende haben keinen gemeinsamen Schussplatz; alte Staende mit next_attack_tick laden weiter.
+ var codec = load("res://scripts/mission/checkpoint_value_codec.gd")
+ var payload: Dictionary = codec.decode_value(saved.payload).value
+ _check(not payload.has("next_attack_tick"),"new state carries no shared fire slot")
+ var legacy_payload: Dictionary = payload.duplicate(true)
+ legacy_payload["next_attack_tick"] = 5
+ var legacy: Dictionary = saved.duplicate(true)
+ legacy.payload = codec.encode_value(legacy_payload).value
+ _check(owner.prepare_restore(rig.sim,driver,legacy).get("ok",false),"old state with next_attack_tick still loads (value ignored)")
+ legacy_payload["next_attack_tick"] = -3
+ legacy.payload = codec.encode_value(legacy_payload).value
+ _check(not owner.prepare_restore(rig.sim,driver,legacy).get("ok",false),"old state with an invalid next_attack_tick is still rejected")
  var controller := QuietController.new()
  controller.name = "TacticalController"
  rig.scene.add_child(controller)
@@ -53,14 +65,18 @@ func _run() -> void:
   _check(not owner.validate_restore(prep.prepared).get("ok",false),"changed source clock is rejected")
   driver._current_tick = rig.sim.tick_counter
   prep = owner.prepare_restore(rig.sim,driver,saved)
-  driver._next_attack_tick += 1
+  driver._combat_startup_grace_ticks += 1
   _check(prep.get("ok",false) and not owner.validate_restore(prep.prepared).get("ok",false), "changed driver state invalidates preparation")
-  driver._next_attack_tick -= 1
+  driver._combat_startup_grace_ticks -= 1
   prep = owner.prepare_restore(rig.sim,driver,saved)
   _check(prep.get("ok",false),"fresh lifecycle candidate prepares")
   if prep.get("ok",false):
    var checked: Dictionary = owner.validate_restore(prep.prepared)
+   # FT-0b Regel 11: Unterdrueckung steht nicht im Speicherstand; der echte Wiederherstellweg leert sie.
+   driver.get_suppression_tracker().set_state("enemy:probe", 3.0, 2)
+   driver.get_suppression_tracker().set_state("own:a", 5.0, 3)
    if checked.get("ok",false): owner._publish_restore(prep.prepared)
+   _check(driver.get_suppression_level("enemy:probe")==0 and driver.get_suppression_level("own:a")==0,"restore clears suppression of both sides")
    _check(checked.get("ok",false) and rig.sim.tick_counter==saved.tick and abs(driver._get_duration_seconds()-900.0)<0.2,"tick, RNG and elapsed clock publish")
  rig.scene.free()
  done()

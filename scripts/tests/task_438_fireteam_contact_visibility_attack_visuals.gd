@@ -132,7 +132,7 @@ func _test_live_close_contact_generates_fire_event_and_vfx() -> void:
 	detection_progress["%s:%s" % [enemy_id, friendly_id]] = 0
 	combat_loop.set("_detection_progress", detection_progress)
 	combat_loop.set("_current_tick", 100)
-	combat_loop.set("_next_attack_tick", 0)
+	combat_loop.call("align_to_common_decision_step_for_test")
 	combat_loop.call("_try_enqueue_attacks", simulation_root)
 	var fire_events: Array = Array(combat_loop.call("get_fire_event_snapshot"))
 	await _wait_frames(10)

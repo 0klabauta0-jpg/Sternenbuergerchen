@@ -143,7 +143,7 @@ func _test_live_engage_drill_can_emit_fire_event() -> void:
 
 	if simulation_root.has_method("set_combat_rng_seed"):
 		simulation_root.call("set_combat_rng_seed", 468)
-	combat_loop.set("_next_attack_tick", 0)
+	combat_loop.call("align_to_common_decision_step_for_test")
 	controller.call("_set_selected_fireteams", PackedStringArray([FIRETEAM_ID]), false)
 	controller.call("set_fireteams_tactical_stance", PackedStringArray([FIRETEAM_ID]), "aggressive")
 	var enemies: Array = Array(controller.call("_get_all_enemy_units", true))
