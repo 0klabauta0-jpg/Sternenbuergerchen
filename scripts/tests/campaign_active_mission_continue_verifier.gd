@@ -150,7 +150,12 @@ func _run() -> void:
  if not _check(bool(_flow.get_meta("campaign_active_restore_complete",false)) and is_instance_valid(_flow.get("_active_mission")),"actual mission is reconstructed on continue"):
   print("RESTORE_FAILURE ",_flow.get_meta("campaign_active_restore_error",{}))
   await _finish(); return
+ # M4d P1: nach dem Fortsetzen MITTEN im Einsatz zaehlt der Magazinvorrat der Kampagne (Schalter an der lebenden Versorgung).
+ _check(bool(_runtime.get("_supply").get("_campaign_magazine_mode")) and bool(_runtime.get("_supply").call("person_has_magazine_store","campaign_leader")),"M4d: Kampagnen-Schalter des Magazinvorrats nach Fortsetzen mitten im Einsatz wahr")
  var restored: Node = _flow.get("_active_mission")
+ # M4e: auch am Root der wiederhergestellten Einsatzszene zaehlt der Magazinvorrat der Person (schmale Bindung), nicht nur am Heim-Adapter.
+ var restored_root: Node = restored.get_node("SimulationRoot")
+ _check(bool(restored_root.call("person_has_magazine_store","campaign_leader")) and int(restored_root.call("get_person_magazine_count","campaign_leader","ammo_light")) == int(_runtime.get("_supply").call("person_magazine_count","campaign_leader","ammo_light")),"M4e: Einsatz-Root nach Fortsetzen mitten im Einsatz: Magazinvorrat der Person ist dort wahr und gleich der Kampagnen-Versorgung")
  var restored_units: Node = restored.get_node("UnitRegistry")
  for id in before:
   var person = restored_units.get_unit(id)

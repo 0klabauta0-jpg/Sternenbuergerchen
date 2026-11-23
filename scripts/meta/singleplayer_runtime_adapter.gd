@@ -165,6 +165,7 @@ func configure(flow: Node, screen: Control) -> void:
 	_travel.configure()
 	_space_encounter = load("res://scripts/core/campaign_space_encounter.gd").new()
 	_campaign_mode = bool(_flow.call("is_campaign_start"))
+	_supply.set_campaign_magazine_mode(_campaign_mode)  # M4c: Magazinvorrat der Person zaehlt nur in der Kampagne
 	if _campaign_mode:
 		_onboarding = load("res://scripts/core/campaign_onboarding_state.gd").new()
 		_onboarding.configure()
@@ -677,6 +678,8 @@ func bind_mission_air_support(mission: Node) -> Dictionary:
 	if not is_instance_valid(_flow) or not is_instance_valid(mission) or _flow.call("get_active_mission") != mission or not _flow.is_ancestor_of(mission): return {"ok":false, "reason":"mission_context_changed"}
 	var mission_root: Node = mission.get_node_or_null("SimulationRoot")
 	if mission_root == null or _simulation == null: return {"ok":false, "reason":"runtime_unavailable"}
+	# M4e: nur in der Kampagne zaehlt der Magazinvorrat der Person auch im Einsatz (schmaler Verweis, kein Besitzerwechsel).
+	if _campaign_mode and _supply != null and mission_root.has_method("bind_mission_magazine_supply"): mission_root.call("bind_mission_magazine_supply", _supply)
 	return mission_root.bind_air_support_source(_simulation, self, String(mission.get_meta("location_id", "")))
 
 func get_campaign_entry_feedback() -> Dictionary:
@@ -1786,6 +1789,8 @@ func _save_before_launch() -> Dictionary:
 
 func launch_to_moon_orbit(craft_id: String) -> Dictionary:
 	var pre_launch_save: Dictionary = _save_before_launch()
+	# M4d: Mitfliegende VOR dem Abflug lesen; danach steht ihr Status auf "away" und die Bordliste ist leer.
+	var ammo_crew: Array = Array(_flow.call("_aboard_unit_ids_of_craft", craft_id)).duplicate() if _flow != null else []
 	var request_id := _request_id("orbit-launch", {})
 	var result: Dictionary = _simulation.commit_singleplayer_space_launch(self, craft_id, request_id)
 	if result.get("ok", false):
@@ -1794,7 +1799,12 @@ func launch_to_moon_orbit(craft_id: String) -> Dictionary:
 		# edit pilot or payload using the old homebase transport projection.
 		_flow.call("_refresh_homebase_screen")
 		if not result.get("replayed", false): call_deferred("_publish_space_launch_event", request_id)
+		# M4c (W2): der Abflug von der Heimatbasis ist bestaetigt -> die Faecher der Mitfliegenden aus dem Basislager auffuellen.
+		var ammo_departure: Dictionary = {} if result.get("replayed", false) else replenish_ammo_for_departure(craft_id, ammo_crew)
 		var travel: Dictionary = Dictionary(result.travel_result)
+		if not String(ammo_departure.get("short_message", "")).is_empty():
+			travel = travel.duplicate()
+			travel["ammo_message"] = String(ammo_departure.short_message)
 		if not pre_launch_save.is_empty():
 			travel = travel.duplicate()
 			travel["pre_launch_save"] = pre_launch_save
@@ -2203,6 +2213,28 @@ func is_person_protected_from_death(unit_id: String) -> bool:
 		var pilots: Variant = _flow.get("_assigned_aircraft_pilot_by_craft")
 		if typeof(pilots) == TYPE_DICTIONARY and Dictionary(pilots).values().has(unit_id): return true
 	return _polisa_market != null and String(_polisa_market.snapshot().get("recruiter_id", "")) == unit_id
+
+## M4b: Startausstattung mit Magazinen (Basislager + volle Faecher), einmal je Stand; true = jetzt gewaehrt (Kampagne, neu oder alt).
+func grant_ammo_start_if_missing() -> bool:
+	if not _campaign_mode: return false
+	var ids: Array = []
+	for unit in Array(_flow.get("_all_team_units")): ids.append(String(Dictionary(unit).get("unit_id", "")))
+	return bool(_supply.grant_ammo_start_if_missing(ids))
+
+## M4b: Faecher der heimgekehrten Personen aus dem Basislager auffuellen (feste Reihenfolge); Ergebnis mit "message".
+func replenish_ammo(unit_ids: Array) -> Dictionary:
+	if not _campaign_mode: return {"added": 0, "short": 0, "message": ""}
+	return Dictionary(_supply.fill_person_compartments(unit_ids, true))
+
+## M4c (W2): Faecher der mitfliegenden Personen (an Bord des Schiffs plus zugeteilter Pilot) beim bestaetigten Abflug von der
+## Heimatbasis aus dem Basislager auffuellen; dieselbe Funktion und Reihenfolge wie bei der Heimkehr. Wiederholbar (ergaenzt nur Fehlendes).
+## Aufgerufen von launch_to_moon_orbit (der einzigen verbindlichen Abflugstelle von der Heimatbasis), nie beim Oeffnen eines Dialogs.
+func replenish_ammo_for_departure(craft_id: String, crew_ids: Array = []) -> Dictionary:
+	if not _campaign_mode or _flow == null or _supply == null: return {"added": 0, "short": 0, "message": "", "short_message": ""}
+	var ids: Array = crew_ids.duplicate() if not crew_ids.is_empty() else Array(_flow.call("_aboard_unit_ids_of_craft", craft_id)).duplicate()
+	var pilot := String(Dictionary(_flow.get("_assigned_aircraft_pilot_by_craft")).get(craft_id, ""))
+	if not pilot.is_empty() and not ids.has(pilot): ids.append(pilot)
+	return Dictionary(_supply.fill_person_compartments(ids, true))
 
 ## Rucksack und Ausruestung einer gefallenen Person verwerfen (Auftragsfracht siehe SingleplayerSupplyState.discard_person_equipment).
 func discard_person_equipment(unit_id: String) -> Dictionary:
@@ -2846,7 +2878,11 @@ func _advance_polisa_recruitment() -> void:
 		if not already_configured:
 			_simulation.request_personnel_loadout_command("set_loadout", {"unit_id":String(pending.unit_id),"loadout":{"armor":profile.get("armor", "suit"),"weapon_1":profile.get("weapon_1", "pistol"),"weapon_2":profile.get("weapon_2", "none")}})
 		var result := _commit("singleplayer_supply", "station_recruit_finalize", {"reservation_id":reservation_id}, "final:"+reservation_id, {"recruit_verify":Callable(self,"_verify_polisa_recruit_admitted")})
-		if result.get("ok", false): _polisa_recruit_pending.erase(reservation_id)
+		if result.get("ok", false):
+			_polisa_recruit_pending.erase(reservation_id)
+			# M4b/M4c (K2): neue Person kommt mit vollem Fach (sofern die Startausstattung des Standes gewaehrt ist) - genau einmal und erst
+			# nach abgeschlossener Anwerbung, nicht bei jedem Wiederholungsdurchlauf der Schleife (sonst Magazine aus dem Nichts).
+			_supply.provision_new_person(String(pending.unit_id))
 
 func get_polisa_snapshot(snapshot: Dictionary = {}) -> Dictionary:
 	if snapshot.is_empty(): snapshot = get_snapshot()

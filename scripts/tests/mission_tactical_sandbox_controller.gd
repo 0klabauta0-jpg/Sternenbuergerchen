@@ -7765,6 +7765,9 @@ func _build_live_fireteam_card_runtime_line(unit: Node) -> String:
 			primary_parts.append(stance_label)
 		if unit.has_method("get_fire_status"):
 			secondary_parts.append(_format_unit_fire_status_text(String(unit.call("get_fire_status"))))
+		var ammo_text: String = _build_unit_ammo_text(unit)
+		if not ammo_text.is_empty():
+			secondary_parts.append(ammo_text)
 	var lines: PackedStringArray = []
 	if not primary_parts.is_empty():
 		lines.append(" | ".join(primary_parts))
@@ -7822,6 +7825,16 @@ func _build_live_fireteam_card_technical_tooltip(unit: Node) -> String:
 	if not trait_text.is_empty():
 		lines.append("Merkmale: %s" % trait_text)
 	return "\n".join(lines)
+
+
+## M4a: kurze Munitionsangabe der Einheitenkarte ("Mun. 9/12 +2", "lädt nach", "Keine Munition"); leer ohne Treiber oder Munitionsbedarf.
+func _build_unit_ammo_text(unit: Node) -> String:
+	if unit == null or not unit.has_method("get_unit_id"):
+		return ""
+	var driver = _get_combat_loop_driver()
+	if driver == null or not driver.has_method("get_unit_ammo_text"):
+		return ""
+	return String(driver.call("get_unit_ammo_text", String(unit.call("get_unit_id"))))
 
 
 func _build_unit_suppression_readability_text(unit: Node) -> String:
