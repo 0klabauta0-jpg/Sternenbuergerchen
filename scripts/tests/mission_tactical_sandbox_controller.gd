@@ -5116,9 +5116,9 @@ func _is_fireteam_go_recovery_blocked(fireteam_id: String) -> bool:
 	var suppression_state: Dictionary = Dictionary(_suppression_state_by_fireteam.get(normalized_fireteam_id, {}))
 	if suppression_state.is_empty():
 		return false
-	var suppression_value: float = maxf(float(suppression_state.get("value", 0.0)), 0.0)
-	var suppression_threshold: float = maxf(float(suppression_state.get("threshold", 1.0)), 1.0)
-	return bool(suppression_state.get("is_heavily_suppressed", false)) or suppression_value >= suppression_threshold * 1.8
+	# FT-0b: gesperrt ab Stufe 2 (Niedergehalten) - passend dazu, dass der Plan erst unter Stufe 2 automatisch weiterlaeuft.
+	var suppression_level: int = int(suppression_state.get("level", 0))
+	return suppression_level >= 2 or bool(suppression_state.get("is_heavily_suppressed", false))
 
 
 func _refresh_ad_hoc_panel_visibility() -> void:
