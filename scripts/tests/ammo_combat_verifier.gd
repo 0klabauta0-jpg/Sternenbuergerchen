@@ -10,7 +10,8 @@ const WEAPONS = preload("res://scripts/core/weapon_data.gd")
 const OFFER_PATH := "res://data/singleplayer/trade_offers.json"
 const BASE := "base:homebase"
 const SCALE := 6
-const PISTOL_MAG := 12
+const PISTOL_DATA_MAG := 12  # Waffendaten; im Gefecht wirkt magazine_scale (2.0)
+const PISTOL_MAG := 24  # wirksame Magazingroesse der Pistole
 const PISTOL_RELOAD := 180
 
 
@@ -137,9 +138,15 @@ func _duel(own_weapon: String, enemy_weapon: String, own_extra: Dictionary = {},
 ## Vorbedingung: die Zahlen, auf die sich die Tests stuetzen (Waffendaten und reload_scale aus der Datendatei).
 func _test_a0_data() -> void:
 	var pistol: Dictionary = WEAPONS.get_weapon("pistol")
-	_check(int(pistol.get("magazine_size", 0)) == PISTOL_MAG and int(pistol.get("reload_ticks", 0)) * SCALE == PISTOL_RELOAD, "A0: Pistole 12 Schuss, 30 Ticks x reload_scale 6 = 180")
+	_check(int(pistol.get("magazine_size", 0)) == PISTOL_DATA_MAG and int(pistol.get("reload_ticks", 0)) * SCALE == PISTOL_RELOAD, "A0: Pistole 12 Schuss, 30 Ticks x reload_scale 6 = 180")
 	var rules: Dictionary = Dictionary(JSON.parse_string(FileAccess.get_file_as_string("res://data/combat/ammo_rules.json")))
 	_check(int(rules.get("reload_scale", -1)) == SCALE, "A0: reload_scale in ammo_rules.json ist 6")
+	_check(float(rules.get("magazine_scale", -1.0)) == 2.0, "A0: magazine_scale in ammo_rules.json ist 2.0 (M4b)")
+	_check(PISTOL_DATA_MAG * 2 == PISTOL_MAG and int(f_info_size("pistol")) == PISTOL_MAG and int(f_info_size("sniper")) == 10 and int(f_info_size("rocket_launcher")) == 2, "M4b: wirksame Magazingroesse = Waffendaten x 2 (Pistole 24, Scharfschuetze 10, Raketenwerfer 2)")
+
+
+func f_info_size(weapon_id: String) -> int:
+	return int(preload("res://scripts/combat/combat_ammo.gd").new().weapon_info(weapon_id).magazine_size)
 
 
 ## A1: ohne Reserve genau ein Magazin, danach kein Schuss mehr; Zustand "Keine Munition".
@@ -212,7 +219,7 @@ func _test_a3_hit_miss_and_suppression() -> void:
 func _test_a4_enemy_reloads_never_empty() -> void:
 	var f := _ammo_rig(_duel("none", "pistol"), {})
 	var states := {}
-	for i in range(300):
+	for i in range(500):
 		_run_ticks(f, 3)
 		states[String(_status(f, "enemy").get("state", ""))] = true
 	var ticks := _shot_ticks(f, "enemy")
@@ -238,7 +245,7 @@ func _test_a5_no_ammo_weapon() -> void:
 	f.driver._ammo_tracker().weapon_lookup = func(_weapon_id: String) -> Dictionary:
 		return {"ammo_class": "", "magazine_size": 0, "reload_ticks": 0}
 	_run_ticks(f, 600)
-	_check(_shots_by(f, "own") > 3 * PISTOL_MAG, "A5: ohne Munitionsbedarf mehr als drei Magazine Schuesse (%d)" % _shots_by(f, "own"))
+	_check(_shots_by(f, "own") > 2 * PISTOL_MAG, "A5: ohne Munitionsbedarf mehr als zwei Magazine Schuesse (%d)" % _shots_by(f, "own"))
 	_check(String(_status(f, "own").get("state", "")) == "none" and String(f.driver.get_unit_ammo_text("own")) == "", "A5: Zustand 'none', keine Anzeige")
 	f.scope.free()
 	var g := _ammo_rig(_duel("medictool", "none"), {})
@@ -260,8 +267,8 @@ func _test_a6_second_source_and_wrong_class() -> void:
 	bag.items["ammo_light"] = int(bag.items.get("ammo_light", 0)) + 1
 	f.sim.configure_singleplayer_owners(null, s)
 	f["sup"] = s
-	_run_ticks(f, 1100)
-	_check(_shots_by(f, "own") == 3 * PISTOL_MAG, "A6: eingelegtes + zwei Reservemagazine (Fach und Rucksack) = 36 Schuesse (%d)" % _shots_by(f, "own"))
+	_run_ticks(f, 1800)
+	_check(_shots_by(f, "own") == 3 * PISTOL_MAG, "A6: eingelegtes + zwei Reservemagazine (Fach und Rucksack) = 72 Schuesse (%d)" % _shots_by(f, "own"))
 	_check(_bag_count(f, "own", "ammo_light") == 0, "A6: beide leichten Magazine verbraucht")
 	_check(_bag_count(f, "own", "ammo_rifle") == 3, "A6: die falsche Sorte (Gewehrmagazine) bleibt unangetastet (%d)" % _bag_count(f, "own", "ammo_rifle"))
 	_check(String(_status(f, "own").get("state", "")) == "empty", "A6: danach leer, obwohl Gewehrmagazine da sind")
@@ -272,7 +279,7 @@ func _test_a6_second_source_and_wrong_class() -> void:
 func _test_a7_stock_after_mission() -> void:
 	var f := _ammo_rig(_duel("pistol", "none"), {"own": {"ammo_light": 2, "ammo_rail": 1}})
 	var before := _total_items(f, "ammo_light")
-	_run_ticks(f, 1100)
+	_run_ticks(f, 1800)
 	_check(before == 2 and _total_items(f, "ammo_light") == 0, "A7: beide leichten Magazine sind aus dem gesamten Bestand verschwunden (%d -> %d)" % [before, _total_items(f, "ammo_light")])
 	_check(_bag_count(f, "own", "ammo_rail") == 1, "A7: nicht benutzte Magazine bleiben")
 	_check(String(_status(f, "own").get("state", "")) == "empty", "A7: am Ende des Einsatzes leer")
@@ -295,7 +302,7 @@ func _test_a8_determinism() -> void:
 	var b := _ammo_rig(specs, reserves, 11)
 	var log_a := _hit_log(a, 800)
 	var log_b := _hit_log(b, 800)
-	_check(log_a.size() > 2 * PISTOL_MAG, "A8: der Lauf hat viele Schuesse (%d)" % log_a.size())
+	_check(log_a.size() > PISTOL_MAG, "A8: der Lauf hat viele Schuesse (%d)" % log_a.size())
 	_check(log_a == log_b, "A8: gleiche Schuss- und Trefferfolge in zwei Durchlaeufen")
 	_check(a.calls == b.calls, "A8: gleiche Schuetzen in jedem Schritt")
 	_check(_bag_count(a, "u1", "ammo_light") == _bag_count(b, "u1", "ammo_light") and _bag_count(a, "u3", "ammo_light") == _bag_count(b, "u3", "ammo_light"), "A8: gleicher Verbrauch an Magazinen")
@@ -307,12 +314,12 @@ func _test_a8_determinism() -> void:
 ## A9: Anzeigetext in den drei Zustaenden.
 func _test_a9_texts() -> void:
 	var f := _ammo_rig(_duel("pistol", "none"), {"own": {"ammo_light": 1}})
-	_check(String(f.driver.get_unit_ammo_text("own")) == "Mun. 12/12 +1", "A9: vor dem ersten Schuss 'Mun. 12/12 +1' (%s)" % f.driver.get_unit_ammo_text("own"))
+	_check(String(f.driver.get_unit_ammo_text("own")) == "Mun. 24/24 +1", "A9: vor dem ersten Schuss 'Mun. 24/24 +1' (%s)" % f.driver.get_unit_ammo_text("own"))
 	_run_until_shots(f, "own", 3)
-	_check(String(f.driver.get_unit_ammo_text("own")) == "Mun. 9/12 +1", "A9: nach drei Schuessen 'Mun. 9/12 +1' (%s)" % f.driver.get_unit_ammo_text("own"))
+	_check(String(f.driver.get_unit_ammo_text("own")) == "Mun. 21/24 +1", "A9: nach drei Schuessen 'Mun. 21/24 +1' (%s)" % f.driver.get_unit_ammo_text("own"))
 	_run_until_shots(f, "own", PISTOL_MAG)
 	_check(String(f.driver.get_unit_ammo_text("own")) == "lädt nach", "A9: beim Nachladen 'lädt nach' (%s)" % f.driver.get_unit_ammo_text("own"))
-	_run_ticks(f, 700)
+	_run_ticks(f, 1000)
 	_check(String(f.driver.get_unit_ammo_text("own")) == "Keine Munition", "A9: ohne Munition 'Keine Munition' (%s)" % f.driver.get_unit_ammo_text("own"))
 	_check(String(f.driver.get_unit_ammo_text("enemy")) == "", "A9: Waffe ohne Munitionsbedarf zeigt nichts")
 	f.scope.free()

@@ -17,6 +17,7 @@ var take_reserve: Callable = Callable()
 var weapon_lookup: Callable = Callable()
 
 var _reload_scale: int = AMMO_RULES.DEFAULT_RELOAD_SCALE
+var _rules: Dictionary = {}
 ## "unit_id|weapon_id" -> {"state": {rounds, reload_ticks_left}, "last": Tick der letzten Fortschreibung}
 var _entries: Dictionary = {}
 ## "unit_id|weapon_id" -> abgegebene Schuesse im Einsatz (nur Zaehler, kein Einfluss auf die Regeln)
@@ -24,7 +25,8 @@ var _shots: Dictionary = {}
 
 
 func _init() -> void:
-	_reload_scale = AMMO_RULES.reload_scale(AMMO_RULES.load_rules())
+	_rules = AMMO_RULES.load_rules()
+	_reload_scale = AMMO_RULES.reload_scale(_rules)
 
 
 func reset() -> void:
@@ -38,7 +40,8 @@ func weapon_info(weapon_id: String) -> Dictionary:
 	if weapon_id != "":
 		weapon = Dictionary(weapon_lookup.call(weapon_id)) if weapon_lookup.is_valid() else WEAPON_DATA.get_weapon(weapon_id)
 	var ammo_class: String = String(weapon.get("ammo_class", ""))
-	var magazine_size: int = int(weapon.get("magazine_size", 0))
+	# Wirksame Groesse im Gefecht (M4b): Waffendaten x magazine_scale.
+	var magazine_size: int = AMMO_RULES.effective_magazine_size(int(weapon.get("magazine_size", 0)), _rules)
 	return {
 		"ammo_class": ammo_class,
 		"magazine_size": magazine_size,
