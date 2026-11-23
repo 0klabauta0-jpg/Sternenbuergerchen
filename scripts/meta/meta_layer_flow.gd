@@ -4590,6 +4590,8 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 	# LC2c: Ist das Schiff dieses Einsatzes verloren (Bruchlandung/Explosion), gibt es kein Einschiffen und keinen Rueckflug: die Notrettung
 	# holt alle Lebenden ab. Das Ergebnis wird so gebucht, wie es ist (Sieg bleibt Sieg); die Einstufung laeuft mit craft_lost.
 	var craft_lost: bool = is_campaign_start() and bool(_active_mission.get_node("TacticalController").call("_is_air_craft_crashed", String(_active_singleplayer_identity.get("craft_id", ""))))
+	# LC2g W3: Auch jedes andere eigene Schiff, das in diesem Einsatz abgeschossen wurde (nicht die Einsatzidentitaet), geht verloren.
+	var other_craft_losses: Array = _other_craft_losses_of_mission() if is_campaign_start() else []
 	if is_campaign_start():
 		var crew_boarding: Dictionary = {"ok": true} if craft_lost else _active_mission.get_node("TacticalController").call("request_campaign_crew_boarding", String(_active_singleplayer_identity.get("craft_id", "")))
 		if not bool(crew_boarding.get("ok", false)):
@@ -4661,6 +4663,8 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 	_last_mission_result = _apply_campaign_casualties(_last_mission_result)
 	if craft_lost and not failed_extraction:
 		_last_mission_result["craft_loss"] = _book_craft_loss_rescue(_last_mission_result, casualty_rules)
+	if not other_craft_losses.is_empty() and not failed_extraction:
+		_last_mission_result["other_craft_losses"] = other_craft_losses.duplicate(true)
 	if failed_extraction and bool(_last_mission_result.get("casualty_total_loss", false)):
 		# Task 5b: Notrettung. Der Malus wird jetzt mit dem Basisstand gesichert und beim Wiederherstellen angewendet.
 		var total_loss_penalty: Dictionary = _stage_total_loss_penalty(_last_mission_result)
@@ -4677,6 +4681,9 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 		debrief_screen.set_mission_result(_last_mission_result)
 
 	_release_active_mission()
+	if not failed_extraction:
+		for other_loss in other_craft_losses:
+			_retire_lost_craft(Dictionary(other_loss))
 	if craft_lost and not failed_extraction:
 		_retire_lost_craft(Dictionary(_last_mission_result.get("craft_loss", {})))
 	var drop_source := _get_mission_drop_source()
@@ -4717,6 +4724,29 @@ func _book_craft_loss_rescue(mission_result: Dictionary, rules: Dictionary) -> D
 				push_warning("Notrettung: Gebuehr %d nicht gebucht (%s)" % [fee, String(charged.get("reason", ""))])
 				fee = 0
 	return {"craft_id": craft_id, "ship_name": ship_name if not ship_name.is_empty() else craft_id, "outcome": outcome, "rescue_fee": fee}
+
+
+## LC2g W3: Verlustbelege fuer jedes abgeschossene Schiff dieses Einsatzes, das nicht das Einsatzschiff ist und noch in der Flotte steht
+## ({craft_id, ship_name, outcome, rescue_fee:0}; die Rettungsgebuehr bucht nur das Einsatzschiff). Raeumung und Insassen ueber _retire_lost_craft.
+func _other_craft_losses_of_mission() -> Array:
+	var losses: Array = []
+	var simulation: Node = _active_mission.get_node_or_null("SimulationRoot") if is_instance_valid(_active_mission) else null
+	if simulation == null or not simulation.has_method("get_air_crash_sites"):
+		return losses
+	var own_id: String = String(_active_singleplayer_identity.get("craft_id", ""))
+	var seen: Dictionary = {}
+	for site in Array(simulation.call("get_air_crash_sites")):
+		var craft_id: String = String(Dictionary(site).get("craft_id", "")).strip_edges()
+		if craft_id.is_empty() or craft_id == own_id or seen.has(craft_id):
+			continue
+		for craft_variant in _homebase_aircraft_definitions:
+			var definition: Dictionary = Dictionary(craft_variant)
+			if String(definition.get("craft_id", "")).strip_edges() == craft_id:
+				seen[craft_id] = true
+				var ship_name: String = String(definition.get("display_name", "")).strip_edges()
+				losses.append({"craft_id": craft_id, "ship_name": ship_name if not ship_name.is_empty() else craft_id, "outcome": String(Dictionary(site).get("outcome", "crash")), "rescue_fee": 0})
+				break
+	return losses
 
 
 ## LC2e B1: Das durch Absturz verlorene Schiff verlaesst die Flotte dauerhaft: Definition, Pilotenzuordnung, Ort, Fracht-Auswahl, Reisezustand,
