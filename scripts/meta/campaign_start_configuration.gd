@@ -197,6 +197,8 @@ func _away_detail(flow: Node, runtime: Node) -> String:
 
 func get_home_checkpoint_guard(flow: Node, runtime: Node) -> Dictionary:
 	if active_restore_in_progress: return {"ok":false,"reason":"active_restore_pending"}
+	# Abschnitt P: pleite = es wird nie mehr gespeichert (auch nicht der regelmaessige Speicherpunkt).
+	if flow != null and flow.has_method("is_campaign_bankrupt") and bool(flow.call("is_campaign_bankrupt")): return {"ok":false,"reason":"campaign_bankrupt"}
 	if not error_message.is_empty():
 		return {"ok": false, "reason": "campaign_load_failed"}
 	var guard: Dictionary=runtime.call("get_world_checkpoint_guard")

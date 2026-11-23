@@ -29,8 +29,8 @@ const DEFAULT_APPROACH_STYLE := STYLE_NORMAL
 const STYLE_LABELS := {"vorsichtig": "Vorsichtig", "normal": "Normal", "aggressiv": "Aggressiv"}
 const STYLE_TOOLTIPS := {
 	"vorsichtig": "Tiefflug unter dem Radar; Landung ungenauer (Streukreis x 1,5).",
-	"normal": "Normale Flughoehe.",
-	"aggressiv": "Normale Flughoehe.",
+	"normal": "Normale Flughöhe.",
+	"aggressiv": "Normale Flughöhe.",
 }
 ## Approach path per mission craft (task LA, 2026-11-22): the second axis next to the style.
 ## Numbers live in data/combat/air_defense_units.json "approach_paths"; a missing block

@@ -78,6 +78,54 @@
         "polisa"
       ]
     },
+    "polisa_ammo_light": {
+      "id": "polisa_ammo_light",
+      "item_id": "ammo_light",
+      "name": "Magazin leicht",
+      "unit_price": 12,
+      "stock": 1,
+      "unlimited": true,
+      "category": "infantry",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_ammo_rifle": {
+      "id": "polisa_ammo_rifle",
+      "item_id": "ammo_rifle",
+      "name": "Magazin Gewehr",
+      "unit_price": 20,
+      "stock": 1,
+      "unlimited": true,
+      "category": "infantry",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_ammo_rail": {
+      "id": "polisa_ammo_rail",
+      "item_id": "ammo_rail",
+      "name": "Schienenladung",
+      "unit_price": 45,
+      "stock": 1,
+      "unlimited": true,
+      "category": "infantry",
+      "location_ids": [
+        "polisa"
+      ]
+    },
+    "polisa_ammo_rocket": {
+      "id": "polisa_ammo_rocket",
+      "item_id": "ammo_rocket",
+      "name": "Rakete",
+      "unit_price": 60,
+      "stock": 1,
+      "unlimited": true,
+      "category": "infantry",
+      "location_ids": [
+        "polisa"
+      ]
+    },
     "polisa_armor_light": {
       "id": "polisa_armor_light",
       "item_id": "armor_light",

@@ -10,6 +10,9 @@ const INVENTORY = preload("res://scripts/mission/inventory_transfer_contract.gd"
 const MODULAR = preload("res://scripts/core/campaign_modular_plan.gd")
 const EMERGENCY_TANKER = preload("res://scripts/core/emergency_tanker_service.gd")
 var _inventory: Dictionary = {}
+## Liefert zu einer Person die getragene Ruestung ("" = unbekannt). Gesetzt vom Besitzer der Ausruestung (SimulationRoot);
+## nichts davon wird gespeichert: die Fachgroesse im Behaelter wird daraus nur abgeleitet.
+var _armor_provider: Callable = Callable()
 var _location_resources: Dictionary = {}
 var _modular_capacity_baseline := -1
 var _modular_plan_cache: Dictionary = {}
@@ -121,7 +124,7 @@ func register_craft(craft_id: String, initial_fuel: float = -1.0) -> bool:
 	return true
 
 func get_supply_snapshot() -> Dictionary:
-	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "emergency_fuel": Dictionary(_definitions.get("emergency_fuel", {})).duplicate(true), "debt": Dictionary(_definitions.get("debt", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "station_home_pads": get_station_home_pads()}
+	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "emergency_fuel": Dictionary(_definitions.get("emergency_fuel", {})).duplicate(true), "debt": Dictionary(_definitions.get("debt", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory_view(), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "station_home_pads": get_station_home_pads()}
 
 func get_research_snapshot() -> Dictionary:
 	if _research_snapshot_revision != _revision:
@@ -215,7 +218,9 @@ func _buy(payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not _valid_positive_integer(payload.get("quantity")):
 		return _reject("invalid_quantity", "Menge muss eine positive ganze Zahl sein")
 	var quantity: int = int(payload.quantity)
-	if quantity > int(_stock_by_offer_id.get(offer_id, 0)):
+	# Angebote mit "unlimited": true (Munition, M3) haben keinen Vorrat; die Bestandszahl bleibt unveraendert.
+	var unlimited: bool = bool(offer.get("unlimited", false))
+	if not unlimited and quantity > int(_stock_by_offer_id.get(offer_id, 0)):
 		return _reject("insufficient_stock", "Angebotsmenge reicht nicht")
 	var price: int = int(offer.get("unit_price", 0))
 	if price <= 0 or quantity > _credits / price:
@@ -227,7 +232,7 @@ func _buy(payload: Dictionary, context: Dictionary) -> Dictionary:
 		purchased_items=_inventory[destination].items
 		if INVENTORY.used(purchased_items)+quantity>int(_inventory[destination].capacity): return _reject("container_full","Schiffsfracht ist voll")
 	_credits -= quantity * price
-	_stock_by_offer_id[offer_id] = int(_stock_by_offer_id[offer_id]) - quantity
+	if not unlimited: _stock_by_offer_id[offer_id] = int(_stock_by_offer_id[offer_id]) - quantity
 	var item_id: String = String(offer.item_id)
 	purchased_items[item_id] = int(purchased_items.get(item_id, 0)) + quantity
 	_revision += 1
@@ -484,7 +489,9 @@ func preview_emergency_tanker(payload: Dictionary, context: Dictionary = {}) -> 
 	var callout_fee: int = int(data.callout_fee)
 	var price: int = callout_fee + int(ceil(float(quantity) * float(data.price_per_unit)))
 	# Schulden (K, E2/E3): der Nottankdienst ist einer von zwei Wegen ins Minus; er liefert bis zum Kreditrahmen auf Kredit.
-	var credits_after: int = _credits - price
+	# Abschnitt P: credits_override (nur vom Adapter gesetzt) fragt "wie wuerde die Bestellung mit diesem erreichbaren Kontostand ausgehen"
+	# mit genau dieser Rechnung (Pleite-Pruefung); ohne den Schluessel gilt das echte Guthaben.
+	var credits_after: int = int(context.get("credits_override", _credits)) - price
 	var debt: Dictionary = Dictionary(_definitions.get("debt", {}))
 	if credits_after < 0:
 		if debt.is_empty():
@@ -645,7 +652,7 @@ func export_state() -> Dictionary:
 	return exported
 
 func _export_state_base() -> Dictionary:
-	return {"schema_version":1,"definitions":_definitions.duplicate(true),"credits":_credits,"item_quantities":_item_quantities.duplicate(true),"fuel_by_craft_id":_fuel_by_craft_id.duplicate(true),"stock_by_offer_id":_stock_by_offer_id.duplicate(true),"requests":_requests.duplicate(true),"reward_receipts":_reward_receipts.duplicate(true),"revision":_revision,"inventory":_inventory.duplicate(true),"location_resources":_export_resources(),"research_receipts":_research_receipts.duplicate(true),"modular_capacity_baseline":_modular_capacity_baseline}
+	return {"schema_version":1,"definitions":_definitions.duplicate(true),"credits":_credits,"item_quantities":_item_quantities.duplicate(true),"fuel_by_craft_id":_fuel_by_craft_id.duplicate(true),"stock_by_offer_id":_stock_by_offer_id.duplicate(true),"requests":_requests.duplicate(true),"reward_receipts":_reward_receipts.duplicate(true),"revision":_revision,"inventory":_inventory_view(),"location_resources":_export_resources(),"research_receipts":_research_receipts.duplicate(true),"modular_capacity_baseline":_modular_capacity_baseline}
 
 func restore_state(data: Dictionary) -> Dictionary:
 	var fresh = get_script().new()
@@ -758,6 +765,9 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_open_tanker_cache_revision = -1
 	_revision = int(data.revision)
 	_station_purchase_cache_revision = -1
+	# Stand von vor M2 tragen Fachgroesse 1: aus der Ruestung neu bestimmen, solange nichts verschoben werden muss. Den Ueberschuss
+	# ins Lager bucht erst `sync_compartments_after_load`, wenn der Loadout-Besitzer die Personen kennt (nie den Stand ablehnen).
+	_sync_compartments(false)
 	return {"ok":true}
 
 func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: bool = false) -> void:
@@ -787,10 +797,93 @@ func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: 
 	# The fabrication projection also depends on this cold-initialized storage.
 	_research_snapshot_revision = -1
 
+func set_armor_provider(provider: Callable) -> void:
+	_armor_provider = provider
+
+## Fachgroesse zu einer Ruestung (ammo_rules.json); unbekannte oder leere Ruestung = Standardgroesse.
+func _compartment_size_for(armor_id: String) -> int:
+	return maxi(1, INVENTORY.AMMO_RULES.compartment_capacity(armor_id, INVENTORY.ammo_rules()))
+
+## Was beim Verkleinern des Fachs auf `size` ins Lager muss: ueberzaehlige Magazine, nach Kennung geordnet.
+## Ergebnis {item: Anzahl}; leer, wenn alles Platz hat. Veraendert nichts.
+func _compartment_overflow(personal: String, size: int) -> Dictionary:
+	var bag: Dictionary = _inventory[personal]
+	var items: Dictionary = bag.items
+	var rules: Dictionary = INVENTORY.ammo_rules()
+	var left := maxi(0, INVENTORY.compartment_used(bag) - size)
+	var moves: Dictionary = {}
+	var order: Array = []
+	var ammo_ids: Array = []
+	for item in items:
+		if INVENTORY.AMMO_RULES.is_ammo_item(String(item), rules): ammo_ids.append(String(item))
+	ammo_ids.sort()
+	order.append_array(ammo_ids)
+	# Chips zaehlen nicht gegen die Fachgroesse (M2-5) und wandern nie.
+	for item in order:
+		if left <= 0: break
+		var take := mini(left, int(items.get(item, 0)))
+		if take > 0:
+			moves[item] = take
+			left -= take
+	return moves
+
+func _storage_accepts(storage: Dictionary, add: Dictionary, remove: Dictionary = {}) -> bool:
+	var probe_items: Dictionary = Dictionary(storage.items).duplicate()
+	for item in remove: probe_items[item] = int(probe_items.get(item, 0)) - int(remove[item])
+	for item in add: probe_items[item] = int(probe_items.get(item, 0)) + int(add[item])
+	for item in probe_items.keys():
+		if int(probe_items[item]) <= 0: probe_items.erase(item)
+	var probe := {"capacity": storage.capacity, "items": probe_items}
+	if storage.has("armor_chip_capacity"): probe["armor_chip_capacity"] = storage.armor_chip_capacity
+	return INVENTORY.valid_container(probe)
+
+func _apply_compartment_size(personal: String, size: int, moves: Dictionary, storage: Dictionary) -> void:
+	var bag: Dictionary = _inventory[personal]
+	for item in moves:
+		bag.items[item] = int(bag.items[item]) - int(moves[item])
+		if int(bag.items[item]) <= 0: bag.items.erase(item)
+		storage.items[item] = int(storage.items.get(item, 0)) + int(moves[item])
+	bag["armor_chip_capacity"] = size
+
+## Sollgroesse des Fachs einer Person laut Ruestung; 0 = keine Auskunft oder kein Fach.
+func _target_compartment_size(id: String) -> int:
+	if not _armor_provider.is_valid() or INVENTORY.ammo_rules().is_empty(): return 0
+	if not (id.begins_with("unit:") and id.ends_with(":backpack")) or not Dictionary(_inventory.get(id, {})).has("armor_chip_capacity"): return 0
+	var armor := String(_armor_provider.call(id.trim_prefix("unit:").trim_suffix(":backpack")))
+	return 0 if armor.is_empty() else _compartment_size_for(armor)
+
+## Nur lesen: die Behaelter so, wie sie nach einem Abgleich ohne Verschieben aussaehen (fuer Abfragen und Speichern).
+func _inventory_view() -> Dictionary:
+	var view: Dictionary = _inventory.duplicate(true)
+	for key in view.keys():
+		var size := _target_compartment_size(String(key))
+		if size > 0 and _compartment_overflow(String(key), size).is_empty(): view[key]["armor_chip_capacity"] = size
+	return view
+
+## Einmal aufrufen, sobald der Loadout-Besitzer die geladenen Personen kennt: Ueberschuss ins Basislager (nur wenn es eines gibt).
+func sync_compartments_after_load() -> void:
+	_sync_compartments(true)
+
+## Leitet die Fachgroesse jeder Person aus ihrer getragenen Ruestung ab (Alt-Staende tragen 1). Aendert Zustand: nur in Befehlen und beim Laden.
+## Passt der Inhalt, wird die Groesse einfach gesetzt. Passt er nicht, wandert der Ueberschuss nur dann ins Basislager, wenn
+## `move_overflow` gesetzt ist UND es dort Platz gibt; sonst (auch ohne Lager) bleibt alles stehen - nichts geht verloren.
+func _sync_compartments(move_overflow: bool = false) -> void:
+	for key in _inventory.keys():
+		var id := String(key)
+		var size := _target_compartment_size(id)
+		if size == 0 or size == int(_inventory[id].armor_chip_capacity): continue
+		var moves := _compartment_overflow(id, size)
+		if moves.is_empty():
+			_inventory[id]["armor_chip_capacity"] = size
+		elif move_overflow and _inventory.has("base:homebase") and _storage_accepts(_inventory["base:homebase"], moves):
+			_apply_compartment_size(id, size, moves, _inventory["base:homebase"])
+			_revision += 1
+
 func _inventory_access(id: String, context: Dictionary) -> bool:
 	return _inventory.has(id) and Array(context.get("accessible_containers",[])).has(id)
 
 func _inventory_transfer(payload: Dictionary, context: Dictionary) -> Dictionary:
+	_sync_compartments()
 	var source := String(payload.get("source_container_id",""))
 	var target := String(payload.get("destination_container_id",""))
 	var item := String(payload.get("item_id",""))
@@ -819,6 +912,7 @@ func _inventory_equip(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var source := String(payload.get("source_container_id",""))
 	var slot := String(payload.get("slot",""))
 	var item := String(payload.get("item_id",""))
+	_sync_compartments()
 	if String(payload.get("unit_id",""))!=String(context.get("unit_id","")) or not context.has("loadout") or not _inventory_access(source,context):
 		return _reject("inventory_access", "Person und Ausruestung sind hier nicht erreichbar")
 	if slot == "backpack":
@@ -832,10 +926,24 @@ func _inventory_equip(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var returns_item := previous!="none" and INVENTORY.known(previous)
 	if INVENTORY.backpack_slots_used(_inventory[source]) - (0 if unequip else 1) + (1 if returns_item else 0) > int(_inventory[source].capacity):
 		return _reject("container_full", "Kein Platz fuer abgelegte Ausruestung")
+	# Ruestungswechsel: Das Fach richtet sich nach der neuen Ruestung. ALLES wird geprueft, bevor irgendetwas gebucht wird.
+	var personal := "unit:" + String(payload.unit_id) + ":backpack"
+	var new_size := 0
+	var overflow: Dictionary = {}
+	if slot == "armor" and _inventory.has(personal) and Dictionary(_inventory[personal]).has("armor_chip_capacity") and not INVENTORY.ammo_rules().is_empty():
+		new_size = _compartment_size_for("suit" if unequip else item.trim_prefix("armor_"))
+		overflow = _compartment_overflow(personal, new_size)
+		if not overflow.is_empty():
+			var swap_remove: Dictionary = {} if unequip else {item: 1}
+			var swap_add: Dictionary = {previous: 1} if returns_item else {}
+			for moved in overflow: swap_add[moved] = int(swap_add.get(moved, 0)) + int(overflow[moved])
+			if source == personal or not _storage_accepts(_inventory[source], swap_add, swap_remove):
+				return _reject("compartment_overflow", "Erst das Rüstungsfach leeren: Die neue Rüstung hat weniger Plätze.")
 	if not unequip:
 		from[item]=int(from[item])-1
 		if from[item]==0: from.erase(item)
 	if returns_item: from[previous]=int(from.get(previous,0))+1
+	if new_size > 0: _apply_compartment_size(personal, new_size, overflow, _inventory[source])
 	loadout[slot]=item.trim_prefix("armor_") if slot=="armor" else item
 	_revision+=1
 	return {"ok":true,"loadout":loadout,"message":"Ausruestung angelegt"}
@@ -1059,6 +1167,7 @@ func _campaign_research(payload: Dictionary, context: Dictionary, request_id: St
 
 func _campaign_cargo(payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not bool(context.get("campaign_authorized",false)): return _reject("untrusted_cargo","Kein bestaetigter Bergungs-/Lieferbeleg")
+	_sync_compartments()
 	var container := String(payload.get("container_id",""))
 	var item := String(payload.get("item_id",""))
 	var raw: Variant = payload.get("amount",0)
@@ -1075,13 +1184,22 @@ func _campaign_cargo(payload: Dictionary, context: Dictionary) -> Dictionary:
 	_revision+=1
 	return {"ok":true,"message":"Fracht bestaetigt","item_id":item,"amount":amount}
 
+## Rezepte mit "free": true brauchen keine Erwerbserlaubnis (Munition, M3).
+static func is_free_recipe(blueprint_id: String) -> bool:
+	return bool(get_campaign_recipe(blueprint_id).get("free", false))
+
+## Stueck je Herstellung; fehlt das Feld, gilt 1 (alle bisherigen Rezepte).
+static func recipe_output_count(recipe: Dictionary) -> int:
+	return int(recipe.get("output_count", 1))
+
 func preview_campaign_fabrication(blueprint: String) -> Dictionary:
 	# Inventory/credit projection only. The command still checks runtime home access.
 	var recipe := get_campaign_recipe(blueprint)
-	if not _blueprints().has(blueprint) or recipe.is_empty(): return _reject("blueprint_locked","Erwerbserlaubnis noch nicht freigeschaltet")
+	if recipe.is_empty() or not (_blueprints().has(blueprint) or is_free_recipe(blueprint)): return _reject("blueprint_locked","Erwerbserlaubnis noch nicht freigeschaltet")
 	if not _inventory.has("base:homebase"): return _reject("inventory_access", "Basislager nicht verfügbar")
-	if not INVENTORY.known(String(recipe.get("item", ""))) or not INVENTORY.positive_integer(recipe.get("cost", 0)) or not recipe.get("inputs", {}) is Dictionary:
+	if not INVENTORY.known(String(recipe.get("item", ""))) or not INVENTORY.positive_integer(recipe.get("cost", 0)) or not recipe.get("inputs", {}) is Dictionary or not INVENTORY.positive_integer(recipe.get("output_count", 1)):
 		return _reject("invalid_recipe", "Herstellungsrezept ungültig")
+	var count := recipe_output_count(recipe)
 	var inputs: Dictionary = recipe.get("inputs", {})
 	var after := INVENTORY.used(_item_quantities)
 	for item: String in inputs:
@@ -1090,8 +1208,8 @@ func preview_campaign_fabrication(blueprint: String) -> Dictionary:
 			return _reject("missing_materials", "Im Basislager fehlen: %d × %s" % [int(inputs[item]), RESEARCH.item_label(item)])
 		after -= int(inputs[item])
 	if _credits < int(recipe.cost): return _reject("insufficient_credits", "Credits reichen nicht")
-	if after + 1 > int(_inventory["base:homebase"].capacity): return _reject("container_full", "Basislager voll")
-	return {"ok":true, "recipe_id":blueprint, "item_id":recipe.item, "cost":int(recipe.cost), "inputs":inputs.duplicate(true)}
+	if after + count > int(_inventory["base:homebase"].capacity): return _reject("container_full", "Basislager voll")
+	return {"ok":true, "recipe_id":blueprint, "item_id":recipe.item, "cost":int(recipe.cost), "inputs":inputs.duplicate(true), "output_count":count}
 
 func _campaign_fabricate(payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not bool(context.get("at_home",false)): return _reject("home_required","Herstellung nur an der Heimatbasis")
@@ -1103,12 +1221,15 @@ func _campaign_fabricate(payload: Dictionary, context: Dictionary) -> Dictionary
 		_item_quantities[item] -= int(quote.inputs[item])
 		if _item_quantities[item] == 0: _item_quantities.erase(item)
 	_credits -= int(quote.cost)
-	_item_quantities[quote.item_id] = int(_item_quantities.get(quote.item_id,0)) + 1
+	_item_quantities[quote.item_id] = int(_item_quantities.get(quote.item_id,0)) + int(quote.output_count)
 	_revision += 1
 	var result := {"ok":true,"message":"Gegenstand hergestellt","item_id":quote.item_id}
 	# Preserve legacy receipt shape; only material recipes need the new exact ledger.
 	if not Dictionary(quote.inputs).is_empty():
 		result.merge({"recipe_id":blueprint,"cost":quote.cost,"materials_consumed":quote.inputs.duplicate(true)})
+	# Stueckzahl (M3): nur Rezepte mit mehr als einem Stueck schreiben sie in den Beleg; alte Belege bleiben gleich.
+	if int(quote.output_count) > 1:
+		result["output_count"] = int(quote.output_count)
 	return result
 
 func _valid_campaign_fabrication_requests(requests: Dictionary) -> bool:
@@ -1119,6 +1240,9 @@ func _valid_campaign_fabrication_requests(requests: Dictionary) -> bool:
 		var recipe := get_campaign_recipe(id)
 		var receipt: Dictionary = request.get("result", {})
 		if recipe.is_empty() or receipt.get("item_id") != recipe.get("item"): return false
+		# Stueckzahl (M3): ein Rezept mit mehr als einem Stueck verlangt sie im Beleg; sonst darf der Beleg keine andere als 1 tragen.
+		var count := recipe_output_count(recipe)
+		if (count > 1 and int(receipt.get("output_count", 0)) != count) or (count == 1 and receipt.has("output_count")): return false
 		var inputs: Dictionary = recipe.get("inputs", {})
 		if not inputs.is_empty():
 			if receipt.get("recipe_id") != id or receipt.get("cost") != recipe.cost or receipt.get("materials_consumed") != inputs: return false
@@ -1208,6 +1332,10 @@ func advance_debt_clock(delta: float) -> Dictionary:
 ## Restzeit bis zur naechsten Zinsbuchung (Sekunden) oder -1, wenn die Uhr steht (Konto im Plus).
 func get_debt_interest_remaining() -> float:
 	return _debt_remaining if _credits < 0 else -1.0
+
+## Kreditrahmen aus dem Block debt (Abschnitt P, Pleite) oder 0, wenn die Daten keinen Block haben (dann gibt es keine Pleite).
+func get_debt_limit() -> int:
+	return int(Dictionary(_definitions.get("debt", {})).get("debt_limit", 0))
 
 func get_modular_base() -> Dictionary:
 	if _modular_plan_cache_revision != _revision:
@@ -1338,13 +1466,34 @@ func _valid_campaign_bed_requests(requests: Dictionary) -> bool:
 		if counts[i] != i + 3: return false
 	return true
 
+## Ankaufpreis des Haendlers am Ort (0 = kauft nicht). Die eine Preisquelle fuer _sell und get_sellable_proceeds.
+func _commodity_price(location: String, item: String) -> int:
+	var wanted := "c_benit" if location == "satellite_crash" else "b_benit"
+	var orders: Dictionary = Dictionary(_definitions.get("commodity_buy_orders", {})).get(location, {wanted: 15})
+	return int(orders.get(item, 0))
+
+## Abschnitt P (Pleite, W1): was die Waren in den genannten Lagern (Schiffslager "craft:<id>", Frachtaufzug) beim Haendler am Ort
+## zusammen braechten, mit den Regeln von _sell (Handelsdienst am Ort, Preis > 0, keine Auftragsgegenstaende). Nur lesend.
+func get_sellable_proceeds(location_id: String, container_ids: Array) -> int:
+	if not _has_service(location_id, "trade"): return 0
+	var total := 0
+	var seen: Dictionary = {}
+	for raw_id: Variant in container_ids:
+		var container := String(raw_id)
+		if seen.has(container) or not _inventory.has(container): continue
+		seen[container] = true
+		var items: Dictionary = Dictionary(_inventory[container]).get("items", {})
+		for item_id: Variant in items.keys():
+			var item := String(item_id)
+			var price := _commodity_price(location_id, item)
+			if price > 0 and not INVENTORY.RESERVED_QUEST_ITEMS.has(item): total += int(items[item_id]) * price
+	return total
+
 func _sell(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var location := String(context.get("location_id",""))
 	if not _has_service(location,"trade") or bool(context.get("craft_busy",true)): return _reject("trade_unavailable","Handel nicht erreichbar")
-	var wanted := "c_benit" if location=="satellite_crash" else "b_benit"
 	var item := String(payload.get("item_id",""))
-	var orders: Dictionary = Dictionary(_definitions.get("commodity_buy_orders", {})).get(location, {wanted:15})
-	var price := int(orders.get(item, 0))
+	var price := _commodity_price(location, item)
 	var container := String(payload.get("source_container_id","craft:"+String(context.get("craft_id",""))))
 	if container != "craft:"+String(context.get("craft_id","")) and container != String(context.get("cargo_lift_container_id","")): return _reject("inventory_access","Verkauf nur aus lokalem Schiff oder Frachtaufzug")
 	if price <= 0 or INVENTORY.RESERVED_QUEST_ITEMS.has(item) or not _inventory.has(container) or not INVENTORY.positive_integer(payload.get("quantity",0)): return _reject("not_purchased","Dieser Haendler kauft diesen Rohstoff nicht")

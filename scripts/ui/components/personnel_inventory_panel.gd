@@ -18,7 +18,7 @@ const SLOT_ICON := Vector2(48, 48)
 const STORAGE_TILE_SIZE := Vector2(110, 64)
 const STORAGE_TILE_ICON := 28
 const STORAGE_TILE_PADDING := Vector2(6, 4)
-const LABELS := {"suit":"Anzug","armor_light":"Leichte Rüstung","armor_medium":"Mittlere Rüstung","armor_heavy":"Schwere Rüstung","rifle":"Sturmgewehr","smg":"Maschinenpistole","sniper":"Scharfschützengewehr","rail_gun":"Railgun","rocket_launcher":"Raketenwerfer","medictool":"Sanitätsgerät","ore":"Erz","salvage":"Bergungsgut","pistol":"Pistole","a_benit":"A-Benit","b_benit":"B-Benit","c_benit":"C-Benit","satellite_chip":"Satellitenchip","outpost_chip":"Außenpostenchip","c_benit_crate":"C-Benit-Kiste","mining_tool":"Hand-Mining-Tool","salvage_tool":"Bergungswerkzeug","backpack":"Rucksack","none":"Leer"}
+const LABELS := {"suit":"Anzug","armor_light":"Leichte Rüstung","armor_medium":"Mittlere Rüstung","armor_heavy":"Schwere Rüstung","rifle":"Sturmgewehr","smg":"Maschinenpistole","sniper":"Scharfschützengewehr","rail_gun":"Railgun","rocket_launcher":"Raketenwerfer","medictool":"Sanitätsgerät","ore":"Erz","salvage":"Bergungsgut","pistol":"Pistole","a_benit":"A-Benit","b_benit":"B-Benit","c_benit":"C-Benit","satellite_chip":"Satellitenchip","outpost_chip":"Außenpostenchip","c_benit_crate":"C-Benit-Kiste","mining_tool":"Hand-Mining-Tool","salvage_tool":"Bergungswerkzeug","backpack":"Rucksack","ammo_light":"Magazin leicht","ammo_rifle":"Magazin Gewehr","ammo_rail":"Schienenladung","ammo_rocket":"Rakete","none":"Leer"}
 var _rest: CheckButton
 var _signature := ""
 var _unit_id := ""
@@ -352,8 +352,8 @@ func _carried_storage_title(data: Dictionary) -> String:
 	if not data.has("armor_chip_capacity"):
 		return backpack
 	var suit_capacity := int(data.armor_chip_capacity)
-	var suit_used := mini(suit_capacity, ITEMS.count_chips(data.items))
-	return "Rüstungsfach · %d/%d\n%s" % [suit_used, suit_capacity, backpack if capacity > 0 else "Kein Rucksack"]
+	var suit_used := ITEMS.compartment_used(data)
+	return "Rüstungsfach (%d/%d)\n%s" % [suit_used, suit_capacity, backpack if capacity > 0 else "Kein Rucksack"]
 
 func _refresh_bag_preview()->void:
 	_bag_heading.text = _carried_storage_title(_personal_storage)

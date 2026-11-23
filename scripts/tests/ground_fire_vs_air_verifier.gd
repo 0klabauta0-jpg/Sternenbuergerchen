@@ -126,6 +126,7 @@ func _run() -> void:
 	_test_driver_real_rig()
 	_test_hull_gate_in_root()
 	_test_real_outpost_guard()
+	_test_real_outpost_chip_rocket_guard()
 	await process_frame
 	print("GROUND_FIRE_VS_AIR passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -880,6 +881,53 @@ func _test_real_outpost_guard() -> void:
 		var result: Dictionary = gfa.step(ctx)
 		silent = silent and result.events.is_empty() and result.updates.is_empty() and result.messages.is_empty()
 	_check(silent and roller.used == 0, "j: der Wachmann (Pistole) steht ueber dem Schiff in Sicht und Reichweite und schiesst NICHT - Rumpf bleibt 100 %")
+	holder.free()
+
+
+## Zusatz (Raketenwerfer im Auftrag "Chip aus gesichertem Aussenposten bergen"): ueber den echten Ladeweg traegt genau
+## EINE der zwei Wachen den Raketenwerfer (outpost_chip_recovery_guard_02), die andere behaelt die Maschinenpistole.
+func _test_real_outpost_chip_rocket_guard() -> void:
+	var path := "res://data/mission_scenarios/outpost_chip_recovery.json"
+	var scenario = DATA_SCRIPT.load_from_file(path)
+	_check(PackedStringArray(Dictionary(scenario.call("validate")).get("errors", PackedStringArray())).is_empty(), "K-Aussenposten: Szenario besteht die eigene Pruefung ohne Fehler")
+	var total := 0
+	for group in scenario.enemy_groups: total += Array(Dictionary(group).get("enemy_ids", [])).size()
+	_check(total == 2, "K-Aussenposten: es bleiben zwei Gegner (%d)" % total)
+	var holder := Node.new()
+	root.add_child(holder)
+	var units: Array = []
+	for enemy_id in ["outpost_chip_recovery_guard_01", "outpost_chip_recovery_guard_02"]:
+		var setup = SETUP_SCRIPT.new()
+		setup.set("_mission_scenario", scenario)
+		var unit: Node = TEST_UNIT_SCRIPT.new()
+		unit.set("unit_id", enemy_id)
+		unit.set("team_id", "team_bravo")
+		holder.add_child(unit)
+		setup.call("_apply_authored_enemy_loadout", unit, enemy_id, "team_bravo")
+		setup.free()
+		units.append(unit)
+	var weapons: Array = units.map(func(u): return String(COMBAT_RESOLVER.get_unit_active_weapon_id(u)))
+	_check(weapons == ["smg", "rocket_launcher"], "K-Aussenposten: ueber den echten Ladeweg genau ein Raketenwerfer (guard_02), guard_01 behaelt die Maschinenpistole (%s)" % str(weapons))
+	# Eigenes Schiff in der Luft in Reichweite und Sicht: der Raketenwerfer schaltet auf und schiesst, die Maschinenpistole nicht.
+	var gfa = GFA.new()
+	var roller := Roller.new()
+	roller.values = [0.0]
+	var shot_by: Array = []
+	var warned_by: Array = []
+	for tick in range(0, 300, 3):
+		var ctx := {"tick": tick, "targets": [_target(100, 100, 0.5, "locked" if tick > 0 else "intact")], "shooters": units, "id_of": Callable(self, "_real_id"), "weapon_of": Callable(self, "_real_weapon"),
+			"is_fit": Callable(self, "_real_fit"), "has_ground_contact": Callable(self, "_fcontact_false"), "sees": Callable(self, "_fsees_close"), "roll": Callable(roller, "next")}
+		var result: Dictionary = gfa.step(ctx)
+		for event in result.events:
+			if String(event.type) == "shot": shot_by.append(String(event.attacker_id))
+			if String(event.type) == "warning": warned_by.append(String(event.attacker_id))
+	_check(shot_by.size() >= 1 and shot_by.all(func(id): return id == "outpost_chip_recovery_guard_02"), "K-Aussenposten: nur guard_02 (Raketenwerfer) schiesst aufs Schiff (%s)" % str(shot_by))
+	_check(not warned_by.has("outpost_chip_recovery_guard_01"), "K-Aussenposten: die Maschinenpistole schaltet nicht auf das Schiff auf")
+	# Gegen Bodentruppen: normale Waffe im normalen Schusstakt (keine Sonderregel), kampffaehig.
+	var rocket: Dictionary = WEAPONS.WEAPON_CATALOG["rocket_launcher"]
+	var guard_hp: int = int(units[1].call("get_max_health_points"))
+	print("INFO Raketenwerfer gegen Bodentruppe: damage_per_hit=%d, base_hit_chance=%.2f, ticks_between_attacks=%d, Trefferpunkte der Einheit=%d, kampffaehig=%s" % [int(rocket.damage_per_hit), float(rocket.base_hit_chance), int(rocket.ticks_between_attacks), guard_hp, str(COMBAT_RESOLVER.can_enemy_attack(units[1]))])
+	_check(bool(COMBAT_RESOLVER.can_enemy_attack(units[1])), "K-Aussenposten: der Raketenwerfer-Wachmann kaempft weiter am Boden (kampffaehig)")
 	holder.free()
 
 
