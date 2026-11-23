@@ -150,6 +150,8 @@ func _run() -> void:
  if not _check(bool(_flow.get_meta("campaign_active_restore_complete",false)) and is_instance_valid(_flow.get("_active_mission")),"actual mission is reconstructed on continue"):
   print("RESTORE_FAILURE ",_flow.get_meta("campaign_active_restore_error",{}))
   await _finish(); return
+ # M4d P1: nach dem Fortsetzen MITTEN im Einsatz zaehlt der Magazinvorrat der Kampagne (Schalter an der lebenden Versorgung).
+ _check(bool(_runtime.get("_supply").get("_campaign_magazine_mode")) and bool(_runtime.get("_supply").call("person_has_magazine_store","campaign_leader")),"M4d: Kampagnen-Schalter des Magazinvorrats nach Fortsetzen mitten im Einsatz wahr")
  var restored: Node = _flow.get("_active_mission")
  var restored_units: Node = restored.get_node("UnitRegistry")
  for id in before:

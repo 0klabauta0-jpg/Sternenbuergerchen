@@ -95,6 +95,10 @@ func _parts_a_b_c() -> void:
 	_check(bool(Dictionary(sup.export_state()).get("ammo_start_granted", false)), "A: der Stand traegt den Merker der gewaehrten Startausstattung")
 	_check(_bag_n(runtime, LEADER, "ammo_light") == 0 and _bag_n(runtime, PILOT, "ammo_light") == 0, "A: echte Startaufstellung (Anzug, keine Waffe): beide Faecher leer")
 	_check(not bool(runtime.call("grant_ammo_start_if_missing")) and _base_n(runtime, "ammo_light") == 16, "A: ein zweiter Aufruf gewaehrt nichts mehr")
+	# M4d P1: der nicht gespeicherte Kampagnen-Schalter steht in der neuen Kampagne auf wahr; eine Versorgung ohne Kampagne hat ihn nicht.
+	_check(bool(sup.get("_campaign_magazine_mode")) and bool(sup.call("person_has_magazine_store", LEADER)), "A: Kampagnen-Schalter des Magazinvorrats steht in der neuen Kampagne auf wahr")
+	var bare: RefCounted = load("res://scripts/core/singleplayer_supply_state.gd").new()
+	_check(not bool(bare.get("_campaign_magazine_mode")) and not bool(bare.call("person_has_magazine_store", LEADER)), "A: eine Versorgung ohne Kampagne hat den Schalter nicht")
 	# B: Abflug. Truppfuehrerin nimmt sich eine Pistole; ohne Auffuellen flöge sie mit leerem Fach los.
 	_equip_pistol(flow, runtime, LEADER)
 	_check(_bag_n(runtime, LEADER, "ammo_light") == 0, "B: nach dem Anlegen der Pistole ist das Fach noch leer")
@@ -156,6 +160,7 @@ func _load_and_check(label: String, light: int, rifle: int, leader_bag: int) -> 
 	if _check(runtime != null, "D: %s: Fortsetzen liefert eine Laufzeit" % label):
 		_check(_base_n(runtime, "ammo_light") == light and _base_n(runtime, "ammo_rifle") == rifle, "D: %s: Lager %d/%d (%d/%d)" % [label, light, rifle, _base_n(runtime, "ammo_light"), _base_n(runtime, "ammo_rifle")])
 		_check(_bag_n(runtime, LEADER, "ammo_light") == leader_bag, "D: %s: Fach der Truppfuehrerin %d (%d)" % [label, leader_bag, _bag_n(runtime, LEADER, "ammo_light")])
+		_check(bool(runtime.get("_supply").get("_campaign_magazine_mode")), "D: %s: Kampagnen-Schalter nach dem Laden wahr" % label)
 	await _close(flow)
 
 func _part_d_load_twice_and_old_state() -> void:

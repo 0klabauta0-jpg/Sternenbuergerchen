@@ -60,6 +60,8 @@ static func commit(candidate: Dictionary, data: Dictionary) -> Dictionary:
 	elif not _base_state_matches(base.export_state(),data.base_personnel): return _bad("active_base_personnel_changed")
 	var world: Dictionary = candidate.world
 	# No awaits, callbacks, or emitted signals in this publication tail.
+	# M4d (P1): diese frische Versorgung wird die lebende der Kampagne; der nicht gespeicherte Magazin-Schalter gehoert dann an.
+	world.supply.set_campaign_magazine_mode(true)
 	root.configure_singleplayer_owners(world.campaign,world.supply,world.onboarding,world.fleet)
 	root.configure_ship_equipment(world.equipment)
 	root.configure_departure_adapter(adapter)
