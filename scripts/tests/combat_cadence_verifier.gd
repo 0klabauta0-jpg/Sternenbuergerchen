@@ -39,6 +39,24 @@ class NPC extends Node2D:
 	## M6a (Nachbesserung F2): Hauptwaffe der Einheit; leer = nicht gesetzt (der Treiber nimmt dann die aktive Waffe).
 	var weapon_1_id := ""
 	func get_weapon_1_id() -> String: return weapon_1_id
+	## M6c: Zweitwaffe und Waffenplatz wie an der echten Einheit (Platz 2 = aktive Waffe ist die Zweitwaffe). Ohne weapon_2 aendert sich nichts.
+	var weapon_2_id := ""
+	var combat_weapon_slot := 1
+	var _main_active_weapon_id := ""
+	var display_name := ""
+	func get_weapon_2_id() -> String: return weapon_2_id
+	func get_display_name() -> String: return display_name
+	func get_combat_weapon_slot() -> int: return combat_weapon_slot
+	func set_combat_weapon_slot(slot: int) -> void:
+		var normalized: int = 2 if slot == 2 else 1
+		if normalized == combat_weapon_slot:
+			return
+		if normalized == 2:
+			_main_active_weapon_id = active_weapon_id
+			active_weapon_id = weapon_2_id
+		else:
+			active_weapon_id = _main_active_weapon_id
+		combat_weapon_slot = normalized
 	func get_current_unit_command(): return command
 	func get_stealth() -> float: return 0.0
 	func get_discipline() -> float: return 0.0
@@ -284,6 +302,8 @@ func _rig(specs: Array, seed_value: int = 7) -> Dictionary:
 		npc.team_id = String(spec.team)
 		npc.active_weapon_id = String(spec.get("weapon", "pistol"))
 		npc.weapon_1_id = String(spec.get("weapon_1", ""))
+		npc.weapon_2_id = String(spec.get("weapon_2", ""))
+		npc.display_name = String(spec.get("name", ""))
 		npc.hp = int(spec.get("hp", 100000))
 		npc.initiative = float(spec.get("initiative", -1.0))
 		npc.hit_multiplier = float(spec.get("hit_multiplier", -1.0))

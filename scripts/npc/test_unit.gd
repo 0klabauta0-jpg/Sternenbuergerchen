@@ -67,6 +67,7 @@ var _identity_model_write_only:=false
 @export var armor_id: String = "medium"
 @export var weapon_1_id: String = "rifle"
 @export var weapon_2_id: String = "rifle"
+var _combat_weapon_slot: int = 1
 @export var team_id: String = "team_test":
 	set(value):
 		if team_id == value:
@@ -230,6 +231,20 @@ func get_weapon_2_id() -> String:
 
 func get_active_weapon_id() -> String:
 	return _resolve_active_combat_weapon_id()
+
+
+## M6c: aktiver Waffenplatz im Gefecht (1 = Hauptwaffe, 2 = Zweitwaffe). Vorgabe 1 = Verhalten wie bisher. Den Platz setzt der
+## Gefechtstreiber, wenn die Hauptwaffe ganz leer ist; er ist fluechtig (nicht im Speicherstand, nicht im Netz-Snapshot).
+func get_combat_weapon_slot() -> int:
+	return _combat_weapon_slot
+
+
+func set_combat_weapon_slot(slot: int) -> void:
+	var normalized: int = 2 if slot == 2 else 1
+	if normalized == _combat_weapon_slot:
+		return
+	_combat_weapon_slot = normalized
+	_refresh_weapon_visual()
 
 
 func has_loadout_item(item_id: String) -> bool:
@@ -1289,6 +1304,10 @@ func _refresh_weapon_visual() -> void:
 
 
 func _resolve_active_combat_weapon_id() -> String:
+	if _combat_weapon_slot == 2:
+		var switched_weapon_id: String = WEAPON_DATA_SCRIPT.sanitize_weapon_id(weapon_2_id)
+		if WEAPON_DATA_SCRIPT.is_attack_weapon_id(switched_weapon_id):
+			return switched_weapon_id
 	var primary_weapon_id: String = WEAPON_DATA_SCRIPT.sanitize_weapon_id(weapon_1_id)
 	if WEAPON_DATA_SCRIPT.is_attack_weapon_id(primary_weapon_id):
 		return primary_weapon_id
@@ -1299,6 +1318,8 @@ func _resolve_active_combat_weapon_id() -> String:
 
 
 func _resolve_visual_weapon_id() -> String:
+	if _combat_weapon_slot == 2:
+		return _resolve_active_combat_weapon_id()
 	var primary_weapon_id: String = WEAPON_DATA_SCRIPT.sanitize_weapon_id(weapon_1_id)
 	if WEAPON_DATA_SCRIPT.is_valid_weapon_id(primary_weapon_id):
 		return primary_weapon_id

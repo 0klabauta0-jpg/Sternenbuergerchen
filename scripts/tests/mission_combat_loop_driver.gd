@@ -2227,6 +2227,11 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 var _ammo_state = null
 ## Nur fuer Pruefer, die Takt oder Unterdrueckung ueber viele Schuesse zaehlen (nicht die Munition): false = alle Waffen ohne Munitionsbedarf.
 var ammo_enabled: bool = true
+## M6c: Einheiten auf der Zweitwaffe (Platz 2), Tick, ab dem nach einem Waffenwechsel wieder geschossen wird, und Einheiten ganz ohne
+## Munition (Meldung / Gegner-Deckung). Fluechtig wie der Munitionszustand: gehoert dem Einsatz (reset_ammo), nicht im Speicherstand.
+var _ammo_slot2_ids: Dictionary = {}
+var _ammo_switch_ready_tick: Dictionary = {}
+var _ammo_fully_empty_ids: Dictionary = {}
 
 
 func _ammo_tracker():
@@ -2290,7 +2295,20 @@ func _ammo_weapon_id(unit) -> String:
 
 ## Darf die Einheit jetzt schiessen (Munition)? Nein beim Nachladen und ganz ohne Munition; die Gelegenheit ist dann verbraucht.
 func _ammo_unit_can_fire(unit_id: String, unit) -> bool:
-	return bool(_ammo_tracker().can_fire(unit_id, _ammo_weapon_id(unit), _current_tick, _ammo_unit_unlimited(unit)))
+	var unlimited: bool = _ammo_unit_unlimited(unit)
+	if not _ammo_slot2_ids.is_empty() and _ammo_slot2_ids.has(unit_id) and not unlimited:
+		_ammo_review_return_to_main(unit_id, unit)
+	if not _ammo_switch_ready_tick.is_empty() and int(_ammo_switch_ready_tick.get(unit_id, 0)) > _current_tick:
+		# M6c: der Waffenwechsel laeuft (Dauer wie Nachladen der Zielwaffe): die Gelegenheit ist verbraucht.
+		return false
+	var can_fire: bool = bool(_ammo_tracker().can_fire(unit_id, _ammo_weapon_id(unit), _current_tick, unlimited))
+	if can_fire:
+		if not _ammo_fully_empty_ids.is_empty():
+			_ammo_fully_empty_ids.erase(unit_id)
+		return true
+	if not unlimited:
+		_ammo_review_empty_weapon(unit_id, unit)
+	return false
 
 
 func _ammo_note_shot(unit) -> void:
@@ -2298,9 +2316,110 @@ func _ammo_note_shot(unit) -> void:
 		return
 	var unit_id: String = String(unit.call("get_unit_id"))
 	var weapon_id: String = _ammo_weapon_id(unit)
-	if String(_ammo_tracker().note_shot(unit_id, weapon_id, _current_tick, _ammo_unit_unlimited(unit))) == "empty" and OS.is_debug_build():
-		# Einmal je Einheit und Magazin im Protokoll (nur Test-/Debug-Laeufe): wer ist wann ohne Munition, nach wie vielen Schuessen.
-		print("AMMO_EMPTY unit=%s weapon=%s tick=%d shots=%d" % [unit_id, weapon_id, _current_tick, int(_ammo_tracker().shots_fired(unit_id, weapon_id))])
+	if String(_ammo_tracker().note_shot(unit_id, weapon_id, _current_tick, _ammo_unit_unlimited(unit))) == "empty":
+		if OS.is_debug_build():
+			# Einmal je Einheit und Magazin im Protokoll (nur Test-/Debug-Laeufe): wer ist wann ohne Munition, nach wie vielen Schuessen.
+			print("AMMO_EMPTY unit=%s weapon=%s tick=%d shots=%d" % [unit_id, weapon_id, _current_tick, int(_ammo_tracker().shots_fired(unit_id, weapon_id))])
+		_ammo_review_empty_weapon(unit_id, unit)
+
+
+## M6c (C1): Waffenplatz der Einheit (1 = Hauptwaffe, 2 = Zweitwaffe); Einheiten ohne Wechsel-Schnittstelle bleiben bei 1.
+func _ammo_unit_slot(unit) -> int:
+	return int(unit.call("get_combat_weapon_slot")) if unit != null and unit.has_method("get_combat_weapon_slot") else 1
+
+
+## M6c (C1): Hauptwaffe wirklich leer (Zustand "empty": Magazin 0, kein Nachladen laeuft, keine Reserve; "laedt nach" zaehlt NICHT)
+## und die andere Waffe ist eine Angriffswaffe mit Munition im Magazin: Wechsel auf sie. Sonst ist die Einheit ganz ohne Munition
+## (C2: einmalige Meldung bei eigenen Einheiten, C3: Gegner suchen Deckung). Wird nur gefragt, wenn die Einheit nicht schiessen kann.
+func _ammo_review_empty_weapon(unit_id: String, unit) -> void:
+	if unit == null or not is_instance_valid(unit) or not unit.has_method("set_combat_weapon_slot") or not unit.has_method("get_weapon_2_id"):
+		return
+	var weapon_id: String = _ammo_weapon_id(unit)
+	if weapon_id.is_empty():
+		return
+	var tracker = _ammo_tracker()
+	if String(tracker.status(unit_id, weapon_id, _current_tick, false).get("state", "")) != "empty":
+		return
+	var slot: int = _ammo_unit_slot(unit)
+	var other_slot: int = 2 if slot == 1 else 1
+	var other_id: String = String(unit.call("get_weapon_2_id" if other_slot == 2 else "get_weapon_1_id"))
+	if other_id != weapon_id and WEAPON_DATA_SCRIPT.is_attack_weapon_id(other_id):
+		var other_state: Dictionary = tracker.status(unit_id, other_id, _current_tick, false)
+		if String(other_state.get("state", "")) == "ready" and int(other_state.get("rounds", 0)) > 0:
+			_ammo_switch_weapon_slot(unit_id, unit, other_slot, weapon_id, other_id)
+			return
+	if not _ammo_fully_empty_ids.has(unit_id):
+		_ammo_fully_empty_ids[unit_id] = true
+		_ammo_report_to_player(unit, unit_id, "empty", "%s: Keine Munition mehr." % _ammo_unit_name(unit, unit_id))
+
+
+## M6c (C1): Auf der Zweitwaffe: sobald die Hauptwaffe wieder Munition hat (Magazin, oder Reserve zum Nachladen), zurueck auf Platz 1.
+func _ammo_review_return_to_main(unit_id: String, unit) -> void:
+	if unit == null or not is_instance_valid(unit) or _ammo_unit_slot(unit) != 2 or not unit.has_method("get_weapon_1_id"):
+		return
+	var main_id: String = String(unit.call("get_weapon_1_id"))
+	if not WEAPON_DATA_SCRIPT.is_attack_weapon_id(main_id):
+		return
+	var main_state: String = String(_ammo_tracker().status(unit_id, main_id, _current_tick, false).get("state", ""))
+	if main_state == "reloading":
+		# Das Nachladen der Hauptwaffe (Reserve ist da) beginnt mit dem Wechsel, nicht erst danach: beides laeuft gleichzeitig.
+		_ammo_tracker().can_fire(unit_id, main_id, _current_tick, false)
+	if main_state == "ready" or main_state == "reloading":
+		_ammo_switch_weapon_slot(unit_id, unit, 1, _ammo_weapon_id(unit), main_id)
+
+
+## Wechsel des Waffenplatzes: kostet die Nachladedauer der Zielwaffe (vorhandene Zahl: reload_ticks x reload_scale), in der Zeit kein Schuss.
+func _ammo_switch_weapon_slot(unit_id: String, unit, new_slot: int, from_weapon_id: String, to_weapon_id: String) -> void:
+	unit.call("set_combat_weapon_slot", new_slot)
+	_ammo_switch_ready_tick[unit_id] = _current_tick + int(_ammo_tracker().weapon_info(to_weapon_id).reload_ticks)
+	if new_slot == 2:
+		_ammo_slot2_ids[unit_id] = true
+		_ammo_report_to_player(unit, unit_id, "switch", "%s: Hauptwaffe leer – wechselt auf %s." % [_ammo_unit_name(unit, unit_id), WEAPON_DATA_SCRIPT.get_display_name(to_weapon_id)])
+	else:
+		_ammo_slot2_ids.erase(unit_id)
+	_ammo_fully_empty_ids.erase(unit_id)
+
+
+func _ammo_unit_name(unit, unit_id: String) -> String:
+	var unit_name: String = String(unit.call("get_display_name")).strip_edges() if unit != null and unit.has_method("get_display_name") else ""
+	if unit_name.is_empty() and unit != null and unit.has_method("get_callsign"):
+		unit_name = String(unit.call("get_callsign")).strip_edges()
+	return unit_name if not unit_name.is_empty() else unit_id
+
+
+## M6c (C2): einmalige Zeile in der Ereignisliste des Einsatzes (Weg wie die Eigenbeschuss-Meldung: Kommunikationsereignis des
+## Taktik-Controllers). Nur fuer eigene Einheiten; der Aufrufer sorgt dafuer, dass es je Wechsel / je Leerlauf nur einmal geschieht.
+func _ammo_report_to_player(unit, unit_id: String, kind: String, text: String) -> void:
+	if _get_unit_team_id_for_diagnostics(unit) != friendly_team_id:
+		return
+	var tactical_controller = _get_tactical_controller()
+	if tactical_controller == null or not tactical_controller.has_method("record_tactical_communication_event"):
+		return
+	tactical_controller.call("record_tactical_communication_event", "ammo_report", {
+		"event_id": "ammo_%s:%s:%d" % [kind, unit_id, _current_tick],
+		"fireteam_id": _get_unit_fireteam_id(unit),
+		"unit_id": unit_id,
+		"phase": 1,
+		"short_text": text,
+		"detail_text": text,
+		"map_label": text,
+		"priority": TACTICAL_COMMUNICATION_EVENT_SCRIPT.PRIORITY_NORMAL,
+		"duration_seconds": 3.0,
+		"channels": PackedStringArray([TACTICAL_COMMUNICATION_EVENT_SCRIPT.CHANNEL_SELECTED_FIRETEAM, TACTICAL_COMMUNICATION_EVENT_SCRIPT.CHANNEL_MISSION_CONTROL]),
+		"feedback_action": "move",
+		"feedback_state": "blocked",
+	}, {"now_msec": Time.get_ticks_msec(), "cooldown_msec": 0})
+
+
+## M6c (C3): Ein Gegner ohne Munition (alle Waffen leer) rueckt nicht weiter vor und patrouilliert nicht in den Feind: er sucht
+## Deckung mit dem vorhandenen Deckungsbefehl (Zielwahl und Abkuehlzeit wie beim Ausweichen unter Feuer). Steht er schon in Deckung,
+## bleibt er stehen. Eigene Trupps: kein automatischer Rueckzug (kommt mit dem Rueckzugsbefehl).
+func _ammo_enemy_without_ammo_seeks_cover(simulation_root: Node, enemy, unit_id: String) -> void:
+	if _enemy_limbo_cover_on_cooldown(unit_id):
+		return
+	if _get_enemy_limbo_cover_score(enemy) >= enemy_limbo_cover_min_cover_score:
+		return
+	_try_enqueue_enemy_limbo_cover_move(simulation_root, enemy)
 
 
 ## Munitionszustand einer Einheit (nur lesen): {"state": none|ready|reloading|empty, rounds, magazine_size, reserve, reload_ticks_left}.
@@ -2325,6 +2444,13 @@ func get_unit_ammo_text(unit_id: String) -> String:
 func _ammo_respawn_unit(unit_id: String) -> void:
 	if _ammo_state != null:
 		_ammo_state.reset_unit(unit_id)
+	# M6c: frische Verstaerkung = wieder die Hauptwaffe, kein laufender Wechsel, nicht mehr "ganz leer".
+	var respawned_unit = _resolve_unit_by_id(unit_id)
+	if respawned_unit != null and is_instance_valid(respawned_unit) and respawned_unit.has_method("set_combat_weapon_slot"):
+		respawned_unit.call("set_combat_weapon_slot", 1)
+	_ammo_slot2_ids.erase(unit_id)
+	_ammo_switch_ready_tick.erase(unit_id)
+	_ammo_fully_empty_ids.erase(unit_id)
 	var simulation_root = get_node_or_null(simulation_root_path)
 	if simulation_root != null and simulation_root.has_method("forget_mission_ammo"):
 		simulation_root.call("forget_mission_ammo", unit_id)
@@ -2333,6 +2459,13 @@ func _ammo_respawn_unit(unit_id: String) -> void:
 func reset_ammo() -> void:
 	if _ammo_state != null:
 		_ammo_state.reset()
+	for switched_unit_id in _ammo_slot2_ids.keys():
+		var switched_unit = _resolve_unit_by_id(String(switched_unit_id))
+		if switched_unit != null and is_instance_valid(switched_unit) and switched_unit.has_method("set_combat_weapon_slot"):
+			switched_unit.call("set_combat_weapon_slot", 1)
+	_ammo_slot2_ids.clear()
+	_ammo_switch_ready_tick.clear()
+	_ammo_fully_empty_ids.clear()
 	# M6a: der Einsatz-Vorrat gehoert zum Einsatz und wird mit ihm geleert (Start, Neustart, Zwischenstand geladen).
 	var simulation_root = get_node_or_null(simulation_root_path)
 	if simulation_root != null and simulation_root.has_method("reset_mission_ammo"):
@@ -5939,6 +6072,11 @@ func _advance_enemy_units(simulation_root: Node) -> void:
 			continue
 
 		if String(enemy.call("get_vital_state")) != "fit":
+			continue
+
+		# M6c (C3): ganz ohne Munition: keine Vorruecken/Patrouille, Deckung suchen (nur wenn es solche Einheiten gibt).
+		if not _ammo_fully_empty_ids.is_empty() and enemy.has_method("get_unit_id") and _ammo_fully_empty_ids.has(String(enemy.call("get_unit_id"))):
+			_ammo_enemy_without_ammo_seeks_cover(simulation_root, enemy, String(enemy.call("get_unit_id")))
 			continue
 
 		if _try_enqueue_enemy_team_tactics_move(simulation_root, enemy):
