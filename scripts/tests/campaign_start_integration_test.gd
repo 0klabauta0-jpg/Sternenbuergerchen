@@ -48,6 +48,16 @@ func _run() -> void:
 	for job: Dictionary in campaign_jobs.values():
 		if not expected_ids.has(String(job.scenario_id)):
 			expected_ids.append(String(job.scenario_id))
+	# Handel 2a: dazu je ein friedlicher Besuch fuer jeden kleinen Aussenposten aus data/singleplayer/small_outposts.json (Szenario aus dem Ortseintrag).
+	var outposts_file := FileAccess.open("res://data/singleplayer/small_outposts.json", FileAccess.READ)
+	var outposts: Dictionary = Dictionary(JSON.parse_string(outposts_file.get_as_text())).get("locations", {}) if outposts_file != null else {}
+	var campaign_locations: Dictionary = Dictionary(flow.get("_singleplayer_runtime").get("_campaign").get_campaign_snapshot().get("locations", {}))
+	_check(not outposts.is_empty(), "Small outposts data lists visits")
+	for place_id in outposts:
+		var visit_id: String = String(Dictionary(campaign_locations.get(place_id, {})).get("scenario_file_path", "")).get_file().get_basename()
+		_check(not visit_id.is_empty() and not expected_ids.has(visit_id), "Small outpost %s has its own free visit" % String(place_id))
+		if not visit_id.is_empty() and not expected_ids.has(visit_id):
+			expected_ids.append(visit_id)
 	_check(campaign_jobs.size() >= 5 and catalog_ids.size() == expected_ids.size(), "Campaign offers every job plus the free visits (Auftraege %d, Katalog %d)" % [campaign_jobs.size(), catalog_ids.size()])
 	for id in expected_ids:
 		_check(catalog_ids.has(id), "Campaign catalog offers " + String(id))

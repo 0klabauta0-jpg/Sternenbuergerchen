@@ -344,15 +344,24 @@ func _enter_with_focus(kind: String) -> Dictionary:
 	var target: Control = null
 	match kind:
 		"name":
+			# Wie ein Spieler: Der Block der Schiffsgruppen ist mit einem Schiff eingeklappt (Ueberschrift-Knopf), die Verwaltung
+			# dahinter ebenfalls (Knopf "Schiffsgruppen verwalten"); erst aufklappen, dann steht das Namensfeld sichtbar da.
+			var heading := view.find_child("WingHeading", true, false) as Button
+			var body := view.find_child("WingBody", true, false) as Control
+			if heading != null and body != null and not body.is_visible_in_tree():
+				heading.pressed.emit()
+				await _frames(1)
+			for button in view.find_children("*", "Button", true, false):
+				if (button as Button).text.begins_with("Schiffsgruppen verwalten") and (button as Button).is_visible_in_tree():
+					var management := view.find_child("WingManagement", true, false) as Control
+					if management != null and not management.is_visible_in_tree():
+						(button as Button).pressed.emit()
+						await _frames(1)
 			for edit in view.find_children("*", "LineEdit", true, false):
-				if (edit as LineEdit).placeholder_text == "Rottenname":
+				if (edit as LineEdit).placeholder_text == "Name der Schiffsgruppe":
 					target = edit
-			if target != null:
-				var node: Node = target
-				while node != null and node != view:
-					if node is CanvasItem:
-						node.show()
-					node = node.get_parent()
+			if target != null and not target.is_visible_in_tree():
+				target = null
 		"tree":
 			target = view.get("_navigation")
 		"button":
