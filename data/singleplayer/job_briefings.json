@@ -3,5 +3,6 @@
   "outpost_recovery": {"objectives":["Außenposten sichern","Kiste bergen und zum Schiff zurückbringen"]},
   "benit_delivery": {"objectives":["C-Benit zum Handelsposten liefern","Zum Schiff zurückkehren"]},
   "outpost_chip_recovery": {"objectives":["Außenposten sichern","Datenträger bergen","Zur Heimatbasis bringen und hochladen"]},
-  "buccaneer_rescue": {"objectives":["Feindliche Cutlass besiegen","Neutrale Buccaneer retten"]}
+  "buccaneer_rescue": {"objectives":["Feindliche Cutlass besiegen","Neutrale Buccaneer retten"]},
+  "wreck_crater_salvage": {"objectives":["Schrott am Wrack bergen","Plünderer abwehren","Frachtkiste aus dem Wrack bergen und zum Schiff zurückkehren"]}
 }

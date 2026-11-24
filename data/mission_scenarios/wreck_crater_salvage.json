@@ -1,0 +1,245 @@
+{
+  "version": 1,
+  "scenario_id": "wreck_crater_salvage",
+  "display_name": "Wrack am Krater bergen",
+  "map_file_path": "res://maps/satellite_crash_site.json",
+  "time_limit_seconds": 2400.0,
+  "mission_slot_count_override": 4,
+  "win_condition": "objective_capture",
+  "objective": {
+    "marker_id": "objective_point",
+    "capture_radius": 80.0
+  },
+  "enemy_groups": [
+    {
+      "group_id": "looters_smg",
+      "display_name": "Plünderer (Maschinenpistole)",
+      "team_id": "team_bravo",
+      "spawn_marker_id": "spawn_bravo",
+      "skill_accuracy": 0.15,
+      "enemy_ids": [
+        "wreck_looter_01",
+        "wreck_looter_02"
+      ],
+      "tactics": {
+        "advance_style": "probe",
+        "aim_move_speed_factor": 0.18,
+        "air_asset_risk_profile": "none",
+        "allowed_weapon_roles": [
+          "smg"
+        ],
+        "anti_armor_threat": false,
+        "communication_intensity": "normal",
+        "contact_behavior": "pin_then_report",
+        "cover_behavior": "break_to_cover_on_contact",
+        "facing": "west",
+        "heavy_weapon_role": "none",
+        "lz_threat_zone_id": "",
+        "movement_posture_policy": "travel_until_threat",
+        "profile_id": "patrol_probe",
+        "ready_distance_world": 760.0,
+        "ready_speed_factor": 0.3,
+        "security_mode": "patrol",
+        "sight_behavior": "scan_waypoints",
+        "stance": "patrol",
+        "travel_speed_factor": 0.55,
+        "visual_archetype": "enemy_space_suit_orange",
+        "weapon_id": "smg",
+        "weapon_profile": "standard_close"
+      }
+    },
+    {
+      "group_id": "looters_pistol",
+      "display_name": "Plünderer (Pistole)",
+      "team_id": "team_bravo",
+      "spawn_marker_id": "spawn_bravo",
+      "skill_accuracy": 0.12,
+      "enemy_ids": [
+        "wreck_looter_03",
+        "wreck_looter_04"
+      ],
+      "tactics": {
+        "advance_style": "probe",
+        "aim_move_speed_factor": 0.18,
+        "air_asset_risk_profile": "none",
+        "allowed_weapon_roles": [
+          "sidearm"
+        ],
+        "anti_armor_threat": false,
+        "communication_intensity": "normal",
+        "contact_behavior": "pin_then_report",
+        "cover_behavior": "break_to_cover_on_contact",
+        "facing": "west",
+        "heavy_weapon_role": "none",
+        "lz_threat_zone_id": "",
+        "movement_posture_policy": "travel_until_threat",
+        "profile_id": "patrol_probe",
+        "ready_distance_world": 760.0,
+        "ready_speed_factor": 0.3,
+        "security_mode": "patrol",
+        "sight_behavior": "scan_waypoints",
+        "stance": "patrol",
+        "travel_speed_factor": 0.55,
+        "visual_archetype": "enemy_space_suit_orange",
+        "weapon_id": "pistol",
+        "weapon_profile": "standard_close"
+      }
+    }
+  ],
+  "wave_config": {
+    "wave_count": 2,
+    "units_per_wave": 2,
+    "first_wave_delay_seconds": 75.0,
+    "wave_delay_seconds": 60.0
+  },
+  "patrol_bindings": [
+    {
+      "binding_id": "wreck_looters_to_wreck",
+      "mode": "pre_contact",
+      "patrol_path_id": "wreck_looter_route",
+      "target_id": "spawn_bravo"
+    }
+  ],
+  "briefing": {
+    "title": "Wrack am Krater bergen",
+    "summary": "Ein Jäger ist an der Absturzstelle niedergegangen. Schrott und die Frachtkiste aus dem Wrack bergen - Plünderer haben den Absturz auch gesehen. Fracht und Personen sicher zurückbringen.",
+    "minimap_mode": "terrain_only",
+    "objectives": [
+      {
+        "target_id": "satellite_data",
+        "text": "Schrott am Wrack bergen"
+      },
+      {
+        "target_id": "spawn_bravo",
+        "text": "Plünderer abwehren"
+      },
+      {
+        "target_id": "objective_point",
+        "text": "Frachtkiste aus dem Wrack bergen"
+      },
+      {
+        "target_id": "ship_return",
+        "text": "Mit dem Bergegut zum Schiff zurückkehren"
+      }
+    ]
+  },
+  "vertical_slice": {
+    "scenario_kind": "singleplayer_job",
+    "contract_version": 1,
+    "play_modes": [
+      "singleplayer"
+    ],
+    "finite_enemy_roster": true,
+    "team_slots": [
+      {
+        "role": "recovery",
+        "player_assignable_modes": [
+          "singleplayer"
+        ],
+        "spawn_marker_id": "spawn_alpha",
+        "team_id": "team_alpha",
+        "npc_owned": false
+      }
+    ],
+    "interaction_points": [
+      {
+        "gate_id": "salvage_wreck",
+        "step_id": "salvage_wreck",
+        "duration_seconds": 6.0,
+        "required_state": "salvage_wreck_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Schrott am Wrack bergen",
+        "interaction_id": "satellite_data",
+        "marker_id": "satellite_data",
+        "grants_items": [
+          {
+            "item_id": "salvage",
+            "quantity": 6
+          }
+        ]
+      },
+      {
+        "gate_id": "recover_wreck_crate",
+        "step_id": "recover_wreck_crate",
+        "duration_seconds": 4.0,
+        "required_state": "recover_wreck_crate_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Frachtkiste aus dem Wrack bergen",
+        "interaction_id": "objective_point",
+        "marker_id": "objective_point",
+        "requires_step_id": "clear_looters",
+        "grants_items": [
+          {
+            "item_id": "salvage",
+            "quantity": 2
+          },
+          {
+            "item_id": "armor_medium",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "gate_id": "return_to_ship",
+        "step_id": "return_to_ship",
+        "duration_seconds": 3.0,
+        "required_state": "return_to_ship_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Mit dem Bergegut zum Schiff zurückkehren",
+        "interaction_id": "ship_return",
+        "marker_id": "ship_return",
+        "requires_step_id": "recover_wreck_crate"
+      }
+    ],
+    "flow_steps": [
+      {
+        "step_id": "salvage_wreck",
+        "objective_type": "interaction_use",
+        "min_hold_seconds": 6.0,
+        "required_state": "salvage_wreck_done",
+        "target_marker_id": "satellite_data"
+      },
+      {
+        "step_id": "clear_looters",
+        "objective_type": "air_defense_shutdown",
+        "enemy_group_id": "looters_smg",
+        "enemy_group_ids": [
+          "looters_smg",
+          "looters_pistol"
+        ],
+        "required_state": "looters_cleared",
+        "target_marker_id": "spawn_bravo",
+        "min_hold_seconds": 0.0,
+        "requires_step_id": "salvage_wreck"
+      },
+      {
+        "step_id": "recover_wreck_crate",
+        "objective_type": "interaction_use",
+        "min_hold_seconds": 4.0,
+        "required_state": "recover_wreck_crate_done",
+        "target_marker_id": "objective_point",
+        "requires_step_id": "clear_looters"
+      },
+      {
+        "step_id": "return_to_ship",
+        "objective_type": "interaction_use",
+        "min_hold_seconds": 3.0,
+        "required_state": "return_to_ship_done",
+        "target_marker_id": "ship_return",
+        "requires_step_id": "recover_wreck_crate"
+      }
+    ]
+  },
+  "notes": [
+    "Kapitel 2. Runtime gates, not UI clicks, determine completion."
+  ]
+}

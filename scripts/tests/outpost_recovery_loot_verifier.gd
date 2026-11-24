@@ -148,7 +148,8 @@ func _case_scenario_data() -> void:
 	for file_name in dir.get_files():
 		if file_name.ends_with(".json") and FileAccess.get_file_as_string("res://data/mission_scenarios/" + file_name).contains("grants_items"):
 			other.append(file_name)
-	_check(other == ["outpost_recovery.json"], "nur outpost_recovery.json traegt grants_items (%s)" % str(other))
+	# Kapitel 2 (Wrack am Krater) nutzt grants_items ebenfalls; weitere Szenarien muessen hier einzeln aufgenommen werden.
+	_check(other == ["outpost_recovery.json", "wreck_crater_salvage.json"], "nur outpost_recovery.json und wreck_crater_salvage.json tragen grants_items (%s)" % str(other))
 
 
 func _case_validation() -> void:
