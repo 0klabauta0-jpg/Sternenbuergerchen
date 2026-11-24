@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "note": "Handel 2a: kleine Aussenposten ohne Auftrag. Nicht im Spielstand; nur Freischaltung und Haendler-Marker.",
+  "locations": {
+    "muellers_farm": {"service_marker_id": "spawn_bravo", "service_radius_world": 256.0, "unlock_after_job_id": "outpost_recovery", "locked_hint": "Erst nach dem Auftrag am Handelsaußenposten"},
+    "shady_lab": {"service_marker_id": "spawn_bravo", "service_radius_world": 256.0, "unlock_after_job_id": "outpost_recovery", "locked_hint": "Erst nach dem Auftrag am Handelsaußenposten"},
+    "templanon": {"service_marker_id": "recon_altfeld", "service_radius_world": 256.0, "unlock_after_job_id": "outpost_recovery", "locked_hint": "Erst nach dem Auftrag am Handelsaußenposten"}
+  }
+}

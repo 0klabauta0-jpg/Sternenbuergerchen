@@ -1244,8 +1244,10 @@ func _collect_resource(payload: Dictionary,context: Dictionary) -> Dictionary:
 	var quantity:=int(site.remaining); owner.consume(id); _revision+=1
 	return {"ok":true,"item_id":site.item_id,"quantity":quantity,"message":"Geborgen: %d" % quantity}
 
-# Kapitel 2: neue Orte, die in einem aelteren Stand fehlen duerfen (gleich singleplayer_campaign_state.gd).
-const ADDITIVE_LOCATION_IDS: Array = ["relay_ridge", "asteroid_belt", "muellers_farm", "shady_lab", "templanon"]
+# Kapitel 2: neue Orte, die in einem aelteren Stand fehlen duerfen. Eine Quelle: orbit_location_priority.gd (Blattdatei ohne Abhaengigkeiten);
+# der Kampagnenstand zeigt auf dieselbe Liste.
+const ORBIT_LOCATION_PRIORITY: GDScript = preload("res://scripts/core/orbit_location_priority.gd")
+const ADDITIVE_LOCATION_IDS: Array = ORBIT_LOCATION_PRIORITY.ADDITIVE_LOCATION_IDS
 
 ## Strecke "start>ziel": nennt sie den Ort als Start oder als Ziel?
 func _route_names_place(route: String, place: String) -> bool:

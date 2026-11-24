@@ -402,7 +402,10 @@
       "trade",
       "refuel"
     ],
-    "relay_ridge": []
+    "relay_ridge": [],
+    "muellers_farm": ["trade"],
+    "shady_lab": ["trade"],
+    "templanon": ["trade"]
   },
   "route_fuel_costs": {
     "homebase>satellite_crash": 12.0,
@@ -418,7 +421,25 @@
     "homebase>polisa": 10.0,
     "polisa>homebase": 10.0,
     "homebase>relay_ridge": 10.0,
-    "relay_ridge>homebase": 10.0
+    "relay_ridge>homebase": 10.0,
+    "homebase>muellers_farm": 9.0,
+    "muellers_farm>homebase": 9.0,
+    "muellers_farm>trade_outpost": 6.0,
+    "trade_outpost>muellers_farm": 6.0,
+    "muellers_farm>satellite_crash": 11.0,
+    "satellite_crash>muellers_farm": 11.0,
+    "homebase>shady_lab": 10.0,
+    "shady_lab>homebase": 10.0,
+    "shady_lab>trade_outpost": 9.0,
+    "trade_outpost>shady_lab": 9.0,
+    "shady_lab>satellite_crash": 11.0,
+    "satellite_crash>shady_lab": 11.0,
+    "homebase>templanon": 10.0,
+    "templanon>homebase": 10.0,
+    "templanon>trade_outpost": 9.0,
+    "trade_outpost>templanon": 9.0,
+    "templanon>satellite_crash": 11.0,
+    "satellite_crash>templanon": 11.0
   },
   "leg_fuel_costs": {
     "homebase>satellite_crash": {"launch": 1.0, "jump": 10.0, "approach": 1.0},
@@ -434,7 +455,25 @@
     "homebase>polisa": {"launch": 1.0, "jump": 8.0, "approach": 1.0},
     "polisa>homebase": {"surface_exit": 2.0, "jump": 8.0, "landing": 0.0},
     "homebase>relay_ridge": {"launch": 1.0, "jump": 8.0, "approach": 1.0},
-    "relay_ridge>homebase": {"surface_exit": 2.0, "jump": 8.0, "landing": 0.0}
+    "relay_ridge>homebase": {"surface_exit": 2.0, "jump": 8.0, "landing": 0.0},
+    "homebase>muellers_farm": {"launch": 1.0, "jump": 7.0, "approach": 1.0},
+    "muellers_farm>homebase": {"surface_exit": 2.0, "jump": 7.0, "landing": 0.0},
+    "muellers_farm>trade_outpost": {"surface_exit": 2.0, "jump": 3.0, "approach": 1.0},
+    "trade_outpost>muellers_farm": {"surface_exit": 2.0, "jump": 3.0, "approach": 1.0},
+    "muellers_farm>satellite_crash": {"surface_exit": 2.0, "jump": 8.0, "approach": 1.0},
+    "satellite_crash>muellers_farm": {"surface_exit": 2.0, "jump": 8.0, "approach": 1.0},
+    "homebase>shady_lab": {"launch": 1.0, "jump": 8.0, "approach": 1.0},
+    "shady_lab>homebase": {"surface_exit": 2.0, "jump": 8.0, "landing": 0.0},
+    "shady_lab>trade_outpost": {"surface_exit": 2.0, "jump": 6.0, "approach": 1.0},
+    "trade_outpost>shady_lab": {"surface_exit": 2.0, "jump": 6.0, "approach": 1.0},
+    "shady_lab>satellite_crash": {"surface_exit": 2.0, "jump": 8.0, "approach": 1.0},
+    "satellite_crash>shady_lab": {"surface_exit": 2.0, "jump": 8.0, "approach": 1.0},
+    "homebase>templanon": {"launch": 1.0, "jump": 8.0, "approach": 1.0},
+    "templanon>homebase": {"surface_exit": 2.0, "jump": 8.0, "landing": 0.0},
+    "templanon>trade_outpost": {"surface_exit": 2.0, "jump": 6.0, "approach": 1.0},
+    "trade_outpost>templanon": {"surface_exit": 2.0, "jump": 6.0, "approach": 1.0},
+    "templanon>satellite_crash": {"surface_exit": 2.0, "jump": 8.0, "approach": 1.0},
+    "satellite_crash>templanon": {"surface_exit": 2.0, "jump": 8.0, "approach": 1.0}
   },
   "emergency_fuel": {
     "callout_fee": 100,
