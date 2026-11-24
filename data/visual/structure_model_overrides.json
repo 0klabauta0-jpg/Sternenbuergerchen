@@ -1,0 +1,32 @@
+{
+	"schema_version": 1,
+	"enabled": true,
+	"toggle_key": "F7",
+	"brightness": 1.0,
+	"human_height_m": 1.8,
+	"note": "Erster Schritt: neue Modelle stehen ZUSAETZLICH auf den im Layout vorgesehenen freien Bauplaetzen (expansion_areas), im Menschenmass (Spielfigur ca. 0,61 m = 1,8 m). Die begehbaren Bestandsgebaeude (habitat_cutaway_01, freihafen_hall_01) bleiben unveraendert: Betten, Terminals und Schlafplaetze der Navigation sind an ihre Einrichtung gebunden. Karten und Navigation werden nicht beruehrt.",
+	"entries": [
+		{
+			"id": "home_pod",
+			"model": "res://art/tripo_models_20261124/basis_home_pod_4k_01.glb",
+			"role": "Wohn-/Hauptmodul (Start-Pod, home_pod_4k)",
+			"relates_to": "habitat_cutaway_01",
+			"site": "future_workshop",
+			"scale": 4.5,
+			"door_height_model": 0.168,
+			"rotation_y_deg": 0.0,
+			"offset": [0.0, 0.0, 0.0]
+		},
+		{
+			"id": "lager_werkstatt",
+			"model": "res://art/tripo_models_20261124/basis_lager_werkstatt_01.glb",
+			"role": "Lager/Werkstatt",
+			"relates_to": "freihafen_hall_01",
+			"site": "future_storage",
+			"scale": 0.338,
+			"door_height_model": 2.1,
+			"rotation_y_deg": -90.0,
+			"offset": [1.8, 0.0, 0.3]
+		}
+	]
+}

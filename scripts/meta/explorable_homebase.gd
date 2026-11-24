@@ -26,6 +26,12 @@ const HEX_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 const PAD_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_outpost_pad.gd")
 const PAD_DECK_TOP: float = preload("res://scripts/terrain/place_reference_dressing.gd").PAD_DECK_TOP
 const SHIP_VISUALS: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
+## Neue Gebaeudemodelle (Versuch 24.11.): Zuordnung in data/visual/structure_model_overrides.json, Taste F7 schaltet um.
+const STRUCTURE_MODELS_SCRIPT: GDScript = preload("res://scripts/meta/structure_model_overrides.gd")
+const STRUCTURE_MODELS_KEY: Key = KEY_F7
+var _structure_models: Node3D
+var _structure_models_label: Label
+var _structure_models_serial: int = 0
 const INTERACTION_RADIUS: float = 1.8
 const BASE_NAV: GDScript = preload("res://scripts/meta/base_interior_navigation.gd")
 const TACTICAL_THEME: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
@@ -912,6 +918,9 @@ func _initialize_runtime() -> void:
 				_structure_visual_nodes[id] = visual
 				_structure_visual_records[id] = {"source_path": String(asset.path), "actual_sha256": String(_asset_sources.back().get("actual_sha256", "")), "route": String(asset.get("visual_route", "original_furnished_cutaway_glb")), "original_path": String(asset.get("original_path", asset.path))}
 	_build_landing_pads(stage)
+	_structure_models = STRUCTURE_MODELS_SCRIPT.new()
+	stage.add_child(_structure_models)
+	_structure_models.call("build", _layout)
 	var paths := preload("res://scripts/terrain/frontier_art_dressing.gd").new()
 	paths.name = "HomebaseBuiltPaths"
 	stage.add_child(paths)
@@ -1123,6 +1132,34 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	elif event.pressed and not event.echo and key == KEY_E:
 		request_terminal(_nearby_terminal)
 		get_viewport().set_input_as_handled()
+	elif event.pressed and not event.echo and key == STRUCTURE_MODELS_KEY and _structure_models != null:
+		_show_structure_models_notice(bool(_structure_models.call("toggle")))
+		get_viewport().set_input_as_handled()
+
+
+## Neue Gebaeudemodelle (Versuch): kurze Meldung oben in der Mitte.
+func _show_structure_models_notice(is_on: bool) -> void:
+	if not is_instance_valid(_structure_models_label):
+		_structure_models_label = Label.new()
+		_structure_models_label.name = "StructureModelsNotice"
+		_structure_models_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_structure_models_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_structure_models_label.add_theme_color_override("font_shadow_color", Color(0.02, 0.04, 0.06, 0.95))
+		_structure_models_label.add_theme_constant_override("shadow_outline_size", 7)
+		add_child(_structure_models_label)
+		_structure_models_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+		_structure_models_label.offset_left = -180.0
+		_structure_models_label.offset_right = 180.0
+		_structure_models_label.offset_top = 96.0
+		_structure_models_label.offset_bottom = 122.0
+	_structure_models_label.text = "Neue Gebäudemodelle: %s (F7)" % ("an" if is_on else "aus")
+	_structure_models_label.visible = true
+	_structure_models_serial += 1
+	var serial: int = _structure_models_serial
+	if is_inside_tree():
+		get_tree().create_timer(1.8).timeout.connect(func() -> void:
+			if serial == _structure_models_serial and is_instance_valid(_structure_models_label):
+				_structure_models_label.visible = false)
 
 
 func _escape_belongs_to_base() -> bool:
