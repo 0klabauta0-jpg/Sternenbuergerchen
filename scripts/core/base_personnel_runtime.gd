@@ -454,7 +454,7 @@ func _build_hex_container(count: int) -> Dictionary:
 	infrastructure["campaign_beds"] = total_beds
 	var candidate: Dictionary = CAPACITY_LAYOUT.expand(_source_layout, _terrain, _navigation_graph, Array(_flow.get("_all_team_units")).size(), infrastructure)
 	var fresh: Array = Array(candidate.get("campaign_housing", [])).filter(func(house: Dictionary) -> bool: return String(house.get("id", "")).begins_with("campaign_habitat_c%02d" % count))
-	if fresh.size() != 2 or Array(candidate.get("beds", [])).size() != total_beds: return _reject("housing_site_blocked", "Kein erreichbarer Stellplatz für den Wohncontainer")
+	if bool(candidate.get("campaign_housing_failed", false)) or fresh.size() != 2 or Array(candidate.get("beds", [])).size() != total_beds: return _reject("housing_site_blocked", "Kein erreichbarer Stellplatz für den Wohncontainer")
 	if _hex_site_busy(fresh): return _reject("housing_site_busy", "Der Stellplatz ist belegt. Person zuerst vom Platz bewegen")
 	var previous: Array = Array(_layout.get("campaign_housing", []))
 	_navigation_graph.set_campaign_housing(Array(candidate.get("campaign_housing", [])))

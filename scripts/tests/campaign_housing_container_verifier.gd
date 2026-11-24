@@ -89,6 +89,22 @@ func _run() -> void:
 	check(not load(SUPPLY).new().restore_state(bad).get("ok", false), "Beleg mit Kosten 0 abgelehnt")
 	bad = old_owner.export_state(); bad.requests["c-2"].result.housing_count = 1
 	check(not load(SUPPLY).new().restore_state(bad).get("ok", false), "doppelte Gebaeudenummer abgelehnt")
+	# 7b. Belege ueber die Stellplaetze hinaus (Altstand/Manipulation) bleiben gueltig, zaehlen aber nicht: nie mehr Betten als baubar.
+	var many = _owner(100000)
+	built = 0
+	for number in range(1, 6): many.apply_command(_command("m-%d" % number), _ctx(9))
+	check(many.get_campaign_housing_count() == 5 and many.get_campaign_bed_count() == 22, "ohne Grenze: fuenf Container = 22 Betten")
+	var many_restored = load(SUPPLY).new()
+	check(many_restored.restore_state(many.export_state()).get("ok", false), "Beleg mit fuenf Gebaeuden laedt (Stand bleibt gueltig)")
+	many_restored.set_housing_site_limit(4)
+	check(many_restored.get_campaign_housing_count() == 5 and many_restored.get_campaign_housing_beds() == [4, 4, 4, 4] and many_restored.get_campaign_bed_count() == 18, "Hex-Basis mit vier Stellplaetzen: Versorgung meldet 18 Betten, nicht 22")
+	var old_many = _owner(100000)
+	built = 0
+	for number in range(1, 6): old_many.apply_command(_command("a-%d" % number), _ctx(0, false))
+	var old_many_restored = load(SUPPLY).new()
+	old_many_restored.restore_state(old_many.export_state())
+	old_many_restored.set_housing_site_limit(4)
+	check(old_many.get_campaign_bed_count() == 12 and old_many_restored.get_campaign_bed_count() == 10, "fuenf Alt-Gebaeude: 12 Betten ohne Grenze, 10 mit vier Stellplaetzen")
 	# 8. Obergrenze
 	var capped = _owner(10000)
 	built = 0

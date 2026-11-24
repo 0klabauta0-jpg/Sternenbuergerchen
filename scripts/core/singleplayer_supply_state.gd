@@ -1509,7 +1509,13 @@ func get_campaign_housing_beds() -> Array:
 		if receipt.get("operation") != "campaign_build_housing": continue
 		var number := int(receipt.get("housing_count", 0))
 		if number >= 1 and number <= count: result[number - 1] = int(receipt.get("beds", LEGACY_HOUSING_BEDS))
+	# Hex-Basis: nur so viele Gebaeude, wie Stellplaetze existieren (Belege darueber bleiben gueltig, zaehlen aber nicht).
+	if _housing_site_limit >= 0 and result.size() > _housing_site_limit: result = result.slice(0, _housing_site_limit)
 	return result
+
+## Laufzeit-Grenze (nicht gespeichert): Zahl der Gebaeude-Stellplaetze der Heimatbasis; -1 = unbegrenzt.
+var _housing_site_limit := -1
+func set_housing_site_limit(limit: int) -> void: _housing_site_limit = limit
 
 func get_campaign_housing_count() -> int:
 	var count := 0
@@ -1545,10 +1551,12 @@ func _campaign_build_housing(payload: Dictionary, context: Dictionary) -> Dictio
 func get_campaign_bed_count() -> int:
 	var count := 2
 	for housing_beds in get_campaign_housing_beds(): count += int(housing_beds)
+	var buildable := count
 	for entry: Dictionary in _requests.values():
 		var result: Dictionary = entry.get("result", {})
 		if result.get("operation") == "campaign_build_bed": count = maxi(count, int(result.get("bed_count", 2)))
-	return count
+	# Nie mehr Betten melden, als auf den Stellplaetzen wirklich gebaut werden koennen.
+	return mini(count, buildable) if _housing_site_limit >= 0 else count
 
 func _campaign_build_bed(payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not payload.is_empty(): return _reject("invalid_bed_request", "Ungültiger Bauauftrag")

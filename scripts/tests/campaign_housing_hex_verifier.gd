@@ -10,6 +10,12 @@ var flow: Node
 var adapter: Node
 var base: Node
 
+## Attrappe: kein Feld ist begehbar.
+class FakeTerrain:
+	extends Node
+	func is_walkable(_grid: Vector2i) -> bool: return false
+	func grid_to_world(_grid: Vector2i) -> Vector2: return Vector2.ZERO
+
 func check(condition: bool, text: String) -> void:
 	if condition: passed += 1
 	else:
@@ -95,6 +101,13 @@ func _run() -> void:
 	check(bool(offer.container) and int(offer.sites) >= 3, "Hex-Basis bietet Wohncontainer an, mindestens drei Stellplaetze (%s)" % str(offer))
 	check(Array(base.get_snapshot().layout.beds).size() == 2 and base.get_recruitment_bed_capacity().beds == 2, "vor dem Bau: zwei Betten")
 	_everything_reachable("vor dem Bau")
+	# K6: nicht begehbare Bettzelle -> kein Teilergebnis, der ganze Bau ist ungueltig (Kauf lehnt ab, keine Abbuchung).
+	var fake: Node = FakeTerrain.new()
+	var failing: Dictionary = CAPACITY.hex_container_housing(base._source_layout, fake, {"campaign_housing":2, "campaign_housing_beds":[4, 4]})
+	check(bool(failing.get("failed", false)) and Array(failing.houses).is_empty() and Array(failing.beds).is_empty(), "nicht begehbare Bettzelle: kein Teilergebnis (%s)" % str(failing.get("failed", false)))
+	var failing_layout: Dictionary = CAPACITY.expand(base._source_layout, fake, base._navigation_graph, 2, {"campaign_housing":1, "campaign_housing_beds":[4], "campaign_beds":6, "hex_containers":true})
+	check(bool(failing_layout.get("campaign_housing_failed", false)) and Array(failing_layout.campaign_housing).is_empty(), "Layout markiert den fehlgeschlagenen Bau (campaign_housing_failed)")
+	fake.free()
 	# Person steht auf dem Stellplatz -> housing_site_busy, nichts bewegt sich
 	var actor: Node2D = base.get_actor(leader)
 	var home_position: Vector2 = actor.position

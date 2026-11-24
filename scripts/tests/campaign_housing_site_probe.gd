@@ -40,7 +40,8 @@ func _print_map(x0: float, x1: float, z0: float, z1: float) -> void:
 			line += " " if tile == null else ("." if terrain.is_walkable(cell) else "#")
 		print("z%5.2f %s" % [float(y) * (sqrt(3.0) * 0.5) / NAV.SCALE, line])
 
-const COPY_STEP := 17 ## Zellen zwischen den zwei Habitat-Kopien eines Containers (Modellbreite 4,24 m)
+const CAPACITY_LAYOUT = preload("res://scripts/meta/base_capacity_layout.gd")
+const COPY_STEP: int = CAPACITY_LAYOUT.HEX_CONTAINER_COPY_STEP ## Kopie-Abstand aus dem Spielcode (Modellbreite 4,24 m)
 const MARGIN := 0.75
 
 ## Zellen des Quell-Habitats, die das Spiel als Sperre kopiert (gleiche Schleife wie NAV._apply_field_beds).

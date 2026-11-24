@@ -412,7 +412,10 @@ func _apply_section() -> void:
 				var title:String="Wohncontainer mit vier Betten – %d Cr" % int(supply_script.CONTAINER_HOUSING_COST)
 				action.title_label.text="Wohncontainer mit vier Betten"
 				action.button.text=title
-				var max_beds:int=2+int(supply_script.CONTAINER_HOUSING_BEDS)*int(offer.get("sites",0))
+				# Vorhandene Alt-Gebaeude haben nur zwei Betten; nur die freien Stellplaetze bringen je vier dazu.
+				var placed:Array=Array(_snapshot.get("supply", {}).get("campaign_housing_beds", [])).slice(0,int(offer.get("sites",0)))
+				var max_beds:int=2+int(supply_script.CONTAINER_HOUSING_BEDS)*maxi(0,int(offer.get("sites",0))-placed.size())
+				for placed_beds in placed:max_beds+=int(placed_beds)
 				action.state_label.text="Gebaut: %d / %d Betten" % [built_beds,max_beds]
 				var blocker:String=_housing_container_blocker(offer)
 				if action.button.disabled and not blocker.is_empty():

@@ -26,7 +26,7 @@ static func hex_container_housing(source: Dictionary, terrain: Node, infrastruct
 	for index in range(mini(int(infrastructure.get("campaign_housing", 0)), HEX_CONTAINER_SITES.size())):
 		var container := index < kinds.size() and int(kinds[index]) >= 4
 		for copy in range(2 if container else 1):
-			if habitat.is_empty() or source_beds.size() < 2: return {"assets":assets, "houses":houses, "beds":beds}
+			if habitat.is_empty() or source_beds.size() < 2: return _hex_container_failure(source, index, "Habitat oder Quellbetten fehlen")
 			var delta: Vector2i = Vector2i(HEX_CONTAINER_SITES[index]) + Vector2i(HEX_CONTAINER_COPY_STEP * copy, 0)
 			var offset: Vector3 = NAV.plane_at_grid(delta)
 			var building_id := "campaign_habitat_c%02d%s" % [index + 1, "ab"[copy]] if container else "campaign_habitat_%02d" % (index + 1)
@@ -35,7 +35,7 @@ static func hex_container_housing(source: Dictionary, terrain: Node, infrastruct
 				var original: Dictionary = source_beds[bed_index]
 				var raw: Array = original.grid
 				var grid := Vector2i(int(raw[0]), int(raw[1])) + delta
-				if not terrain.is_walkable(grid): return {"assets":assets, "houses":houses, "beds":beds}
+				if not terrain.is_walkable(grid): return _hex_container_failure(source, index, "Bettzelle %s nicht begehbar" % str(grid))
 				var bed := original.duplicate(true)
 				bed.id = "container_%02d_bed_%d" % [index + 1, copy * 2 + bed_index + 1] if container else "field_bed_%02d" % (index * 2 + bed_index + 1)
 				bed.grid = [grid.x, grid.y]
@@ -50,6 +50,12 @@ static func hex_container_housing(source: Dictionary, terrain: Node, infrastruct
 			assets.append(building); houses.append(building)
 			beds.append_array(translated)
 	return {"assets":assets, "houses":houses, "beds":beds}
+
+## Kein Teilergebnis: ein Stellplatz, auf dem etwas nicht passt, macht den ganzen Bau ungueltig ("failed": true,
+## keine Gebaeude, keine Betten). Der Kauf lehnt dann ab (keine Abbuchung, Maske unveraendert).
+static func _hex_container_failure(source: Dictionary, index: int, reason: String) -> Dictionary:
+	push_error("Wohncontainer-Stellplatz %d ungueltig: %s" % [index + 1, reason])
+	return {"failed":true, "assets":Array(source.get("assets", [])).duplicate(true), "houses":[], "beds":[]}
 
 static func hex_container_site_count() -> int:
 	return HEX_CONTAINER_SITES.size()
@@ -117,6 +123,7 @@ static func expand(source: Dictionary, terrain: Node, navigation: RefCounted, ro
 		var containers := hex_container_housing(source, terrain, infrastructure)
 		result["assets"] = containers.assets
 		result["campaign_housing"] = containers.houses
+		result["campaign_housing_failed"] = bool(containers.get("failed", false))
 		result["interiors"] = Array(result.get("interiors", [])).duplicate(true)
 		beds.append_array(containers.beds)
 	elif not paid and infrastructure.has("campaign_housing"):
