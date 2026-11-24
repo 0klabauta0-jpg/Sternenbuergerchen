@@ -2361,7 +2361,7 @@ func _ammo_review_empty_weapon(unit_id: String, unit) -> void:
 func _ammo_review_return_to_main(unit_id: String, unit) -> void:
 	if unit == null or not is_instance_valid(unit) or _ammo_unit_slot(unit) != 2 or not unit.has_method("get_weapon_1_id"):
 		return
-	var main_id: String = String(unit.call("get_weapon_1_id"))
+	var main_id: String = WEAPON_DATA_SCRIPT.sanitize_weapon_id(String(unit.call("get_weapon_1_id")))
 	if not WEAPON_DATA_SCRIPT.is_attack_weapon_id(main_id):
 		return
 	var main_state: String = String(_ammo_tracker().status(unit_id, main_id, _current_tick, false).get("state", ""))
@@ -2411,8 +2411,7 @@ func _ammo_report_to_player(unit, unit_id: String, kind: String, text: String) -
 		"priority": TACTICAL_COMMUNICATION_EVENT_SCRIPT.PRIORITY_NORMAL,
 		"duration_seconds": 3.0,
 		"channels": PackedStringArray([TACTICAL_COMMUNICATION_EVENT_SCRIPT.CHANNEL_SELECTED_FIRETEAM, TACTICAL_COMMUNICATION_EVENT_SCRIPT.CHANNEL_MISSION_CONTROL]),
-		"feedback_action": "move",
-		"feedback_state": "blocked",
+		# K6: keine eigene Kennzeichnung: die Vorgabe der Ereignisart ("move"/"accepted", wie jede neutrale Statusmeldung) statt "blocked".
 	}, {"now_msec": Time.get_ticks_msec(), "cooldown_msec": 0})
 
 
