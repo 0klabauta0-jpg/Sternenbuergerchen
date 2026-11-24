@@ -4,6 +4,7 @@ extends RefCounted
 const MAP = preload("res://scripts/terrain/terrain_map_data.gd")
 const NAV_PATH := "res://maps/base_interior_navigation.json"
 const SCALE := 4
+const STRUCTURE_BLOCKING = preload("res://scripts/meta/structure_model_blocking.gd")
 const MODULAR_GEOMETRY = preload("res://scripts/meta/modular_base_geometry.gd")
 static func supports(base_path: String) -> bool:
  return base_path.get_file() in ["campaign_intro_base.json", "homebase_frontier_exploration.json"]
@@ -11,12 +12,16 @@ static func load_map(base_path: String):
  var data = MAP.load_from_file(NAV_PATH if supports(base_path) else base_path)
  if base_path.get_file() == "campaign_intro_base.json":
   preload("res://scripts/terrain/homebase_rock_rules.gd").apply_fine(data)
+ if supports(base_path): STRUCTURE_BLOCKING.apply_to_map(data)
  return data
 static func layout(base_path: String) -> Dictionary:
  var source: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(base_path))
  if not supports(base_path): return Dictionary(source.get("homebase_exploration",{})).duplicate(true)
  var nav: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(NAV_PATH))
- return Dictionary(nav.get("homebase_exploration",{})).duplicate(true)
+ var result: Dictionary = Dictionary(nav.get("homebase_exploration",{})).duplicate(true)
+ # Neue Gebaeudemodelle: Terminal-Lagen als Ueberlagerung (data/visual/structure_model_overrides.json), nicht in der Karte.
+ STRUCTURE_BLOCKING.apply_to_layout(result)
+ return result
 static func plane_at_grid(grid: Vector2i) -> Vector3:
  return Vector3((float(grid.x)+float(grid.y)*.5)/SCALE,0,float(grid.y)*sqrt(3.0)*.5/SCALE)
 static func standing_y(plane: Vector3) -> float:
@@ -68,7 +73,8 @@ func _apply_field_beds() -> void:
     var source_plane := plane_at_grid(source)
     if not Rect2(9.0, 3.0, 7.0, 6.0).has_point(Vector2(source_plane.x, source_plane.z)): continue
     var target := source + delta
-    if _graph_terrain.is_walkable(source) or not _graph_ids.has(target): continue
+    # Wandfelder der alten Habitat-Karte: vom Pod freigegebene Felder zaehlen weiter als Wand der Container.
+    if (_graph_terrain.is_walkable(source) and not STRUCTURE_BLOCKING.was_made_walkable(source)) or not _graph_ids.has(target): continue
     var point: int = _graph_ids[target]
     _graph.set_point_disabled(point, true)
     _field_disabled.append(point)
@@ -112,7 +118,10 @@ func _apply_field_beds() -> void:
     if MODULAR_GEOMETRY.bed_blocks(bed,_graph.get_point_position(id)):
      _graph.set_point_disabled(id,true)
      _field_disabled.append(id)
- for rect: Rect2 in _craft_rectangles:
+ # Neue Gebaeudemodelle (data/visual/structure_model_overrides.json): Waende/Grundrisse sperren.
+ var blocking_rects: Array[Rect2] = _craft_rectangles.duplicate()
+ blocking_rects.append_array(STRUCTURE_BLOCKING.blocked_rects())
+ for rect: Rect2 in blocking_rects:
   # Raster only the conservative local AABB, not the complete base graph.
   var first := rect.position
   var last := rect.end
@@ -136,6 +145,11 @@ func _apply_field_beds() -> void:
    seen[cell] = true
    _clearance_cells.append(cell)
  _clearance_revision += 1
+
+## Ist das Feld im Wegegraph vorhanden und nicht gesperrt (Wand, Moebel, Schiff, Grundriss)?
+func is_grid_open(grid: Vector2i) -> bool:
+ if _graph_terrain == null or not _graph_ids.has(grid): return false
+ return not _graph.is_point_disabled(int(_graph_ids[grid]))
 
 func get_ground_clearance_mask() -> Dictionary:
  if not is_instance_valid(_graph_terrain): return {"ok":false,"reason":"base_clearance_unavailable"}

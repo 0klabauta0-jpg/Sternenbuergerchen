@@ -26,6 +26,11 @@ const HEX_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 const PAD_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_outpost_pad.gd")
 const PAD_DECK_TOP: float = preload("res://scripts/terrain/place_reference_dressing.gd").PAD_DECK_TOP
 const SHIP_VISUALS: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
+## Neue Gebaeudemodelle (24.11.): Zuordnung in data/visual/structure_model_overrides.json. Terminal-Lagen und Begehbarkeit
+## stehen in den Karten bzw. in dieser Zuordnung; ein Umschalten zur Laufzeit gibt es daher nicht mehr (nur "enabled" in der Datei).
+const STRUCTURE_MODELS_SCRIPT: GDScript = preload("res://scripts/meta/structure_model_overrides.gd")
+var _structure_models: Node3D
+var _replaced_asset_ids: Array = STRUCTURE_MODELS_SCRIPT.replaced_ids()
 const INTERACTION_RADIUS: float = 1.8
 const BASE_NAV: GDScript = preload("res://scripts/meta/base_interior_navigation.gd")
 const TACTICAL_THEME: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
@@ -899,6 +904,9 @@ func _initialize_runtime() -> void:
 		# only real craft definitions may instantiate a ship on an occupied pad.
 		if String(asset.get("id", "")) == "cutlass_01":
 			continue
+		# Ersetztes Bestandsgebaeude: Modell und Einrichtung werden gar nicht geladen (kein unsichtbarer Knoten).
+		if String(asset.get("id", "")) in _replaced_asset_ids:
+			continue
 		var visual: Node3D = _load_visual(asset)
 		if visual != null:
 			stage.add_child(visual)
@@ -912,6 +920,9 @@ func _initialize_runtime() -> void:
 				_structure_visual_nodes[id] = visual
 				_structure_visual_records[id] = {"source_path": String(asset.path), "actual_sha256": String(_asset_sources.back().get("actual_sha256", "")), "route": String(asset.get("visual_route", "original_furnished_cutaway_glb")), "original_path": String(asset.get("original_path", asset.path))}
 	_build_landing_pads(stage)
+	_structure_models = STRUCTURE_MODELS_SCRIPT.new()
+	stage.add_child(_structure_models)
+	_structure_models.call("build", _layout, _asset_visual_nodes)
 	var paths := preload("res://scripts/terrain/frontier_art_dressing.gd").new()
 	paths.name = "HomebaseBuiltPaths"
 	stage.add_child(paths)
@@ -1544,6 +1555,8 @@ func _sync_capacity_visuals(stage: Node3D) -> void:
 		visual.set_meta("landing_pad_id",String(pad.id))
 		visual.call("build",Vector2(float(pad.plane[0]),float(pad.plane[1])),Vector2(float(pad.size[0]),float(pad.size[1])),String(pad.designation))
 		_apply_pad_deck_height(visual,pad)
+	# Neue Gebaeudemodelle: Das Ausblenden ersetzter Bestandsgebaeude muss nach jedem Sync erneut greifen.
+	if _structure_models != null: _structure_models.call("refresh", layout)
 
 func cancel_modal_input() -> void:
 	_camera_dragging = false

@@ -1,0 +1,113 @@
+{
+	"schema_version": 2,
+	"enabled": true,
+	"brightness": 1.0,
+	"human_height_m": 1.8,
+	"note": "Neue Gebaeudemodelle im Menschenmass (Spielfigur ca. 0,61 m = 1,8 m). mode=replace: das Modell steht an der Stelle des Bestandsgebaeudes (replaces), das Bestandsgebaeude ist ausgeblendet. mode=additional: Zusatzgebaeude auf einem Bauplatz (site). Alle *_model-Masse sind Rohmasse des Modells (Blender, x rechts, y hinten, z oben).",
+	"entries": [
+		{
+			"id": "home_pod",
+			"mode": "replace",
+			"replaces": "habitat_cutaway_01",
+			"model": "res://art/tripo_models_20261124/basis_home_pod_4k_01.glb",
+			"role": "Wohn-/Hauptmodul (Start-Pod, home_pod_4k)",
+			"scale": 4.5,
+			"door_height_model": 0.168,
+			"rotation_y_deg": 0.0,
+			"offset": [-0.045, -0.134, -0.512],
+			"floor_probe_model": [0.1, -0.1],
+			"interior_model": [-0.439, 0.450, -0.273, 0.198],
+			"door_model": [0.01, 0.07],
+			"partition_x_model": [-0.10, 0.27],
+			"partition_door_y_model": [-0.07, 0.04],
+			"bed_model": [[-0.34, 0.085], [-0.34, -0.095]],
+			"bed_top_model": 0.114,
+			"container_template_note": "Die Wohncontainer sind Kopien des ALTEN Habitats (Modell, Waende, Betten). Ihre Bettvorlage bleibt deshalb die Lage der zwei Betten im alten Habitat, nicht die Betten im Pod.",
+			"container_template_beds": [
+				{"grid": [32, 28], "id": "habitat_bed_01", "rest_plane": [11.125, 4.825], "room_id": "habitat_cutaway_01", "rotation_y": -1.5707963267949, "sleep_plane": [11.125, 5.35], "sleep_y": 0.61, "surface_y": 0.4763},
+				{"grid": [34, 28], "id": "habitat_bed_02", "rest_plane": [11.84, 4.825], "room_id": "habitat_cutaway_01", "rotation_y": -1.5707963267949, "sleep_plane": [11.84, 5.35], "sleep_y": 0.61, "surface_y": 0.4763}
+			],
+			"tv_model": [0.17, 0.165],
+			"block_note": "Gesperrt fuer Figuren (Ebene x, z, Breite, Tiefe): Aussenwaende, Trennwaende ausser der Tuerluecke (z 5,37 bis 5,865), Vorderwand ausser der Tuer (x 12,165 bis 12,765). Moebel: Betten (x 10,565 bis 11,285), Tisch mit Stuehlen (x 12,34 bis 13,08, z 5,22 bis 5,84), Schrank rechts (x 13,70 bis 14,15, z 4,47 bis 5,96). Die Benutzen-Stellen personnel, jobs und die beiden Betten bleiben frei.",
+			"walk_note": "Innenraum des Pods wird fuer Figuren begehbar gemacht (die alte Habitat-Karte hatte dort nur eine kleine Insel).",
+			"walk_rects": [
+				[10.6, 4.76, 3.78, 1.92]
+			],
+			"block_rects": [
+				[10.565, 4.965, 0.72, 0.405],
+				[10.565, 5.775, 0.72, 0.405],
+				[11.85, 4.55, 0.31, 0.82],
+				[11.85, 5.865, 0.31, 0.995],
+				[13.52, 4.55, 0.31, 0.82],
+				[13.52, 5.865, 0.31, 0.995],
+				[10.3, 4.40, 4.4, 0.30],
+				[10.28, 4.40, 0.28, 2.60],
+				[14.42, 4.40, 0.28, 2.60],
+				[10.28, 6.74, 1.885, 0.31],
+				[12.765, 6.74, 1.935, 0.31],
+				[12.34, 5.22, 0.74, 0.62],
+				[13.70, 4.47, 0.45, 1.49]
+			]
+		},
+		{
+			"id": "lager_werkstatt",
+			"mode": "replace",
+			"replaces": "freihafen_hall_01",
+			"model": "res://art/tripo_models_20261124/basis_lager_werkstatt_01.glb",
+			"role": "Lager/Werkstatt (ersetzt die Halle; Herstellen/Crafting laeuft ueber das Werkstatt-Terminal)",
+			"scale": 0.338,
+			"door_height_model": 2.1,
+			"rotation_y_deg": -90.0,
+			"offset": [0.0, 0.0, 0.0],
+			"gate_side": "west",
+			"gate_world": [24.8, 6.4],
+			"outside_terminals": ["team", "workshop", "mission"],
+			"block_note": "Geschlossenes Modell (Tor zu, Dach drauf), bleibt so. Grundriss 5,4 x 2,74 m um die Hallenmitte (27,5 / 6,06) fuer Figuren gesperrt; das Tor liegt an der Westkante und zeigt zum Platz.",
+			"block_rects": [
+				[24.8, 4.69, 5.4, 2.74]
+			]
+		},
+		{
+			"id": "treibstofftank",
+			"mode": "replace",
+			"replaces": "utility_fuel_01",
+			"model": "res://art/tripo_models_20261124/basis_treibstofftank_01.glb",
+			"role": "Tankstation am Flugdeck (ersetzt die alte Zapfstelle utility_fuel_01)",
+			"raw_size_model": [0.9995, 0.5981, 0.8208],
+			"raw_tris": 4128,
+			"scale": 1.2367,
+			"real_height_range": [2.5, 4.0],
+			"scale_note": "Rohmass 1,00 x 0,60 x 0,82 (Blender-Einheiten). Gewaehlt 3,0 m Tankhoehe im Menschenmass (Figur 0,609 m = 1,8 m): 0,8208 * 3,655 m je Einheit = 3,0 m; Spielfaktor = 3,655 * 0,338 = 1,2367. Wirkt 3,65 x 2,19 x 3,0 m. Grund: ein Bodentank fuer Schiffsbetankung, gut mannshoch (>= 2,5 m), unter dem Dach eines Hangars (<= 4 m).",
+			"rotation_y_deg": 0.0,
+			"offset": [0.0, 0.0, -0.97],
+			"offset_note": "0,97 m nach Norden (z-) gegenueber der alten Zapfstelle, damit der Rahmen mindestens 1 m von beiden Landepads (Rand z 12,59) entfernt bleibt.",
+			"keep_free_terminals": ["refuel"],
+			"block_rects": [
+				[26.05, 10.75, 1.30, 0.80]
+			]
+		},
+		{
+			"id": "frachtaufzug",
+			"mode": "additional",
+			"model": "res://art/tripo_models_20261124/basis_frachtaufzug_01.glb",
+			"role": "Frachtaufzug (nur Schmuck, keine Funktion) auf dem frei gewordenen Bauplatz future_storage am Ostrand des Flugdecks",
+			"site": "future_storage",
+			"decoration_only": true,
+			"raw_size_model": [5.714, 2.256, 8.0],
+			"scale": 0.2538,
+			"real_height_range": [1.2, 2.5],
+			"scale_note": "Rohmass der GLB (x breit, y hoch, z tief) 5,71 x 2,26 x 8,00 (die facts.json nennt dieselben Teile um den Faktor 8 kleiner). Gewaehlt: Plattform 6,0 m tief (8,0 Einheiten = 6,0 m, also 0,75 m je Einheit), damit 4,3 m breit und 1,7 m hoch (Gelaender, Steuerpult). Spielfaktor = 0,75 * 0,338 = 0,2538.",
+			"rotation_y_deg": 0.0,
+			"offset": [0.0, 0.0, 0.0],
+			"block_rects": [
+				[38.25, 18.0, 1.52, 2.10]
+			]
+		}
+	],
+	"terminal_note": "Lage der Terminals als Ueberlagerung beim Laden (statt in der 27-MB-Karte). plane = Benutzen-Stelle in Ebenenmetern (wird auf das naechste Feld gerundet). new=true legt den Eintrag an.",
+	"terminal_overrides": [
+		{"id": "team", "plane": [24.1, 5.1]},
+		{"id": "workshop", "plane": [24.1, 6.3], "title": "Werkstatt", "new": true},
+		{"id": "mission", "plane": [24.1, 7.5]}
+	]
+}
