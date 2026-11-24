@@ -221,6 +221,7 @@ func _finish_ready_after_scenario_loaded(runtime_leader: Node, unit_registry: No
 		return
 	if _loaded_terrain_map_data!=null:
 		_hex_setup_required=not String(_loaded_terrain_map_data.get_tactical_grid_rules()).is_empty()
+		simulation_root.hex_waiting_units_block=true # nur der Einsatz: Wartende sind fuer andere Wege ein Hindernis (Heimatbasis: aus)
 		var configured:Dictionary=simulation_root.configure_hex_ground_runtime(_loaded_terrain_map_data,terrain_registry)
 		_hex_setup_presentation_only=_hex_setup_required and configured.get("reason","")=="not_authority"
 		if not configured.ok and configured.get("reason","")!="not_authority":
@@ -364,7 +365,7 @@ func get_hex_setup_status()->Dictionary:
 	return {"required":_hex_setup_required,"presentation_only":_hex_setup_presentation_only,"pending_count":_hex_setup_pending.size(),"attempts":_hex_setup_attempts,"error":_hex_setup_error.duplicate(true)}
 
 
-func _admit_hex_setup_nodes(nodes:Array)->void:
+func _admit_hex_setup_nodes(nodes:Array,late_wave:bool=false)->void:
 	if not _hex_setup_required or _hex_setup_presentation_only:return
 	var simulation:Node=_get_simulation_root()
 	if simulation==null or not simulation.is_hex_ground_runtime_active():return
@@ -376,6 +377,7 @@ func _admit_hex_setup_nodes(nodes:Array)->void:
 		if not is_instance_valid(unit) or not unit is Node2D or not unit.has_method("get_unit_id"):continue
 		var id:String=String(unit.call("get_unit_id"))
 		if registry.get_unit(id)!=unit or not simulation.get_hex_unit_state(id).is_empty() or bool(unit.get_meta("dropship_embarked",false)):continue
+		if late_wave and combined.has(id):continue # wartende Aufbau-Einheit bleibt ein normaler Eintrag
 		if not unit.global_position.is_finite():
 			_hex_setup_error={"ok":false,"reason":"invalid_setup_position"}
 			return
@@ -384,12 +386,39 @@ func _admit_hex_setup_nodes(nodes:Array)->void:
 			_hex_setup_error=placement
 			return
 		combined[id]={"unit_id":id,"grid":placement.grid,"identity":simulation.call("_hex_payload_identity",id)}
+		if late_wave:
+			combined[id]["late"]=true
+			combined[id]["anchor"]=placement.grid
+			combined[id]["grid"]=_late_wave_free_grid(placement.grid,simulation)
 	_hex_setup_pending.clear()
 	for entry in combined.values():_hex_setup_pending.append(entry)
 	_hex_setup_pending_context=simulation.get_hex_ground_context_revision()
 	_hex_setup_pending_root_id=simulation.get_instance_id()
 	_hex_setup_last_stamp=""
 	_retry_hex_setup_admission()
+
+
+## Spaete Wellen: ist die Ankerzelle belegt, die naechste freie begehbare Zelle in Ringen 1 bis 4 (feste Reihenfolge).
+## Ist nichts frei, bleibt der Anker stehen; die Einheit wartet und wird beim Wiederholen neu berechnet.
+func _late_wave_free_grid(anchor:Vector2i,simulation:Node)->Vector2i:
+	var terrain:Node=simulation.get_hex_ground_terrain_registry()
+	var blocked:Dictionary=load("res://scripts/mission/hex_ground_admission.gd").new()._blocked_fields(simulation.get_hex_ground_planning_snapshot())
+	if not blocked.has(anchor):return anchor
+	var seen:Dictionary={anchor:true}
+	var frontier:Array[Vector2i]=[anchor]
+	for ring in range(1,5):
+		var next_frontier:Array[Vector2i]=[]
+		for grid in frontier:
+			for next in terrain.get_legal_hex_neighbors(grid):
+				if seen.has(next):continue
+				seen[next]=true
+				next_frontier.append(next)
+		for grid in next_frontier:
+			if blocked.has(grid) or not terrain.is_walkable(grid):continue
+			var tile=terrain.get_tile_at_grid(grid)
+			if tile!=null and tile.is_valid():return grid
+		frontier=next_frontier
+	return anchor
 
 
 func _hex_setup_spawn_grid(unit:Node2D,terrain:Node)->Dictionary:
@@ -427,6 +456,8 @@ func _retry_hex_setup_admission()->void:
 	if current.size()!=_hex_setup_pending.size():_hex_setup_last_stamp=""
 	_hex_setup_pending=current
 	if current.is_empty():return
+	for entry in current:
+		if entry.get("late",false):entry["grid"]=_late_wave_free_grid(entry.anchor,simulation)
 	var stamp:String=str([simulation.get_hex_ground_context_revision(),simulation.get_hex_ground_revision(),simulation.get_hex_ground_terrain_registry().get_revision()])
 	if stamp==_hex_setup_last_stamp:return
 	_hex_setup_last_stamp=stamp
@@ -1199,6 +1230,9 @@ func _apply_scenario_timer_to_combat_driver() -> void:
 	combat_driver.set("mission_time_limit_seconds", scenario_time_limit)
 
 
+var _wave_enemy_units: Array = []
+
+
 func _setup_enemy_waves(enemy_units: Array) -> void:
 	var enemy_wave_controller = get_node_or_null(enemy_wave_controller_path)
 	if enemy_wave_controller == null or not enemy_wave_controller.has_method("initialize_enemy_units"):
@@ -1208,10 +1242,39 @@ func _setup_enemy_waves(enemy_units: Array) -> void:
 	_apply_scenario_wave_config(enemy_wave_controller)
 	if enemy_wave_controller.has_method("set_patrol_paths"):
 		enemy_wave_controller.call("set_patrol_paths", _build_enemy_patrol_paths())
+	if enemy_wave_controller.has_method("set_patrol_once"):
+		enemy_wave_controller.call("set_patrol_once", _build_enemy_patrol_once_ids())
 	if enemy_wave_controller.has_method("set_enemy_tactics"):
 		enemy_wave_controller.call("set_enemy_tactics", _build_enemy_tactics_by_unit_id(enemy_units))
 
 	enemy_wave_controller.call("initialize_enemy_units", enemy_units)
+	# Spaeter startende Wellen werden erst beim Wellenstart in die Hex-Simulation aufgenommen.
+	_wave_enemy_units = enemy_units.duplicate()
+	if enemy_wave_controller.has_signal("wave_started"):
+		var admit_callable := Callable(self, "_on_enemy_wave_started_admit")
+		if not enemy_wave_controller.is_connected("wave_started", admit_callable):
+			enemy_wave_controller.connect("wave_started", admit_callable)
+
+
+func _on_enemy_wave_started_admit(wave_number: int) -> void:
+	# Nur Einheiten schon gestarteter Wellen, die leben (Lebenszustand "fit"); Gefallene bekommen keinen neuen Hex-Zustand.
+	var enemy_wave_controller = get_node_or_null(enemy_wave_controller_path)
+	var per_wave: int = 1
+	if enemy_wave_controller != null:
+		per_wave = maxi(int(enemy_wave_controller.get("units_per_wave")), 1)
+	var started_limit: int = wave_number * per_wave
+	var valid_units: Array = []
+	var index: int = 0
+	for unit in _wave_enemy_units:
+		if unit == null or not is_instance_valid(unit) or not unit.has_method("get_unit_id"):
+			continue
+		index += 1
+		if index > started_limit:
+			break
+		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+			continue
+		valid_units.append(unit)
+	_admit_hex_setup_nodes(valid_units, true)
 
 
 func _build_enemy_tactics_by_unit_id(enemy_units: Array) -> Dictionary:
@@ -1250,6 +1313,23 @@ func _get_loaded_grid_size() -> Vector2i:
 	if _loaded_terrain_map_data != null and _loaded_terrain_map_data.has_method("get_grid_size"):
 		return _loaded_terrain_map_data.call("get_grid_size")
 	return Vector2i.ZERO
+
+
+## Gegner, deren Patrouillenweg nur einmal abgelaufen wird: Bindungen mit mode "once" (ohne mode oder "pre_contact" bleibt die Schleife).
+func _build_enemy_patrol_once_ids() -> PackedStringArray:
+	var result := PackedStringArray()
+	if _mission_scenario == null:
+		return result
+	for binding_variant in Array(_mission_scenario.get("patrol_bindings")):
+		var binding: Dictionary = Dictionary(binding_variant)
+		if String(binding.get("mode", "")).strip_edges().to_lower() != "once":
+			continue
+		var target_id: String = String(binding.get("target_id", "")).strip_edges()
+		if target_id.is_empty():
+			continue
+		for target_unit_id in _resolve_patrol_binding_targets(target_id):
+			result.append(String(target_unit_id))
+	return result
 
 
 func _build_enemy_patrol_paths() -> Dictionary:

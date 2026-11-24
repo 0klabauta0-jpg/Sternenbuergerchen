@@ -6,6 +6,7 @@
     }
   },
   "jobs": {
-    "satellite_recovery": "questionable_businesspeople"
+    "satellite_recovery": "questionable_businesspeople",
+    "wreck_crater_salvage": "questionable_businesspeople"
   }
 }

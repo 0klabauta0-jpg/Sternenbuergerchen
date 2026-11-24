@@ -2613,6 +2613,9 @@ var _hex_facing_replay_keys: Array[String] = []
 var _hex_facing_replay_cursor := 0
 var _last_hex_ground_events: Array[Dictionary] = []
 var _hex_movement_runtime=HEX_MOVEMENT_RUNTIME_SCRIPT.new()
+## Kapitel 2, 1g (W2): Wartende (Ziel von einem Fitten besetzt) gelten fuer andere Wege als Hindernis. Nur die Einsatz-Simulation
+## (mission_test_setup) schaltet das ein; die Heimatbasis behaelt das alte Verhalten (ihre Gaenge sind eng, Aktionen brechen bei "blocked" ab).
+var hex_waiting_units_block:=false
 var _hex_visual_unit_ids:Dictionary={}
 var _hex_projection_terrain_revision:=-1
 var _hex_boundary_facing:Dictionary={}
@@ -2749,6 +2752,7 @@ func has_hex_position_arrived(unit_id:String,target_position:Vector2,command_id:
 	var state:Dictionary=get_hex_unit_state(unit_id)
 	if state.is_empty() or state.movement_state.moving or state.route_state.has_commitments:return false
 	var target_grid:Vector2i=_hex_ground_registry.call("world_to_grid",target_position)
+	target_grid=_hex_movement_runtime.effective_goal_for(unit_id,command_id,target_grid)
 	if state.grid!=target_grid:return false
 	var order:Dictionary=get_hex_movement_readout(unit_id)
 	if not order.is_empty() and order.goal_grid==target_grid and has_hex_destination_arrived(unit_id,command_id):return true

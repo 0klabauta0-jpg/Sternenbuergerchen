@@ -8,6 +8,13 @@ class QuietController extends Node:
  var _order_plans_by_key := {}
  var _area_orders_by_id := {}
  var _fireteam_movement_controller = StillMovement.new()
+class FakeWaves extends Node:
+ var total := 0
+ var current := 0
+ var started := false
+ func get_total_wave_count() -> int: return total
+ func get_current_wave_number() -> int: return current
+ func are_all_waves_started() -> bool: return started
 func _run() -> void:
  var script = load("res://scripts/mission/stable_mission_lifecycle_checkpoint.gd")
  if script == null: _check(false,"stable lifecycle helper exists"); done(); return
@@ -39,6 +46,20 @@ func _run() -> void:
  controller.name = "TacticalController"
  rig.scene.add_child(controller)
  _check(owner.export_state(rig.sim,driver).get("ok",false),"empty planned orders remain savable")
+ # W4 (1g): Solange eine spaete Gegnerwelle aussteht, ist der Einsatz nicht sicher speicherbar (der Wellenregler hat keinen Speicherstand).
+ var waves := FakeWaves.new()
+ rig.scene.add_child(waves)
+ driver.enemy_wave_controller_path = driver.get_path_to(waves)
+ waves.total = 2; waves.current = 0; waves.started = false
+ _check(owner.export_state(rig.sim,driver).get("reason","")=="enemy_wave_pending","before wave 1 the mission is not savable (enemy_wave_pending)")
+ waves.current = 1
+ _check(owner.export_state(rig.sim,driver).get("reason","")=="enemy_wave_pending","between wave 1 and 2 the mission is not savable (enemy_wave_pending)")
+ waves.current = 2; waves.started = true
+ _check(owner.export_state(rig.sim,driver).get("ok",false),"after the last wave the mission is no longer refused for waves")
+ waves.total = 0; waves.current = 0; waves.started = false
+ _check(owner.export_state(rig.sim,driver).get("ok",false),"a wave controller without enemies (total 0) never blocks")
+ driver.enemy_wave_controller_path = NodePath()
+ waves.queue_free()
  controller._order_plans_by_key["ft1|phase"] = {"waypoints":[Vector2(40,20)]}
  _check(owner.export_state(rig.sim,driver).get("reason","")=="mission_planned_orders_unsupported","planned movement cannot be silently omitted")
  _check(not owner.prepare_restore(rig.sim,driver,saved).get("ok",false),"restore rejects a target with planned movement")

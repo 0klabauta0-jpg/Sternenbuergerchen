@@ -92,6 +92,13 @@ func build_patrol_decision(enemy: Node, context: Dictionary) -> Dictionary:
 	var target_position: Vector2 = _coerce_vector2(patrol_path[waypoint_index], current_position)
 	var waypoint_reached_distance: float = maxf(float(context.get("waypoint_reached_distance", 18.0)), 0.0)
 	if current_position.distance_to(target_position) <= waypoint_reached_distance:
+		# Weg nur einmal ablaufen: am letzten Wegpunkt ist die Patrouille beendet (wie bei Kontakt), die Gruppentaktik uebernimmt.
+		if bool(context.get("patrol_once", false)) and waypoint_index >= patrol_path.size() - 1:
+			return {
+				"handled": false,
+				"contact_locked": true,
+				"reason": "patrol_finished",
+			}
 		waypoint_index = (waypoint_index + 1) % patrol_path.size()
 		target_position = _coerce_vector2(patrol_path[waypoint_index], target_position)
 

@@ -83,5 +83,24 @@
     "reward": {
       "credits": 300
     }
+  },
+  "wreck_crater_salvage": {
+    "id": "wreck_crater_salvage",
+    "title": "Wrack am Krater bergen",
+    "description": "Wrack am Krater bergen. Bestätigten Fortschritt im Auftrag verfolgen.",
+    "location_id": "satellite_crash",
+    "scenario_id": "wreck_crater_salvage",
+    "prerequisite_job_id": "buccaneer_rescue",
+    "home_upload": false,
+    "required_step_ids": [
+      "salvage_wreck",
+      "clear_looters",
+      "recover_wreck_crate",
+      "return_to_ship"
+    ],
+    "reward": {
+      "credits": 200
+    },
+    "locked_hint": "Erst nach der Rettung der Buccaneer im Planetenorbit"
   }
 }
