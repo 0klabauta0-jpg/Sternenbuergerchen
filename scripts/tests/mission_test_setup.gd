@@ -364,7 +364,7 @@ func get_hex_setup_status()->Dictionary:
 	return {"required":_hex_setup_required,"presentation_only":_hex_setup_presentation_only,"pending_count":_hex_setup_pending.size(),"attempts":_hex_setup_attempts,"error":_hex_setup_error.duplicate(true)}
 
 
-func _admit_hex_setup_nodes(nodes:Array)->void:
+func _admit_hex_setup_nodes(nodes:Array,late_wave:bool=false)->void:
 	if not _hex_setup_required or _hex_setup_presentation_only:return
 	var simulation:Node=_get_simulation_root()
 	if simulation==null or not simulation.is_hex_ground_runtime_active():return
@@ -384,12 +384,39 @@ func _admit_hex_setup_nodes(nodes:Array)->void:
 			_hex_setup_error=placement
 			return
 		combined[id]={"unit_id":id,"grid":placement.grid,"identity":simulation.call("_hex_payload_identity",id)}
+		if late_wave:
+			combined[id]["late"]=true
+			combined[id]["anchor"]=placement.grid
+			combined[id]["grid"]=_late_wave_free_grid(placement.grid,simulation)
 	_hex_setup_pending.clear()
 	for entry in combined.values():_hex_setup_pending.append(entry)
 	_hex_setup_pending_context=simulation.get_hex_ground_context_revision()
 	_hex_setup_pending_root_id=simulation.get_instance_id()
 	_hex_setup_last_stamp=""
 	_retry_hex_setup_admission()
+
+
+## Spaete Wellen: ist die Ankerzelle belegt, die naechste freie begehbare Zelle in Ringen 1 bis 4 (feste Reihenfolge).
+## Ist nichts frei, bleibt der Anker stehen; die Einheit wartet und wird beim Wiederholen neu berechnet.
+func _late_wave_free_grid(anchor:Vector2i,simulation:Node)->Vector2i:
+	var terrain:Node=simulation.get_hex_ground_terrain_registry()
+	var blocked:Dictionary=load("res://scripts/mission/hex_ground_admission.gd").new()._blocked_fields(simulation.get_hex_ground_planning_snapshot())
+	if not blocked.has(anchor):return anchor
+	var seen:Dictionary={anchor:true}
+	var frontier:Array[Vector2i]=[anchor]
+	for ring in range(1,5):
+		var next_frontier:Array[Vector2i]=[]
+		for grid in frontier:
+			for next in terrain.get_legal_hex_neighbors(grid):
+				if seen.has(next):continue
+				seen[next]=true
+				next_frontier.append(next)
+		for grid in next_frontier:
+			if blocked.has(grid) or not terrain.is_walkable(grid):continue
+			var tile=terrain.get_tile_at_grid(grid)
+			if tile!=null and tile.is_valid():return grid
+		frontier=next_frontier
+	return anchor
 
 
 func _hex_setup_spawn_grid(unit:Node2D,terrain:Node)->Dictionary:
@@ -427,6 +454,8 @@ func _retry_hex_setup_admission()->void:
 	if current.size()!=_hex_setup_pending.size():_hex_setup_last_stamp=""
 	_hex_setup_pending=current
 	if current.is_empty():return
+	for entry in current:
+		if entry.get("late",false):entry["grid"]=_late_wave_free_grid(entry.anchor,simulation)
 	var stamp:String=str([simulation.get_hex_ground_context_revision(),simulation.get_hex_ground_revision(),simulation.get_hex_ground_terrain_registry().get_revision()])
 	if stamp==_hex_setup_last_stamp:return
 	_hex_setup_last_stamp=stamp
@@ -1228,7 +1257,7 @@ func _on_enemy_wave_started_admit(_wave_number: int) -> void:
 	for unit in _wave_enemy_units:
 		if is_instance_valid(unit):
 			valid_units.append(unit)
-	_admit_hex_setup_nodes(valid_units)
+	_admit_hex_setup_nodes(valid_units, true)
 
 
 func _build_enemy_tactics_by_unit_id(enemy_units: Array) -> Dictionary:
