@@ -450,6 +450,9 @@ func _validate_saved_state(data: Dictionary) -> Dictionary:
 	for current_id in _jobs:
 		if not data.jobs.has(current_id) and not ADDITIVE_JOB_IDS.has(String(current_id)):
 			return _reject("stale_campaign_definitions", "Auftragsdaten geaendert")
+		# Ein neuer Auftrag, den der Stand nicht kennt, kann keinen Abschlussbeleg haben.
+		if not data.jobs.has(current_id) and data.completion_receipts.has(String(current_id) + ":completed"):
+			return _reject("stale_campaign_definitions", "Auftragsbeleg ohne Auftrag")
 	for job_id in _jobs:
 		if not data.jobs.has(job_id):
 			continue # additiver neuer Auftrag: gilt als offered
@@ -472,9 +475,12 @@ func _validate_saved_state(data: Dictionary) -> Dictionary:
 		if status == "pending_upload" and not bool(_jobs[job_id].get("home_upload",false)): return _reject("invalid_upload","Auftrag enthält keinen hochzuladenden Chip")
 		saved["status"] = "offered"
 		saved.erase("craft_id")
-		if JSON.stringify(JSON.parse_string(JSON.stringify(saved)), "", true) != JSON.stringify(JSON.parse_string(JSON.stringify(_jobs[job_id])), "", true):
-			return _reject("stale_job_definition", "Auftragsdefinition geaendert")
 		var receipt_id := String(job_id) + ":completed"
+		# Kapitel 2: ein neuer, noch nicht angenommener Auftrag traegt nichts vom Spieler; beim Laden gilt die heutige Definition.
+		# Ab accepted (und fuer die alten fuenf Auftraege) bleibt der Vergleich streng.
+		var definition_exempt: bool = status == "offered" and ADDITIVE_JOB_IDS.has(String(job_id)) and not data.completion_receipts.has(receipt_id)
+		if not definition_exempt and JSON.stringify(JSON.parse_string(JSON.stringify(saved)), "", true) != JSON.stringify(JSON.parse_string(JSON.stringify(_jobs[job_id])), "", true):
+			return _reject("stale_job_definition", "Auftragsdefinition geaendert")
 		if (status == "completed") != data.completion_receipts.has(receipt_id):
 			return _reject("invalid_completion_receipt", "Auftragsbeleg fehlt")
 	for receipt_id in data.completion_receipts:
