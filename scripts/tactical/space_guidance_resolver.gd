@@ -1,6 +1,11 @@
 extends RefCounted
 ## Fixture guidance only: collision and formation are handled separately.
 const FLIGHT_ENV = preload("res://scripts/tactical/flight_environment.gd")
+## With face_plane: below this angle error and spin the turn command is exactly 0.0.
+const AIM_DEADZONE_DEGREES := 1.0
+const AIM_DEADZONE_SPIN := 0.02
+## Target spin per radian of angle error close to the target (1/s).
+const AIM_LINEAR_GAIN := 2.0
 
 static func resolve(flight: Dictionary, goal: Dictionary, hull: Dictionary, power: Dictionary) -> Dictionary:
 	if typeof(flight.get("position_plane")) != TYPE_VECTOR2 or typeof(flight.get("velocity_plane")) != TYPE_VECTOR2 or typeof(goal.get("target_plane")) != TYPE_VECTOR2:
@@ -48,7 +53,7 @@ static func torque_of(hull: Dictionary) -> float:
 	return float(value) if typeof(value) in [TYPE_INT, TYPE_FLOAT] else 0.0
 
 ## Turn command in -1..1. Space without goal.face_plane keeps turn 0.0 (nose never turns).
-## Atmosphere without face_plane aligns the nose with the velocity, or brakes the spin when slow.
+## Atmosphere without face_plane never aims the nose (the footprint hangs on it); it only brakes a running spin.
 static func _turn_command(flight: Dictionary, goal: Dictionary, torque: float, fraction: float, mass: float, atmosphere: bool, env_factors: Dictionary) -> float:
 	var face: Variant = goal.get("face_plane")
 	var has_face: bool = typeof(face) == TYPE_VECTOR2 and face.is_finite()
@@ -63,13 +68,14 @@ static func _turn_command(flight: Dictionary, goal: Dictionary, torque: float, f
 	var alpha := torque * fraction / mass
 	if atmosphere:
 		alpha *= float(env_factors.acceleration_factor)
-	var aim := Vector2.ZERO
-	if has_face:
-		aim = face - flight.position_plane
-	elif flight.velocity_plane.length() > 0.2:
-		aim = flight.velocity_plane
 	var w_soll := 0.0
-	if aim.length_squared() > 0.000001:
-		var err := wrapf(aim.angle() - heading, -PI, PI)
-		w_soll = signf(err) * minf(sqrt(2.0 * alpha * absf(err)) * 0.45, 2.0)
+	if has_face:
+		var aim: Vector2 = face - flight.position_plane
+		if aim.length_squared() > 0.000001:
+			var err := wrapf(aim.angle() - heading, -PI, PI)
+			# Dead zone: aimed and nearly still, so the nose does not jitter.
+			if absf(err) < deg_to_rad(AIM_DEADZONE_DEGREES) and absf(angular_velocity) < AIM_DEADZONE_SPIN:
+				return 0.0
+			# The linear cap keeps the loop stable near zero (the square root alone rings there).
+			w_soll = signf(err) * minf(minf(sqrt(2.0 * alpha * absf(err)) * 0.45, 2.0), absf(err) * AIM_LINEAR_GAIN)
 	return clampf((w_soll - angular_velocity) * 4.0 * mass / (torque * fraction), -1.0, 1.0)

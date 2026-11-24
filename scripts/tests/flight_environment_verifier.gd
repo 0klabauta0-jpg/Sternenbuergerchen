@@ -61,6 +61,29 @@ func _fly_to_far_target(area_id: String) -> float:
 		top = maxf(top, flight.velocity_plane.length())
 	return top
 
+## Runs resolve+step in the atmosphere; returns {flight, turn (last intent), heading_at_40}.
+func _air_run(steps: int, goal: Dictionary, mass: float = 1.0, torque: float = 0.6, omega: float = 0.0, start: Dictionary = {}) -> Dictionary:
+	var hull := _hull()
+	hull["turn_acceleration"] = torque
+	var power := {"thrust_fraction":1.0}
+	var air := {"position_plane":Vector2.ZERO, "velocity_plane":Vector2.ZERO, "mass":mass, "heading_rad":0.0, "angular_velocity":omega, "space_area_id":"atmosphere:x"}
+	if not start.is_empty():
+		air = start.duplicate()
+	var last_turn := 0.0
+	var heading_at_40 := 0.0
+	for i in steps:
+		var g: Dictionary = goal.duplicate()
+		if not g.has("target_plane"):
+			g["target_plane"] = air.position_plane
+		var guided: Dictionary = GUIDANCE.resolve(air, g, hull, power)
+		last_turn = float(guided.intent.turn)
+		var stepped: Dictionary = FLIGHT.step(air, guided.intent, hull, power, 0.05, "atmosphere")
+		for key in ["position_plane", "velocity_plane", "heading_rad", "angular_velocity"]:
+			air[key] = stepped[key]
+		if i == 39:
+			heading_at_40 = air.heading_rad
+	return {"flight":air, "turn":last_turn, "heading_at_40":heading_at_40}
+
 func _initialize() -> void:
 	var power := {"thrust_fraction":1.0}
 	# 1: one second of full forward thrust from rest.
@@ -96,5 +119,29 @@ func _initialize() -> void:
 	check(fallback.get("speed_factor") == 1.0 and fallback.get("acceleration_factor") == 1.0 and fallback.get("weapon_range_factor") == 1.0, "case6 unknown environment is 1.0")
 	var atmosphere: Dictionary = ENV.factors("atmosphere")
 	check(atmosphere.get("speed_factor") == 0.6 and atmosphere.get("acceleration_factor") == 0.7 and atmosphere.get("weapon_range_factor") == 0.8, "case6 atmosphere factors from file")
+	# 7 (W1): atmosphere without face_plane never turns the nose by itself, even when flying sideways.
+	var cross: Dictionary = _air_run(200, {"target_plane":Vector2(0, 50)})
+	check(cross.flight.position_plane.y > 5.0, "case7 ship actually flew")
+	check(cross.flight.heading_rad == 0.0 and cross.flight.angular_velocity == 0.0, "case7 nose stays 0, heading %s" % cross.flight.heading_rad)
+	# 7b: a running spin is braked to a stop and the nose stays put afterwards.
+	var spin: Dictionary = _air_run(200, {}, 1.0, 0.6, 1.0)
+	check(absf(spin.flight.angular_velocity) < 0.001, "case7b spin decays, omega %s" % spin.flight.angular_velocity)
+	var heading_stopped: float = spin.flight.heading_rad
+	var after: Dictionary = _air_run(100, {}, 1.0, 0.6, 0.0, spin.flight)
+	check(absf(after.flight.heading_rad - heading_stopped) < 0.001, "case7b nose stays after braking")
+	# 8 (K1): dead zone after aiming, nose stays within 2 degrees and turn ends at exactly 0.0.
+	var aimed: Dictionary = _air_run(200, {"face_plane":Vector2(0, 5)})
+	var held: Dictionary = _air_run(200, {"face_plane":Vector2(0, 5)}, 1.0, 0.6, 0.0, aimed.flight)
+	check(absf(wrapf(held.flight.heading_rad - PI / 2.0, -PI, PI)) < deg_to_rad(2.0), "case8 nose holds within 2 degrees, heading %s" % held.flight.heading_rad)
+	check(held.turn == 0.0, "case8 turn is 0.0 at the end, got %s" % held.turn)
+	# 9 (K3): torque 0, mass 2.0, goal on own position.
+	var no_torque: Dictionary = _air_run(50, {"face_plane":Vector2(0, 5)}, 1.0, 0.0)
+	check(no_torque.turn == 0.0 and no_torque.flight.heading_rad == 0.0, "case9 torque 0 gives turn 0.0")
+	var heavy: Dictionary = _air_run(400, {"face_plane":Vector2(0, 5)}, 2.0)
+	var light: Dictionary = _air_run(400, {"face_plane":Vector2(0, 5)}, 1.0)
+	check(absf(wrapf(heavy.flight.heading_rad - PI / 2.0, -PI, PI)) < deg_to_rad(10.0), "case9 mass 2.0 reaches the nose, heading %s" % heavy.flight.heading_rad)
+	check(heavy.heading_at_40 < light.heading_at_40, "case9 heavier ship turns slower")
+	var self_goal: Dictionary = _air_run(20, {"face_plane":Vector2.ZERO})
+	check(self_goal.turn == 0.0 and not is_nan(self_goal.flight.heading_rad) and not is_nan(self_goal.turn), "case9 goal on own position, turn 0.0, no NaN")
 	print("FLIGHT_ENVIRONMENT passed=", passed, " failed=", failed)
 	quit(0 if failed == 0 else 1)
