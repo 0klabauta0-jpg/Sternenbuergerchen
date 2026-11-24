@@ -5,7 +5,9 @@ extends RefCounted
 const CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
 const RNG = preload("res://scripts/core/gameplay_rng_state.gd")
 const COOLDOWN_FIELDS := ["_discipline_break_cooldown", "_misidentification_cooldown", "_medic_support_cooldown", "_recent_incoming_fire_tick_by_fireteam"]
-const BLOCKING_DICTS := ["_queued_bleedout_by_unit_id", "_down_state_started_tick_by_unit_id", "_detection_progress", "_enemy_patrol_paths_by_unit_id", "_enemy_security_states_by_group_id", "_enemy_team_tactics_states_by_group_id", "_mission_interaction_runtime_states", "_mission_scenario_runtime_step_states", "_combat_outcome_by_fire_event_id"]
+# Verbluten in Stufen (24.11.2026): "_down_state_started_tick_by_unit_id" sperrt das Speichern nicht mehr; der Ausfall-Tick steht im
+# Ausfallstand (casualty_flags.down_started_ticks). "_queued_bleedout_by_unit_id" bleibt (nur einen Tick lang belegt).
+const BLOCKING_DICTS := ["_queued_bleedout_by_unit_id", "_detection_progress", "_enemy_patrol_paths_by_unit_id", "_enemy_security_states_by_group_id", "_enemy_team_tactics_states_by_group_id", "_mission_interaction_runtime_states", "_mission_scenario_runtime_step_states", "_combat_outcome_by_fire_event_id"]
 class PreparedLifecycle extends RefCounted:
 	pass
 var _preparations: Dictionary = {}

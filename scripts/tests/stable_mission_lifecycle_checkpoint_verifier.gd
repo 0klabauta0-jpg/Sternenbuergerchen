@@ -78,6 +78,23 @@ func _run() -> void:
    if checked.get("ok",false): owner._publish_restore(prep.prepared)
    _check(driver.get_suppression_level("enemy:probe")==0 and driver.get_suppression_level("own:a")==0,"restore clears suppression of both sides")
    _check(checked.get("ok",false) and rig.sim.tick_counter==saved.tick and abs(driver._get_duration_seconds()-900.0)<0.2,"tick, RNG and elapsed clock publish")
+ # Verbluten in Stufen: Wer liegt, sperrt das Speichern nicht; sein Ausfall-Tick steht im Stand und kommt beim Laden zurueck.
+ var lying_id: String = String(rig.actors.a.get_unit_id())
+ driver._down_state_started_tick_by_unit_id[lying_id] = driver._current_tick
+ var lying_saved: Dictionary = owner.export_state(rig.sim,driver)
+ _check(lying_saved.get("ok",false),"a lying person does not block the save")
+ var lying_state: Dictionary = JSON.parse_string(JSON.stringify(lying_saved))
+ driver._down_state_started_tick_by_unit_id.clear()
+ var lying_prep: Dictionary = owner.prepare_restore(rig.sim,driver,lying_state)
+ _check(lying_prep.get("ok",false),"the saved state with a lying person prepares")
+ if lying_prep.get("ok",false) and owner.validate_restore(lying_prep.prepared).get("ok",false):
+  owner._publish_restore(lying_prep.prepared)
+  _check(driver._down_state_started_tick_by_unit_id.get(lying_id,-1) == int(lying_saved.tick),"restore brings the same fall tick back, the clock keeps running")
+ else:
+  _check(false,"the saved state with a lying person validates")
+ driver._queued_bleedout_by_unit_id[lying_id] = true
+ _check(owner.export_state(rig.sim,driver).get("reason","") == "mission_lifecycle_unsupported","a queued bleedout (one tick long) still blocks the save")
+ driver._queued_bleedout_by_unit_id.clear()
  rig.scene.free()
  done()
 func done() -> void:

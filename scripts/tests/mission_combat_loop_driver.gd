@@ -87,7 +87,9 @@ const FRIENDLY_STANDARD_COVER_MIN_DISTANCE: float = 10.0
 # Spielzeit: ein Tick = ein Physik-Tick des SimulationRoot, normal 60 je Sekunde (project.godot setzt nichts anderes).
 const GAME_TICKS_PER_SECOND: int = 60
 const FRIENDLY_STANDARD_COVER_COOLDOWN_TICKS: int = 96 # vorher 1600 ms
-const DOWN_STATE_VISIBLE_MIN_TICKS: int = 180 # vorher DOWN_STATE_VISIBLE_MIN_SECONDS = 3,0 s
+# Verbluten in Stufen (24.11.2026): die feste Liegefrist von 180 Ticks (3 s) ist ersetzt durch die Stufen aus
+# data/combat/bleedout_stages.json (Wuerfe bei 3:00 / 5:00 / 6:00, sicher bei 6:30); gilt fuer alle Einheiten.
+const BLEEDOUT_STAGES_SCRIPT = preload("res://scripts/combat/bleedout_stages.gd")
 const FRIENDLY_LOW_COVER_THRESHOLD: int = 16
 const ENEMY_PATROL_WAYPOINT_REACHED_DISTANCE: float = 18.0
 const ENEMY_TACTICS_PUSH_STEP_DISTANCE: float = 144.0
@@ -108,7 +110,8 @@ signal combat_resolved(mission_result: Dictionary)
 @export var friendly_team_id: String = "team_alpha"
 ## Kampagnenregeln für Ausfälle: eigene Einheiten stehen nicht von selbst wieder auf.
 @export var campaign_casualty_rules_enabled: bool = false
-## Nur bei eingeschaltetem Schalter: Frist, in der ein Sanitäter eine liegende Einheit noch versorgen kann.
+## Nur noch Anzeige/Kompatibilitaet: seit dem Verbluten in Stufen (24.11.2026) steuert dieser Wert das Verbluten NICHT mehr;
+## die Zeitpunkte kommen aus data/combat/bleedout_stages.json. Der Schluessel bleibt wegen alter Staende und Pruefer.
 @export var down_revive_window_seconds: float = 3.0
 @export var contact_range: float = 180.0
 @export var damage_per_hit: int = 40
@@ -160,6 +163,10 @@ func _record_resolver_target_evaluation(_attacker, _target) -> void:
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _queued_bleedout_by_unit_id: Dictionary = {}
 var _down_state_started_tick_by_unit_id: Dictionary = {}
+## Je Liegender: wie viele Stufen schon ausgewertet sind (Laufzeitzustand; wird mit der Uhr geloescht).
+var _bleedout_stages_done_by_unit_id: Dictionary = {}
+## Nach dem Laden: Personen, deren schon vergangene Stufen still nachgerechnet werden (keine zweite Funkmeldung).
+var _bleedout_silent_catchup_ids: Dictionary = {}
 var _was_downed_unit_ids: Dictionary = {}
 var _enemy_reposition_ready_at_tick: Dictionary = {}
 var _combat_finished: bool = false
@@ -2019,7 +2026,10 @@ func _mark_unit_down_started(unit_id: String) -> void:
 
 
 func _clear_down_state_linger(unit_id: String) -> void:
-	_down_state_started_tick_by_unit_id.erase(unit_id.strip_edges())
+	var normalized_unit_id: String = unit_id.strip_edges()
+	_down_state_started_tick_by_unit_id.erase(normalized_unit_id)
+	_bleedout_stages_done_by_unit_id.erase(normalized_unit_id)
+	_bleedout_silent_catchup_ids.erase(normalized_unit_id)
 
 
 ## Aktueller Spiel-Tick des Gefechts (Zaehler des SimulationRoot, wie im Treiber gefuehrt).
@@ -2038,12 +2048,58 @@ func _has_down_state_linger_elapsed(unit_id: String, unit = null) -> bool:
 	if not _down_state_started_tick_by_unit_id.has(normalized_unit_id):
 		_mark_unit_down_started(normalized_unit_id)
 		return false
+	# Verbluten in Stufen: Erreicht die Liegezeit seit dem Ausfall-Tick eine Stufe, wird EINMAL ausgewuerfelt (zustandsloser
+	# Wurf aus Einsatz-Seed, Kennung und Stufe); die letzte Stufe trifft sicher. Je Tick nur ein Vergleich mit der naechsten Stufe.
 	var started_tick: int = int(_down_state_started_tick_by_unit_id.get(normalized_unit_id, _current_tick))
-	var linger_ticks: int = DOWN_STATE_VISIBLE_MIN_TICKS
-	if campaign_casualty_rules_enabled and _is_friendly_unit(unit):
-		# Das Aufricht-Fenster kommt aus den Regeln in Sekunden; ceil: nie vor Ablauf der Sekunden frei.
-		linger_ticks = int(ceil(down_revive_window_seconds * float(GAME_TICKS_PER_SECOND) - 0.000001))
-	return _current_tick - started_tick >= linger_ticks
+	var stage_list: Array = BLEEDOUT_STAGES_SCRIPT.stages()
+	var done: int = int(_bleedout_stages_done_by_unit_id.get(normalized_unit_id, 0))
+	var elapsed: int = _current_tick - started_tick
+	var mission_seed: int = _bleedout_mission_seed()
+	var silent: bool = _bleedout_silent_catchup_ids.has(normalized_unit_id)
+	var verdict: bool = false
+	while done < stage_list.size() and elapsed >= BLEEDOUT_STAGES_SCRIPT.stage_ticks(stage_list[done]):
+		var hit: bool = BLEEDOUT_STAGES_SCRIPT.stage_hits(stage_list, done, mission_seed, normalized_unit_id)
+		done += 1
+		_bleedout_stages_done_by_unit_id[normalized_unit_id] = done
+		if hit:
+			verdict = true
+			break
+		if not silent:
+			_report_bleedout_survived(unit, normalized_unit_id)
+	_bleedout_silent_catchup_ids.erase(normalized_unit_id)
+	return verdict
+
+
+## Einsatz-Seed des SimulationRoot (combat_rng_seed); nur als Text-Seed fuer den zustandslosen Verblutungswurf, der
+## Gefechts-Zufallsstrom (get_next_combat_roll) wird NICHT beruehrt. Ohne SimulationRoot oder Seed: 0.
+func _bleedout_mission_seed() -> int:
+	var root_node = get_node_or_null(simulation_root_path)
+	if root_node == null:
+		return 0
+	var value = root_node.get("combat_rng_seed")
+	return int(value) if value != null else 0
+
+
+## Funkmeldung nach einer UEBERSTANDENEN Stufe; nur fuer eigene Leute (wie die Munitionsmeldungen).
+func _report_bleedout_survived(unit, unit_id: String) -> void:
+	if _get_unit_team_id_for_diagnostics(unit) != friendly_team_id:
+		return
+	var tactical_controller = _get_tactical_controller()
+	if tactical_controller == null or not tactical_controller.has_method("record_tactical_communication_event"):
+		return
+	var text: String = "%s hält durch – Zustand kritisch." % _ammo_unit_name(unit, unit_id)
+	tactical_controller.call("record_tactical_communication_event", "bleedout_report", {
+		"event_id": "bleedout_survived:%s:%d" % [unit_id, _current_tick],
+		"fireteam_id": _get_unit_fireteam_id(unit),
+		"unit_id": unit_id,
+		"phase": 1,
+		"short_text": text,
+		"detail_text": text,
+		"map_label": text,
+		"priority": TACTICAL_COMMUNICATION_EVENT_SCRIPT.PRIORITY_NORMAL,
+		"duration_seconds": 3.0,
+		"channels": PackedStringArray([TACTICAL_COMMUNICATION_EVENT_SCRIPT.CHANNEL_SELECTED_FIRETEAM, TACTICAL_COMMUNICATION_EVENT_SCRIPT.CHANNEL_MISSION_CONTROL]),
+	}, {"now_msec": Time.get_ticks_msec(), "cooldown_msec": 0})
 
 
 func get_casualty_flags() -> Dictionary:
@@ -2065,13 +2121,30 @@ func clear_casualty_flags() -> void:
 func export_casualty_state() -> Dictionary:
 	var ids: Array = _was_downed_unit_ids.keys()
 	ids.sort()
-	return {"was_downed_unit_ids": ids}
+	var state: Dictionary = {"was_downed_unit_ids": ids}
+	# Verbluten in Stufen: Wer gerade liegt, bringt seinen Ausfall-Tick mit (OPTIONAL: ohne Liegende fehlt der Schluessel,
+	# der Stand sieht aus wie bisher). Die Wuerfe selbst brauchen keinen Speicher: sie ergeben sich aus Tick und Seed.
+	if not _down_state_started_tick_by_unit_id.is_empty():
+		var ticks: Dictionary = {}
+		for unit_id in _down_state_started_tick_by_unit_id:
+			ticks[String(unit_id)] = int(_down_state_started_tick_by_unit_id[unit_id])
+		state["down_started_ticks"] = ticks
+	return state
 
 
 ## Prueft einen gespeicherten Ausfallzustand, ohne etwas zu aendern. allowed_unit_ids: die Personen, die im Einsatz sind.
 func validate_casualty_state(state: Variant, allowed_unit_ids: Array) -> Dictionary:
-	if not state is Dictionary or state.size() != 1 or not state.has("was_downed_unit_ids") or not state["was_downed_unit_ids"] is Array:
+	var has_ticks: bool = state is Dictionary and state.has("down_started_ticks")
+	if not state is Dictionary or state.size() != (2 if has_ticks else 1) or not state.has("was_downed_unit_ids") or not state["was_downed_unit_ids"] is Array:
 		return {"ok": false, "reason": "invalid_mission_casualty_flags"}
+	if has_ticks:
+		# Optionaler Schluessel: Kennung -> Ausfall-Tick (ganze Zahl >= 0). Fehlform lehnt ab; unbekannte Einheiten werden beim Laden verworfen.
+		if not state["down_started_ticks"] is Dictionary:
+			return {"ok": false, "reason": "invalid_mission_casualty_flags"}
+		for tick_id in state["down_started_ticks"]:
+			var tick_value = state["down_started_ticks"][tick_id]
+			if typeof(tick_id) != TYPE_STRING or String(tick_id).is_empty() or typeof(tick_value) != TYPE_INT or int(tick_value) < 0 or int(tick_value) > 1000000000000:
+				return {"ok": false, "reason": "invalid_mission_casualty_flags"}
 	var ids: Array = state["was_downed_unit_ids"]
 	if ids.size() > allowed_unit_ids.size():
 		return {"ok": false, "reason": "invalid_mission_casualty_flags"}
@@ -2095,6 +2168,16 @@ func restore_casualty_state(state: Variant, allowed_unit_ids: Array = []) -> Dic
 	_was_downed_unit_ids.clear()
 	for id in state["was_downed_unit_ids"]:
 		_was_downed_unit_ids[String(id)] = true
+	# Die Uhren der Liegenden laufen mit demselben Ausfall-Tick weiter; schon vergangene Stufen werden still nachgerechnet
+	# (kein zweiter "haelt durch"-Funkspruch). Fehlt der Schluessel (alter Stand), bleiben die Uhren leer wie bisher.
+	if state.has("down_started_ticks"):
+		_down_state_started_tick_by_unit_id.clear()
+		_bleedout_stages_done_by_unit_id.clear()
+		_bleedout_silent_catchup_ids.clear()
+		for tick_id in state["down_started_ticks"]:
+			if allowed.has(String(tick_id)):
+				_down_state_started_tick_by_unit_id[String(tick_id)] = int(state["down_started_ticks"][tick_id])
+				_bleedout_silent_catchup_ids[String(tick_id)] = true
 	return {"ok": true}
 
 
