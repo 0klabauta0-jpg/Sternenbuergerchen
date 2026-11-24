@@ -78,6 +78,46 @@ func _run() -> void:
    if checked.get("ok",false): owner._publish_restore(prep.prepared)
    _check(driver.get_suppression_level("enemy:probe")==0 and driver.get_suppression_level("own:a")==0,"restore clears suppression of both sides")
    _check(checked.get("ok",false) and rig.sim.tick_counter==saved.tick and abs(driver._get_duration_seconds()-900.0)<0.2,"tick, RNG and elapsed clock publish")
+ # Verbluten in Stufen: Wer liegt, sperrt das Speichern nicht; sein Ausfall-Tick steht im Stand und kommt beim Laden zurueck.
+ var lying_id: String = String(rig.actors.a.get_unit_id())
+ driver._down_state_started_tick_by_unit_id[lying_id] = driver._current_tick
+ var lying_saved: Dictionary = owner.export_state(rig.sim,driver)
+ _check(lying_saved.get("ok",false),"a lying person does not block the save")
+ var lying_state: Dictionary = JSON.parse_string(JSON.stringify(lying_saved))
+ driver._down_state_started_tick_by_unit_id.clear()
+ var lying_prep: Dictionary = owner.prepare_restore(rig.sim,driver,lying_state)
+ _check(lying_prep.get("ok",false),"the saved state with a lying person prepares")
+ if lying_prep.get("ok",false) and owner.validate_restore(lying_prep.prepared).get("ok",false):
+  owner._publish_restore(lying_prep.prepared)
+  _check(driver._down_state_started_tick_by_unit_id.get(lying_id,-1) == int(lying_saved.tick),"restore brings the same fall tick back, the clock keeps running")
+ else:
+  _check(false,"the saved state with a lying person validates")
+ # Ein Verbluten, das eingereiht aber noch nicht gewirkt hat, sperrt weiter (der Effekt steht noch in der Warteschlange).
+ driver.campaign_casualty_rules_enabled = true
+ driver._queued_bleedout_by_unit_id[lying_id] = true
+ _check(owner.export_state(rig.sim,driver).get("reason","") == "mission_lifecycle_unsupported","a queued, not yet applied bleedout still blocks the save")
+ # Hat es gewirkt (Kampagne, keine Rueckkehr), ist der Stand speicherbar; die Verblutete bleibt nach dem Laden verblutet.
+ actor.apply_damage(1000, {})
+ driver._on_unit_vital_status_changed(actor._vital_status, actor)
+ actor.advance_bleedout()
+ driver._on_unit_vital_status_changed(actor._vital_status, actor)
+ _check(actor.get_vital_state() == "bleedout" and driver._queued_bleedout_by_unit_id.is_empty() and driver._down_state_started_tick_by_unit_id.is_empty(),"an applied bleedout (campaign, no return) frees the marker and the clock")
+ var bled_saved: Dictionary = owner.export_state(rig.sim,driver)
+ _check(bled_saved.get("ok",false),"a bled-out person does not block the save")
+ var bled_state: Dictionary = {}
+ var bled_flags: Dictionary = {}
+ if bled_saved.get("ok",false):
+  bled_state = JSON.parse_string(JSON.stringify(bled_saved))
+  var bled_payload: Variant = codec.decode_value(bled_state.get("payload",{})).get("value",{})
+  if bled_payload is Dictionary and bled_payload.get("casualty_flags",null) is Dictionary: bled_flags = bled_payload.casualty_flags
+ _check(bled_flags.has("was_downed_unit_ids") and bled_flags.was_downed_unit_ids.has(lying_id) and not bled_flags.has("down_started_ticks"),"the saved state keeps the down marker, but no clock for the bled-out person")
+ var bled_prep: Dictionary = owner.prepare_restore(rig.sim,driver,bled_state) if not bled_state.is_empty() else {}
+ if bled_prep.get("ok",false) and owner.validate_restore(bled_prep.prepared).get("ok",false):
+  owner._publish_restore(bled_prep.prepared)
+  _check(actor.get_vital_state() == "bleedout" and driver._down_state_started_tick_by_unit_id.is_empty() and driver._queued_bleedout_by_unit_id.is_empty(),"after restore she is still bled out: no clock, no marker, not lying again")
+ else:
+  _check(false,"the saved state with a bled-out person loads")
+ driver._queued_bleedout_by_unit_id.clear()
  rig.scene.free()
  done()
 func done() -> void:

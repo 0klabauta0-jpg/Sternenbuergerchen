@@ -24,6 +24,7 @@ func _process(_delta: float) -> bool:
 	_case_unconnected_unit_flagged_by_tick()
 	_case_unconnected_unit_heal_resets_window()
 	_case_switch_off_unconnected_unit_not_flagged()
+	_case_lying_time_in_team_state()
 	print("CAMPAIGN_CASUALTY_DRIVER passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
 	return true
@@ -102,10 +103,13 @@ func _case_switch_off_skirmish_respawns() -> void:
 	friend.call("apply_damage", 1000, {})
 	_check(friend.call("get_vital_state") == "down", "switch off: unit at 0 HP is down")
 	driver.call("_queue_bleedout_for_downed_friendly", env.sim)
-	_check(_bleedout_effects(env.sim) == 0, "switch off: no bleedout before 3 s (constant, window ignored)")
+	_check(_bleedout_effects(env.sim) == 0, "switch off: no bleedout right after going down")
 	_age_down_state(driver, FRIEND_ID, 3.5)
 	driver.call("_queue_bleedout_for_downed_friendly", env.sim)
-	_check(_bleedout_effects(env.sim) == 1, "switch off: bleedout queued after 3 s")
+	_check(_bleedout_effects(env.sim) == 0, "switch off: still no bleedout after 3.5 s (the old 3 s constant is gone; stages start at 180 s)")
+	_age_down_state(driver, FRIEND_ID, 390.5)
+	driver.call("_queue_bleedout_for_downed_friendly", env.sim)
+	_check(_bleedout_effects(env.sim) == 1, "switch off: bleedout queued after 390 s at the latest (last stage is certain)")
 	friend.call("advance_bleedout")
 	_check(env.respawn.call("has_pending_respawn", FRIEND_ID), "skirmish still respawns")
 	# Björn 21.11.: Wiederkehr-Zeiten verlängert (Rover 60, FOB 240, Homebase 420 Sekunden; vorher 30/150/270).
@@ -125,8 +129,8 @@ func _case_switch_on_no_respawn_inside_window() -> void:
 	friend.call("apply_damage", 1000, {})
 	_age_down_state(driver, FRIEND_ID, 5.0)
 	driver.call("_queue_bleedout_for_downed_friendly", env.sim)
-	_check(friend.call("get_vital_state") == "down", "campaign: still down after 5 s with 60 s window")
-	_check(_bleedout_effects(env.sim) == 0, "campaign: no bleedout queued inside window")
+	_check(friend.call("get_vital_state") == "down", "campaign: still down after 5 s (first stage only at 180 s)")
+	_check(_bleedout_effects(env.sim) == 0, "campaign: no bleedout queued before the first stage")
 	driver.call("_request_respawn_for_unit", friend, FRIEND_ID)
 	_check(not env.respawn.call("has_pending_respawn", FRIEND_ID), "no respawn in campaign")
 	_check(friend.call("get_vital_state") == "down", "campaign: respawn request does not touch the unit")
@@ -150,13 +154,53 @@ func _case_switch_on_medic_revive_flagged() -> void:
 	env.fixture.free()
 
 
+## Verbluten in Stufen, N2: Der Teamzustand der Kampagne traegt die Liegezeit (Spielzeit seit dem Ausfall-Tick) nur fuer wer liegt.
+func _case_lying_time_in_team_state() -> void:
+	var env := _build(true, 60.0)
+	var driver = env.driver
+	var friend = env.friend
+	var states: Array = driver.call("_build_team_states", driver.get("friendly_unit_paths"))
+	var first: Dictionary = Dictionary(states[0]) if states.size() == 1 else {}
+	_check(states.size() == 1 and not first.has("down_seconds"), "N2: wer kampffaehig ist, hat keine Liegezeit im Teamzustand")
+	_check(is_equal_approx(float(driver.call("get_unit_down_seconds", FRIEND_ID)), -1.0), "N2: ohne Uhr gibt der Treiber -1 zurueck")
+	friend.call("apply_damage", 1000, {})
+	_age_down_state(driver, FRIEND_ID, 179.0)
+	states = driver.call("_build_team_states", driver.get("friendly_unit_paths"))
+	first = Dictionary(states[0]) if states.size() == 1 else {}
+	_check(states.size() == 1 and is_equal_approx(float(first.get("down_seconds", -9.0)), 179.0), "N2: Liegezeit 179 s im Teamzustand (%s)" % str(first.get("down_seconds", "fehlt")))
+	_age_down_state(driver, FRIEND_ID, 200.0)
+	states = driver.call("_build_team_states", driver.get("friendly_unit_paths"))
+	first = Dictionary(states[0]) if states.size() == 1 else {}
+	_check(states.size() == 1 and is_equal_approx(float(first.get("down_seconds", -9.0)), 200.0), "N2: Liegezeit 200 s im Teamzustand")
+	var rules_script = load("res://scripts/core/campaign_casualty_rules.gd")
+	var long_result: Dictionary = rules_script.classify_unit(first, "won")
+	_check(long_result.get("severity", "") == "severe", "N2: die Abrechnung wertet diese Person als schwer (%s)" % str(long_result))
+	env.fixture.free()
+	# Die Liegezeit gilt zum Gefechtsende: der Tick-Zaehler laeuft danach weiter, die Zeit der Person nicht.
+	var late := _build(true, 60.0)
+	late.friend.call("apply_damage", 1000, {})
+	_age_down_state(late.driver, FRIEND_ID, 100.0)
+	late.driver.call("_resolve_combat", "aborted", "")
+	_check(bool(late.driver.get("_combat_finished")), "N2: das Gefecht ist beendet")
+	late.driver.set("_current_tick", int(late.driver.get("_current_tick")) + 200 * 60)
+	var late_seconds: float = float(late.driver.call("get_unit_down_seconds", FRIEND_ID))
+	_check(is_equal_approx(late_seconds, 100.0), "N2: liegt beim Gefechtsende 100 s, 200 s spaeter weiter 100 s (%s)" % str(late_seconds))
+	var late_states: Array = late.driver.call("_build_team_states", late.driver.get("friendly_unit_paths"))
+	var late_result: Dictionary = rules_script.classify_unit(Dictionary(late_states[0]) if late_states.size() == 1 else {}, "won")
+	_check(late_result.get("severity", "") == "medium", "N2: die spaete Abrechnung zaehlt mittelschwer, nicht schwer (%s)" % str(late_result))
+	late.fixture.free()
+
+
 func _case_switch_on_window_zero_bleedout_no_respawn() -> void:
 	var env := _build(true, 0.0)
 	var driver = env.driver
 	var friend = env.friend
 	friend.call("apply_damage", 1000, {})
 	driver.call("_queue_bleedout_for_downed_friendly", env.sim)
-	_check(_bleedout_effects(env.sim) == 1, "window 0: bleedout queued at once")
+	_check(_bleedout_effects(env.sim) == 0, "window 0: the old window no longer decides, nothing queued at once")
+	_age_down_state(driver, FRIEND_ID, 390.5)
+	driver.call("_queue_bleedout_for_downed_friendly", env.sim)
+	_check(_bleedout_effects(env.sim) == 1, "window 0: bleedout queued at 390 s at the latest")
 	friend.call("advance_bleedout")
 	_check(friend.call("get_vital_state") == "bleedout", "window 0: unit is bleedout")
 	_check(not env.respawn.call("has_pending_respawn", FRIEND_ID), "window 0: no respawn")
@@ -177,7 +221,10 @@ func _case_switch_on_enemy_still_respawns() -> void:
 	_check(enemy.call("get_vital_state") == "down", "campaign: enemy at 0 HP is down")
 	_age_down_state(driver, ENEMY_ID, 3.5)
 	driver.call("_queue_bleedout_for_downed_enemy", env.sim)
-	_check(_bleedout_effects(env.sim) == 1, "campaign: enemy bleedout uses the 3 s constant, not the window")
+	_check(_bleedout_effects(env.sim) == 0, "campaign: enemy follows the same stages, no bleedout after 3.5 s")
+	_age_down_state(driver, ENEMY_ID, 390.5)
+	driver.call("_queue_bleedout_for_downed_enemy", env.sim)
+	_check(_bleedout_effects(env.sim) == 1, "campaign: enemy bleedout queued at 390 s at the latest")
 	enemy.call("advance_bleedout")
 	_check(env.respawn.call("has_pending_respawn", ENEMY_ID), "campaign: enemy respawns as before")
 	var flags: Dictionary = driver.call("get_casualty_flags")
@@ -212,7 +259,7 @@ func _case_unconnected_unit_heal_resets_window() -> void:
 	friend.call("apply_damage", 1000, {})
 	driver.call("_queue_bleedout_for_downed_friendly", env.sim)
 	_check(friend.call("get_vital_state") == "down", "unconnected: downed again, still down")
-	_check(_bleedout_effects(env.sim) == 0, "unconnected: no bleedout, the 60 s window starts anew")
+	_check(_bleedout_effects(env.sim) == 0, "unconnected: no bleedout, the clock starts anew")
 	env.fixture.free()
 
 

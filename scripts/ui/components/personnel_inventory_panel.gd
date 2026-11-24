@@ -405,7 +405,14 @@ func _wear(data: Dictionary, slot: String) -> void:
 	operation_requested.emit("inventory_equip",{"unit_id":_unit_id,"craft_id":_craft_id,"source_container_id":String(data.get("source_container_id","")),"item_id":String(data.get("item_id","")),"slot":slot})
 
 
+func _item_icon_path(item: String) -> String:
+	const KIT := "res://Assets/curated/versorgung_kit_20261124/"
+	if item in ["ammo_light","ammo_rifle","ammo_rail","ammo_rocket"]: return KIT+"icon_magazine.png"
+	if item in ["cargo_crate","c_benit_crate"]: return KIT+"icon_cargo_crate.png"
+	return ""
 func _item_icon(item: String) -> Texture2D:
+	var own:=_item_icon_path(item)
+	if not own.is_empty() and ResourceLoader.exists(own): return load(own)
 	var illustrated:=MENU_ICONS.get_icon(item)
 	if illustrated!=null:return illustrated
 	if item in ["armor_light","armor_medium","armor_heavy"]: return load("res://Assets/curated/ui/campaign_inventory/"+item+".svg")

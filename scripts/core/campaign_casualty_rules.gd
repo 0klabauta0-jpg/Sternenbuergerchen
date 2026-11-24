@@ -10,6 +10,8 @@ const DEFAULT_RESPAWN := {"outage_base_seconds": 3600, "outage_step_seconds": 18
 const MAX_RESPAWN_LIMIT := 9
 ## Cap for a stored respawns_used counter.
 const MAX_RESPAWNS_USED := 1000
+## Erste Stufe des Verblutens (data/combat/bleedout_stages.json): ab dieser Liegezeit zaehlt "liegt" am Einsatzende als schwer.
+const BLEEDOUT_STAGES_SCRIPT = preload("res://scripts/combat/bleedout_stages.gd")
 
 static func _is_number(value: Variant) -> bool:
 	return typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT
@@ -105,6 +107,18 @@ static func load_rules(path: String = RULES_PATH) -> Dictionary:
 static func _is_fit(team_state: Dictionary) -> bool:
 	return str(team_state.get("vital_state", "fit")) == "fit" and float(team_state.get("health_points", 1.0)) > 0.0
 
+## Verbluten in Stufen, N2: Wer am Einsatzende noch am Boden liegt ("down") und dessen Liegezeit (team_state.down_seconds, Spielzeit
+## seit dem Ausfall) die erste Stufe des Verblutens erreicht hat, zaehlt wie ein Verblutender als schwer verwundet. Fehlt die Liegezeit
+## oder ist sie unbrauchbar (kein endlicher Zahlenwert), gilt sie nicht: wie bisher mittelschwer.
+static func _lay_long_enough(team_state: Dictionary) -> bool:
+	if str(team_state.get("vital_state", "")) != "down":
+		return false
+	var seconds: Variant = team_state.get("down_seconds", null)
+	if not _is_counter_value(seconds):
+		return false
+	var first: Dictionary = BLEEDOUT_STAGES_SCRIPT.stages()[0]
+	return float(seconds) >= float(first.get("at_seconds", BLEEDOUT_STAGES_SCRIPT.FALLBACK_AT_SECONDS))
+
 static func classify_unit(team_state: Dictionary, mission_outcome: String) -> Dictionary:
 	var unit_id := str(team_state.get("unit_id", ""))
 	var was_downed := bool(team_state.get("was_downed", false))
@@ -120,7 +134,7 @@ static func classify_unit(team_state: Dictionary, mission_outcome: String) -> Di
 	if not recovered:
 		return {"unit_id": unit_id, "outcome": "dead", "severity": ""}
 	var vital := str(team_state.get("vital_state", "down"))
-	var severity := "severe" if vital == "bleedout" or vital == "respawning" else "medium"
+	var severity := "severe" if vital == "bleedout" or vital == "respawning" or _lay_long_enough(team_state) else "medium"
 	return {"unit_id": unit_id, "outcome": "wounded", "severity": severity}
 
 static func _leadership(unit: Dictionary) -> float:

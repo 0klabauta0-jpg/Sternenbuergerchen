@@ -97,13 +97,16 @@ func _style_checks(mission: Node, controller: Node, simulation_root: Node, team:
 	controller.call("set_planning_state", saved)
 	check(String(controller.get("_current_approach_style")) == "vorsichtig" and String(_find_card(controller, "craft_a").get("approach_style", "")) == "vorsichtig", "the stored style survives the planning-state round trip like the approach angle")
 
-	# Landing scatter: x1.5 only for vorsichtig, at the campaign field LZ resolution.
+	# Landing scatter: vorsichtig x0.75, normal x1.0, aggressiv x1.5, at the campaign field LZ resolution.
 	controller.set("_lz_position", hot_lz)
 	var cautious_lz: Dictionary = controller.call("_resolve_campaign_field_lz")
 	controller.call("_select_approach_style", "normal")
 	var normal_lz: Dictionary = controller.call("_resolve_campaign_field_lz")
 	print("field lz radius normal=", normal_lz.get("lz_accuracy_radius"), " vorsichtig=", cautious_lz.get("lz_accuracy_radius"))
-	check(bool(normal_lz.get("ok", false)) and bool(cautious_lz.get("ok", false)) and is_equal_approx(float(cautious_lz.lz_accuracy_radius), float(normal_lz.lz_accuracy_radius) * 1.5), "the campaign field LZ scatter radius is 1.5 times larger for vorsichtig")
+	controller.call("_select_approach_style", "aggressiv")
+	var aggressive_lz: Dictionary = controller.call("_resolve_campaign_field_lz")
+	print("field lz radius aggressiv=", aggressive_lz.get("lz_accuracy_radius"))
+	check(bool(normal_lz.get("ok", false)) and bool(cautious_lz.get("ok", false)) and bool(aggressive_lz.get("ok", false)) and is_equal_approx(float(cautious_lz.lz_accuracy_radius), float(normal_lz.lz_accuracy_radius) * 0.75) and is_equal_approx(float(aggressive_lz.lz_accuracy_radius), float(normal_lz.lz_accuracy_radius) * 1.5), "the campaign field LZ scatter radius is 0.75 times for vorsichtig and 1.5 times for aggressiv")
 
 	# Repair restores the craft's integrity (helper on the service repair path).
 	for _frame in range(3):

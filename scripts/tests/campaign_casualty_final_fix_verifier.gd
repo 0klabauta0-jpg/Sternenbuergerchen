@@ -237,15 +237,18 @@ func _probe_lying_unit(s: Dictionary) -> void:
 	var driver: Node = s.driver
 	var capture = load("res://scripts/mission/campaign_active_mission_capture.gd")
 	var pilot: Node2D = s.controller.call("_get_campaign_sortie_unit", "campaign_pilot")
-	driver.set("down_revive_window_seconds", 600.0)
 	pilot.call("apply_damage", 10000)
 	if not await _wait(func(): return Dictionary(driver.get("_down_state_started_tick_by_unit_id")).has("campaign_pilot"), 5000, "I4 Messung: der Pilot liegt (Fristbeginn gemerkt)"): return
 	var lying: Dictionary = capture.capture_components(_flow, _runtime)
 	print("I4_PROBE lying hp=", pilot.call("get_health"), " vital=", pilot.call("get_vital_state"), " capture_ok=", lying.get("ok"), " reason=", lying.get("reason"))
-	_check(not bool(lying.get("ok", false)), "I4 Messung: solange jemand am Boden liegt, ist der Einsatz nicht speicherbar [%s]" % [lying.get("reason", "")])
-	driver.set("down_revive_window_seconds", 0.3)
+	# Verbluten in Stufen (24.11.2026): Speichern ist IMMER moeglich, auch waehrend jemand liegt (der Ausfall-Tick steht im Stand).
+	_check(bool(lying.get("ok", false)), "I4 Messung: solange jemand am Boden liegt, ist der Einsatz speicherbar [%s]" % [lying.get("reason", "")])
+	# Verbluten in Stufen: nicht mehr das Fenster, sondern der Ausfall-Tick bestimmt den Zeitpunkt; 390,5 s zurueckdatiert = letzte Stufe, sicher.
+	var started_ticks: Dictionary = driver.get("_down_state_started_tick_by_unit_id")
+	started_ticks["campaign_pilot"] = int(driver.get("_current_tick")) - int(390.5 * 60.0)
 	if not await _wait(func(): return Dictionary(driver.get("_queued_bleedout_by_unit_id")).has("campaign_pilot"), 5000, "I4 Messung: Ablauf der Frist stoesst das Verbluten an"): return
 	await create_timer(0.5).timeout
 	var critical: Dictionary = capture.capture_components(_flow, _runtime)
 	print("I4_PROBE critical hp=", pilot.call("get_health"), " vital=", pilot.call("get_vital_state"), " queued=", driver.get("_queued_bleedout_by_unit_id"), " capture_ok=", critical.get("ok"), " reason=", critical.get("reason"))
-	_check(not bool(critical.get("ok", false)), "I4 Messung: auch eine Kritische macht den Einsatz nicht speicherbar [%s]" % [critical.get("reason", "")])
+	# Nachbesserung 1 (W2): Wer verblutet ist und nicht zurueckkehrt (Kampagne), sperrt das Speichern nicht mehr.
+	_check(bool(critical.get("ok", false)) and String(pilot.call("get_vital_state")) == "bleedout" and Dictionary(driver.get("_queued_bleedout_by_unit_id")).is_empty(), "I4 Messung: auch eine Verblutete macht den Einsatz speicherbar, Zustand bleibt verblutet, Merker geleert [%s]" % [critical.get("reason", "")])
