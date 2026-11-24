@@ -36,8 +36,14 @@ func _verdict(fingerprint: String) -> Dictionary:
 func _run() -> void:
 	var today: Dictionary = _system()
 	_check(today.location_orbits.has(PLACE), "Fixture: heutige Daten enthalten den Ort %s" % PLACE)
+	# "Vorher" = heutige Daten ohne ALLE additiven Orte (Handel 2a-2 haengt Muellers Farm, Shady Lab und Templanon an dieselbe Liste an;
+	# die Vorgaenger-Pruefsumme kennt keinen von ihnen). Siehe SingleplayerSpaceTravelState._system_fingerprint_accepted (alle Teilmengen).
 	var before: Dictionary = today.duplicate(true)
-	before.location_orbits.erase(PLACE)
+	for place: String in CAMPAIGN.ADDITIVE_LOCATION_IDS: before.location_orbits.erase(place)
+	var before_posts: Dictionary = today.duplicate(true)
+	for place: String in ["muellers_farm", "shady_lab", "templanon"]: before_posts.location_orbits.erase(place)
+	_check(before_posts.location_orbits.has(PLACE) and not before_posts.location_orbits.has("shady_lab"), "Fixture: ein Stand mit relay_ridge, aber ohne die drei kleinen Posten")
+	_check(bool(_verdict(_sum(before_posts)).get("ok", false)), "Fall a5: Zwischenstand von VOR den drei kleinen Posten (mit relay_ridge) wird angenommen")
 	var verdict_today: Dictionary = _verdict(_sum(today))
 	_check(bool(verdict_today.get("ok", false)), "Fall b: Zwischenstand mit der heutigen Pruefsumme wird angenommen (%s)" % str(verdict_today.get("reason", "")))
 	var verdict_before: Dictionary = _verdict(_sum(before))

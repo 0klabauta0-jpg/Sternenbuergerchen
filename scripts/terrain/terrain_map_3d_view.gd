@@ -75,6 +75,12 @@ const WEAPON_FIRE_VFX_CATALOG_PATH: String = "res://data/weapon_fire_vfx_catalog
 const FACTORY_MODEL_ROOT: String = "res://Assets/curated/kenney/factory/models"
 const FACTORY_COLORMAP_TEXTURE_PATH: String = FACTORY_MODEL_ROOT + "/Textures/colormap.png"
 const TILE_SPACING: float = 1.0
+## Versuch Bodentexturen: diese Taste legt den Schalter fuer alle Bodenmaterialien um.
+const GROUND_TILES_KEY: int = KEY_F9
+const GROUND_TILES_KEY_NAME: String = "F9"
+static var _ground_tiles_last_key_frame: int = -1
+var _ground_tiles_label: Label = null
+var _ground_tiles_label_serial: int = 0
 const TILE_THICKNESS: float = 0.035
 const HEIGHT_STEP: float = 0.5
 const OBJECT_HEIGHT_STEP: float = 0.42
@@ -1383,6 +1389,50 @@ func _process(delta: float) -> void:
 			"creates_movement": false,
 			"sets_multiplayer_truth": false,
 		}
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	var key := event as InputEventKey
+	if key == null or not key.pressed or key.echo or key.keycode != GROUND_TILES_KEY:
+		return
+	# Mehrere Ansichten koennen dieselbe Taste sehen: nur die erste im Bild legt um.
+	if _ground_tiles_last_key_frame == Engine.get_process_frames():
+		_show_ground_tiles_notice(FRONTIER_ART_PROFILE_SCRIPT.ground_tiles_on())
+		return
+	_ground_tiles_last_key_frame = Engine.get_process_frames()
+	toggle_ground_tiles()
+
+
+## Schaltet die Bodentexturen fuer alle Bodenmaterialien um und meldet es kurz.
+func toggle_ground_tiles() -> bool:
+	var now_on: bool = not FRONTIER_ART_PROFILE_SCRIPT.ground_tiles_on()
+	FRONTIER_ART_PROFILE_SCRIPT.set_ground_tiles(now_on)
+	_show_ground_tiles_notice(now_on)
+	_request_viewport_redraw(true)
+	return now_on
+
+
+func _show_ground_tiles_notice(is_on: bool) -> void:
+	if not is_instance_valid(_ground_tiles_label):
+		_ground_tiles_label = Label.new()
+		_ground_tiles_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_ground_tiles_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_ground_tiles_label.add_theme_color_override("font_shadow_color", Color(0.02, 0.04, 0.06, 0.95))
+		_ground_tiles_label.add_theme_constant_override("shadow_outline_size", 7)
+		add_child(_ground_tiles_label)
+		_ground_tiles_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+		_ground_tiles_label.offset_left = -180.0
+		_ground_tiles_label.offset_right = 180.0
+		_ground_tiles_label.offset_top = 60.0
+		_ground_tiles_label.offset_bottom = 86.0
+	_ground_tiles_label.text = "Bodentexturen: %s (%s)" % ["an" if is_on else "aus", GROUND_TILES_KEY_NAME]
+	_ground_tiles_label.visible = true
+	_ground_tiles_label_serial += 1
+	var serial := _ground_tiles_label_serial
+	if is_inside_tree():
+		get_tree().create_timer(1.8).timeout.connect(func() -> void:
+			if serial == _ground_tiles_label_serial and is_instance_valid(_ground_tiles_label):
+				_ground_tiles_label.visible = false)
 
 
 func set_frontier_art_enabled(enabled: bool) -> void:

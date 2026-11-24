@@ -9,6 +9,9 @@ const WING_PANEL = preload("res://scripts/ui/space_wing_panel.gd")
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const SERVICE_ROUTE_PROJECTION = preload("res://scripts/ui/polisa_service_route_projection.gd")
 const TANKER_PANEL = preload("res://scripts/ui/emergency_tanker_panel.gd")
+## Klick auf einen Orbitmarker merkt das Ziel nur vor (orbit_previewed); erst "Start" fliegt los und sendet orbit_requested.
+signal orbit_previewed(orbit_id: String, marker_id: String)
+signal orbit_requested(orbit_id: String, marker_id: String)
 var _provider: Callable
 var _commands: Callable
 var _area_provider: Callable
@@ -16,7 +19,18 @@ var _orbit_canvas: Control
 var _orbit_button: Button
 var _system_button: Button
 var _orbit_center: Button
-var _orbit_auto: Button
+var _pending_jump: Dictionary = {}
+var _course_box: VBoxContainer
+var _course_text: Label
+var _course_start: Button
+var _mode_row: HBoxContainer
+var _mode_auto: Button
+var _mode_manual: Button
+var _course_start_ok := true
+var _open_orbit_on_arrival := false
+var _arrival_saw_quantum := false
+var _arrival_attempts := 0
+var _arrival_target: Dictionary = {}
 var _station_dock: Button
 var _orbit_craft_id := ""
 var _orbit_visible := false
@@ -88,6 +102,30 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.keycode == KEY_ALT and not event.echo:
 		_show_fuel_help = event.pressed and is_visible_in_tree()
 		_update_fuel_help()
+	elif event is InputEventKey and event.pressed and not event.echo and not _pending_jump.is_empty() and is_visible_in_tree():
+		# Vorgemerkter Kurs: Esc verwirft ihn, Enter startet ihn. Ein offenes Spielmenue behaelt beide Tasten.
+		# Reihenfolge: der Autoload GlobalEscapeMenu nimmt Esc ebenfalls schon in _input (global_escape_menu.gd:138);
+		# _input laeuft rueckwaerts durch den Baum, die Karte (spaeter im Baum als der Autoload) kommt also zuerst.
+		if _game_menu_open():
+			return
+		if event.keycode == KEY_ESCAPE:
+			_discard_preview()
+			get_viewport().set_input_as_handled()
+		elif event.keycode in [KEY_ENTER, KEY_KP_ENTER] and _enter_means_start():
+			_start_pending()
+			get_viewport().set_input_as_handled()
+
+func _game_menu_open() -> bool:
+	var tree := get_tree()
+	var menu: Node = tree.root.get_node_or_null("GlobalEscapeMenu") if tree != null else null
+	return menu != null and menu.has_method("is_overlay_open") and bool(menu.call("is_overlay_open"))
+
+## Enter gilt nur dann als "Start", wenn kein anderes Bedienelement den Fokus hat (Textfeld, Baum, anderer Knopf).
+func _enter_means_start() -> bool:
+	var focus: Control = get_viewport().gui_get_focus_owner()
+	if focus == null or focus == _course_start:
+		return true
+	return not (focus is LineEdit or focus is TextEdit or focus is Tree or focus is BaseButton)
 
 func _build() -> void:
 	_built = true
@@ -129,7 +167,7 @@ func _build() -> void:
 	heading.add_child(_view_homebase)
 	var system_caption := _label("SYSTEM: " + DISPLAY.SYSTEM_NAME, 16, APP_THEME.MUTED)
 	system_caption.name = "SystemCaption"
-	system_caption.tooltip_text = "Baum: Orte ansehen oder Ziel wählen. Kartenmarker: Sprung beauftragen."
+	system_caption.tooltip_text = "Baum: Orte ansehen oder Ziel wählen. Kartenmarker: Kurs ansehen, dann Start. Doppelklick zoomt auf Körper oder Ort."
 	column.add_child(system_caption)
 	var body := HBoxContainer.new()
 	body.name = "SystemAndDetails"
@@ -161,15 +199,14 @@ func _build() -> void:
 	_orbit_center = _button("OrbitRecenter", "Schiff zentrieren", func(): _orbit_canvas.call("recenter_selected"))
 	_orbit_center.hide()
 	map_views.add_child(_orbit_center)
-	_orbit_auto = _button("OrbitAutomatic", "Durchflug: an", _toggle_orbit_automatic)
-	_orbit_auto.tooltip_text = "Automatischen Orbitdurchflug für dieses Schiff ein- oder ausschalten."
-	map_views.add_child(_orbit_auto)
 	_station_dock = _button("BeginStationDock", "Polisa andocken", _begin_station_dock)
 	_station_dock.hide()
 	_station_dock.disabled = true
 	_station_dock.tooltip_text = "Dockauftrag senden; Gate, Besatzung und Besuch werden vom Spiel geprueft."
 	map_views.add_child(_station_dock)
 	visibility_changed.connect(_refresh_station_dock_button)
+	# Wieder sichtbar: sofort den Stand lesen (nicht erst nach dem naechsten 0,1-s-Takt), damit z. B. die Ankunft nicht verpasst wird.
+	visibility_changed.connect(func(): if is_visible_in_tree(): refresh())
 	_move_session = "%d:%d" % [get_instance_id(),Time.get_ticks_usec()]
 	_canvas = CANVAS.new()
 	_canvas.name = "SystemMap"
@@ -177,7 +214,8 @@ func _build() -> void:
 	_canvas.clip_contents = true
 	_canvas.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_canvas.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_canvas.orbit_requested.connect(_jump)
+	_canvas.orbit_previewed.connect(_preview_jump)
+	_canvas.preview_cleared.connect(_discard_preview)
 	_canvas.location_selected.connect(_select)
 	_canvas.body_selected.connect(func(id: String): _navigation.focus_body(id))
 	_canvas.craft_selected.connect(_on_map_craft_selected)
@@ -250,8 +288,9 @@ func _build() -> void:
 	_status.tooltip_text = "Am Flugdeck abheben, dann den Zielorbit wählen. Ein Zielort wird erst mit Anflug starten betreten."
 	_status.name = "TravelStatus"
 	information.add_child(_status)
+	_build_course_box(information)
 	_abort = _button("AbortQuantum", "Sprung abbrechen", _cancel_current_travel)
-	_abort.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_abort.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	information.add_child(_abort)
 	_progress = ProgressBar.new()
 	_progress.name = "QuantumProgress"
@@ -265,10 +304,10 @@ func _build() -> void:
 	var actions := VBoxContainer.new()
 	information.add_child(actions)
 	_approach = _button("BeginApproach", "Anflug starten", _begin_approach)
-	_approach.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_approach.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	actions.add_child(_approach)
 	_land = _button("LandHomebase", "An Mondbasis landen", func(): _send("space_land_homebase", {"craft_id": _craft_id()}))
-	_land.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_land.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	actions.add_child(_land)
 	_boundary = _label("Ortskarte wird geladen.", 14, Color("f2ca86"))
 	_boundary.name = "LoadBoundary"
@@ -332,10 +371,8 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	_runtime = snapshot.duplicate(true) if not snapshot.is_empty() else (Dictionary(_provider.call()) if _provider.is_valid() else {})
 	_wing_panel.refresh(_runtime)
 	var travel: Dictionary = _runtime.get("space_travel", {})
-	_orbit_auto.text = "Durchflug: an" if travel.get("orbit_transit_automatic", true) else "Durchflug: aus"
-	_orbit_auto.visible = bool(travel.get("orbit_transit_available", false))
-	_orbit_auto.disabled = String(travel.get("craft_id", "")).is_empty() or not _orbit_auto.visible
 	var phase: String = String(travel.get("phase", "grounded"))
+	_update_course(travel, phase)
 	var fleet_signature:=JSON.stringify(_runtime.get("crafts",[]))
 	if String(_fleet_selector.get_meta("fleet_signature",""))!=fleet_signature:
 		_fleet_selector.clear()
@@ -543,11 +580,191 @@ func _on_orbit_move_requested(craft_id: String, target_hex: Vector2i) -> void:
 	_move_sequence += 1
 	_send("space_move",{"craft_id":craft_id,"target_hex":target_hex,"request_id":"orbit-ui:%s:%d" % [_move_session,_move_sequence]})
 
-func _toggle_orbit_automatic() -> void:
+## Block "KURS": vorgemerktes Ziel mit Etappen und Treibstoff, Wahl des Durchflugs, Knopf "Start".
+func _build_course_box(parent: VBoxContainer) -> void:
+	_course_box = VBoxContainer.new()
+	_course_box.name = "CoursePanel"
+	_course_box.add_theme_constant_override("separation", 6)
+	parent.add_child(_course_box)
+	var heading := _label("KURS", 16, Color("b4dae8"))
+	heading.add_theme_font_override("font", APP_THEME.HEADING)
+	_course_box.add_child(heading)
+	_course_text = _label("", 14, Color("f2ca86"))
+	_course_text.name = "CourseText"
+	_course_box.add_child(_course_text)
+	_mode_row = HBoxContainer.new()
+	_mode_row.name = "OrbitModeRow"
+	_mode_row.add_theme_constant_override("separation", 4)
+	_course_box.add_child(_mode_row)
+	var caption := _label("Durchflug:", 14, APP_THEME.MUTED)
+	_mode_row.add_child(caption)
+	var group := ButtonGroup.new()
+	_mode_auto = _button("OrbitModeAutomatic", "Automatik", func(): _set_orbit_mode(true))
+	_mode_manual = _button("OrbitModeManual", "Selbst fliegen", func(): _set_orbit_mode(false))
+	_mode_auto.tooltip_text = "Der Durchflug zum Planeten oder ins All läuft von selbst."
+	_mode_manual.tooltip_text = "Bei der Ankunft öffnet sich die Orbit-Ansicht; ein Klick schickt das Schiff dorthin."
+	for button: Button in [_mode_auto, _mode_manual]:
+		button.toggle_mode = true
+		button.button_group = group
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.size_flags_stretch_ratio = 1.0
+		button.custom_minimum_size.x = 0
+		_mode_row.add_child(button)
+	_mode_auto.button_pressed = true
+	_course_start = _button("StartCourse", "Start", _start_pending)
+	_course_start.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_course_start.tooltip_text = "Kurs fliegen (Enter). Esc oder Rechtsklick auf freie Fläche verwirft das Ziel."
+	_course_box.add_child(_course_start)
+	_course_box.hide()
+
+func _preview_jump(orbit_id: String, marker_id: String) -> void:
+	var travel: Dictionary = _runtime.get("space_travel", {})
+	if not GRID.can_jump_to_marker(travel, orbit_id, marker_id): return
+	_pending_jump = {"orbit_id": orbit_id, "marker_id": marker_id, "craft_id": String(travel.get("craft_id", "")), "wings": _selected_wings()}
+	orbit_previewed.emit(orbit_id, marker_id)
+	_update_course(travel, String(travel.get("phase", "grounded")))
+
+func _discard_preview() -> void:
+	if _pending_jump.is_empty(): return
+	_pending_jump = {}
+	if _canvas != null: _canvas.call("clear_preview_course")
+	_update_course(_runtime.get("space_travel", {}), String(Dictionary(_runtime.get("space_travel", {})).get("phase", "grounded")))
+
+## "Start": der alte Weg (_jump) mit dem vorgemerkten Ziel. Gesperrt, wenn der Treibstoff nicht reicht.
+func _start_pending() -> void:
+	if _pending_jump.is_empty() or not _course_start_ok: return
+	var orbit_id := String(_pending_jump.orbit_id)
+	var marker_id := String(_pending_jump.marker_id)
+	var pending := _pending_jump.duplicate()
+	_error.text = ""
+	orbit_requested.emit(orbit_id, marker_id)
+	_jump(orbit_id, marker_id)
+	var travel: Dictionary = _runtime.get("space_travel", {})
+	if not _error.text.is_empty():
+		# Abgelehnt: Ziel und Kurslinie bleiben stehen, der Grund steht im Fehlerfeld.
+		_pending_jump = pending
+		_open_orbit_on_arrival = false
+		_error.visible = true
+		_update_course(travel, String(travel.get("phase", "grounded")))
+		return
+	_pending_jump = {}
+	_canvas.call("clear_preview_course")
+	if not bool(travel.get("orbit_transit_automatic", true)):
+		_open_orbit_on_arrival = true
+		_arrival_saw_quantum = false
+		_arrival_attempts = 0
+		_arrival_target = {"orbit_id": orbit_id, "marker_id": marker_id}
+		if _orbit_craft_id.is_empty():
+			_orbit_craft_id = String(travel.get("craft_id", ""))
+			_orbit_availability_signature = ""
+	else:
+		_open_orbit_on_arrival = false
+	_update_course(travel, String(travel.get("phase", "grounded")))
+
+func _selected_wings() -> Array:
+	return _wing_panel.selected_wing_ids() if _wing_panel != null else []
+
+func _set_orbit_mode(automatic: bool) -> void:
 	var travel: Dictionary = _runtime.get("space_travel", {})
 	var craft_id := String(travel.get("craft_id", ""))
-	if craft_id.is_empty(): return
-	_send("space_set_orbit_automatic", {"craft_id":craft_id, "enabled":not bool(travel.get("orbit_transit_automatic", true))})
+	if craft_id.is_empty() or automatic == bool(travel.get("orbit_transit_automatic", true)): return
+	_send("space_set_orbit_automatic", {"craft_id": craft_id, "enabled": automatic})
+
+## Fuer das Ziel: Treibstoff aus der Erreichbarkeit des zugehoerigen Ortes (so weit die Daten reichen). {text, ok}
+func _course_fuel(travel: Dictionary, orbit_id: String) -> Dictionary:
+	var location_orbits: Dictionary = travel.get("location_orbits", {})
+	var selected := String(Dictionary(_runtime.get("campaign", {})).get("selected_location_id", ""))
+	var location_id := ""
+	var ids: Array = []
+	for id in location_orbits:
+		if String(location_orbits[id]) == orbit_id: ids.append(String(id))
+	ids.sort()
+	if String(location_orbits.get(selected, "")) == orbit_id:
+		location_id = selected
+	elif not ids.is_empty():
+		location_id = String(ids[0])
+	var reach: Dictionary = Dictionary(travel.get("fuel_reachability", {}))
+	if location_id.is_empty() or not reach.has(location_id):
+		return {"text": "Treibstoff: keine Angabe für dieses Ziel", "ok": true}
+	var outcome: Dictionary = reach[location_id]
+	# Hat der Koerper mehrere Orte, sagt der Text, fuer welchen die Zahl gilt.
+	var label := "Treibstoff"
+	if ids.size() > 1:
+		var locations: Dictionary = Dictionary(Dictionary(_runtime.get("campaign", {})).get("locations", {}))
+		label = "Treibstoff für " + DISPLAY.location_name(location_id, locations.get(location_id, {}))
+	if not bool(outcome.get("ok", false)):
+		var why := String(outcome.get("message", "Zu wenig Treibstoff"))
+		return {"text": label + ": reicht nicht · " + why, "ok": false}
+	if not bool(outcome.get("route_ok", true)):
+		return {"text": label + ": reicht für die nächste Etappe · ganzer Hinweg braucht %d (vorhanden %d)" % [int(ceil(float(outcome.get("needed_total", 0.0)))), int(floor(float(outcome.get("available", 0.0))))], "ok": true,
+			"warning": "Reicht nur bis zum Orbit – dort tanken oder den Nottankdienst rufen."}
+	return {"text": label + ": reicht · ganzer Hinweg gedeckt", "ok": true}
+
+func _update_course(travel: Dictionary, phase: String) -> void:
+	if _course_box == null: return
+	# Ein vorgemerktes Ziel gilt nur, solange der Sprung wirklich noch moeglich ist.
+	if not _pending_jump.is_empty() and (phase not in ["orbit", "stopped"] or not GRID.can_jump_to_marker(travel, String(_pending_jump.orbit_id), String(_pending_jump.marker_id))):
+		_pending_jump = {}
+	# Anderes Schiff oder andere Schiffsgruppe gewaehlt: das Ziel galt fuer die alte Wahl und wird verworfen.
+	if not _pending_jump.is_empty() and (String(_pending_jump.get("craft_id", "")) != String(travel.get("craft_id", "")) or _pending_jump.get("wings", []) != _selected_wings()):
+		_pending_jump = {}
+	var automatic := bool(travel.get("orbit_transit_automatic", true))
+	var available := bool(travel.get("orbit_transit_available", false))
+	var has_craft := not String(travel.get("craft_id", "")).is_empty()
+	_mode_row.visible = available
+	_mode_auto.set_pressed_no_signal(automatic)
+	_mode_manual.set_pressed_no_signal(not automatic)
+	_mode_auto.disabled = not has_craft
+	_mode_manual.disabled = not has_craft
+	var pending := not _pending_jump.is_empty()
+	_course_box.visible = pending or available
+	_course_text.visible = pending
+	_course_start.visible = pending
+	if pending:
+		var orbit_id := String(_pending_jump.orbit_id)
+		var marker_id := String(_pending_jump.marker_id)
+		var destination := Vector2.ZERO
+		var found := false
+		for marker: Dictionary in Array(Dictionary(Dictionary(travel.get("orbits", {})).get(orbit_id, {})).get("markers", [])):
+			if String(marker.get("id", "")) == marker_id:
+				destination = GRID.normalized(GRID.cell_from_record(marker))
+				found = true
+		var origin := GRID.pair(travel.get("position", []))
+		if found: _canvas.call("set_preview_course", origin, destination)
+		var cells := int(_canvas.call("get_preview_cell_count"))
+		var fuel := _course_fuel(travel, orbit_id)
+		_course_start_ok = bool(fuel.ok) and found
+		var lines := PackedStringArray(["Ziel: %s · Marker %s" % [_orbit_name(orbit_id), marker_id.get_slice("_", 1)]])
+		lines.append("Etappe: Quantensprung" + (" · %d Felder" % maxi(cells - 1, 1) if cells > 0 else ""))
+		lines.append(String(fuel.text))
+		if fuel.has("warning"): lines.append(String(fuel.warning))
+		if not _course_start_ok: lines.append("Start gesperrt.")
+		_course_text.text = "\n".join(lines)
+		_course_start.disabled = not _course_start_ok
+	else:
+		_canvas.call("clear_preview_course")
+		_course_start_ok = true
+	_update_arrival(phase)
+
+## "Selbst fliegen": Kommt das Schiff an, oeffnet sich die Orbit-Ansicht von selbst (wenn der lokale Orbit schon bereitsteht).
+func _update_arrival(phase: String) -> void:
+	if not _open_orbit_on_arrival: return
+	# War die Karte waehrend des Sprungs verdeckt, wurde "quantum" nie gesehen: dann zaehlt, dass das Schiff am Ziel steht.
+	var at_target := not _arrival_target.is_empty() and String(_runtime.get("space_travel", {}).get("orbit_id", "")) == String(_arrival_target.orbit_id) and String(_runtime.get("space_travel", {}).get("orbit_marker_id", "")) == String(_arrival_target.marker_id)
+	if phase == "quantum":
+		_arrival_saw_quantum = true
+	elif phase == "orbit" and (_arrival_saw_quantum or at_target):
+		_arrival_attempts += 1
+		_show_orbit_view()
+		if _orbit_visible or _arrival_attempts > 40: _open_orbit_on_arrival = false
+	elif phase in ["grounded", "surface", "approach"]:
+		_open_orbit_on_arrival = false
+
+func get_course_snapshot() -> Dictionary:
+	var travel: Dictionary = _runtime.get("space_travel", {})
+	return {"pending": _pending_jump.duplicate(), "text": _course_text.text if not _pending_jump.is_empty() else "", "start_disabled": _course_start.disabled,
+		"line_points": Array(_canvas.call("get_preview_course")).size() if _canvas != null else 0,
+		"mode": "automatic" if bool(travel.get("orbit_transit_automatic", true)) else "manual", "orbit_view_open": _orbit_visible}
 
 func _phase_text(travel: Dictionary, preparation: Dictionary = {}) -> String:
 	var phase := String(travel.get("phase", "grounded"))
@@ -644,6 +861,9 @@ func _cancel_current_travel() -> void:
 func _begin_approach() -> void:
 	var runtime: Dictionary = _provider.call() if _provider.is_valid() else _runtime
 	_send("space_begin_approach", {"craft_id": _craft_id(), "location_id": String(Dictionary(runtime.get("campaign", {})).get("selected_location_id", ""))})
+	# Selbst fliegen: nach "Anflug starten" gleich die Orbit-Ansicht zeigen, statt ueber den Durchflug zu warten.
+	if _error.text.is_empty() and not bool(Dictionary(_runtime.get("space_travel", {})).get("orbit_transit_automatic", true)) and not _orbit_craft_id.is_empty():
+		_show_orbit_view()
 
 func _send(operation: String, payload: Dictionary = {}) -> void:
 	if not _commands.is_valid():

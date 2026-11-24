@@ -354,7 +354,10 @@
     "fortified_outpost": "planet_orbit",
     "distress_orbit": "planet_orbit",
     "polisa": "polisa_orbit",
-    "relay_ridge": "planet_orbit"
+    "relay_ridge": "planet_orbit",
+    "muellers_farm": "glut_1b_orbit",
+    "shady_lab": "planet_orbit",
+    "templanon": "planet_orbit"
   },
   "version": 2,
   "grid_size": [

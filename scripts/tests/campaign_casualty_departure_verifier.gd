@@ -51,6 +51,10 @@ func _request_return() -> Dictionary:
 func _press_return(hud: bool, s: Dictionary) -> Dictionary:
 	if hud:
 		s.controller.call("_on_mission_dropship_return_pressed", _craft_id)
+		# Rueckflug-Knopf mit Rueckfrage: fragt der erste Klick nur nach dem Rueckzug, bestaetigt der Spieler mit dem zweiten (fruehestens 0,4 s spaeter).
+		if is_instance_valid(s.controller) and bool(s.controller.call("_is_retreat_armed", _craft_id)):
+			OS.delay_msec(450)
+			s.controller.call("_on_mission_dropship_return_pressed", _craft_id)
 		return {"ok": true, "hud": true, "feedback": _card_feedback(s)}
 	return _request_return()
 

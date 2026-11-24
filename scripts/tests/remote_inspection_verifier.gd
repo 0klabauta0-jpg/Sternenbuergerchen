@@ -43,7 +43,7 @@ func _run() -> void:
 	_check(registry.get_location(unseen) == null, "future mission has no loaded world before inspection")
 	var unknown: Dictionary = _flow._request_star_map_operation("inspect_location", {"location_id":unseen})
 	var inspected: Dictionary = _flow.get_remote_inspection_snapshot()
-	_check(unknown.get("ok", false) and inspected.view == "inspection" and inspected.screen.blackout and inspected.screen.visible and inspected.screen.title == "Bastion Silex", "catalogued unseen location opens an explicitly black named view")
+	_check(unknown.get("ok", false) and inspected.view == "inspection" and inspected.screen.blackout and inspected.screen.visible and inspected.screen.title == "Windbruch", "catalogued unseen location opens an explicitly black named view")
 	_check(not _flow.get("_campaign_tutorial").visible and not _flow.get("_singleplayer_services_toggle").visible, "first remote screen opening immediately suppresses unrelated tutorial and service overlays")
 	_check(registry.get_location(unseen) == null and _same(baseline, _owners()), "unknown location creates no mission, actor, area, route, fuel, resource or RNG mutation")
 	var remote: Control = _flow.get("_remote_inspection_screen")

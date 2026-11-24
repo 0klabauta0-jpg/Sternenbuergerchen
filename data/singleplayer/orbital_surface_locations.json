@@ -1,6 +1,6 @@
 {
-  "planet": ["fortified_outpost", "relay_ridge"],
+  "planet": ["fortified_outpost", "relay_ridge", "shady_lab", "templanon"],
   "glut_1a": ["satellite_crash"],
-  "glut_1b": ["trade_outpost"],
+  "glut_1b": ["trade_outpost", "muellers_farm"],
   "moon": ["homebase"]
 }

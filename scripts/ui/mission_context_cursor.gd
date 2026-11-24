@@ -101,7 +101,7 @@ func update_objective_feedback() -> void:
 	_objective_action.visible=not complete
 	_objective_action.disabled=_controller.get("_selected_fireteam_ids").is_empty() or bool(satellite.get("blocked",false)) or status=="in_progress" or not selected_active or not bool(_controller.call("_can_issue_local_commands"))
 	if complete:
-		_objective_text.text="✓ Daten gesichert\nZum Schiff und zur Heimatbasis zurückkehren. Basis → Datenterminal."
+		_objective_text.text="✓ Daten gesichert\nZum Schiff zurück und einsteigen – es hebt dann ab. Dort: Basis → Datenterminal."
 	elif status=="in_progress":
 		_objective_text.text="Daten werden gesichert · %d %%\nTrupp in Reichweite lassen."%roundi(progress*100)
 	elif not selected_active:

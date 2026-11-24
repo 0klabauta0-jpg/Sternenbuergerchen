@@ -95,6 +95,22 @@ func _wait_order_state(session: Dictionary, states: Array) -> bool:
 func _wait_finished(session: Dictionary, state: String) -> bool:
 	return await _wait_for(session, func() -> bool: return _finished_state(session) == state, 15000)
 
+## Fall 4: treibt die Spielzeit selbst voran (bis zu 20 Schritte von 0,1 s), statt nur mit Wanduhr-Frist auf Bilder zu
+## warten - eine unter Rechnerlast stehende Test-Sitzung macht den Fall sonst grundlos rot. Die Pruefungen bleiben
+## unveraendert. Reicht das Treiben nicht, gilt weiter die alte Frist; bei Fehlschlag eine Diagnosezeile.
+func _drive_until_finished(session: Dictionary, state: String) -> bool:
+	var steps: int = 0
+	while steps < 20 and _finished_state(session) != state:
+		session.runtime.call("advance_space_travel", 0.1)
+		steps += 1
+		await process_frame
+	if _finished_state(session) == state:
+		return true
+	var done: bool = await _wait_finished(session, state)
+	if not done:
+		print("DIAG_TANKER_FALL4 schritte=%d finished=%s order=%s offene_auftraege=%d" % [steps, _finished_state(session), _order_state(session), session.supply.get_open_tanker_orders().size()])
+	return done
+
 func _frames(count: int) -> void:
 	for index in range(count): await process_frame
 
@@ -217,7 +233,8 @@ func _scenario_expire() -> void:
 	s.flow.call("remove_skirmish_craft", craft_id)
 	supply.remove_skirmish_craft(craft_id)
 	s.runtime.get("_travel").unregister_craft(craft_id)
-	_check(await _wait_finished(s, "expired"), "4: der Auftrag verfaellt (expired), Zustand " + _finished_state(s) + " / " + _order_state(s))
+	var expired: bool = await _drive_until_finished(s, "expired")
+	_check(expired, "4: der Auftrag verfaellt (expired), Zustand " + _finished_state(s) + " / " + _order_state(s))
 	_check(supply.get_credits() == 500, "4: volle Erstattung (280), Guthaben 500, ist %d" % supply.get_credits())
 	_check(supply.get_open_tanker_orders().is_empty() and s.runtime.get_emergency_tanker_snapshot().orders.is_empty(), "4: kein Auftrag bleibt offen")
 	await _frames(40)

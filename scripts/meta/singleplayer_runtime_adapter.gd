@@ -4,6 +4,7 @@ extends Node
 
 const SIM = preload("res://scripts/core/simulation_root.gd")
 const CAMPAIGN = preload("res://scripts/core/singleplayer_campaign_state.gd")
+const ORBIT_LOCATION_PRIORITY = preload("res://scripts/core/orbit_location_priority.gd")
 const SUPPLY = preload("res://scripts/core/singleplayer_supply_state.gd")
 const TRAVEL = preload("res://scripts/core/singleplayer_fleet_travel_state.gd")
 const ORBIT_SURFACES = preload("res://scripts/mission/orbit_surface_locations.gd")
@@ -286,6 +287,11 @@ func configure(flow: Node, screen: Control) -> void:
 	# Handel-Nachbesserung W3: friedlicher Besuch des Handelsaussenpostens in der Kampagne ohne Zeitlimit (0 = keins); das Skirmish-Szenario trade_outpost_visit bleibt.
 	if _campaign_mode:
 		catalog.append({"mission_id": "trade_outpost_open_visit", "mission_name": "Handelsaußenposten besuchen", "map_file_path": "res://maps/trade_outpost.json", "scenario_file_path": "res://data/mission_scenarios/trade_outpost_open_visit.json", "slot_count": 4, "time_limit_seconds": 0.0, "win_condition": "objective_capture"})
+	# Handel 2a: friedliche Besuchsszenarien der kleinen Aussenposten (small_outposts.json); ohne Eintrag im Katalog kann der Anflug sie nicht waehlen.
+	for place_id: String in Dictionary(_campaign.get_campaign_snapshot().locations):
+		if _campaign.small_outpost_entry(place_id).is_empty(): continue
+		var place_def: Dictionary = _campaign.get_campaign_snapshot().locations[place_id]
+		catalog.append({"mission_id": String(place_def.scenario_file_path).get_file().get_basename(), "mission_name": String(place_def.name) + " besuchen", "map_file_path": place_def.map_file_path, "scenario_file_path": place_def.scenario_file_path, "slot_count": 4, "time_limit_seconds": 0.0, "win_condition": "objective_capture"})
 	for job: Dictionary in Dictionary(_campaign.get_campaign_snapshot().jobs).values():
 		var found := false
 		for item: Dictionary in catalog:
@@ -366,13 +372,8 @@ func _fuel_reachability(craft_id: String, locations: Dictionary) -> Dictionary:
 	return result
 
 static func _location_for_orbit(location_orbits: Dictionary, orbit_id: String, preferred: String = "") -> String:
-	if orbit_id.is_empty(): return ""
-	if not preferred.is_empty() and String(location_orbits.get(preferred, "")) == orbit_id: return preferred
-	var ids: Array = []
-	for id in location_orbits:
-		if String(location_orbits[id]) == orbit_id: ids.append(String(id))
-	ids.sort()
-	return "" if ids.is_empty() else String(ids[0])
+	# Regel an EINER Stelle: orbit_location_priority.gd (gleiche Auswahl wie SimulationRoot._location_at_orbit).
+	return ORBIT_LOCATION_PRIORITY.location_at_orbit(location_orbits, orbit_id, preferred)
 
 ## Etappen, die einem Schiff bis zum Ziel noch bevorstehen: [{leg, origin, destination}].
 func _remaining_outbound_legs(travel: Dictionary, location_id: String) -> Array:
@@ -385,6 +386,9 @@ func _remaining_outbound_legs(travel: Dictionary, location_id: String) -> Array:
 	if phase == "surface":
 		var here := String(travel.get("location_id", ""))
 		if here.is_empty() or here == location_id: return []
+		# Handel 2a-2, Nachbesserung 2: derselbe Orbit (Farm <-> Handelsposten) ist kein Sprung: nur Ortsabflug und Anflug (3).
+		var here_orbit := String(location_orbits.get(here, ""))
+		if not here_orbit.is_empty() and here_orbit == String(location_orbits.get(location_id, "")): return [{"leg":"surface_exit", "origin":here, "destination":"homebase"}, approach]
 		return [{"leg":"surface_exit", "origin":here, "destination":"homebase"}, {"leg":"jump", "origin":here, "destination":location_id}, approach]
 	if phase == "approach": return []
 	if phase == "orbit":
@@ -1014,6 +1018,9 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		if _polisa_shuttle_dispatcher != null:
 			var service: Dictionary = request_polisa_service_departure(String(data.get("craft_id", "")))
 			if not service.get("ok", false) or service.get("handled", false): return service
+		# ask_retreat: nur der Knopf "Zur Heimatbasis" der Versorgung fragt vor einem Rueckzug nach; der Befehl selbst bleibt sonst unveraendert.
+		if bool(data.get("ask_retreat", false)):
+			return _flow.call("_request_singleplayer_return", String(data.get("craft_id", "")), true)
 		return _flow.call("_request_singleplayer_return", String(data.get("craft_id", "")))
 	return _reject("unknown_operation", "Kampagnenaktion nicht verfuegbar")
 
@@ -3161,7 +3168,23 @@ func _home_services_snapshot() -> Dictionary:
 		if not _local_upload_container(id, job).is_empty(): local_jobs.append(id)
 		elif blocker.is_empty() and bool(job.get("home_upload", false)) and String(job.get("status", "")) in ["pending_upload", "active"]:
 			blocker = _upload_blocker_text(_find_campaign_chip_container("satellite_chip" if id == "satellite_recovery" else "outpost_chip", String(job.get("craft_id", ""))))
-	return {"workshop_available":_home_workshop_available(), "upload_job_ids":local_jobs, "upload_blocker":blocker, "all_at_home":_all_at_home(), "lost_craft_ids":_lost_craft_ids()}
+	return {"workshop_available":_home_workshop_available(), "upload_job_ids":local_jobs, "upload_blocker":blocker, "chip_note":_orphan_chip_note(), "all_at_home":_all_at_home(), "lost_craft_ids":_lost_craft_ids()}
+
+
+## Nur Text fuers Datenterminal: Ein Datenchip liegt bei einer eigenen Person oder im Lager, der zugehoerige Auftrag ist aber nicht mehr
+## aktiv oder wartet auf das Hochladen (abgebrochen: "accepted"/"failed"). Sonst leer.
+func _orphan_chip_note() -> String:
+	if _campaign == null or _supply == null: return ""
+	var jobs: Dictionary = _campaign.get_campaign_snapshot().get("jobs", {})
+	for id: String in ["satellite_recovery", "outpost_chip_recovery"]:
+		var job: Dictionary = jobs.get(id, {})
+		if String(job.get("status", "")) not in ["accepted", "failed"]: continue
+		if _find_campaign_chip_container("satellite_chip" if id == "satellite_recovery" else "outpost_chip", "").is_empty(): continue
+		# K4: "accepted" heisst, der Auftrag ist schon angenommen und noch offen (nichts erneut annehmen); nur "failed" muss neu angenommen werden.
+		if String(job.get("status", "")) == "accepted":
+			return "Datenchip vorhanden, aber der Auftrag „%s“ ist noch offen: Einsatz erneut fliegen und abschließen." % String(job.get("title", id))
+		return "Datenchip vorhanden, aber der Auftrag „%s“ gilt als abgebrochen. Im Smart Mobile den Auftrag erneut annehmen und den Einsatz noch einmal fliegen." % String(job.get("title", id))
+	return ""
 
 
 ## LC2h H5: Kennungen der im Einsatz verlorenen Schiffe (Verlustbelege des Ablaufs).

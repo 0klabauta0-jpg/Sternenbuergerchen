@@ -190,6 +190,7 @@ func _paving_material(color: String) -> ShaderMaterial:
 	material.set_shader_parameter("base_color",Color(color))
 	material.set_shader_parameter("paved_surface",true)
 	material.set_shader_parameter("authored_paving_wear",not _homebase_paths)
+	FrontierArtProfile.register_ground_material(material)
 	if not _homebase_paths and _paths.size()==4:
 		for spec in [["wear_service_span",_paths[0]["points"][2],_paths[0]["points"][3]],["wear_hall_span",_paths[2]["points"][0],_paths[2]["points"].back()],["wear_utility_span",_paths[3]["points"][1],_paths[3]["points"][2]]]:
 			material.set_shader_parameter(spec[0],Vector4(spec[1].x,spec[1].y,spec[2].x,spec[2].y))

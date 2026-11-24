@@ -241,6 +241,10 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 		button.text = {"set_lz":"Landezone waehlen", "drop":"Trupp absetzen" if landed else "Landen", "board":"Einsteigen", "return":"Abheben"}[action]
 		if action == "set_lz": button.text = "Landezone waehlen"
 		button.tooltip_text = "Alle Bodenpersonen muessen zum Schiff. Einsteigen wird nach Ankunft bestaetigt." if action == "board" else ("Pilot und Besatzung muessen an Bord sein." if action == "return" else "Landezone und Anflug des ausgewaehlten Schiffs")
+		if action == "return" and not selected_card.is_empty():
+			# Scharfe Rueckfrage vor einem Rueckzug: der Knopf heisst "Rückzug?" und der Hinweis nennt die offenen Schritte.
+			button.text = String(controller.call("_dropship_return_button_text", craft_id, button.text))
+			button.tooltip_text = String(controller.call("_dropship_return_button_tooltip", craft_id, button.tooltip_text))
 		button.set_meta("mission_dropship_craft_id", craft_id)
 		var callback := Callable(controller, method).bind(craft_id)
 		if not button.pressed.is_connected(callback):
@@ -259,7 +263,8 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 	var feedback := card.get_node("Contents/MissionDropshipCardFeedbackLabel") as Label
 	feedback.text = "" if selected_card.is_empty() else String(controller.call("_get_mission_dropship_card_feedback_text", selected_card))
 	if feedback.text == "Trupp ab": feedback.text = "Trupp abgesetzt"
-	feedback.max_lines_visible = 1
+	# Die Rueckfrage vor dem Rueckzug ist lang: sie bekommt mehrere Zeilen, sonst bliebe nur der Anfang lesbar.
+	feedback.max_lines_visible = 4 if (not selected_card.is_empty() and bool(controller.call("_is_retreat_armed", craft_id))) else 1
 	feedback.tooltip_text = feedback.text
 	feedback.mouse_filter = Control.MOUSE_FILTER_PASS
 	feedback.visible = not feedback.text.is_empty() and feedback.text != "Trupp ab"
