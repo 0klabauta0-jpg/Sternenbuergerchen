@@ -10,6 +10,7 @@ const TERRAIN = preload("res://scripts/terrain/terrain_registry.gd")
 const TILE = preload("res://scripts/terrain/terrain_tile_data.gd")
 const UNITS = preload("res://scripts/registries/unit_registry.gd")
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
+const NAV = preload("res://scripts/tactical/space_navigation_resolver.gd")
 const DT := 0.05
 
 var _passed := 0
@@ -42,6 +43,8 @@ class FixVision extends Node:
 class FixTransport extends Node:
 	var boarded := true
 	var landing_clear := true
+	var style := "normal"
+	func _find_mission_dropship_card_entry(_craft_id: String) -> Dictionary: return {"approach_style":style}
 	var parked := {}
 	var landed_position := {}
 	func get_campaign_air_support_pilot_guard(craft_id: String) -> Dictionary:
@@ -231,10 +234,9 @@ func _case_3() -> void:
 ## Fall 4: Ziel nicht mehr sichtbar: Feuerstopp, Ziel leer.
 func _case_4() -> void:
 	var tag := "[4 Sicht verloren] "
-	# Mitte (12,12) statt (10,10): die Rundbahn liegt drei Reihen vom Kartenrand, damit das Schiff beim Wiederaufnehmen der Ausrichtung nicht am Rand haengt
-	# (bei (10,10) blieb es nach Angriffsende und Pause mit map_edge stehen, siehe Bericht).
-	var env: Dictionary = _build({"foe":Vector2i(15, 12)}, ["foe"])
-	_circle(env, "cas", "c4", Vector2i(12, 12))
+	# Nachbesserung 2 (A): wieder Mitte (10,10) am Kartenrand; die Notbremse haelt das Schiff dort nicht mehr fest.
+	var env: Dictionary = _build({"foe":Vector2i(13, 10)}, ["foe"])
+	_circle(env, "cas", "c4")
 	_tick(env, 0.6)
 	_check(_target(env) == "foe", tag + "Aufbau: Ziel foe")
 	_tick(env, 6.0)
@@ -369,8 +371,8 @@ func _case_10() -> void:
 ## Fall 11 (W2a): "Feuer einstellen" des Spielers haelt die Zielwahl an; "Feuer frei" oder neue Rolle hebt den Halt auf.
 func _case_11() -> void:
 	var tag := "[11 Feuerhalt] "
-	var env: Dictionary = _build({"foe":Vector2i(15, 12)}, ["foe"])
-	_circle(env, "cas", "c11", Vector2i(12, 12))
+	var env: Dictionary = _build({"foe":Vector2i(13, 10)}, ["foe"])
+	_circle(env, "cas", "c11")
 	_tick(env, 3.0)
 	_check(_target(env) == "foe" and env.shots.size() >= 1, tag + "Aufbau: CAS greift an und schiesst")
 	env.mission_root.request_air_support_cease_fire("ship", "ui-air-stop:1")
@@ -381,14 +383,25 @@ func _case_11() -> void:
 	_check(env.shots.size() == shots and _count(env, "target_engaged") == 1, tag + "weiter kein Schuss, kein neues target_engaged")
 	_check(_texts(env, "cas_hold") == ["ship hält das Feuer – Luftnahunterstützung wartet."], tag + "Ereignis einmal mit dem Wortlaut: " + str(_texts(env, "cas_hold")))
 	var freed: Dictionary = env.mission_root.request_air_support_attack_order({"craft_id":"ship", "target_unit_id":"foe", "request_id":"ui-fire:1"})
-	_tick(env, 10.0)
+	var shots_free: int = env.shots.size()
+	var t_first := -1.0
+	for _s in range(75):
+		_tick(env, 0.2)
+		_trace(env, "11")
+		if env.shots.size() > shots_free:
+			t_first = 0.2 * (_s + 1)
+			break
+	print("AIR_CAS_ROLE MESSUNG 11: erster Schuss nach dem Spielerbefehl nach %.1f s, Nasenfehler %.1f Grad" % [t_first, rad_to_deg(float(env.shots[shots_free])) if env.shots.size() > shots_free else -1.0])
+	# Die Nase steht nach dem Feuerstopp bis zu 175 Grad neben dem Ziel; die Drehrate der Cutlass in der Atmosphaere (etwa 0,45 rad/s) braucht dafuer mehr als 10 s: Fenster 15 s.
+	_check(t_first > 0.0 and float(env.shots[shots_free]) < deg_to_rad(10.0), tag + "Nachbesserung 2 (B): nach dem Spielerbefehl faellt in 15 s ein Schuss mit Nasenfehler unter 10 Grad (nach %.1f s)" % t_first)
+	_tick(env, maxf(10.0 - maxf(t_first, 0.0), 0.0))
 	# Ob die Nase den Schussbogen auf dieser engen Bahn trifft, prueft Fall 1 (CAS) und Fall 13 (Schweben); hier zaehlt: Befehl steht, Halt aufgehoben, Nase wird aufs Ziel gesetzt.
 	var goal_now: Dictionary = Dictionary(Dictionary(env.combat.get_flight_controls().get("ship", {})).get("goal", {}))
 	_check(bool(freed.get("ok", false)) and _order(env).get("target_id") == "foe" and not _sortie(env).has("cas_hold") and goal_now.get("face_plane") == env.mission_root._air_attack_target_plane("ship"), tag + "Feuer frei vom Spieler: Befehl steht, Halt aufgehoben, Nase aufs Ziel gesetzt: " + str(freed))
 	env.mission_root.request_air_support_cease_fire("ship", "ui-air-stop:2")
 	_tick(env, 2.0)
 	_check(_order(env).get("verb") != "attack_target", tag + "zweiter Feuerstopp haelt wieder")
-	_check(bool(_circle(env, "cas", "c11b", Vector2i(12, 12)).get("ok", false)), tag + "Aufbau: Rolle neu gesetzt")
+	_check(bool(_circle(env, "cas", "c11b").get("ok", false)), tag + "Aufbau: Rolle neu gesetzt")
 	_tick(env, 1.0)
 	_check(_target(env) == "foe" and _order(env).get("target_id") == "foe", tag + "neue Rolle hebt den Halt auf: CAS greift wieder an")
 	env.flow.free()
@@ -500,6 +513,171 @@ func _case_16() -> void:
 	env.flow.free()
 
 
+## Fall 17 (Nachbesserung 2, A): Rundbahn an der Kartenkante (Mitte (10,10)), Angriff / Feuerstopp / Angriff, 30 s: nie 2 s starr bei Tempo oder Drall, Wegpunkt wechselt.
+func _case_17() -> void:
+	var tag := "[17 Kartenrand] "
+	var env: Dictionary = _build({"foe":Vector2i(13, 10)}, ["foe"])
+	_circle(env, "cas", "c17")
+	var st := {}
+	_watch(env, 3.0, st)
+	env.mission_root.request_air_support_cease_fire("ship", "ui-air-stop:17")
+	_watch(env, 3.0, st)
+	var again: Dictionary = env.mission_root.request_air_support_attack_order({"craft_id":"ship", "target_unit_id":"foe", "request_id":"ui-fire:17"})
+	_watch(env, 24.0, st)
+	print("AIR_CAS_ROLE MESSUNG 17: laengste Starre %.2f s, Wegpunktwechsel %d, Status %s" % [float(st.max_still), int(st.get("changes", 0)), String(env.combat.get_flight_status("ship").get("reason", ""))])
+	_check(bool(again.get("ok", false)), tag + "Aufbau: zweiter Angriffsbefehl: " + str(again))
+	_check(float(st.max_still) < 2.0, tag + "nie 2 s starr bei Tempo/Drall ueber 0,05 (%.2f s)" % float(st.max_still))
+	_check(int(st.get("changes", 0)) >= 2, tag + "der Wegpunkt wechselt mindestens zweimal (%d)" % int(st.get("changes", 0)))
+	env.flow.free()
+
+
+## Fall 18 (Nachbesserung 2, A): gesetzte Einfrierlage (Kurs -88 Grad, Tempo 0,5 zum Rand): nach hoechstens 2 s bewegt sich das Schiff wieder.
+func _case_18() -> void:
+	var tag := "[18 Einfrierlage] "
+	var env: Dictionary = _build({}, [])
+	_circle(env, "none", "c18")
+	_tick(env, 2.0)
+	var flight: RefCounted = env.fleet.get_flight_state("ship")
+	# Die aeusserste Lage nahe Reihe 6, in der die Huelle bei Kurs -88 Grad noch ganz auf der Karte liegt (ruhend gueltig; erst der Schritt zum Rand ragt hinaus).
+	var edge: Vector2 = GRID.HEX.axial_to_plane(Vector2(10, 5))
+	var inner: Vector2 = GRID.HEX.axial_to_plane(Vector2(10, 10))
+	var spot: Vector2 = GRID.HEX.axial_to_plane(Vector2(10, 6))
+	var footprint: Array = env.mission_root._resolve_air_support_craft("ship").equipment.get_space_flight_profile("ship").footprint_hexes
+	for k in range(0, 41):
+		var candidate: Vector2 = edge.lerp(inner, float(k) / 40.0)
+		var probe: Dictionary = flight.get_snapshot()
+		probe.merge({"position_plane":candidate, "heading_rad":deg_to_rad(-88.0), "footprint_hexes":footprint}, true)
+		var swept: Dictionary = NAV.preview_swept_cells(probe, probe)
+		if swept.get("ok", false) and env.mission_root._air_support_cells_on_map(swept.cells):
+			spot = candidate
+			break
+	var outward: Vector2 = (edge - inner).normalized()
+	env.tick = int(env.tick) + 1
+	var forced: Dictionary = flight.commit_motion({"expected_revision":flight.get_snapshot().revision, "position_plane":spot, "heading_rad":deg_to_rad(-88.0), "velocity_plane":outward * 0.5, "angular_velocity":0.0}, int(env.tick))
+	_check(bool(forced.get("ok", false)), tag + "Aufbau: Einfrierlage gesetzt: " + str(forced))
+	var st := {}
+	for _d in range(10):
+		_watch(env, 0.2, st)
+		var dp: Dictionary = _pose(env, "ship")
+		print("AIR_CAS_ROLE TRACE 18 pos=%s head=%.1f v=%.3f w=%.3f wp=%d status=%s ctl=%s" % [str(dp.position_plane), rad_to_deg(float(dp.heading_rad)), Vector2(dp.velocity_plane).length(), float(dp.angular_velocity), int(_sortie(env).get("waypoint_index", -1)), String(env.combat.get_flight_status("ship").get("reason", "")), str(env.combat.get_flight_controls().has("ship"))])
+	var before: Vector2 = _pose(env, "ship").position_plane
+	var heading_before: float = float(_pose(env, "ship").heading_rad)
+	_watch(env, 1.0, st)
+	var moved: float = before.distance_to(_pose(env, "ship").position_plane)
+	var turned: float = absf(wrapf(float(_pose(env, "ship").heading_rad) - heading_before, -PI, PI))
+	print("AIR_CAS_ROLE MESSUNG 18: Starre %.2f s, Weg in 1 s %.3f, Drehung %.4f, Status %s" % [float(st.max_still), moved, turned, String(env.combat.get_flight_status("ship").get("reason", ""))])
+	_check(float(st.max_still) < 2.0 and (moved > 0.02 or turned > 0.002), tag + "nach hoechstens 2 s bewegt sich das Schiff wieder (Starre %.2f s, Weg %.3f)" % [float(st.max_still), moved])
+	env.flow.free()
+
+
+## Fall 19 (Nachbesserung 2, N1): Abbruch mit gescheitertem Rueckflug, danach Spieler-Angriffsbefehl: in 10 s faellt ein Schuss (der Feuerstopp kommt nur einmal).
+func _case_19() -> void:
+	var tag := "[19 Feuer nach Abbruch] "
+	var env: Dictionary = _build({"foe":Vector2i(13, 10)}, ["foe"])
+	_circle(env, "cas", "c19")
+	_tick(env, 3.0)
+	_sortie(env)["landing_grid"] = Vector2i(40, 40)
+	_damage(env)
+	_tick(env, 2.0)
+	var shots: int = env.shots.size()
+	# Solange der Rumpf unter der Grenze des Stils liegt, lehnt der Angriffsbefehl ab (hull_too_damaged); erst ein anderer Stil (aggressiv: Grenze 10 %) gibt ihn frei.
+	env.transport.style = "aggressiv"
+	var ordered: Dictionary = env.mission_root.request_air_support_attack_order({"craft_id":"ship", "target_unit_id":"foe", "request_id":"ui-fire:19"})
+	# Die Rolle ist jetzt "none": das Schiff kreist weiter und dreht die Nase (aus beliebiger Lage) aufs Ziel; der erste Schuss kommt, sobald sie im Bogen steht (hier bis 30 s).
+	for _s in range(150):
+		_tick(env, 0.2)
+		if env.shots.size() > shots: break
+	_check(bool(ordered.get("ok", false)) and env.shots.size() > shots, tag + "Spielerbefehl nach gescheitertem Abbruch: in 30 s ein Schuss (%d -> %d) %s" % [shots, env.shots.size(), str(ordered)])
+	# Wieder unter der Grenze (Stil normal): der Abbruch-Zweig laeuft weiter, loescht den Spielerbefehl aber nicht noch einmal (der Feuerstopp kam schon).
+	env.transport.style = "normal"
+	_tick(env, 2.0)
+	_check(_order(env).get("verb") == "attack_target" and bool(_sortie(env).get("break_off_stopped", false)), tag + "der Abbruch-Zweig sendet keinen zweiten Feuerstopp: " + str(_order(env)))
+	env.flow.free()
+
+
+## Fall 20 (Nachbesserung 2, N2): eigene Leute ruecken an das laufende CAS-Ziel heran: CAS gibt es auf (Meldung einmal), ein Spielerziel bleibt.
+func _case_20() -> void:
+	var tag := "[20 Freund rueckt an] "
+	var env: Dictionary = _build({"foe":Vector2i(13, 10)}, ["foe"], {"friend":Vector2i(16, 10)})
+	_circle(env, "cas", "c20")
+	_tick(env, 3.0)
+	_check(_target(env) == "foe" and env.shots.size() >= 1, tag + "Aufbau: CAS greift an und schiesst")
+	var rt: Object = env.mission_root.get("_hex_ground_runtime")
+	var moved: Dictionary = rt.relocate_unit("friend", Vector2i(14, 10), int(rt.get("_revision")))
+	_check(bool(moved.get("ok", false)), tag + "Aufbau: Freund rueckt neben das Ziel: " + str(moved))
+	_tick(env, 1.0)
+	var shots: int = env.shots.size()
+	_check(_target(env) == "" and _order(env).get("verb") != "attack_target", tag + "CAS gibt das Ziel auf: '%s' / %s" % [_target(env), str(_order(env))])
+	_tick(env, 3.0)
+	_check(env.shots.size() == shots and _count(env, "cas_friendly_close") == 1, tag + "danach kein Schuss, Meldung einmal (%d Schuesse, %d Meldungen)" % [env.shots.size() - shots, _count(env, "cas_friendly_close")])
+	var manual: Dictionary = env.mission_root.request_air_support_attack_order({"craft_id":"ship", "target_unit_id":"foe", "request_id":"ui-fire:20"})
+	_tick(env, 3.0)
+	_check(bool(manual.get("ok", false)) and _target(env) == "foe" and _order(env).get("target_id") == "foe", tag + "ein Spielerziel bleibt unberuehrt: '%s'" % _target(env))
+	env.flow.free()
+
+
+## Fall 21 (Nachbesserung 2, K1): Zielen im Schweben rutscht nicht auf den Gegner zu (Lage aendert sich um weniger als 0,1 Felder).
+func _case_21() -> void:
+	var tag := "[21 Schweben ohne Kriechen] "
+	var env: Dictionary = _build({"foe":Vector2i(10, 15)}, ["foe"])
+	env.mission_root.request_air_support_takeoff("ship")
+	env.transport.parked["ship"] = false
+	_tick(env, 3.0)
+	var pos0: Vector2 = _pose(env, "ship").position_plane
+	env.mission_root.request_air_support_attack_order({"craft_id":"ship", "target_unit_id":"foe", "request_id":"ui-fire:21"})
+	var far := 0.0
+	var turned := 0.0
+	var heading0: float = float(_pose(env, "ship").heading_rad)
+	for _s in range(40):
+		_tick(env, 0.2)
+		far = maxf(far, Vector2(_pose(env, "ship").position_plane).distance_to(pos0))
+		turned = maxf(turned, absf(wrapf(float(_pose(env, "ship").heading_rad) - heading0, -PI, PI)))
+	_check(turned > deg_to_rad(20.0), tag + "Aufbau: die Nase dreht (%.0f Grad)" % rad_to_deg(turned))
+	_check(far < 0.1, tag + "die Lage aendert sich beim Drehen um weniger als 0,1 Felder (%.3f)" % far)
+	env.flow.free()
+
+
+## Fall 22 (Nachbesserung 2, K2/K3): Liste der Systemvorsaetze; cas_hold im Snapshot.
+func _case_22() -> void:
+	var tag := "[22 Kennungen] "
+	var env: Dictionary = _build({}, [])
+	for id in ["air-return:x", "air-role-cas-lost:x", "air-role-nopilot:x", "air-break-off:x", "ground-fire-break-off:x", "shootdown-stop:x"]:
+		_check(env.mission_root._air_system_request(id), tag + "Systemkennung: " + id)
+	for id in ["air-support-order:x", "air-support-fire:x", "air-support-cease:x", "ui-air-stop:x", "ui-air-role-clear:x", "ui-fire:x", ""]:
+		_check(not env.mission_root._air_system_request(id), tag + "Spielerkennung: '%s'" % id)
+	_circle(env, "cas", "c22")
+	_check(not bool(env.mission_root.get_air_support_role_snapshot("ship").get("cas_hold", true)), tag + "K2: cas_hold im Snapshot, anfangs false")
+	env.mission_root.request_air_support_cease_fire("ship", "air-support-cease:22")
+	_check(bool(env.mission_root.get_air_support_role_snapshot("ship").get("cas_hold", false)), tag + "K3: ein Feuerstopp des Adapters haelt CAS an, Snapshot cas_hold true")
+	env.flow.free()
+
+
+## Nur zur Diagnose (Nachbesserung 2, B): Zustand der Ausrichtung alle 0,2 s.
+func _trace(env: Dictionary, label: String) -> void:
+	var pose: Dictionary = _pose(env, "ship")
+	var goal: Dictionary = Dictionary(Dictionary(env.combat.get_flight_controls().get("ship", {})).get("goal", {}))
+	var desired: Variant = env.mission_root._air_attack_target_plane("ship")
+	var err := -1.0
+	if desired != null: err = rad_to_deg(absf(wrapf((Vector2(desired) - Vector2(pose.position_plane)).angle() - float(pose.heading_rad), -PI, PI)))
+	print("AIR_CAS_ROLE TRACE %s t=%d face=%s err=%.1f w=%.3f wp=%d status=%s" % [label, int(env.tick), str(goal.has("face_plane")), err, float(pose.angular_velocity), int(_sortie(env).get("waypoint_index", -1)), String(env.combat.get_flight_status("ship").get("reason", ""))])
+
+
+## Beobachtet den Flug: laengste Zeit ohne Lageaenderung bei Tempo oder Drall ueber 0,05, und Zahl der Wegpunktwechsel.
+func _watch(env: Dictionary, seconds: float, st: Dictionary) -> void:
+	for _i in range(int(round(seconds / DT))):
+		_tick(env, DT)
+		var pose: Dictionary = _pose(env, "ship")
+		var moving: bool = Vector2(pose.velocity_plane).length() > 0.05 or absf(float(pose.angular_velocity)) > 0.05
+		if st.has("pos") and Vector2(pose.position_plane).distance_to(st.pos) < 0.0005 and absf(wrapf(float(pose.heading_rad) - float(st.heading), -PI, PI)) < 0.0005 and moving: st["still"] = float(st.get("still", 0.0)) + DT
+		else: st["still"] = 0.0
+		st["max_still"] = maxf(float(st.get("max_still", 0.0)), float(st.still))
+		st["pos"] = Vector2(pose.position_plane)
+		st["heading"] = float(pose.heading_rad)
+		var wp: int = int(_sortie(env).get("waypoint_index", -1))
+		if st.has("wp") and wp != int(st.wp): st["changes"] = int(st.get("changes", 0)) + 1
+		st["wp"] = wp
+
+
 func _initialize() -> void:
 	_case_1()
 	_case_2()
@@ -517,5 +695,11 @@ func _initialize() -> void:
 	_case_14()
 	_case_15()
 	_case_16()
+	_case_17()
+	_case_18()
+	_case_19()
+	_case_20()
+	_case_21()
+	_case_22()
 	print("AIR_CAS_ROLE passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
