@@ -277,6 +277,8 @@ static func publish(owner: Node, candidate: Dictionary) -> void:
 	if candidate.bindings.has("presence_bindings"):
 		for id in candidate.bindings.presence_bindings:
 			candidate.bindings.actors[id].set_meta("dropship_embarked", candidate.bindings.presence_bindings[id])
+			# Luftrollen 5b-1: wie beim echten Einsteigen (simulation_root _publish_hex_embarked_actors): eingeschifft heisst unsichtbar.
+			if candidate.bindings.presence_bindings[id] and candidate.bindings.actors[id].visible: candidate.bindings.actors[id].visible = false
 
 static func bad(reason: String) -> Dictionary:
 	return {"ok":false, "reason":reason}

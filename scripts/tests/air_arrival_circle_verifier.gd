@@ -53,8 +53,10 @@ class FixTransport extends Node:
 	# Das Schiff war nie gelandet: kein "geparkt". Das ist der Unterschied zum Start (request_air_support_takeoff).
 	func get_campaign_air_support_pilot_guard(_craft_id: String) -> Dictionary:
 		return {"ok":true, "pilot_unit_id":"pilot"} if boarded else {"ok":false, "reason":"pilot_boarding_pending"}
-	func _is_parked_campaign_dropship(_craft_id: String) -> bool: return false
-	func _campaign_landed_craft_position(_craft_id: String) -> Vector2: return Vector2.ZERO
+	var parked := false
+	var parked_position := Vector2.ZERO
+	func _is_parked_campaign_dropship(_craft_id: String) -> bool: return parked
+	func _campaign_landed_craft_position(_craft_id: String) -> Vector2: return parked_position
 	func _ground_ship_touchdown_ready(_id: String, _position: Vector2, _visual: bool) -> bool: return landing_clear
 
 
@@ -66,6 +68,7 @@ func _run() -> void:
 	await _part_flak_arrival()
 	if not "--no-real" in OS.get_cmdline_user_args():
 		await _part_real()
+		await _part_ground_sortie()
 	await _finish()
 
 
@@ -444,13 +447,12 @@ func _part_real() -> void:
 	var capture: Dictionary = load("res://scripts/mission/campaign_active_mission_capture.gd").capture_components(_flow, _runtime)
 	print("CAPTURE_CIRCLING reason=", capture.get("reason", ""))
 	_check(not bool(capture.get("ok", true)), "(f) der Einsatz-Speicherpunkt wird waehrend des Kreisens abgelehnt (Grund: " + String(capture.get("reason", "")) + ")")
-	# E10 finding: with the troop still aboard the earlier gate mission_crew_not_deployed answers first; transport_not_grounded
-	# is only reached with a deployed crew.
+	# Luftrollen 5b-1: ein fliegendes Schiff bleibt gesperrt, jetzt mit eigenem Grund und Satz (air_sortie_airborne), auch mit Trupp an Bord.
 	# The sentence must come from the player-facing source (campaign_save_projection.gd, BASE_TEXTS) for the reason the projection reports.
 	var shown_text: String = String(projection.get("save_blocked_text", ""))
 	var source_text: String = String(load("res://scripts/meta/campaign_save_projection.gd").call("blocked_text", String(projection.get("save_blocked_reason", ""))))
-	_check(String(capture.get("reason", "")) in ["mission_crew_not_deployed", "transport_not_grounded"] and shown_text == source_text and shown_text != GENERIC_SAVE_TEXT, "(f) Speichern gesperrt (Grund " + String(capture.get("reason", "")) + "); der Spieler liest: " + shown_text)
-	_check(shown_text == "Die Besatzung ist noch nicht ausgestiegen. Nach dem Aussteigen erneut speichern.", "(f) der Spieler liest den Satz zu mission_crew_not_deployed: " + shown_text)
+	_check(String(capture.get("reason", "")) == "air_sortie_airborne" and String(projection.get("save_blocked_reason", "")) == "air_sortie_airborne" and shown_text == source_text and shown_text != GENERIC_SAVE_TEXT, "(f) Speichern gesperrt (Grund " + String(capture.get("reason", "")) + ", Anzeige " + String(projection.get("save_blocked_reason", "")) + "); der Spieler liest: " + shown_text)
+	_check(shown_text == "Speichern geht gerade nicht: Ein Schiff ist in der Luft. Nach der Landung erneut speichern.", "(f) der Spieler liest den Satz zu air_sortie_airborne: " + shown_text)
 
 	# h) Auftragsende / Heimflug, solange das Schiff kreist.
 	var circling_extract: Dictionary = controller.call("request_campaign_extraction", _craft_id)
@@ -473,6 +475,27 @@ func _part_real() -> void:
 	var still_aboard := true
 	for id in _crew_ids: still_aboard = still_aboard and embarked.has(id)
 	_check(still_aboard, "(E7) geparkt, Trupp noch an Bord")
+
+	# Luftrollen 5b-1: aus dem Kreisen gelandet (Schiff am Boden, kein Akteur, aber Systemeintrag) bleibt gesperrt: eigener Grund, eigener Satz, kein Stand.
+	var arrival_capture_script = load("res://scripts/mission/campaign_active_mission_capture.gd")
+	var arrival_holder := {"value": {}}
+	await _wait(func():
+		arrival_holder.value = arrival_capture_script.capture_components(_flow, _runtime)
+		return String(Dictionary(arrival_holder.value).get("reason", "")) == "air_arrival_landed_unsupported", 20000, "(g0) aus dem Kreisen gelandet: der Einsatzstand wird mit eigenem Grund abgelehnt")
+	var arrival_capture: Dictionary = arrival_holder.value
+	_check(not bool(arrival_capture.get("ok", true)) and String(arrival_capture.get("reason", "")) == "air_arrival_landed_unsupported", "(g0) Grund air_arrival_landed_unsupported (war: " + String(arrival_capture.get("reason", "")) + ")")
+	var arrival_projection: Dictionary = _flow.get("_campaign_start").call("get_save_projection", _flow, _runtime)
+	var arrival_text: String = String(arrival_projection.get("save_blocked_text", ""))
+	_check(String(arrival_projection.get("save_blocked_reason", "")) == "air_arrival_landed_unsupported" and arrival_text == "Speichern geht gerade nicht: Dieses Schiff ist aus dem Kreisen gelandet. Nach dem nächsten Start vom Boden geht es wieder.", "(g0) der Spieler liest den Satz: " + arrival_text)
+	var arrival_path: String = load("res://scripts/meta/campaign_active_checkpoint_store.gd").DEFAULT_PATH
+	var arrival_file_before: bool = FileAccess.file_exists(arrival_path)
+	var arrival_time_before: int = FileAccess.get_modified_time(arrival_path) if arrival_file_before else 0
+	current_scene = _flow
+	var arrival_saved: Dictionary = root.get_node("GlobalEscapeMenu").call("save_current_mission_slot")
+	_check(not bool(arrival_saved.get("ok", true)) and FileAccess.file_exists(arrival_path) == arrival_file_before and (not arrival_file_before or FileAccess.get_modified_time(arrival_path) == arrival_time_before), "(g0) das Speichern ueber das Menue scheitert, es entsteht kein Einsatzstand: " + str(arrival_saved))
+	controller.call("_refresh_mission_dropship_panel")
+	details = mission.get_node_or_null("TacticalUI/MissionDropshipPanel/CompactCard/Contents/Header/DetailsButton")
+	embarked = controller.get("_embarked_unit_ids")
 
 	# Trupp absetzen ueber den vorhandenen Weg.
 	var deploy: Dictionary = controller.call("request_campaign_crew_deployment", _craft_id)
@@ -534,6 +557,148 @@ func _part_real() -> void:
 	var destination := String(_campaign().get("selected_location_id", ""))
 	var destination_orbit := String(Dictionary(_space().get("location_orbits", {})).get(destination, ""))
 	await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == destination_orbit, 60000, "(b) der Heimflug beginnt: das Schiff verlaesst den Einsatzort in die Umlaufbahn")
+
+
+# ---------------------------------------------------------------- Teil 4
+# Luftrollen 5b-1: normal gelandet, Pilot steigt ein, Luft-Einsatz vom Boden, wieder gelandet (kein Kreisen). Das Schiff bleibt ein inaktiver Akteur.
+func _part_ground_sortie() -> void:
+	print("--- Teil 4 (echte Kampagne, Luft-Einsatz vom Boden)")
+	if is_instance_valid(_flow):
+		_flow.queue_free()
+		await process_frame
+	_crew_ids.clear()
+	_saw_landed = false
+	_circle_hooks = false
+	_configure_entry()
+	_flow = FLOW.instantiate(); root.add_child(_flow); current_scene = _flow
+	await process_frame
+	_screen = _flow.get_node("HomebaseScreen")
+	_runtime = _flow.get("_singleplayer_runtime")
+	if not await _prepare_initial_base(): return
+	var craft: Dictionary = _screen.call("get_operations_snapshot").get("selected_craft", {})
+	_craft_id = String(craft.get("id", "")); _pilot_id = String(craft.get("pilot_id", ""))
+	var payload: Array = craft.get("payload_fireteam_ids", [])
+	if not _check(not _craft_id.is_empty() and not payload.is_empty(), "(g) echtes Schiff und Trupp sind da"): return
+	_team_id = String(payload[0])
+	for team: Dictionary in Array(_screen.call("get_operations_snapshot").get("fireteams", [])):
+		if String(team.get("id", "")) == _team_id:
+			for member: Dictionary in Array(team.get("members", [])): _crew_ids.append(String(member.id))
+	if not _check(_screen.call("request_operation", "accept_job", {"job_id":"satellite_recovery", "request_id":"ground:accept"}).get("ok", false), "(g) Auftrag angenommen"): return
+	if not _check(_screen.call("request_operation", "select_destination", {"location_id":"satellite_crash", "job_id":"satellite_recovery", "request_id":"ground:destination"}).get("ok", false), "(g) Ziel gewaehlt"): return
+	if not await _launch_and_land("satellite_recovery", "res://maps/satellite_crash_site.json"): return
+	var mission: Node = _flow.get("_active_mission")
+	var controller: Node = mission.get_node("TacticalController")
+	var root_owner: Node = mission.get_node("SimulationRoot")
+	controller.call("_refresh_mission_dropship_panel")
+	var details: Button = mission.get_node_or_null("TacticalUI/MissionDropshipPanel/CompactCard/Contents/Header/DetailsButton")
+	if details != null: details.pressed.emit()
+	await process_frame
+	var pilot_button: Button = _air_button(mission, "air_pilot_board")
+	if not _check(pilot_button != null and not pilot_button.disabled, "(g) Knopf Pilot einsteigen vorhanden"): return
+	pilot_button.pressed.emit()
+	if not await _wait(func(): return bool(controller.call("get_campaign_air_support_pilot_guard", _craft_id).get("ok", false)), 8000, "(g) der Pilot ist an Bord"): return
+	var start_button: Button = _air_button(mission, "air_start")
+	if not _check(start_button != null and not start_button.disabled, "(g) Knopf Start vorhanden"): return
+	start_button.pressed.emit()
+	if not _check(root_owner.call("is_air_support_craft_airborne", _craft_id), "(g) das Schiff ist vom Boden gestartet"): return
+	var ground_entry: Dictionary = Dictionary(root_owner.get("_air_support_sorties")).get(_craft_id, {})
+	_check(bool(ground_entry.get("was_inactive", false)), "(g) vom Boden gestartet: der Sortie-Eintrag steht auf was_inactive = " + str(ground_entry.get("was_inactive", "-")))
+	var airborne_capture: Dictionary = load("res://scripts/mission/campaign_active_mission_capture.gd").capture_components(_flow, _runtime)
+	_check(not bool(airborne_capture.get("ok", true)) and String(airborne_capture.get("reason", "")) == "air_sortie_airborne", "(g) im Flug bleibt der Stand gesperrt (air_sortie_airborne): " + String(airborne_capture.get("reason", "")))
+	var land_button: Button = _air_button(mission, "air_land")
+	if not _check(land_button != null, "(g) Knopf Landen vorhanden"): return
+	land_button.pressed.emit()
+	if not _check(not root_owner.call("is_air_support_craft_airborne", _craft_id) and controller.call("_is_parked_campaign_dropship", _craft_id), "(g) das Schiff ist wieder geparkt"): return
+	var ground_combat: RefCounted = _runtime.get("_simulation").get("_space_combat_state")
+	_check(ground_combat.get_actor(_craft_id) == null and ground_combat.get_inactive_actor(_craft_id) != null, "(g) gelandet: das Schiff ist ein inaktiver Akteur, Akteurbestand und Systemblock stimmen ueberein")
+	var boarded: Dictionary = controller.call("request_campaign_crew_boarding", _craft_id)
+	_check(bool(boarded.get("ok", false)) or String(boarded.get("reason", "")) == "pilot_boarding_pending", "(g) der Trupp beginnt das Einsteigen: " + str(boarded))
+	if not await _wait(func():
+		var aboard_now: Dictionary = controller.get("_embarked_unit_ids")
+		for crew_id in _crew_ids:
+			if not aboard_now.has(crew_id): return false
+		return bool(controller.call("get_campaign_pilot_flight_guard", _craft_id).get("ok", false)), 90000, "(g) Trupp und Pilot sind an Bord"): return
+	# Luftrollen 5b-1 (g1, g1b): gelandet, Trupp und Pilot noch an Bord. Der Einsatzstand traegt den Luftblock; Trockenpruefung und atomares Laden.
+	var capture_script = load("res://scripts/mission/campaign_active_mission_capture.gd")
+	var serial_before: int = int(root_owner.get("_air_sortie_serial"))
+	var rng_before: int = int(root_owner.get("_air_ground_rng_state"))
+	var aboard_before: Array = Dictionary(controller.get("_embarked_unit_ids")).keys()
+	aboard_before.sort()
+	var expected_roster: Array = _crew_ids.duplicate()
+	if not expected_roster.has(_pilot_id): expected_roster.append(_pilot_id)
+	expected_roster.sort()
+	var g1_holder := {"value": {}}
+	await _wait(func():
+		g1_holder.value = capture_script.capture_components(_flow, _runtime)
+		return bool(Dictionary(g1_holder.value).get("ok", false)), 20000, "(g1) der Einsatzstand mit Trupp und Pilot an Bord ist speicherbar (keine ausstehende Arbeit mehr)")
+	var g1_capture: Dictionary = g1_holder.value
+	if not _check(bool(g1_capture.get("ok", false)), "(g1) gelandet, Trupp und Pilot an Bord: der Einsatzstand wird aufgenommen (Grund: " + String(g1_capture.get("reason", "")) + ")"): return
+	var g1_components: Dictionary = g1_capture.components
+	var air_block: Dictionary = Dictionary(g1_components.get("air_sortie", {}))
+	_check(String(air_block.get("schema", "")) == "air_sortie_checkpoint.v1", "(g1) der Stand traegt den Luftblock air_sortie: " + str(air_block.keys()))
+	var g1_active_ids: Array = Array(g1_components.get("active_ids", [])).duplicate()
+	g1_active_ids.sort()
+	_check(g1_active_ids == expected_roster and not aboard_before.is_empty(), "(g1) active_ids ist der ganze Besuchskader samt Pilot: " + str(g1_active_ids))
+	# (g1b) Trockenpruefung und atomares Laden gegen einen verdorbenen Luftblock.
+	var validator = load("res://scripts/mission/campaign_active_checkpoint_validation.gd")
+	var g1_wire: Dictionary = JSON.parse_string(JSON.stringify(g1_components, "", true, true))
+	var dry_good: Dictionary = validator.validate_live({"schema":"campaign_active_checkpoint.v1", "components":g1_wire}, _flow, _runtime)
+	_check(bool(dry_good.get("ok", false)), "(g1b) die Trockenpruefung nimmt den echten Stand mit Luftblock und Eingeschifften an: " + str(dry_good.get("reason", "ok")))
+	var spoiled: Dictionary = g1_wire.duplicate(true)
+	if spoiled.has("air_sortie") and spoiled.air_sortie is Dictionary: spoiled.air_sortie["payload"] = {}
+	var dry_bad: Dictionary = validator.validate_live({"schema":"campaign_active_checkpoint.v1", "components":spoiled}, _flow, _runtime)
+	_check(not bool(dry_bad.get("ok", true)) and String(dry_bad.get("reason", "")) == "invalid_air_sortie_checkpoint", "(g1b) Trockenpruefung lehnt den verdorbenen Luftblock ab: " + str(dry_bad.get("reason", "ok")))
+	var scene_factory = load("res://scripts/mission/campaign_active_scene_preflight.gd")
+	var transaction = load("res://scripts/mission/campaign_active_world_transaction.gd")
+	var current_home: Dictionary = load("res://scripts/meta/campaign_checkpoint_store.gd").load_checkpoint()
+	var staged: Dictionary = scene_factory.instantiate_scene(spoiled, current_home.get("payload", {}))
+	if _check(bool(staged.get("ok", false)), "(g1b) die versteckte Szene fuer die Ladepruefung entsteht: " + str(staged.get("reason", "ok"))):
+		var staged_scene: Node = staged.scene
+		staged_scene.hide()
+		staged_scene.get_node("SimulationRoot").process_mode = Node.PROCESS_MODE_ALWAYS
+		staged_scene.get_node("CombatLoopDriver").process_mode = Node.PROCESS_MODE_ALWAYS
+		root.add_child(staged_scene)
+		for _frame in range(5): await physics_frame
+		staged_scene.get_node("SimulationRoot").process_mode = Node.PROCESS_MODE_DISABLED
+		staged_scene.get_node("CombatLoopDriver").process_mode = Node.PROCESS_MODE_DISABLED
+		var joined_bad: Dictionary = transaction.prepare(spoiled, _runtime, staged_scene)
+		_check(not bool(joined_bad.get("ok", true)) and String(joined_bad.get("reason", "")) == "invalid_air_sortie_checkpoint", "(g1b) das Laden prueft den verdorbenen Luftblock vor dem Veroeffentlichen und lehnt ab: " + str(joined_bad.get("reason", "ok")))
+		_check(_flow.get("_active_mission") == mission and Dictionary(root_owner.get("_air_support_sorties")).is_empty() and int(root_owner.get("_air_sortie_serial")) == serial_before, "(g1b) nach der Ablehnung ist nichts veroeffentlicht: die laufende Mission bleibt")
+		var joined_good: Dictionary = transaction.prepare(g1_wire, _runtime, staged_scene)
+		_check(bool(joined_good.get("ok", false)), "(g1b) derselbe Stand mit heilem Luftblock wird vom Laden angenommen: " + str(joined_good.get("reason", "ok")))
+		staged_scene.queue_free()
+		await process_frame
+	# (g1) Speichern ueber das Menue, Fortsetzen, Nachpruefung.
+	current_scene = _flow
+	var g1_saved: Dictionary = root.get_node("GlobalEscapeMenu").call("save_current_mission_slot")
+	if not _check(bool(g1_saved.get("ok", false)), "(g1) save_current_mission_slot gelingt mit Trupp und Pilot an Bord: " + str(g1_saved)): return
+	var g1_file: Variant = JSON.parse_string(FileAccess.get_file_as_string(load("res://scripts/meta/campaign_active_checkpoint_store.gd").DEFAULT_PATH))
+	var file_components: Dictionary = Dictionary(g1_file).get("components", {}) if g1_file is Dictionary else {}
+	var file_ids: Array = Array(file_components.get("active_ids", [])).duplicate()
+	file_ids.sort()
+	_check(Dictionary(file_components.get("air_sortie", {})).get("schema") == "air_sortie_checkpoint.v1" and file_ids == expected_roster, "(g1) die Datei traegt air_sortie und den ganzen Besuchskader")
+	_flow.queue_free()
+	await process_frame
+	START.request_start(self, "campaign", "continue")
+	_flow = FLOW.instantiate(); root.add_child(_flow); current_scene = _flow
+	await process_frame
+	_screen = _flow.get_node("HomebaseScreen")
+	_runtime = _flow.get("_singleplayer_runtime")
+	if not await _wait(func(): return bool(_flow.get_meta("campaign_active_restore_complete", false)) or _flow.has_meta("campaign_active_restore_error"), 60000, "(g1) die Fortsetzung kommt zu einer Entscheidung"): return
+	if not _check(bool(_flow.get_meta("campaign_active_restore_complete", false)) and not _flow.has_meta("campaign_active_restore_error") and is_instance_valid(_flow.get("_active_mission")), "(g1) der Einsatz wird rekonstruiert, kein campaign_active_restore_error: " + str(_flow.get_meta("campaign_active_restore_error", {}))): return
+	mission = _flow.get("_active_mission")
+	controller = mission.get_node("TacticalController")
+	root_owner = mission.get_node("SimulationRoot")
+	_check(bool(controller.call("_is_parked_campaign_dropship", _craft_id)) and not bool(root_owner.call("is_air_support_craft_airborne", _craft_id)), "(g1) nach dem Laden ist das Schiff geparkt und nicht in der Luft")
+	var aboard_after: Array = Dictionary(controller.get("_embarked_unit_ids")).keys()
+	aboard_after.sort()
+	_check(aboard_after == aboard_before, "(g1) dieselben Akteure sind eingeschifft: " + str(aboard_after))
+	var restored_units: Node = mission.get_node("UnitRegistry")
+	for id in aboard_before:
+		var person: Node2D = restored_units.get_unit(id) as Node2D
+		_check(is_instance_valid(person) and bool(person.get_meta("dropship_embarked", false)) and not person.visible and root_owner.call("get_hex_unit_state", id).is_empty() and not Dictionary(controller.get("_deployed_unit_ids")).has(id), "(g1) eingeschifft nach dem Laden: Meta dropship_embarked, unsichtbar, nicht auf dem Hex-Boden, nicht abgesetzt: " + String(id))
+	_check(int(root_owner.get("_air_sortie_serial")) == serial_before and int(root_owner.get("_air_ground_rng_state")) == rng_before, "(g1) Zaehler und Zufallsstrom des Luftkerns bleiben erhalten (%d / %d)" % [int(root_owner.get("_air_sortie_serial")), int(root_owner.get("_air_ground_rng_state"))])
+
 
 
 # ---------------------------------------------------------------- Haken in den echten Ablauf

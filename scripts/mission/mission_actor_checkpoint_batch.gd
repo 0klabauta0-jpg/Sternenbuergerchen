@@ -5,15 +5,26 @@ class PreparedActors extends RefCounted:
 	pass
 var _preparations: Dictionary = {}
 
-func export_actors(owner: Node) -> Dictionary:
+func export_actors(owner: Node, staged_ids: Array = []) -> Dictionary:
 	if not is_instance_valid(owner) or not owner.has_method("get_unit_registry"): return _reject("actor_owner_unavailable")
 	var registry: Node = owner.get_unit_registry()
 	if not is_instance_valid(registry): return _reject("actor_registry_unavailable")
 	var actors := {}
-	for actor in registry.get_all_units():
+	var units: Array = registry.get_all_units()
+	# Luftrollen 5b-1: Akteure, die nie abgesetzt wurden (Ankunft im Kreisen), sind dem Root bekannt, stehen aber nicht im Register; sie werden ueber ihre Kennung mitgesichert.
+	var staged := {}
+	if not staged_ids.is_empty():
+		units = units.duplicate()
+		for staged_id in staged_ids:
+			if typeof(staged_id) != TYPE_STRING or registry.has_unit(staged_id): continue
+			var known: Variant = owner.call("_resolve_known_unit_for_contract", staged_id) if owner.has_method("_resolve_known_unit_for_contract") else null
+			if not is_instance_valid(known): return _reject("actor_identity_mismatch")
+			units.append(known)
+			staged[staged_id] = true
+	for actor in units:
 		if not is_instance_valid(actor) or actor.is_queued_for_deletion() or not actor.has_method("export_mission_actor_checkpoint"): return _reject("actor_checkpoint_unavailable")
 		var id := String(actor.get("unit_id"))
-		if id.is_empty() or actors.has(id) or registry.get_unit(id) != actor: return _reject("actor_identity_mismatch")
+		if id.is_empty() or actors.has(id) or (not staged.has(id) and registry.get_unit(id) != actor): return _reject("actor_identity_mismatch")
 		var state: Dictionary = actor.export_mission_actor_checkpoint()
 		if state.get("ok", true) == false: return state
 		actors[id] = state

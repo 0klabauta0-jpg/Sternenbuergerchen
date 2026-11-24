@@ -17,6 +17,13 @@ static func prepare(data: Dictionary, adapter: Node, scene: Node) -> Dictionary:
 	var mission: Dictionary = SCENE.prepare(scene,data)
 	if not mission.get("ok",false): return mission
 	var prepared := {"ok":true,"adapter":adapter,"root":root,"adapter_stamp":adapter_stamp,"world":world,"scene":mission,"campaign":world.campaign.export_state(),"supply":world.supply.export_state(),"onboarding":world.onboarding.export_state(),"equipment":world.equipment.export_state(),"market":world.market.export_state(),"wings":world.wing.export_checkpoint_state(),"systems":world.space.export_systems_checkpoint()}
+	# Luftrollen 5b-1: der Luftblock wird gegen die ausdruecklich uebergebene Bindung (Kandidaten der Welt) geprueft; veroeffentlicht wird erst im Schluss von commit.
+	if data.has("air_sortie"):
+		var air: Dictionary = prepare_air(data.air_sortie,String(data.identity.location_id),scene,world,root)
+		if not air.get("ok",false): return air
+		prepared["air_state"] = data.air_sortie
+		prepared["air_location"] = String(data.identity.location_id)
+		prepared["air"] = air
 	var checked := validate(prepared)
 	return prepared if checked.get("ok",false) else checked
 
@@ -32,7 +39,17 @@ static func validate(candidate: Dictionary) -> Dictionary:
 	if not checked.get("ok",false): return checked
 	checked = world.space.validate_navigation_checkpoint_candidate(world.navigation,world.control_bindings)
 	if not checked.get("ok",false): return checked
+	if candidate.has("air"):
+		checked = prepare_air(candidate.air_state,candidate.air_location,candidate.scene.scene,world,root)
+		if not checked.get("ok",false): return checked
 	return SCENE.validate(candidate.scene)
+
+## Luftrollen 5b-1: Pruefung des Luftblocks am Root der Einsatzszene gegen die Kandidaten der Welt-Vorbereitung (Flotte, Rotten, Kampf, Ausruestung) mit der Quelle
+## (Kampagnen-Root) und dem Ort aus der Identitaet. Bindet nichts und schreibt nichts; auch fuer die Trockenpruefung beim Speichern (validate_live).
+static func prepare_air(air_state: Dictionary, location_id: String, mission_scene: Node, world: Dictionary, source: Node) -> Dictionary:
+	var mission_root: Node = mission_scene.get_node_or_null("SimulationRoot") if is_instance_valid(mission_scene) else null
+	if not is_instance_valid(mission_root) or not mission_root.has_method("prepare_air_sortie_checkpoint"): return _bad("mission_scene_unavailable")
+	return mission_root.prepare_air_sortie_checkpoint(air_state,{"fleet":world.fleet,"wings":world.wing,"combat":world.space,"equipment":world.equipment,"source":source,"location_id":location_id})
 
 # The caller holds the scene frozen and has installed it under the hidden
 # mission host. The caller must have completed all bootstrap checks.
@@ -98,7 +115,16 @@ static func commit(candidate: Dictionary, data: Dictionary) -> Dictionary:
 	var finalized: Dictionary = SCENE.finalize(candidate.scene)
 	if not finalized.get("ok",false) or finalized.get("context_changed",false): return _bad("active_finalize_changed")
 	flow.call("_remember_location",scene)
-	adapter.call("bind_mission_air_support",scene)
+	var air_bound: Variant = adapter.call("bind_mission_air_support",scene)
+	if candidate.has("air"):
+		# Luftrollen 5b-1: Veroeffentlichung des Luftblocks direkt nach der Bindung. Vorher geprueft (prepare/validate), hier scheitert nichts Erwartetes;
+		# ein Fehlschlag wird wie active_finalize_changed als Ladefehler gemeldet. Ein Gegner ohne Platz wartet in der Warteliste (nur Warnung und Merker).
+		var air_result: Dictionary = {"ok":false,"reason":"no_source"}
+		if air_bound is Dictionary and air_bound.get("ok",false): air_result = scene.get_node("SimulationRoot").publish_air_sortie_checkpoint(candidate.air.candidate)
+		if not air_result.get("ok",false):
+			if air_result.get("reason") != "hostile_not_admitted": return _bad("active_air_sortie_unpublished")
+			push_warning("Luftrollen 5b-1: Gegner nach dem Laden ohne Platz, er wartet: " + str(air_result.get("failed_hostile_ids",[])))
+			flow.set_meta("campaign_active_air_hostiles_waiting",Array(air_result.get("failed_hostile_ids",[])).duplicate())
 	adapter.call("register_location_resources",scene,location)
 	flow.call("_connect_planning_state_bridge",scene)
 	flow.call("_connect_mission_end",scene)

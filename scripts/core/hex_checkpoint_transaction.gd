@@ -3,6 +3,7 @@ extends RefCounted
 const SCHEMA="hex_tactical_checkpoint.v1"
 const RNG = preload("res://scripts/core/gameplay_rng_state.gd")
 const ACTOR_BATCH = preload("res://scripts/mission/mission_actor_checkpoint_batch.gd")
+const EMBARKED_CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
 class PreparedCheckpoint extends RefCounted:
 	pass
 var _owner:WeakRef
@@ -74,7 +75,7 @@ static func validate_shape(state:Variant)->Dictionary:
 	if not _valid_transport(state.transport):return {"ok":false,"reason":"invalid_hex_transport"}
 	return {"ok":true}
 
-func prepare(state:Dictionary, actor_checkpoint:Dictionary={})->Dictionary:
+func prepare(state:Dictionary, actor_checkpoint:Dictionary={}, embarked_ids:Array=[])->Dictionary:
 	var checked:Dictionary=guard()
 	if not checked.ok:return checked
 	checked=validate_shape(state)
@@ -140,6 +141,15 @@ func prepare(state:Dictionary, actor_checkpoint:Dictionary={})->Dictionary:
 				registry.discard_checkpoint_preparation_id(terrain.prepared.get_instance_id())
 				return _reject("mission_movement_pending")
 			positions[id] = projection.position_world
+		# Luftrollen 5b-1: Eingeschiffte stehen nicht im Bodenstand und haben dort keine Lage; ihre Lage ist die gesicherte aus dem eigenen Akteur-Block
+		# (der Transportblock belegt "an Bord" unabhaengig). Wer im Bodenstand steht, ist nicht eingeschifft.
+		for id in embarked_ids:
+			var embarked_record:Variant=Dictionary(actor_checkpoint.get("actors",{})).get(id)
+			var embarked_data:Dictionary=EMBARKED_CODEC.decode_value(embarked_record.get("payload")) if embarked_record is Dictionary else {}
+			if typeof(id)!=TYPE_STRING or target_ground.has_unit(id) or not embarked_data.get("ok",false) or not embarked_data.value is Dictionary or not embarked_data.value.get("position") is Vector2:
+				registry.discard_checkpoint_preparation_id(terrain.prepared.get_instance_id())
+				return _reject("checkpoint_embarked_on_ground" if typeof(id)==TYPE_STRING and target_ground.has_unit(id) else "invalid_actor_batch")
+			positions[id]=embarked_data.value.position
 		full_actors = ACTOR_BATCH.new()
 		var actor_result: Dictionary = full_actors.prepare_restore(owner, actor_checkpoint, positions)
 		if not actor_result.get("ok", false):

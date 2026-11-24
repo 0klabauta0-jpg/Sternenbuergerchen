@@ -7,7 +7,7 @@ class PreparedGroundActors extends RefCounted:
 	pass
 var _preparations: Dictionary = {}
 
-func prepare_restore(sim: Node, terrain: Node, ground_state: Dictionary, actor_state: Dictionary, active_ids: Array, lifecycle_state:Dictionary={}) -> Dictionary:
+func prepare_restore(sim: Node, terrain: Node, ground_state: Dictionary, actor_state: Dictionary, active_ids: Array, lifecycle_state:Dictionary={}, embarked_ids:Array=[]) -> Dictionary:
 	for id in _preparations.keys():
 		if _preparations[id].handle.get_ref()==null: _preparations.erase(id)
 	if _preparations.size() >= 32: return {"ok":false,"reason":"ground_actor_capacity"}
@@ -19,7 +19,7 @@ func prepare_restore(sim: Node, terrain: Node, ground_state: Dictionary, actor_s
 	# itself as its own placement proof.
 	var actor_records: Variant = actor_state.get("actors")
 	if not actor_records is Dictionary or active_ids.size() != actor_records.size(): return {"ok":false,"reason":"actor_registry_mismatch"}
-	var prepared: Dictionary = sim.prepare_hex_checkpoint_restore(checkpoint, actor_state)
+	var prepared: Dictionary = sim.prepare_hex_checkpoint_restore(checkpoint, actor_state, embarked_ids)
 	if not prepared.get("ok",false): return prepared
 	var handle := PreparedGroundActors.new()
 	_preparations[handle.get_instance_id()] = {"handle":weakref(handle),"hex_owner":weakref(sim),"gp":prepared.prepared,"phase":"prepared"}

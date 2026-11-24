@@ -53,14 +53,36 @@ static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	var driver: Node = mission.get_node_or_null("CombatLoopDriver")
 	var setup: Node = mission.get_node_or_null("MissionSetup")
 	if not is_instance_valid(sim) or not is_instance_valid(terrain) or not is_instance_valid(controller) or not is_instance_valid(driver) or not is_instance_valid(setup): return _reject("mission_owner_unavailable")
+	# Luftrollen 5b-1: Nach einem Luft-Einsatz traegt der Stand einen Luftblock; erst dann gelten Eingeschiffte (Pilot, Trupp an Bord) als gesichert. Ohne Luftblock bleibt alles wie vorher.
+	var air: Dictionary = sim.export_air_sortie_checkpoint()
+	if air.get("ok", true) == false: return _reject("air_sortie_export_failed")
+	var has_air: bool = air.has("schema")
+	if has_air and not sim.get_air_sortie_craft_ids().is_empty(): return _reject("air_sortie_airborne")
+	# Luftrollen 5b-1: aus dem Kreisen gelandet (Schiff am Boden, weder aktiver noch inaktiver Akteur, Systemeintrag da) - der Stand liesse sich nicht laden; Aufgabe 5b-4.
+	var landed_space: Variant = runtime.get("_simulation").get("_space_combat_state") if is_instance_valid(runtime.get("_simulation")) else null
+	if landed_space != null and not landed_space.get_ship_systems(craft_id).is_empty() and landed_space.get_actor(craft_id) == null and landed_space.get_inactive_actor(craft_id) == null: return _reject("air_arrival_landed_unsupported")
 	var deployed: Variant = controller.get("_deployed_unit_ids")
+	if has_air:
+		# Besuchskader = am Boden abgesetzt + an Bord; jede Kennung in genau einer der beiden Gruppen.
+		var aboard: Variant = controller.get("_embarked_unit_ids")
+		if not deployed is Dictionary or not aboard is Dictionary: return _reject("mission_crew_unsupported")
+		var members := {}
+		for id in deployed: members[id] = deployed[id]
+		for id in aboard:
+			if members.has(id): return _reject("mission_crew_unsupported")
+			members[id] = aboard[id]
+		deployed = members
 	if not deployed is Dictionary or deployed.is_empty(): return _reject("mission_crew_not_deployed")
 	var active_ids: Array = deployed.keys()
 	active_ids.sort()
 	var registry: Node = sim.get_unit_registry()
-	if not is_instance_valid(registry) or registry.get_all_units().size() != active_ids.size(): return _reject("mission_crew_unsupported")
+	# Luftrollen 5b-1 (nur mit Luftblock): nie abgesetzte Eingeschiffte stehen nicht im Register; dann zaehlt jeder Registereintrag zum Kader und jede Kennung ist dem Root bekannt.
+	if not is_instance_valid(registry) or (not has_air and registry.get_all_units().size() != active_ids.size()): return _reject("mission_crew_unsupported")
+	if has_air:
+		for unit in registry.get_all_units():
+			if not is_instance_valid(unit) or not deployed.has(String(unit.get("unit_id"))): return _reject("mission_crew_unsupported")
 	for id in active_ids:
-		if typeof(id) != TYPE_STRING or deployed[id] != true or not is_instance_valid(registry.get_unit(id)): return _reject("mission_crew_unsupported")
+		if typeof(id) != TYPE_STRING or deployed[id] != true or not is_instance_valid(sim.call("_resolve_known_unit_for_contract", id) if has_air else registry.get_unit(id)): return _reject("mission_crew_unsupported")
 	if not active_ids.has(pilot): return _reject("mission_crew_unsupported")
 	var home: Dictionary = HOME_STORE.load_checkpoint()
 	if not home.get("ok",false): return home
@@ -136,7 +158,7 @@ static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	checked = market_candidate.restore_state(market_state)
 	if not checked.get("ok",false): return checked
 	var actors := ACTORS.new()
-	var actor_state: Dictionary = actors.export_actors(sim)
+	var actor_state: Dictionary = actors.export_actors(sim, active_ids if has_air else [])
 	if not actor_state.get("ok",false): return actor_state
 	if not sim.is_hex_ground_runtime_active(): return _reject("hex_ground_inactive")
 	var exported: Dictionary = sim.export_hex_checkpoint_state()
@@ -177,6 +199,7 @@ static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	var orbit: Dictionary = ORBIT.capture(runtime,orbit_bindings)
 	if orbit.get("schema")!="orbit_intent_checkpoint.v1": return orbit if orbit.get("ok",true)==false else _reject("orbit_checkpoint_unavailable")
 	var components := {"home_sha256":home_digest,"campaign_run_id":run.id,"identity":identity.duplicate(true),"pilot_id":pilot,"active_ids":active_ids,"roster":roster,"campaign":campaign_state,"supply":supply_state,"onboarding":onboarding_state,"equipment":equipment_state,"market":market_state,"fleet":fleet_state,"navigation":navigation,"systems":systems,"wings":wings,"actors":actor_state,"ground":ground_state,"lifecycle":lifecycle_state,"transport":transport,"root_receipts":root_receipts,"space_requests":requests.value,"route_bindings":{"pad":pad_bindings[craft_id],"departure_token":token_bindings[craft_id]},"base_personnel":base_state,"mission_config":mission_config,"orbit_intent":orbit}
+	if has_air: components["air_sortie"] = air
 	if not home_hex.is_empty(): components["home_hex_tactical"] = home_hex
 	return {"ok":true,"complete":false,"missing":["world_transaction","restore_scene"],"components":components}
 

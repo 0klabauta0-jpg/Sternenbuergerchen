@@ -821,6 +821,56 @@ func _case_12() -> void:
 	env.flow.free()
 
 
+## Fall 13 (Luftrollen 5b-1): ein Einsatz-Root ohne Missionsbindung prueft den Block gegen ausdruecklich uebergebene Bindung (Quelle, Ort, Flotte, Rotten, Kampf, Ausruestung);
+## publish prueft, dass die Bindung zur selben Quelle und zum selben Ort passt, und schreibt vorher nichts. Dazu get_air_sortie_craft_ids.
+func _case_13() -> void:
+	var tag := "[13 Bindung durch bindings] "
+	var env: Dictionary = _build(["ship"], {"ship":50.0})
+	if not _api(env, tag): return
+	var mission_root: Node = env.mission_root
+	_check(mission_root.has_method("get_air_sortie_craft_ids") and mission_root.call("get_air_sortie_craft_ids") == [], tag + "get_air_sortie_craft_ids: ohne Sortie leer")
+	_check(bool(_circle(env, "ship", Vector2i(10, 10), "none", "c13").get("ok", false)), tag + "Aufbau: Kreisen")
+	_check(mission_root.has_method("get_air_sortie_craft_ids") and mission_root.call("get_air_sortie_craft_ids") == ["ship"], tag + "get_air_sortie_craft_ids: ein Schiff in der Luft")
+	var before: Dictionary = mission_root.get_air_support_role_snapshot("ship")
+	var wire: Dictionary = _wire(mission_root.export_air_sortie_checkpoint())
+	Dictionary(mission_root.get("_air_support_sorties")).erase("ship")
+	# Ungebunden machen: weder Quelle noch Ort am Root.
+	var bound_source: WeakRef = mission_root.get("_air_support_source")
+	mission_root.set("_air_support_source", null)
+	mission_root.set("_air_support_location_id", "")
+	var wings: Variant = env.source.get("_space_wing_state")
+	var full := {"fleet":env.fleet, "wings":wings, "source":env.source, "location_id":LOC, "combat":env.combat, "equipment":env.equipment}
+	_check(String(mission_root.prepare_air_sortie_checkpoint(wire, {"fleet":env.fleet, "wings":wings}).get("reason", "")) == BAD, tag + "ungebundener Root ohne source/location_id: abgelehnt")
+	var prepared: Dictionary = mission_root.prepare_air_sortie_checkpoint(wire, full)
+	_check(bool(prepared.get("ok", false)) and prepared.has("candidate"), tag + "ungebundener Root mit ausdruecklicher Bindung: angenommen (" + str(prepared.get("reason", "ok")) + ")")
+	_check(Dictionary(mission_root.get("_air_support_sorties")).is_empty(), tag + "prepare schreibt nichts")
+	var wrong_location: Dictionary = full.duplicate()
+	wrong_location["location_id"] = "anderer_ort"
+	_check(String(mission_root.prepare_air_sortie_checkpoint(wire, wrong_location).get("reason", "")) == BAD, tag + "falscher Ort in der Bindung: abgelehnt (Pose liegt in einem anderen Gebiet)")
+	if not prepared.get("ok", false):
+		env.flow.free()
+		return
+	var candidate: Dictionary = prepared.candidate
+	_check(candidate.get("source") == env.source and String(candidate.get("location_id", "")) == LOC, tag + "Kandidat traegt Quelle und Ort")
+	# Wieder binden (so wie bind_mission_air_support es im Schluss von commit tut), dann publish pruefen.
+	mission_root.set("_air_support_source", bound_source)
+	mission_root.set("_air_support_location_id", LOC)
+	var serial_live: int = int(mission_root.get("_air_sortie_serial"))
+	var other_place: Dictionary = candidate.duplicate()
+	other_place["location_id"] = "anderer_ort"
+	var refused: Variant = mission_root.publish_air_sortie_checkpoint(other_place)
+	_check(refused is Dictionary and not bool(Dictionary(refused).get("ok", true)) and String(Dictionary(refused).get("reason", "")) == "no_source", tag + "publish mit anderem Ort: no_source (" + str(refused) + ")")
+	var other_source: Dictionary = candidate.duplicate()
+	other_source["source"] = env.flow
+	refused = mission_root.publish_air_sortie_checkpoint(other_source)
+	_check(refused is Dictionary and String(Dictionary(refused).get("reason", "")) == "no_source", tag + "publish mit anderer Quelle: no_source (" + str(refused) + ")")
+	_check(Dictionary(mission_root.get("_air_support_sorties")).is_empty() and int(mission_root.get("_air_sortie_serial")) == serial_live, tag + "abgelehntes publish hat nichts geschrieben")
+	var published: Variant = mission_root.publish_air_sortie_checkpoint(candidate)
+	_check(published is Dictionary and bool(Dictionary(published).get("ok", false)), tag + "publish mit passender Bindung: ok (" + str(published) + ")")
+	_check(mission_root.get_air_support_role_snapshot("ship") == before, tag + "Schnappschuss nach dem Laden gleich wie vorher")
+	env.flow.free()
+
+
 func _initialize() -> void:
 	_case_1()
 	_case_1b()
@@ -835,5 +885,6 @@ func _initialize() -> void:
 	_case_10()
 	_case_11()
 	_case_12()
+	_case_13()
 	print("AIR_SORTIE_CHECKPOINT passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)

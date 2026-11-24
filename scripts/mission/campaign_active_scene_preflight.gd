@@ -105,13 +105,24 @@ static func prepare(scene: Node, data: Dictionary) -> Dictionary:
 	var active_sorted: Array = active.duplicate()
 	active_sorted.sort()
 	if visit_ids != active_sorted or scene.get_meta("singleplayer_visit_identities", {}) != transport.visits or scene.get_meta("singleplayer_mission_identity", {}) != identity: return _bad("mission_scene_identity")
+	# Luftrollen 5b-1: wer laut Transportblock an Bord ist (Feld _embarked_unit_ids oder embarked_unit_ids einer Folge, wie transport_checkpoint.validate_data), steht nicht im Bodenstand.
+	var aboard := {}
+	if transport.get("fields") is Dictionary and transport.fields.get("_embarked_unit_ids") is Dictionary:
+		for id in transport.fields._embarked_unit_ids: aboard[id] = true
+	var aboard_sequences: Dictionary = transport.parallel.duplicate() if transport.get("parallel") is Dictionary else {}
+	if transport.get("primary") is Dictionary and transport.primary.get("phase", "") != "": aboard_sequences[String(transport.primary.get("craft_id", ""))] = transport.primary
+	for aboard_craft in aboard_sequences:
+		if aboard_sequences[aboard_craft] is Dictionary and aboard_sequences[aboard_craft].get("embarked_unit_ids") is Dictionary:
+			for id in aboard_sequences[aboard_craft].embarked_unit_ids: aboard[id] = true
 	var actors := {}
 	var presence := {}
+	var embarked_ids: Array = []
 	for id in active_sorted:
 		var actor: Node = sim.get_unit_registry().get_unit(id)
 		if not is_instance_valid(actor): return _bad("mission_scene_actor_missing")
 		actors[id] = actor
-		presence[id] = false
+		presence[id] = aboard.has(id)
+		if presence[id]: embarked_ids.append(id)
 	var bindings := {"actors":actors,"simulation_root":sim,"visits":transport.visits,"craft_identities":transport.craft_identities,"presence_bindings":presence,"pilot_bindings":{craft:pilot}}
 	var transport_prepared: Dictionary = controller.prepare_transport_checkpoint_candidate(wire,bindings)
 	if not transport_prepared.get("ok",false): return transport_prepared
@@ -121,7 +132,7 @@ static func prepare(scene: Node, data: Dictionary) -> Dictionary:
 		if not checkpoint is Dictionary: return _bad("active_hex_lifecycle_mismatch")
 		if checkpoint.get("tick") != data.get("lifecycle",{}).get("tick") or checkpoint.get("rng_state") != data.get("lifecycle",{}).get("rng"): return _bad("active_hex_lifecycle_mismatch")
 		if checkpoint.has("rng_streams") and checkpoint.rng_streams != data.get("lifecycle",{}).get("rng_streams"): return _bad("active_hex_lifecycle_mismatch")
-	var gp: Dictionary = ground.prepare_restore(sim,terrain,data.get("ground",{}),data.get("actors",{}),active_sorted,data.get("lifecycle",{}))
+	var gp: Dictionary = ground.prepare_restore(sim,terrain,data.get("ground",{}),data.get("actors",{}),active_sorted,data.get("lifecycle",{}),embarked_ids)
 	if not gp.get("ok",false): return gp
 	var lifecycle = LIFECYCLE.new()
 	var lp: Dictionary = lifecycle.prepare_restore(sim,driver,data.get("lifecycle",{}))
