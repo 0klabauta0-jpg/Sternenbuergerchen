@@ -53,6 +53,9 @@ func _process(_delta: float) -> bool:
 	_case_diagnostic_field()
 	_case_bleedout_does_not_block_saving()
 	_case_respawn_return_follows_bleedout()
+	_case_give_up_rejections()
+	_case_give_up_skirmish_returns()
+	_case_give_up_campaign()
 	print("BLEEDOUT_STAGES passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
 	return true
@@ -73,7 +76,7 @@ func _build(mission_seed: int = 1, campaign_on: bool = false) -> Dictionary:
 	var driver = DRIVER_SCRIPT.new()
 	var friend = load("res://scripts/npc/test_unit.gd").new()
 	var enemy = load("res://scripts/npc/test_unit.gd").new()
-	var sim := _make_stub("extends Node\nvar effects := []\nvar combat_rng_seed := 1\nfunc enqueue_effect(e):\n\teffects.append(e)\n")
+	var sim := _make_stub("extends Node\nvar effects := []\nvar combat_rng_seed := 1\nvar is_server_authoritative := false\nfunc enqueue_effect(e):\n\teffects.append(e)\n")
 	var ctl := FakeController.new()
 	driver.name = "Driver"
 	friend.name = "Friend"
@@ -515,4 +518,154 @@ func _case_respawn_return_follows_bleedout() -> void:
 	env.driver.set("_current_tick", _tick_at(180.0))
 	env.driver.call("_queue_bleedout_for_downed_friendly", env.sim)
 	_check(_bleedout_effects(env) == 1 and return_seconds == 60.0, "Rueckkehr: das Verbluten kommt mit der ersten Stufe (180 s); die Rueckkehr beginnt erst danach und dauert %d s -> fruehestens bei 240 s" % int(return_seconds))
+	env.fixture.free()
+
+
+# ---- G1: Befehl "Aufgeben" -----------------------------------------------------------------------------------------
+
+## Wie _build, dazu ein echter RespawnManager (Rueckkehrzeit 60 s) und ein Einheitenverzeichnis fuer ihn.
+func _build_with_respawn(mission_seed: int = 1, campaign_on: bool = false) -> Dictionary:
+	var env := _build(mission_seed, campaign_on)
+	var respawn = load("res://scripts/core/respawn_manager.gd").new()
+	var registry := _make_stub("extends Node\nvar units := {}\nfunc get_unit(id):\n\treturn units.get(id)\n")
+	respawn.name = "Respawn"
+	registry.name = "Registry"
+	env.fixture.add_child(respawn)
+	env.fixture.add_child(registry)
+	registry.units[FRIEND_ID] = env.friend
+	registry.units[ENEMY_ID] = env.enemy
+	respawn.set("unit_registry_path", NodePath("../Registry"))
+	respawn.set("simulation_root_path", NodePath("../Sim"))
+	env.driver.set("respawn_manager_path", NodePath("../Respawn"))
+	env["respawn"] = respawn
+	return env
+
+
+func _give_up_messages(env: Dictionary) -> Array:
+	var lines: Array = []
+	for event in env.ctl.events:
+		if String(event.text).ends_with("wurde aufgegeben."):
+			lines.append(event)
+	return lines
+
+
+func _give_up_name(env: Dictionary) -> String:
+	var unit_name: String = String(env.friend.call("get_display_name")).strip_edges() if env.friend.has_method("get_display_name") else ""
+	return unit_name if not unit_name.is_empty() else FRIEND_ID
+
+
+## Die vier Ablehnungen in fester Reihenfolge, das fremde Team und die kampffaehige Person.
+func _case_give_up_rejections() -> void:
+	var env := _build_with_respawn()
+	var driver = env.driver
+	env.friend.call("apply_damage", 1000, {})
+	driver.set("_current_tick", _tick_at(20.0))
+	var unknown: Dictionary = driver.call("request_unit_give_up", "ghost_unit", "team_alpha")
+	_check(unknown.get("ok", true) == false and unknown.get("reason", "") == "unknown_unit" and not String(unknown.get("message", "")).is_empty(), "Aufgeben: unbekannte Einheit -> unknown_unit mit Meldung (%s)" % str(unknown))
+	var unknown_other: Dictionary = driver.call("request_unit_give_up", "ghost_unit", "team_bravo")
+	_check(unknown_other.get("reason", "") == "unknown_unit", "Aufgeben: unbekannt kommt vor 'nicht eigen'")
+	var foreign: Dictionary = driver.call("request_unit_give_up", FRIEND_ID, "team_bravo")
+	_check(foreign.get("ok", true) == false and foreign.get("reason", "") == "not_own_unit", "Aufgeben: ein fremdes Team kann die Person nicht aufgeben -> not_own_unit (%s)" % str(foreign))
+	var enemy_down: Dictionary = driver.call("request_unit_give_up", ENEMY_ID, "team_alpha")
+	_check(enemy_down.get("reason", "") == "not_own_unit", "Aufgeben: eine gegnerische Einheit kann der Spieler nie aufgeben")
+	var empty_team: Dictionary = driver.call("request_unit_give_up", FRIEND_ID, "")
+	_check(empty_team.get("reason", "") == "not_own_unit", "Aufgeben: ohne Team der Anfrage -> not_own_unit")
+	_check(_bleedout_effects(env) == 0 and env.friend.call("get_vital_state") == "down" and _give_up_messages(env).is_empty(), "Aufgeben: abgelehnt heisst nichts verblutet, keine Funkzeile")
+	env.fixture.free()
+	var fit_env := _build_with_respawn()
+	fit_env.driver.set("_current_tick", _tick_at(20.0))
+	var fit_answer: Dictionary = fit_env.driver.call("request_unit_give_up", FRIEND_ID, "team_alpha")
+	_check(fit_answer.get("ok", true) == false and fit_answer.get("reason", "") == "not_down", "Aufgeben: eine kampffaehige Person -> not_down (%s)" % str(fit_answer))
+	_check(fit_env.friend.call("get_vital_state") == "fit" and _bleedout_effects(fit_env) == 0 and Dictionary(fit_env.driver.get("_queued_bleedout_by_unit_id")).is_empty() and _give_up_messages(fit_env).is_empty(), "Aufgeben: die kampffaehige Person bleibt unangetastet")
+	var order_answer: Dictionary = fit_env.driver.call("request_unit_give_up", FRIEND_ID, "team_bravo")
+	_check(order_answer.get("reason", "") == "not_own_unit", "Aufgeben: 'nicht eigen' kommt vor 'liegt nicht'")
+	# not_authoritative: ein verbundener Mitspieler, der nicht der Server ist, entscheidet nicht ueber das Verbluten.
+	var client_env := _build_with_respawn()
+	client_env.friend.call("apply_damage", 1000, {})
+	client_env.sim.set("is_server_authoritative", true)
+	var peer := ENetMultiplayerPeer.new()
+	var peer_error: int = peer.create_client("127.0.0.1", 45871)
+	if peer_error != OK:
+		_check(false, "Aufgeben: Testaufbau, Client-Peer nicht erstellt (%d)" % peer_error)
+	else:
+		get_multiplayer().multiplayer_peer = peer
+		fit_env.sim.set("is_server_authoritative", true)
+		var not_server: Dictionary = client_env.driver.call("request_unit_give_up", FRIEND_ID, "team_alpha")
+		_check(not_server.get("ok", true) == false and not_server.get("reason", "") == "not_authoritative", "Aufgeben: nicht der Server -> not_authoritative (%s)" % str(not_server))
+		var fit_client: Dictionary = fit_env.driver.call("request_unit_give_up", FRIEND_ID, "team_alpha")
+		_check(fit_client.get("reason", "") == "not_down", "Aufgeben: 'liegt nicht' kommt vor 'nicht der Server'")
+		_check(_bleedout_effects(client_env) == 0 and client_env.friend.call("get_vital_state") == "down", "Aufgeben: nicht der Server heisst nichts verblutet")
+		get_multiplayer().multiplayer_peer = null
+		peer.close()
+	client_env.fixture.free()
+	fit_env.fixture.free()
+
+
+## Skirmish: Aufgeben bei 20 s laesst die Person SOFORT verbluten (nicht erst bei 180 s), die Rueckkehr beginnt dann.
+func _case_give_up_skirmish_returns() -> void:
+	var env := _build_with_respawn()
+	var driver = env.driver
+	env.friend.call("apply_damage", 1000, {})
+	driver.set("_current_tick", _tick_at(20.0))
+	driver.call("_queue_bleedout_for_downed_friendly", env.sim)
+	_check(_bleedout_effects(env) == 0, "Aufgeben: bei 20 s verblutet ohne Befehl niemand (erste Stufe erst bei 180 s)")
+	var answer: Dictionary = driver.call("request_unit_give_up", FRIEND_ID, "team_alpha")
+	var expected_name: String = _give_up_name(env)
+	_check(answer.get("ok", false) == true and answer.get("unit_id", "") == FRIEND_ID and answer.get("message", "") == "%s wurde aufgegeben." % expected_name, "Aufgeben: bei 20 s angenommen, Meldung '<Name> wurde aufgegeben.' (%s)" % str(answer))
+	_check(_bleedout_effects(env) == 1 and Dictionary(driver.get("_queued_bleedout_by_unit_id")).has(FRIEND_ID), "Aufgeben: derselbe Weg wie der Treffer einer Stufe, ein Verbluten eingereiht, Merker gesetzt")
+	env.friend.call("advance_bleedout")
+	# Mit Rueckkehr geht die Person ueber "bleedout" gleich weiter in "respawning" (der Respawn-Manager beginnt die Rueckkehr).
+	_check(String(env.friend.call("get_vital_state")) in ["bleedout", "respawning"], "Aufgeben: die Person ist sofort verblutet (20 s nach dem Ausfall), Zustand %s" % str(env.friend.call("get_vital_state")))
+	_check(bool(env.respawn.call("has_pending_respawn", FRIEND_ID)) and is_equal_approx(float(env.respawn.call("get_remaining_time", FRIEND_ID)), 60.0), "Aufgeben: die Rueckkehr beginnt jetzt, 60 s (nicht erst nach 180 s)")
+	env.respawn.call("_physics_process", 59.0)
+	_check(bool(env.respawn.call("has_pending_respawn", FRIEND_ID)), "Aufgeben: nach 59 s Rueckkehrzeit noch nicht zurueck")
+	env.respawn.call("_physics_process", 2.0)
+	var returned := false
+	for effect in env.sim.effects:
+		if String(effect.get("effect_type", "")) == "respawn" and String(effect.get("unit_id", "")) == FRIEND_ID:
+			returned = true
+	_check(returned and not bool(env.respawn.call("has_pending_respawn", FRIEND_ID)), "Aufgeben: nach Rueckkehrzeit + 1 s ist die Person wieder da (Respawn-Effekt, 61 s nach dem Befehl)")
+	driver.call("_on_unit_respawn_completed", FRIEND_ID)
+	_check(Dictionary(driver.get("_queued_bleedout_by_unit_id")).is_empty(), "Aufgeben: nach der Rueckkehr ist der Merker geleert")
+	var again: Dictionary = driver.call("request_unit_give_up", FRIEND_ID, "team_alpha")
+	_check(again.get("ok", true) == false and again.get("reason", "") == "not_down", "Aufgeben: nach der Rueckkehr (kampffaehig) -> not_down")
+	env.fixture.free()
+	var twice := _build_with_respawn()
+	twice.friend.call("apply_damage", 1000, {})
+	twice.driver.set("_current_tick", _tick_at(20.0))
+	var first: Dictionary = twice.driver.call("request_unit_give_up", FRIEND_ID, "team_alpha")
+	var second: Dictionary = twice.driver.call("request_unit_give_up", FRIEND_ID, "team_alpha")
+	_check(first.get("ok", false) == true and second.get("ok", true) == false and second.get("reason", "") == "not_down" and _bleedout_effects(twice) == 1, "Aufgeben: der zweite Aufruf (Verbluten schon eingereiht) -> not_down, nicht doppelt")
+	twice.friend.call("advance_bleedout")
+	var third: Dictionary = twice.driver.call("request_unit_give_up", FRIEND_ID, "team_alpha")
+	_check(third.get("reason", "") == "not_down", "Aufgeben: wer schon verblutet ist -> not_down")
+	var lines: Array = _give_up_messages(twice)
+	_check(lines.size() == 1 and String(lines[0].type) == "bleedout_report" and String(lines[0].unit_id) == FRIEND_ID, "Aufgeben: die Funkzeile kommt genau einmal (%d)" % lines.size())
+	twice.fixture.free()
+	var dead_env := _build_with_respawn()
+	dead_env.friend.call("apply_damage", 1000, {})
+	dead_env.friend.call("advance_bleedout")
+	var dead_answer: Dictionary = dead_env.driver.call("request_unit_give_up", FRIEND_ID, "team_alpha")
+	_check(dead_answer.get("reason", "") == "not_down" and _bleedout_effects(dead_env) == 0, "Aufgeben: eine schon verblutete Person -> not_down, nichts eingereiht")
+	dead_env.fixture.free()
+
+
+## Kampagne: danach ist die Person verblutet, der Einsatz speicherbar, am Einsatzende zaehlt sie als schwer verwundet.
+func _case_give_up_campaign() -> void:
+	var env := _build(1, true)
+	env.friend.call("apply_damage", 1000, {})
+	env.driver.set("_current_tick", _tick_at(20.0))
+	var answer: Dictionary = env.driver.call("request_unit_give_up", FRIEND_ID, "team_alpha")
+	_check(answer.get("ok", false) == true, "Aufgeben Kampagne: bei 20 s angenommen (%s)" % str(answer))
+	env.friend.call("advance_bleedout")
+	_check(env.friend.call("get_vital_state") == "bleedout", "Aufgeben Kampagne: die Person ist verblutet")
+	_check(Dictionary(env.driver.get("_queued_bleedout_by_unit_id")).is_empty() and Dictionary(env.driver.get("_down_state_started_tick_by_unit_id")).is_empty(), "Aufgeben Kampagne: Merker und Uhr sind frei, der Einsatz ist speicherbar")
+	var state: Dictionary = env.driver.call("export_casualty_state")
+	_check(state == {"was_downed_unit_ids": [FRIEND_ID]}, "Aufgeben Kampagne: der Stand traegt nur den Ausfall-Merker (%s)" % str(state))
+	var team_states: Array = env.driver.call("_build_team_states", env.driver.get("friendly_unit_paths"))
+	var rules_script = load("res://scripts/core/campaign_casualty_rules.gd")
+	var resolved: Dictionary = rules_script.classify_unit(Dictionary(team_states[0]) if team_states.size() == 1 else {}, "won")
+	_check(resolved.get("outcome", "") == "wounded" and resolved.get("severity", "") == "severe", "Aufgeben Kampagne: am Einsatzende schwer verwundet wie jede Verblutete (%s)" % str(resolved))
+	var lost: Dictionary = rules_script.classify_unit(Dictionary(team_states[0]) if team_states.size() == 1 else {}, "aborted")
+	_check(lost.get("outcome", "") == "dead", "Aufgeben Kampagne: bleibt sie zurueck, ist sie tot wie jede Verblutete")
 	env.fixture.free()

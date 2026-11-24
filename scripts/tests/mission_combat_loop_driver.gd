@@ -2012,17 +2012,77 @@ func _queue_bleedout_for_downed_units(simulation_root: Node, units: Array) -> vo
 		if not _has_down_state_linger_elapsed(unit_id, unit):
 			continue
 
-		simulation_root.call(
-			"enqueue_effect",
-			{
-				"effect_type": "bleedout",
-				"priority": 20,
-				"unit_id": unit_id,
-			}
-		)
-		_queued_bleedout_by_unit_id[unit_id] = true
-		_set_event_text("%s BLEEDOUT" % unit_id)
+		_enqueue_bleedout_effect(simulation_root, unit_id)
 		return
+
+
+## Der Weg, auf dem eine Person verblutet: Verbluten-Effekt in den SimulationRoot einreihen und merken. Gemeinsam fuer den Treffer
+## einer Stufe und fuer den Befehl "Aufgeben" (request_unit_give_up); der Effekt setzt die Person auf "bleedout", der Rest
+## (Rueckkehr per Respawn, Freigabe von Merker und Uhr) folgt aus _on_unit_vital_status_changed.
+func _enqueue_bleedout_effect(simulation_root: Node, unit_id: String) -> void:
+	simulation_root.call(
+		"enqueue_effect",
+		{
+			"effect_type": "bleedout",
+			"priority": 20,
+			"unit_id": unit_id,
+		}
+	)
+	_queued_bleedout_by_unit_id[unit_id] = true
+	_set_event_text("%s BLEEDOUT" % unit_id)
+
+
+## Verbluten in Stufen, G1: Der Spieler gibt EINE liegende Person seines Teams auf; sie verblutet sofort (ohne Wurf, ueber
+## _enqueue_bleedout_effect), der Einsatz laeuft weiter. Gilt in allen Modi. Ablehnungen in fester Reihenfolge:
+## unknown_unit, not_own_unit (Team der Einheit ungleich requesting_team_id), not_down (nicht am Boden: kampffaehig, schon verblutet,
+## tot, oder schon eingereiht), not_authoritative (im Mehrspieler entscheidet nur der Server ueber das Verbluten).
+func request_unit_give_up(unit_id: String, requesting_team_id: String) -> Dictionary:
+	var key: String = unit_id.strip_edges()
+	var unit = null
+	if not key.is_empty():
+		unit = _find_unit_by_id(_get_units(friendly_unit_paths), key)
+		if unit == null:
+			unit = _find_unit_by_id(_get_units(enemy_unit_paths), key)
+	if unit == null:
+		return _give_up_rejection("unknown_unit", "Unbekannte Einheit.")
+	var requesting: String = requesting_team_id.strip_edges()
+	if requesting.is_empty() or _get_unit_team_id_for_diagnostics(unit) != requesting:
+		return _give_up_rejection("not_own_unit", "Nur eigene Personen können aufgegeben werden.")
+	if not unit.has_method("get_vital_state") or String(unit.call("get_vital_state")) != "down" or _queued_bleedout_by_unit_id.get(key, false):
+		return _give_up_rejection("not_down", "Die Person liegt nicht am Boden.")
+	var simulation_root: Node = get_node_or_null(simulation_root_path)
+	if simulation_root == null or not simulation_root.has_method("enqueue_effect") or not _should_run_local_combat(simulation_root):
+		return _give_up_rejection("not_authoritative", "Über das Verbluten entscheidet der Server.")
+	_enqueue_bleedout_effect(simulation_root, key)
+	var unit_name: String = _ammo_unit_name(unit, key)
+	_report_unit_given_up(unit, key, unit_name)
+	return {"ok": true, "unit_id": key, "message": "%s wurde aufgegeben." % unit_name}
+
+
+func _give_up_rejection(reason: String, message: String) -> Dictionary:
+	return {"ok": false, "reason": reason, "message": message}
+
+
+## Funkzeile fuer das eigene Team; der Treffer einer Stufe hat keine eigene Verbluten-Zeile, daher kommt sie genau einmal.
+func _report_unit_given_up(unit, unit_id: String, unit_name: String) -> void:
+	if _get_unit_team_id_for_diagnostics(unit) != friendly_team_id:
+		return
+	var tactical_controller = _get_tactical_controller()
+	if tactical_controller == null or not tactical_controller.has_method("record_tactical_communication_event"):
+		return
+	var text: String = "%s wurde aufgegeben." % unit_name
+	tactical_controller.call("record_tactical_communication_event", "bleedout_report", {
+		"event_id": "bleedout_given_up:%s:%d" % [unit_id, _current_tick],
+		"fireteam_id": _get_unit_fireteam_id(unit),
+		"unit_id": unit_id,
+		"phase": 1,
+		"short_text": text,
+		"detail_text": text,
+		"map_label": text,
+		"priority": TACTICAL_COMMUNICATION_EVENT_SCRIPT.PRIORITY_NORMAL,
+		"duration_seconds": 3.0,
+		"channels": PackedStringArray([TACTICAL_COMMUNICATION_EVENT_SCRIPT.CHANNEL_SELECTED_FIRETEAM, TACTICAL_COMMUNICATION_EVENT_SCRIPT.CHANNEL_MISSION_CONTROL]),
+	}, {"now_msec": Time.get_ticks_msec(), "cooldown_msec": 0})
 
 
 func _mark_unit_down_started(unit_id: String) -> void:
