@@ -347,7 +347,7 @@ func _move_and_use(mission: Node, interaction: String, step: String, map_path: S
 		if is_instance_valid(driver):
 			# Der Haendlerpunkt (trade_service) ist in outpost_recovery kein Ablaufschritt (flow_steps), also nie in completed_step_ids; sein Abschluss steht im Laufzeitstand der Interaktion (derselbe Stand, aus dem der Adapter den Service-Kontext bildet).
 			return PackedStringArray(driver.call("get_mission_scenario_runtime_gate_snapshot").get("completed_step_ids", [])).has(step) or bool(Dictionary(driver.call("get_mission_interaction_runtime_states").get(interaction, {})).get("complete", false))
-		return step == "return_to_ship" and String(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}).get("status", "")) == "completed", 180000, interaction + " actual timed Use commits required runtime step"):
+		return step == "return_to_ship" and String(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {}).get("status", "")) == "completed", 45000, interaction + " actual timed Use commits required runtime step"):
 		_dump("use_execution_" + interaction)
 		return false
 	return true

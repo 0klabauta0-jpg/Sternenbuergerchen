@@ -456,7 +456,7 @@ func _ui_part() -> void:
 	# Nachbesserung W2: Schiff an der Absturzstelle gelandet, aber zu weit vom Haendler (Dienst "trade" fehlt) -> gesperrt, Text sagt, was zu tun ist.
 	_ui_far = true
 	panel.call("refresh")
-	check(buy_a.disabled and buy_a.tooltip_text.contains("näher am Händler landen"), "Anzeige Absturzstelle, Schiff zu weit vom Haendler: Kaufknopf gesperrt, Text nennt die Abhilfe (%s)" % buy_a.tooltip_text)
+	check(buy_a.disabled and buy_a.tooltip_text.contains("in Sichtweite des Händlers landen, aber nicht direkt neben ihm") and not buy_a.tooltip_text.contains("256"), "Anzeige Absturzstelle, Schiff zu weit vom Haendler: Kaufknopf gesperrt, Text nennt die Abhilfe ohne Zahl (%s)" % buy_a.tooltip_text)
 	_ui_far = false
 	panel.call("refresh")
 	check(not buy_a.disabled, "Anzeige Absturzstelle: mit Handelsdienst ist der Kaufknopf wieder frei")

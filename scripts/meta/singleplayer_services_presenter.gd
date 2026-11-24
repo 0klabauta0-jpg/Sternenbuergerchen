@@ -282,7 +282,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	# Handel (Nachbesserung W2): An der Absturzstelle gilt der Handel nur, wenn das gelandete Schiff nah am Haendler steht; sonst sagt der Text, was zu tun ist.
 	var trade_reason: String = unavailable_reason
 	if location == "satellite_crash" and available and not Array(context.get("services", [])).has("trade"):
-		trade_reason = "Schiff muss näher am Händler landen (höchstens 256 Einheiten) – Handel erst dort"
+		trade_reason = "Schiff in Sichtweite des Händlers landen, aber nicht direkt neben ihm – Handel erst dort"
 	var offer: Dictionary = Dictionary(Dictionary(supply.get("offers", {})).get(OFFER_ID, {}))
 	var price: int = int(offer.get("unit_price", 0))
 	var stock: int = int(Dictionary(supply.get("stock_by_offer_id", {})).get(OFFER_ID, 0))

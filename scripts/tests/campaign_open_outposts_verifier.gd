@@ -84,29 +84,42 @@ func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 	return false
 
 ## Landeplatz fuer den Besuch der Absturzstelle: das Feld innerhalb von 256 Einheiten um den Haendler (trade_service), auf dem die ECHTE Landepruefung
-## des Spiels besteht (Zelle: field_landing_contract.validate; ganze Rumpffaeche des Schiffs und erreichbarer Ausstieg: _check_ground_ship_landing_site,
-## wie in satellite_crash_landing_probe). Gewaehlt wird das dem Haendler naechste Feld. Alle anderen Landungen laufen wie im Treiber.
+## des Spiels besteht (Zelle: field_landing_contract.validate; ganze Rumpffaeche des Schiffs und erreichbarer Ausstieg: _check_ground_ship_landing_site).
+## Gewaehlt wird das dem Haendler naechste Feld, dessen Rumpf den Haendler frei laesst. Alle anderen Landungen laufen wie im Treiber.
+## Nachbesserung 2 W2 (gemessen 24.11.): Bei der Landung 209 Einheiten vom Haendler lag eine Rumpfzelle (38,-7) direkt neben dem Haendlerfeld (38,-8).
+## Der Gang zum Haendler verteilt den Trupp auf Plaetze um den Punkt; der Platz des Piloten fiel in den Rumpf ("target_occupied"), der Truppfuehrer wartete
+## am Ausstieg auf ihn ("backoff_required") - beide standen 180 s still. Darum muss jede Rumpfzelle mindestens 2 Felder vom Haendlerfeld entfernt sein.
 func _landing_target(map) -> Vector2:
 	if not _oo_near_trader:
 		return super._landing_target(map)
 	var active: Node = _flow.get("_active_mission")
 	var controller: Node = active.get_node("TacticalController")
 	var registry: Node = controller.call("_get_terrain_registry")
+	var hex_registry: Node = active.get_node("SimulationRoot").call("get_hex_ground_terrain_registry")
 	var contract = load("res://scripts/mission/field_landing_contract.gd")
+	var hex = load("res://scripts/terrain/hex_grid.gd")
 	var trader: Vector2 = map.get_marker_position("trade_service")
+	var trader_grid: Vector2i = hex_registry.call("world_to_grid", trader)
 	var card: Dictionary = Dictionary(controller.call("_find_mission_dropship_card_entry", _craft_id)).duplicate(true)
 	var best: Vector2 = Vector2.INF
+	var best_clearance := -1
 	for tile in map.get_tiles():
 		var d: float = tile.world_position.distance_to(trader)
-		# Naeher als 200 Einheiten liegt der Rumpf (23 Zellen) ueber dem Haendler: die Besatzung kommt dann nicht mehr auf 96 Einheiten heran (im Lauf beobachtet).
-		if d < 200.0 or d > 250.0 or (best.is_finite() and d >= best.distance_to(trader)): continue
+		if d > 250.0 or (best.is_finite() and d >= best.distance_to(trader)): continue
 		if not bool(contract.validate(registry, tile.grid_position, []).ok): continue
 		card["lz_position"] = tile.world_position
 		var projection: Dictionary = controller.call("_read_ground_ship_landing_projection", card, tile.world_position, "NW")
 		var profile: Dictionary = load("res://scripts/mission/polisa_ground_body_profile.gd").from_projection(card, projection)
-		if bool(profile.get("ok", false)) and bool(controller.call("_check_ground_ship_landing_site", card, tile.world_position, profile.profile).get("ok", false)):
-			best = tile.world_position
-	_check(best.is_finite(), "C: an der Absturzstelle gibt es 200 bis 250 Einheiten vom Haendler ein gueltiges Landefeld fuer das Schiff")
+		if not bool(profile.get("ok", false)) or not bool(controller.call("_check_ground_ship_landing_site", card, tile.world_position, profile.profile).get("ok", false)): continue
+		var hull: Dictionary = controller.call("_get_bound_ground_ship_cells", hex_registry, card, tile.world_position, profile.profile)
+		if not bool(hull.get("ok", false)): continue
+		var clearance := 1000000
+		for cell: Vector2i in hull.blocked_cells: clearance = mini(clearance, int(hex.distance(cell, trader_grid)))
+		if clearance < 2: continue
+		best = tile.world_position
+		best_clearance = clearance
+	print("OO_LANDING trader_grid=%s chosen=%s distance=%s hull_clearance_cells=%d" % [str(trader_grid), str(best), str(snappedf(best.distance_to(trader), 0.1)) if best.is_finite() else "-", best_clearance])
+	_check(best.is_finite(), "C: an der Absturzstelle gibt es hoechstens 250 Einheiten vom Haendler ein gueltiges Landefeld, dessen Rumpf mindestens 2 Felder Abstand zum Haendler laesst")
 	return best if best.is_finite() else super._landing_target(map)
 
 func _market_button_ready(services: Control, button: Button) -> bool:
@@ -143,9 +156,8 @@ func _visit_part() -> void:
 	var controller: Node = mission.get_node("TacticalController")
 	controller.call("_set_selected_fireteams", PackedStringArray([_team_id]), false)
 	_check(String(_campaign().get("selected_job_id", "")) == "" and String(Dictionary(_campaign().jobs.satellite_recovery).get("status", "")) == "completed", "C: der Besuch laeuft ohne Auftrag; der Story-Auftrag bleibt abgeschlossen")
-	if not await _move_and_use(mission, "trade_service", "trade_service", SAT_MAP):
-		return
-	# Nachbesserung W3: Spielzeit ueber das alte Limit (1200 s) hinaus vorspulen: der friedliche Besuch endet nicht, es gibt keine Nachbesprechung.
+	# Nachbesserung W3 (N1: direkt nach der Landung, unabhaengig vom Gang zum Haendler): Spielzeit ueber das alte Limit (1200 s) hinaus vorspulen:
+	# der friedliche Besuch endet nicht, es gibt keine Nachbesprechung.
 	var visit_driver: Node = mission.get_node("CombatLoopDriver")
 	_check(float(visit_driver.get("mission_time_limit_seconds")) <= 0.0 and float(_flow.get("_active_mission_time_limit_seconds")) <= 0.0, "C: der Besuch laeuft ohne Zeitlimit (Treiber %s, Ablauf %s)" % [str(visit_driver.get("mission_time_limit_seconds")), str(_flow.get("_active_mission_time_limit_seconds"))])
 	visit_driver.set("_mission_started_at_msec", int(visit_driver.call("_game_now_msec")) - 1300000)
@@ -154,6 +166,12 @@ func _visit_part() -> void:
 	await process_frame
 	_check(String(Dictionary(visit_driver.call("get_mission_result")).get("result", "")) != "defeat" and _flow.get("_active_mission") == mission, "C: nach 1300 s Spielzeit ist der Besuch weder verloren noch beendet")
 	_check(String(Dictionary(_flow.get("_last_mission_result")).get("result", "")) != "defeat", "C: es gibt keinen Verlustbericht und keine Nachbesprechung")
+	if _flow.get("_active_mission") != mission:
+		return
+	var approach_started: int = Time.get_ticks_msec()
+	if not await _move_and_use(mission, "trade_service", "trade_service", SAT_MAP):
+		return
+	print("OO_TRADE_APPROACH_MS %d (Gang zum Haendler und Benutzen, echte Zeit)" % (Time.get_ticks_msec() - approach_started))
 	# Nachbesserung W2: Das Schiff steht (Landeplatz neben dem Haendler, siehe _landing_target) hoechstens 256 Einheiten vom Haendler; der Handel
 	# laeuft ueber die ECHTEN Knoepfe des Haendlerfensters (derselbe Aufruf, den der Knopf absetzt): ein Kauf (A-Benit), ein Verkauf (C-Benit).
 	var trader: Vector2 = MAP.load_from_file(SAT_MAP).get_marker_position("trade_service")
