@@ -189,6 +189,7 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		"repair": result = _repair(payload, authority_context)
 		"consume_route_fuel": result = _consume_route(payload, authority_context)
 		"consume_leg_fuel": result = _consume_leg(payload, authority_context)
+		"consume_air_fuel": result = _consume_air_fuel(payload, authority_context)
 		"emergency_tanker_order": result = _emergency_tanker_order(payload, authority_context, request_id)
 		"emergency_tanker_deliver": result = _emergency_tanker_deliver(payload, authority_context, request_id)
 		"emergency_tanker_cancel": result = _emergency_tanker_cancel(payload, authority_context, request_id)
@@ -448,6 +449,24 @@ func _consume_leg(payload: Dictionary, context: Dictionary) -> Dictionary:
 	_fuel_by_craft_id[craft_id] = maxf(float(_fuel_by_craft_id[craft_id]) - float(validation.fuel_cost), 0.0)
 	_revision += 1
 	return validation
+
+## Luftrollen 2: Treibstoff je Flugzeit. Das Schiff ist schon in der Luft, deshalb sperrt ein offener Tankerauftrag NICHT; es wird nie gekauft
+## und nie unter 0 gebucht. Nur der Simulationsbesitzer setzt den Kontext air_fuel_authorized. Der Beleg laeuft ueber _requests (Wiederholung = replayed).
+func _consume_air_fuel(payload: Dictionary, context: Dictionary) -> Dictionary:
+	var authorized: Variant = context.get("air_fuel_authorized", false)
+	if typeof(authorized) != TYPE_BOOL or not authorized:
+		return _reject("air_fuel_not_authorized", "Lufttreibstoff nicht bestaetigt")
+	var craft_id: String = String(payload.get("craft_id", ""))
+	if not _fuel_by_craft_id.has(craft_id):
+		return _reject("unknown_craft", "Schiff unbekannt")
+	var amount: Variant = payload.get("amount")
+	if typeof(amount) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(amount)) or float(amount) <= 0.0 or float(amount) > float(_definitions.fuel_capacity):
+		return _reject("invalid_air_fuel", "Treibstoffmenge ungueltig")
+	var before: float = float(_fuel_by_craft_id[craft_id])
+	var consumed: float = minf(float(amount), before)
+	_fuel_by_craft_id[craft_id] = maxf(before - consumed, 0.0)
+	_revision += 1
+	return {"ok": true, "craft_id": craft_id, "consumed": consumed, "fuel": float(_fuel_by_craft_id[craft_id])}
 
 # --- Nottankdienst (T2 des Tanker-Auftrags, 21.11.2026) ------------------------------------------------
 # Geld, Treibstoff und Belege liegen hier. Zustaende und Restzeit fuehrt scripts/core/emergency_tanker_service.gd, getickt von der

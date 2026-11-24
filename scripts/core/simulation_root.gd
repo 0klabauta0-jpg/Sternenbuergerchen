@@ -8140,6 +8140,7 @@ const AIR_ROLE_NAMES := ["none", "cas", "air_defense"]
 const AIR_RING_BLOCKED_REPORT_SECONDS := 5.0
 var _air_role_receipts: Dictionary = {}
 var _air_role_poll := 0.0
+var _air_fuel_retry := 0.0
 var _air_role_elapsed := 0.0
 var _air_sortie_serial := 0
 var _air_role_data_cache: Dictionary = {}
@@ -8285,6 +8286,10 @@ func _begin_air_sortie(craft_id: String, arriving: bool, arrival_position: Vecto
 	if not binding.get("ok", false): return binding
 	var pilot: Dictionary = _resolve_air_support_pilot(craft_id)
 	if not pilot.get("ok", false): return pilot
+	# Luftrollen 2: mit Treibstoffkonto und Rest <= Ortsabflug + 1 kein Lufteinsatz (gilt auch fuer die Ankunft im Kreisen).
+	var fuel_supply: RefCounted = _air_fuel_supply()
+	if fuel_supply != null and fuel_supply.has_fuel_account(craft_id) and float(fuel_supply.get_fuel(craft_id)) <= float(_air_fuel_costs(fuel_supply).land_at) + 0.00001:
+		return {"ok":false, "reason":"air_fuel_low", "message":"Treibstoff reicht nur noch für den Abflug vom Ort – kein Lufteinsatz."}
 	var position: Variant = arrival_position
 	if not arriving:
 		var controller: Node = get_parent().get_node_or_null("TacticalController")
@@ -8661,9 +8666,9 @@ func request_air_support_role_clear(craft_id: String, request_id: String) -> Dic
 
 func get_air_support_role_snapshot(craft_id: String) -> Dictionary:
 	var sortie: Dictionary = _air_support_sorties.get(craft_id, {})
-	if sortie.is_empty(): return {"ok":false, "airborne":false, "role":"", "center_hex":null, "waypoint_index":0, "target_id":"", "returning":""}
+	if sortie.is_empty(): return {"ok":false, "airborne":false, "role":"", "center_hex":null, "waypoint_index":0, "target_id":"", "returning":"", "fuel":_air_fuel_rest(craft_id), "fuel_warned":false}
 	var role: Dictionary = sortie.get("air_role", {})
-	return {"ok":true, "airborne":is_air_support_craft_airborne(craft_id), "role":String(role.get("role", "")), "center_hex":role.get("center_hex"), "waypoint_index":int(sortie.get("waypoint_index", 0)), "target_id":String(sortie.get("role_target_id", "")), "returning":String(sortie.get("returning", ""))}
+	return {"ok":true, "airborne":is_air_support_craft_airborne(craft_id), "role":String(role.get("role", "")), "center_hex":role.get("center_hex"), "waypoint_index":int(sortie.get("waypoint_index", 0)), "target_id":String(sortie.get("role_target_id", "")), "returning":String(sortie.get("returning", "")), "fuel":_air_fuel_rest(craft_id), "fuel_warned":bool(sortie.get("fuel_warned", false))}
 
 ## Rolle weg, Rueckflug zur Landezone (reason: "player", spaeter "fuel" / "break_off"); das Landen selbst macht _advance_air_roles.
 func _air_begin_return(craft_id: String, reason: String) -> Dictionary:
@@ -8682,8 +8687,88 @@ func _air_begin_return(craft_id: String, reason: String) -> Dictionary:
 	_air_emit_role_event(craft_id, "landing_pending", "Fliegt zur Landezone und landet.")
 	return {"ok":true}
 
+## ---------------------------------------------------------------- Luftrollen 2: Treibstoff je Flugzeit
+## Versorgungsbesitzer des Kampagnenkerns (hier liegen die Treibstoffkonten); null ohne Kampagne.
+func _air_fuel_supply() -> RefCounted:
+	var source: Node = _air_support_source.get_ref() if _air_support_source != null else null
+	if not is_instance_valid(source): return null
+	var owner_value: Variant = source.get("_singleplayer_supply_owner")
+	return owner_value if owner_value is RefCounted and owner_value.has_method("has_fuel_account") and owner_value.has_method("get_leg_fuel_cost") else null
+
+## Rest aus dem Konto, -1.0 ohne Konto (oder ohne Kampagne).
+func _air_fuel_rest(craft_id: String) -> float:
+	var supply: RefCounted = _air_fuel_supply()
+	return float(supply.get_fuel(craft_id)) if supply != null and supply.has_fuel_account(craft_id) else -1.0
+
+## Heimflugkosten (Ortsabflug + Sprung + Landung der Strecke <ort>>homebase; unbekannt zaehlt 0) und Abbruchgrenze (Ortsabflug + Reserve).
+func _air_fuel_costs(supply: RefCounted) -> Dictionary:
+	var exit_cost := maxf(float(supply.get_leg_fuel_cost(_air_support_location_id, "homebase", "surface_exit")), 0.0)
+	var jump_cost := maxf(float(supply.get_leg_fuel_cost(_air_support_location_id, "homebase", "jump")), 0.0)
+	var landing_cost := maxf(float(supply.get_leg_fuel_cost(_air_support_location_id, "homebase", "landing")), 0.0)
+	return {"home_cost":exit_cost + jump_cost + landing_cost, "land_at":exit_cost + float(_air_role_config("fuel").get("land_margin", 1.0))}
+
+func _air_craft_label(craft_id: String) -> String:
+	var parent: Node = get_parent()
+	var controller: Node = parent.get_node_or_null("TacticalController") if parent != null else null
+	if controller != null and controller.has_method("_find_mission_dropship_card_entry"):
+		var name_text := String(Dictionary(controller.call("_find_mission_dropship_card_entry", craft_id)).get("display_name", "")).strip_edges()
+		if not name_text.is_empty(): return name_text
+	return craft_id
+
+func _air_departure_token() -> String:
+	var parent: Node = get_parent()
+	var identity: Variant = parent.get_meta("singleplayer_mission_identity", {}) if parent != null else {}
+	var token := String(Dictionary(identity).get("departure_token", "")) if typeof(identity) == TYPE_DICTIONARY else ""
+	return token if not token.is_empty() else _air_support_location_id
+
+## Eine Buchung. Die Kennung traegt die Revision der Versorgung VOR der Buchung: die Serial beginnt je Missionskern neu und wird nicht gespeichert,
+## ohne Revision wuerde die Versorgung nach dem Laden eine neue Buchung fuer eine Wiederholung halten.
+func _air_book_fuel(supply: RefCounted, craft_id: String, sortie: Dictionary, units: float) -> void:
+	sortie["fuel_steps"] = int(sortie.get("fuel_steps", 0)) + 1
+	var request_id := "air-fuel:%s:%s:%d:%d:r%d" % [craft_id, _air_departure_token(), int(sortie.get("sortie_serial", 0)), int(sortie.fuel_steps), int(supply.get_revision())]
+	supply.apply_command({"contract_category":"singleplayer_supply", "operation":"consume_air_fuel", "payload":{"craft_id":craft_id, "amount":units}, "request_id":request_id}, {"air_fuel_authorized":true})
+
+## Treibstoffuhr: je Tick aus delta (Spielzeit), unabhaengig vom 0,2-s-Takt und von Rolle, Rundbahn und Pilot. Je volle 60 s eine Buchung (Rest 0: keine mehr).
+## Nach jeder Buchung Warnung / Abbruch; scheitert der Abbruch (kein Weg), wird bei jedem 0,2-s-Takt neu versucht (Ereignis nur beim ersten Mal).
+func _advance_air_fuel(delta: float) -> void:
+	var supply: RefCounted = _air_fuel_supply()
+	if supply == null: return
+	var config: Dictionary = _air_role_config("fuel")
+	var step_seconds := maxf(float(config.get("seconds_per_unit", 60.0)), 0.001)
+	var units := float(config.get("units_per_step", 1.0))
+	var step := maxf(delta, 0.0)
+	_air_fuel_retry -= step
+	var retry_due := _air_fuel_retry <= 0.0
+	if retry_due: _air_fuel_retry = 0.2
+	for craft_id in _air_support_sorties.keys():
+		var sortie: Dictionary = _air_support_sorties[craft_id]
+		if not supply.has_fuel_account(craft_id): continue
+		var booked := false
+		if step > 0.0 and float(supply.get_fuel(craft_id)) > 0.0:
+			sortie["fuel_seconds"] = float(sortie.get("fuel_seconds", 0.0)) + step
+			while float(sortie.fuel_seconds) >= step_seconds - 0.000001 and float(supply.get_fuel(craft_id)) > 0.0:
+				sortie["fuel_seconds"] = maxf(float(sortie.fuel_seconds) - step_seconds, 0.0)
+				_air_book_fuel(supply, craft_id, sortie, units)
+				booked = true
+		if booked or retry_due:
+			_air_fuel_evaluate(supply, craft_id, sortie, booked)
+
+func _air_fuel_evaluate(supply: RefCounted, craft_id: String, sortie: Dictionary, after_booking: bool) -> void:
+	var rest := float(supply.get_fuel(craft_id))
+	var costs: Dictionary = _air_fuel_costs(supply)
+	if rest <= float(costs.land_at) + 0.00001:
+		if String(sortie.get("returning", "")) != "": return
+		if not bool(sortie.get("fuel_return_reported", false)):
+			sortie["fuel_return_reported"] = true
+			_air_emit_role_event(craft_id, "fuel_return", "%s: Treibstoff %d – Einsatz abgebrochen, fliegt zur Landezone und landet." % [_air_craft_label(craft_id), int(round(rest))])
+		_air_begin_return(craft_id, "fuel")
+	elif after_booking and rest <= float(costs.home_cost) + 0.00001 and not bool(sortie.get("fuel_warned", false)):
+		sortie["fuel_warned"] = true
+		_air_emit_role_event(craft_id, "fuel_warning", "%s: Treibstoff %d – reicht gerade noch für den Heimflug." % [_air_craft_label(craft_id), int(round(rest))])
+
 ## Takt 0,2 s (kehrt sofort zurueck, wenn keine Sortie fliegt): naechster Wegpunkt der Rundbahn bzw. Landung am Ende des Rueckflugs.
 func _advance_air_roles(delta: float) -> void:
+	_advance_air_fuel(delta)
 	_air_role_poll -= maxf(delta, 0.0)
 	_air_role_elapsed += maxf(delta, 0.0)
 	if _air_role_poll > 0.0: return

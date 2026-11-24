@@ -13752,6 +13752,9 @@ func _on_mission_dropship_card_arrival_mode_pressed(craft_id: String, mode_name:
 
 func _append_air_support_card_row(host: VBoxContainer, card: Dictionary) -> void:
 	var simulation: Node = get_node_or_null("../SimulationRoot")
+	if host != null and host.get_node_or_null("AirSupportCardRow") != null:
+		var shown: Label = host.get_node_or_null("AirSupportFuelLabel") as Label
+		if shown != null: shown.text = _air_support_fuel_line(String(card.get("craft_id", "")))
 	if host == null or host.get_node_or_null("AirSupportCardRow") != null or not _is_air_support_offered(): return
 	var craft_id := String(card.get("craft_id", ""))
 	if craft_id.is_empty(): return
@@ -13761,6 +13764,20 @@ func _append_air_support_card_row(host: VBoxContainer, card: Dictionary) -> void
 	host.add_child(row)
 	for item in [["Pilot einsteigen", "pilot_board"], ["Start", "start"], ["Fliegen", "move"], ["Landen", "land"], ["Feuer", "fire"], ["Feuerstopp", "cease"], ["Luftradar", "radar"], ["Kreisen", "circle"], ["CAS", "role_cas"], ["Luftschutz", "role_air_defense"], ["Kreisen aus", "role_clear"]]:
 		row.add_child(_build_mission_dropship_card_command_button(item[0], "Schiffbefehl; Fliegen und Feuer nutzen das markierte Hexfeld.", false, Callable(self, "_on_air_support_card_action").bind(craft_id, item[1]), craft_id, "air_" + item[1]))
+	var fuel_label := Label.new()
+	fuel_label.name = "AirSupportFuelLabel"
+	fuel_label.text = _air_support_fuel_line(craft_id)
+	host.add_child(fuel_label)
+
+
+## Luftrollen 2: Zeile "Treibstoff: N" (nur mit Treibstoffkonto), bei Warnung mit Zusatz.
+func _air_support_fuel_line(craft_id: String) -> String:
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	if simulation == null or craft_id.is_empty(): return ""
+	var snapshot: Dictionary = simulation.get_air_support_role_snapshot(craft_id)
+	var fuel := float(snapshot.get("fuel", -1.0))
+	if fuel < 0.0: return ""
+	return "Treibstoff: %d%s" % [int(round(fuel)), " – Heimflug knapp" if bool(snapshot.get("fuel_warned", false)) else ""]
 
 
 ## Nottankdienst (T3): Knopf, Angebot und Zustand an der Schiffskarte des Ortes. Die Karte liest nur die Auskunft des Adapters
