@@ -23,6 +23,10 @@ var _static_layer: Control
 var _dock_cache: Dictionary = {}
 var _dock_projection: Dictionary = {}
 var _dock_visible := false
+## Zuletzt angeklickter Zielpunkt (nur Anzeige): die Kurslinie vom Schiff dorthin wird gezeichnet, bis das Schiff ankommt.
+var _course_target := Vector2i.ZERO
+var _course_active := false
+const COURSE_ARRIVAL_DISTANCE := 1.5
 
 func _ready() -> void:
 	clip_contents = true
@@ -166,8 +170,19 @@ func request_move_at(point: Vector2) -> bool:
 	var target := screen_to_hex(point)
 	if _dock_visible and Rect2i(_dock_projection.descriptor.station_block).has_point(GRID.to_offset(target)): return false
 	if not AREA.contains(target,{"coordinate_frame":"local","space_area_id":_snapshot.space_area_id}) or _body_mask.has(target): return false
+	_course_target = target
+	_course_active = true
 	move_requested.emit(_selected,target)
+	queue_redraw()
 	return true
+
+## Kurslinie vom gewaehlten Schiff zum letzten Klickpunkt (Bildschirmkoordinaten); leer, wenn kein Kurs offen ist.
+func get_course_line() -> PackedVector2Array:
+	if not _course_active or not _actors.has(_selected): return PackedVector2Array()
+	var from: Vector2 = _actors[_selected].flight.position_plane
+	var to := HEX.axial_to_plane(Vector2(_course_target))
+	if from.distance_to(to) <= COURSE_ARRIVAL_DISTANCE: return PackedVector2Array()
+	return PackedVector2Array([plane_to_screen(from), plane_to_screen(to)])
 
 ## Viewport-only offset ranges; adaptive stride caps work even when zoomed out.
 func get_visible_grid_projection() -> Dictionary:
@@ -263,6 +278,12 @@ func _draw() -> void:
 		var radius := clampf(_scale()*1.5,5.0,14.0)
 		draw_colored_polygon(PackedVector2Array([point+forward*radius,point-forward*radius*0.65+side*radius*0.65,point-forward*radius*0.3,point-forward*radius*0.65-side*radius*0.65]),color)
 		draw_string(ThemeDB.fallback_font,point+Vector2(10,-10),id,HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("b0c8d5"))
+	var course := get_course_line()
+	if course.size() == 2:
+		draw_dashed_line(course[0],course[1],Color("f2c47c"),2.0,8.0,true)
+		draw_arc(course[1],9.0,0.0,TAU,24,Color("f2c47c"),2.0,true)
+	elif _course_active and not _actors.has(_selected):
+		_course_active = false
 	var name: String = str(_body_visual.get("name",_layout.body_id))
 	draw_string(ThemeDB.fallback_font,Vector2(16,22),name+" Ã‚Â· Orbit",HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("b0c8d5"))
 

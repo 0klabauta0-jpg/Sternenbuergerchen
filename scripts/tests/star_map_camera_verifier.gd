@@ -44,7 +44,8 @@ func _run() -> void:
 	var canvas: Control = load("res://scripts/ui/star_map_canvas.gd").new()
 	root.add_child(canvas)
 	canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	canvas.connect("orbit_requested", func(orbit_id: String, marker_id: String): targets.append(orbit_id + "/" + marker_id))
+	# Stufe 1: Ein Klick auf einen Marker merkt das Ziel vor (orbit_previewed); orbit_requested sendet erst "Start" der Sternkarte.
+	canvas.connect("orbit_previewed", func(orbit_id: String, marker_id: String): targets.append(orbit_id + "/" + marker_id))
 	var definitions: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/star_system.json"))
 	var travel := {"phase": "stopped", "craft_id": "test_ship", "position": [0.18, 0.70], "orbits": definitions.orbits, "bodies": definitions.bodies}
 	var before: Dictionary = travel.duplicate(true)

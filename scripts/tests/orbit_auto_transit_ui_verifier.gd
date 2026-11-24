@@ -13,14 +13,18 @@ func _command(operation: String, payload: Dictionary = {}) -> Dictionary:
 func _run() -> void:
 	var view = SCREEN.new(); root.add_child(view); view.configure(_snapshot, _command)
 	await process_frame
-	var button: Button = view.find_child("OrbitAutomatic", true, false)
-	assert(button != null and not button.disabled and button.text == "Durchflug: an")
-	button.pressed.emit()
+	# Stufe 1: statt des kleinen Schalters zwei gleich grosse Umschaltknoepfe "Automatik" / "Selbst fliegen" im Kursblock.
+	var automatic: Button = view.find_child("OrbitModeAutomatic", true, false)
+	var manual: Button = view.find_child("OrbitModeManual", true, false)
+	assert(automatic != null and manual != null and not automatic.disabled and not manual.disabled and automatic.button_pressed and not manual.button_pressed)
+	manual.pressed.emit()
 	assert(calls.size() == 1 and calls[0].operation == "space_set_orbit_automatic" and calls[0].payload == {"craft_id":"ship", "enabled":false})
-	assert(button.text == "Durchflug: aus")
+	assert(manual.button_pressed and not automatic.button_pressed)
+	automatic.pressed.emit()
+	assert(calls.size() == 2 and calls[1].payload == {"craft_id":"ship", "enabled":true} and automatic.button_pressed)
 	runtime.space_travel.orbit_transit_available = false
 	view.refresh()
-	assert(button.disabled and not button.visible)
+	assert(not automatic.is_visible_in_tree() and not manual.is_visible_in_tree())
 	view.queue_free(); await process_frame
 	print("ORBIT_AUTO_TRANSIT_UI passed")
 	quit()
