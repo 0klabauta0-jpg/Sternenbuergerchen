@@ -171,6 +171,7 @@ func configure(flow: Node, screen: Control) -> void:
 	_campaign_mode = bool(_flow.call("is_campaign_start"))
 	_skirmish_mode = not _campaign_mode and _flow.has_meta("skirmish_preset_id")
 	_supply.set_campaign_magazine_mode(_campaign_mode or _skirmish_mode)  # M4c/M6b: Magazinvorrat der Person zaehlt in Kampagne und Skirmish
+	_supply.set_blueprint_gate_enabled(_campaign_mode)  # Erwerbserlaubnis-Sperre gilt nur in der Kampagne; Skirmish/Mehrspieler bauen alle Munition
 	if _campaign_mode:
 		_onboarding = load("res://scripts/core/campaign_onboarding_state.gd").new()
 		_onboarding.configure()
