@@ -6254,6 +6254,9 @@ func _try_enqueue_enemy_team_tactics_move(simulation_root: Node, enemy) -> bool:
 	var unit_id: String = String(enemy.call("get_unit_id")).strip_edges()
 	if unit_id.is_empty():
 		return false
+	# Ein Patrouillenweg geht vor der Gruppentaktik, solange es noch keinen Feindkontakt gab.
+	if _enemy_patrol_paths_by_unit_id.has(unit_id) and not bool(_enemy_patrol_contact_locked.get(unit_id, false)) and not _enemy_should_hold_position(enemy):
+		return false
 	var state: Dictionary = get_enemy_team_tactics_state_for_unit(unit_id)
 	var decision: Dictionary = Dictionary(_enemy_behavior_orchestrator.call(
 		"build_team_tactics_decision",
