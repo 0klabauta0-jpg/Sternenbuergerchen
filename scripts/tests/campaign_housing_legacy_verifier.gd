@@ -36,7 +36,7 @@ func _free() -> void:
 	flow.queue_free(); await process_frame
 
 ## Frischer Stand, dann der alte Beleg (Einzelbett) eingeschrieben; `before` darf die Basis vorher veraendern.
-func _write_legacy_checkpoint(before: Callable) -> bool:
+func _write_legacy_checkpoint(before: Callable, receipts := 1) -> bool:
 	if not await _boot("new"): return false
 	if before.is_valid(): before.call()
 	var saved: Dictionary = flow.get("_campaign_start").save_home_checkpoint(flow, adapter, true)
@@ -45,7 +45,9 @@ func _write_legacy_checkpoint(before: Callable) -> bool:
 	if not loaded.get("ok", false): check(false, "frischer Stand lesbar"); await _free(); return false
 	var payload: Dictionary = loaded.payload
 	var signature := JSON.stringify({"operation":"campaign_build_bed","payload":{}}, "", true)
-	payload.supply.requests["old-bed-1"] = {"signature":signature,"result":{"ok":true,"operation":"campaign_build_bed","request_id":"old-bed-1","bed_count":3,"cost":100}}
+	for number in range(1, receipts + 1):
+		var request_id := "old-bed-%d" % number
+		payload.supply.requests[request_id] = {"signature":signature,"result":{"ok":true,"operation":"campaign_build_bed","request_id":request_id,"bed_count":number + 2,"cost":100}}
 	var modified: Dictionary = STORE.save_checkpoint(payload)
 	check(modified.get("ok", false), "alter Bettbeleg-Stand akzeptiert: " + str(modified.get("reason", "")))
 	await _free()
@@ -127,6 +129,28 @@ func _write_old_sleeper_checkpoint(bed_id: String) -> bool:
 	check(modified.get("ok", false), "Fixture: Altstand mit Schlaefer an der alten Bettlage akzeptiert: " + str(modified.get("reason", "")))
 	return modified.get("ok", false)
 
+## Altstand mit fuenf Alt-Gebaeuden (zehn Einzelbett-Belege: 3..12 Betten), Schlaefer in `bed_id`, das es bei vier
+## Stellplaetzen nicht gibt (field_bed_09) bzw. nie gab. Real erzeugt (Schlaf in field_bed_01), dann bed_id umgeschrieben.
+func _write_gone_bed_checkpoint(bed_id: String) -> bool:
+	if not await _write_legacy_checkpoint(Callable(), 10): return false
+	if not await _boot("continue"): return false
+	var sleep: Dictionary = base.request_operation("base_sleep", {"unit_id":"campaign_leader", "bed_id":"field_bed_01"})
+	check(sleep.get("ok", false), "Fixture E: Person geht ins Bett field_bed_01: " + str(sleep))
+	for i in range(6000):
+		sim._physics_process(0.05)
+		if base._states.campaign_leader.status == "sleeping": break
+	check(base._states.campaign_leader.status == "sleeping", "Fixture E: Person schlaeft")
+	var saved: Dictionary = flow.get("_campaign_start").save_home_checkpoint(flow, adapter, true)
+	check(saved.get("ok", false), "Fixture E: gespeichert: " + str(saved.get("reason", "")))
+	await _free()
+	var loaded: Dictionary = STORE.load_checkpoint()
+	if not loaded.get("ok", false): check(false, "Fixture E: Stand lesbar"); return false
+	var payload: Dictionary = loaded.payload
+	payload.hex_tactical.base_personnel.units.campaign_leader.bed_id = bed_id
+	var modified: Dictionary = STORE.save_checkpoint(payload)
+	check(modified.get("ok", false), "Fixture E: Stand mit Schlaefer in %s akzeptiert: %s" % [bed_id, str(modified.get("reason", ""))])
+	return modified.get("ok", false)
+
 func run() -> void:
 	# A: Schlaefer im Alt-Bett field_bed_01 (Beleg alt, Schlaf im neuen Alt-Gebaeude), Speichern und erneut Laden.
 	if not await _write_legacy_checkpoint(Callable()): quit(1); return
@@ -173,6 +197,21 @@ func run() -> void:
 	var booted := await _boot("continue", true)
 	print("GEGENPROBE Habitat-Bett: geladen=", booted, " Fehler=", last_error)
 	check(not booted and last_error.contains("base_checkpoint_bed_pose"), "Schlaefer in Habitat-Bett mit falscher Lage: Stand wird weiter abgelehnt (base_checkpoint_bed_pose)")
+	if flow != null: await _free()
+	# E: fuenf Alt-Gebaeude, Schlaefer in field_bed_09 (bei vier Stellplaetzen gibt es das Bett nicht mehr): Stand laedt, Person geweckt (W4).
+	if not await _write_gone_bed_checkpoint("field_bed_09"): quit(1); return
+	if not await _boot("continue"): quit(1); return
+	var ids_e: Array = Array(base.get_snapshot().layout.beds).map(func(bed): return String(bed.id))
+	check(adapter._supply.get_campaign_housing_count() == 5 and adapter._supply.get_campaign_bed_count() == 10 and ids_e.size() == 10 and not ids_e.has("field_bed_09"), "fuenf Alt-Belege: Bettenzahl auf das Gebaute begrenzt (10, kein field_bed_09): " + str(ids_e))
+	var gone: Dictionary = base._states.campaign_leader
+	check(gone.status == "outside" and String(gone.bed_id) == "" and not bool(gone.rest_automatic), "Schlaefer in vorhandenem field_bed_09-Altstand ist geweckt: " + str(gone.status))
+	check(not _in_footprint("campaign_leader"), "Geweckte Person (W4) steht nicht in einer Sperrzelle")
+	await _free()
+	# E2: Gegenprobe: unbekannte Bett-Id ohne field_bed_-Vorsatz bleibt abgelehnt.
+	if not await _write_gone_bed_checkpoint("bunk_99"): quit(1); return
+	var booted_e := await _boot("continue", true)
+	print("GEGENPROBE unbekanntes Bett: geladen=", booted_e, " Fehler=", last_error)
+	check(not booted_e and last_error.contains("base_checkpoint_bed_mismatch"), "Schlaefer in unbekanntem Bett bunk_99: Stand wird weiter abgelehnt (base_checkpoint_bed_mismatch)")
 	if flow != null: await _free()
 	if failed == 0: print("CAMPAIGN_HOUSING_LEGACY_PASS")
 	quit(0 if failed == 0 else 1)

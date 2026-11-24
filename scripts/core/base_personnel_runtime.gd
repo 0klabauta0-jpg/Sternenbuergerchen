@@ -1715,11 +1715,15 @@ func _checkpoint_candidate(state:Dictionary,target,movement:Dictionary)->Diction
 		elif not value.action.is_empty():return _checkpoint_reject("base_checkpoint_action_status")
 		if value.status=="sleeping" or action.get("type")=="sleep":
 			var bed:Dictionary=_find_layout("beds",value.bed_id)
-			if not _checkpoint_id(value.bed_id) or bed.is_empty() or beds.has(value.bed_id):return _checkpoint_reject("base_checkpoint_bed_mismatch")
+			# Alt-Bett, das es bei den vier Stellplaetzen nicht mehr gibt (field_bed_09 ff. aus einem Altstand mit mehr als vier
+			# Alt-Gebaeuden): der Schlaefer wird wie bei einer abweichenden Lage geweckt. Andere unbekannte Bett-Ids bleiben Fehler.
+			var gone_bed:bool=value.status=="sleeping" and _checkpoint_id(value.bed_id) and bed.is_empty() and String(value.bed_id).begins_with("field_bed_")
+			if not _checkpoint_id(value.bed_id) or (bed.is_empty() and not gone_bed) or beds.has(value.bed_id):return _checkpoint_reject("base_checkpoint_bed_mismatch")
 			if value.status=="sleeping":
 				var pose:Dictionary=target.read_unit(id)
 				if pose.route_state.has_commitments or pose.movement_state.moving:return _checkpoint_reject("base_checkpoint_bed_pose")
-				if pose.grid!=_terrain.world_to_grid(_world(bed.grid)):
+				if gone_bed:woken=true
+				elif pose.grid!=_terrain.world_to_grid(_world(bed.grid)):
 					# Alt-Bett (field_bed_*): ein Stand vor dem Wohncontainer-Umbau hat den Schlaefer an der alten Bettlage
 					# gespeichert, das Bett steht jetzt auf Stellplatz 1. Dann wird die Person geweckt statt den Stand abzulehnen.
 					# Habitat- und Container-Betten bleiben streng.
