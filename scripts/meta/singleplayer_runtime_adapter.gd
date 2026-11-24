@@ -739,10 +739,13 @@ func bind_mission_air_support(mission: Node) -> Dictionary:
 	# Luftrollen 4a: feindliche Flieger des Einsatzes (nur Kampagne; ohne Eintrag im Szenario aendert sich nichts).
 	if bound.get("ok", false) and _campaign_mode and mission_root.has_method("configure_enemy_aircraft"):
 		var setup: Node = mission.get_node_or_null("MissionSetup")
+		# Das schon geladene Szenario des Einsatzes hat Vorrang; sonst von der Platte (fehlende Datei: Warnung statt stillem Nichts).
+		var scenario = setup.get("_mission_scenario") if setup != null else null
 		var scenario_path := String(setup.get("scenario_file_path")) if setup != null else ""
-		if not scenario_path.is_empty():
-			var scenario = load("res://scripts/mission/mission_scenario_data.gd").load_from_file(scenario_path)
-			if scenario != null: mission_root.call("configure_enemy_aircraft", scenario.get_enemy_aircraft_config())
+		if scenario == null and not scenario_path.is_empty():
+			scenario = load("res://scripts/mission/mission_scenario_data.gd").load_from_file(scenario_path)
+			if scenario == null: push_warning("Luftrollen 4a: Szenario '%s' nicht lesbar, keine feindlichen Flieger." % scenario_path)
+		if scenario != null and scenario.has_method("get_enemy_aircraft_config"): mission_root.call("configure_enemy_aircraft", scenario.get_enemy_aircraft_config())
 	return bound
 
 func get_campaign_entry_feedback() -> Dictionary:
