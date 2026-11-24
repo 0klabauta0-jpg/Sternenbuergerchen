@@ -602,8 +602,26 @@ func export_checkpoint_state() -> Dictionary:
 	if not encoded.ok: return encoded
 	return {"schema":"space_travel_checkpoint.v1", "craft_id":_flight.get_snapshot().craft_id, "system_fingerprint":JSON.stringify(_definition, "", true).sha256_text(), "travel":encoded.value, "flight":flight}
 
+const ADDITIVE_LOCATION_SOURCE = preload("res://scripts/core/singleplayer_campaign_state.gd")
+
+## Eine Einsatz-Zwischenstand-Pruefsumme gilt, wenn sie der heutigen Sternsystem-Definition entspricht ODER der heutigen
+## OHNE die Umlaufbahn-Eintraege additiver Orte (ADDITIVE_LOCATION_IDS, Liste im Kampagnenstand): ein vor dem Hinzufuegen eines
+## neuen Ortes im Einsatz gespeicherter Stand soll weiter laden. Jede andere Abweichung (alter Ort, Umlaufbahn, Koerper, Version) lehnt weiter ab.
+func _system_fingerprint_accepted(saved: Variant) -> bool:
+	if typeof(saved) != TYPE_STRING: return false
+	if String(saved) == JSON.stringify(_definition, "", true).sha256_text(): return true
+	var present: Array = []
+	for place: String in ADDITIVE_LOCATION_SOURCE.ADDITIVE_LOCATION_IDS:
+		if Dictionary(_definition.get("location_orbits", {})).has(place): present.append(place)
+	for mask in range(1, 1 << present.size()):
+		var candidate: Dictionary = _definition.duplicate(true)
+		for index in present.size():
+			if (mask >> index) & 1 == 1: candidate.location_orbits.erase(present[index])
+		if String(saved) == JSON.stringify(candidate, "", true).sha256_text(): return true
+	return false
+
 func prepare_checkpoint_restore(state: Dictionary) -> Dictionary:
-	if state.size() != 5 or not state.has_all(["schema", "craft_id", "system_fingerprint", "travel", "flight"]) or state.schema != "space_travel_checkpoint.v1" or state.craft_id != _flight.get_snapshot().craft_id or state.system_fingerprint != JSON.stringify(_definition, "", true).sha256_text() or not state.flight is Dictionary:
+	if state.size() != 5 or not state.has_all(["schema", "craft_id", "system_fingerprint", "travel", "flight"]) or state.schema != "space_travel_checkpoint.v1" or state.craft_id != _flight.get_snapshot().craft_id or not _system_fingerprint_accepted(state.system_fingerprint) or not state.flight is Dictionary:
 		return {"ok":false, "reason":"invalid_travel_checkpoint"}
 	var decoded := CHECKPOINT_CODEC.decode_value(state.travel)
 	if not decoded.ok or not decoded.value is Dictionary: return {"ok":false, "reason":"invalid_travel_checkpoint"}
