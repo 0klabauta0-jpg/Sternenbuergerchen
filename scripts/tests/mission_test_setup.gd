@@ -376,6 +376,7 @@ func _admit_hex_setup_nodes(nodes:Array,late_wave:bool=false)->void:
 		if not is_instance_valid(unit) or not unit is Node2D or not unit.has_method("get_unit_id"):continue
 		var id:String=String(unit.call("get_unit_id"))
 		if registry.get_unit(id)!=unit or not simulation.get_hex_unit_state(id).is_empty() or bool(unit.get_meta("dropship_embarked",false)):continue
+		if late_wave and combined.has(id):continue # wartende Aufbau-Einheit bleibt ein normaler Eintrag
 		if not unit.global_position.is_finite():
 			_hex_setup_error={"ok":false,"reason":"invalid_setup_position"}
 			return
@@ -1252,11 +1253,24 @@ func _setup_enemy_waves(enemy_units: Array) -> void:
 			enemy_wave_controller.connect("wave_started", admit_callable)
 
 
-func _on_enemy_wave_started_admit(_wave_number: int) -> void:
+func _on_enemy_wave_started_admit(wave_number: int) -> void:
+	# Nur Einheiten schon gestarteter Wellen, die leben (Lebenszustand "fit"); Gefallene bekommen keinen neuen Hex-Zustand.
+	var enemy_wave_controller = get_node_or_null(enemy_wave_controller_path)
+	var per_wave: int = 1
+	if enemy_wave_controller != null:
+		per_wave = maxi(int(enemy_wave_controller.get("units_per_wave")), 1)
+	var started_limit: int = wave_number * per_wave
 	var valid_units: Array = []
+	var index: int = 0
 	for unit in _wave_enemy_units:
-		if is_instance_valid(unit):
-			valid_units.append(unit)
+		if unit == null or not is_instance_valid(unit) or not unit.has_method("get_unit_id"):
+			continue
+		index += 1
+		if index > started_limit:
+			break
+		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+			continue
+		valid_units.append(unit)
 	_admit_hex_setup_nodes(valid_units, true)
 
 
