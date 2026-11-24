@@ -42,8 +42,9 @@ class FixPerson extends Node2D:
 	func apply_damage(amount: int, _context: Dictionary = {}) -> bool: health -= amount; return true
 
 class FixVision extends Node:
+	var ids: Array = []
 	func get_multiplayer_visible_unit_ids(_team: String) -> PackedStringArray:
-		return PackedStringArray([])
+		return PackedStringArray(ids)
 
 class FixTransport extends Node:
 	var boarded := true
@@ -70,7 +71,8 @@ func _check(ok: bool, label: String) -> bool:
 
 # ---------------------------------------------------------------- Aufbau
 ## Felder 5..19, Landezone (10,10). accounts: Schiff -> Tankinhalt. spawn: Feld des feindlichen Fliegers (null: keiner konfiguriert).
-func _build(craft_ids: Array[String], accounts: Dictionary, spawn: Variant = null) -> Dictionary:
+## foes: Bodeneinheit (Team red) -> Feld; sichtbar ist, was in visible steht.
+func _build(craft_ids: Array[String], accounts: Dictionary, spawn: Variant = null, foes: Dictionary = {}, visible: Array = []) -> Dictionary:
 	var flow := FixFlow.new(); root.add_child(flow)
 	var adapter = ADAPTER.new(); flow.add_child(adapter); adapter._flow = flow
 	var source = ROOT_SCRIPT.new(); adapter.add_child(source); adapter._simulation = source
@@ -103,10 +105,15 @@ func _build(craft_ids: Array[String], accounts: Dictionary, spawn: Variant = nul
 	for id in craft_ids:
 		var pilot = FixPerson.new(); pilot.unit_id = "pilot_" + id; mission.add_child(pilot); units.register_unit(pilot.unit_id, pilot); mission_root.register_known_unit(pilot.unit_id, pilot)
 		pilot.set_meta("dropship_embarked", true)
-	var vision = FixVision.new(); vision.name = "CombatLoopDriver"; mission.add_child(vision)
+	var vision = FixVision.new(); vision.name = "CombatLoopDriver"; vision.ids = visible.duplicate(); mission.add_child(vision)
 	var transport = FixTransport.new(); transport.name = "TacticalController"; mission.add_child(transport)
 	for q in range(5, 20):
 		for r in range(5, 20): terrain.register_tile(TILE.new({"tile_id":"air:%d:%d" % [q, r], "grid_position":Vector2i(q, r), "explicit_hex_ramps":true}))
+	var placements: Array[Dictionary] = []
+	for foe_id in foes:
+		var foe = FixPerson.new(); foe.unit_id = String(foe_id); foe.team = "red"; mission.add_child(foe); units.register_unit(foe.unit_id, foe); mission_root.register_known_unit(foe.unit_id, foe)
+		placements.append({"unit_id":String(foe_id), "grid":foes[foe_id]})
+	if not placements.is_empty(): mission_root.admit_hex_ground_units(placements)
 	for id in craft_ids:
 		transport.landed_position[id] = terrain.grid_to_world(Vector2i(10, 10))
 		transport.parked[id] = true
@@ -115,7 +122,7 @@ func _build(craft_ids: Array[String], accounts: Dictionary, spawn: Variant = nul
 	mission_root.air_role_event.connect(func(event: Dictionary) -> void: events.append(event))
 	if spawn != null:
 		mission_root.configure_enemy_aircraft([{"aircraft_id":FOE, "model_id":"buccaneer", "faction_id":"pirates", "spawn_hex":spawn, "delay_seconds":20.0}])
-	return {"flow":flow, "adapter":adapter, "source":source, "fleet":fleet, "mission_root":mission_root, "terrain":terrain, "transport":transport, "events":events, "tick":50, "combat":source.get("_space_combat_state"), "supply":supply, "equipment":equipment}
+	return {"flow":flow, "adapter":adapter, "source":source, "fleet":fleet, "mission_root":mission_root, "terrain":terrain, "transport":transport, "events":events, "tick":50, "combat":source.get("_space_combat_state"), "supply":supply, "equipment":equipment, "vision":vision}
 
 
 # ---------------------------------------------------------------- Helfer
@@ -125,6 +132,7 @@ func _run(env: Dictionary, seconds: float) -> void:
 	for _i in range(int(round(seconds / DT))):
 		env.tick = int(env.tick) + 1
 		source.tick_counter = int(env.tick)
+		mission_root.tick_counter = int(env.tick)
 		source._advance_space_flights(DT, int(env.tick))
 		mission_root._advance_air_support_orders(DT)
 
@@ -249,6 +257,7 @@ func _case_1() -> void:
 	var control: Dictionary = Dictionary(env.combat.get_flight_controls().get("ship", {}))
 	_check(bool(control.get("air_support_move", false)) and Vector2(Dictionary(control.get("goal", {})).get("target_plane", Vector2.INF)).distance_to(GRID.HEX.axial_to_plane(Vector2(waypoints_before[2]))) < 0.001, tag + "Lenkung fliegt Wegpunkt 2 an")
 	var revision: int = env.supply.get_revision()
+	var home_cost := float(mission_root._air_fuel_costs(env.supply).home_cost)
 	_run(env, 29.4)
 	_check(is_equal_approx(float(env.supply.get_fuel("ship")), 12.5) and _air_receipts(env).is_empty(), tag + "nach 29,4 s keine Buchung (%s)" % str(env.supply.get_fuel("ship")))
 	_run(env, 0.1)
@@ -256,7 +265,30 @@ func _case_1() -> void:
 	var expected_id := "air-fuel:ship:%s:%d:4:r%d" % [LOC, serial, revision]
 	_check(_air_receipts(env) == [expected_id], tag + "Beleg-ID mit Schritt 4: erwartet %s, ist %s" % [expected_id, str(_air_receipts(env))])
 	_check(int(mission_root.get("_air_fuel_book_failures")) == 0, tag + "keine gescheiterte Buchung (kein request_id_conflict)")
-	_check(_count(env, "ship", "fuel_warning") == 0, tag + "keine zweite Warnung")
+	_check(_count(env, "ship", "fuel_warning") == 0, tag + "keine zweite Warnung (Warnung kann kommen: Rest 11,5 <= Heimflugkosten %s, siehe Gegenprobe)" % str(home_cost))
+	_check(home_cost > 0.0 and 11.5 <= home_cost + 0.00001, tag + "Aufbau: die Warnung koennte kommen (Heimflugkosten %s, Rest nach der Buchung 11,5)" % str(home_cost))
+	env.flow.free()
+
+
+## Gegenprobe zu Fall 1: ohne gesichertes fuel_warned kommt bei derselben Buchung genau eine Warnung. Sonst waere die "keine zweite Warnung" leer.
+func _case_1b() -> void:
+	var tag := "[1b Gegenprobe Warnung] "
+	var env: Dictionary = _build(["ship"], {"ship":12.5})
+	if not _api(env, tag): return
+	var mission_root: Node = env.mission_root
+	_check(bool(_circle(env, "ship", Vector2i(10, 10), "none", "c1b").get("ok", false)), tag + "Aufbau: Kreisen")
+	var sortie: Dictionary = _sortie(env, "ship")
+	sortie["fuel_seconds"] = 30.5
+	sortie["fuel_steps"] = 3
+	sortie["fuel_warned"] = false
+	var wire: Dictionary = _wire(mission_root.export_air_sortie_checkpoint())
+	Dictionary(mission_root.get("_air_support_sorties")).erase("ship")
+	var prepared: Dictionary = mission_root.prepare_air_sortie_checkpoint(wire, {"fleet":env.fleet})
+	_check(bool(prepared.get("ok", false)), tag + "prepare: " + str(prepared.get("reason", "ok")))
+	if prepared.get("ok", false):
+		mission_root.publish_air_sortie_checkpoint(prepared.candidate)
+		_run(env, 29.5)
+		_check(_count(env, "ship", "fuel_warning") == 1, tag + "ohne fuel_warned kommt genau eine Warnung (%d)" % _count(env, "ship", "fuel_warning"))
 	env.flow.free()
 
 
@@ -412,10 +444,28 @@ func _case_5() -> void:
 	if not _api(env, tag): return
 	var mission_root: Node = env.mission_root
 	_check(bool(_circle(env, "ship", Vector2i(10, 10), "none", "c5").get("ok", false)), tag + "Aufbau: Kreisen")
-	mission_root.set("_air_ground_rng_state", 12345)
-	var exported: Dictionary = mission_root.export_air_sortie_checkpoint()
-	var wire: Dictionary = _wire(exported)
-	var expected_state := (12345 * 1103515245 + 12345) & 0x7fffffff
+	# Von Hand gesetzter kleiner Stand, ein Stand ueber 10^9 (die Haelfte aller echten Staende liegt darueber) und ein echter Stand nach mehreren Zuegen.
+	_rng_roundtrip(env, tag + "Stand 12345: ", 12345)
+	_rng_roundtrip(env, tag + "Stand 2000000011 (ueber 10^9): ", 2000000011)
+	_rng_roundtrip(env, tag + "Stand 0x7fffffff (Obergrenze): ", 0x7fffffff)
+	mission_root.set("_air_ground_rng_state", 1)
+	var drawn := 0
+	while int(mission_root.get("_air_ground_rng_state")) <= 1000000000 and drawn < 60:
+		mission_root.draw_air_ground_roll()
+		drawn += 1
+	_check(int(mission_root.get("_air_ground_rng_state")) > 1000000000, tag + "Aufbau: echter Stand ueber 10^9 nach %d Zuegen" % drawn)
+	_rng_roundtrip(env, tag + "echter Stand nach %d Zuegen: " % drawn, int(mission_root.get("_air_ground_rng_state")))
+	var bad: Dictionary = _tampered(_wire(mission_root.export_air_sortie_checkpoint()), func(data: Dictionary) -> void: data["rng"] = 0x80000000)
+	_check(String(mission_root.prepare_air_sortie_checkpoint(bad, {"fleet":env.fleet}).get("reason", "")) == BAD, tag + "Stand ueber 0x7fffffff abgelehnt")
+	env.flow.free()
+
+
+## Setzt den Zufallsstand, sichert, zieht weiter (Bezugswert), verwirft die Sortie, laedt und prueft: Stand zurueck, derselbe naechste Wert.
+func _rng_roundtrip(env: Dictionary, tag: String, state: int) -> void:
+	var mission_root: Node = env.mission_root
+	mission_root.set("_air_ground_rng_state", state)
+	var wire: Dictionary = _wire(mission_root.export_air_sortie_checkpoint())
+	var expected_state := (state * 1103515245 + 12345) & 0x7fffffff
 	var reference: float = mission_root.draw_air_ground_roll()
 	_check(is_equal_approx(reference, float(expected_state) / 2147483648.0), tag + "Aufbau: Bezugswert ohne Speichern")
 	for _i in range(7): mission_root.draw_air_ground_roll()
@@ -423,10 +473,10 @@ func _case_5() -> void:
 	var prepared: Dictionary = mission_root.prepare_air_sortie_checkpoint(wire, {"fleet":env.fleet})
 	_check(bool(prepared.get("ok", false)), tag + "prepare: " + str(prepared.get("reason", "ok")))
 	if prepared.get("ok", false):
-		mission_root.publish_air_sortie_checkpoint(prepared.candidate)
-		_check(int(mission_root.get("_air_ground_rng_state")) == 12345, tag + "Zufallsstrom wieder bei 12345")
+		var published: Variant = mission_root.publish_air_sortie_checkpoint(prepared.candidate)
+		_check(int(mission_root.get("_air_ground_rng_state")) == state, tag + "Zufallsstrom wieder beim gesicherten Stand")
 		_check(is_equal_approx(float(mission_root.draw_air_ground_roll()), reference), tag + "derselbe Wert wie ohne Speichern")
-	env.flow.free()
+		_check(published is Dictionary and bool(Dictionary(published).get("ok", false)), tag + "publish meldet ok: " + str(published))
 
 
 ## Fall 6: Rueckflug 'fuel' mit gemeldeter blockierter Landung: laeuft nach dem Laden weiter, kein zweites landing_blocked, landet, sobald frei.
@@ -526,6 +576,21 @@ func _case_7() -> void:
 	var other_area: Dictionary = _wire(fleet_state)
 	other_area.crafts.ship.flight["space_area_id"] = "atmosphere:trade_outpost"
 	_check(not bool(receiver.prepare_checkpoint_restore(other_area, ["ship"], ["ship"]).get("ok", true)), tag + "Atmosphaere eines anderen Orts abgelehnt")
+	# Nachbesserung k4: ein lebender Reisezustand (Phase surface, Schiff in der Luft) wird mit Erlaubnis direkt wiederhergestellt; die Quellenpruefung benutzt dieselbe Erlaubnis.
+	owner.set("_phase", "surface")
+	owner.set("_craft_id", "ship")
+	owner.set("_location_id", LOC)
+	owner.set("_orbit_id", raw.orbit_id)
+	var live_state: Dictionary = owner.export_checkpoint_state(true)
+	_check(live_state.get("schema") == "space_travel_checkpoint.v1", tag + "Aufbau: lebender Reisezustand in der Luft laesst sich mit Erlaubnis sichern: " + str(live_state.get("reason", "ok")))
+	if live_state.has("schema"):
+		var live_wire: Dictionary = _wire(live_state)
+		var denied: Dictionary = owner.prepare_checkpoint_restore(live_wire)
+		_check(not bool(denied.get("ok", true)), tag + "ohne Erlaubnis abgelehnt")
+		var live_prepared: Dictionary = owner.prepare_checkpoint_restore(live_wire, true)
+		_check(bool(live_prepared.get("ok", false)), tag + "lebender Reisezustand mit Erlaubnis wiederherstellbar (Quellenpruefung): " + str(live_prepared.get("reason", "ok")))
+		if live_prepared.get("ok", false):
+			_check(bool(owner.validate_checkpoint_restore(live_prepared.prepared).get("ok", false)), tag + "die Bestaetigung benutzt dieselbe Erlaubnis: " + str(owner.validate_checkpoint_restore(live_prepared.prepared).get("reason", "ok")))
 	env.flow.free()
 
 
@@ -557,11 +622,208 @@ func _case_8() -> void:
 	_check(systems.get("schema") == "space_systems_checkpoint.v1" and CODEC.decode_value(systems.payload).value.systems.keys() == ["ship"], tag + "Systeme ohne Gegner")
 	var systems_all: Dictionary = env.combat.export_systems_checkpoint()
 	_check(CODEC.decode_value(systems_all.payload).value.systems.size() == 2 and systems_all == env.combat.export_systems_checkpoint([]), tag + "Systeme ohne Liste wie bisher")
+	# Laden: der Empfaenger hat den Gegner noch nicht (er kommt erst mit dem Sortie-Block). Der verkuerzte Systemblock passt, der volle nicht mehr.
+	mission_root._air_hostile_release_all()
+	_check(env.combat.get_actor(FOE) == null and env.combat.get_ship_systems(FOE).is_empty(), tag + "Aufbau: Gegner beim Empfaenger entfernt")
+	var cut_prepared: Dictionary = env.combat.prepare_systems_checkpoint_restore(systems)
+	_check(bool(cut_prepared.get("ok", false)), tag + "prepare_systems_checkpoint_restore nimmt den verkuerzten Systemblock an: " + str(cut_prepared.get("reason", "ok")))
+	_check(not bool(env.combat.prepare_systems_checkpoint_restore(systems_all).get("ok", true)), tag + "der volle Systemblock (mit Gegner) passt zum Empfaenger ohne Gegner nicht")
+	if cut_prepared.get("ok", false):
+		_check(bool(env.combat.validate_systems_checkpoint_restore(cut_prepared.prepared).get("ok", false)), tag + "der verkuerzte Systemblock laesst sich bestaetigen")
+	env.flow.free()
+
+
+## Rottenbefehl des Schiffs.
+func _order(env: Dictionary) -> Dictionary:
+	var binding: Dictionary = env.mission_root._resolve_air_support_craft("ship")
+	if not binding.get("ok", false): return {}
+	return Dictionary(Dictionary(binding.wings.get_snapshot().wings.get(binding.wing_id, {})).get("order", {}))
+
+
+## Sichern und Laden einer CAS-Sortie mit laufendem Angriffsbefehl auf ein Bodenziel weit ausserhalb von Radius + Verfolgung (19,19).
+## Der Rottenstand selbst bleibt (er sichert den Befehl mit). Gibt zurueck, was nach dem Laden gilt.
+func _cas_roundtrip(tag: String, request_id: String) -> Dictionary:
+	var env: Dictionary = _build(["ship"], {"ship":50.0}, null, {"foe":Vector2i(19, 19)}, ["foe"])
+	if not _api(env, tag): return {}
+	var mission_root: Node = env.mission_root
+	_check(bool(_circle(env, "ship", Vector2i(10, 10), "cas", "c9").get("ok", false)), tag + "Aufbau: CAS an (10,10)")
+	_run(env, 1.0)
+	var ordered: Dictionary = mission_root.request_air_support_attack_order({"craft_id":"ship", "target_unit_id":"foe", "request_id":request_id})
+	_check(bool(ordered.get("ok", false)), tag + "Aufbau: Angriffsbefehl " + request_id + ": " + str(ordered.get("reason", "ok")))
+	var order: Dictionary = _order(env)
+	_check(order.get("verb") == "attack_target" and String(order.get("target_id", "")) == "foe", tag + "Aufbau: Rotte hat den Befehl " + str(order.get("order_id", "")))
+	var before: Dictionary = _sortie(env, "ship")
+	var before_cas := String(before.get("cas_order_id", "-"))
+	var wire: Dictionary = _wire(mission_root.export_air_sortie_checkpoint())
+	Dictionary(mission_root.get("_air_support_sorties")).erase("ship")
+	var prepared: Dictionary = mission_root.prepare_air_sortie_checkpoint(wire, {"fleet":env.fleet})
+	_check(bool(prepared.get("ok", false)), tag + "prepare: " + str(prepared.get("reason", "ok")))
+	var result := {}
+	if prepared.get("ok", false):
+		mission_root.publish_air_sortie_checkpoint(prepared.candidate)
+		var restored: Dictionary = _sortie(env, "ship")
+		result = {"order_id":String(order.get("order_id", "")), "before_cas":before_cas, "cas_order_id":String(restored.get("cas_order_id", "")), "air_order_id":String(restored.get("air_order_id", "")), "order_kept_at_load":_order(env).get("order_id") == order.get("order_id")}
+		_run(env, 2.0)
+		result["verb_after"] = String(_order(env).get("verb", ""))
+	env.flow.free()
+	return result
+
+
+## Fall 9 (Nachbesserung W1): ein laufender Rollenbefehl (Kennung air-role-cas:) gilt nach dem Laden weiter als Rollenbefehl, ein Spielerbefehl bleibt Spielerbefehl.
+func _case_9() -> void:
+	var tag := "[9 Rollenbefehl aus Praefix] "
+	var role: Dictionary = _cas_roundtrip(tag + "CAS-Befehl: ", "air-role-cas:ship:60:foe")
+	if not role.is_empty():
+		_check(not String(role.order_id).is_empty() and String(role.before_cas) == String(role.order_id), tag + "vor dem Sichern steht cas_order_id auf dem Rottenbefehl (" + str(role.before_cas) + ")")
+		_check(bool(role.order_kept_at_load) and String(role.cas_order_id) == String(role.order_id) and String(role.air_order_id).is_empty(), tag + "nach dem Laden ist cas_order_id aus dem Praefix abgeleitet: " + str(role))
+		_check(String(role.verb_after) != "attack_target", tag + "das Rollenziel wird ausserhalb von Radius und Verfolgungsgrenze fallen gelassen, nicht endlos verfolgt (Befehl danach: %s)" % str(role.verb_after))
+	var player: Dictionary = _cas_roundtrip(tag + "Spielerbefehl: ", "ui-fire:9")
+	if not player.is_empty():
+		_check(String(player.cas_order_id).is_empty() and String(player.air_order_id).is_empty(), tag + "Spielerbefehl: keine Rollenkennung abgeleitet: " + str(player))
+		_check(String(player.verb_after) == "attack_target", tag + "Spielerbefehl bleibt auch ausserhalb des Radius bestehen (Befehl danach: %s)" % str(player.verb_after))
+	# Ohne Befehl bleibt beides leer.
+	var env: Dictionary = _build(["ship"], {"ship":50.0})
+	if not _api(env, tag): return
+	var mission_root: Node = env.mission_root
+	_check(bool(_circle(env, "ship", Vector2i(10, 10), "cas", "c9b").get("ok", false)), tag + "Aufbau: CAS ohne Ziel")
+	var wire: Dictionary = _wire(mission_root.export_air_sortie_checkpoint())
+	Dictionary(mission_root.get("_air_support_sorties")).erase("ship")
+	var prepared: Dictionary = mission_root.prepare_air_sortie_checkpoint(wire, {"fleet":env.fleet})
+	if _check(bool(prepared.get("ok", false)), tag + "prepare ohne Befehl: " + str(prepared.get("reason", "ok"))):
+		mission_root.publish_air_sortie_checkpoint(prepared.candidate)
+		var restored: Dictionary = _sortie(env, "ship")
+		_check(String(restored.get("cas_order_id", "")).is_empty() and String(restored.get("air_order_id", "")).is_empty(), tag + "ohne Rottenbefehl bleiben cas_order_id und air_order_id leer")
+	env.flow.free()
+
+
+## Fall 10 (Nachbesserung W1): Luftschutz mit laufendem Befehl (air-role-ad:) gegen den Gegner: air_order_id wird aus dem Praefix abgeleitet.
+func _case_10() -> void:
+	var tag := "[10 Luftschutz-Befehl aus Praefix] "
+	var env: Dictionary = _build(["ship"], {"ship":50.0}, Vector2i(17, 10))
+	if not _api(env, tag): return
+	var mission_root: Node = env.mission_root
+	_check(bool(_circle(env, "ship", Vector2i(10, 10), "air_defense", "c10").get("ok", false)), tag + "Aufbau: Luftschutz an (10,10)")
+	_run(env, 21.0)
+	_check(mission_root.get_air_hostile_ids() == [FOE], tag + "Aufbau: Gegner fliegt")
+	var issued: Dictionary = mission_root._air_issue_air_target_order("ship", FOE, [FOE])
+	_check(bool(issued.get("ok", false)), tag + "Aufbau: Luftschutz-Befehl gegen den Gegner: " + str(issued.get("reason", "ok")))
+	var order: Dictionary = _order(env)
+	var before := String(_sortie(env, "ship").get("air_order_id", "-"))
+	_check(String(order.get("order_id", "")).begins_with("air-role-ad:ship:") and before == String(order.get("order_id", "")), tag + "Aufbau: air_order_id vor dem Sichern " + before)
+	var wire: Dictionary = _wire(mission_root.export_air_sortie_checkpoint())
+	mission_root._air_hostile_release_all()
+	Dictionary(mission_root.get("_air_support_sorties")).erase("ship")
+	var prepared: Dictionary = mission_root.prepare_air_sortie_checkpoint(wire, {"fleet":env.fleet})
+	if _check(bool(prepared.get("ok", false)), tag + "prepare: " + str(prepared.get("reason", "ok"))):
+		mission_root.publish_air_sortie_checkpoint(prepared.candidate)
+		var restored: Dictionary = _sortie(env, "ship")
+		_check(String(restored.get("air_order_id", "")) == String(order.get("order_id", "")) and String(restored.get("cas_order_id", "")).is_empty(), tag + "air_order_id nach dem Laden aus dem Praefix abgeleitet: " + str(restored.get("air_order_id", "")))
+	env.flow.free()
+
+
+## Fall 11 (Nachbesserung W2): scheitert die Aufnahme eines Gegners, meldet publish es, und sein Warte-Eintrag behaelt Lage, Systemzustand und Merker.
+func _case_11() -> void:
+	var tag := "[11 publish mit Ergebnis] "
+	var env: Dictionary = _build(["ship"], {"ship":50.0}, Vector2i(17, 10))
+	if not _api(env, tag): return
+	var mission_root: Node = env.mission_root
+	_check(bool(_circle(env, "ship", Vector2i(10, 10), "none", "c11").get("ok", false)), tag + "Aufbau: Kreisen")
+	_run(env, 21.0)
+	_check(mission_root.get_air_hostile_ids() == [FOE], tag + "Aufbau: Gegner fliegt")
+	var systems: Dictionary = env.combat.get("_ship_systems")[FOE]
+	var slot := String(Dictionary(systems.stats.weapons[0]).slot_id)
+	systems.state["hull"] = 40.0
+	systems.state["shield"] = 0.0
+	systems.cooldowns[slot] = 0.5
+	var behaviour: Dictionary = mission_root.get("_air_hostile_state")[FOE]
+	behaviour["shots"] = {slot:3}
+	behaviour["last_shot"] = {slot:12.5}
+	behaviour["spotted"] = true
+	var wire: Dictionary = _wire(mission_root.export_air_sortie_checkpoint())
+	# Den Gegner auf das Feld des eigenen Schiffs setzen: gueltig im Block, aber nicht aufnehmbar (Platz belegt).
+	var ship_position: Vector2 = env.fleet.get_flight_state("ship").get_snapshot().position_plane
+	var blocked: Dictionary = _tampered(wire, func(data: Dictionary) -> void: data.hostiles[FOE]["position_plane"] = ship_position)
+	mission_root._air_hostile_release_all()
+	Dictionary(mission_root.get("_air_support_sorties")).erase("ship")
+	var prepared: Dictionary = mission_root.prepare_air_sortie_checkpoint(blocked, {"fleet":env.fleet})
+	if not _check(bool(prepared.get("ok", false)), tag + "prepare: " + str(prepared.get("reason", "ok"))):
+		env.flow.free()
+		return
+	var result: Variant = mission_root.publish_air_sortie_checkpoint(prepared.candidate)
+	_check(result is Dictionary and not bool(Dictionary(result).get("ok", true)) and Dictionary(result).get("failed_hostile_ids") == [FOE] and String(Dictionary(result).get("reason", "")) == "hostile_not_admitted", tag + "publish meldet den Gegner als nicht aufgenommen: " + str(result))
+	var pending: Array = mission_root.get("_air_hostile_pending")
+	_check(pending.size() == 1 and String(pending[0].aircraft_id) == FOE and Dictionary(pending[0]).has("restore"), tag + "Warte-Eintrag traegt die gesicherte Lage: " + str(pending))
+	if pending.size() == 1 and Dictionary(pending[0]).has("restore"):
+		var kept: Dictionary = pending[0].restore
+		_check(is_equal_approx(float(kept.systems_state.hull), 40.0) and bool(kept.spotted) and kept.shots == {slot:3} and kept.last_shot == {slot:12.5}, tag + "Rumpf 40, gesichtet, Schussliste im Warte-Eintrag")
+	# Der Warte-Eintrag selbst ist speicherbar (kein Block, den das Laden ablehnt).
+	var again: Dictionary = mission_root.export_air_sortie_checkpoint()
+	var wire_again: Dictionary = _wire(again)
+	_check(again.get("schema") == SCHEMA and bool(mission_root.prepare_air_sortie_checkpoint(wire_again, {"fleet":env.fleet}).get("ok", false)), tag + "ein Stand mit so einem Warte-Eintrag wird weiter angenommen")
+	# Spaeter wird er mit dem gesicherten Zustand eingesetzt, nicht neu am Spawnfeld.
+	var before_events: int = env.events.size()
+	_run(env, 4.0)
+	_check(mission_root.get_air_hostile_ids() == [FOE] and _enemy_count(env) == 1 and Array(mission_root.get("_air_hostile_pending")).is_empty(), tag + "nach 4 s genau ein Gegner, Warteliste leer")
+	if env.combat.get_actor(FOE) != null:
+		var restored: Dictionary = env.combat.get_ship_systems(FOE)
+		_check(is_equal_approx(float(restored.state.hull), 40.0), tag + "mit Rumpf 40 eingesetzt (nicht voll): " + str(restored.state.hull))
+	var state: Dictionary = Dictionary(mission_root.get("_air_hostile_state").get(FOE, {}))
+	_check(bool(state.get("spotted", false)) and not bool(state.get("returned", true)) and not Dictionary(state.get("entry", {"restore":1})).has("restore"), tag + "gesichtet, nicht 'kehrt zurueck', Eintrag ohne Zusatzfeld")
+	var announced := 0
+	for i in range(before_events, env.events.size()):
+		if env.events[i].kind in ["hostile_spotted", "hostile_returned"]: announced += 1
+	_check(announced == 0, tag + "keine neue Sichtungs- oder Rueckkehrmeldung")
+	# Kein Platzproblem: publish meldet ok.
+	var fine: Dictionary = mission_root.prepare_air_sortie_checkpoint(wire, {"fleet":env.fleet})
+	if bool(fine.get("ok", false)):
+		var ok_result: Variant = mission_root.publish_air_sortie_checkpoint(fine.candidate)
+		_check(ok_result is Dictionary and bool(Dictionary(ok_result).get("ok", false)), tag + "ohne Platzproblem meldet publish ok: " + str(ok_result))
+	# Ohne Quelle.
+	var no_source: Variant = mission_root.publish_air_sortie_checkpoint({})
+	_check(no_source is Dictionary and bool(Dictionary(no_source).get("ok", false)), tag + "leerer Kandidat (kein Block): ok: " + str(no_source))
+	env.flow.free()
+
+
+## Fall 12 (Nachbesserung k1, k3): Zeitgeber der CAS-Sperre und der Nasenhaltezeit werden gesichert; publish uebernimmt tiefe Kopien.
+func _case_12() -> void:
+	var tag := "[12 Zeitgeber, Kopien] "
+	var env: Dictionary = _build(["ship"], {"ship":50.0})
+	if not _api(env, tag): return
+	var mission_root: Node = env.mission_root
+	_check(bool(_circle(env, "ship", Vector2i(10, 10), "cas", "c12").get("ok", false)), tag + "Aufbau: CAS")
+	_run(env, 1.0)
+	var sortie: Dictionary = _sortie(env, "ship")
+	var clock: float = float(mission_root.get("_air_cas_clock"))
+	sortie["cas_friendly_until"] = clock + 4.0
+	sortie["nose_hold_seconds"] = 1.5
+	var wire: Dictionary = _wire(mission_root.export_air_sortie_checkpoint())
+	Dictionary(mission_root.get("_air_support_sorties")).erase("ship")
+	var prepared: Dictionary = mission_root.prepare_air_sortie_checkpoint(wire, {"fleet":env.fleet})
+	if not _check(bool(prepared.get("ok", false)), tag + "prepare: " + str(prepared.get("reason", "ok"))):
+		env.flow.free()
+		return
+	mission_root.publish_air_sortie_checkpoint(prepared.candidate)
+	var restored: Dictionary = _sortie(env, "ship")
+	_check(is_equal_approx(float(restored.get("nose_hold_seconds", -1.0)), 1.5), tag + "nose_hold_seconds gesichert: " + str(restored.get("nose_hold_seconds", "fehlt")))
+	_check(is_equal_approx(float(restored.get("cas_friendly_until", -99.0)) - float(mission_root.get("_air_cas_clock")), 4.0), tag + "Rest der CAS-Sperre (4 s) gesichert: " + str(restored.get("cas_friendly_until", "fehlt")))
+	var bad: Dictionary = _tampered(wire, func(data: Dictionary) -> void: data.sorties.ship["nose_hold_seconds"] = -1.0)
+	_check(String(mission_root.prepare_air_sortie_checkpoint(bad, {"fleet":env.fleet}).get("reason", "")) == BAD, tag + "negative Haltezeit abgelehnt")
+	# k3: der Kandidat teilt keine Dictionaries mit dem Spielstand.
+	var live_steps: int = int(restored.get("fuel_steps", -1))
+	var live_waypoints: int = Array(restored.get("waypoints", [])).size()
+	var live_stance: String = String(Dictionary(restored.get("air_role", {})).get("stance", ""))
+	var entry: Dictionary = prepared.candidate.sorties.ship
+	entry["fuel_steps"] = 777
+	entry.waypoints.append(Vector2i(6, 6))
+	Dictionary(entry.air_role)["stance"] = "wild"
+	var live: Dictionary = _sortie(env, "ship")
+	_check(int(live.get("fuel_steps", -1)) == live_steps and Array(live.get("waypoints", [])).size() == live_waypoints and String(Dictionary(live.get("air_role", {})).get("stance", "")) == live_stance, tag + "Aenderungen am Kandidaten nach publish beruehren den Spielstand nicht")
 	env.flow.free()
 
 
 func _initialize() -> void:
 	_case_1()
+	_case_1b()
 	_case_2()
 	_case_3()
 	_case_4()
@@ -569,5 +831,9 @@ func _initialize() -> void:
 	_case_6()
 	_case_7()
 	_case_8()
+	_case_9()
+	_case_10()
+	_case_11()
+	_case_12()
 	print("AIR_SORTIE_CHECKPOINT passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)

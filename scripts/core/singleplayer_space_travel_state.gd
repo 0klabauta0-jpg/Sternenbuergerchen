@@ -640,13 +640,13 @@ func prepare_checkpoint_restore(state: Dictionary, allow_atmosphere: bool = fals
 	var flight_prepared: Dictionary = _flight.prepare_checkpoint_restore(state.flight, allow_atmosphere)
 	if not flight_prepared.get("ok", false): return flight_prepared
 	if not _checkpoint_frame_consistent(data, state.flight, allow_atmosphere): return {"ok":false, "reason":"travel_flight_checkpoint_mismatch"}
-	var source: Dictionary = export_checkpoint_state()
+	var source: Dictionary = export_checkpoint_state(allow_atmosphere)
 	if source.get("schema") != "space_travel_checkpoint.v1": return {"ok":false, "reason":"travel_checkpoint_source_unstable"}
 	for id in _travel_checkpoint_preparations.keys():
 		if _travel_checkpoint_preparations[id].handle.get_ref() == null: _travel_checkpoint_preparations.erase(id)
 	if _travel_checkpoint_preparations.size() >= 32: return {"ok":false, "reason":"travel_checkpoint_capacity"}
 	var handle := PreparedTravelCheckpoint.new()
-	_travel_checkpoint_preparations[handle.get_instance_id()] = {"handle":weakref(handle), "source":source, "source_epoch":_space_area_epoch, "data":data, "flight":flight_prepared.prepared}
+	_travel_checkpoint_preparations[handle.get_instance_id()] = {"handle":weakref(handle), "source":source, "source_epoch":_space_area_epoch, "data":data, "flight":flight_prepared.prepared, "allow_atmosphere":allow_atmosphere}
 	return {"ok":true, "prepared":handle}
 
 func _checkpoint_frame_consistent(data: Dictionary, flight: Dictionary, allow_atmosphere: bool = false) -> bool:
@@ -680,7 +680,7 @@ func _checkpoint_frame_consistent(data: Dictionary, flight: Dictionary, allow_at
 func validate_checkpoint_restore(handle: RefCounted) -> Dictionary:
 	if handle == null or not _travel_checkpoint_preparations.has(handle.get_instance_id()): return {"ok":false, "reason":"travel_checkpoint_unknown"}
 	var prepared: Dictionary = _travel_checkpoint_preparations[handle.get_instance_id()]
-	if prepared.handle.get_ref() != handle or prepared.source != export_checkpoint_state() or prepared.source_epoch != _space_area_epoch: return {"ok":false, "reason":"travel_checkpoint_changed"}
+	if prepared.handle.get_ref() != handle or prepared.source != export_checkpoint_state(bool(prepared.get("allow_atmosphere", false))) or prepared.source_epoch != _space_area_epoch: return {"ok":false, "reason":"travel_checkpoint_changed"}
 	return _flight.validate_checkpoint_restore(prepared.flight)
 
 func commit_checkpoint_restore(handle: RefCounted) -> Dictionary:
