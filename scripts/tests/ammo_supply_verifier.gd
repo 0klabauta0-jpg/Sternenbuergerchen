@@ -39,6 +39,7 @@ func _run() -> void:
 	_receipt_part()
 	_old_state_part()
 	_permit_part()
+	_outside_part()
 	_grants_file_part()
 	_m3_state_part()
 	_overview_part()
@@ -339,9 +340,62 @@ func _permit_part() -> void:
 	forged.definitions.offers["polisa_ammo_rail"]["required_blueprint"] = "light_armor"
 	check(not bool(SUPPLY.new().restore_state(forged).get("ok", true)), "Ladeschutz: eine andere Erlaubnis an einem Munitionsangebot macht den Stand unladbar")
 
+## Auflage W1 (Nachbesserung 2): Ausserhalb der Kampagne (Schalter aus) bleibt alle Munition herstellbar; Vorgabe (Schalter an) ist streng.
+func _outside_part() -> void:
+	var s: RefCounted = _sup(-1, false)
+	_stock_all(s)
+	var exp_on: String = JSON.stringify(s.export_state(), "", true)
+	var keys_on: Array = s.export_state().keys()
+	keys_on.sort()
+	check(Array(s.get_supply_snapshot().blueprints) == ["ammo_light", "ammo_rifle"] and _locked(_make(s, "ammo_rail")) and _locked(_make(s, "ammo_rocket")), "Skirmish-Bau: Vorgabe (Schalter an) ist streng wie die Kampagne - Schiene und Raketen gesperrt")
+	s.set_blueprint_gate_enabled(false)
+	var exp_off: String = JSON.stringify(s.export_state(), "", true)
+	check(exp_on == exp_off, "Skirmish-Bau: Export eines Standes mit Schalter aus und mit Schalter an ist gleich (Schalter nicht im Spielstand)")
+	var bp: Array = Array(s.get_supply_snapshot().blueprints)
+	check(bp == ["ammo_light", "ammo_rifle", "ammo_rail", "ammo_rocket"], "Skirmish-Bau: Schalter aus - alle vier Sorten in den Erlaubnissen, Start zuerst, ohne Waffen (%s)" % [bp])
+	check(not bp.has("rocket_launcher") and not bp.has("rail_gun"), "Skirmish-Bau: Waffen-Erlaubnisse (rocket_launcher, rail_gun) sind NICHT in der Liste")
+	var owned_by_id: Dictionary = {}
+	for row: Dictionary in Array(s.get_supply_snapshot().blueprint_overview): owned_by_id[String(row.get("id", ""))] = bool(row.get("owned", false))
+	check(owned_by_id.get("ammo_light", false) == true and owned_by_id.get("ammo_rifle", false) == true and owned_by_id.get("ammo_rail", false) == true and owned_by_id.get("ammo_rocket", false) == true, "Skirmish-Bau: Uebersicht zeigt alle vier Munitionssorten als owned (%s)" % [owned_by_id])
+	check(owned_by_id.get("rocket_launcher", true) == false and owned_by_id.get("rail_gun", true) == false, "Skirmish-Bau: Uebersicht zeigt die Waffen weiter als nicht erworben")
+	var rail: Dictionary = _make(s, "ammo_rail")
+	var rocket: Dictionary = _make(s, "ammo_rocket")
+	check(bool(rail.get("ok", false)) and bool(rocket.get("ok", false)) and int(_base(s).get("ammo_rail", 0)) == 2 and int(_base(s).get("ammo_rocket", 0)) == 2, "Skirmish-Bau: Schienenladung und Raketen werden hergestellt (2 + 2 im Basislager) (%s / %s)" % [rail, rocket])
+	var keys_off: Array = s.export_state().keys()
+	keys_off.sort()
+	check(keys_on == keys_off, "Skirmish-Bau: Export hat nach dem Bau dieselben Schluessel wie vorher (kein neuer Schluessel)")
+	s.set_blueprint_gate_enabled(true)
+	check(Array(s.get_supply_snapshot().blueprints) == ["ammo_light", "ammo_rifle"] and _locked(_make(s, "ammo_rail")) and _locked(_make(s, "ammo_rocket")), "Skirmish-Bau: Schalter wieder an - wieder gesperrt wie in der Kampagne")
+	# Datei ohne den Schluessel oder mit falscher Art: leere Liste, keine Warnung; Doppelte entfallen.
+	var path: String = "user://erl2_grants.json"
+	var cases: Array = [
+		['{"version":1,"start":["ammo_light","ammo_rifle"],"bundles":{},"labels":{}}', ["ammo_light", "ammo_rifle"], "fehlt der Schluessel"],
+		['{"version":1,"start":["ammo_light","ammo_rifle"],"outside_campaign":"ammo_rail","bundles":{},"labels":{}}', ["ammo_light", "ammo_rifle"], "ist der Schluessel keine Liste"],
+		['{"version":1,"start":["ammo_light"],"outside_campaign":["ammo_light","ammo_rail","ammo_rail"],"bundles":{},"labels":{}}', ["ammo_light", "ammo_rail"], "enthaelt die Liste Doppelte"],
+		['{"version":1,"start":["ammo_light"],"outside_campaign":["ammo_rail",7],"bundles":{},"labels":{}}', ["ammo_light"], "ist die Liste keine reine Liste von Texten"],
+	]
+	for c: Array in cases:
+		var f: FileAccess = FileAccess.open(path, FileAccess.WRITE)
+		f.store_string(String(c[0]))
+		f.close()
+		SUPPLY.grants_path_override = path
+		SUPPLY.grants_warned = false
+		SUPPLY.reset_grants_cache()
+		var t: RefCounted = _sup(-1, false)
+		t.set_blueprint_gate_enabled(false)
+		var got: Array = Array(t.get_supply_snapshot().blueprints)
+		check(got == c[1] and SUPPLY.grants_warned == false, "Skirmish-Bau: %s - Erlaubnisse %s, keine Warnung (%s)" % [c[2], c[1], got])
+	SUPPLY.grants_path_override = ""
+	SUPPLY.grants_warned = false
+	SUPPLY.reset_grants_cache()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	# Der Adapter setzt den Schalter aus dem Modus (Quelltext-Pruefung; der echte Adapter-Aufbau ist hier zu gross).
+	var adapter_src: String = FileAccess.get_file_as_string("res://scripts/meta/singleplayer_runtime_adapter.gd")
+	check(adapter_src.contains("_supply.set_blueprint_gate_enabled(_campaign_mode)"), "Adapter: setzt den Schalter der Versorgung aus dem Kampagnenmodus")
+
 func _grants_file_part() -> void:
 	var text: String = FileAccess.get_file_as_string("res://data/singleplayer/blueprint_grants.json").strip_edges()
-	check(text == '{"version":1,"start":["ammo_light","ammo_rifle"],"bundles":{"rocket_launcher":["ammo_rocket"],"rail_gun":["ammo_rail"]},"labels":{"ammo_light":"Leichte Munition","ammo_rifle":"Gewehrmunition","ammo_rail":"Schienenladung","ammo_rocket":"Raketen","rocket_launcher":"Raketenwerfer","rail_gun":"Schienenkanone"}}', "Datei: blueprint_grants.json hat genau den vorgegebenen Wortlaut")
+	check(text == '{"version":1,"start":["ammo_light","ammo_rifle"],"outside_campaign":["ammo_light","ammo_rifle","ammo_rail","ammo_rocket"],"bundles":{"rocket_launcher":["ammo_rocket"],"rail_gun":["ammo_rail"]},"labels":{"ammo_light":"Leichte Munition","ammo_rifle":"Gewehrmunition","ammo_rail":"Schienenladung","ammo_rocket":"Raketen","rocket_launcher":"Raketenwerfer","rail_gun":"Schienenkanone"}}', "Datei: blueprint_grants.json hat genau den vorgegebenen Wortlaut")
 	# Kaputte Datei -> Rueckfall auf Start ohne Paare, einmal Warnung; nie eine leere Liste.
 	var bad_path: String = "user://erl_bad_grants.json"
 	var f: FileAccess = FileAccess.open(bad_path, FileAccess.WRITE)

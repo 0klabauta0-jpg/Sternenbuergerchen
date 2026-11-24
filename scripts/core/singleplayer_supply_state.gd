@@ -1484,14 +1484,29 @@ static func blueprint_grants() -> Dictionary:
 	if not _grants_cache.is_empty() and _grants_cache_path == path: return _grants_cache
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
 	if parsed is Dictionary and _grants_valid(parsed):
-		_grants_cache = {"start": Array(parsed.start).duplicate(), "bundles": Dictionary(parsed.bundles).duplicate(true), "labels": Dictionary(parsed.labels).duplicate()}
+		_grants_cache = {"start": Array(parsed.start).duplicate(), "outside_campaign": _outside_list(parsed), "bundles": Dictionary(parsed.bundles).duplicate(true), "labels": Dictionary(parsed.labels).duplicate()}
 	else:
 		if not grants_warned:
 			grants_warned = true
 			push_warning("blueprint_grants.json fehlt oder ist unbrauchbar; Rueckfall auf leichte und Gewehrmunition")
-		_grants_cache = {"start": ["ammo_light", "ammo_rifle"], "bundles": {}, "labels": {}}
+		_grants_cache = {"start": ["ammo_light", "ammo_rifle"], "outside_campaign": [], "bundles": {}, "labels": {}}
 	_grants_cache_path = path
 	return _grants_cache
+
+## Erlaubnisse ausserhalb der Kampagne: fehlt der Schluessel oder ist er keine Liste von Texten, gilt eine leere Liste (keine Warnung).
+static func _outside_list(data: Dictionary) -> Array:
+	var raw: Variant = data.get("outside_campaign")
+	if not raw is Array: return []
+	for id: Variant in raw:
+		if typeof(id) != TYPE_STRING or String(id).is_empty(): return []
+	return Array(raw).duplicate()
+
+## Schalter der Kampagnen-Sperre (nicht im Spielstand): Vorgabe true = streng wie die Kampagne. Ist er false (Skirmish, Mehrspieler),
+## gelten zusaetzlich die Erlaubnisse aus "outside_campaign" (alle Munition herstellbar).
+var _blueprint_gate_enabled: bool = true
+
+func set_blueprint_gate_enabled(enabled: bool) -> void:
+	_blueprint_gate_enabled = enabled
 
 static func reset_grants_cache() -> void:
 	_grants_cache = {}
@@ -1520,6 +1535,8 @@ func _blueprints() -> Array:
 	var grants: Dictionary = blueprint_grants()
 	var result: Array = []
 	for id: Variant in grants.start: _add_blueprint(result, String(id), grants.bundles)
+	if not _blueprint_gate_enabled:
+		for id: Variant in grants.get("outside_campaign", []): _add_blueprint(result, String(id), grants.bundles)
 	for receipt: Dictionary in _reward_receipts.values():
 		_add_blueprint(result, String(Dictionary(receipt.get("reward",{})).get("blueprint_id","")), grants.bundles)
 	for id: String in _research_receipts:
