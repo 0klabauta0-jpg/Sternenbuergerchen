@@ -32,6 +32,8 @@ func _run() -> void:
 	_buy_part()
 	_old_state_part()
 	_known_part()
+	_roundtrip_part()
+	_no_buy_part()
 	print("TRADE_GOODS passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed else 0)
 
@@ -168,3 +170,48 @@ func _known_part() -> void:
 		if not INVENTORY.known(item): all_known = false
 	check(all_known, "Kennungen: alle fuenf Gueter sind dem Frachtvertrag bekannt")
 	check(not INVENTORY.known("food_x"), "Kennungen: eine unbekannte Kennung bleibt unbekannt")
+
+# ---------- Nachbesserung 1: Rundlauf mit Ware im Schiff ----------
+
+func _fresh_owner() -> RefCounted:
+	var l: RefCounted = SUPPLY.new()
+	l.configure([], _dat())
+	l.register_craft("ship", 5.0)
+	return l
+
+## Ware kommt wie in den anderen Pruefungen ueber den oeffentlichen Befehl "campaign_cargo" (campaign_authorized) ins Schiffslager.
+func _roundtrip_part() -> void:
+	var amounts := {"food": 3, "medical_supplies": 2, "bandage": 4, "luxury_goods": 1, "stim": 5}
+	var s: RefCounted = _sup()
+	for item: String in amounts: _load_ship(s, item, int(amounts[item]))
+	var used_before: int = INVENTORY.used(_ship(s))
+	var saved: Dictionary = Dictionary(JSON.parse_string(JSON.stringify(s.export_state())))
+	var loaded: RefCounted = _fresh_owner()
+	var r: Dictionary = loaded.restore_state(saved)
+	check(bool(r.get("ok", false)), "Rundlauf: Stand mit allen fuenf Gueterarten im Schiff laedt in einen frischen Besitzer (%s)" % r)
+	var ship: Dictionary = _ship(loaded) if bool(r.get("ok", false)) else {}
+	var amounts_ok := not ship.is_empty()
+	for item: String in amounts:
+		if int(ship.get(item, 0)) != int(amounts[item]): amounts_ok = false
+	check(amounts_ok, "Rundlauf: die Mengen stimmen nach dem Laden (3, 2, 4, 1, 5)")
+	check(INVENTORY.used(ship) == used_before and used_before == 15, "Rundlauf: Lagerplaetze gezaehlt wie vorher (15, jedes Stueck ein Platz)")
+	# Zweiter Teil: dieselbe Form mit einer UNBEKANNTEN Kennung im Schiff wird wie bisher abgelehnt - known() ist die Schranke.
+	var bad: Dictionary = Dictionary(JSON.parse_string(JSON.stringify(s.export_state())))
+	bad["inventory"]["craft:ship"]["items"]["gueter_unbekannt_x"] = 1
+	var bad_r: Dictionary = _fresh_owner().restore_state(bad)
+	check(not bool(bad_r.get("ok", true)), "Rundlauf: ein Stand mit unbekannter Warenkennung im Schiff wird abgelehnt (%s)" % bad_r.get("reason", ""))
+
+# ---------- Nachbesserung 1: Kaufen geht heute nirgends ----------
+
+func _no_buy_part() -> void:
+	var all_ok := true
+	var label := ""
+	for loc: String in ["trade_outpost", "satellite_crash", "polisa"]:
+		for item: String in GOODS:
+			var s: RefCounted = _sup()
+			var c0: int = s.get_credits()
+			var r: Dictionary = s.apply_command(_cmd("buy", {"offer_id": "market:%s:%s" % [loc, item], "quantity": 1}), _ctx(loc))
+			if bool(r.get("ok", true)) or String(r.get("reason", "")) != "unknown_offer" or s.get_credits() != c0 or int(_ship(s).get(item, 0)) != 0:
+				all_ok = false
+				label = "%s:%s -> %s" % [loc, item, r]
+	check(all_ok, "Kauf: keines der fuenf Gueter ist an Handelsaussenposten, Absturzstelle oder Polisa kaufbar (unknown_offer, Credits und Schiff unveraendert) %s" % label)

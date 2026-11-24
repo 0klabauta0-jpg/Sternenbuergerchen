@@ -344,7 +344,8 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	var trade_ready: bool = available and local_service and Array(context.get("services",[])).has("trade")
 	var bought_items: Array = []
 	for sell_item: String in MARKET_SELL_ORDER:
-		if _market_buy_price(supply, location, sell_item) > 0: bought_items.append(sell_item)
+		# Handelsgueter (nicht Benit): der Verkaufsknopf erscheint nur, wenn davon mindestens ein Stueck im Schiff oder Frachtaufzug liegt.
+		if _market_buy_price(supply, location, sell_item) > 0 and (sell_item.ends_with("_benit") or int(cargo.get(sell_item, 0)) > 0): bought_items.append(sell_item)
 	var sell_buttons: Array = [_sell] + _sell_extra
 	for slot in range(sell_buttons.size()):
 		var sell_button: Button = sell_buttons[slot]
