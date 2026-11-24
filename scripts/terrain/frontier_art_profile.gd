@@ -22,6 +22,74 @@ var trail_surface: bool = false
 ## Render-only: 1.0 paints roads into the ground, lower under a built road deck.
 var road_paint_strength: float = 1.0
 
+## Versuch Bodentexturen: kachelbare Texturen am Boden-Shader. Der Schalter ist
+## global (alle Ansichten, alle Bodenmaterialien); AUS ergibt das bisherige Bild.
+const GROUND_TILE_DIR := "res://art/ground_tiles_20261124/"
+const GROUND_TILE_FILES := {
+	"ground_tex_normal": "boden_11_fels_rot_ruhig.png",
+	"ground_tex_gravel": "boden_09_fels_rot_geroell.png",
+	"ground_tex_clay": "boden_06_lehm_rissig_rost.png",
+	"ground_tex_rock": "boden_01_fels_dunkelrot.png",
+	"ground_tex_base": "boden_03_basis_betonplatten.png",
+	"ground_tex_paving": "boden_08_bodenplatten_graubraun.png",
+}
+## Stellschrauben (die Vorgaben im Shader sind dieselben Werte).
+const GROUND_TILE_METERS := 4.0       # Kantenlaenge einer Kachel in Metern, ein Feld ist etwa 1 m
+const GROUND_TILE_BRIGHTNESS := 0.92  # die EINE Helligkeit fuer alle Bodentexturen
+const GROUND_BASE_TILE_GAIN := 0.45   # Heimatbasis-Beton ist sehr hell, wird extra gedaempft
+const GROUND_DETAIL_KEEP := 0.35      # Rest der zoomabhaengigen Abdunklung (Kiesel, Risse, Wellen)
+static var ground_tiles_enabled: bool = true
+static var _ground_tile_textures: Dictionary = {}
+static var _ground_tile_materials: Array = []
+
+static func ground_tiles_on() -> bool:
+	return ground_tiles_enabled
+
+## Legt den Schalter um und gibt ihn an alle noch lebenden Bodenmaterialien weiter.
+static func set_ground_tiles(on: bool) -> void:
+	ground_tiles_enabled = on
+	var alive: Array = []
+	for ref in _ground_tile_materials:
+		var material = ref.get_ref()
+		if material != null:
+			material.set_shader_parameter("ground_tiles_enabled", on)
+			alive.append(ref)
+	_ground_tile_materials = alive
+
+## Jedes Material mit dem Boden-Shader meldet sich hier an: Texturen setzen, Schalter uebernehmen.
+static func register_ground_material(material: ShaderMaterial) -> void:
+	material.set_shader_parameter("ground_tiles_enabled", ground_tiles_enabled)
+	material.set_shader_parameter("ground_tile_meters", GROUND_TILE_METERS)
+	material.set_shader_parameter("ground_tile_brightness", GROUND_TILE_BRIGHTNESS)
+	material.set_shader_parameter("ground_base_tile_gain", GROUND_BASE_TILE_GAIN)
+	material.set_shader_parameter("ground_detail_keep", GROUND_DETAIL_KEEP)
+	for uniform_name in GROUND_TILE_FILES:
+		material.set_shader_parameter(uniform_name, _ground_texture(String(uniform_name)))
+	if _ground_tile_materials.size() >= 256:
+		var alive: Array = []
+		for ref in _ground_tile_materials:
+			if ref.get_ref() != null:
+				alive.append(ref)
+		_ground_tile_materials = alive
+	_ground_tile_materials.append(weakref(material))
+
+## Die Texturen kommen mit Mipmaps an den Shader, auch wenn der Import keine erzeugt hat.
+static func _ground_texture(uniform_name: String) -> Texture2D:
+	if _ground_tile_textures.has(uniform_name):
+		return _ground_tile_textures[uniform_name]
+	var source := load(GROUND_TILE_DIR + String(GROUND_TILE_FILES[uniform_name])) as Texture2D
+	var result: Texture2D = source
+	if source != null:
+		var image := source.get_image()
+		if image != null and not image.is_empty():
+			if image.is_compressed():
+				image.decompress()
+			if not image.has_mipmaps():
+				image.generate_mipmaps()
+			result = ImageTexture.create_from_image(image)
+	_ground_tile_textures[uniform_name] = result
+	return result
+
 func surface_color(surface_type: String) -> Color:
 	return SURFACE_COLORS.get(surface_type, SURFACE_COLORS["ground"])
 
@@ -40,6 +108,7 @@ func material_for(color: Color, rock: bool = false, paved: bool = false, slope_s
 	material.set_shader_parameter("slope_normal_softening", slope_softening)
 	# Location-specific wear belongs to authored dressing, never generic maps.
 	material.set_shader_parameter("authored_paving_wear", false)
+	register_ground_material(material)
 	_apply_blend(material,rock)
 	_materials[key] = material
 	return material
