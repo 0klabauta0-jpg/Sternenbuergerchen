@@ -19,7 +19,7 @@ const SLOT_ICON := Vector2(48, 48)
 const STORAGE_TILE_SIZE := Vector2(110, 64)
 const STORAGE_TILE_ICON := 28
 const STORAGE_TILE_PADDING := Vector2(6, 4)
-const LABELS := {"suit":"Anzug","armor_light":"Leichte Rüstung","armor_medium":"Mittlere Rüstung","armor_heavy":"Schwere Rüstung","rifle":"Sturmgewehr","smg":"Maschinenpistole","sniper":"Scharfschützengewehr","rail_gun":"Railgun","rocket_launcher":"Raketenwerfer","medictool":"Sanitätsgerät","ore":"Erz","salvage":"Bergungsgut","pistol":"Pistole","a_benit":"A-Benit","b_benit":"B-Benit","c_benit":"C-Benit","satellite_chip":"Satellitenchip","outpost_chip":"Außenpostenchip","c_benit_crate":"C-Benit-Kiste","mining_tool":"Hand-Mining-Tool","salvage_tool":"Bergungswerkzeug","backpack":"Rucksack","ammo_light":"Magazin leicht","ammo_rifle":"Magazin Gewehr","ammo_rail":"Schienenladung","ammo_rocket":"Rakete","none":"Leer"}
+const LABELS := {"suit":"Anzug","armor_light":"Leichte Rüstung","armor_medium":"Mittlere Rüstung","armor_heavy":"Schwere Rüstung","rifle":"Sturmgewehr","smg":"Maschinenpistole","sniper":"Scharfschützengewehr","rail_gun":"Railgun","rocket_launcher":"Raketenwerfer","medictool":"Sanitätsgerät","ore":"Erz","salvage":"Bergungsgut","pistol":"Pistole","a_benit":"A-Benit","b_benit":"B-Benit","c_benit":"C-Benit","satellite_chip":"Satellitenchip","outpost_chip":"Außenpostenchip","c_benit_crate":"C-Benit-Kiste","mining_tool":"Hand-Mining-Tool","salvage_tool":"Bergungswerkzeug","backpack":"Rucksack","ammo_light":"Magazin leicht","ammo_rifle":"Magazin Gewehr","ammo_rail":"Schienenladung","ammo_rocket":"Rakete","none":"Leer","cargo_crate":"Frachtkiste"}
 var _rest: CheckButton
 var _signature := ""
 var _unit_id := ""

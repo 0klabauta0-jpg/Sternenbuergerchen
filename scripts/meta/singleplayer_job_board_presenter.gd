@@ -31,6 +31,8 @@ var _summary: Label
 var _job_list_rebuilds := 0
 var _picture_key := ""
 var _empty: Label
+var _standing_box: VBoxContainer
+var _standing_signature: String = ""
 
 func configure(screen: Control) -> void:
 	_screen = weakref(screen)
@@ -78,6 +80,11 @@ func configure(screen: Control) -> void:
 	_empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_empty.custom_minimum_size.x = 230
 	selector.add_child(_empty)
+	# Dauerauftraege (H3): nur Anzeige unter den normalen Auftraegen, kein Annehmen-Knopf (Annahme beim Haendler).
+	_standing_box = VBoxContainer.new()
+	_standing_box.name = "StandingOrders"
+	_standing_box.add_theme_constant_override("separation", 4)
+	selector.add_child(_standing_box)
 	_detail_card = PanelContainer.new()
 	_detail_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_body.add_child(_detail_card)
@@ -190,6 +197,7 @@ func refresh() -> void:
 	var campaign: Dictionary = singleplayer.get("campaign", {})
 	var jobs: Dictionary = campaign.get("jobs", {})
 	var availability: Dictionary = campaign.get("job_availability", {})
+	_refresh_standing_orders(Array(campaign.get("standing_orders", [])))
 	var signature: String = JSON.stringify([jobs, availability])
 	if signature != _signature:
 		_signature = signature
@@ -264,6 +272,32 @@ func refresh() -> void:
 	_detail_card.visible=_details_expanded;_objectives.visible=_details_expanded;_actions.visible=_details_expanded
 	_footer.visible = _details_expanded
 	_layout_device()
+
+## Dauerauftraege (H3) unter den normalen Auftraegen: Titel, darunter der Satz des Besitzers; gesperrt und nicht verfuegbar mit "Gesperrt: ".
+## Baut nur neu, wenn sich der Snapshot aendert (die Sperrzeit tickt im Sekundentakt). Ohne Eintraege (Skirmish, alter Stand) bleibt der Block leer.
+func _refresh_standing_orders(entries: Array) -> void:
+	var signature: String = JSON.stringify(entries)
+	if signature == _standing_signature: return
+	_standing_signature = signature
+	for child: Node in _standing_box.get_children():
+		_standing_box.remove_child(child)
+		child.queue_free()
+	if entries.is_empty(): return
+	var heading := Label.new()
+	heading.name = "StandingOrdersHeading"
+	heading.text = "Daueraufträge"
+	heading.add_theme_font_size_override("font_size", 16)
+	_standing_box.add_child(heading)
+	for entry: Dictionary in entries:
+		var line := Label.new()
+		line.name = "StandingOrder_" + String(entry.get("id", "")).replace(":", "_")
+		line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		line.custom_minimum_size.x = 230
+		var message: String = String(entry.get("message", ""))
+		if String(entry.get("status", "")) in ["locked", "unavailable"] and not message.is_empty(): message = "Gesperrt: " + message
+		line.text = String(entry.get("title", "")) + "\n" + message
+		line.modulate = Color("b0c1c3") if String(entry.get("status", "")) in ["locked", "unavailable"] else Color.WHITE
+		_standing_box.add_child(line)
 
 ## Gesperrt gelisteter Auftrag (Vorgaenger fertig, Vorbedingung fehlt): statt des Statustexts steht der
 ## Grund der Sperre im Wortlaut des Kampagnenstands. Sonst unveraenderter Statustext.
