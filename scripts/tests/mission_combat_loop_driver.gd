@@ -162,6 +162,8 @@ func _record_resolver_target_evaluation(_attacker, _target) -> void:
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _queued_bleedout_by_unit_id: Dictionary = {}
 var _down_state_started_tick_by_unit_id: Dictionary = {}
+## Tick, in dem das Gefecht endete (-1: laeuft noch). Die Liegezeit am Einsatzende wird bis hierhin gemessen (get_unit_down_seconds).
+var _combat_end_tick: int = -1
 ## Je Liegender: wie viele Stufen schon ausgewertet sind (Laufzeitzustand; wird mit der Uhr geloescht).
 var _bleedout_stages_done_by_unit_id: Dictionary = {}
 ## Nach dem Laden: Personen, deren schon vergangene Stufen still nachgerechnet werden (keine zweite Funkmeldung).
@@ -2040,6 +2042,17 @@ func _clear_down_state_linger(unit_id: String) -> void:
 ## Aktueller Spiel-Tick des Gefechts (Zaehler des SimulationRoot, wie im Treiber gefuehrt).
 func get_game_tick() -> int:
 	return _current_tick
+
+
+## Verbluten in Stufen, N2: Liegezeit der Person in Sekunden Spielzeit (aktueller Tick minus Ausfall-Tick); -1.0, wenn sie keine
+## Uhr hat (nicht ausgefallen, verblutet ohne Rueckkehr, alter Stand). Die Abrechnung am Einsatzende liest das ueber den Aufrufer.
+func get_unit_down_seconds(unit_id: String) -> float:
+	var key: String = unit_id.strip_edges()
+	if not _down_state_started_tick_by_unit_id.has(key):
+		return -1.0
+	# Nach dem Gefechtsende laeuft der Tick-Zaehler weiter, gewuerfelt wird nicht mehr: die Liegezeit gilt zum Gefechtsende.
+	var end_tick: int = _combat_end_tick if _combat_end_tick >= 0 else _current_tick
+	return float(maxi(end_tick - int(_down_state_started_tick_by_unit_id[key]), 0)) / float(GAME_TICKS_PER_SECOND)
 
 
 func _is_friendly_unit(unit) -> bool:
@@ -4479,6 +4492,9 @@ func _build_team_states(paths: Array[NodePath]) -> Array:
 		}
 		if campaign_casualty_rules_enabled:
 			team_state["was_downed"] = _was_downed_unit_ids.has(String(team_state["unit_id"]))
+			var lying_seconds: float = get_unit_down_seconds(String(team_state["unit_id"]))
+			if lying_seconds >= 0.0:
+				team_state["down_seconds"] = lying_seconds
 		team_states.append(team_state)
 
 	return team_states
@@ -5193,6 +5209,7 @@ func _resolve_combat(result: String, winning_team_id: String, result_condition_o
 
 	_resolved_without_seen_friendly = result.strip_edges().to_lower() == "defeat" and not _has_seen_active_friendly_units
 	_combat_finished = true
+	_combat_end_tick = _current_tick
 	_winning_team_id = winning_team_id
 	_mission_result_condition_override = result_condition_override.strip_edges()
 	_mission_result = _build_mission_result(result, winning_team_id)

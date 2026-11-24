@@ -24,6 +24,7 @@ func _process(_delta: float) -> bool:
 	_case_unconnected_unit_flagged_by_tick()
 	_case_unconnected_unit_heal_resets_window()
 	_case_switch_off_unconnected_unit_not_flagged()
+	_case_lying_time_in_team_state()
 	print("CAMPAIGN_CASUALTY_DRIVER passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
 	return true
@@ -151,6 +152,40 @@ func _case_switch_on_medic_revive_flagged() -> void:
 	var states: Array = driver.call("_build_team_states", driver.get("friendly_unit_paths"))
 	_check(states.size() == 1 and Dictionary(states[0]).get("was_downed", false) == true, "campaign: team state carries was_downed true")
 	env.fixture.free()
+
+
+## Verbluten in Stufen, N2: Der Teamzustand der Kampagne traegt die Liegezeit (Spielzeit seit dem Ausfall-Tick) nur fuer wer liegt.
+func _case_lying_time_in_team_state() -> void:
+	var env := _build(true, 60.0)
+	var driver = env.driver
+	var friend = env.friend
+	var states: Array = driver.call("_build_team_states", driver.get("friendly_unit_paths"))
+	_check(states.size() == 1 and not Dictionary(states[0]).has("down_seconds"), "N2: wer kampffaehig ist, hat keine Liegezeit im Teamzustand")
+	_check(is_equal_approx(float(driver.call("get_unit_down_seconds", FRIEND_ID)), -1.0), "N2: ohne Uhr gibt der Treiber -1 zurueck")
+	friend.call("apply_damage", 1000, {})
+	_age_down_state(driver, FRIEND_ID, 179.0)
+	states = driver.call("_build_team_states", driver.get("friendly_unit_paths"))
+	_check(states.size() == 1 and is_equal_approx(float(Dictionary(states[0]).get("down_seconds", -9.0)), 179.0), "N2: Liegezeit 179 s im Teamzustand (%s)" % str(Dictionary(states[0]).get("down_seconds", "fehlt")))
+	_age_down_state(driver, FRIEND_ID, 200.0)
+	states = driver.call("_build_team_states", driver.get("friendly_unit_paths"))
+	_check(states.size() == 1 and is_equal_approx(float(Dictionary(states[0]).get("down_seconds", -9.0)), 200.0), "N2: Liegezeit 200 s im Teamzustand")
+	var rules_script = load("res://scripts/core/campaign_casualty_rules.gd")
+	var long_result: Dictionary = rules_script.classify_unit(Dictionary(states[0]), "won")
+	_check(long_result.get("severity", "") == "severe", "N2: die Abrechnung wertet diese Person als schwer (%s)" % str(long_result))
+	env.fixture.free()
+	# Die Liegezeit gilt zum Gefechtsende: der Tick-Zaehler laeuft danach weiter, die Zeit der Person nicht.
+	var late := _build(true, 60.0)
+	late.friend.call("apply_damage", 1000, {})
+	_age_down_state(late.driver, FRIEND_ID, 100.0)
+	late.driver.call("_resolve_combat", "aborted", "")
+	_check(bool(late.driver.get("_combat_finished")), "N2: das Gefecht ist beendet")
+	late.driver.set("_current_tick", int(late.driver.get("_current_tick")) + 200 * 60)
+	var late_seconds: float = float(late.driver.call("get_unit_down_seconds", FRIEND_ID))
+	_check(is_equal_approx(late_seconds, 100.0), "N2: liegt beim Gefechtsende 100 s, 200 s spaeter weiter 100 s (%s)" % str(late_seconds))
+	var late_states: Array = late.driver.call("_build_team_states", late.driver.get("friendly_unit_paths"))
+	var late_result: Dictionary = rules_script.classify_unit(Dictionary(late_states[0]) if late_states.size() == 1 else {}, "won")
+	_check(late_result.get("severity", "") == "medium", "N2: die spaete Abrechnung zaehlt mittelschwer, nicht schwer (%s)" % str(late_result))
+	late.fixture.free()
 
 
 func _case_switch_on_window_zero_bleedout_no_respawn() -> void:

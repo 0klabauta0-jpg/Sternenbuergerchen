@@ -122,6 +122,8 @@ func _publish_restore(handle: RefCounted) -> void:
 	RNG.publish(sim, record.rng_streams)
 	sim._latest_command_token_by_unit_id=record.data.latest_tokens
 	sim._committed_command_token_by_unit_id=record.data.committed_tokens
+	# Reihenfolge ist noetig: erst der Tick, dann (unten) die Uhren. restore_casualty_state begrenzt einen Ausfall-Tick aus der Zukunft
+	# auf den aktuellen Tick; mit dem alten Tick davor starteten sonst alle Uhren neu.
 	driver._current_tick=record.tick
 	driver._combat_startup_grace_ticks=record.data.startup_grace
 	driver._has_seen_active_friendly_units=record.data.seen_friendly
