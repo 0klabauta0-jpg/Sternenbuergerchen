@@ -15,6 +15,15 @@ const WEAPON_FORMULAS: Dictionary = {
 		"range_class": "none",
 		"weight": 0.0,
 	},
+	# Pistole: bisher ohne eigene Formel (fiel auf "rifle" zurueck, Gewicht 3). Werte wie "rifle", nur das Gewicht = WeaponData / Sanitaetswerkzeug (1 kg).
+	"pistol": {
+		"accuracy_mod": 0.04,
+		"speed_mod": 0.0,
+		"toughness_mod": 0.0,
+		"cover_mod": 0.02,
+		"range_class": "medium",
+		"weight": 1.0,
+	},
 	"smg": {
 		"accuracy_mod": -0.06,
 		"speed_mod": 0.12,
@@ -66,6 +75,13 @@ const WEAPON_FORMULAS: Dictionary = {
 }
 
 const ARMOR_FORMULAS: Dictionary = {
+	# Nur Anzug: bisher ohne eigene Formel (fiel auf "medium" zurueck: Tempo 0, Gewicht 2). Jetzt leichter und 0,05 schneller als "light".
+	"suit": {
+		"speed_mod": 0.20,
+		"toughness_mod": 0.0,
+		"cover_mod": 0.0,
+		"weight": 0.5,
+	},
 	"light": {
 		"speed_mod": 0.15,
 		"toughness_mod": -0.08,
