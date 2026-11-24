@@ -10,6 +10,7 @@ const COMMANDS: GDScript = preload("res://scripts/mission/singleplayer_campaign_
 const RETREAT_WIN_CONDITIONS: Array = ["evacuation", "departure"]
 ## Handel H1: Ort -> Szenario des friedlichen Besuchs nach abgeschlossenem Story-Auftrag.
 const OPEN_OUTPOSTS_PATH := "res://data/singleplayer/open_outposts.json"
+const OPEN_GARRISONS_PATH := "res://data/singleplayer/open_garrisons.json"
 const SMALL_OUTPOSTS_PATH := "res://data/singleplayer/small_outposts.json"
 ## Kapitel 2: nur diese Auftragskennungen duerfen in einem aelteren Spielstand fehlen; sie gelten dann als neu (offered).
 const ADDITIVE_JOB_IDS: Array = ["wreck_crater_salvage", "stranded_refuel", "flak_silence", "cutlass_boarding", "hillside_bunker", "prospector_escort"]
@@ -169,6 +170,8 @@ func validate_location_visit(location_id: String, retry_allowed: bool = false) -
 		if _jobs.has(String(small.get("unlock_after_job_id", ""))) and String(_jobs[String(small.unlock_after_job_id)].status) == "completed": return {"ok":true}
 		return _reject("outpost_locked", "Gesperrt: " + String(small.get("locked_hint", "")))
 	if location_id == "homebase" or bool(_locations[location_id].get("free_visit", false)) or (not _enforce_sequence and not ADDITIVE_LOCATION_IDS.has(location_id)): return {"ok":true}  # additive Orte ohne Auftrag auch im freien Spiel nicht (kein spielbares Szenario im Gefecht)
+	# Windbruch-Garnison: der freie Kampf-Ort ist immer anfliegbar (ohne angenommenen Auftrag laeuft das Lager, mit Auftrag dessen Szenario).
+	if not open_garrison_scenario_id(location_id).is_empty(): return {"ok":true}
 	var availability := get_job_availability(retry_allowed)
 	for id: String in _jobs:
 		# Ein gesperrt gelisteter Auftrag oeffnet seinen Ort nicht.
@@ -196,6 +199,16 @@ func open_visit_scenario_id(location_id: String) -> String:
 		if String(_jobs[id].location_id) == location_id and String(_jobs[id].scenario_id) == story_scenario and String(_jobs[id].status) == "completed":
 			return String(Dictionary(visits)[location_id])
 	return ""
+
+## Windbruch-Garnison: Szenario des freien Kampf-Ortes (data/singleplayer/open_garrisons.json); "" = der Ort hat keins oder an ihm ist ein
+## Kampagnenauftrag angenommen/aktiv (dann laeuft wie bisher NUR dessen Szenario, die Garnison ist nicht da). Nur in der Kampagne. Nur lesend.
+func open_garrison_scenario_id(location_id: String) -> String:
+	if not _enforce_sequence or not _locations.has(location_id): return ""
+	var garrisons: Variant = JSON.parse_string(FileAccess.get_file_as_string(OPEN_GARRISONS_PATH)) if FileAccess.file_exists(OPEN_GARRISONS_PATH) else {}
+	if typeof(garrisons) != TYPE_DICTIONARY or not Dictionary(garrisons).has(location_id): return ""
+	for id: String in _jobs:
+		if String(_jobs[id].location_id) == location_id and String(_jobs[id].status) in ["accepted", "active", "pending_upload"]: return ""
+	return String(Dictionary(garrisons)[location_id])
 
 func _accept(payload: Dictionary) -> Dictionary:
 	var job_id := String(payload.get("job_id", ""))

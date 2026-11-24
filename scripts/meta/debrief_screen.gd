@@ -886,6 +886,9 @@ func _apply_player_readout_texts() -> void:
 	var loot_text := build_loot_text(_mission_result)
 	if not loot_text.is_empty():
 		_native_review_confirmation.text += "\n" + loot_text
+	var bounty_text := build_bounty_text(_mission_result)
+	if not bounty_text.is_empty():
+		_native_review_confirmation.text += "\n" + bounty_text
 	var craft_loss_text := build_craft_loss_text(_mission_result)
 	if not craft_loss_text.is_empty():
 		_native_review_confirmation.text += "\n" + craft_loss_text
@@ -918,6 +921,35 @@ static func build_craft_loss_text(mission_result: Dictionary) -> String:
 			else:
 				lines.append("Auftragsfracht verloren: %s. Sie steht am Ladeort wieder bereit." % String(cargo))
 	return "\n".join(lines)
+
+
+## Kopfgeld (Dauerauftrag "Rebellen hetzen"): eigene Zeile, getrennt von der Auftragsbelohnung (Feld bounty des Ergebnisses); sonst leer.
+static func build_bounty_text(mission_result: Dictionary) -> String:
+	if typeof(mission_result.get("bounty")) != TYPE_DICTIONARY:
+		return ""
+	return String(Dictionary(mission_result.get("bounty")).get("line", ""))
+
+
+## Kistenfund im freien Rebellenlager: "Kiste: <Menge> <Name>" je Zeile des Fundes; Rest ohne Platz steht dahinter. Leer ohne Fund.
+static func build_chest_text(loot: Array) -> String:
+	var labels: Dictionary = load("res://scripts/ui/components/personnel_inventory_panel.gd").LABELS
+	var found := PackedStringArray()
+	var left := PackedStringArray()
+	for entry_variant in loot:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var label := String(labels.get(String(entry.get("item_id", "")), String(entry.get("item_id", ""))))
+		if int(entry.get("quantity", 0)) > 0:
+			found.append("%d %s" % [int(entry.quantity), label])
+		if int(entry.get("left_behind", 0)) > 0:
+			left.append("%d %s" % [int(entry.left_behind), label])
+	if found.is_empty() and left.is_empty():
+		return ""
+	var text := "Kiste: " + (", ".join(found) if not found.is_empty() else "nichts mitgenommen")
+	if not left.is_empty():
+		text += " (kein Platz im Frachtraum: " + ", ".join(left) + ")"
+	return text
 
 
 ## Beute aus optionalen Ausruestungskisten (Feld loot_items des Abschlussergebnisses, vom Adapter gebucht); ohne Beute leer.

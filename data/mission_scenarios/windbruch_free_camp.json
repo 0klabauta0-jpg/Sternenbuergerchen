@@ -1,0 +1,229 @@
+{
+  "version": 1,
+  "scenario_id": "windbruch_free_camp",
+  "display_name": "Windbruch – Rebellenlager",
+  "map_file_path": "res://maps/windbruch_outpost.json",
+  "time_limit_seconds": 0.0,
+  "mission_slot_count_override": 4,
+  "win_condition": "objective_capture",
+  "objective": {
+    "marker_id": "objective_point",
+    "capture_radius": 80.0
+  },
+  "enemy_groups": [
+    {
+      "group_id": "camp_hold_yard",
+      "display_name": "Rebellen am Hof (Gewehr)",
+      "team_id": "team_bravo",
+      "spawn_marker_id": "spawn_enemy_defense",
+      "enemy_ids": ["windbruch_camp_01"],
+      "tactics": {
+        "profile_id": "defensive_cover",
+        "stance": "defend",
+        "cover_behavior": "hold_best_cover",
+        "security_mode": "cover_arc",
+        "facing": "east",
+        "advance_style": "hold",
+        "allowed_weapon_roles": ["rifle", "smg", "sidearm"],
+        "sight_behavior": "cover_arc",
+        "contact_behavior": "suppress_from_cover",
+        "weapon_profile": "standard_close",
+        "visual_archetype": "enemy_space_suit_orange",
+        "movement_posture_policy": "hold_ready",
+        "ready_distance_world": 320.0,
+        "travel_speed_factor": 0.3,
+        "ready_speed_factor": 0.2,
+        "aim_move_speed_factor": 0.15,
+        "heavy_weapon_role": "none",
+        "anti_armor_threat": false,
+        "air_asset_risk_profile": "none",
+        "communication_intensity": "low",
+        "weapon_id": "rifle"
+      }
+    },
+    {
+      "group_id": "camp_hold_east",
+      "display_name": "Rebellen am Trockenbett (Maschinenpistole)",
+      "team_id": "team_bravo",
+      "spawn_marker_id": "spawn_bravo",
+      "enemy_ids": ["windbruch_camp_02"],
+      "tactics": {
+        "profile_id": "defensive_cover",
+        "stance": "defend",
+        "cover_behavior": "hold_best_cover",
+        "security_mode": "cover_arc",
+        "facing": "west",
+        "advance_style": "hold",
+        "allowed_weapon_roles": ["rifle", "smg", "sidearm"],
+        "sight_behavior": "cover_arc",
+        "contact_behavior": "suppress_from_cover",
+        "weapon_profile": "standard_close",
+        "visual_archetype": "enemy_space_suit_orange",
+        "movement_posture_policy": "hold_ready",
+        "ready_distance_world": 320.0,
+        "travel_speed_factor": 0.3,
+        "ready_speed_factor": 0.2,
+        "aim_move_speed_factor": 0.15,
+        "heavy_weapon_role": "none",
+        "anti_armor_threat": false,
+        "air_asset_risk_profile": "none",
+        "communication_intensity": "low",
+        "weapon_id": "smg"
+      }
+    },
+    {
+      "group_id": "camp_patrol_yard",
+      "display_name": "Rebellenstreife am Hof (Gewehr)",
+      "team_id": "team_bravo",
+      "spawn_marker_id": "spawn_enemy_defense",
+      "enemy_ids": ["windbruch_camp_03"],
+      "tactics": {
+        "advance_style": "patrol",
+        "aim_move_speed_factor": 0.18,
+        "air_asset_risk_profile": "none",
+        "allowed_weapon_roles": ["rifle", "smg", "sidearm"],
+        "anti_armor_threat": false,
+        "communication_intensity": "normal",
+        "contact_behavior": "pin_then_report",
+        "cover_behavior": "break_to_cover_on_contact",
+        "facing": "west",
+        "heavy_weapon_role": "none",
+        "lz_threat_zone_id": "",
+        "movement_posture_policy": "travel_until_threat",
+        "profile_id": "patrol_probe",
+        "ready_distance_world": 760.0,
+        "ready_speed_factor": 0.3,
+        "security_mode": "patrol",
+        "sight_behavior": "scan_waypoints",
+        "stance": "patrol",
+        "travel_speed_factor": 0.55,
+        "visual_archetype": "enemy_space_suit_orange",
+        "weapon_id": "rifle",
+        "weapon_profile": "standard_close"
+      }
+    },
+    {
+      "group_id": "camp_patrol_edge",
+      "display_name": "Rebellenstreife an der Kante (Gewehr)",
+      "team_id": "team_bravo",
+      "spawn_marker_id": "spawn_enemy_defense",
+      "enemy_ids": ["windbruch_camp_04"],
+      "tactics": {
+        "advance_style": "patrol",
+        "aim_move_speed_factor": 0.18,
+        "air_asset_risk_profile": "none",
+        "allowed_weapon_roles": ["rifle", "smg", "sidearm"],
+        "anti_armor_threat": false,
+        "communication_intensity": "normal",
+        "contact_behavior": "pin_then_report",
+        "cover_behavior": "break_to_cover_on_contact",
+        "facing": "west",
+        "heavy_weapon_role": "none",
+        "lz_threat_zone_id": "",
+        "movement_posture_policy": "travel_until_threat",
+        "profile_id": "patrol_probe",
+        "ready_distance_world": 760.0,
+        "ready_speed_factor": 0.3,
+        "security_mode": "patrol",
+        "sight_behavior": "scan_waypoints",
+        "stance": "patrol",
+        "travel_speed_factor": 0.55,
+        "visual_archetype": "enemy_space_suit_orange",
+        "weapon_id": "rifle",
+        "weapon_profile": "standard_close"
+      }
+    }
+  ],
+  "wave_config": {
+    "wave_delay_seconds": 0.0,
+    "wave_count": 1,
+    "first_wave_delay_seconds": 0.0,
+    "units_per_wave": 4
+  },
+  "patrol_bindings": [
+    {"binding_id": "camp_patrol_yard_route", "target_id": "camp_patrol_yard", "patrol_path_id": "hof_runde", "mode": "pre_contact"},
+    {"binding_id": "camp_patrol_edge_route", "target_id": "camp_patrol_edge", "patrol_path_id": "kanten_wache", "mode": "pre_contact"}
+  ],
+  "briefing": {
+    "summary": "Rebellenlager bei Windbruch: Die Besatzung steht frisch an den Gebäuden und geht Streife. Man kann jederzeit landen, kämpfen und wieder abfliegen.",
+    "minimap_mode": "terrain_only",
+    "objectives": [
+      {
+        "target_id": "ship_return",
+        "text": "Freiwillig: Rebellen ausschalten, dann zum Schiff zurückkehren"
+      }
+    ],
+    "title": "Windbruch – Rebellenlager"
+  },
+  "vertical_slice": {
+    "scenario_kind": "singleplayer_visit",
+    "team_slots": [
+      {
+        "role": "recovery",
+        "player_assignable_modes": ["singleplayer"],
+        "spawn_marker_id": "spawn_alpha",
+        "team_id": "team_alpha",
+        "npc_owned": false
+      }
+    ],
+    "play_modes": ["singleplayer"],
+    "contract_version": 1,
+    "interaction_points": [
+      {
+        "gate_id": "camp_departure",
+        "step_id": "camp_departure",
+        "duration_seconds": 1.0,
+        "required_state": "camp_departure_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Zum Schiff zurückkehren",
+        "interaction_id": "ship_return",
+        "marker_id": "ship_return"
+      },
+      {
+        "gate_id": "camp_chest",
+        "step_id": "camp_chest",
+        "duration_seconds": 3.0,
+        "required_state": "camp_chest_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Kiste im Lager öffnen",
+        "interaction_id": "camp_chest",
+        "marker_id": "outpost_chip",
+        "grants_pool": [
+          {"id": "assault_rifle", "items": [{"item_id": "rifle", "quantity": 1}]},
+          {"id": "medium_armor", "items": [{"item_id": "armor_medium", "quantity": 1}]},
+          {"id": "rocket_launcher_with_rockets", "items": [{"item_id": "rocket_launcher", "quantity": 1}, {"item_id": "ammo_rocket", "quantity": 2}]},
+          {"id": "rocket_ammo", "items": [{"item_id": "ammo_rocket", "quantity": 4}]}
+        ]
+      }
+    ],
+    "flow_steps": [
+      {
+        "step_id": "camp_departure",
+        "min_hold_seconds": 1.0,
+        "objective_type": "interaction_use",
+        "required_state": "camp_departure_done",
+        "target_marker_id": "ship_return"
+      },
+      {
+        "objective_type": "location_return",
+        "requires_step_id": "camp_departure",
+        "step_id": "visit_return",
+        "required_state": "visit_returned",
+        "min_hold_seconds": 0.0,
+        "target_marker_id": "ship_return"
+      }
+    ]
+  },
+  "notes": [
+    "Freies Rebellenlager bei Windbruch (Kennung fortified_outpost): wird nur geladen, wenn kein Kampagnenauftrag fuer den Ort angenommen ist (data/singleplayer/open_garrisons.json).",
+    "Doppelt so viele Gegner wie die Wache von outpost_chip_recovery (2), eine Stufe besser bewaffnet (Gewehr/MPi), keine Raketenwerfer. Haelfte haelt, Haelfte geht Streife auf den Wegen hof_runde und kanten_wache.",
+    "Kein Zeitlimit, kein Pflichtziel, kein Fehlschlag: Abflug jederzeit. Die Besatzung ist bei jedem neuen Besuch wieder vollzaehlig.",
+    "Kein Kampagnenauftrag: Gegner hier zahlen kein Kampagnenergebnis."
+  ]
+}

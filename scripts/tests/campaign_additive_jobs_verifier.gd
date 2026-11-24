@@ -213,24 +213,24 @@ func _case_visibility() -> void:
 	_check(not bool(old_entry.visible) and not bool(old_entry.shown_as_locked), "Fall 9: alter Auftrag ohne Hinweis bleibt unsichtbar")
 	_case_gated_location()
 
-## Fall 7 (Anflug): ein gesperrt gelisteter Auftrag oeffnet seinen Ort nicht. fortified_outpost ist ohne den Pruefeintrag verschlossen
-## (sein einziger Auftrag outpost_chip_recovery ist unsichtbar); der Pruefeintrag liegt dort, sein Vorgaenger satellite_recovery ist nur angenommen.
+## Fall 7 (Anflug): ein gesperrt gelisteter Auftrag oeffnet seinen Ort nicht. distress_orbit ist ohne den Pruefeintrag verschlossen
+## (sein einziger Auftrag buccaneer_rescue ist unsichtbar; Windbruch ist seit der Garnison ein freier Kampf-Ort und kein Beispiel mehr); der Pruefeintrag liegt dort, sein Vorgaenger satellite_recovery ist nur angenommen.
 ## Fehlte in validate_location_visit die Bedingung "not shown_as_locked", waere der Pruefeintrag sichtbar und der Ort offen -> der Fall wird rot.
 func _case_gated_location() -> void:
 	var gated: Dictionary = _probe(GATE_ID)
-	gated.location_id = "fortified_outpost"
+	gated.location_id = "distress_orbit"
 	gated.prerequisite_job_id = "satellite_recovery"
 	var gated_jobs: Dictionary = old_jobs.duplicate(true)
 	gated_jobs[GATE_ID] = gated
 	var plain: RefCounted = _owner(old_jobs, 0)
 	_check(bool(_cmd(plain, "accept_job", {"job_id":"satellite_recovery"}).get("ok", false)), "Fixture: satellite_recovery angenommen (ohne Pruefeintrag)")
-	var without: Dictionary = plain.validate_location_visit("fortified_outpost", true)
-	_check(not bool(without.get("ok", true)) and String(without.get("reason", "")) == "tutorial_locked", "Fall 7: ohne Pruefeintrag ist fortified_outpost verschlossen (%s)" % str(without))
+	var without: Dictionary = plain.validate_location_visit("distress_orbit", true)
+	_check(not bool(without.get("ok", true)) and String(without.get("reason", "")) == "tutorial_locked", "Fall 7: ohne Pruefeintrag ist distress_orbit verschlossen (%s)" % str(without))
 	var owner: RefCounted = _owner(gated_jobs, 0)
 	_check(bool(_cmd(owner, "accept_job", {"job_id":"satellite_recovery"}).get("ok", false)), "Fixture: satellite_recovery angenommen (mit Pruefeintrag)")
 	var entry: Dictionary = owner.get_job_availability(true)[GATE_ID]
-	_check(bool(entry.visible) and bool(entry.shown_as_locked), "Fall 7: Pruefeintrag an fortified_outpost ist sichtbar und gesperrt (%s)" % str(entry))
-	var with_entry: Dictionary = owner.validate_location_visit("fortified_outpost", true)
+	_check(bool(entry.visible) and bool(entry.shown_as_locked), "Fall 7: Pruefeintrag an distress_orbit ist sichtbar und gesperrt (%s)" % str(entry))
+	var with_entry: Dictionary = owner.validate_location_visit("distress_orbit", true)
 	_check(not bool(with_entry.get("ok", true)) and String(with_entry.get("reason", "")) == "tutorial_locked", "Fall 7: der gesperrt gelistete Auftrag oeffnet den Ort nicht (%s)" % str(with_entry))
 
 func _case_normalize() -> void:

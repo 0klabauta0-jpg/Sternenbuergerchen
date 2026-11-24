@@ -220,6 +220,7 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		"standing_accept": result = _standing_accept(payload, authority_context)
 		"standing_deliver": result = _standing_deliver(payload, authority_context)
 		"standing_abandon": result = _standing_abandon(payload)
+		"bounty_payout": result = _bounty_payout(payload)
 		_: result = _reject("unknown_operation", "Aktion unbekannt")
 	if bool(result.get("ok", false)):
 		result["request_id"] = request_id
@@ -237,6 +238,14 @@ func _prune_air_fuel_receipts(craft_id: String, keep_id: String) -> void:
 		var old_result: Dictionary = Dictionary(_requests[request_id].get("result", {}))
 		if old_result.get("operation") == "consume_air_fuel" and String(old_result.get("craft_id", "")) == craft_id: stale.append(request_id)
 	for request_id in stale: _requests.erase(request_id)
+
+## Zahl der gespeicherten Belege, deren Kennung mit prefix beginnt und mit suffix endet (nur lesend). Gibt der Adapter zum Beispiel die
+## Zahl der bisherigen Kistenfunde: sie steht im Spielstand und ist der feste Startwert des naechsten Besuchs.
+func count_requests(prefix: String, suffix: String = "") -> int:
+	var total := 0
+	for request_id: String in _requests:
+		if request_id.begins_with(prefix) and request_id.ends_with(suffix): total += 1
+	return total
 
 func get_purchase_receipt(request_id: String) -> Dictionary:
 	# Visual clients may read only the confirmed result, never mutate inventory.
@@ -785,6 +794,12 @@ func _standing_accept(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var id: String = String(payload.get("order_id", ""))
 	var order: Dictionary = _standing_orders.get_order(id)
 	if order.is_empty(): return _reject("unknown_order", "Unbekannter Auftrag.")
+	if String(order.kind) == "bounty":
+		# Kopfgeld-Dauerauftrag: im Smart Mobile annehmbar, kein Handelsort, keine Fracht.
+		var bounty_accepted: Dictionary = standing_accept_state(id)
+		if not bool(bounty_accepted.get("ok", false)): return bounty_accepted
+		var bounty_number: int = int(bounty_accepted.number)
+		return {"ok": true, "message": "Auftrag angenommen: %d Cr für jeden ausgeschalteten Gegner." % int(order.pay_per_unit), "order_id": id, "number": bounty_number, "receipt_id": _standing_receipt_id(id, bounty_number), "outcome": "accepted"}
 	if String(order.kind) != "freight" or not bool(order.get("playable", true)): return _reject("not_freight", "Das ist kein Frachtauftrag, den man beim Händler übernimmt.")
 	var location: String = String(context.get("location_id", ""))
 	if not _has_service(location, "trade") or bool(context.get("craft_busy", true)): return _reject("trade_unavailable", "Handel nicht erreichbar")
@@ -843,12 +858,28 @@ func _standing_abandon(payload: Dictionary) -> Dictionary:
 	var number: int = int(active.number)
 	if not standing_finish_state(id, false): return _reject("not_active", "Dieser Auftrag läuft nicht.")
 	var removed := 0
-	for container_id: Variant in _inventory:
-		var items: Dictionary = Dictionary(_inventory[container_id]).get("items", {})
-		removed += int(items.get(STANDING_CRATE, 0))
-		items.erase(STANDING_CRATE)
+	# Nur ein Frachtauftrag raeumt Kisten: das Kopfgeld (kind bounty) darf die Kisten eines laufenden Frachtauftrags nicht anruehren.
+	if String(order.kind) == "freight":
+		for container_id: Variant in _inventory:
+			var items: Dictionary = Dictionary(_inventory[container_id]).get("items", {})
+			removed += int(items.get(STANDING_CRATE, 0))
+			items.erase(STANDING_CRATE)
 	return {"ok": true, "message": "Auftrag aufgegeben. Kein Lohn.", "order_id": id, "number": number, "receipt_id": _standing_receipt_id(id, number),
 		"outcome": "abandoned", "pay": 0, "crates_removed": removed}
+
+## Kopfgeld auszahlen (Befehl bounty_payout): `kills` ausgeschaltete Gegner mal pay_per_unit des ANGENOMMENEN Dauerauftrags der Art "bounty".
+## Das ist die einzige Stelle, die Kopfgeld bucht; ohne angenommenen Dauerauftrag wird abgelehnt und kein Credit gebucht.
+func _bounty_payout(payload: Dictionary) -> Dictionary:
+	if _standing_orders == null: return _reject("standing_unavailable", "Daueraufträge sind nicht verfügbar")
+	var active: Dictionary = _standing_orders.get_active("bounty")
+	if active.is_empty(): return _reject("bounty_not_active", "Kein Kopfgeld-Auftrag angenommen")
+	var kills: Variant = payload.get("kills", -1)
+	if typeof(kills) != TYPE_INT or int(kills) < 1 or int(kills) > 1000: return _reject("invalid_kills", "Anzahl ungültig")
+	var each: int = int(active.pay_per_unit)
+	var pay: int = int(kills) * each
+	_credits += pay
+	_revision += 1
+	return {"ok": true, "kills": int(kills), "pay_per_unit": each, "credits_added": pay, "line": "Kopfgeld: %d × %d = %d Credits" % [int(kills), each, pay], "order_id": String(active.id)}
 
 func _standing_receipt_id(id: String, number: int) -> String:
 	return "standing:%s:%d" % [id, number]

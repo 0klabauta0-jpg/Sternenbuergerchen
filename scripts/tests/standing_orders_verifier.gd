@@ -51,7 +51,7 @@ func _run() -> void:
 func _daten() -> void:
 	var s := _fresh()
 	var snap: Array = s.get_snapshot({})
-	_check(snap.size() == 5, "fuenf Auftraege (beobachtet %d)" % snap.size())
+	_check(snap.size() == 6, "sechs Auftraege (fuenf Waren-Auftraege und Rebellen hetzen; beobachtet %d)" % snap.size())
 	var a: Dictionary = _entry(s, FA)
 	_check(String(a.kind) == "freight" and String(a.origin) == "trade_outpost" and String(a.destination) == "satellite_crash" and int(a.crates) == 4 and int(a.pay) == 30, "Fracht-Eintrag traegt die Daten")
 	_check(String(a.status) == "open" and int(a.lock_remaining_seconds) == 0, "Anfang: Fracht offen, keine Sperre")
@@ -163,7 +163,7 @@ func _skirmish() -> void:
 	camp.advance_standing_clock(3.0)
 	var cex: Dictionary = camp.export_state()
 	_check(cex.has("standing_clock") and is_equal_approx(float(cex.standing_clock), 3.0), "Kampagne: Versorgungsexport fuehrt die Uhr")
-	_check(camp.get_standing_orders_snapshot().size() == 5, "Kampagne: Snapshot hat fuenf Auftraege")
+	_check(camp.get_standing_orders_snapshot().size() == 6, "Kampagne: Snapshot hat sechs Auftraege")
 	var back = SUPPLY.new()
 	back.configure()
 	back.enable_standing_orders()
@@ -291,7 +291,7 @@ func _adapter_und_takt() -> void:
 	_check(camp._supply.get_standing_orders() != null, "Kampagnen-Adapter legt den Besitzer an")
 	var camp_snapshot: Dictionary = {}
 	camp._attach_standing_orders(camp_snapshot)
-	_check(camp_snapshot.has("standing_orders") and Array(camp_snapshot.standing_orders).size() == 5, "Kampagnen-Adapter liefert campaign.standing_orders (fuenf Eintraege)")
+	_check(camp_snapshot.has("standing_orders") and Array(camp_snapshot.standing_orders).size() == 6, "Kampagnen-Adapter liefert campaign.standing_orders (sechs Eintraege)")
 	var titles: Array = []
 	for e: Dictionary in camp_snapshot.standing_orders: titles.append(String(e.title))
 	_check(titles.has("Fracht: 4 Kisten C-Benit nach Aschental · 30 Cr") and titles.has("Bergung: Bergungsgut (Aschental) · 8 Cr je Stück"), "Titel nutzen die echten Kataloge (beobachtet %s)" % str(titles))

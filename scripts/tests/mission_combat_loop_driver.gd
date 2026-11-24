@@ -502,6 +502,9 @@ func request_mission_evacuation() -> Dictionary:
 
 var _finite_enemy_roster: bool = false
 var _known_enemy_gate_groups: Dictionary = {}
+var _bounty_seen_fit: Dictionary = {}  # Kopfgeld: Gegner-Kennungen, die kampffaehig gesehen wurden
+var _bounty_out: Dictionary = {}  # Kopfgeld: davon die ausgeschalteten
+var _bounty_settled: int = 0  # Kopfgeld: schon abgerechnete Zahl
 
 func configure_scenario_runtime_gates_from_file(path: String) -> bool:
 	if _mission_scenario_runtime_gates == null:
@@ -3557,8 +3560,29 @@ func _build_enemy_group_fit_counts() -> Dictionary:
 			var unit = _find_unit_by_id(candidate_units, String(unit_id_variant))
 			if _is_unit_fit_for_gate_count(unit):
 				fit_count += 1
+				_bounty_seen_fit[String(unit_id_variant)] = true
 		result[group_id] = fit_count
+	# Kopfgeld: ein Gegner, der einmal kampffaehig beobachtet wurde und es nicht mehr ist (niedergestreckt oder aus der Taktik gefallen),
+	# zaehlt genau einmal (Schluessel = Einheit, auch bei spaeten Wellen).
+	var live_enemies: Array = _get_active_enemy_units()
+	for seen_id in _bounty_seen_fit.keys():
+		if not _bounty_out.has(seen_id) and not _is_unit_fit_for_gate_count(_find_unit_by_id(live_enemies, String(seen_id))):
+			_bounty_out[seen_id] = true
 	return result
+
+
+## Kopfgeld: Zahl der Gegner, die in diesem Einsatz ausgeschaltet wurden (so, wie die Auftragsziele "kampffaehig" zaehlen), je Gegner einmal.
+func get_enemies_out_of_action_count() -> int:
+	return _bounty_out.size()
+
+
+## Kopfgeld: wie viele davon schon abgerechnet sind; der Besitzer bucht nur die Differenz (mehrfache Abrechnung bucht nichts doppelt).
+func get_bounty_settled_count() -> int:
+	return _bounty_settled
+
+
+func mark_bounty_settled(count: int) -> void:
+	_bounty_settled = maxi(_bounty_settled, count)
 
 
 func _is_unit_fit_for_gate_count(unit) -> bool:

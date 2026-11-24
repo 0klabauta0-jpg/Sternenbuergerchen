@@ -174,7 +174,7 @@ func run() -> void:
 	check(items["body:sun"].get_text(0) == "Börner  /  SYSTEM" and view.find_child("SystemCaption",true,false).text == "SYSTEM: Börner", "actual tree and heading display the same corrected system name")
 	check(items.has("body:glut_2") and items.has("body:polisa") and items["body:polisa"].get_parent() == items["body:glut_2"], "Eidolon and its real station remain in the tree")
 	check(items["body:glut_1a"].get_parent() == items["body:planet"] and items["location:satellite_crash"].get_parent() == items["body:glut_1a"], "actual moon and location hierarchy matches route owners")
-	check(items.has("location:fortified_outpost") and items.has("location:distress_orbit") and not items["location:fortified_outpost"].get_metadata(0).can_select_destination and not board.get("_card_buttons").has("outpost_chip_recovery"), "all places are inspectable while future mission offers and routes remain unavailable")
+	check(items.has("location:fortified_outpost") and items.has("location:distress_orbit") and not items["location:distress_orbit"].get_metadata(0).can_select_destination and not board.get("_card_buttons").has("outpost_chip_recovery"), "all places are inspectable while future mission offers and routes remain unavailable")
 	check(items["body:glut_1a"].get_text(0) == "Neralis" and items["location:satellite_crash"].get_text(0) == "Aschental" and items["body:glut_2"].get_text(0) == "Eidolon", "stable ID names agree in actual tree")
 	check(items["location:satellite_crash"].get_tooltip_text(0).begins_with("Aschental ·"), "actual destination tooltip uses the same projected name")
 	var expected_marker_count := 0
@@ -192,7 +192,7 @@ func run() -> void:
 	fuel_projection.space_travel.fuel_reachability = {"satellite_crash":{"ok":true},"trade_outpost":{"ok":false,"message":"Zu wenig Treibstoff"},"fortified_outpost":{"ok":true},"distress_orbit":{"ok":true}}
 	view.refresh(fuel_projection)
 	var fuel_text: String = view.get("_fuel_help").text
-	check(fuel_text.contains("Aschental") and fuel_text.contains("Kestrel · Zu wenig Treibstoff") and not fuel_text.contains("Windbruch") and not fuel_text.contains("Fernwacht"), "fuel display retains real visible locations and exact supply outcome without revealing future jobs")
+	check(fuel_text.contains("Aschental") and fuel_text.contains("Kestrel · Zu wenig Treibstoff") and fuel_text.contains("Windbruch") and not fuel_text.contains("Fernwacht"), "fuel display retains real visible locations (Windbruch is now an open camp) and exact supply outcome without revealing future jobs")
 	# Spielerwunsch 24.11.: der Ort fortified_outpost heisst im Spiel Windbruch; der alte Name steht in keinem Anzeigenamen mehr.
 	var windbruch_names_ok: bool = String(DISPLAY.location_name("fortified_outpost")) == "Windbruch"
 	for location_id: String in DISPLAY.LOCATION_NAMES:
@@ -213,11 +213,11 @@ func run() -> void:
 		print("TREE_INSPECTION available=", calls.slice(inspection_count))
 		check(calls.size() == inspection_count + 1 and calls.back() == {"operation":"inspect_location", "payload":{"location_id":"satellite_crash"}}, "available location inspection also bypasses route selection " + str(dimensions))
 		inspection_count = calls.size()
-		check(await tree_inspect_button(tree,items["location:fortified_outpost"]), "unavailable mission location still has a reachable inspection button " + str(dimensions))
+		check(await tree_inspect_button(tree,items["location:distress_orbit"]), "unavailable mission location still has a reachable inspection button " + str(dimensions))
 		print("TREE_INSPECTION unavailable=", calls.slice(inspection_count), " selected=", tree.get_selected().get_metadata(0) if tree.get_selected() != null else {})
-		check(calls.size() == inspection_count + 1 and calls.back() == {"operation":"inspect_location", "payload":{"location_id":"fortified_outpost"}}, "unknown location view never selects a route or mission " + str(dimensions))
-		await tree_click(tree,items["location:fortified_outpost"])
-		check(calls.size() == inspection_count + 1 and tree.get_selected() == items["location:fortified_outpost"], "locked row focuses for keyboard inspection without a destination command " + str(dimensions))
+		check(calls.size() == inspection_count + 1 and calls.back() == {"operation":"inspect_location", "payload":{"location_id":"distress_orbit"}}, "unknown location view never selects a route or mission " + str(dimensions))
+		await tree_click(tree,items["location:distress_orbit"])
+		check(calls.size() == inspection_count + 1 and tree.get_selected() == items["location:distress_orbit"], "locked row focuses for keyboard inspection without a destination command " + str(dimensions))
 		tree.grab_focus(); await key(KEY_ENTER); await key(KEY_ENTER,false)
 		check(calls.size() == inspection_count + 2 and calls.back().operation == "inspect_location" and before_inspection == [owner.export_state(), travel.get_snapshot()], "Enter inspects and all view actions preserve actual campaign and travel owners " + str(dimensions))
 		var count := calls.size()

@@ -11,7 +11,7 @@ extends RefCounted
 ##    Erst bei true: 2. Kisten entfernen und Lohn buchen. So wird der Lohn genau einmal gebucht.
 ##  - Im Versorgungsstand aendern standing_accept_state / standing_finish_state Zustand und _revision zusammen; B ruft nur diese.
 ##  - Die Uhr (advance_clock) erhoeht die _revision bewusst nicht (sie tickt je Bild).
-const KINDS: Array = ["freight", "mining", "salvage"]
+const KINDS: Array = ["freight", "mining", "salvage", "bounty"]
 const MAX_CLOCK := 1.0e9
 const MAX_LOCK_SECONDS := 86400
 const MAX_CRATES := 48
@@ -110,7 +110,8 @@ func finish(id: String, _delivered: bool) -> bool:
 	if String(Dictionary(_active.get(kind, {})).get("id", "")) != id:
 		return false
 	_active.erase(kind)
-	_locks[id] = _clock + float(_lock_seconds)
+	# Kopfgeld-Auftraege haben keine Sperrzeit: wer abgibt, kann sofort wieder annehmen.
+	if kind != "bounty": _locks[id] = _clock + float(_lock_seconds)
 	return true
 
 ## Definition eines Auftrags aus den Daten (Kopie) oder {}.
@@ -207,6 +208,15 @@ func _entry(order: Dictionary, owned_items: Variant) -> Dictionary:
 	# Fehlt owned_items (null), gilt nichts als im Besitz: die Werkzeugpflicht laesst sich nicht umgehen.
 	var owned: Dictionary = owned_items if typeof(owned_items) == TYPE_DICTIONARY else {}
 	var missing: bool = not required.is_empty() and int(owned.get(required, 0)) < 1
+	if kind == "bounty":
+		# Kopfgeld: im Smart Mobile annehmbar, bleibt angenommen bis zur Abgabe, keine Frist, keine Ware.
+		if String(Dictionary(_active.get(kind, {})).get("id", "")) == id:
+			entry.status = "active"
+			entry.reason = "active"
+			entry.message = "Läuft: %d Cr für jeden ausgeschalteten Gegner, in jedem Einsatz." % int(order.get("pay_per_unit", 0))
+		else:
+			entry.message = String(order.get("briefing", ""))
+		return entry
 	if not bool(order.get("playable", true)):
 		entry.status = "unavailable"
 		entry.reason = "item_missing" if missing else "not_playable"
@@ -242,6 +252,8 @@ func _missing_text(order: Dictionary) -> String:
 func _title(order: Dictionary) -> String:
 	var where: String = _place(String(order.origin))
 	match String(order.kind):
+		"bounty":
+			return "%s: %d Cr je ausgeschaltetem Gegner" % [String(order.get("name", "Kopfgeld")), int(order.pay_per_unit)]
 		"freight":
 			return "Fracht: %s %s nach %s · %d Cr" % [_crates_text(int(order.crates)), _item(String(order.item)), _place(String(order.destination)), int(order.pay)]
 		"mining":

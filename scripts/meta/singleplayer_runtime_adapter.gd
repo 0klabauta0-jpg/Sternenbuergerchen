@@ -287,6 +287,14 @@ func configure(flow: Node, screen: Control) -> void:
 	# Handel-Nachbesserung W3: friedlicher Besuch des Handelsaussenpostens in der Kampagne ohne Zeitlimit (0 = keins); das Skirmish-Szenario trade_outpost_visit bleibt.
 	if _campaign_mode:
 		catalog.append({"mission_id": "trade_outpost_open_visit", "mission_name": "Handelsaußenposten besuchen", "map_file_path": "res://maps/trade_outpost.json", "scenario_file_path": "res://data/mission_scenarios/trade_outpost_open_visit.json", "slot_count": 4, "time_limit_seconds": 0.0, "win_condition": "objective_capture"})
+	# Windbruch-Garnison: das freie Rebellenlager (open_garrisons.json), ohne Zeitlimit; ohne Eintrag kann der Anflug es nicht waehlen.
+	if _campaign_mode:
+		var garrisons: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/open_garrisons.json"))
+		for place_id: String in (Dictionary(garrisons) if typeof(garrisons) == TYPE_DICTIONARY else {}):
+			var garrison_id: String = String(Dictionary(garrisons)[place_id])
+			var garrison_place: Dictionary = Dictionary(_campaign.get_campaign_snapshot().locations).get(place_id, {})
+			if garrison_place.is_empty(): continue
+			catalog.append({"mission_id": garrison_id, "mission_name": String(garrison_place.name) + " – Rebellenlager", "map_file_path": garrison_place.map_file_path, "scenario_file_path": "res://data/mission_scenarios/" + garrison_id + ".json", "slot_count": 4, "time_limit_seconds": 0.0, "win_condition": "objective_capture"})
 	# Handel 2a: friedliche Besuchsszenarien der kleinen Aussenposten (small_outposts.json); ohne Eintrag im Katalog kann der Anflug sie nicht waehlen.
 	for place_id: String in Dictionary(_campaign.get_campaign_snapshot().locations):
 		if _campaign.small_outpost_entry(place_id).is_empty(): continue
@@ -959,6 +967,10 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 			if operation == "station_buy_ship" and String(data.get("delivery_mode", "homebase")) == "local" and not bool(result.get("replayed", false)): _flow.call("finalize_polisa_local_ship_purchase", String(result.get("craft_id", "")))
 			_flow.call("_refresh_homebase_screen")
 		return result
+	if operation in ["standing_accept", "standing_abandon"] and String(payload.get("order_id", "")).begins_with("bounty:"):
+		# Smart Mobile: der Kopfgeld-Dauerauftrag wird ohne Handelsort angenommen/abgegeben; Fracht bleibt beim Haendler (weiter unten).
+		if not _campaign_mode: return _reject("not_campaign", "Daueraufträge gibt es nur in der Kampagne")
+		return _commit("singleplayer_supply", operation, {"order_id": String(payload.get("order_id", ""))}, _request_id("standing", payload))
 	if operation in ["inventory_transfer","inventory_equip"]:
 		var unit_id := String(data.get("unit_id",""))
 		var context := _inventory_context(unit_id,String(data.get("craft_id","")))
@@ -1368,7 +1380,69 @@ func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
 func is_campaign_mission() -> bool:
 	return _campaign_mode or _space_route_requested or String(_flow.get("_selected_mission_id")) in ["satellite_recovery", "trade_outpost_visit"]
 
+## Kopfgeld: letzte Abrechnung ({} = keine); die Zeile fuer Anzeigen ohne Einsatzergebnis (Abflug von einem freien Ort).
+var last_bounty: Dictionary = {}
+
+## Kopfgeld (Dauerauftrag "Rebellen hetzen"): rechnet die seit der letzten Abrechnung ausgeschalteten Gegner dieses Einsatzes ab.
+## Gilt fuer JEDEN Einsatz (Auftrag oder freier Besuch), auch bei Fehlschlag/Rueckzug, getrennt von der Auftragsbelohnung.
+## Gebucht wird NUR ueber den Befehl bounty_payout des Versorgungsstands, und der lehnt ohne angenommenen Dauerauftrag ab (kein Credit).
+## Mehrfacher Aufruf bucht nichts doppelt: der Einsatztreiber merkt sich, wie viele schon abgerechnet sind.
+func settle_bounty_instance(mission: Node) -> Dictionary:
+	if not _campaign_mode or _simulation == null or not is_instance_valid(mission): return {}
+	var driver: Node = mission.get_node_or_null("CombatLoopDriver")
+	if driver == null or not driver.has_method("get_enemies_out_of_action_count"): return {}
+	var total: int = int(driver.call("get_enemies_out_of_action_count"))
+	var open_count: int = total - int(driver.call("get_bounty_settled_count"))
+	if open_count <= 0: return {}
+	var paid: Dictionary = _commit("singleplayer_supply", "bounty_payout", {"kills": open_count}, "bounty:%s:%d:%d" % [_request_session, driver.get_instance_id(), total])
+	# Auch ohne angenommenen Auftrag gelten diese Gegner als abgerechnet: spaeteres Annehmen zahlt nichts rueckwirkend.
+	driver.call("mark_bounty_settled", total)
+	if not bool(paid.get("ok", false)): return {}
+	last_bounty = {"kills": int(paid.kills), "pay": int(paid.credits_added), "line": String(paid.line)}
+	return last_bounty.duplicate(true)
+
+## Beutekiste im freien Rebellenlager (Szenario aus open_garrisons.json): wurde sie geoeffnet, bucht der Abflug GENAU EINEN Fund aus ihrem
+## grants_pool in die Schiffsfracht. Startwert = Zahl der bisherigen Kistenfunde (steht in den gespeicherten Belegen, je Besuch fest);
+## je Besuch einmal (Merker am Einsatzort), jeder Besuch eigene Belege. Passt etwas nicht ins Schiff, bleibt es liegen (wie bei grants_items).
+## Rueckgabe wie _grant_used_interaction_loot: [{item_id, quantity, left_behind}].
+var last_camp_loot: Array = []
+
+func settle_free_camp_loot(mission: Node, craft_id: String, scenario_id: String) -> Array:
+	if not _campaign_mode or _supply == null or _simulation == null or craft_id.is_empty() or not is_instance_valid(mission) or mission.has_meta("camp_loot_booked"): return []
+	var garrisons: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/open_garrisons.json"))
+	if typeof(garrisons) != TYPE_DICTIONARY or not Dictionary(garrisons).values().has(scenario_id): return []
+	var driver: Node = mission.get_node_or_null("CombatLoopDriver")
+	if driver == null or not driver.has_method("get_mission_interaction_runtime_states"): return []
+	var states: Dictionary = Dictionary(driver.call("get_mission_interaction_runtime_states"))
+	var scenario = load("res://scripts/mission/mission_scenario_data.gd").load_from_file("res://data/mission_scenarios/" + scenario_id + ".json")
+	if scenario == null: return []
+	var report: Array = []
+	for point_variant in Array(Dictionary(scenario.call("get_vertical_slice")).get("interaction_points", [])):
+		var interaction_id: String = String(Dictionary(point_variant).get("interaction_id", ""))
+		if not Dictionary(point_variant).has("grants_pool") or not bool(Dictionary(states.get(interaction_id, {})).get("complete", false)): continue
+		var prefix := "campaign-cargo:loot:%s:%s:" % [scenario_id, interaction_id]
+		var visit_no: int = int(_supply.count_requests(prefix, ":0:0"))
+		var line_no := 0
+		for entry: Dictionary in scenario.call("get_interaction_grants", interaction_id, visit_no):
+			var booked := 0
+			var left_behind := 0
+			for piece in range(int(entry.quantity)):
+				var cargo: Dictionary = _campaign_cargo(craft_id, String(entry.item_id), 1, "loot:%s:%s:%d:%d:%d" % [scenario_id, interaction_id, visit_no, line_no, piece])
+				if bool(cargo.get("ok", false)): booked += 1
+				else: left_behind += 1
+			report.append({"item_id": String(entry.item_id), "quantity": booked, "left_behind": left_behind})
+			line_no += 1
+		mission.set_meta("camp_loot_booked", true)
+	if not report.is_empty(): last_camp_loot = report
+	return report
+
+func settle_bounty(craft_id: String) -> Dictionary:
+	if craft_id.is_empty() or _flow == null or not _flow.has_method("get_mission_for_craft"): return {}
+	return settle_bounty_instance(_flow.call("get_mission_for_craft", craft_id))
+
 func record_mission_result(result: Dictionary, authoritative_mission_identity: Dictionary = {}) -> void:
+	var bounty: Dictionary = settle_bounty(String(authoritative_mission_identity.get("craft_id", "")))
+	if not bounty.is_empty(): result["bounty"] = bounty
 	_recover_secured_campaign_chips()
 	var selected: Dictionary = _campaign.get_campaign_snapshot()
 	var craft_id: String = String(authoritative_mission_identity.get("craft_id", ""))
@@ -2358,6 +2432,8 @@ func _destination_scenario_id(selected: Dictionary, location_id: String, selecte
 	if _campaign_mode and _campaign != null:
 		var visit: String = String(_campaign.open_visit_scenario_id(location_id))
 		if not visit.is_empty(): return visit
+		var garrison: String = String(_campaign.open_garrison_scenario_id(location_id))
+		if not garrison.is_empty(): return garrison
 	return String(Dictionary(selected.locations[location_id]).scenario_file_path).get_file().get_basename()
 
 ## Handel H2: Ankaufspreise der Station Polisa fuer die Stationsanzeige: die Preise der Warenboerse (Benit) ueber den Handelsdaten (Erz, Bergungsgut).

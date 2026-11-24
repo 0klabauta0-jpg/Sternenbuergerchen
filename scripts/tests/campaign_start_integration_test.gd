@@ -58,6 +58,13 @@ func _run() -> void:
 		_check(not visit_id.is_empty() and not expected_ids.has(visit_id), "Small outpost %s has its own free visit" % String(place_id))
 		if not visit_id.is_empty() and not expected_ids.has(visit_id):
 			expected_ids.append(visit_id)
+	# Windbruch-Garnison: dazu das freie Kampf-Szenario je Ort aus data/singleplayer/open_garrisons.json (Szenario aus der Zuordnung).
+	var garrisons: Dictionary = Dictionary(JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/open_garrisons.json")))
+	_check(not garrisons.is_empty(), "Open garrisons data lists camps")
+	for place_id in garrisons:
+		var camp_id: String = String(garrisons[place_id])
+		_check(campaign_locations.has(place_id) and not expected_ids.has(camp_id), "Garrison %s has its own free camp scenario" % String(place_id))
+		if not expected_ids.has(camp_id): expected_ids.append(camp_id)
 	_check(campaign_jobs.size() >= 5 and catalog_ids.size() == expected_ids.size(), "Campaign offers every job plus the free visits (Auftraege %d, Katalog %d)" % [campaign_jobs.size(), catalog_ids.size()])
 	for id in expected_ids:
 		_check(catalog_ids.has(id), "Campaign catalog offers " + String(id))
