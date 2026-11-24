@@ -25,11 +25,17 @@ const SVG_BODIES := {
 	# Zapfsaeule mit Schluessel (Tanken, Reparieren, Aufmunitionieren)
 	"service": '<rect x="5" y="4" width="9" height="16" rx="1.5"/><path d="M5 20h9M7.5 8h4"/><path d="M14 9h2.5a1.5 1.5 0 0 1 1.5 1.5V16a1.5 1.5 0 0 0 3 0V9l-2-2" stroke="#edbb6c"/>',
 }
+const SVG_BODIES_NAV := {
+	# Leiste einklappen / ausklappen (Doppelpfeil), Charakterdetails (Karte mit Kopf)
+	"nav_collapse": '<path d="M11 6l-6 6 6 6"/><path d="M19 6l-6 6 6 6" stroke="#edbb6c"/>',
+	"nav_expand": '<path d="M13 6l6 6-6 6"/><path d="M5 6l6 6-6 6" stroke="#edbb6c"/>',
+	"details": '<rect x="3" y="5" width="18" height="14" rx="1.5"/><circle cx="9" cy="11" r="2" stroke="#edbb6c"/><path d="M5.8 16.2c.6-1.6 5.8-1.6 6.4 0M14.5 10h4M14.5 14h4"/>',
+}
 static var _cache: Dictionary = {}
 
 static func get_icon(id: String) -> Texture2D:
 	if id == "jobs": return EQUIPMENT.get_icon("satellite_chip")
-	if SVG_BODIES.has(id): return _svg_icon(id)
+	if SVG_BODIES.has(id) or SVG_BODIES_NAV.has(id): return _svg_icon(id)
 	if not REGIONS.has(id): return null
 	if not _cache.has(id):
 		var texture := AtlasTexture.new()
@@ -42,7 +48,7 @@ static func get_icon(id: String) -> Texture2D:
 static func _svg_icon(id: String) -> Texture2D:
 	if not _cache.has(id):
 		var image := Image.new()
-		if image.load_svg_from_string(SVG_HEAD + String(SVG_BODIES[id]) + "</svg>", 2.0) != OK:
+		if image.load_svg_from_string(SVG_HEAD + String(SVG_BODIES[id] if SVG_BODIES.has(id) else SVG_BODIES_NAV[id]) + "</svg>", 2.0) != OK:
 			return null
 		_cache[id] = ImageTexture.create_from_image(image)
 	return _cache[id]

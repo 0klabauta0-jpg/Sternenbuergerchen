@@ -51,6 +51,109 @@ func _key(code: Key) -> bool:
 	return handled
 
 
+## Echter Mausklick (Bewegung, Druck, Loslassen) an einem Punkt des Fensters.
+func _click_at(point: Vector2) -> void:
+	var motion := InputEventMouseMotion.new()
+	motion.position = point
+	motion.global_position = point
+	root.push_input(motion)
+	await process_frame
+	for pressed: bool in [true, false]:
+		var event := InputEventMouseButton.new()
+		event.button_index = MOUSE_BUTTON_LEFT
+		event.pressed = pressed
+		event.position = point
+		event.global_position = point
+		event.button_mask = MOUSE_BUTTON_MASK_LEFT if pressed else 0
+		root.push_input(event)
+		await process_frame
+
+
+func _settle(frames: int = 10) -> void:
+	for i in frames:
+		await process_frame
+
+
+func _bar_state(presenter: Control) -> Dictionary:
+	var scroll: Node = presenter.find_child("NavigationScroll", true, false)
+	var bar_buttons: Array = []
+	_collect_buttons(scroll, bar_buttons)
+	var bar_labels: Array = []
+	_find_labels(presenter.find_child("NavigationColumn", true, false), bar_labels)
+	var visible_labels := 0
+	for label: Label in bar_labels:
+		if label.is_visible_in_tree() and not label.text.is_empty():
+			visible_labels += 1
+	var workspace: Control = presenter.find_child("Workspace", true, false)
+	return {"buttons": bar_buttons, "labels": visible_labels, "width": (presenter.find_child("NavigationColumn", true, false) as Control).size.x, "workspace": workspace.size.x}
+
+
+func _check_collapsible_bar(screen: Node, presenter: Control) -> void:
+	screen.call("request_operation", "navigate", {"mode": "base"})
+	await _settle(12)
+	var toggle: Button = presenter.find_child("ToggleNavigation", true, false) as Button
+	_check(toggle != null and toggle.is_visible_in_tree(), "Umschalter der linken Leiste (ToggleNavigation) ist da und sichtbar")
+	if toggle == null:
+		return
+	var open_state: Dictionary = _bar_state(presenter)
+	var open_texts: Array = Array(open_state.buttons).map(func(b: Button) -> String: return b.text)
+	_check(open_texts == EXPECTED_ORDER, "ausgeklappt (Vorgabe): Beschriftungen wie bisher (beobachtet %s)" % str(open_texts))
+	# Klick auf die Ecke des Umschalters (ganze Flaeche klickbar), nicht nur auf die Mitte.
+	var rect: Rect2 = toggle.get_global_rect()
+	await _click_at(rect.position + Vector2(3, 3))
+	await _settle()
+	var closed: Dictionary = _bar_state(presenter)
+	_check(float(closed.width) < float(open_state.width) * 0.4, "eingeklappt: Leiste schmal (%.0f px statt %.0f px, unter 40 Prozent)" % [closed.width, open_state.width])
+	_check(int(closed.labels) == 0, "eingeklappt: kein Beschriftungs-Label sichtbar (%d)" % int(closed.labels))
+	_check(Array(closed.buttons).size() == EXPECTED_ORDER.size(), "eingeklappt: Anzahl der Knoepfe unveraendert (%d statt %d)" % [Array(closed.buttons).size(), EXPECTED_ORDER.size()])
+	var all_ok := true
+	var order_ok := true
+	var bad := ""
+	var index := 0
+	for b: Button in closed.buttons:
+		var size_ok: bool = b.get_global_rect().size.x >= 43.5 and b.get_global_rect().size.y >= 43.5
+		var tip_ok: bool = not b.tooltip_text.strip_edges().is_empty()
+		var text_ok: bool = b.text.is_empty() and b.icon != null
+		if not (size_ok and tip_ok and text_ok):
+			all_ok = false
+			bad += " [%d: %s %s tip='%s' text='%s']" % [index, str(b.get_global_rect().size), str(b.icon != null), b.tooltip_text, b.text]
+		if index < EXPECTED_ORDER.size() and not b.tooltip_text.begins_with(String(EXPECTED_ORDER[index])):
+			order_ok = false
+		index += 1
+	_check(all_ok, "eingeklappt: jeder Knopf mindestens 44 x 44, mit Icon, ohne Text, mit Tooltip%s" % bad)
+	_check(order_ok, "eingeklappt: Reihenfolge der Knoepfe unveraendert (Tooltips beginnen mit den Namen)")
+	_check(toggle.get_global_rect().size.x >= 43.5 and toggle.get_global_rect().size.y >= 43.5 and not toggle.tooltip_text.is_empty(), "eingeklappt: auch der Umschalter ist mindestens 44 x 44 und hat einen Tooltip")
+	_check(float(closed.workspace) > float(open_state.workspace) + 50.0, "eingeklappt: Inhalt rechts ist breiter geworden (%.0f px statt %.0f px)" % [closed.workspace, open_state.workspace])
+	# Zustand bleibt beim Ansichtswechsel (Basis -> Lager -> Basis) und ueber refresh().
+	screen.call("request_operation", "navigate", {"mode": "squad"})
+	await _settle()
+	var squad_state: Dictionary = _bar_state(presenter)
+	_check(float(squad_state.width) < float(open_state.width) * 0.4 and int(squad_state.labels) == 0, "eingeklappt bleibt in der Trupp-Ansicht (%.0f px)" % squad_state.width)
+	screen.call("request_operation", "navigate", {"mode": "base"})
+	await _settle()
+	presenter.call("refresh")
+	await _settle()
+	var back: Dictionary = _bar_state(presenter)
+	var back_ok := true
+	for b: Button in back.buttons:
+		if not b.text.is_empty() or b.tooltip_text.is_empty():
+			back_ok = false
+	_check(float(back.width) < float(open_state.width) * 0.4 and back_ok, "eingeklappt bleibt nach Basis -> Trupp -> Basis und refresh() (%.0f px)" % back.width)
+	# Zweiter Klick (Mitte): wieder ausgeklappt.
+	await _click_at(toggle.get_global_rect().get_center())
+	await _settle()
+	var reopened: Dictionary = _bar_state(presenter)
+	var reopened_texts: Array = Array(reopened.buttons).map(func(b: Button) -> String: return b.text)
+	_check(absf(float(reopened.width) - float(open_state.width)) < 1.0, "zweiter Klick: Ausgangsbreite (%.0f px, vorher %.0f px)" % [reopened.width, open_state.width])
+	_check(reopened_texts == EXPECTED_ORDER, "zweiter Klick: Beschriftungen und Reihenfolge wie vorher (beobachtet %s)" % str(reopened_texts))
+	_check(absf(float(reopened.workspace) - float(open_state.workspace)) < 1.0, "zweiter Klick: Inhalt wieder so breit wie vorher")
+	var tip_restored := true
+	for b: Button in reopened.buttons:
+		if b.text == "RRR-Service" and b.tooltip_text != "Tanken · Reparieren · Aufmunitionieren":
+			tip_restored = false
+	_check(tip_restored, "zweiter Klick: Hilfetext des RRR-Service wieder wie vorher")
+
+
 func _by_text(buttons: Array) -> Dictionary:
 	var result: Dictionary = {}
 	for button: Button in buttons:
@@ -234,6 +337,8 @@ func _run() -> void:
 	if squad_menu:
 		menu.call("close_menu")
 		await process_frame
+	# --- Teil F: linke Leiste ein- und ausklappbar
+	await _check_collapsible_bar(screen, presenter)
 	# --- Kopfzeile
 	screen.call("request_operation", "navigate", {"mode": "base"})
 	for i in 6:

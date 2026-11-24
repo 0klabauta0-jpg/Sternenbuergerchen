@@ -26,6 +26,7 @@ const DENSITY: Dictionary = {
 	"button_height": 30, "button_primary_height": 34, "button_font": 15, "button_padding_y": 4,
 	"input_height": 30, "option_height": 30, "option_font": 15,
 	"nav_width": 166, "nav_button_height": 36, "nav_base_height": 45, "nav_icon": 24, "nav_font": 15,
+	"nav_collapsed_width": 52, "nav_collapsed_button": 44,
 	"nav_toggle_size": Vector2(32, 36), "nav_sub_height": 32, "nav_sub_font": 15, "nav_sub_width": 142, "nav_sub_icon": 22,
 	"card_min_height": 64, "card_empty_min_height": 48, "card_padding_y": 3, "card_text_separation": 0,
 	"card_portrait": 48, "card_name_height": 28, "card_name_padding_y": 1, "card_name_padding_x": 4,
@@ -122,6 +123,11 @@ var _flight_management_bar: VBoxContainer
 var _nav_group_toggles: Dictionary = {}
 var _nav_column: VBoxContainer
 var _nav_dock_spacer: Control
+# Linke Leiste ein-/ausgeklappt (Sitzungszustand, kein Speicherstand): eingeklappt nur Icons mit Tooltip.
+var _nav_toggle: Button
+var _nav_inner: VBoxContainer
+var _nav_collapsed := false
+var _nav_items: Array[Button] = []
 var _nav_group_open: Dictionary = {"base": true, "mission": true}
 var _interface_settings_path: String = "user://sternenbuergerchen_settings.cfg"
 var _right_flyout_active:=false
@@ -256,6 +262,17 @@ func _build() -> void:
 	_nav_column.custom_minimum_size.x = DENSITY.nav_width
 	_nav_column.add_theme_constant_override("separation", 0)
 	body.add_child(_nav_column)
+	_nav_inner = nav
+	# Umschalter oben: Leiste ein-/ausklappen. Heisst "Toggle…", damit er nicht als Leistenknopf der Reihenfolge zaehlt.
+	_nav_toggle = _nav_button("Einklappen", "nav_collapse", DENSITY.nav_collapsed_button, DENSITY.nav_icon)
+	_nav_toggle.name = "ToggleNavigation"
+	_nav_toggle.tooltip_text = "Leiste einklappen"
+	_nav_toggle.pressed.connect(func(): set_nav_collapsed(not _nav_collapsed))
+	_nav_column.add_child(_nav_toggle)
+	var nav_gap := Control.new()
+	nav_gap.custom_minimum_size.y = 4
+	nav_gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_nav_column.add_child(nav_gap)
 	var nav_scroll := ScrollContainer.new()
 	nav_scroll.name = "NavigationScroll"
 	nav_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -296,8 +313,10 @@ func _build() -> void:
 		if button.disabled:
 			button.tooltip_text = "Noch nicht verfügbar"
 		_nav[key] = button
+		_register_nav_item(button, String(item.label), key, button.tooltip_text)
 	var nav_spacer := Control.new()
 	_skirmish_shop_toggle = _button("Aufbau & Einkauf", false)
+	_register_nav_item(_skirmish_shop_toggle, "Aufbau & Einkauf", "build")
 	_skirmish_shop_toggle.name = "ToggleSkirmishShop"
 	nav.add_child(_skirmish_shop_toggle)
 	_skirmish_shop_toggle.hide()
@@ -312,8 +331,10 @@ func _build() -> void:
 	var refuel := _nav_sub_button("RRR-Service", "service")
 	refuel.name = "OpenBaseServices"
 	refuel.tooltip_text = SERVICE_TOOLTIP
+	_register_nav_item(refuel, "RRR-Service", "service", SERVICE_TOOLTIP)
 	_flight_management_bar.add_child(refuel)
 	refuel.pressed.connect(func(): _open_base_management("ship"))
+	_register_nav_item(detail_button, "Charakterdetails", "details")
 	nav.add_child(detail_button)
 	detail_button.pressed.connect(func(): _act("details", {"unit_id": _focused_id}))
 	# Keep Smart Mobile with the other navigation entries. A bottom-pinned
@@ -370,6 +391,7 @@ func _build() -> void:
 	for entry in [["Bauen", "build"], ["Werkstatt", "workshop"], ["Lager", "inventory"], ["Datenterminal", "data"]]:
 		var action := _nav_sub_button(String(entry[0]), String(entry[1]))
 		action.name = "BaseAction_" + String(entry[1])
+		_register_nav_item(action, String(entry[0]), String(entry[1]))
 		_base_management_bar.add_child(action)
 		action.pressed.connect(_open_base_management.bind(String(entry[1])))
 	_load_nav_groups()
@@ -840,7 +862,7 @@ func refresh() -> void:
 	if _skirmish_shop.visible: _skirmish_shop.call("refresh")
 	for key in ["jobs", "map"]:
 		_nav[key].disabled = not campaign_ready
-		_nav[key].tooltip_text = "" if campaign_ready else "Noch nicht verfügbar"
+		_set_nav_tip(_nav[key], "" if campaign_ready else "Noch nicht verfügbar")
 	if _job_board != null:
 		_job_board.visible = _mode == "jobs"
 		if _job_board.visible:
@@ -864,6 +886,8 @@ func refresh() -> void:
 		for key in _workflow_labels:
 			(_workflow_labels[key] as Label).add_theme_color_override("font_color", GOLD if key == _mode else MUTED)
 		_workflow.visible = _mode != "base" and not _right_flyout_active
+	if _nav_collapsed:
+		_apply_nav_collapsed()
 	_set_options(_sort_selector, Array(snapshot.get("roster_sort_options", [])), String(snapshot.get("roster_sort_mode", "name_asc")))
 	_update_roster(Array(snapshot.get("roster", [])))
 	var team: Dictionary = Dictionary(snapshot.get("focused_fireteam", {}))
@@ -1197,7 +1221,7 @@ func _pad_selected(index: int) -> void:
 func get_launch_action_rects() -> Array[Rect2]:
 	var result: Array[Rect2] = []
 	# Also used by the campaign hint card: it must not cover any of these actions (Playtest L04).
-	var controls: Array = [_start, _board, _unboard, _launch_reason, _base_management_bar, _flight_management_bar, _team_selector, _flyout_close] + _nav.values() + _nav_group_toggles.values()
+	var controls: Array = [_start, _board, _unboard, _launch_reason, _base_management_bar, _flight_management_bar, _team_selector, _flyout_close, _nav_toggle] + _nav.values() + _nav_group_toggles.values()
 	if _job_board != null:
 		controls.append(_job_board.get("_footer"))
 	if _inventory_panel != null:
@@ -1461,6 +1485,75 @@ func _nav_group_header(button: Button, key: String) -> HBoxContainer:
 	row.add_child(toggle)
 	_nav_group_toggles[key] = toggle
 	return row
+
+
+## Leistenknopf fuer das Ein-/Ausklappen anmelden: Beschriftung, Icon, Hilfetext und Ausgangsform merken.
+func _register_nav_item(button: Button, label: String, icon_key: String, tip: String = "") -> void:
+	button.set_meta("nav_label", label)
+	button.set_meta("nav_icon_key", icon_key)
+	button.set_meta("nav_tip", tip)
+	button.set_meta("nav_expanded_icon", button.icon)
+	button.set_meta("nav_min", button.custom_minimum_size)
+	button.set_meta("nav_hflags", button.size_flags_horizontal)
+	button.set_meta("nav_align", button.alignment)
+	button.set_meta("nav_icon_max", button.get_theme_constant("icon_max_width"))
+	_nav_items.append(button)
+
+
+func _set_nav_tip(button: Button, tip: String) -> void:
+	button.set_meta("nav_tip", tip)
+	_update_nav_tooltip(button)
+
+
+func _update_nav_tooltip(button: Button) -> void:
+	var tip := String(button.get_meta("nav_tip", ""))
+	if _nav_collapsed:
+		var label := String(button.get_meta("nav_label", ""))
+		button.tooltip_text = label if tip.is_empty() else "%s · %s" % [label, tip]
+	else:
+		button.tooltip_text = tip
+
+
+func is_nav_collapsed() -> bool:
+	return _nav_collapsed
+
+
+func set_nav_collapsed(collapsed: bool) -> void:
+	_nav_collapsed = collapsed
+	_apply_nav_collapsed()
+
+
+## Eingeklappt: nur Icons (alle gleich gross, mindestens 44 x 44), Beschriftung als Tooltip, Leiste nur so breit wie Icon + Rand.
+## Der frei gewordene Platz faellt dem Inhalt rechts zu (Workspace dehnt sich).
+func _apply_nav_collapsed() -> void:
+	if _nav_column == null or _nav_toggle == null:
+		return
+	var width: float = float(DENSITY.nav_collapsed_width if _nav_collapsed else DENSITY.nav_width)
+	_nav_column.custom_minimum_size.x = width
+	_nav_inner.custom_minimum_size.x = width
+	for button: Button in _nav_items:
+		if _nav_collapsed:
+			button.text = ""
+			button.icon = NAV_ICONS.get_icon(String(button.get_meta("nav_icon_key")))
+			button.expand_icon = true
+			button.alignment = HORIZONTAL_ALIGNMENT_CENTER
+			button.custom_minimum_size = Vector2(DENSITY.nav_collapsed_button, DENSITY.nav_collapsed_button)
+			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			button.add_theme_constant_override("icon_max_width", DENSITY.nav_icon)
+		else:
+			button.text = String(button.get_meta("nav_label"))
+			button.icon = button.get_meta("nav_expanded_icon")
+			button.alignment = button.get_meta("nav_align")
+			button.custom_minimum_size = button.get_meta("nav_min")
+			button.size_flags_horizontal = int(button.get_meta("nav_hflags"))
+			button.add_theme_constant_override("icon_max_width", int(button.get_meta("nav_icon_max")))
+		_update_nav_tooltip(button)
+	for toggle: Button in _nav_group_toggles.values():
+		toggle.visible = not _nav_collapsed
+	_nav_toggle.text = "" if _nav_collapsed else "Einklappen"
+	_nav_toggle.icon = NAV_ICONS.get_icon("nav_expand" if _nav_collapsed else "nav_collapse")
+	_nav_toggle.alignment = HORIZONTAL_ALIGNMENT_CENTER if _nav_collapsed else HORIZONTAL_ALIGNMENT_LEFT
+	_nav_toggle.tooltip_text = "Leiste ausklappen" if _nav_collapsed else "Leiste einklappen"
 
 
 func _toggle_nav_group(key: String) -> void:
