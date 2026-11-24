@@ -1,10 +1,14 @@
 extends "res://scripts/tests/campaign_five_actual_sorties_verifier.gd"
-## Diagnostic continuation: requires a real checkpoint from the first sortie/full verifier.
+## ACHTUNG - KEIN EIGENSTAENDIGER TEST: Dieses Skript setzt den Pruefpunkt (Checkpoint) fort, den campaign_five_actual_sorties_verifier
+## (oder campaign_chapter_one_sortie_verifier) im SELBEN Benutzerprofil hinterlassen hat. Es ist nur sinnvoll, wenn es DIREKT NACH
+## campaign_five_actual_sorties_verifier im selben Profil laeuft. Allein oder mit frischem Wegwerfprofil (z. B. ueber nachlauf.ps1) findet es
+## keinen Pruefpunkt, prueft NICHTS und endet mit der Zeile "campaign_remaining_actual_sorties_verifier SKIPPED: Vorbedingung fehlt"
+## (kein Fehlschlag, aber auch kein bestandener Lauf). Eine Lauf-Zusammenfassung ohne "passed=" ist hier kein Erfolg.
 func _run() -> void:
 	var existing:Dictionary=STORE.load_checkpoint()
 	if not bool(existing.get("ok",false)) or int(Dictionary(existing.get("payload",{})).get("onboarding",{}).get("stage_index",0))<2:
-		printerr("Run campaign_chapter_one_sortie_verifier or the full five-sortie verifier first.")
-		quit(1);return
+		print("campaign_remaining_actual_sorties_verifier SKIPPED: Vorbedingung fehlt - kein Pruefpunkt ab Stufe 2 im Profil; es wurde NICHTS geprueft. Zuerst campaign_five_actual_sorties_verifier im selben Profil laufen lassen.")
+		quit(0);return
 	Engine.time_scale=4.0
 	START.request_start(self,"campaign","continue")
 	_flow=FLOW.instantiate(); root.add_child(_flow)
