@@ -18,7 +18,10 @@ static func layout(base_path: String) -> Dictionary:
  var source: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(base_path))
  if not supports(base_path): return Dictionary(source.get("homebase_exploration",{})).duplicate(true)
  var nav: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(NAV_PATH))
- return Dictionary(nav.get("homebase_exploration",{})).duplicate(true)
+ var result: Dictionary = Dictionary(nav.get("homebase_exploration",{})).duplicate(true)
+ # Neue Gebaeudemodelle: Terminal-Lagen als Ueberlagerung (data/visual/structure_model_overrides.json), nicht in der Karte.
+ STRUCTURE_BLOCKING.apply_to_layout(result)
+ return result
 static func plane_at_grid(grid: Vector2i) -> Vector3:
  return Vector3((float(grid.x)+float(grid.y)*.5)/SCALE,0,float(grid.y)*sqrt(3.0)*.5/SCALE)
 static func standing_y(plane: Vector3) -> float:

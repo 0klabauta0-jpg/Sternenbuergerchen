@@ -1604,6 +1604,7 @@ func _save_nav_groups() -> void:
 
 func _terminal_requested(id: String) -> void:
 	if id=="refuel":_open_base_management("ship");return
+	if id=="workshop":_open_base_management("workshop");return
 	if id=="jobs":_navigate_from_sidebar("jobs");return
 	var target: String = "personnel" if id == "personnel" else ("squad" if id == "team" else ("jobs" if id == "jobs" else ("services" if id == "refuel" else "mission")))
 	_act("navigate", {"mode": target})

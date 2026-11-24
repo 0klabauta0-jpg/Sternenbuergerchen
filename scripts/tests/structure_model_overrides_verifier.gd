@@ -239,6 +239,145 @@ func _check_replace(base: Control, stage: Node3D, layout: Dictionary, entry: Dic
 			_check(bad.is_empty(), "Weg Eingang -> %s fuehrt nur durch Tuer und Tuerluecken (%d Punkte)%s" % [key, way.size(), (" FEHLER:" + bad) if not bad.is_empty() else ""])
 
 
+func _nav_of(base: Control) -> Object:
+	var personnel: Node = base.call("_personnel_runtime")
+	return personnel.get("_navigation_graph") if personnel != null else null
+
+
+func _spawn_world(base: Control, layout: Dictionary) -> Vector2:
+	var spawn_cell: Array = layout.get("avatar_spawn_grid", [36, 40])
+	return base.get("_terrain").call("grid_to_world", Vector2i(int(spawn_cell[0]), int(spawn_cell[1])))
+
+
+## Geschlossenes Gebaeude ersetzt ein Bestandsgebaeude (Lager statt Halle): Lage, Menschenmass, gesperrter Grundriss,
+## Terminals AUSSEN an der Torseite auf begehbaren Feldern mit Abstand.
+func _check_closed_replace(base: Control, layout: Dictionary, entry: Dictionary, holder: Node3D, old_nodes: Dictionary, person_height: float) -> void:
+	var id := String(entry.get("id", ""))
+	var old_id := String(entry.get("replaces", ""))
+	var plane := Vector2.INF
+	for a in layout.get("assets", []):
+		if String(Dictionary(a).get("id", "")) == old_id:
+			var p: Array = Dictionary(a).get("plane", [0, 0])
+			plane = Vector2(float(p[0]), float(p[1]))
+	_check(plane != Vector2.INF, "ersetztes Bestandsgebaeude im Layout: %s" % old_id)
+	var off: Array = entry.get("offset", [0, 0, 0])
+	_check(holder.position.distance_to(Vector3(plane.x + float(off[0]), float(off[1]), plane.y + float(off[2]))) < 0.001, "%s steht an der Stelle von %s plus Versatz" % [id, old_id])
+	_check(not old_nodes.has(old_id) and holder.visible, "%s: altes %s nicht in der Szene, neues Modell sichtbar" % [id, old_id])
+	var ratio: float = person_height / 1.8
+	var door_real: float = float(entry.get("door_height_model", 0.0)) * float(entry.get("scale", 1.0)) / ratio
+	_check(door_real >= 1.95 and door_real <= 2.35, "Menschenmass: Tor wirkt %.2f m hoch (Figur %.3f m): %s" % [door_real, person_height, id])
+	var rect: Rect2 = _rect_xz(_bounds(holder))
+	print("INFO %s Rahmen x %.2f..%.2f z %.2f..%.2f" % [id, rect.position.x, rect.end.x, rect.position.y, rect.end.y])
+	var nav_graph: Object = _nav_of(base)
+	var terrain: Node = base.get("_terrain")
+	_check(nav_graph != null, "Wegsuche der Basis-Navigation erreichbar")
+	if nav_graph == null:
+		return
+	# Grundriss wirklich gesperrt: kein offenes, begehbares Feld im Rahmen (innen 0,1 m eingerueckt).
+	var open_inside := 0
+	var sampled := 0
+	var inner := rect.grow(-0.1)
+	var sx := inner.position.x
+	while sx <= inner.end.x:
+		var sz := inner.position.y
+		while sz <= inner.end.y:
+			var cell: Vector2i = _plane_to_grid(Vector2(sx, sz))
+			var tile: Variant = terrain.call("get_tile_at_grid", cell)
+			if tile != null and bool(tile.walkable):
+				sampled += 1
+				if bool(nav_graph.call("is_grid_open", cell)):
+					open_inside += 1
+			sz += 0.1
+		sx += 0.1
+	_check(sampled > 0 and open_inside == 0, "%s: Grundriss gesperrt, kein offenes Feld im Rahmen (%d von %d begehbaren Probefeldern offen)" % [id, open_inside, sampled])
+	# Torseite: laut Eintrag (gate_side) Westseite = -x; Terminals davor, Streifen davor frei.
+	var gate: Array = entry.get("gate_world", [])
+	_check(gate.size() == 2 and String(entry.get("gate_side", "")) == "west" and absf(float(gate[0]) - rect.position.x) <= 0.2 and float(gate[1]) > rect.position.y and float(gate[1]) < rect.end.y, "%s: Tor liegt an der Westkante des Rahmens (gate_world %s)" % [id, str(gate)])
+	var spots: Array = []
+	var from_world: Vector2 = _spawn_world(base, layout)
+	for tid in entry.get("outside_terminals", []):
+		var found: Array = layout.get("terminals", []).filter(func(t: Dictionary) -> bool: return String(t.get("id", "")) == String(tid))
+		_check(found.size() == 1, "%s: genau ein Terminal %s (%d)" % [id, String(tid), found.size()])
+		if found.size() != 1:
+			continue
+		var tg: Array = Dictionary(found[0]).get("grid", [])
+		var cell2 := Vector2i(int(tg[0]), int(tg[1]))
+		var pl: Vector3 = BASE_NAV.plane_at_grid(cell2)
+		var spot := Vector2(pl.x, pl.z)
+		spots.append(spot)
+		_check(not rect.grow(0.3).has_point(spot), "%s: Benutzen-Stelle %s (%.2f / %.2f) liegt ausserhalb des Grundrisses (mit 0,3 m Rand)" % [id, String(tid), spot.x, spot.y])
+		_check(spot.x < rect.position.x and absf(spot.y - float(gate[1])) <= 2.0, "%s: Benutzen-Stelle %s liegt an der Torseite, hoechstens 2 m neben dem Tor" % [id, String(tid)])
+		# Streifen zwischen Benutzen-Stelle und Tor: begehbar und offen.
+		var strip_ok := true
+		var wx := spot.x
+		while wx <= rect.position.x - 0.4:  # die Karte endet beim alten Hallenrand etwa 0,3 m vor dem neuen Rahmen
+			var c3: Vector2i = _plane_to_grid(Vector2(wx, spot.y))
+			var t3: Variant = terrain.call("get_tile_at_grid", c3)
+			if t3 == null or not bool(t3.walkable) or not bool(nav_graph.call("is_grid_open", c3)):
+				strip_ok = false
+			wx += 0.1
+		_check(strip_ok, "%s: Streifen von %s bis zum Tor ist frei" % [id, String(tid)])
+		var path: Array = nav_graph.call("find_world_path", from_world, terrain.call("grid_to_world", cell2))
+		_check(not path.is_empty(), "%s: %s vom Startpunkt erreichbar (Weg %d Punkte)" % [id, String(tid), path.size()])
+	_check(spots.size() == 3, "%s: drei Terminals aussen an der Torseite (%d)" % [id, spots.size()])
+	var min_gap := INF
+	for i in spots.size():
+		for j in range(i + 1, spots.size()):
+			min_gap = minf(min_gap, (spots[i] as Vector2).distance_to(spots[j]))
+	_check(spots.size() == 3 and min_gap >= 1.0, "%s: Benutzen-Stellen nebeneinander mit je mindestens 1 m Abstand (kleinster %.2f m)" % [id, min_gap])
+
+
+## Alle Terminals: je Kennung genau einmal, Benutzen-Stelle auf begehbarem, offenem Feld ausserhalb aller gesperrten Grundrisse,
+## vom Startpunkt erreichbar (flightdeck liegt auf dem Landepad und war schon vorher nicht ueber die Wegsuche erreichbar).
+## Landepads bleiben frei, der Kampagnenstart-Pfad liefert dieselben Lagen.
+func _check_all_terminals(base: Control, layout: Dictionary) -> void:
+	var blocking = load("res://scripts/meta/structure_model_blocking.gd")
+	var nav_graph: Object = _nav_of(base)
+	var terrain: Node = base.get("_terrain")
+	var from_world: Vector2 = _spawn_world(base, layout)
+	var seen: Dictionary = {}
+	for t in layout.get("terminals", []):
+		var td: Dictionary = t
+		seen[String(td.get("id", ""))] = int(seen.get(String(td.get("id", "")), 0)) + 1
+	for need in ["personnel", "jobs", "team", "mission", "workshop", "refuel"]:
+		_check(int(seen.get(need, 0)) == 1, "Terminal %s genau einmal im Layout (%d)" % [need, int(seen.get(need, 0))])
+	var block_rects: Array = blocking.blocked_rects()
+	for t in layout.get("terminals", []):
+		var td2: Dictionary = t
+		var tid := String(td2.get("id", ""))
+		if tid == "flightdeck":
+			continue
+		var tg: Array = td2.get("grid", [])
+		var cell := Vector2i(int(tg[0]), int(tg[1]))
+		var pl: Vector3 = BASE_NAV.plane_at_grid(cell)
+		var tile: Variant = terrain.call("get_tile_at_grid", cell)
+		_check(tile != null and bool(tile.walkable) and nav_graph != null and bool(nav_graph.call("is_grid_open", cell)), "Terminal %s: Benutzen-Stelle %s auf begehbarem, offenem Feld" % [tid, str(cell)])
+		var inside_block := false
+		for r in block_rects:
+			if (r as Rect2).has_point(Vector2(pl.x, pl.z)):
+				inside_block = true
+		_check(not inside_block, "Terminal %s: Benutzen-Stelle ausserhalb aller gesperrten Grundrisse" % tid)
+		var path: Array = nav_graph.call("find_world_path", from_world, terrain.call("grid_to_world", cell)) if nav_graph != null else []
+		_check(not path.is_empty(), "Terminal %s: per Wegsuche vom Startpunkt erreichbar (%d Punkte)" % [tid, path.size()])
+	for pad in layout.get("landing_pads", []):
+		var pd: Dictionary = pad
+		var pp: Array = pd.get("plane", [0, 0])
+		var ps: Array = pd.get("size", [8.0, 6.0])
+		var pad_rect := Rect2(float(pp[0]) - float(ps[0]) * 0.5, float(pp[1]) - float(ps[1]) * 0.5, float(ps[0]), float(ps[1]))
+		var hit := false
+		for r in block_rects:
+			if (r as Rect2).intersects(pad_rect):
+				hit = true
+		_check(not hit, "Landepad %s: kein gesperrter Grundriss darauf" % String(pd.get("id", "")))
+	var coarse: Dictionary = BASE_NAV.layout("res://maps/campaign_intro_base.json")
+	var same := true
+	for t in layout.get("terminals", []):
+		var other: Array = coarse.get("terminals", []).filter(func(c: Dictionary) -> bool: return String(c.get("id", "")) == String(Dictionary(t).get("id", "")))
+		if other.size() != 1 or Dictionary(other[0]).get("grid", []) != Dictionary(t).get("grid", []):
+			same = false
+	_check(same and Array(coarse.get("terminals", [])).size() == Array(layout.get("terminals", [])).size(), "Kampagnenstart-Pfad (campaign_intro_base.json) liefert dieselben Terminal-Lagen wie die Ansicht")
+
+
 func _terminal_ids(base: Control) -> Array:
 	var ids: Array = []
 	for t in base.get("_terminals"):
@@ -252,6 +391,7 @@ func _run() -> void:
 	var entries: Array = Array(config.get("entries", []))
 	_check(not config.is_empty() and entries.size() == 2, "Zuordnung laedt, zwei Eintraege (%d)" % entries.size())
 	_check(entries.any(func(e: Dictionary) -> bool: return String(e.get("id", "")) == "home_pod" and String(e.get("mode", "")) == "replace" and String(e.get("replaces", "")) == "habitat_cutaway_01"), "Pod ersetzt das Habitat (mode=replace, replaces=habitat_cutaway_01)")
+	_check(entries.any(func(e: Dictionary) -> bool: return String(e.get("id", "")) == "lager_werkstatt" and String(e.get("mode", "")) == "replace" and String(e.get("replaces", "")) == "freihafen_hall_01"), "Lager ersetzt die Halle (mode=replace, replaces=freihafen_hall_01)")
 	_check(bool(config.get("enabled", false)) and not config.has("toggle_key"), "Vorgabe AN, keine Umschalt-Taste mehr (Karten und Begehbarkeit haengen an AN)")
 	_check(absf(float(config.get("brightness", 0.0)) - 1.0) < 0.0001, "Helligkeits-Stellschraube vorhanden, Vorgabe 1,0")
 	for entry_variant in entries:
@@ -330,7 +470,10 @@ func _run() -> void:
 		if holders.size() != 1:
 			continue
 		if String(entry.get("mode", "additional")) == "replace":
-			_check_replace(base, stage, layout, entry, holders[0], old_nodes, person_height)
+			if entry.has("interior_model"):
+				_check_replace(base, stage, layout, entry, holders[0], old_nodes, person_height)
+			else:
+				_check_closed_replace(base, layout, entry, holders[0], old_nodes, person_height)
 			continue
 		var box: AABB = _bounds(holders[0])
 		var center: Vector2 = OVERRIDES.site_center(layout, String(entry.get("site", "")))
@@ -375,6 +518,7 @@ func _run() -> void:
 				covers_person = true
 		_check(not covers_person, "ueberdeckt keine Figur und kein Schiff: %s" % id)
 		_check(holders[0].visible and group.visible, "sichtbar bei AN: %s" % id)
+	_check_all_terminals(base, layout)
 	var terminals_before: Array = _terminal_ids(base)
 	var map_data: Object = base.get("_map_data")
 	var tiles_before: int = Array(map_data.call("get_tiles")).size()
@@ -388,12 +532,12 @@ func _run() -> void:
 	_check(not group.visible and not bool(base.get("_structure_models").call("is_enabled")), "Sicht AUS: neue Modelle weg")
 	for id in old_boxes:
 		_check((old_nodes[id] as Node3D).visible and _bounds(old_nodes[id]).is_equal_approx(old_boxes[id]), "AUS: Bestandsbild unveraendert: %s" % id)
-	_check(_terminal_ids(base) == terminals_before and terminals_before.size() == 6, "Terminals unveraendert (%s)" % str(terminals_before))
+	_check(_terminal_ids(base) == terminals_before and terminals_before.size() == 7, "Terminals unveraendert, sieben mit Werkstatt (%s)" % str(terminals_before))
 	base.get("_structure_models").call("set_enabled", true)
 	await process_frame
 	_check(group.visible and bool(base.get("_structure_models").call("is_enabled")), "Sicht wieder AN: neue Modelle da")
 	_check(_terminal_ids(base) == terminals_before, "Terminals nach Rueckschalten gleich")
-	_check(not old_nodes.has("habitat_cutaway_01") and (old_nodes["freihafen_hall_01"] as Node3D).visible, "nach Rueckschalten: Habitat weiter nicht geladen, Halle sichtbar")
+	_check(not old_nodes.has("habitat_cutaway_01") and not old_nodes.has("freihafen_hall_01"), "nach Rueckschalten: Habitat und Halle weiter nicht geladen")
 	# Platz future_workshop ist leer: kein neues Modell steht dort.
 	var ws_center: Vector2 = OVERRIDES.site_center(layout, "future_workshop")
 	var ws_rect := Rect2(ws_center - Vector2(2.5, 2.0), Vector2(5.0, 4.0))
@@ -413,5 +557,10 @@ func _run() -> void:
 		if not base.has_method("request_terminal"):
 			reachable = false
 	_check(reachable, "Benutzen-Stellen: Zugang (request_terminal) vorhanden")
+	# Werkstatt-Terminal oeffnet die vorhandene Werkstatt-Ansicht der Basisverwaltung (wie refuel die Schiff-Ansicht).
+	presenter.call("_terminal_requested", "refuel")
+	_check(String(presenter.get("_flyout_kind")) == "ship", "Terminal refuel oeffnet die Basisverwaltung (ship)")
+	presenter.call("_terminal_requested", "workshop")
+	_check(String(presenter.get("_flyout_kind")) == "workshop", "Terminal workshop oeffnet die Basisverwaltung (workshop), keine neue Spielfunktion (%s)" % str(presenter.get("_flyout_kind")))
 	print("STRUCTURE_MODELS passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)

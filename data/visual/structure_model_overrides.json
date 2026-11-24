@@ -49,15 +49,27 @@
 		},
 		{
 			"id": "lager_werkstatt",
-			"mode": "additional",
+			"mode": "replace",
+			"replaces": "freihafen_hall_01",
 			"model": "res://art/tripo_models_20261124/basis_lager_werkstatt_01.glb",
-			"role": "Lager/Werkstatt",
-			"relates_to": "freihafen_hall_01",
-			"site": "future_storage",
+			"role": "Lager/Werkstatt (ersetzt die Halle; Herstellen/Crafting laeuft ueber das Werkstatt-Terminal)",
 			"scale": 0.338,
 			"door_height_model": 2.1,
 			"rotation_y_deg": -90.0,
-			"offset": [1.8, 0.0, 0.3]
+			"offset": [0.0, 0.0, 0.0],
+			"gate_side": "west",
+			"gate_world": [24.8, 6.4],
+			"outside_terminals": ["team", "workshop", "mission"],
+			"block_note": "Geschlossenes Modell (Tor zu, Dach drauf), bleibt so. Grundriss 5,4 x 2,74 m um die Hallenmitte (27,5 / 6,06) fuer Figuren gesperrt; das Tor liegt an der Westkante und zeigt zum Platz.",
+			"block_rects": [
+				[24.8, 4.69, 5.4, 2.74]
+			]
 		}
+	],
+	"terminal_note": "Lage der Terminals als Ueberlagerung beim Laden (statt in der 27-MB-Karte). plane = Benutzen-Stelle in Ebenenmetern (wird auf das naechste Feld gerundet). new=true legt den Eintrag an.",
+	"terminal_overrides": [
+		{"id": "team", "plane": [24.1, 5.1]},
+		{"id": "workshop", "plane": [24.1, 6.3], "title": "Werkstatt", "new": true},
+		{"id": "mission", "plane": [24.1, 7.5]}
 	]
 }

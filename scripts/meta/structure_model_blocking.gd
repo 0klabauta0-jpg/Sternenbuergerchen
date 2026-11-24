@@ -38,6 +38,36 @@ static func container_template_beds() -> Array:
 	return result
 
 
+## Terminal-Lagen als Ueberlagerung beim Laden des Layouts (terminal_overrides): bestehende Eintraege wandern,
+## mit new=true wird ein Eintrag angelegt. Die Karte selbst bleibt unveraendert.
+static func apply_to_layout(layout: Dictionary) -> void:
+	if not FileAccess.file_exists(CONFIG_PATH):
+		return
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(CONFIG_PATH))
+	if not parsed is Dictionary or not bool(Dictionary(parsed).get("enabled", false)):
+		return
+	var terminals: Array = layout.get("terminals", [])
+	for raw_variant in Array(Dictionary(parsed).get("terminal_overrides", [])):
+		var raw: Dictionary = raw_variant
+		var plane: Array = raw.get("plane", [])
+		if plane.size() != 2:
+			continue
+		var row := roundi(float(plane[1]) * SCALE / (sqrt(3.0) * 0.5))
+		var column := roundi(float(plane[0]) * SCALE - float(row) * 0.5)
+		var target: Dictionary = {}
+		for terminal_variant in terminals:
+			if String(Dictionary(terminal_variant).get("id", "")) == String(raw.get("id", "")):
+				target = terminal_variant
+		if target.is_empty():
+			if not bool(raw.get("new", false)):
+				continue
+			target = {"id": String(raw.get("id", "")), "title": String(raw.get("title", raw.get("id", ""))), "enabled": true}
+			terminals.append(target)
+		target["grid"] = [column, row]
+		target["model_anchor_plane"] = [float(plane[0]), float(plane[1])]
+	layout["terminals"] = terminals
+
+
 static func blocked_rects() -> Array[Rect2]:
 	return _rects("block_rects")
 
