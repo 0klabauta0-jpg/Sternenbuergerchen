@@ -1,10 +1,27 @@
 extends "res://scripts/tests/campaign_five_actual_sorties_verifier.gd"
-## Diagnostic continuation: requires a real checkpoint from the first sortie/full verifier.
+## ACHTUNG - KEIN EIGENSTAENDIGER TEST: Dieses Skript setzt den Pruefpunkt (Checkpoint) im SELBEN Benutzerprofil fort, und zwar nur, wenn dort
+## genau der Stand nach dem ersten Meilenstein liegt (satellite_recovery abgeschlossen, die drei Restauftraege offen). Echt laeuft er direkt nach
+## campaign_chapter_one_sortie_verifier (hinterlaesst diesen Stand, dort Z. 36) oder nach einem ABGEBROCHENEN campaign_five_actual_sorties_verifier.
+## Nach einem vollstaendigen Five-Lauf ueberschreiben dessen spaetere Meilenstein-Speicherungen (Z. 580, 603) den Pruefpunkt; dann endet er mit
+## "CAMPAIGN_REMAINING_ACTUAL_SORTIES SKIPPED reason=state_not_left_by_five_actual_sorties". Allein oder mit frischem Wegwerfprofil (z. B. ueber
+## nachlauf.ps1) findet er keinen Pruefpunkt (reason=no_checkpoint). Ueberspringen prueft NICHTS (kein Fehlschlag, aber auch kein bestandener Lauf).
 func _run() -> void:
 	var existing:Dictionary=STORE.load_checkpoint()
-	if not bool(existing.get("ok",false)) or int(Dictionary(existing.get("payload",{})).get("onboarding",{}).get("stage_index",0))<2:
-		printerr("Run campaign_chapter_one_sortie_verifier or the full five-sortie verifier first.")
-		quit(1);return
+	# Enge Vorbedingung: genau der Stand, den campaign_five_actual_sorties_verifier nach seinem ersten Meilenstein-Pruefpunkt (save_home_checkpoint
+	# nach "upload completes first mission") hinterlaesst: satellite_recovery abgeschlossen, die drei Restauftraege vorhanden aber NICHT abgeschlossen.
+	# Der Stand von campaign_dead_end_probe_verifier (outpost_recovery bereits abgeschlossen) loest den Test deshalb NICHT aus.
+	var skip_reason:="no_checkpoint"
+	if bool(existing.get("ok",false)):
+		var jobs:Dictionary=Dictionary(Dictionary(Dictionary(existing.get("payload",{})).get("campaign",{})).get("jobs",{}))
+		var open_ok:=true
+		for job_id in ["outpost_recovery","benit_delivery","outpost_chip_recovery"]:
+			open_ok=open_ok and jobs.has(job_id) and String(Dictionary(jobs[job_id]).get("status",""))!="completed"
+		if jobs.has("satellite_recovery") and String(Dictionary(jobs["satellite_recovery"]).get("status",""))=="completed" and open_ok: skip_reason=""
+		else: skip_reason="state_not_left_by_five_actual_sorties"
+	if not skip_reason.is_empty():
+		print("campaign_remaining_actual_sorties_verifier SKIPPED: Vorbedingung fehlt (%s) - der Pruefpunkt im Profil ist nicht der Stand nach dem ersten Meilenstein von campaign_five_actual_sorties_verifier; es wurde NICHTS geprueft. Zuerst campaign_five_actual_sorties_verifier im selben Profil laufen lassen." % skip_reason)
+		print("CAMPAIGN_REMAINING_ACTUAL_SORTIES SKIPPED reason=%s" % skip_reason)
+		quit(0);return
 	Engine.time_scale=4.0
 	START.request_start(self,"campaign","continue")
 	_flow=FLOW.instantiate(); root.add_child(_flow)
