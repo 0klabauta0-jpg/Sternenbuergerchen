@@ -104,7 +104,8 @@ func _rules_part() -> void:
 	r = _bankrupt(-2000, [_grounded_stuck(), _can_fly()])
 	_check(not bool(r.get("bankrupt", true)), "Regel: zwei Schiffe, eines flugfaehig: nicht pleite")
 	r = _bankrupt(-2000, [])
-	_check(not bool(r.get("bankrupt", true)), "Regel: leere Schiffsliste: nicht pleite (kein Absturz)")
+	# LC2g: geaendert von "leere Schiffsliste = nicht pleite" - eine leere Flotte ist jetzt ein Kampagnenende (cause no_craft).
+	_check(bool(r.get("bankrupt", false)) and String(r.get("cause", "")) == "no_craft", "Regel: leere Schiffsliste: pleite mit Grund no_craft (kein Absturz)")
 	var refuel: Dictionary = _grounded_stuck()
 	refuel["refuel_affordable"] = true
 	_check(not bool(_bankrupt(-1500, [refuel]).get("bankrupt", true)), "Regel: Tanken ist bezahlbar: nicht pleite")

@@ -304,8 +304,10 @@ func _test_hull_floor() -> void:
 				lowest = mini(lowest, int(shot.integrity_after))
 		if result.updates.has("cutlass"): status.status = result.updates.cutlass.snapshot
 		tick += 150
-	_check(hits >= 3 and lowest == 1 and int(status.status.integrity) == 1, "e: Rumpf faellt durch Bodenbeschuss nie unter 1 %% (Treffer %d, tiefster Stand %d)" % [hits, lowest])
-	_check(String(status.status.state) != "crashed" and String(status.status.state) != "destroyed", "e: kein Abschuss in LC6")
+	# LC2b: die Untergrenze 1 % fuer den Bodenbeschuss ist weg. Der Rumpf faellt auf 0 (Abschuss), danach schiesst niemand mehr:
+	# genau ein Treffer-Ereignis ab 3 %, kein weiterer.
+	_check(hits == 1 and lowest == 0 and int(status.status.integrity) == 0, "e (LC2b): Rumpf faellt durch Bodenbeschuss auf 0 %% (Treffer %d, tiefster Stand %d)" % [hits, lowest])
+	_check(String(status.status.state) == "crashed" or String(status.status.state) == "destroyed", "e (LC2b): Rumpf 0 ist ein Endzustand (Abschuss)")
 
 
 func _test_break_off_and_messages() -> void:
@@ -350,7 +352,9 @@ func _test_break_off_and_messages() -> void:
 	var hit: Dictionary = gfa.step(_ctx(480, [_target(60, 100, 0.5, "locked")], [shooter], roller))
 	_check(_texts(hit) == ["Cutlass schwer beschädigt – dreht ab. Rumpf 26 %."], "f/g: Abdreh-Meldung wortgleich (60 % - 34 = 26 %, Treffermeldung nur einmal je Flug)")
 	_check(hit.cease == ["cutlass"], "f: Feuerstopp wird angefordert")
-	var again: Dictionary = gfa.step(_ctx(720, [_target(26, 100, 0.5, "damaged")], [shooter], roller))
+	# LC2b: bei 26 % wuerde der naechste Treffer (34 Punkte) das Schiff abschiessen; die Erwartung (nur eine Meldung, Feuerstopp
+	# ausstehend) gilt unveraendert fuer ein Schiff mit 40 % (Treffer auf 6 %).
+	var again: Dictionary = gfa.step(_ctx(720, [_target(40, 100, 0.5, "damaged")], [shooter], roller))
 	_check(_texts(again).is_empty() and again.cease == ["cutlass"], "g: Meldungen je Ereignis nur einmal; Feuerstopp bleibt ausstehend, bis er gelingt")
 	gfa.mark_cease_done("cutlass")
 	_check(gfa.step(_ctx(740, [_target(26, 100, 0.5, "damaged")], [shooter], roller)).cease.is_empty(), "f: nach gelungenem Feuerstopp nichts mehr ausstehend")
@@ -432,10 +436,11 @@ func _hit_sequence(weapon: String, craft_type: String, dist: float, hits: int) -
 
 
 func _test_fixed_hit_damage() -> void:
-	_check(_hit_sequence("rocket_launcher", "fighter", 6.0, 3) == [50, 1, 1], "A: leichter Jaeger, Raketenwerfer: erster Treffer 50 %, zweiter 1 % (Boden), ein dritter bleibt bei 1 %")
-	_check(_hit_sequence("rocket_launcher", "dropship", 6.0, 4) == [66, 32, 1, 1], "A: Landefaehre, Raketenwerfer: 66 %, 32 %, 1 %")
-	_check(_hit_sequence("rail_gun", "fighter", 6.0, 4) == [63, 26, 1, 1], "A: leichter Jaeger, Schienenkanone: 63 %, 26 %, 1 %")
-	_check(_hit_sequence("rail_gun", "dropship", 6.0, 5) == [75, 50, 25, 1, 1], "A: Landefaehre, Schienenkanone: 75 %, 50 %, 25 %, 1 %")
+	# LC2b: ohne Untergrenze 1 %: der letzte Treffer bringt den Rumpf auf 0 (Abschuss), danach kommt kein Treffer mehr.
+	_check(_hit_sequence("rocket_launcher", "fighter", 6.0, 3) == [50, 0], "A (LC2b): leichter Jaeger, Raketenwerfer: erster Treffer 50 %, zweiter 0 % (abgeschossen), kein dritter")
+	_check(_hit_sequence("rocket_launcher", "dropship", 6.0, 4) == [66, 32, 0], "A (LC2b): Landefaehre, Raketenwerfer: 66 %, 32 %, 0 %")
+	_check(_hit_sequence("rail_gun", "fighter", 6.0, 4) == [63, 26, 0], "A (LC2b): leichter Jaeger, Schienenkanone: 63 %, 26 %, 0 %")
+	_check(_hit_sequence("rail_gun", "dropship", 6.0, 5) == [75, 50, 25, 0], "A (LC2b): Landefaehre, Schienenkanone: 75 %, 50 %, 25 %, 0 %")
 	for weapon in ["rocket_launcher", "rail_gun"]:
 		var near_seq: Array = _hit_sequence(weapon, "fighter", 1.0, 2)
 		var far_seq: Array = _hit_sequence(weapon, "fighter", 18.0 if weapon == "rocket_launcher" else 20.0, 2)
