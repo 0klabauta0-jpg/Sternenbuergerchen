@@ -66,6 +66,22 @@ static func has_space(data: Dictionary, item: String, amount: int) -> bool:
 	probe["items"] = items
 	return backpack_slots_used(probe) <= int(data.capacity)
 
+## M6b (B2): Wie viele Stueck bewegt EIN Zug per Drag and Drop? So viele, wie im Ziel Platz haben (Fach plus Rucksack, siehe has_space),
+## hoechstens der ganze Stapel; `one_only` (Umschalttaste) genau 1. 0 = nichts passt (der Aufrufer schickt dann 1 und bekommt die Ablehnung).
+## Auftragsfracht zaehlt nie mehr als 1. Rein lesend.
+static func drag_amount(source: Dictionary, destination: Dictionary, item: String, one_only: bool) -> int:
+	var stack := int(Dictionary(source.get("items", {})).get(item, 0))
+	if stack <= 0: return 0
+	if one_only or RESERVED_QUEST_ITEMS.has(item): return 1 if fits(destination, item, 1) else 0
+	var amount := stack
+	while amount > 0 and not fits(destination, item, amount): amount -= 1
+	return amount
+
+## Passt `amount` Stueck in den Behaelter? Dieselbe Regel wie der Befehl inventory_transfer (Fachbehaelter: has_space; sonst Kapazitaet).
+static func fits(destination: Dictionary, item: String, amount: int) -> bool:
+	if destination.has("armor_chip_capacity"): return has_space(destination, item, amount)
+	return used(Dictionary(destination.get("items", {}))) + amount <= int(destination.get("capacity", 0))
+
 static func positive_integer(value: Variant) -> bool:
 	return typeof(value) in [TYPE_INT,TYPE_FLOAT] and is_finite(float(value)) and float(value)>0 and float(value)==floor(float(value)) and float(value)<=2147483647
 static func valid_container(data: Variant) -> bool:

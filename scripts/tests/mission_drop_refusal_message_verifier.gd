@@ -10,7 +10,8 @@ var _case_one_reached := false
 var _aux_mission: Node
 
 func _wait(predicate: Callable, milliseconds: int, label: String) -> bool:
-	if label == "trade_outpost_visit real landing unloads all original crew into authoritative simulation":
+	# Seit e4b407fe0 (10.11.) laedt der Handelsaussenposten das Szenario outpost_recovery (frueher trade_outpost_visit); die Wartemarke des Elterntests traegt diese Kennung.
+	if label == "outpost_recovery real landing unloads all original crew into authoritative simulation":
 		_case_one_reached = true
 		await _check_refused_landing()
 		await _check_no_team_available()
