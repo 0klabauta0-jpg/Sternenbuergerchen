@@ -275,7 +275,8 @@ func _area_reject(reason: String) -> Dictionary:
 # Construct a detached fleet for a world-level restore transaction. The caller
 # must rebind Root, combat and all area authorities before publishing it.
 const FLEET_CHECKPOINT_CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
-func export_checkpoint_state() -> Dictionary:
+## air_sortie_craft_ids (Luftrollen 5a): Schiffe mit gesicherter Sortie, deren Flugpose in "atmosphere:<ort>" liegen darf; ohne Liste bleibt die Ablehnung.
+func export_checkpoint_state(air_sortie_craft_ids: Array = []) -> Dictionary:
 	if not _space_area_contexts.is_empty() or not _space_area_context_serials.is_empty(): return {"ok":false, "reason":"fleet_area_transition_pending"}
 	if _space_area_bindings.size() != _space_area_receipts.size(): return {"ok":false, "reason":"fleet_area_receipts_incomplete"}
 	var receipts := {}
@@ -292,12 +293,12 @@ func export_checkpoint_state() -> Dictionary:
 		receipts[id] = {"binding":binding, "result":encoded.value}
 	var crafts := {}
 	for id in _owners:
-		var state: Dictionary = _owners[id].export_checkpoint_state()
+		var state: Dictionary = _owners[id].export_checkpoint_state(air_sortie_craft_ids.has(id))
 		if state.get("ok", true) == false: return state
 		crafts[id] = state
 	return {"schema":"space_fleet_checkpoint.v1", "focus":_focus, "crafts":crafts, "receipts":receipts}
 
-func prepare_checkpoint_restore(state: Dictionary, expected_crafts: Array) -> Dictionary:
+func prepare_checkpoint_restore(state: Dictionary, expected_crafts: Array, air_sortie_craft_ids: Array = []) -> Dictionary:
 	if state.size() != 4 or not state.has_all(["schema", "focus", "crafts", "receipts"]) or state.schema != "space_fleet_checkpoint.v1" or typeof(state.focus) != TYPE_STRING or not state.crafts is Dictionary or not state.receipts is Dictionary or state.receipts.size() > 4096 or state.crafts.size() > 64 or state.crafts.size() != expected_crafts.size(): return {"ok":false, "reason":"invalid_fleet_checkpoint"}
 	if (state.crafts.is_empty() and not state.focus.is_empty()) or (not state.crafts.is_empty() and not state.crafts.has(state.focus)): return {"ok":false, "reason":"invalid_fleet_checkpoint"}
 	var seen := {}
@@ -311,7 +312,7 @@ func prepare_checkpoint_restore(state: Dictionary, expected_crafts: Array) -> Di
 		if not state.crafts[id] is Dictionary or not state.crafts[id].get("flight") is Dictionary: return {"ok":false, "reason":"invalid_fleet_checkpoint"}
 		candidate.register_craft(id)
 		var owner: RefCounted = candidate._owners[id]
-		var prepared: Dictionary = owner.prepare_checkpoint_restore(state.crafts[id])
+		var prepared: Dictionary = owner.prepare_checkpoint_restore(state.crafts[id], air_sortie_craft_ids.has(id))
 		if not prepared.get("ok", false): return prepared
 		var restored: Dictionary = owner.commit_checkpoint_restore(prepared.prepared)
 		if not restored.get("ok", false): return restored
