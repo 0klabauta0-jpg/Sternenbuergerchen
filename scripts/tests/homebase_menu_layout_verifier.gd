@@ -154,6 +154,74 @@ func _check_collapsible_bar(screen: Node, presenter: Control) -> void:
 	_check(tip_restored, "zweiter Klick: Hilfetext des RRR-Service wieder wie vorher")
 
 
+func _nav_item(presenter: Control, label: String) -> Button:
+	for item: Button in presenter.get("_nav_items"):
+		if String(item.get_meta("nav_label", "")) == label:
+			return item
+	return null
+
+
+## Teil F, Nachbesserung 1 (W2): Eingeklappt sind alle Untermenue-Gruppen offen dargestellt, jeder Knopf ist sichtbar und per Mausklick bedienbar,
+## auch wenn seine Gruppe vorher zugeklappt war; ausgeklappt gilt wieder der gemerkte Gruppenzustand.
+func _check_collapsed_groups(screen: Node, presenter: Control) -> void:
+	screen.call("request_operation", "navigate", {"mode": "base"})
+	await _settle(12)
+	var toggle: Button = presenter.find_child("ToggleNavigation", true, false) as Button
+	if toggle == null:
+		_check(false, "W2: Umschalter der Leiste fehlt")
+		return
+	if bool(presenter.call("is_nav_collapsed")):
+		toggle.pressed.emit()
+		await _settle()
+	var groups := {"base": ["Bauen", "Werkstatt", "Lager", "Datenterminal"], "mission": ["RRR-Service"]}
+	var group_names := {"base": "Basis", "mission": "Flugdeck"}
+	for closed_key: String in groups:
+		var other_key: String = "mission" if closed_key == "base" else "base"
+		presenter.call("set_nav_group_open", closed_key, false)
+		presenter.call("set_nav_group_open", other_key, true)
+		await _settle()
+		var closed_items: Array = groups[closed_key]
+		var tag := "Gruppe %s zugeklappt" % group_names[closed_key]
+		for label: String in closed_items:
+			_check(not _nav_item(presenter, label).is_visible_in_tree(), "W2 %s, Leiste offen: %s ist verborgen (Testlage)" % [tag, label])
+		toggle.pressed.emit()
+		await _settle()
+		_check(bool(presenter.call("is_nav_collapsed")), "W2 %s: Leiste ist eingeklappt" % tag)
+		for label: String in closed_items + groups[other_key]:
+			var item: Button = _nav_item(presenter, label)
+			_check(item != null and item.is_visible_in_tree(), "W2 %s, Leiste eingeklappt: %s ist sichtbar" % [tag, label])
+			if item == null or not item.is_visible_in_tree():
+				continue
+			var hits := [0]
+			var counter := func(): hits[0] += 1
+			item.pressed.connect(counter)
+			await _click_at(item.get_global_rect().get_center())
+			await _settle(2)
+			item.pressed.disconnect(counter)
+			_check(hits[0] == 1, "W2 %s, Leiste eingeklappt: Mausklick auf %s loest aus (%d)" % [tag, label, hits[0]])
+			# Ein geoeffnetes Seitenfenster mit dem ersten Esc schliessen; das Spielmenue bleibt zu.
+			if bool(presenter.call("is_workspace_flyout_open")):
+				await _key(KEY_ESCAPE)
+				await _settle(4)
+			var menu: Node = root.get_node_or_null("GlobalEscapeMenu")
+			if menu != null and bool(menu.call("is_overlay_open")):
+				menu.call("close_menu")
+				await _settle(2)
+			screen.call("request_operation", "navigate", {"mode": "base"})
+			await _settle(6)
+		toggle.pressed.emit()
+		await _settle()
+		_check(not bool(presenter.call("is_nav_collapsed")), "W2 %s: Leiste ist wieder ausgeklappt" % tag)
+		for label: String in closed_items:
+			_check(not _nav_item(presenter, label).is_visible_in_tree(), "W2 %s, wieder ausgeklappt: %s ist wieder zugeklappt (gemerkter Zustand)" % [tag, label])
+		for label: String in groups[other_key]:
+			_check(_nav_item(presenter, label).is_visible_in_tree(), "W2 %s, wieder ausgeklappt: %s der offenen Gruppe bleibt sichtbar" % [tag, label])
+		_check(not bool(Dictionary(presenter.get("_nav_group_open")).get(closed_key, true)) and bool(Dictionary(presenter.get("_nav_group_open")).get(other_key, false)), "W2 %s: gemerkter Gruppenzustand unveraendert" % tag)
+	presenter.call("set_nav_group_open", "base", true)
+	presenter.call("set_nav_group_open", "mission", true)
+	await _settle()
+
+
 func _by_text(buttons: Array) -> Dictionary:
 	var result: Dictionary = {}
 	for button: Button in buttons:
@@ -326,6 +394,46 @@ func _run() -> void:
 		_check(win_menu and exits[0] == exits_win and String(presenter.get("_mode")) == "base", "Zweites Esc nach %s: oeffnet das Spielmenue, Trupp-Seite bleibt zu (Wechsel %d, Menue offen %s)" % [window_case, exits[0] - exits_win, str(win_menu)])
 		if win_menu:
 			menu.call("close_menu")
+	# Teil F, Nachbesserung 1 (W1): Ist KEIN Seitenfenster offen, aber eine Bewegungsauswahl scharf, bricht das erste Esc NUR diese ab
+	# (verbraucht, kein Spielmenue); danach schickt ein Bodenklick niemanden los; erst das zweite Esc oeffnet das Spielmenue.
+	if menu != null and bool(menu.call("is_overlay_open")):
+		menu.call("close_menu")
+	screen.call("request_operation", "navigate", {"mode": "base"})
+	await _settle(12)
+	var armed_roster: Array = Array(screen.call("get_operations_snapshot").get("roster", []))
+	var armed_id := String(Dictionary(armed_roster[0]).get("id", "")) if not armed_roster.is_empty() else ""
+	_check(not armed_id.is_empty() and bool(base.call("_select_person", armed_id)), "W1 Testlage: eine Person ist ausgewaehlt (%s)" % armed_id)
+	await _settle(4)
+	var move_button: Button = Dictionary(base.get("_person_buttons")).get("move") as Button
+	_check(move_button != null, "W1 Testlage: Knopf 'Bewegen' am Personen-Befehlsfeld ist da")
+	if move_button != null:
+		move_button.pressed.emit()
+		await _settle(2)
+		_check(bool(base.get("_move_armed")), "W1: nach 'Bewegen' ist die Bewegungsauswahl scharf")
+		var moves_before: int = int(base.get("_movement_command_count"))
+		var exits_armed: int = exits[0]
+		var esc_taken: bool = await _key(KEY_ESCAPE)
+		await _settle(4)
+		var armed_menu: bool = menu != null and bool(menu.call("is_overlay_open"))
+		_check(not bool(base.get("_move_armed")), "W1: Esc bei scharfer Auswahl bricht die Auswahl ab")
+		_check(not armed_menu, "W1: Esc bei scharfer Auswahl oeffnet das Spielmenue NICHT")
+		_check(esc_taken, "W1: das Esc wird von der Basisansicht verbraucht")
+		_check(String(presenter.get("_mode")) == "base" and exits[0] == exits_armed, "W1: Modus bleibt 'base', Trupp-Seite nicht offen (Modus '%s')" % String(presenter.get("_mode")))
+		_check(not (base.get("_person_feedback") as Label).text.begins_with("Bewegen:"), "W1: der Hinweis 'Bewegen: Ziel auf dem Boden anklicken.' ist weg (\"%s\")" % (base.get("_person_feedback") as Label).text)
+		if armed_menu:
+			menu.call("close_menu")
+			await _settle(2)
+		var ground: Vector2 = host.get_global_rect().position + host.get_global_rect().size * Vector2(0.5, 0.8)
+		await _click_at(ground)
+		await _settle(4)
+		_check(int(base.get("_movement_command_count")) == moves_before, "W1: ein Bodenklick danach schickt niemanden los (Befehle %d -> %d)" % [moves_before, int(base.get("_movement_command_count"))])
+		await _key(KEY_ESCAPE)
+		await _settle(4)
+		var second_menu: bool = menu != null and bool(menu.call("is_overlay_open"))
+		_check(second_menu, "W1: das zweite Esc oeffnet das Spielmenue")
+		if second_menu:
+			menu.call("close_menu")
+			await _settle(2)
 	# Ausserhalb der Basisansicht (Uebersicht Trupp) bleibt Esc beim Spielmenue wie bisher.
 	screen.call("request_operation", "navigate", {"mode": "squad"})
 	for i in 10:
@@ -339,6 +447,7 @@ func _run() -> void:
 		await process_frame
 	# --- Teil F: linke Leiste ein- und ausklappbar
 	await _check_collapsible_bar(screen, presenter)
+	await _check_collapsed_groups(screen, presenter)
 	# --- Kopfzeile
 	screen.call("request_operation", "navigate", {"mode": "base"})
 	for i in 6:

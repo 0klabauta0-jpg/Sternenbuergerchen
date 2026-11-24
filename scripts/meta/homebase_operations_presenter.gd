@@ -1550,6 +1550,9 @@ func _apply_nav_collapsed() -> void:
 		_update_nav_tooltip(button)
 	for toggle: Button in _nav_group_toggles.values():
 		toggle.visible = not _nav_collapsed
+	# Ohne Pfeile liesse sich eine zugeklappte Gruppe nicht mehr oeffnen: eingeklappt sind alle Gruppen offen dargestellt,
+	# ausgeklappt gilt wieder der gemerkte Zustand (_nav_group_open bleibt unberuehrt).
+	_apply_nav_groups()
 	_nav_toggle.text = "" if _nav_collapsed else "Einklappen"
 	_nav_toggle.icon = NAV_ICONS.get_icon("nav_expand" if _nav_collapsed else "nav_collapse")
 	_nav_toggle.alignment = HORIZONTAL_ALIGNMENT_CENTER if _nav_collapsed else HORIZONTAL_ALIGNMENT_LEFT
@@ -1575,7 +1578,7 @@ func _apply_nav_groups() -> void:
 		var open := bool(_nav_group_open.get(key, true))
 		var bar: Control = _base_management_bar if key == "base" else _flight_management_bar
 		if bar != null:
-			bar.visible = open
+			bar.visible = open or _nav_collapsed
 		var toggle: Button = _nav_group_toggles[key]
 		toggle.text = "▾" if open else "▸"
 		toggle.tooltip_text = "Untermenü einklappen" if open else "Untermenü aufklappen"

@@ -1556,13 +1556,20 @@ func cancel_modal_input() -> void:
 
 func _input(event: InputEvent) -> void:
 	if not _active or _pad_preview or not is_visible_in_tree(): _camera_dragging=false; return
-	# Esc: Der Autoload GlobalEscapeMenu nimmt Esc in seinem _input an (vor jedem _unhandled_key_input) und oeffnet das Spielmenue.
-	# Szenenknoten bekommen _input vor Autoloads: Ist ein Seitenfenster offen, gehoert das erste Esc dem Fenster (wie sein "x").
-	# Sonst nimmt das Basisbild Esc NICHT an; es geht an den Autoload und oeffnet das Spielmenue. Tippt man in ein Textfeld
+	# Esc: Der Autoload GlobalEscapeMenu nimmt Esc in seinem _unhandled_input an (global_escape_menu.gd:146) und oeffnet das Spielmenue.
+	# Szenenknoten bekommen _input vor dem _unhandled_input der Autoloads. Reihenfolge: Ist ein Seitenfenster offen, gehoert das erste Esc
+	# dem Fenster (wie sein "x"); sonst gehoert es einer scharfen Bewegungsauswahl (nur sie wird abgebrochen); erst danach nimmt
+	# das Basisbild Esc NICHT an, es geht an den Autoload und oeffnet das Spielmenue. Tippt man in ein Textfeld
 	# oder ist das Spielmenue schon offen, bleibt Esc bei diesen.
 	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_ESCAPE and _initialized and _escape_belongs_to_base():
 		if side_window_open_probe.is_valid() and bool(side_window_open_probe.call()):
 			side_window_close_requested.emit()
+			get_viewport().set_input_as_handled()
+			return
+		if _move_armed:
+			_move_armed = false
+			if _person_feedback != null:
+				_person_feedback.text = ""
 			get_viewport().set_input_as_handled()
 			return
 	if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_MIDDLE and not event.pressed:
