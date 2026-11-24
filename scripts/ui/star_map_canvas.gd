@@ -42,6 +42,10 @@ var _drag_moved := 0.0
 var _preview_points := PackedVector2Array()
 var _preview_target := Vector2.ZERO
 var _preview_cells := 0
+## Zoomstufe nach Doppelklick: Orte eines Koerpers sind dann lesbar benannt.
+const FOCUS_ZOOM := 6.0
+## Ab dieser Zoomstufe tragen die Orte ihren Namen.
+const LABEL_ZOOM := 3.0
 const MIN_ZOOM := 0.55
 const MAX_ZOOM := 32.0
 const MIN_ORBIT_RADIUS_PX := 10.0
@@ -222,6 +226,25 @@ func focus_body(body_id: String) -> void:
 	_camera_pan = (Vector2(0.5, 0.5) - GRID.pair(body.position)) * _screen_scale()
 	_layout_buttons()
 
+## Zoomt auf den Koerper (Doppelklick): Zoomstufe setzen, dann den Koerper in die Bildmitte.
+func zoom_to_body(body_id: String, requested_zoom: float = FOCUS_ZOOM) -> void:
+	if not _bodies.has(body_id): return
+	_camera_zoom = clampf(maxf(requested_zoom, _camera_zoom), MIN_ZOOM, MAX_ZOOM)
+	focus_body(body_id)
+
+## Zoomt auf einen Ort: Orte auf einem Koerper zoomen auf diesen Koerper, die uebrigen auf ihren Kartenpunkt.
+func zoom_to_location(location_id: String, requested_zoom: float = FOCUS_ZOOM) -> void:
+	var body: Dictionary = _body_for_location(location_id)
+	if not body.is_empty():
+		zoom_to_body(String(body.id), requested_zoom)
+		return
+	var point := location_map_point(location_id)
+	if point == Vector2.ZERO: return
+	_camera_zoom = clampf(maxf(requested_zoom, _camera_zoom), MIN_ZOOM, MAX_ZOOM)
+	_initial_camera_framed = true
+	_camera_pan = (Vector2(0.5, 0.5) - point) * _screen_scale()
+	_layout_buttons()
+
 ## Kurs-Vorschau (vor dem Start): Linie vom Schiff zum vorgemerkten Ziel, beides in Kartenkoordinaten (0..1).
 func set_preview_course(origin: Vector2, destination: Vector2) -> void:
 	var control := GRID.route_control(origin, destination)
@@ -276,6 +299,7 @@ func _gui_input(event: InputEvent) -> void:
 			var body_id := body_at(event.position)
 			if not body_id.is_empty():
 				body_selected.emit(body_id)
+				if event.double_click: zoom_to_body(body_id)
 				accept_event()
 				return
 		_selection_start = event.position
@@ -321,6 +345,12 @@ func orbit_marker_at(point: Vector2) -> Dictionary:
 	return closest
 
 func _child_gui_input(event: InputEvent, control: Control) -> void:
+	if event is InputEventMouseButton and event.pressed and event.double_click and event.button_index == MOUSE_BUTTON_LEFT:
+		for id in _location_buttons:
+			if _location_buttons[id] == control:
+				zoom_to_location(String(id))
+				control.accept_event()
+				return
 	if _handle_gui_event(event):
 		control.accept_event()
 
@@ -492,14 +522,65 @@ func _draw() -> void:
 			var point := _hex_center(hex)
 			draw_line(point + Vector2(0, -5), point + Vector2(0, -20), Color("f2c47c"), 2.0)
 			draw_string(ThemeDB.fallback_font, point + Vector2(-5, -22), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("f2c47c"))
-		if _camera_zoom >= 3.0:
-			var letter: String = {"satellite_crash": "A", "trade_outpost": "B", "fortified_outpost": "C"}.get(id, "")
-			draw_string(ThemeDB.fallback_font, _hex_center(hex) + Vector2(-4, 4), letter, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("ebfaff"))
+	_draw_location_labels()
 	_draw_home_marker()
 	if _selection_active and _selection_start.distance_to(_selection_end) >= 6.0:
 		var box := Rect2(_selection_start, _selection_end - _selection_start).abs()
 		draw_rect(box, Color(0.3, 0.85, 0.95, 0.18), true)
 		draw_rect(box, Color("77dce9"), false, 1.0)
+
+
+const LABEL_FONT_SIZE := 12
+
+## Anzeigename eines Ortes (aus dem Anzeige-Katalog, vom Aufrufer im Orts-Snapshot mitgegeben). Nie nur ein Buchstabe.
+func _location_label_text(id: String) -> String:
+	var shown := String(Dictionary(_locations.get(id, {})).get("name", ""))
+	if shown.length() <= 1: shown = DISPLAY.location_name(id)
+	return shown
+
+## Mittelpunkt des Ortsmarkers auf der Leinwand: Sechseck auf der Koerperoberflaeche, sonst der Kartenpunkt des Ortes.
+func _location_anchor(id: String) -> Vector2:
+	var body: Dictionary = _body_for_location(id)
+	if not body.is_empty() and _world != null:
+		return _hex_center(_location_marker_polygon(body))
+	return map_to_screen(location_map_point(id))
+
+## Namensschilder der Orte (id -> {text, rect, visible}) im Leinwandraum. Ab LABEL_ZOOM sichtbar; die Heimatbasis hat ihr eigenes Schild.
+## Das Schild steht rechts vom Marker; liegen zwei Schilder uebereinander, rutscht das spaetere nach unten.
+func get_location_labels() -> Dictionary:
+	var result := {}
+	if _world == null: return result
+	var placed: Array[Rect2] = []
+	var ids: Array = _location_buttons.keys()
+	ids.sort()
+	for id in ids:
+		if String(id) == "homebase": continue
+		var text := _location_label_text(String(id))
+		var text_size := ThemeDB.fallback_font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_FONT_SIZE)
+		var plate := Vector2(text_size.x + 10.0, 18.0)
+		var anchor := _location_anchor(String(id))
+		var rect := Rect2(anchor + Vector2(MIN_LOCATION_DIAMETER_PX * 0.5 + 4.0, -plate.y * 0.5), plate)
+		for guard in range(8):
+			var clash := false
+			for other in placed:
+				if rect.intersects(other):
+					clash = true
+					rect.position.y = other.end.y + 2.0
+			if not clash: break
+		placed.append(rect)
+		result[String(id)] = {"text": text, "rect": rect, "visible": _camera_zoom >= LABEL_ZOOM}
+	return result
+
+
+func _draw_location_labels() -> void:
+	var labels := get_location_labels()
+	for id in labels:
+		var entry: Dictionary = labels[id]
+		if not bool(entry.visible): continue
+		var rect: Rect2 = entry.rect
+		draw_rect(rect, Color(0.024, 0.055, 0.094, 0.82), true)
+		draw_rect(rect, Color("91e4ee"), false, 1.0)
+		draw_string(ThemeDB.fallback_font, rect.position + Vector2(5.0, 13.0), String(entry.text), HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_FONT_SIZE, Color("ebfaff"))
 
 
 func _draw_preview_course() -> void:
