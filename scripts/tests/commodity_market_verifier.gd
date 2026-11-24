@@ -316,12 +316,34 @@ func _save_part() -> void:
 	check(bool(r.get("ok", false)), "Laden: Stand mit Marktbestand laedt (%s)" % r)
 	check(int(_entry(loaded, "trade_outpost", "a_benit").stock) == 5 and int(_entry(loaded, "satellite_crash", "b_benit").stock) == 0 and int(_entry(loaded, "trade_outpost", "c_benit").stock) == 8, "Laden: die Bestaende sind erhalten (5, 0, 8)")
 	check(int(Dictionary(Dictionary(loaded.get_supply_snapshot().inventory)["craft:ship"].items).get("a_benit", 0)) == 3, "Laden: gekaufte Ware liegt weiter im Schiff")
-	var bad: Dictionary = _roundtrip(s)
-	bad["market_stock"]["trade_outpost:a_benit"] = 99
-	check(not bool(SUPPLY.new().restore_state(bad).get("ok", true)), "Ladeschutz: ein Bestand ueber dem Datenwert macht den Stand unladbar")
-	var bad2: Dictionary = _roundtrip(s)
-	bad2["market_stock"]["trade_outpost:a_benit"] = -1
-	check(not bool(SUPPLY.new().restore_state(bad2).get("ok", true)), "Ladeschutz: ein negativer Bestand macht den Stand unladbar")
+	# Nachbesserung W1: alte Staende muessen weiter laden - ein Bestand ueber dem (spaeter gesenkten) Datenwert wird gekappt, nicht abgelehnt.
+	var cap: int = int(_market_file().locations.trade_outpost.a_benit.stock)
+	var high: Dictionary = _roundtrip(s)
+	high["market_stock"]["trade_outpost:a_benit"] = cap + 3
+	var high_loaded: RefCounted = _loader()
+	var high_r: Dictionary = high_loaded.restore_state(high)
+	check(bool(high_r.get("ok", false)), "Laden: ein Bestand ueber dem Datenwert (Daten gesenkt) laedt (%s)" % high_r)
+	check(bool(high_r.get("ok", false)) and int(_entry(high_loaded, "trade_outpost", "a_benit").stock) == cap, "Laden: der zu hohe Bestand wird auf den Datenwert gekappt")
+	var neg: Dictionary = _roundtrip(s)
+	neg["market_stock"]["trade_outpost:a_benit"] = -1
+	var neg_loaded: RefCounted = _loader()
+	var neg_r: Dictionary = neg_loaded.restore_state(neg)
+	check(bool(neg_r.get("ok", false)) and int(_entry(neg_loaded, "trade_outpost", "a_benit").stock) == 0, "Laden: ein negativer Bestand wird auf 0 gesetzt, der Stand laedt (%s)" % neg_r)
+	var gone: Dictionary = _roundtrip(s)
+	gone["market_stock"]["trade_outpost:gestrichene_ware"] = 4
+	gone["market_stock"]["verlassener_ort:a_benit"] = 2
+	var gone_loaded: RefCounted = _loader()
+	var gone_r: Dictionary = gone_loaded.restore_state(gone)
+	check(bool(gone_r.get("ok", false)) and int(_entry(gone_loaded, "trade_outpost", "a_benit").stock) == 5, "Laden: Bestaende fuer unbekannte Waren/Orte werden still verworfen, der Rest bleibt (%s)" % gone_r)
+	var junk: Dictionary = _roundtrip(s)
+	junk["market_stock"]["trade_outpost:a_benit"] = "viel"
+	check(not bool(SUPPLY.new().restore_state(junk).get("ok", true)), "Ladeschutz: ein Bestand, der keine Zahl ist, macht den Stand weiter unladbar")
+
+func _loader() -> RefCounted:
+	var l: RefCounted = SUPPLY.new()
+	l.configure([], _dat())
+	l.register_craft("ship", 5.0)
+	return l
 
 func _old_state_part() -> void:
 	var s: RefCounted = _sup()

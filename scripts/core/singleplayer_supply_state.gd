@@ -758,18 +758,19 @@ func restore_state(data: Dictionary) -> Dictionary:
 	if typeof(resources)!=TYPE_DICTIONARY: return _reject("invalid_resources","Ortsressourcen ungueltig")
 	for place in resources:
 		if not fresh._location_resources.has(place) or typeof(resources[place])!=TYPE_DICTIONARY or not fresh._location_resources[place].restore_state(resources[place]): return _reject("invalid_resources","Ortsressourcen ungueltig")
-	# Handel H2: Marktbestaende sind optional (alter Stand: voller Bestand); gespeichert darf nie mehr sein als der Datenwert.
+	# Handel H2: Marktbestaende sind optional (alter Stand: voller Bestand). Alte Staende muessen weiter laden: ein Bestand ueber dem
+	# (spaeter gesenkten) Datenwert wird gekappt, ein negativer auf 0 gesetzt, unbekannte Orte/Waren werden still verworfen.
 	var market_saved: Variant = data.get("market_stock", {})
 	var market_full: Dictionary = fresh._full_market_stock()
 	if typeof(market_saved) != TYPE_DICTIONARY: return _reject("invalid_stock", "Marktbestand ungueltig")
 	for market_key: Variant in market_saved:
-		if market_full.has(market_key) and (not _valid_nonnegative_integer(market_saved[market_key]) or int(market_saved[market_key]) > int(market_full[market_key])):
+		if market_full.has(market_key) and not _valid_integer(market_saved[market_key]):
 			return _reject("invalid_stock", "Marktbestand ungueltig")
 	_reset_route_fuel_preparation()
 	_market = fresh._market.duplicate(true)
 	_market_stock = market_full.duplicate()
 	for market_key: Variant in market_saved:
-		if market_full.has(market_key): _market_stock[market_key] = int(market_saved[market_key])
+		if market_full.has(market_key): _market_stock[market_key] = clampi(int(market_saved[market_key]), 0, int(market_full[market_key]))
 	_location_resources=fresh._location_resources
 	_definitions = fresh._definitions.duplicate(true)
 	_credits = int(data.credits)
