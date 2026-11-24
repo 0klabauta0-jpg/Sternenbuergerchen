@@ -41,6 +41,8 @@ class Simulation extends Node:
 		if id == "station_shuttle_pilot_1" and is_instance_valid(pilot): return {"grid":Vector2i(1,1)}
 		return {}
 	func _discard_pending_move_commands_for_unit(_id: String) -> void: pass
+	## Attrappen-Eingabe: Der Controller fragt die Radar-Projektion je Schiff ab (seit ee1ff1a8b); hier gibt es keine fremden Flugzeuge.
+	func get_air_support_radar_contacts(_craft_id: String) -> Dictionary: return {"ok":false}
 
 class ShuttleOwner extends RefCounted:
 	var phase := "station_landing_required"
