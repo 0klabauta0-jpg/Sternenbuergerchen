@@ -195,15 +195,16 @@ class PreparedFlightCheckpoint extends RefCounted:
 	pass
 var _flight_checkpoint_preparations: Dictionary = {}
 
-func export_checkpoint_state() -> Dictionary:
+## allow_atmosphere (Luftrollen 5a): nur fuer ein Schiff mit gesicherter Sortie darf die Pose in "atmosphere:<ort>" liegen; ohne den Wert bleibt die Ablehnung.
+func export_checkpoint_state(allow_atmosphere: bool = false) -> Dictionary:
 	var data := get_snapshot()
-	if not _valid_checkpoint_pose(data): return {"ok":false, "reason":"unsupported_flight_checkpoint"}
+	if not _valid_checkpoint_pose(data, allow_atmosphere): return {"ok":false, "reason":"unsupported_flight_checkpoint"}
 	data["schema"] = "space_flight_checkpoint.v1"
 	data["position_plane"] = [_position.x, _position.y]
 	data["velocity_plane"] = [_velocity.x, _velocity.y]
 	return data
 
-func prepare_checkpoint_restore(data: Dictionary) -> Dictionary:
+func prepare_checkpoint_restore(data: Dictionary, allow_atmosphere: bool = false) -> Dictionary:
 	var keys := ["schema", "craft_id", "position_plane", "velocity_plane", "heading_rad", "angular_velocity", "assist_mode", "motion_mode", "mass", "revision", "tick", "space_area_id", "coordinate_frame"]
 	if data.size() != keys.size() or not data.has_all(keys) or data.schema != "space_flight_checkpoint.v1" or data.craft_id != _craft_id or _craft_id.is_empty():
 		return {"ok":false, "reason":"invalid_flight_checkpoint"}
@@ -220,18 +221,20 @@ func prepare_checkpoint_restore(data: Dictionary) -> Dictionary:
 		pose[key] = int(value)
 	for id in _flight_checkpoint_preparations.keys():
 		if _flight_checkpoint_preparations[id].handle.get_ref() == null: _flight_checkpoint_preparations.erase(id)
-	if not _valid_checkpoint_pose(pose) or _flight_checkpoint_preparations.size() >= 32:
+	if not _valid_checkpoint_pose(pose, allow_atmosphere) or _flight_checkpoint_preparations.size() >= 32:
 		return {"ok":false, "reason":"invalid_flight_checkpoint"}
 	var handle := PreparedFlightCheckpoint.new()
 	_flight_checkpoint_preparations[handle.get_instance_id()] = {"handle":weakref(handle), "source_snapshot":get_snapshot(), "source_epoch":_checkpoint_epoch, "pose":pose}
 	return {"ok":true, "prepared":handle}
 
-static func _valid_checkpoint_pose(pose: Dictionary) -> bool:
+static func _valid_checkpoint_pose(pose: Dictionary, allow_atmosphere: bool = false) -> bool:
 	if not _valid_pose(pose): return false
 	# Flight remains reusable for local fixture arenas. Travel owns canonical
-	# system/body/phase validation; atmosphere requires another save contract.
+	# system/body/phase validation; atmosphere is saved only for a craft with a
+	# saved air sortie (Luftrollen 5a), always in tactical mode.
 	if pose.coordinate_frame == "local":
-		return pose.motion_mode in ["tactical", "inactive"] and not String(pose.space_area_id).begins_with("atmosphere:")
+		if String(pose.space_area_id).begins_with("atmosphere:"): return allow_atmosphere and pose.motion_mode == "tactical"
+		return pose.motion_mode in ["tactical", "inactive"]
 	return pose.motion_mode in ["grounded", "travel"]
 
 func validate_checkpoint_restore(handle: RefCounted) -> Dictionary:
