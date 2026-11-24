@@ -184,7 +184,8 @@ func _button(node_name: String, text: String) -> Button:
 	button.name = node_name
 	button.text = text
 	button.custom_minimum_size.y = 34
-	button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	# Der Knopf fuellt die Fussleiste (mehrere teilen sich die Breite): sichtbare Flaeche = Klickflaeche.
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_actions.add_child(button)
 	return button
 

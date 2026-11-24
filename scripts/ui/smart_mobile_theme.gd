@@ -7,6 +7,7 @@ const PANEL := Color("10242d")
 const TEXT := Color("e0edf0")
 const MUTED := Color("9fbac5")
 const AMBER := Color("edbb6c")
+const PRIMARY_FILL := Color("b6833f")
 const BACKGROUNDS = preload("res://scripts/assets/background_image_catalog.gd")
 static var _pictures: Dictionary = {}
 static var _theme: Theme
@@ -26,7 +27,12 @@ static func box(id: String = "panel") -> StyleBoxFlat:
 	if id == "hover": style.bg_color = Color("1b3944")
 	if id == "pressed": style.bg_color = Color("294650"); style.border_color = AMBER
 	if id == "focus": style.bg_color = Color.TRANSPARENT; style.border_color = AMBER; style.set_border_width_all(2)
-	if id == "primary": style.bg_color = Color("b6833f"); style.border_color = AMBER
+	if id == "primary": style.bg_color = PRIMARY_FILL; style.border_color = AMBER
+	# Hauptknopf: dieselbe Farbe in allen Zustaenden (hover heller, pressed dunkler, disabled entsaettigt), nie das graublaue Standardfeld.
+	if id == "primary_hover": style.bg_color = PRIMARY_FILL.lightened(0.14); style.border_color = AMBER.lightened(0.2)
+	if id == "primary_pressed": style.bg_color = PRIMARY_FILL.darkened(0.22); style.border_color = AMBER
+	if id == "primary_disabled": style.bg_color = Color.from_hsv(PRIMARY_FILL.h, PRIMARY_FILL.s * 0.4, PRIMARY_FILL.v * 0.7); style.border_color = Color.from_hsv(AMBER.h, AMBER.s * 0.35, AMBER.v * 0.6)
+	if id == "primary_focus": style.bg_color = Color.TRANSPARENT; style.border_color = Color("fff0c0"); style.set_border_width_all(2)
 	_styles[id] = style
 	return style
 
@@ -54,7 +60,13 @@ static func get_theme() -> Theme:
 
 static func primary(button: Button) -> void:
 	button.add_theme_stylebox_override("normal", box("primary"))
+	for state in ["hover", "pressed", "disabled", "focus"]:
+		button.add_theme_stylebox_override(state, box("primary_" + state))
+	button.add_theme_stylebox_override("hover_pressed", box("primary_pressed"))
 	button.add_theme_color_override("font_color", INK)
+	for font_state in ["font_hover_color", "font_pressed_color", "font_hover_pressed_color", "font_focus_color"]:
+		button.add_theme_color_override(font_state, INK)
+	button.add_theme_color_override("font_disabled_color", Color("4a4130"))
 	button.add_theme_font_override("font", HEADING)
 
 static func location_picture(location_id: String) -> Texture2D:
