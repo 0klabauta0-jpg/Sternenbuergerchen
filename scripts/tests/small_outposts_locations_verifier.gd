@@ -238,5 +238,10 @@ func _case_orbit_resolution() -> void:
 	_check(short_legs.size() == 2 and String(short_legs[0].leg) == "surface_exit" and String(short_legs[1].leg) == "approach" and is_equal_approx(short_cost, 3.0), "Kurzweg Farm -> Handelsposten (derselbe Orbit): Reichweite verlangt 3 ohne Sprung (%d Etappen, %s)" % [short_legs.size(), str(short_cost)])
 	var long_legs: Array = runtime.call("_remaining_outbound_legs", {"phase": "surface", "location_id": "muellers_farm", "orbit_id": "", "location_orbits": location_orbits}, "satellite_crash")
 	_check(long_legs.size() == 3 and String(long_legs[1].leg) == "jump", "Weg Farm -> Absturzstelle (anderer Orbit) behaelt die Sprungetappe")
-	if runtime is Node: (runtime as Node).free()
-	else: runtime = null
+	# Planetenorbit (shady_lab, templanon, relay_ridge, Gesicherter Aussenposten teilen einen Orbit): auch hier kein Sprung zwischen Orten.
+	for pair: Array in [["shady_lab", "templanon"], ["templanon", "shady_lab"]]:
+		var pair_legs: Array = runtime.call("_remaining_outbound_legs", {"phase": "surface", "location_id": pair[0], "orbit_id": "", "location_orbits": location_orbits}, pair[1])
+		var pair_names: Array = []
+		for pair_leg: Dictionary in pair_legs: pair_names.append(String(pair_leg.leg))
+		_check(pair_names == ["surface_exit", "approach"], "Kurzweg %s -> %s (Planetenorbit): Reichweite ohne Sprung (%s)" % [pair[0], pair[1], str(pair_names)])
+	(runtime as Node).free()

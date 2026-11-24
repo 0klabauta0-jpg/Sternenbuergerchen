@@ -14,7 +14,7 @@ const SMALL_OUTPOSTS_PATH := "res://data/singleplayer/small_outposts.json"
 ## Kapitel 2: nur diese Auftragskennungen duerfen in einem aelteren Spielstand fehlen; sie gelten dann als neu (offered).
 const ADDITIVE_JOB_IDS: Array = ["wreck_crater_salvage", "stranded_refuel", "flak_silence", "cutlass_boarding", "hillside_bunker", "prospector_escort"]
 ## Kapitel 2: nur diese Ortskennungen duerfen in einem aelteren Spielstand fehlen (ein Ort, den es heute gar nicht gibt, stoert nicht).
-## Gleich singleplayer_supply_state.gd.
+## Eine Quelle: orbit_location_priority.gd; auch singleplayer_supply_state.gd zeigt auf dieselbe Liste.
 const ORBIT_LOCATION_PRIORITY: GDScript = preload("res://scripts/core/orbit_location_priority.gd")
 const ADDITIVE_LOCATION_IDS: Array = ORBIT_LOCATION_PRIORITY.ADDITIVE_LOCATION_IDS  # eine Quelle: orbit_location_priority.gd
 
