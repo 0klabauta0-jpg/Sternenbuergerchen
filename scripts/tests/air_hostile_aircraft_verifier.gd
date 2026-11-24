@@ -501,6 +501,12 @@ func _case_15() -> void:
 	_tick(env, 1.5)
 	var back: Dictionary = env.combat.get_ship_systems(FOE)
 	_check(env.combat.get_actor(FOE) != null and not back.is_empty() and is_equal_approx(float(back.state.hull), 60.0) and is_equal_approx(float(back.state.shield), float(back.stats.shield.capacity)), tag + "20 s nach dem Start zurueck: Rumpf 60, Schild voll: " + str(back.get("state", {})))
+	# Nachbesserung 2, Punkt 4: bei der Rueckkehr lautet die Meldung "kehrt zurueck", nicht noch einmal "gesichtet".
+	_tick(env, 2.0)
+	var returned: Array = []
+	for event in env.events:
+		if event.kind == "hostile_returned": returned.append(event.text)
+	_check(returned == ["Feindlicher Flieger kehrt zurück: Buccaneer."] and _count(env, "hostile_spotted") == 0, tag + "Rueckkehr: hostile_returned einmal mit dem Wortlaut, kein hostile_spotted dazu: %s / %d" % [str(returned), _count(env, "hostile_spotted")])
 	env.flow.free()
 	var env2: Dictionary = _build(["ship"])
 	_tick(env2, 20.0)
@@ -514,6 +520,25 @@ func _case_15() -> void:
 	_tick(env2, 60.0)
 	_check(env2.combat.get_actor(FOE) == null and _count(env2, "hostile_withdrawn") == 0 and _count(env2, "hostile_down") == 1, tag + "abgeschossen: kein Abdrehen, nie zurueck")
 	env2.flow.free()
+
+
+## Nachbesserung 2, Punkt 3: die Abdreh-Uhr wird zurueckgesetzt, wenn zwischendurch wieder ein eigenes Schiff fliegt (6 s + 6 s Boden ohne Reset wuerden abziehen).
+func _case_15b() -> void:
+	var tag := "[15b Abdreh-Uhr zurueck] "
+	var env: Dictionary = _build(["ship"])
+	_tick(env, 20.0)
+	_check(bool(env.mission_root.request_air_support_landing("ship").get("ok", false)), tag + "Aufbau: Schiff landet")
+	_tick(env, 6.0)
+	env.transport.parked["ship"] = true
+	_check(bool(env.mission_root.request_air_support_takeoff("ship").get("ok", false)), tag + "Aufbau: Neustart nach 6 s")
+	env.transport.parked["ship"] = false
+	_tick(env, 3.0)
+	_check(bool(env.mission_root.request_air_support_landing("ship").get("ok", false)), tag + "Aufbau: erneut gelandet")
+	_tick(env, 6.0)
+	_check(env.combat.get_actor(FOE) != null and _count(env, "hostile_withdrawn") == 0, tag + "6 + 6 s Boden, dazwischen geflogen: er ist noch da")
+	_tick(env, 5.0)
+	_check(env.combat.get_actor(FOE) == null and _count(env, "hostile_withdrawn") == 1, tag + "erst nach 10 s am Stueck zieht er ab")
+	env.flow.free()
 
 
 ## Nachbesserung 1, W5: Werte in den Daten; je Waffe hoechstens ein Schuss je Sekunde.
@@ -635,6 +660,8 @@ func _case_20() -> void:
 	var sig_a := _signature(a)
 	_check(sig_a == _signature(b) and sig_a == _signature(c), tag + "Adapter/Kampagne = leere Liste = nicht konfiguriert: %s | %s | %s" % [str(sig_a), str(_signature(b)), str(_signature(c))])
 	_check(int(sig_a[0]) == 1 and a.combat.get_area_actor_ids("atmosphere:moon_site") == ["ship"], tag + "kein Zufallszug, nur das eigene Schiff im Gebiet")
+	# Nachbesserung 2, Punkt 3: der Adapter hat die Konfiguration wirklich versucht (sonst bliebe ein Ladefehler gruen); ohne Konfiguration kein Aufruf.
+	_check(int(a.mission_root.get("_air_hostile_config_calls")) >= 1 and int(b.mission_root.get("_air_hostile_config_calls")) == 1 and int(c.mission_root.get("_air_hostile_config_calls")) == 0, tag + "Aufrufe von configure_enemy_aircraft: Adapter %d, leere Liste %d, nicht konfiguriert %d" % [int(a.mission_root.get("_air_hostile_config_calls")), int(b.mission_root.get("_air_hostile_config_calls")), int(c.mission_root.get("_air_hostile_config_calls"))])
 	a.flow.free(); b.flow.free(); c.flow.free()
 
 
@@ -665,6 +692,38 @@ func _case_22() -> void:
 	env.flow.free()
 
 
+## Nachbesserung 2, Punkte 1 und 2: Trefferquote je Schuetze (eigenes Schiff player_air_to_air, Gegner hostile_aircraft) und Rumpfregel nach dem getroffenen Schiff.
+## Die Daten werden auf 1,0 / 0,0 gesetzt, damit nichts vom Zufall abhaengt.
+func _case_23() -> void:
+	var tag := "[23 Quote je Schuetze, Rumpfregel] "
+	var env: Dictionary = _build(["ship"])
+	_tick(env, 20.0)
+	env.source.set("_air_role_data_cache", {"version":1, "hostile_aircraft":{"sensor_range":12.0, "accuracy":0.0}, "player_air_to_air":{"accuracy":1.0}})
+	var mine_ok := 0
+	var mine_hits := 0
+	var foe_ok := 0
+	var foe_hits := 0
+	var hull_before := float(_systems_state(env, FOE).hull)
+	var ship_hull := float(_systems_state(env, "ship").hull)
+	for i in range(12):
+		_refill(env, "ship")
+		_refill(env, FOE, false)
+		_systems_state(env, FOE)["shield"] = 0.0
+		var shot: Dictionary = env.source.resolve_local_ship_shot("ship", FOE, "weapon_1", "c23-mine-%d" % i)
+		if bool(shot.get("ok", false)):
+			mine_ok += 1
+			if String(shot.event.get("hit_craft_id", "")) == FOE: mine_hits += 1
+		var back: Dictionary = env.source.resolve_local_ship_shot(FOE, "ship", "weapon_1", "c23-foe-%d" % i)
+		if bool(back.get("ok", false)):
+			foe_ok += 1
+			if String(back.event.get("hit_craft_id", "")) == "ship": foe_hits += 1
+	_check(mine_ok >= 1 and mine_hits == mine_ok, tag + "eigene Schuesse mit Quote 1,0: alle treffen (%d von %d)" % [mine_hits, mine_ok])
+	_check(foe_ok >= 1 and foe_hits == 0, tag + "Schuesse des Gegners mit Quote 0,0: keiner trifft (%d von %d)" % [foe_hits, foe_ok])
+	_check(float(_systems_state(env, FOE).hull) < hull_before, tag + "getroffener Gegner nimmt normalen Rumpfschaden (%.1f -> %.1f)" % [hull_before, float(_systems_state(env, FOE).hull)])
+	_check(float(_systems_state(env, "ship").hull) >= ship_hull - 0.0001, tag + "eigenes Schiff behaelt den Raumrumpf")
+	env.flow.free()
+
+
 func _initialize() -> void:
 	_case_1()
 	_case_2()
@@ -682,6 +741,7 @@ func _initialize() -> void:
 	_case_13b()
 	_case_14()
 	_case_15()
+	_case_15b()
 	_case_16()
 	_case_17()
 	_case_18()
@@ -689,5 +749,6 @@ func _initialize() -> void:
 	_case_20()
 	_case_21()
 	_case_22()
+	_case_23()
 	print("AIR_HOSTILE_AIRCRAFT passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)

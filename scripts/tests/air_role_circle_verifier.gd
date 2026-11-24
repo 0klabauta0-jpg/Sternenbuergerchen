@@ -262,9 +262,56 @@ func _case_4() -> void:
 	var res: Dictionary = _circle(env, "ship", Vector2i(5, 5), "none", "c4a")
 	_check(not bool(res.get("ok", true)) and String(res.get("reason", "")) == "circle_off_map", tag + "Mitte (5,5): nur 2 Wegpunkte auf der Karte -> circle_off_map: " + str(res))
 	_check(_pose(env, "ship") == pose_before and Dictionary(mission_root.get("_air_support_sorties")).is_empty() and env.source.get("_space_wing_state").get_snapshot() == wings_before, tag + "nichts hat sich geaendert (Pose, Rotte, kein Start)")
-	var ok: Dictionary = _circle(env, "ship", Vector2i(7, 10), "none", "c4b")
+	# Kartenrand-Regel (Entscheidung des Besitzers): eine Rundbahn, deren Wegpunkte mit gedrehter Huelle samt Rand nicht alle auf die Karte passen, wird gar nicht erst gesetzt
+	# (frueher blieben bei Mitte (7,10) nur 4 Wegpunkte; dieser Fall wurde nicht aufgeweicht, sondern ist jetzt die Ablehnung).
+	var near: Dictionary = _circle(env, "ship", Vector2i(7, 10), "none", "c4b")
+	_check(not bool(near.get("ok", true)) and String(near.get("reason", "")) == "circle_near_map_edge" and String(near.get("message", "")) == "Zu nah am Kartenrand – Mittelpunkt weiter innen wählen.", tag + "Mitte (7,10): circle_near_map_edge mit Meldung: " + str(near))
+	_check(_pose(env, "ship") == pose_before and Dictionary(mission_root.get("_air_support_sorties")).is_empty() and env.source.get("_space_wing_state").get_snapshot() == wings_before and env.events.is_empty(), tag + "Ablehnung ohne Wirkung: Pose, Rotte, Sortie, keine Ereignisse")
+	var edge: Dictionary = _circle(env, "ship", Vector2i(8, 10), "none", "c4c")
+	_check(not bool(edge.get("ok", true)) and String(edge.get("reason", "")) == "circle_near_map_edge", tag + "Buccaneer, Mitte (8,10) (einen Schritt zu nah): abgelehnt: " + str(edge))
+	var inside: Dictionary = _circle(env, "ship", Vector2i(9, 10), "none", "c4d")
 	var wps: Array = _sortie(env, "ship").get("waypoints", [])
-	_check(bool(ok.get("ok", false)) and wps.size() == 4 and wps.has(Vector2i(11, 10)) and wps.has(Vector2i(11, 6)) and wps.has(Vector2i(7, 6)) and wps.has(Vector2i(7, 14)), tag + "Mitte (7,10): genau 4 Wegpunkte: " + str(wps))
+	_check(bool(inside.get("ok", false)) and wps.size() == 6, tag + "Buccaneer, Mitte (9,10) (gerade weit genug innen): angenommen, 6 Wegpunkte: " + str(inside))
+	var visited := {}
+	for _i in range(480):
+		_tick(env, 0.5)
+		visited[int(_sortie(env, "ship").get("waypoint_index", -1))] = true
+	_check(visited.size() == 6 and _count(env, "ship", "role_blocked") == 0 and bool(env.combat.get_flight_status("ship").get("ok", true)), tag + "das Schiff dreht an jedem der 6 Wegpunkte (besucht %d), nie blockiert" % visited.size())
+	env.flow.free()
+	# Cutlass: Mitte (9,10) zu nah, (10,10) gerade weit genug.
+	var env2: Dictionary = _build("cutlass", ["ship"])
+	env2.transport.parked["ship"] = true
+	var cut_bad: Dictionary = _circle(env2, "ship", Vector2i(9, 10), "none", "c4e")
+	_check(not bool(cut_bad.get("ok", true)) and String(cut_bad.get("reason", "")) == "circle_near_map_edge", tag + "Cutlass, Mitte (9,10): abgelehnt: " + str(cut_bad))
+	_check(bool(_circle(env2, "ship", Vector2i(10, 10), "none", "c4f").get("ok", false)), tag + "Cutlass, Mitte (10,10): angenommen")
+	env2.flow.free()
+
+
+## Fall 4b (Nachbesserung 1, K1): voller Umlauf der Cutlass mit Mitte (10,10), dem engsten angenommenen Fall: 6 besuchte Wegpunkte, keine Notbremse
+## (Flugstatus map_edge), nie ausserhalb des Pruefrasters 5..19. Wird dieser Fall rot, ist K1 echt (nicht die Randregel umbauen, sondern berichten).
+func _case_4b() -> void:
+	var tag := "[4b Cutlass-Umlauf] "
+	var env: Dictionary = _build("cutlass", ["ship"])
+	env.transport.parked["ship"] = true
+	var res: Dictionary = _circle(env, "ship", Vector2i(10, 10), "none", "c4bx")
+	_check(bool(res.get("ok", false)), tag + "Aufbau: Mitte (10,10) angenommen: " + str(res))
+	var visited := {}
+	var edge_stops := 0
+	var off_map := 0
+	var outside := ""
+	for _i in range(int(round(300.0 / DT))):
+		_tick(env, DT)
+		visited[int(_sortie(env, "ship").get("waypoint_index", -1))] = true
+		var reason := String(env.combat.get_flight_status("ship").get("reason", ""))
+		if reason == "map_edge": edge_stops += 1
+		var cell: Vector2i = GRID.HEX.round_axial(GRID.HEX.plane_to_axial(Vector2(_pose(env, "ship").position_plane)))
+		if cell.x < 5 or cell.x > 19 or cell.y < 5 or cell.y > 19:
+			off_map += 1
+			if outside.is_empty(): outside = str(cell)
+	_check(visited.size() == 6, tag + "6 Wegpunkte besucht (%d)" % visited.size())
+	_check(edge_stops == 0, tag + "keine Notbremse am Kartenrand (map_edge-Schritte: %d)" % edge_stops)
+	_check(off_map == 0, tag + "nie ausserhalb des Rasters 5..19 (Schritte draussen: %d, erstes Feld %s)" % [off_map, outside])
+	_check(_count(env, "ship", "role_blocked") == 0 and bool(env.combat.get_flight_status("ship").get("ok", true)), tag + "nie blockiert, Flugstatus ok")
 	env.flow.free()
 
 
@@ -720,6 +767,7 @@ func _initialize() -> void:
 	_case_2()
 	_case_3()
 	_case_4()
+	_case_4b()
 	_case_5()
 	_case_6()
 	_case_7()
