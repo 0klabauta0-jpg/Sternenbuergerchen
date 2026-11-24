@@ -30,6 +30,7 @@ func check(ok: bool, label: String) -> void:
 
 func _run() -> void:
 	_item_part()
+	_bounty_abandon_part()
 	_accept_part()
 	_deliver_part()
 	_lock_part()
@@ -123,6 +124,20 @@ func _revision(s: RefCounted) -> int:
 
 func _roundtrip(s: RefCounted) -> Dictionary:
 	return Dictionary(JSON.parse_string(JSON.stringify(s.export_state())))
+
+# ---------- Kopfgeld abgeben beruehrt keine Fracht (Nachpruefung K2) ----------
+
+func _bounty_abandon_part() -> void:
+	var s: RefCounted = _sup()
+	var crates: int = int(_order(A).crates)
+	check(bool(_accept(s, A, "trade_outpost").get("ok", false)) and _crates(s) == crates, "K2: Frachtauftrag laeuft, %d Kisten an Bord" % crates)
+	var bounty: Dictionary = s.apply_command(_cmd("standing_accept", {"order_id": "bounty:rebels"}), {})
+	check(bool(bounty.get("ok", false)), "K2: Kopfgeld-Auftrag zusaetzlich angenommen")
+	var dropped: Dictionary = s.apply_command(_cmd("standing_abandon", {"order_id": "bounty:rebels"}), {})
+	check(bool(dropped.get("ok", false)) and int(dropped.get("crates_removed", -1)) == 0, "K2: Kopfgeld abgeben raeumt keine Kisten (entfernt %s)" % str(dropped.get("crates_removed", "?")))
+	check(_crates(s) == crates and String(_status(s, A).get("status", "")) == "active", "K2: Kisten (%d) und Frachtauftrag unveraendert (Status %s)" % [_crates(s), String(_status(s, A).get("status", ""))])
+	var gone: Dictionary = _abandon(s, A, "")
+	check(bool(gone.get("ok", false)) and int(gone.get("crates_removed", 0)) == crates and _crates(s) == 0, "K2: die Fracht selbst abgeben raeumt weiter alle Kisten")
 
 # ---------- Gegenstand ----------
 

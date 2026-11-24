@@ -854,10 +854,12 @@ func _standing_abandon(payload: Dictionary) -> Dictionary:
 	var number: int = int(active.number)
 	if not standing_finish_state(id, false): return _reject("not_active", "Dieser Auftrag läuft nicht.")
 	var removed := 0
-	for container_id: Variant in _inventory:
-		var items: Dictionary = Dictionary(_inventory[container_id]).get("items", {})
-		removed += int(items.get(STANDING_CRATE, 0))
-		items.erase(STANDING_CRATE)
+	# Nur ein Frachtauftrag raeumt Kisten: das Kopfgeld (kind bounty) darf die Kisten eines laufenden Frachtauftrags nicht anruehren.
+	if String(order.kind) == "freight":
+		for container_id: Variant in _inventory:
+			var items: Dictionary = Dictionary(_inventory[container_id]).get("items", {})
+			removed += int(items.get(STANDING_CRATE, 0))
+			items.erase(STANDING_CRATE)
 	return {"ok": true, "message": "Auftrag aufgegeben. Kein Lohn.", "order_id": id, "number": number, "receipt_id": _standing_receipt_id(id, number),
 		"outcome": "abandoned", "pay": 0, "crates_removed": removed}
 
