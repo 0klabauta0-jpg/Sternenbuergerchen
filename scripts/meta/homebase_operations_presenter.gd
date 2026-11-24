@@ -8,6 +8,8 @@ const THEME: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 const DRAG_SURFACE: GDScript = preload("res://scripts/meta/operations_drag_surface.gd")
 const BADGES: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 const NAV_ICONS: GDScript = preload("res://scripts/ui/homebase_navigation_icons.gd")
+const CREDIT_TEXT: GDScript = preload("res://scripts/core/credit_text.gd")
+const SERVICE_TOOLTIP := "Tanken · Reparieren · Aufmunitionieren"
 const INK := Color("08232e")
 const PANEL := Color("102f3b")
 const CREAM := Color("f4f2e9")
@@ -15,6 +17,7 @@ const MUTED := Color("a8c0ca")
 const CYAN := Color("29e1e7")
 const GOLD := Color("ffd348")
 const REFRESH_SECONDS: float = 0.25
+const HEADER_REFRESH_SECONDS: float = 0.5
 const EQUIPMENT_LABELS: Dictionary = {"suit": "Anzug", "light": "Leicht", "medium": "Mittel", "heavy": "Schwer", "rifle": "Sturmgewehr", "smg": "Maschinenpistole", "sniper": "Scharfschützengewehr", "rail_gun": "Railgun", "rocket_launcher": "Raketenwerfer", "medictool": "Sanitätsgerät", "none": "Keine"}
 const SHIP_BACKDROP_SCRIPT: GDScript = preload("res://scripts/meta/ship_context_backdrop.gd")
 # PC density, user decision 14.11.2026: mouse and keyboard sizes at 1920x1080.
@@ -22,8 +25,9 @@ const SHIP_BACKDROP_SCRIPT: GDScript = preload("res://scripts/meta/ship_context_
 const DENSITY: Dictionary = {
 	"button_height": 30, "button_primary_height": 34, "button_font": 15, "button_padding_y": 4,
 	"input_height": 30, "option_height": 30, "option_font": 15,
-	"nav_width": 166, "nav_button_height": 36, "nav_icon": 24, "nav_font": 15,
-	"nav_toggle_size": Vector2(32, 36), "nav_sub_height": 30, "nav_sub_font": 14,
+	"nav_width": 166, "nav_button_height": 36, "nav_base_height": 45, "nav_icon": 24, "nav_font": 15,
+	"nav_collapsed_width": 52, "nav_collapsed_button": 44,
+	"nav_toggle_size": Vector2(32, 36), "nav_sub_height": 32, "nav_sub_font": 15, "nav_sub_width": 142, "nav_sub_icon": 22,
 	"card_min_height": 64, "card_empty_min_height": 48, "card_padding_y": 3, "card_text_separation": 0,
 	"card_portrait": 48, "card_name_height": 28, "card_name_padding_y": 1, "card_name_padding_x": 4,
 	"card_name_font": 16, "card_name_font_compact": 15, "card_name_font_wide": 23,
@@ -45,6 +49,9 @@ var _columns: Dictionary = {}
 var _selectors: Dictionary = {}
 var _workspace: Control
 var _homebase_location: Label
+var _header_title: Label
+var _header_status: Label
+var _status_variants: Array[String] = []
 var _roster_list: VBoxContainer
 var _search: LineEdit
 var _sort_selector: OptionButton
@@ -116,6 +123,11 @@ var _flight_management_bar: VBoxContainer
 var _nav_group_toggles: Dictionary = {}
 var _nav_column: VBoxContainer
 var _nav_dock_spacer: Control
+# Linke Leiste ein-/ausgeklappt (Sitzungszustand, kein Speicherstand): eingeklappt nur Icons mit Tooltip.
+var _nav_toggle: Button
+var _nav_inner: VBoxContainer
+var _nav_collapsed := false
+var _nav_items: Array[Button] = []
 var _nav_group_open: Dictionary = {"base": true, "mission": true}
 var _interface_settings_path: String = "user://sternenbuergerchen_settings.cfg"
 var _right_flyout_active:=false
@@ -143,9 +155,15 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if not is_visible_in_tree() or _mode == "base":
+	if not is_visible_in_tree():
 		return
 	_elapsed += delta
+	if _mode == "base":
+		# Auf dem Basisbild laeuft nicht die ganze Ansicht, aber die Kopfzeile bleibt aktuell (hoechstens zweimal je Sekunde).
+		if _elapsed >= HEADER_REFRESH_SECONDS:
+			_elapsed = 0.0
+			_refresh_header_only()
+		return
 	if _elapsed >= REFRESH_SECONDS:
 		_elapsed = 0.0
 		refresh()
@@ -195,10 +213,24 @@ func _build() -> void:
 	var header := HBoxContainer.new()
 	header.custom_minimum_size.y = 56
 	outer.add_child(header)
-	var title: Label = _label("STERNENBÜRGERCHEN  /  Heimatbasis", 27, CREAM)
+	header.add_theme_constant_override("separation", 28)
+	var title: Label = _label("HEIMATBASIS", 27, CREAM)
+	title.name = "HomebaseTitle"
 	THEME.style_section_heading(title, 30)
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.autowrap_mode = TextServer.AUTOWRAP_OFF
+	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	header.add_child(title)
+	_header_title = title
+	# Die wichtigsten Zahlen der Basis, rechts neben dem Titel, aus den vorhandenen Besitzern (nur Anzeige).
+	_header_status = _label("", 17, CREAM)
+	_header_status.name = "HomebaseStatus"
+	_header_status.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_header_status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_header_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_header_status.clip_text = true
+	_header_status.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_header_status.resized.connect(_fit_header_status)
+	header.add_child(_header_status)
 	_homebase_location = _label("", 16, MUTED)
 	_homebase_location.name = "HomebaseLocation"
 	# A header badge needs its text width. A wrapping, non-expanding HBox child
@@ -230,6 +262,17 @@ func _build() -> void:
 	_nav_column.custom_minimum_size.x = DENSITY.nav_width
 	_nav_column.add_theme_constant_override("separation", 0)
 	body.add_child(_nav_column)
+	_nav_inner = nav
+	# Umschalter oben: Leiste ein-/ausklappen. Heisst "Toggle…", damit er nicht als Leistenknopf der Reihenfolge zaehlt.
+	_nav_toggle = _nav_button("Einklappen", "nav_collapse", DENSITY.nav_collapsed_button, DENSITY.nav_icon)
+	_nav_toggle.name = "ToggleNavigation"
+	_nav_toggle.tooltip_text = "Leiste einklappen"
+	_nav_toggle.pressed.connect(func(): set_nav_collapsed(not _nav_collapsed))
+	_nav_column.add_child(_nav_toggle)
+	var nav_gap := Control.new()
+	nav_gap.custom_minimum_size.y = 4
+	nav_gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_nav_column.add_child(nav_gap)
 	var nav_scroll := ScrollContainer.new()
 	nav_scroll.name = "NavigationScroll"
 	nav_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -242,18 +285,12 @@ func _build() -> void:
 	_nav_dock_spacer.name = "NavigationDockSpacer"
 	_nav_dock_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_nav_column.add_child(_nav_dock_spacer)
-	for item in [{"id": "base", "label": "Basis erkunden"}, {"id": "personnel", "label": "Personal"}, {"id": "squad", "label": "Trupp &\nAusrüstung"}, {"id": "mission", "label": "Flugdeck"}, {"id": "map", "label": "Sternkarte"}, {"id": "jobs", "label": "Smart Mobile"}]:
+	# Wunsch 24.11.: Smart Mobile oben, dann Basis (mit Unterpunkten), Personal, Trupp, Flugdeck (mit RRR-Service), Sternkarte.
+	# Alle Knoepfe: eine Schrift, eine Groesse, einzeilig, Icon links, dieselbe Rahmenform.
+	for item in [{"id": "jobs", "label": "Smart Mobile"}, {"id": "base", "label": "Basis"}, {"id": "personnel", "label": "Personal"}, {"id": "squad", "label": "Trupp"}, {"id": "mission", "label": "Flugdeck"}, {"id": "map", "label": "Sternkarte"}]:
 		var key: String = String(item.id)
-		var button: Button = _button(String(item.label), false)
+		var button: Button = _nav_button(String(item.label), key, DENSITY.nav_base_height if key == "base" else DENSITY.nav_button_height, DENSITY.nav_icon)
 		button.name = "Navigate_" + key
-		button.custom_minimum_size.y = DENSITY.nav_button_height
-		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		button.add_theme_font_override("font", THEME.get_heading_font())
-		button.add_theme_font_size_override("font_size", DENSITY.nav_font)
-		button.icon = NAV_ICONS.get_icon(key)
-		button.expand_icon = true
-		button.add_theme_constant_override("icon_max_width", DENSITY.nav_icon)
-		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		if key == "base":
 			_base_navigation_group = VBoxContainer.new()
 			_base_navigation_group.name = "BaseNavigationGroup"
@@ -276,8 +313,10 @@ func _build() -> void:
 		if button.disabled:
 			button.tooltip_text = "Noch nicht verfügbar"
 		_nav[key] = button
+		_register_nav_item(button, String(item.label), key, button.tooltip_text)
 	var nav_spacer := Control.new()
 	_skirmish_shop_toggle = _button("Aufbau & Einkauf", false)
+	_register_nav_item(_skirmish_shop_toggle, "Aufbau & Einkauf", "build")
 	_skirmish_shop_toggle.name = "ToggleSkirmishShop"
 	nav.add_child(_skirmish_shop_toggle)
 	_skirmish_shop_toggle.hide()
@@ -288,12 +327,14 @@ func _build() -> void:
 	nav_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	nav.add_child(nav_spacer)
 	var detail_button: Button = _button("Charakterdetails", false)
-	var refuel := _button("Tankservice", false)
+	# RRR = Refuel, Repair, Restock. Heute bietet das Fenster Tanken und Reparieren (siehe Bericht); die Funktion bleibt unveraendert.
+	var refuel := _nav_sub_button("RRR-Service", "service")
 	refuel.name = "OpenBaseServices"
+	refuel.tooltip_text = SERVICE_TOOLTIP
+	_register_nav_item(refuel, "RRR-Service", "service", SERVICE_TOOLTIP)
 	_flight_management_bar.add_child(refuel)
-	refuel.custom_minimum_size.y = DENSITY.nav_sub_height
-	refuel.add_theme_font_size_override("font_size", DENSITY.nav_sub_font)
 	refuel.pressed.connect(func(): _open_base_management("ship"))
+	_register_nav_item(detail_button, "Charakterdetails", "details")
 	nav.add_child(detail_button)
 	detail_button.pressed.connect(func(): _act("details", {"unit_id": _focused_id}))
 	# Keep Smart Mobile with the other navigation entries. A bottom-pinned
@@ -316,6 +357,8 @@ func _build() -> void:
 	_base.connect("terminal_open_requested", _terminal_requested)
 	_base.connect("command_dock_geometry_changed", _on_command_dock_geometry_changed)
 	_base.connect("exploration_exit_requested", func(): _act("navigate", {"mode": "squad"}))
+	_base.set("side_window_open_probe", is_workspace_flyout_open)
+	_base.connect("side_window_close_requested", _close_workspace_flyout)
 	_skirmish_shop = load("res://scripts/ui/skirmish_base_shop.gd").new()
 	_skirmish_shop.name = "SkirmishBaseShop"
 	_skirmish_shop.call("configure", _singleplayer_snapshot, _singleplayer_request)
@@ -345,11 +388,10 @@ func _build() -> void:
 	_base_management_bar.name = "BaseManagementActions"
 	_base_management_bar.add_theme_constant_override("separation", 3)
 	_base_navigation_group.add_child(_base_management_bar)
-	for entry in [["Bauen", "build"], ["Werkstatt / Erlaubnisse", "workshop"], ["Lager & Ausrüstung", "inventory"], ["Datenterminal / Hochladen", "data"]]:
-		var action := _button(String(entry[0]), false)
-		action.add_theme_font_size_override("font_size", DENSITY.nav_sub_font)
-		action.custom_minimum_size.y = DENSITY.nav_sub_height
-		action.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	for entry in [["Bauen", "build"], ["Werkstatt", "workshop"], ["Lager", "inventory"], ["Datenterminal", "data"]]:
+		var action := _nav_sub_button(String(entry[0]), String(entry[1]))
+		action.name = "BaseAction_" + String(entry[1])
+		_register_nav_item(action, String(entry[0]), String(entry[1]))
 		_base_management_bar.add_child(action)
 		action.pressed.connect(_open_base_management.bind(String(entry[1])))
 	_load_nav_groups()
@@ -820,7 +862,7 @@ func refresh() -> void:
 	if _skirmish_shop.visible: _skirmish_shop.call("refresh")
 	for key in ["jobs", "map"]:
 		_nav[key].disabled = not campaign_ready
-		_nav[key].tooltip_text = "" if campaign_ready else "Noch nicht verfügbar"
+		_set_nav_tip(_nav[key], "" if campaign_ready else "Noch nicht verfügbar")
 	if _job_board != null:
 		_job_board.visible = _mode == "jobs"
 		if _job_board.visible:
@@ -844,6 +886,8 @@ func refresh() -> void:
 		for key in _workflow_labels:
 			(_workflow_labels[key] as Label).add_theme_color_override("font_color", GOLD if key == _mode else MUTED)
 		_workflow.visible = _mode != "base" and not _right_flyout_active
+	if _nav_collapsed:
+		_apply_nav_collapsed()
 	_set_options(_sort_selector, Array(snapshot.get("roster_sort_options", [])), String(snapshot.get("roster_sort_mode", "name_asc")))
 	_update_roster(Array(snapshot.get("roster", [])))
 	var team: Dictionary = Dictionary(snapshot.get("focused_fireteam", {}))
@@ -851,10 +895,12 @@ func refresh() -> void:
 	_update_equipment(focused, Dictionary(snapshot.get("loadout_options", {})))
 	var singleplayer: Dictionary=snapshot.get("singleplayer",{})
 	var bodies: Dictionary = Dictionary(singleplayer.get("space_travel", {})).get("bodies", {})
+	_update_header(snapshot, singleplayer)
 	var home_body := DISPLAY.body_name("moon", bodies.moon) if bodies.has("moon") else ""
 	var home_location: Dictionary = Dictionary(Dictionary(singleplayer.get("campaign", {})).get("locations", {})).get("homebase", {})
 	_homebase_location.text = "Standort: %s · %s" % [DISPLAY.location_name("homebase", home_location), home_body] if not home_body.is_empty() else ""
-	_homebase_location.visible = _mode == "base" and not home_body.is_empty()
+	# Der Standort steht jetzt im Titel (System / Himmelskoerper / HEIMATBASIS); die Zeile bleibt als Text vorhanden, nimmt im Kopf aber keinen Platz.
+	_homebase_location.visible = false
 	var inventory: Dictionary=Dictionary(singleplayer.get("supply",{})).get("inventory",{})
 	_inventory_panel.visible=not inventory.is_empty()
 	_identity_row.visible=inventory.is_empty()
@@ -872,6 +918,100 @@ func refresh() -> void:
 	if changed_mode:
 		_layout_columns()
 	_update_base_surface(snapshot)
+
+
+## Kopfzeile: "<System> / <Himmelskoerper> / HEIMATBASIS" und die Statuszeile. Nur Anzeige aus den vorhandenen Besitzern:
+## System = Koerper ohne parent_id, Himmelskoerper = Koerper mit surface_location_id "homebase" (ohne den Zusatz nach " · "),
+## Credits und Treibstoff aus supply, Personal und Schiffe aus den Listen der Operationsansicht (busy = unterwegs).
+func _update_header(snapshot: Dictionary, singleplayer: Dictionary) -> void:
+	var bodies: Dictionary = Dictionary(Dictionary(singleplayer.get("space_travel", {})).get("bodies", {}))
+	var system_name := ""
+	var place_name := ""
+	for id in bodies:
+		var record: Dictionary = Dictionary(bodies[id])
+		if system_name.is_empty() and record.has("parent_id") and String(record.get("parent_id", "")).is_empty():
+			system_name = DISPLAY.body_name(String(id), record)
+		if place_name.is_empty() and String(record.get("surface_location_id", "")) == "homebase":
+			place_name = DISPLAY.body_name(String(id), record)
+	place_name = place_name.split(" · ")[0].strip_edges()
+	var parts: PackedStringArray = PackedStringArray()
+	if not system_name.is_empty():
+		parts.append(system_name.to_upper())
+	if not place_name.is_empty():
+		parts.append(place_name.to_upper())
+	parts.append("HEIMATBASIS")
+	_header_title.text = "  /  ".join(parts)
+	# "Unterwegs" nur, wer/was die Basis wirklich verlassen hat (Feld "away"); an Bord eines Schiffs, das noch am Pad steht, zaehlt als in der Basis.
+	var people_in := 0
+	var people_out := 0
+	for unit_variant in Array(snapshot.get("roster", [])):
+		if bool(Dictionary(unit_variant).get("away", false)):
+			people_out += 1
+		else:
+			people_in += 1
+	var crafts_in := 0
+	var crafts_out := 0
+	for craft_variant in Array(snapshot.get("crafts", [])):
+		if bool(Dictionary(craft_variant).get("away", false)):
+			crafts_out += 1
+		else:
+			crafts_in += 1
+	var supply: Dictionary = Dictionary(singleplayer.get("supply", {}))
+	var credits_text := "Credits %s" % CREDIT_TEXT.format(int(supply.credits)) if supply.has("credits") else ""
+	var fuel_long := ""
+	var fuel_short := ""
+	var fuel_values: Dictionary = Dictionary(supply.get("fuel_by_craft_id", {}))
+	if not fuel_values.is_empty():
+		var fuel_sum := 0.0
+		for craft_id in fuel_values:
+			fuel_sum += float(fuel_values[craft_id])
+		var capacity: float = float(supply.get("fuel_capacity", 0.0)) * fuel_values.size()
+		fuel_long = "Treibstoff %d / %d" % [roundi(fuel_sum), roundi(capacity)] if capacity > 0.0 else "Treibstoff %d" % roundi(fuel_sum)
+		fuel_short = "Tank %d/%d" % [roundi(fuel_sum), roundi(capacity)] if capacity > 0.0 else "Tank %d" % roundi(fuel_sum)
+	# Drei Fassungen, von ausfuehrlich bis kurz; gewaehlt wird die erste, die in die Zeile passt (_fit_header_status).
+	_status_variants = [
+		_join_status([credits_text, "Personal %d in der Basis, %d unterwegs" % [people_in, people_out], "Schiffe %d in der Basis, %d unterwegs" % [crafts_in, crafts_out], fuel_long]),
+		_join_status([credits_text, "Personal %d Basis / %d weg" % [people_in, people_out], "Schiffe %d Basis / %d weg" % [crafts_in, crafts_out], fuel_long]),
+		_join_status([credits_text, "Personal %d/%d" % [people_in, people_out], "Schiffe %d/%d" % [crafts_in, crafts_out], fuel_short]),
+	]
+	_header_status.tooltip_text = "%s\nTreibstoff: Summe der registrierten Schiffe / Gesamtfassungsvermögen. Unterwegs/weg = hat die Basis verlassen (Flug, Orbit, Einsatz, anderer Ort); in der Kurzform steht Basis/weg." % _status_variants[0]
+	_fit_header_status()
+
+
+func _join_status(entries: Array) -> String:
+	var kept: PackedStringArray = PackedStringArray()
+	for entry in entries:
+		if not String(entry).is_empty():
+			kept.append(String(entry))
+	return "  ·  ".join(kept)
+
+
+## Waehlt die laengste Fassung der Statuszeile, die ganz in die Zeile passt (kein Abschneiden der vier Angaben).
+func _fit_header_status() -> void:
+	if _header_status == null or _status_variants.is_empty():
+		return
+	var font: Font = _header_status.get_theme_font("font")
+	var font_size: int = _header_status.get_theme_font_size("font_size")
+	var available: float = _header_status.size.x
+	var chosen: String = _status_variants[_status_variants.size() - 1]
+	if available <= 1.0:
+		chosen = _status_variants[0]
+	else:
+		for variant in _status_variants:
+			if font.get_string_size(String(variant), HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x <= available:
+				chosen = String(variant)
+				break
+	if _header_status.text != chosen:
+		_header_status.text = chosen
+
+
+## Nur die Kopfzeile neu (Basisbild): kein Neuaufbau der Ansicht.
+func _refresh_header_only() -> void:
+	var screen: Control = _owner_screen()
+	if screen == null or not _built or not is_visible_in_tree():
+		return
+	var snapshot: Dictionary = screen.call("get_operations_snapshot")
+	_update_header(snapshot, Dictionary(snapshot.get("singleplayer", {})))
 
 
 func _update_roster(roster: Array) -> void:
@@ -1081,7 +1221,7 @@ func _pad_selected(index: int) -> void:
 func get_launch_action_rects() -> Array[Rect2]:
 	var result: Array[Rect2] = []
 	# Also used by the campaign hint card: it must not cover any of these actions (Playtest L04).
-	var controls: Array = [_start, _board, _unboard, _launch_reason, _base_management_bar, _flight_management_bar, _team_selector, _flyout_close] + _nav.values() + _nav_group_toggles.values()
+	var controls: Array = [_start, _board, _unboard, _launch_reason, _base_management_bar, _flight_management_bar, _team_selector, _flyout_close, _nav_toggle] + _nav.values() + _nav_group_toggles.values()
 	if _job_board != null:
 		controls.append(_job_board.get("_footer"))
 	if _inventory_panel != null:
@@ -1300,6 +1440,37 @@ func _layout_nav_dock_spacer() -> void:
 		_nav_dock_spacer.custom_minimum_size.y = overlap
 
 
+## Gemeinsame Form aller Leistenknoepfe: Schrift, Groesse, einzeilig, linksbuendig, Icon links, gleiche Rahmenform.
+func _nav_style(button: Button, icon_key: String, icon_size: int) -> void:
+	THEME.style_command_button(button, "neutral")
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.add_theme_font_override("font", THEME.get_heading_font())
+	button.add_theme_font_size_override("font_size", DENSITY.nav_font)
+	button.icon = NAV_ICONS.get_icon(icon_key)
+	button.expand_icon = true
+	button.add_theme_constant_override("icon_max_width", icon_size)
+	button.autowrap_mode = TextServer.AUTOWRAP_OFF
+	button.clip_text = true
+
+
+func _nav_button(text: String, icon_key: String, height: float, icon_size: int) -> Button:
+	var button := Button.new()
+	button.text = text
+	button.custom_minimum_size.y = height
+	_nav_style(button, icon_key, icon_size)
+	return button
+
+
+## Unterpunkt (Basis: Bauen, Werkstatt, Lager, Datenterminal; Flugdeck: RRR-Service): alle gleich gross, leicht eingerueckt.
+func _nav_sub_button(text: String, icon_key: String) -> Button:
+	var button := Button.new()
+	button.text = text
+	button.custom_minimum_size = Vector2(DENSITY.nav_sub_width, DENSITY.nav_sub_height)
+	button.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_nav_style(button, icon_key, DENSITY.nav_sub_icon)
+	return button
+
+
 func _nav_group_header(button: Button, key: String) -> HBoxContainer:
 	# Playtest L16: a submenu folds only on an explicit click, never on pointer exit.
 	var row := HBoxContainer.new()
@@ -1309,11 +1480,83 @@ func _nav_group_header(button: Button, key: String) -> HBoxContainer:
 	row.add_child(button)
 	var toggle := _button("▾", false)
 	toggle.name = "ToggleSubmenu_" + key
-	toggle.custom_minimum_size = DENSITY.nav_toggle_size
+	toggle.custom_minimum_size = Vector2(DENSITY.nav_toggle_size.x, button.custom_minimum_size.y)
 	toggle.pressed.connect(_toggle_nav_group.bind(key))
 	row.add_child(toggle)
 	_nav_group_toggles[key] = toggle
 	return row
+
+
+## Leistenknopf fuer das Ein-/Ausklappen anmelden: Beschriftung, Icon, Hilfetext und Ausgangsform merken.
+func _register_nav_item(button: Button, label: String, icon_key: String, tip: String = "") -> void:
+	button.set_meta("nav_label", label)
+	button.set_meta("nav_icon_key", icon_key)
+	button.set_meta("nav_tip", tip)
+	button.set_meta("nav_expanded_icon", button.icon)
+	button.set_meta("nav_min", button.custom_minimum_size)
+	button.set_meta("nav_hflags", button.size_flags_horizontal)
+	button.set_meta("nav_align", button.alignment)
+	button.set_meta("nav_icon_max", button.get_theme_constant("icon_max_width"))
+	_nav_items.append(button)
+
+
+func _set_nav_tip(button: Button, tip: String) -> void:
+	button.set_meta("nav_tip", tip)
+	_update_nav_tooltip(button)
+
+
+func _update_nav_tooltip(button: Button) -> void:
+	var tip := String(button.get_meta("nav_tip", ""))
+	if _nav_collapsed:
+		var label := String(button.get_meta("nav_label", ""))
+		button.tooltip_text = label if tip.is_empty() else "%s · %s" % [label, tip]
+	else:
+		button.tooltip_text = tip
+
+
+func is_nav_collapsed() -> bool:
+	return _nav_collapsed
+
+
+func set_nav_collapsed(collapsed: bool) -> void:
+	_nav_collapsed = collapsed
+	_apply_nav_collapsed()
+
+
+## Eingeklappt: nur Icons (alle gleich gross, mindestens 44 x 44), Beschriftung als Tooltip, Leiste nur so breit wie Icon + Rand.
+## Der frei gewordene Platz faellt dem Inhalt rechts zu (Workspace dehnt sich).
+func _apply_nav_collapsed() -> void:
+	if _nav_column == null or _nav_toggle == null:
+		return
+	var width: float = float(DENSITY.nav_collapsed_width if _nav_collapsed else DENSITY.nav_width)
+	_nav_column.custom_minimum_size.x = width
+	_nav_inner.custom_minimum_size.x = width
+	for button: Button in _nav_items:
+		if _nav_collapsed:
+			button.text = ""
+			button.icon = NAV_ICONS.get_icon(String(button.get_meta("nav_icon_key")))
+			button.expand_icon = true
+			button.alignment = HORIZONTAL_ALIGNMENT_CENTER
+			button.custom_minimum_size = Vector2(DENSITY.nav_collapsed_button, DENSITY.nav_collapsed_button)
+			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			button.add_theme_constant_override("icon_max_width", DENSITY.nav_icon)
+		else:
+			button.text = String(button.get_meta("nav_label"))
+			button.icon = button.get_meta("nav_expanded_icon")
+			button.alignment = button.get_meta("nav_align")
+			button.custom_minimum_size = button.get_meta("nav_min")
+			button.size_flags_horizontal = int(button.get_meta("nav_hflags"))
+			button.add_theme_constant_override("icon_max_width", int(button.get_meta("nav_icon_max")))
+		_update_nav_tooltip(button)
+	for toggle: Button in _nav_group_toggles.values():
+		toggle.visible = not _nav_collapsed
+	# Ohne Pfeile liesse sich eine zugeklappte Gruppe nicht mehr oeffnen: eingeklappt sind alle Gruppen offen dargestellt,
+	# ausgeklappt gilt wieder der gemerkte Zustand (_nav_group_open bleibt unberuehrt).
+	_apply_nav_groups()
+	_nav_toggle.text = "" if _nav_collapsed else "Einklappen"
+	_nav_toggle.icon = NAV_ICONS.get_icon("nav_expand" if _nav_collapsed else "nav_collapse")
+	_nav_toggle.alignment = HORIZONTAL_ALIGNMENT_CENTER if _nav_collapsed else HORIZONTAL_ALIGNMENT_LEFT
+	_nav_toggle.tooltip_text = "Leiste ausklappen" if _nav_collapsed else "Leiste einklappen"
 
 
 func _toggle_nav_group(key: String) -> void:
@@ -1335,7 +1578,7 @@ func _apply_nav_groups() -> void:
 		var open := bool(_nav_group_open.get(key, true))
 		var bar: Control = _base_management_bar if key == "base" else _flight_management_bar
 		if bar != null:
-			bar.visible = open
+			bar.visible = open or _nav_collapsed
 		var toggle: Button = _nav_group_toggles[key]
 		toggle.text = "▾" if open else "▸"
 		toggle.tooltip_text = "Untermenü einklappen" if open else "Untermenü aufklappen"

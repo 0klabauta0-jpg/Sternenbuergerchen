@@ -14,7 +14,7 @@ func _run() -> void:
 	var presenter: Control=screen.get("_operations_presenter")
 	check(presenter.find_child("Navigate_fob",true,false)==null,"FOB removed from regular navigation")
 	var mobile: Control=presenter.find_child("Navigate_jobs",true,false)
-	check(mobile.get_index()==mobile.get_parent().get_child_count()-1,"Smart Mobile is bottommost navigation action")
+	check(mobile.get_index()==0,"Smart Mobile is topmost navigation action")
 	var columns: Dictionary=presenter.get("_columns")
 	check(columns.roster.size.x<presenter.get("_workspace").size.x*.35,"personnel uses compact bounded roster width")
 	var shared: Control=presenter.find_child("PersonnelInventory",true,false)

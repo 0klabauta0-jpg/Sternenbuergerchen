@@ -21,6 +21,32 @@ var _drag_end := Vector2.ZERO
 var _drag_wing := ""
 var _drag_additive := false
 var _drag_active := false
+var _heading: Button
+var _body: VBoxContainer
+var _open_override = null
+var _ship_count := 0
+
+## Anzeige: Ein-Schiff-Gruppen heissen wie ihr Schiff, die technische Kennung ("solo:...") wird nie gezeigt.
+func _wing_label(id, wing: Dictionary, names: Dictionary) -> String:
+	var wing_name := String(wing.get("name", id))
+	if not wing_name.begins_with("solo:"):
+		return wing_name
+	var craft_ids: Array = Array(wing.get("craft_ids", []))
+	var craft_name := String(names.get(String(craft_ids[0]), "")) if not craft_ids.is_empty() else ""
+	if craft_name.is_empty() or craft_name.begins_with("solo:"): return "Einzelschiff"
+	return craft_name
+
+func _craft_names() -> Dictionary:
+	var names := {}
+	for craft: Dictionary in Array(_snapshot.get("crafts", [])):
+		names[String(craft.get("craft_id", ""))] = String(craft.get("display_name", craft.get("craft_id", "")))
+	return names
+
+func _apply_open_state() -> void:
+	if _body == null: return
+	var open: bool = bool(_open_override) if _open_override != null else _ship_count > 1
+	_body.visible = open
+	_heading.text = "SCHIFFSGRUPPEN " + ("▾" if open else "▸")
 
 func configure(snapshot_provider: Callable, command_handler: Callable) -> void:
 	_provider = snapshot_provider
@@ -31,22 +57,32 @@ func configure(snapshot_provider: Callable, command_handler: Callable) -> void:
 
 func _build() -> void:
 	name = "SpaceWingPanel"
-	var heading := Label.new()
-	heading.text = "ROTTEN"
-	add_child(heading)
+	# Ueberschrift ist zugleich der Knopf zum Ein- und Ausklappen; mit nur einem Schiff ist der Block anfangs eingeklappt.
+	_heading = Button.new()
+	_heading.name = "WingHeading"
+	_heading.flat = true
+	_heading.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_heading.pressed.connect(func():
+		_open_override = not _body.visible
+		_apply_open_state())
+	add_child(_heading)
+	_body = VBoxContainer.new()
+	_body.name = "WingBody"
+	add_child(_body)
 	_cards = VBoxContainer.new()
 	_cards.name = "WingCards"
-	add_child(_cards)
+	_body.add_child(_cards)
 	var manage := Button.new()
-	manage.text = "Rotten verwalten ▸"
-	add_child(manage)
+	manage.text = "Schiffsgruppen verwalten ▸"
+	_body.add_child(manage)
 	_management = VBoxContainer.new()
 	_management.name = "WingManagement"
 	_management.hide()
-	add_child(_management)
+	_body.add_child(_management)
+	_apply_open_state()
 	manage.pressed.connect(func():
 		_management.visible = not _management.visible
-		manage.text = "Rotten verwalten ▾" if _management.visible else "Rotten verwalten ▸")
+		manage.text = "Schiffsgruppen verwalten ▾" if _management.visible else "Schiffsgruppen verwalten ▸")
 	_wings = OptionButton.new()
 	_wings.name = "WingSelector"
 	_management.add_child(_wings)
@@ -58,9 +94,9 @@ func _build() -> void:
 	_crafts.name = "WingCraftSelector"
 	_management.add_child(_crafts)
 	_name_edit = LineEdit.new()
-	_name_edit.placeholder_text = "Rottenname"
+	_name_edit.placeholder_text = "Name der Schiffsgruppe"
 	_management.add_child(_name_edit)
-	_add_button("Neue Rotte", _create)
+	_add_button("Neue Schiffsgruppe", _create)
 	_add_button("Umbenennen", _rename)
 	_add_button("Schiff zuordnen", func(): _selected_action("wing_assign"))
 	_add_button("Schiff entfernen", func(): _selected_action("wing_remove"))
@@ -69,7 +105,7 @@ func _build() -> void:
 	_feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_management.add_child(_feedback)
 	var notice := Label.new()
-	notice.text = "Rotten werden noch nicht im Spielstand gespeichert."
+	notice.text = "Schiffsgruppen werden noch nicht im Spielstand gespeichert."
 	notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_management.add_child(notice)
 
@@ -87,6 +123,11 @@ func refresh(snapshot: Dictionary) -> void:
 	var signature := var_to_str([snapshot.get("space_wings", {}), craft_labels])
 	if signature == _signature: return
 	_signature = signature
+	var ships := Array(snapshot.get("crafts", [])).size()
+	if (ships > 1) != (_ship_count > 1): _open_override = null
+	_ship_count = ships
+	_apply_open_state()
+	var names := _craft_names()
 	var selected_wing := _selected(_wings)
 	var selected_craft := _selected(_crafts)
 	_wings.clear()
@@ -100,7 +141,7 @@ func refresh(snapshot: Dictionary) -> void:
 	ids.sort()
 	for id in ids:
 		var wing: Dictionary = wings[id]
-		_wings.add_item("%s (%d/6)" % [wing.get("name", id), Array(wing.get("craft_ids", [])).size()])
+		_wings.add_item("%s (%d/6)" % [_wing_label(id, wing, names), Array(wing.get("craft_ids", [])).size()])
 		_wings.set_item_metadata(_wings.item_count - 1, id)
 		if id == selected_wing: _wings.select(_wings.item_count - 1)
 	_crafts.clear()
@@ -159,9 +200,24 @@ func _card_input(event: InputEvent, id: String) -> void:
 		_drag_wing = id
 		_drag_additive = event.ctrl_pressed
 		_drag_active = true
+		_show_tab_pressed(id, true)
 		accept_event()
 
+## Der Druck wird hier verbraucht, der Knopf zeichnet ihn deshalb nicht selbst: Druckzustand von Hand zeigen und wieder loesen.
+func _show_tab_pressed(id: String, pressed: bool) -> void:
+	if _cards == null: return
+	for card in _cards.get_children():
+		var button := card.get_child(0) as Button
+		if button == null or String(button.get_meta("wing_id", "")) != id: continue
+		if pressed:
+			button.add_theme_stylebox_override("normal", button.get_theme_stylebox("pressed"))
+			button.add_theme_stylebox_override("hover", button.get_theme_stylebox("pressed"))
+		else:
+			button.remove_theme_stylebox_override("normal")
+			button.remove_theme_stylebox_override("hover")
+
 func cancel_modal_input() -> void:
+	_show_tab_pressed(_drag_wing, false)
 	_drag_active = false
 	_drag_wing = ""
 	_drag_start = Vector2.ZERO
@@ -182,6 +238,7 @@ func _input(event: InputEvent) -> void:
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
 		_drag_end = event.global_position
 		_drag_active = false
+		_show_tab_pressed(_drag_wing, false)
 		if _drag_start.distance_to(_drag_end) < 6.0:
 			_expanded_wings[_drag_wing] = not bool(_expanded_wings.get(_drag_wing, false))
 			select_wing(_drag_wing, _drag_additive)
@@ -224,7 +281,7 @@ func _rebuild_cards() -> void:
 		var button := Button.new()
 		button.name = "WingTab_" + String(id).validate_node_name()
 		button.set_meta("wing_id", id)
-		button.text = ("◆ " if _selected_wings.has(id) else "◇ ") + String(wing.get("name", id)) + (" ▾" if _expanded_wings.has(id) and _expanded_wings[id] else " ▸")
+		button.text = ("◆ " if _selected_wings.has(id) else "◇ ") + _wing_label(id, wing, names) + (" ▾" if _expanded_wings.has(id) and _expanded_wings[id] else " ▸")
 		button.tooltip_text = "Klicken: auswählen und öffnen · Strg: Auswahl ergänzen"
 		button.gui_input.connect(_card_input.bind(String(id)))
 		card.add_child(button)
@@ -241,7 +298,7 @@ func _show_members() -> void:
 	var wings: Dictionary = Dictionary(_snapshot.get("space_wings", {})).get("wings", {})
 	var wing: Dictionary = wings.get(_selected(_wings), {})
 	if wing.is_empty():
-		_members.text = "Noch keine Rotte ausgewählt."
+		_members.text = "Noch keine Schiffsgruppe ausgewählt."
 		return
 	var names: Dictionary = {}
 	for craft: Dictionary in Array(_snapshot.get("crafts", [])):
@@ -258,7 +315,7 @@ func submit(operation: String, payload: Dictionary) -> Dictionary:
 		"request_id":"wing-ui:%s:%d" % [_session, _sequence],
 		"expected_revision":int(Dictionary(_snapshot.get("space_wings", {})).get("revision", 0))}
 	var result: Dictionary = _commands.call("space_wing_command", {"command":command})
-	var reasons := {"craft_already_assigned":"Schiff gehört bereits zu einer Rotte.", "wing_full":"Diese Rotte hat bereits sechs Schiffe.", "pilot_missing":"Dem Schiff ist kein Pilot zugeordnet.", "not_member":"Dieses Schiff gehört nicht zu der ausgewählten Rotte.", "stale_revision":"Der Bestand wurde geändert. Bitte erneut versuchen."}
+	var reasons := {"craft_already_assigned":"Schiff gehört bereits zu einer Schiffsgruppe.", "wing_full":"Diese Schiffsgruppe hat bereits sechs Schiffe.", "pilot_missing":"Dem Schiff ist kein Pilot zugeordnet.", "not_member":"Dieses Schiff gehört nicht zu der ausgewählten Schiffsgruppe.", "stale_revision":"Der Bestand wurde geändert. Bitte erneut versuchen."}
 	_feedback.text = "" if result.get("ok", false) else String(result.get("message", reasons.get(result.get("reason", ""), result.get("reason", "Aktion abgelehnt"))))
 	refresh(_read())
 	return result
@@ -281,7 +338,7 @@ func _create() -> void:
 func _rename() -> void:
 	var id := _selected(_wings)
 	if id.is_empty() or _name_edit.text.strip_edges().is_empty():
-		_feedback.text = "Rotte und Namen auswählen."
+		_feedback.text = "Schiffsgruppe und Namen auswählen."
 		return
 	submit("wing_rename", {"wing_id":id, "name":_name_edit.text})
 
@@ -289,7 +346,7 @@ func _selected_action(operation: String) -> void:
 	var wing := _selected(_wings)
 	var craft := _selected(_crafts)
 	if wing.is_empty() or craft.is_empty():
-		_feedback.text = "Rotte und Schiff auswählen."
+		_feedback.text = "Schiffsgruppe und Schiff auswählen."
 		return
 	var payload := {"wing_id":wing}
 	payload["leader_craft_id" if operation == "wing_leader_set" else "craft_id"] = craft

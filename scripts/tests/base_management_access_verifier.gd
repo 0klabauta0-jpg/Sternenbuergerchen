@@ -16,7 +16,7 @@ func _run()->void:
 	var bar:Control=presenter.get("_base_management_bar")
 	presenter.call("set_interface_settings_path_for_tests","user://nav_groups_fixture.cfg")
 	presenter.call("set_nav_group_open","base",true)
-	check(bar.is_visible_in_tree() and bar.get_parent()==presenter.get("_base_navigation_group"),"base submenu is unfolded directly below Basis erkunden")
+	check(bar.is_visible_in_tree() and bar.get_parent()==presenter.get("_base_navigation_group"),"base submenu is unfolded directly below Basis")
 	for i in 12:await process_frame
 	check(Rect2(Vector2.ZERO,Vector2(root.size)).encloses(bar.get_global_rect()),"expanded submenu stays within the 1280 viewport")
 	if DisplayServer.get_name()!="headless":
@@ -35,9 +35,9 @@ func _run()->void:
 	check(bar.visible,"explicit toggle unfolds the submenu again")
 	var actions:Dictionary={}
 	for button:Button in bar.get_children():actions[button.text]=button
-	check(actions.has("Bauen") and actions.has("Werkstatt / Erlaubnisse") and actions.has("Datenterminal / Hochladen"),"base exposes build workshop and upload directly")
+	check(actions.has("Bauen") and actions.has("Werkstatt") and actions.has("Datenterminal"),"base exposes build workshop and upload directly")
 	var before:Dictionary=flow.get("_singleplayer_runtime").get("_supply").export_state()
-	actions["Datenterminal / Hochladen"].pressed.emit()
+	actions["Datenterminal"].pressed.emit()
 	check(bar.visible,"choosing a submenu entry keeps the submenu open")
 	var services:Node=presenter.get("_services_view")
 	check(services.is_visible_in_tree() and services.get("_section")=="data","actual data-terminal button opens canonical upload view")

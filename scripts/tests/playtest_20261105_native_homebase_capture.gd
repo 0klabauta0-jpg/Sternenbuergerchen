@@ -67,8 +67,14 @@ func _capture(id: String, view: Node = null, settle_frames: int = 8) -> void:
 	_check(String(presenter.call("get_presentation_snapshot").get("mode", "")) == "personnel", "Native E key opens the real Personnel page from the console")
 	await _click_visible(navigation["base"])
 	await _frames(3)
-	var exit: Button = base.get_node("ExitExploration")
-	await _click_visible(exit)
+	# Seit 24.11. gibt es keinen schwebenden Knopf "Übersicht · Esc" mehr: Die Taste Esc macht dasselbe.
+	var leave := InputEventKey.new()
+	leave.keycode = KEY_ESCAPE
+	leave.physical_keycode = KEY_ESCAPE
+	leave.pressed = true
+	# Echte Eingabe: Esc kommt zuerst bei der Basisansicht an (deren _input vor dem Autoload GlobalEscapeMenu), unabhaengig vom Fokus.
+	root.push_input(leave, true)
+	await _frames(2)
 	_check(not bool(base.call("get_exploration_snapshot").get("active", true)), "Visible base exit deactivates its local runtime")
 	_check(String(presenter.call("get_presentation_snapshot").get("mode", "")) == "squad", "Visible base exit returns to team/equipment")
 	_facts["native_homebase"] = {"before":before,"after":after,"window_mode":root.mode,"physical_size":DisplayServer.window_get_size(),"content_size":root.content_scale_size,"input_route":"Viewport.push_input mouse + physical D key; no actor writes"}
