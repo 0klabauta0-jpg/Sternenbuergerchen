@@ -107,7 +107,8 @@ func _data_part() -> void:
 	for loc: String in locs:
 		for item: String in Dictionary(locs[loc]):
 			var e: Dictionary = locs[loc][item]
-			if not item in BENIT and not item in TRADE_GOODS: shape_ok = false
+			# Gueter-Dreieck (24.11.2026): an den drei kleinen Aussenposten kommen Heilkraeuter, Duenger, Aufputschmittel dazu (buy_limit = Abnahme je Heimlandung).
+			if not item in BENIT and not item in TRADE_GOODS and not (item in ["heilkraeuter", "duenger", "aufputschmittel"] and loc in ["muellers_farm", "shady_lab", "templanon"]): shape_ok = false
 			if loc == "polisa" and item in TRADE_GOODS: shape_ok = false # Polisa kauft die Handelsgueter in 2a nicht
 			if e.has("sell_price") and e.has("buy_price"): rule_ok = false # kein Haendler kauft, was er selbst verkauft
 			if e.has("sell_price") and (int(e.sell_price) < 1 or not e.has("stock") or int(e.stock) < 0): shape_ok = false

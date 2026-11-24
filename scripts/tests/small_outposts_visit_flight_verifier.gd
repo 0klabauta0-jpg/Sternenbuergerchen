@@ -133,8 +133,11 @@ func _no_trade_part(place: String) -> void:
 	var buy: Dictionary = _runtime.call("request_operation", "buy", {"craft_id": _craft_id, "service_location_id": place, "offer_id": "market:%s:%s" % [place, item], "quantity": 1, "request_id": "sv:buy"})
 	var sell: Dictionary = _runtime.call("request_operation", "sell", {"craft_id": _craft_id, "service_location_id": place, "source_container_id": "craft:" + _craft_id, "item_id": "c_benit", "quantity": 1, "request_id": "sv:sell"})
 	print("SV_NO_TRADE buy=", buy, " sell=", sell)
-	_check(not bool(buy.get("ok", true)) and String(buy.get("reason", "")) == "service_location_changed", "Kl1: Kauf am Posten %s abgelehnt, Grund %s" % [place, String(buy.get("reason", "?"))])
-	_check(not bool(sell.get("ok", true)) and String(sell.get("reason", "")) == "service_location_changed", "Kl1: Verkauf am Posten %s abgelehnt, Grund %s" % [place, String(sell.get("reason", "?"))])
+	# Gueter-Dreieck (24.11.2026): am Haendler-Marker gilt jetzt der Handelsdienst (das Schiff hat einen Versorgungskontext), aber nur fuer Heilkraeuter,
+	# Duenger und Aufputschmittel. Ein frueheres Handelsgut (Nahrung usw.) und Benit werden mit den Gruenden des Versorgungszustands abgelehnt -
+	# nicht mehr mit service_location_changed (das hiesse: kein Dienst am Ort).
+	_check(not bool(buy.get("ok", true)) and String(buy.get("reason", "")) == "unknown_offer", "Kl1: Kauf eines nicht gehandelten Guts am Posten %s abgelehnt, Grund %s" % [place, String(buy.get("reason", "?"))])
+	_check(not bool(sell.get("ok", true)) and String(sell.get("reason", "")) == "not_purchased", "Kl1: Verkauf von Benit am Posten %s abgelehnt, Grund %s" % [place, String(sell.get("reason", "?"))])
 	_check(int(Dictionary(_runtime.call("get_snapshot").get("supply", {})).get("credits", -2)) == before_credits, "Kl1: die Credits haben sich am Posten nicht bewegt (%d)" % before_credits)
 
 func _finish() -> void:

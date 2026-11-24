@@ -1193,6 +1193,19 @@ func _service_context(craft_id: String) -> Dictionary:
 				local["services"]=["trade"]
 			local.merge({"location_id":place_id,"craft_busy":false},true)
 			return local
+	# Gueter-Dreieck (24.11.2026): an den drei kleinen Aussenposten (small_outposts.json) gilt der Handelsdienst, sobald das Schiff gelandet und
+	# nah genug am Haendler-Marker steht (service_marker_id, service_radius_world). Nur Handel: kein Tanken, keine Reparatur, kein Frachtaufzug.
+	if location == "mission" and _campaign != null and not _campaign.small_outpost_entry(place_id).is_empty():
+		var post: Dictionary = _campaign.small_outpost_entry(place_id)
+		var post_mission: Node = _flow.call("get_mission_for_craft", craft_id)
+		var post_controller: Node = post_mission.get_node_or_null("TacticalController") if post_mission != null else null
+		if post_controller == null or not bool(post_controller.call("_is_parked_campaign_dropship", craft_id)): return {}
+		var post_setup: Node = post_mission.get_node_or_null("MissionSetup")
+		var post_map = post_setup.get("_loaded_terrain_map_data") if post_setup != null else null
+		var post_marker := String(post.get("service_marker_id", ""))
+		if post_map == null or post_marker.is_empty() or not post_map.has_marker(post_marker): return {}
+		if Vector2(post_controller.call("_campaign_landed_craft_position", craft_id)).distance_to(post_map.get_marker_position(post_marker)) > float(post.get("service_radius_world", 256.0)): return {}
+		return {"location_id": place_id, "craft_busy": false, "ground_service_verified": true, "services": ["trade"]}
 
 	return {}
 

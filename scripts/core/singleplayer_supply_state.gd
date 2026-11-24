@@ -48,6 +48,9 @@ var _stock_by_offer_id: Dictionary = {}
 ## (alte Staende ohne ihn laden mit vollem Bestand).
 var _market: Dictionary = {}
 var _market_stock: Dictionary = {}
+## Gueter-Dreieck: Ort -> {goods, text}. An diesen Orten wird nur mit den genannten Gueter gehandelt (Daten: commodity_market.json, post_goods).
+## Bei Ankaufswaren mit buy_limit steht in _market_stock["Ort:Ware"] die noch freie Abnahme (Start = buy_limit), sonst der Bestand.
+var _post_goods: Dictionary = {}
 ## Dauerauftraege (Handel H3): eigener Besitzer, nur in der Kampagne angelegt (enable_standing_orders); null = es gibt ihn nicht (Skirmish).
 const STANDING_ORDERS = preload("res://scripts/core/standing_orders_state.gd")
 const STANDING_ORDERS_PATH := "res://data/singleplayer/standing_orders.json"
@@ -138,6 +141,7 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 	for offer_id in Dictionary(data.get("offers", {})):
 		_stock_by_offer_id[String(offer_id)] = int(data.offers[offer_id].stock)
 	_market = parsed_market.market
+	_post_goods = parsed_market.post_goods
 	_market_stock = _full_market_stock()
 	for craft in crafts:
 		register_craft(String(craft.get("craft_id", craft.get("id", ""))) if typeof(craft) == TYPE_DICTIONARY else String(craft))
@@ -155,7 +159,7 @@ func register_craft(craft_id: String, initial_fuel: float = -1.0) -> bool:
 	return true
 
 func get_supply_snapshot() -> Dictionary:
-	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "campaign_housing_beds":get_campaign_housing_beds(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "emergency_fuel": Dictionary(_definitions.get("emergency_fuel", {})).duplicate(true), "debt": Dictionary(_definitions.get("debt", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory_view(), "blueprints": _blueprints(), "blueprint_overview": _blueprint_overview(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "market": get_market_snapshot(), "station_home_pads": get_station_home_pads()}
+	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "campaign_housing_beds":get_campaign_housing_beds(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "emergency_fuel": Dictionary(_definitions.get("emergency_fuel", {})).duplicate(true), "debt": Dictionary(_definitions.get("debt", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory_view(), "blueprints": _blueprints(), "blueprint_overview": _blueprint_overview(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "market": get_market_snapshot(), "post_goods": _post_goods.duplicate(true), "station_home_pads": get_station_home_pads()}
 
 func get_research_snapshot() -> Dictionary:
 	if _research_snapshot_revision != _revision:
@@ -966,6 +970,7 @@ func restore_state(data: Dictionary) -> Dictionary:
 	if standing_check != null and not standing_check.validate_state(data): return _reject("invalid_standing_orders", "Dauerauftraege ungueltig")
 	_reset_route_fuel_preparation()
 	_market = fresh._market.duplicate(true)
+	_post_goods = fresh._post_goods.duplicate(true)
 	_market_stock = market_full.duplicate()
 	for market_key: Variant in market_saved:
 		if market_full.has(market_key): _market_stock[market_key] = clampi(int(market_saved[market_key]), 0, int(market_full[market_key]))
@@ -1964,6 +1969,7 @@ func _valid_campaign_bed_requests(requests: Dictionary) -> bool:
 ## Handel H2: Preise stehen in data/singleplayer/commodity_market.json (buy_price); danach gilt der Block commodity_buy_orders
 ## der Handelsdaten (Polisa: Erz, Bergungsgut). Kein Preis steht fest im Code. Was ein Haendler selbst verkauft, kauft er nie.
 func _commodity_price(location: String, item: String) -> int:
+	if not _post_allows(location, item): return 0
 	var entry: Dictionary = Dictionary(Dictionary(_market.get(location, {})).get(item, {}))
 	if entry.has("sell_price"): return 0
 	if entry.has("buy_price"): return int(entry.buy_price)
@@ -1990,9 +1996,31 @@ func _parse_market(raw: Variant) -> Dictionary:
 			if e.has("buy_price"):
 				if e.has("sell_price") or not _valid_positive_integer(e.buy_price): return {"ok": false, "message": "Warenboerse: Ankaufspreis ungueltig oder Ware wird zugleich verkauft"}
 				clean["buy_price"] = int(e.buy_price)
+				# Gueter-Dreieck: so viele Stuecke nimmt der Haendler je Heimlandung ab (fehlt der Schluessel: unbegrenzt).
+				if e.has("buy_limit"):
+					if not _valid_positive_integer(e.buy_limit): return {"ok": false, "message": "Warenboerse: Abnahmegrenze ungueltig"}
+					clean["buy_limit"] = int(e.buy_limit)
+			elif e.has("buy_limit"):
+				return {"ok": false, "message": "Warenboerse: Abnahmegrenze ohne Ankaufspreis"}
 			items[String(item)] = clean
 		out[String(loc)] = items
-	return {"ok": true, "market": out}
+	var post_goods: Dictionary = {}
+	var posts: Variant = Dictionary(raw).get("post_goods", {})
+	if typeof(posts) != TYPE_DICTIONARY: return {"ok": false, "message": "Warenboerse: Posten ungueltig"}
+	for place: Variant in posts:
+		var post: Variant = posts[place]
+		if typeof(post) != TYPE_DICTIONARY or typeof(Dictionary(post).get("goods")) != TYPE_ARRAY or Array(Dictionary(post).get("goods")).is_empty(): return {"ok": false, "message": "Warenboerse: Postengueter ungueltig"}
+		var goods: Array = []
+		for good: Variant in Array(Dictionary(post).get("goods")):
+			if typeof(good) != TYPE_STRING or String(good).is_empty(): return {"ok": false, "message": "Warenboerse: Postengut ungueltig"}
+			goods.append(String(good))
+		post_goods[String(place)] = {"goods": goods, "text": String(Dictionary(post).get("text", ""))}
+	return {"ok": true, "market": out, "post_goods": post_goods}
+
+## Gueter-Dreieck: an Orten mit Eintrag in post_goods gilt nur die dort genannte Warenliste; sonst ist alles erlaubt.
+func _post_allows(location: String, item: String) -> bool:
+	if not _post_goods.has(location): return true
+	return Array(Dictionary(_post_goods[location]).get("goods", [])).has(item)
 
 func _market_key(location: String, item: String) -> String:
 	return location + ":" + item
@@ -2003,6 +2031,7 @@ func _full_market_stock() -> Dictionary:
 	for loc: String in _market:
 		for item: String in Dictionary(_market[loc]):
 			if Dictionary(_market[loc][item]).has("sell_price"): stock[_market_key(loc, item)] = int(_market[loc][item].stock)
+			elif Dictionary(_market[loc][item]).has("buy_limit"): stock[_market_key(loc, item)] = int(_market[loc][item].buy_limit)
 	return stock
 
 ## Warenboerse fuer Anzeige und Tests: Ort -> Ware -> {sell_price, stock, buy_price} (nur die vorhandenen Schluessel).
@@ -2013,6 +2042,7 @@ func get_market_snapshot() -> Dictionary:
 		for item: String in Dictionary(_market[loc]):
 			var e: Dictionary = Dictionary(_market[loc][item]).duplicate()
 			if e.has("sell_price"): e["stock"] = int(_market_stock.get(_market_key(loc, item), 0))
+			if e.has("buy_limit"): e["demand"] = int(_market_stock.get(_market_key(loc, item), 0))
 			items[item] = e
 		out[loc] = items
 	return out
@@ -2040,6 +2070,8 @@ func _buy_market(offer_id: String, payload: Dictionary, context: Dictionary) -> 
 	if not entry.has("sell_price"): return _reject("unknown_offer", "Angebot unbekannt")
 	if bool(context.get("craft_busy", true)): return _reject("craft_busy", "Handel erst nach der Landung am Serviceort")
 	if parts[1] != location_id or not _has_service(location_id, "trade"): return _reject("trade_unavailable", "Handel nur am Handelsservice")
+	# Gueter-Dreieck: an den drei kleinen Aussenposten gibt es nur die Gueter aus post_goods (alles andere ist dort kein Angebot).
+	if not _post_allows(parts[1], item_id): return _reject("unknown_offer", "Angebot unbekannt")
 	if not _valid_positive_integer(payload.get("quantity")): return _reject("invalid_quantity", "Menge muss eine positive ganze Zahl sein")
 	var quantity: int = int(payload.quantity)
 	var key: String = _market_key(location_id, item_id)
@@ -2064,6 +2096,7 @@ func get_sellable_proceeds(location_id: String, container_ids: Array) -> int:
 	if not _has_service(location_id, "trade"): return 0
 	var total := 0
 	var seen: Dictionary = {}
+	var taken: Dictionary = {}
 	for raw_id: Variant in container_ids:
 		var container := String(raw_id)
 		if seen.has(container) or not _inventory.has(container): continue
@@ -2072,7 +2105,14 @@ func get_sellable_proceeds(location_id: String, container_ids: Array) -> int:
 		for item_id: Variant in items.keys():
 			var item := String(item_id)
 			var price := _commodity_price(location_id, item)
-			if price > 0 and not INVENTORY.RESERVED_QUEST_ITEMS.has(item): total += int(items[item_id]) * price
+			if price > 0 and not INVENTORY.RESERVED_QUEST_ITEMS.has(item):
+				var count: int = int(items[item_id])
+				if Dictionary(Dictionary(_market.get(location_id, {})).get(item, {})).has("buy_limit"):
+					# Gueter-Dreieck: nur so viel, wie der Haendler noch abnimmt (ueber alle Lager zusammen).
+					var free_demand: int = int(_market_stock.get(_market_key(location_id, item), 0)) - int(taken.get(item, 0))
+					count = clampi(count, 0, maxi(free_demand, 0))
+					taken[item] = int(taken.get(item, 0)) + count
+				total += count * price
 	return total
 
 func _sell(payload: Dictionary, context: Dictionary) -> Dictionary:
@@ -2086,6 +2126,14 @@ func _sell(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var quantity := int(payload.quantity)
 	var items: Dictionary = _inventory[container].items
 	if int(items.get(item,0))<quantity: return _reject("insufficient_items","Bestand reicht nicht")
+	# Gueter-Dreieck: der Haendler nimmt je Heimlandung nur buy_limit Stuecke ab (frei: _market_stock["Ort:Ware"]).
+	var demand_key: String = _market_key(location, item)
+	var limited: bool = Dictionary(Dictionary(_market.get(location, {})).get(item, {})).has("buy_limit")
+	if limited:
+		var open_demand: int = int(_market_stock.get(demand_key, 0))
+		if quantity > open_demand:
+			return _reject("demand_full", "Der Händler nimmt davon nichts mehr ab – nach der Heimlandung wieder." if open_demand <= 0 else "Der Händler nimmt nur noch %d Stück ab – nach der Heimlandung wieder mehr." % open_demand)
+		_market_stock[demand_key] = open_demand - quantity
 	items[item]-=quantity
 	if items[item]==0: items.erase(item)
 	_credits+=quantity*price; _revision+=1
