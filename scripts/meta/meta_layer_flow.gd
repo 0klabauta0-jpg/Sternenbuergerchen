@@ -9259,7 +9259,7 @@ func _release_location_for_waiting_retreat(visit: Node) -> bool:
 
 
 ## Handel H2 (D4): Landung eines Spielerschiffs an der Heimatbasis fuellt die Benit-Warenboerse aller Orte wieder voll auf (Kampagne und Skirmish).
-func _replenish_market_after_landing() -> void:
+func _restock_market_after_landing() -> void:
 	if _singleplayer_runtime == null or not _singleplayer_runtime.has_method("replenish_market"): return
 	_singleplayer_runtime.call("replenish_market")
 
@@ -9275,7 +9275,7 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 	_homecoming_forget_craft(craft_id) # a later landing of the same craft replaces its note
 	_restore_returning_visit_membership(craft_id)
 	_aircraft_location_by_craft[craft_id] = "homebase"
-	_replenish_market_after_landing() # Handel H2: Marktbestaende der Benit-Warenboerse bei der Heimlandung auffuellen
+	_restock_market_after_landing() # Handel H2: Marktbestaende der Benit-Warenboerse bei der Heimlandung auffuellen
 	_admit_unplaced_aboard_crew(craft_id)
 	_remove_pending_mission_craft_transfer(craft_id)
 	# Ein Rueckzug ohne Ausfaelle (Regel 8) hat keinen Debrief, der die Ortsinstanz freigibt. Bleibt sie fokussiert, gilt das Schiff
