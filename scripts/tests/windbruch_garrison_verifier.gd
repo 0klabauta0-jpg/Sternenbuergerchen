@@ -54,6 +54,7 @@ func _initialize() -> void:
 	_bounty_part()
 	_count_part()
 	_chest_part()
+	_report_part()
 	print("WINDBRUCH_GARRISON passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
 
@@ -90,6 +91,9 @@ func _scenario_part() -> void:
 	_check(map_ok, "Freies Lager liegt auf der Karte des Kampagnenauftrags")
 	var guard := _enemy_count(campaign)
 	var camp := _enemy_count(free)
+	# Gesamtzahl der Gegner im Kampagnenauftrag: alle Gruppen UND alle Wellen (Wellen x Einheiten je Welle darf nicht mehr sein als die Gruppen).
+	var campaign_waves: Dictionary = Dictionary(campaign.get("wave_config", {}))
+	_check(int(campaign_waves.get("wave_count", 1)) * int(campaign_waves.get("units_per_wave", 0)) == guard, "Kampagnenwache: Gruppen (%d) und Wellen (%d x %d) ergeben dieselbe Gesamtzahl" % [guard, int(campaign_waves.get("wave_count", 1)), int(campaign_waves.get("units_per_wave", 0))])
 	_check(guard == 2 and camp == 2 * guard, "Gegnerzahl = 2 x Wache (%d x 2 = %d)" % [guard, camp])
 	_check(int(Dictionary(free.get("wave_config", {})).get("units_per_wave", 0)) == camp and int(Dictionary(free.get("wave_config", {})).get("wave_count", 0)) == 1, "Eine Welle mit allen Gegnern sofort (vollzaehlig bei jedem Besuch)")
 	var free_weapons := _weapons(free)
@@ -275,3 +279,16 @@ func _key_of(grants: Array) -> PackedStringArray:
 	var parts := PackedStringArray()
 	for g: Dictionary in grants: parts.append("%s:%d" % [String(g.item_id), int(g.quantity)])
 	return parts
+
+# ---------- Sichtbare Abrechnung beim freien Besuch ----------
+
+func _report_part() -> void:
+	var debrief: GDScript = load("res://scripts/meta/debrief_screen.gd")
+	_check(String(debrief.call("build_bounty_text", {"bounty": {"line": "Kopfgeld: 3 × 50 = 150 Credits"}})) == "Kopfgeld: 3 × 50 = 150 Credits", "Meldung: Kopfgeld-Zeile kommt unveraendert")
+	var chest: String = String(debrief.call("build_chest_text", [{"item_id": "rifle", "quantity": 1, "left_behind": 0}]))
+	_check(chest.begins_with("Kiste: 1 ") and chest.length() > 10, "Meldung: Kistenfund als Zeile (%s)" % chest)
+	var rockets: String = String(debrief.call("build_chest_text", [{"item_id": "rocket_launcher", "quantity": 1, "left_behind": 0}, {"item_id": "ammo_rocket", "quantity": 2, "left_behind": 0}]))
+	_check(rockets.contains(", 2 "), "Meldung: Raketenwerfer mit zwei Raketen in einer Zeile (%s)" % rockets)
+	_check(String(debrief.call("build_chest_text", [])) == "", "Meldung: ohne Fund keine Zeile")
+	var flow_src := FileAccess.get_file_as_string("res://scripts/meta/meta_layer_flow.gd")
+	_check(flow_src.count("_report_visit_settlement(visit_bounty, visit_loot)") == 2 and flow_src.contains("_show_save_feedback(\"  \".join(lines))"), "Meldung: Abflug und Heimflug von einem freien Ort melden ueber die Zeile am Bildschirmrand")

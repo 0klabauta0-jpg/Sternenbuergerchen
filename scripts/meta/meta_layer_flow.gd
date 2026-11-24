@@ -9495,8 +9495,9 @@ func _complete_space_surface_departure(craft_id: String, instance: Node, record:
 	# Kopfgeld (Dauerauftrag "Rebellen hetzen"): Abflug von einem freien Ort ohne Auftrag rechnet die Ausgeschalteten ab; mit Auftrag
 	# macht das record_mission_result unten (mehrfaches Abrechnen bucht nichts doppelt).
 	if instance != null and String(identity.get("job_id", "")).is_empty() and _singleplayer_runtime != null and _singleplayer_runtime.has_method("settle_bounty_instance"):
-		_singleplayer_runtime.call("settle_bounty_instance", instance)
-		_singleplayer_runtime.call("settle_free_camp_loot", instance, craft_id, String(identity.get("scenario_id", "")))  # Beutekiste im freien Lager
+		var visit_bounty: Dictionary = Dictionary(_singleplayer_runtime.call("settle_bounty_instance", instance))
+		var visit_loot: Array = Array(_singleplayer_runtime.call("settle_free_camp_loot", instance, craft_id, String(identity.get("scenario_id", ""))))  # Beutekiste im freien Lager
+		_report_visit_settlement(visit_bounty, visit_loot)
 	# Publish the completed Flow projection before observers can admit a new visit.
 	if String(identity.get("craft_id", "")) == craft_id and not String(identity.get("job_id", "")).is_empty():
 		_singleplayer_runtime.call("record_mission_result", _campaign_departure_booking({"result":"aborted","reason":"craft_left_without_objective_completion"}, instance), identity)
@@ -9823,6 +9824,18 @@ func _report_launch_save(saved: Dictionary, ammo_note: String = "") -> void:
 	_show_save_feedback("Vor dem Abheben nicht gespeichert: " + sentence + tail)
 
 
+## Freier Besuch (ohne Auftrag): meldet Kopfgeld und Kistenfund ueber die Zeile am Bildschirmrand (_show_save_feedback), die auch
+## "Gespeichert." und die Munitionsmeldung zeigt. Ohne beides keine Meldung. Der Text kommt aus debrief_screen (gleiche Formulierung wie im Bericht).
+func _report_visit_settlement(bounty: Dictionary, loot: Array) -> void:
+	var debrief: GDScript = load("res://scripts/meta/debrief_screen.gd")
+	var lines := PackedStringArray()
+	var bounty_text: String = String(debrief.call("build_bounty_text", {"bounty": bounty})) if not bounty.is_empty() else ""
+	if not bounty_text.is_empty(): lines.append(bounty_text)
+	var chest_text: String = String(debrief.call("build_chest_text", loot)) if not loot.is_empty() else ""
+	if not chest_text.is_empty(): lines.append(chest_text)
+	if not lines.is_empty(): _show_save_feedback("  ".join(lines))
+
+
 ## Der gemerkte Speicherwunsch (leer = keiner); nur lesen.
 func get_pending_save_wish() -> Dictionary:
 	return _save_wish.duplicate(true)
@@ -10145,8 +10158,9 @@ func _finish_singleplayer_visit_if_returned() -> void:
 	if not String(_active_singleplayer_identity.get("job_id", "")).is_empty():
 		_singleplayer_runtime.call("record_mission_result", _campaign_departure_booking({"result": "aborted", "reason": "craft_returned_without_objective_completion"}, _active_mission), _active_singleplayer_identity.duplicate(true))
 	elif _singleplayer_runtime != null and _singleplayer_runtime.has_method("settle_bounty_instance"):
-		_singleplayer_runtime.call("settle_bounty_instance", _active_mission)  # Kopfgeld auch beim Heimflug von einem freien Ort
-		_singleplayer_runtime.call("settle_free_camp_loot", _active_mission, String(_active_singleplayer_identity.get("craft_id", "")), String(_active_singleplayer_identity.get("scenario_id", "")))
+		var visit_bounty: Dictionary = Dictionary(_singleplayer_runtime.call("settle_bounty_instance", _active_mission))  # Kopfgeld auch beim Heimflug von einem freien Ort
+		var visit_loot: Array = Array(_singleplayer_runtime.call("settle_free_camp_loot", _active_mission, String(_active_singleplayer_identity.get("craft_id", "")), String(_active_singleplayer_identity.get("scenario_id", ""))))
+		_report_visit_settlement(visit_bounty, visit_loot)
 	_release_active_mission()
 	_active_singleplayer_identity.clear()
 	_mission_planning_state = DEFAULT_MISSION_PLANNING_STATE.duplicate(true)

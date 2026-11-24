@@ -930,6 +930,28 @@ static func build_bounty_text(mission_result: Dictionary) -> String:
 	return String(Dictionary(mission_result.get("bounty")).get("line", ""))
 
 
+## Kistenfund im freien Rebellenlager: "Kiste: <Menge> <Name>" je Zeile des Fundes; Rest ohne Platz steht dahinter. Leer ohne Fund.
+static func build_chest_text(loot: Array) -> String:
+	var labels: Dictionary = load("res://scripts/ui/components/personnel_inventory_panel.gd").LABELS
+	var found := PackedStringArray()
+	var left := PackedStringArray()
+	for entry_variant in loot:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var label := String(labels.get(String(entry.get("item_id", "")), String(entry.get("item_id", ""))))
+		if int(entry.get("quantity", 0)) > 0:
+			found.append("%d %s" % [int(entry.quantity), label])
+		if int(entry.get("left_behind", 0)) > 0:
+			left.append("%d %s" % [int(entry.left_behind), label])
+	if found.is_empty() and left.is_empty():
+		return ""
+	var text := "Kiste: " + (", ".join(found) if not found.is_empty() else "nichts mitgenommen")
+	if not left.is_empty():
+		text += " (kein Platz im Frachtraum: " + ", ".join(left) + ")"
+	return text
+
+
 ## Beute aus optionalen Ausruestungskisten (Feld loot_items des Abschlussergebnisses, vom Adapter gebucht); ohne Beute leer.
 static func build_loot_text(mission_result: Dictionary) -> String:
 	if typeof(mission_result.get("loot_items")) != TYPE_ARRAY:
