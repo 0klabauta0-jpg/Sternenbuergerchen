@@ -35,6 +35,7 @@ func _run() -> void:
 	_test_locked_path_uses_group_tactics()
 	_test_without_path_uses_group_tactics()
 	_test_non_patrol_styles_use_group_tactics()
+	_test_once_path_ends_in_group_tactics()
 	_test_hit_patroller_stops_patrolling()
 	_test_fallen_mate_in_sight_stops_patrolling()
 	_test_redirected_waypoint_counts_as_reached()
@@ -127,6 +128,35 @@ func _test_non_patrol_styles_use_group_tactics() -> void:
 		_run_decisions(g, 3)
 		_check(_sources_of(g, "enemy").has("enemy_patrol"), "8 (%s): eine Streifen-Gruppe laeuft den Weg (Quellen %s)" % [style, str(_sources_of(g, "enemy"))])
 		g.scope.free()
+
+
+## W6 (1g): Ein Weg mit Kennzeichen "einmal" wird nur einmal abgelaufen; am letzten Wegpunkt gilt die Patrouille als beendet (Sperre wie bei
+## Kontakt) und die Gruppentaktik uebernimmt. Ohne Kennzeichen bleibt es bei der Schleife.
+func _test_once_path_ends_in_group_tactics() -> void:
+	var f := _patrol_rig(false, true)
+	f.driver._enemy_patrol_once_by_unit_id["enemy"] = true
+	_run_decisions(f, 700)
+	_check(bool(f.driver._enemy_patrol_contact_locked.get("enemy", false)), "9: am Ende des Wegs gilt die Patrouille als beendet (gesperrt)")
+	_check(_sources_of(f, "enemy").has("enemy_patrol") and _sources_of(f, "enemy").has("enemy_team_tactics"), "9: erst Patrouille, danach die Gruppentaktik (Quellen %s)" % str(_sources_of(f, "enemy")))
+	var last_patrol := -1
+	var first_tactics := -1
+	for i in range(f.driver.commands.size()):
+		var source := String(f.driver.commands[i].get("source_command_type", ""))
+		if source == "enemy_patrol":
+			last_patrol = i
+		elif source == "enemy_team_tactics" and first_tactics < 0:
+			first_tactics = i
+	_check(last_patrol >= 0 and first_tactics > last_patrol, "9: nach dem letzten Patrouillenbefehl kommt kein Patrouillenbefehl mehr, die Taktik beginnt danach")
+	var patrol_targets := {}
+	for command in f.driver.commands:
+		if String(command.get("source_command_type", "")) == "enemy_patrol":
+			patrol_targets[Vector2(command.get("target_position", Vector2.ZERO))] = true
+	_check(patrol_targets.size() == 2, "9: beide Wegpunkte genau einmal angelaufen (%d verschiedene Ziele)" % patrol_targets.size())
+	f.scope.free()
+	var g := _patrol_rig(false, true)
+	_run_decisions(g, 700)
+	_check(not bool(g.driver._enemy_patrol_contact_locked.get("enemy", false)) and not _sources_of(g, "enemy").has("enemy_team_tactics"), "9 Gegenprobe: ohne Kennzeichen bleibt es bei der Schleife (Quellen %s)" % str(_sources_of(g, "enemy")))
+	g.scope.free()
 
 
 func _test_contact_uses_group_tactics() -> void:

@@ -6358,8 +6358,19 @@ func _advance_enemy_units(simulation_root: Node) -> void:
 		)
 
 
+## Kapitel 2, 1g (W6): Einheiten, deren Patrouillenweg nur EINMAL abgelaufen wird (Bindung mit mode "once"). Am Ende gilt die Patrouille
+## als beendet wie bei Kontakt: Sperre, danach die Gruppentaktik. Ohne Eintrag bleibt es bei der Schleife (heutiges Verhalten).
+var _enemy_patrol_once_by_unit_id: Dictionary = {}
+
+
 func _initialize_enemy_patrol_paths() -> void:
+	# Jeder Wellenstart ruft das erneut auf: schon laufende Streifen behalten Wegpunkt, Kontaktsperre und Gesundheitsgrundlinie
+	# (sonst finge eine Streife der ersten Welle mit der zweiten Welle wieder von vorn an und waere wieder entsperrt).
+	var previous_index: Dictionary = _enemy_patrol_waypoint_index_by_unit_id.duplicate()
+	var previous_locked: Dictionary = _enemy_patrol_contact_locked.duplicate()
+	var previous_baseline: Dictionary = _enemy_patrol_health_baseline.duplicate()
 	_enemy_patrol_paths_by_unit_id.clear()
+	_enemy_patrol_once_by_unit_id.clear()
 	_enemy_patrol_waypoint_index_by_unit_id.clear()
 	_enemy_patrol_contact_locked.clear()
 	_enemy_patrol_health_baseline.clear()
@@ -6376,8 +6387,12 @@ func _initialize_enemy_patrol_paths() -> void:
 		if patrol_path.is_empty():
 			continue
 		_enemy_patrol_paths_by_unit_id[unit_id] = patrol_path
-		_enemy_patrol_waypoint_index_by_unit_id[unit_id] = 0
-		_enemy_patrol_contact_locked[unit_id] = false
+		if enemy_wave_controller.has_method("is_patrol_once_for_unit") and bool(enemy_wave_controller.call("is_patrol_once_for_unit", unit_id)):
+			_enemy_patrol_once_by_unit_id[unit_id] = true
+		_enemy_patrol_waypoint_index_by_unit_id[unit_id] = int(previous_index.get(unit_id, 0))
+		_enemy_patrol_contact_locked[unit_id] = bool(previous_locked.get(unit_id, false))
+		if previous_baseline.has(unit_id):
+			_enemy_patrol_health_baseline[unit_id] = previous_baseline[unit_id]
 
 
 ## Kontakt ohne Sichtlinie zum Feind (Kapitel 2, 1f): Wer Schaden genommen hat oder wessen Kamerad aus der Gruppe in seiner Sichtweite
@@ -6445,6 +6460,9 @@ func _advance_patrol_waypoint_if_redirect_reached(simulation_root: Node, unit_id
 		return
 	if HEX_GRID_SCRIPT.distance(goal, waypoint_cell) > 2:
 		return
+	if bool(_enemy_patrol_once_by_unit_id.get(unit_id, false)) and index >= patrol_path.size() - 1:
+		_enemy_patrol_contact_locked[unit_id] = true
+		return
 	_enemy_patrol_waypoint_index_by_unit_id[unit_id] = (index + 1) % patrol_path.size()
 
 
@@ -6463,6 +6481,7 @@ func _try_enqueue_enemy_patrol_move(simulation_root: Node, enemy) -> bool:
 			"patrol_path": Array(_enemy_patrol_paths_by_unit_id.get(unit_id, [])),
 			"waypoint_index": int(_enemy_patrol_waypoint_index_by_unit_id.get(unit_id, 0)),
 			"contact_locked": bool(_enemy_patrol_contact_locked.get(unit_id, false)),
+			"patrol_once": bool(_enemy_patrol_once_by_unit_id.get(unit_id, false)),
 			"should_hold": _enemy_should_hold_position(enemy) or _enemy_patrol_contact_alert(enemy, unit_id),
 			"waypoint_reached_distance": ENEMY_PATROL_WAYPOINT_REACHED_DISTANCE,
 			"posture_fields": _build_enemy_patrol_posture_command_fields(enemy),

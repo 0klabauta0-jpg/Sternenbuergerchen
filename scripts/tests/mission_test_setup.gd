@@ -1242,6 +1242,8 @@ func _setup_enemy_waves(enemy_units: Array) -> void:
 	_apply_scenario_wave_config(enemy_wave_controller)
 	if enemy_wave_controller.has_method("set_patrol_paths"):
 		enemy_wave_controller.call("set_patrol_paths", _build_enemy_patrol_paths())
+	if enemy_wave_controller.has_method("set_patrol_once"):
+		enemy_wave_controller.call("set_patrol_once", _build_enemy_patrol_once_ids())
 	if enemy_wave_controller.has_method("set_enemy_tactics"):
 		enemy_wave_controller.call("set_enemy_tactics", _build_enemy_tactics_by_unit_id(enemy_units))
 
@@ -1311,6 +1313,23 @@ func _get_loaded_grid_size() -> Vector2i:
 	if _loaded_terrain_map_data != null and _loaded_terrain_map_data.has_method("get_grid_size"):
 		return _loaded_terrain_map_data.call("get_grid_size")
 	return Vector2i.ZERO
+
+
+## Gegner, deren Patrouillenweg nur einmal abgelaufen wird: Bindungen mit mode "once" (ohne mode oder "pre_contact" bleibt die Schleife).
+func _build_enemy_patrol_once_ids() -> PackedStringArray:
+	var result := PackedStringArray()
+	if _mission_scenario == null:
+		return result
+	for binding_variant in Array(_mission_scenario.get("patrol_bindings")):
+		var binding: Dictionary = Dictionary(binding_variant)
+		if String(binding.get("mode", "")).strip_edges().to_lower() != "once":
+			continue
+		var target_id: String = String(binding.get("target_id", "")).strip_edges()
+		if target_id.is_empty():
+			continue
+		for target_unit_id in _resolve_patrol_binding_targets(target_id):
+			result.append(String(target_unit_id))
+	return result
 
 
 func _build_enemy_patrol_paths() -> Dictionary:

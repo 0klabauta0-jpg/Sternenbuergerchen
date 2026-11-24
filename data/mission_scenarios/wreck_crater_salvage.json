@@ -22,7 +22,7 @@
         "wreck_looter_02"
       ],
       "tactics": {
-        "advance_style": "probe",
+        "advance_style": "patrol",
         "aim_move_speed_factor": 0.18,
         "air_asset_risk_profile": "none",
         "allowed_weapon_roles": [
@@ -59,7 +59,7 @@
         "wreck_looter_04"
       ],
       "tactics": {
-        "advance_style": "probe",
+        "advance_style": "patrol",
         "aim_move_speed_factor": 0.18,
         "air_asset_risk_profile": "none",
         "allowed_weapon_roles": [
@@ -95,7 +95,7 @@
   "patrol_bindings": [
     {
       "binding_id": "wreck_looters_to_wreck",
-      "mode": "pre_contact",
+      "mode": "once",
       "patrol_path_id": "wreck_looter_route",
       "target_id": "spawn_bravo"
     }

@@ -18,6 +18,7 @@ const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tacti
 var _enemy_units: Array = []
 var _spawn_positions_by_unit_id: Dictionary = {}
 var _patrol_paths_by_unit_id: Dictionary = {}
+var _patrol_once_unit_ids: Dictionary = {}
 var _enemy_tactics_by_unit_id: Dictionary = {}
 var _current_wave_number: int = 0
 var _time_until_next_wave: float = 0.0
@@ -69,6 +70,19 @@ func set_patrol_paths(patrol_paths_by_unit_id: Dictionary) -> void:
 		if unit_id.is_empty():
 			continue
 		_patrol_paths_by_unit_id[unit_id] = Array(patrol_paths_by_unit_id.get(unit_id_variant, [])).duplicate(true)
+
+
+## Einheiten, deren Patrouillenweg nur einmal abgelaufen wird (Bindung mit mode "once"); ohne Eintrag gilt die Schleife.
+func set_patrol_once(unit_ids: PackedStringArray) -> void:
+	_patrol_once_unit_ids.clear()
+	for unit_id in unit_ids:
+		var normalized: String = String(unit_id).strip_edges()
+		if not normalized.is_empty():
+			_patrol_once_unit_ids[normalized] = true
+
+
+func is_patrol_once_for_unit(unit_id: String) -> bool:
+	return bool(_patrol_once_unit_ids.get(unit_id.strip_edges(), false))
 
 
 func get_patrol_path_for_unit(unit_id: String) -> Array:
