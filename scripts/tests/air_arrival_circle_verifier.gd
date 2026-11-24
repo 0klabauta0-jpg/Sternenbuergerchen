@@ -466,6 +466,8 @@ func _part_real() -> void:
 	var land_button: Button = _air_button(mission, "air_land")
 	if not _check(land_button != null and land_button.is_visible_in_tree() and not land_button.disabled, "(E7) der vorhandene Knopf Landen ist nach der Kreis-Ankunft erreichbar"): return
 	land_button.pressed.emit()
+	# Luftrollen 1b: die Ankunft im Kreisen ist eine echte Rundbahn; "Landen" fliegt erst zur Landezone (landing_pending) und landet dort. Obergrenze 60 s.
+	await _wait(func(): return not root_owner.call("is_air_support_craft_airborne", _craft_id), 60000, "(E7) das Schiff fliegt aus der Rundbahn zur Landezone und landet")
 	_check(not root_owner.call("is_air_support_craft_airborne", _craft_id) and controller.call("_is_parked_campaign_dropship", _craft_id) and not Dictionary(root_owner.get("_air_support_sorties")).has(_craft_id), "(E7) nach dem Landen ist das Schiff geparkt, Sortie beendet")
 	embarked = controller.get("_embarked_unit_ids")
 	var still_aboard := true
