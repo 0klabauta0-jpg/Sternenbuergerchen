@@ -53,6 +53,7 @@ func _initialize() -> void:
 	_scenario_part()
 	_bounty_part()
 	_count_part()
+	_chest_part()
 	print("WINDBRUCH_GARRISON passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
 
@@ -225,3 +226,52 @@ func _count_part() -> void:
 	driver.call("mark_bounty_settled", 1)
 	_check(int(driver.call("get_bounty_settled_count")) == 2, "Abgerechnete Zahl faellt nie zurueck (kein Doppelbuchen)")
 	fixture.free()
+
+# ---------- Teil 3: Beutekiste ----------
+
+func _chest_part() -> void:
+	var scenario = SCENARIO_DATA.load_from_file("res://data/mission_scenarios/%s.json" % FREE_SCENARIO)
+	_check(scenario != null, "Kiste: Szenario laedt")
+	if scenario == null: return
+	var point: Dictionary = {}
+	for p: Variant in Array(Dictionary(scenario.call("get_vertical_slice")).get("interaction_points", [])):
+		if String(Dictionary(p).get("interaction_id", "")) == "camp_chest": point = Dictionary(p)
+	_check(not point.is_empty(), "Kiste: Benutzen-Stelle camp_chest ist da")
+	var map_text := FileAccess.get_file_as_string("res://maps/windbruch_outpost.json")
+	_check(map_text.contains('"%s"' % String(point.get("marker_id", "-"))) and not ["ship_return", "spawn_alpha"].has(String(point.get("marker_id", ""))), "Kiste: vorhandene Marke der Karte (%s), nicht am Landeplatz" % String(point.get("marker_id", "")))
+	var pool: Array = Array(point.get("grants_pool", []))
+	_check(pool.size() == 4, "Kiste: vier Fundmoeglichkeiten (Bauplan ausgelassen: es gibt ihn nicht als Gegenstand)")
+	var wanted := {"rifle:1": true, "armor_medium:1": true, "rocket_launcher:1|ammo_rocket:2": true, "ammo_rocket:4": true}
+	var seen: Dictionary = {}
+	var always_one := true
+	var stable := true
+	for roll in range(200):
+		var grants: Array = scenario.call("get_interaction_grants", "camp_chest", roll)
+		var parts := PackedStringArray()
+		for g: Dictionary in grants: parts.append("%s:%d" % [String(g.item_id), int(g.quantity)])
+		var key := "|".join(parts)
+		always_one = always_one and wanted.has(key)
+		seen[key] = true
+		stable = stable and key == "|".join(_key_of(scenario.call("get_interaction_grants", "camp_chest", roll)))
+	_check(always_one, "Kiste: jeder Fund ist genau eine der vorgesehenen Moeglichkeiten")
+	_check(stable, "Kiste: gleicher Startwert gibt denselben Fund")
+	_check(seen.size() == 4, "Kiste: alle vier Funde kommen vor (%d gesehen)" % seen.size())
+	_check(Array(scenario.call("get_interaction_grants", "camp_chest")).is_empty(), "Kiste: ohne Startwert gibt es nichts")
+	# Buchung je Besuch: eigene Belege, zweiter Besuch bucht wieder; im selben Besuch doppelt gibt nichts.
+	var s: RefCounted = _supply()
+	var rid := "campaign-cargo:loot:%s:camp_chest:%d:0:0"
+	var ctx := {"campaign_authorized": true}
+	var first: Dictionary = s.apply_command(_cmd("campaign_cargo", {"container_id": "craft:ship", "item_id": "rifle", "amount": 1}, "campaign-cargo:loot:windbruch_free_camp:camp_chest:0:0:0"), ctx)
+	_check(bool(first.get("ok", false)) and int(s.count_requests("campaign-cargo:loot:windbruch_free_camp:camp_chest:", ":0:0")) == 1, "Kiste: erster Besuch gebucht, Zaehler 1")
+	var twice: Dictionary = s.apply_command(_cmd("campaign_cargo", {"container_id": "craft:ship", "item_id": "rifle", "amount": 1}, "campaign-cargo:loot:windbruch_free_camp:camp_chest:0:0:0"), ctx)
+	_check(bool(twice.get("replayed", false)), "Kiste: zweites Buchen im selben Besuch ist ein Replay (gibt nichts)")
+	var second: Dictionary = s.apply_command(_cmd("campaign_cargo", {"container_id": "craft:ship", "item_id": "rifle", "amount": 1}, "campaign-cargo:loot:windbruch_free_camp:camp_chest:1:0:0"), ctx)
+	_check(bool(second.get("ok", false)) and not bool(second.get("replayed", false)) and int(s.count_requests("campaign-cargo:loot:windbruch_free_camp:camp_chest:", ":0:0")) == 2, "Kiste: zweiter Besuch bucht wieder (eigener Beleg)")
+	for item in ["rocket_launcher", "ammo_rocket", "armor_medium"]:
+		var r: Dictionary = s.apply_command(_cmd("campaign_cargo", {"container_id": "craft:ship", "item_id": item, "amount": 1}), ctx)
+		_check(bool(r.get("ok", false)), "Kiste: %s laesst sich ins Schiff buchen" % item)
+
+func _key_of(grants: Array) -> PackedStringArray:
+	var parts := PackedStringArray()
+	for g: Dictionary in grants: parts.append("%s:%d" % [String(g.item_id), int(g.quantity)])
+	return parts

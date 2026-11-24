@@ -235,6 +235,14 @@ func _prune_air_fuel_receipts(craft_id: String, keep_id: String) -> void:
 		if old_result.get("operation") == "consume_air_fuel" and String(old_result.get("craft_id", "")) == craft_id: stale.append(request_id)
 	for request_id in stale: _requests.erase(request_id)
 
+## Zahl der gespeicherten Belege, deren Kennung mit prefix beginnt und mit suffix endet (nur lesend). Gibt der Adapter zum Beispiel die
+## Zahl der bisherigen Kistenfunde: sie steht im Spielstand und ist der feste Startwert des naechsten Besuchs.
+func count_requests(prefix: String, suffix: String = "") -> int:
+	var total := 0
+	for request_id: String in _requests:
+		if request_id.begins_with(prefix) and request_id.ends_with(suffix): total += 1
+	return total
+
 func get_purchase_receipt(request_id: String) -> Dictionary:
 	# Visual clients may read only the confirmed result, never mutate inventory.
 	var entry: Dictionary = _requests.get(request_id, {})

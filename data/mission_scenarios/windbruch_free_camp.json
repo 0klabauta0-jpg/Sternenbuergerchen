@@ -181,6 +181,25 @@
         "display_name": "Zum Schiff zurückkehren",
         "interaction_id": "ship_return",
         "marker_id": "ship_return"
+      },
+      {
+        "gate_id": "camp_chest",
+        "step_id": "camp_chest",
+        "duration_seconds": 3.0,
+        "required_state": "camp_chest_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Kiste im Lager öffnen",
+        "interaction_id": "camp_chest",
+        "marker_id": "outpost_chip",
+        "grants_pool": [
+          {"id": "assault_rifle", "items": [{"item_id": "rifle", "quantity": 1}]},
+          {"id": "medium_armor", "items": [{"item_id": "armor_medium", "quantity": 1}]},
+          {"id": "rocket_launcher_with_rockets", "items": [{"item_id": "rocket_launcher", "quantity": 1}, {"item_id": "ammo_rocket", "quantity": 2}]},
+          {"id": "rocket_ammo", "items": [{"item_id": "ammo_rocket", "quantity": 4}]}
+        ]
       }
     ],
     "flow_steps": [

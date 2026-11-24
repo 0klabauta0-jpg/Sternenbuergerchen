@@ -1388,6 +1388,41 @@ func settle_bounty_instance(mission: Node) -> Dictionary:
 	last_bounty = {"kills": int(paid.kills), "pay": int(paid.credits_added), "line": String(paid.line)}
 	return last_bounty.duplicate(true)
 
+## Beutekiste im freien Rebellenlager (Szenario aus open_garrisons.json): wurde sie geoeffnet, bucht der Abflug GENAU EINEN Fund aus ihrem
+## grants_pool in die Schiffsfracht. Startwert = Zahl der bisherigen Kistenfunde (steht in den gespeicherten Belegen, je Besuch fest);
+## je Besuch einmal (Merker am Einsatzort), jeder Besuch eigene Belege. Passt etwas nicht ins Schiff, bleibt es liegen (wie bei grants_items).
+## Rueckgabe wie _grant_used_interaction_loot: [{item_id, quantity, left_behind}].
+var last_camp_loot: Array = []
+
+func settle_free_camp_loot(mission: Node, craft_id: String, scenario_id: String) -> Array:
+	if not _campaign_mode or _supply == null or _simulation == null or craft_id.is_empty() or not is_instance_valid(mission) or mission.has_meta("camp_loot_booked"): return []
+	var garrisons: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/open_garrisons.json"))
+	if typeof(garrisons) != TYPE_DICTIONARY or not Dictionary(garrisons).values().has(scenario_id): return []
+	var driver: Node = mission.get_node_or_null("CombatLoopDriver")
+	if driver == null or not driver.has_method("get_mission_interaction_runtime_states"): return []
+	var states: Dictionary = Dictionary(driver.call("get_mission_interaction_runtime_states"))
+	var scenario = load("res://scripts/mission/mission_scenario_data.gd").load_from_file("res://data/mission_scenarios/" + scenario_id + ".json")
+	if scenario == null: return []
+	var report: Array = []
+	for point_variant in Array(Dictionary(scenario.call("get_vertical_slice")).get("interaction_points", [])):
+		var interaction_id: String = String(Dictionary(point_variant).get("interaction_id", ""))
+		if not Dictionary(point_variant).has("grants_pool") or not bool(Dictionary(states.get(interaction_id, {})).get("complete", false)): continue
+		var prefix := "campaign-cargo:loot:%s:%s:" % [scenario_id, interaction_id]
+		var visit_no: int = int(_supply.count_requests(prefix, ":0:0"))
+		var line_no := 0
+		for entry: Dictionary in scenario.call("get_interaction_grants", interaction_id, visit_no):
+			var booked := 0
+			var left_behind := 0
+			for piece in range(int(entry.quantity)):
+				var cargo: Dictionary = _campaign_cargo(craft_id, String(entry.item_id), 1, "loot:%s:%s:%d:%d:%d" % [scenario_id, interaction_id, visit_no, line_no, piece])
+				if bool(cargo.get("ok", false)): booked += 1
+				else: left_behind += 1
+			report.append({"item_id": String(entry.item_id), "quantity": booked, "left_behind": left_behind})
+			line_no += 1
+		mission.set_meta("camp_loot_booked", true)
+	if not report.is_empty(): last_camp_loot = report
+	return report
+
 func settle_bounty(craft_id: String) -> Dictionary:
 	if craft_id.is_empty() or _flow == null or not _flow.has_method("get_mission_for_craft"): return {}
 	return settle_bounty_instance(_flow.call("get_mission_for_craft", craft_id))

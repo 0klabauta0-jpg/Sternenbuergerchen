@@ -512,7 +512,10 @@ func _validate_briefing(errors: PackedStringArray) -> void:
 
 ## Gepruefte Beute eines Interaktionspunkts (Rohfeld grants_items aus vertical_slice.interaction_points;
 ## die normalisierten Bindings kennen das Feld nicht). Leer, wenn der Punkt fehlt, das Feld fehlt oder ungueltig ist.
-func get_interaction_grants(interaction_id: String) -> Array:
+##
+## Zufallsfund (Feld grants_pool: Liste von {"id", "items": [{item_id, quantity}]}): GENAU EINE Option, gewaehlt aus roll_seed
+## (gleicher Startwert = gleicher Fund); ohne Startwert (< 0) liefert ein Pool nichts.
+func get_interaction_grants(interaction_id: String, roll_seed: int = -1) -> Array:
 	var result: Array = []
 	for point_variant in Array(vertical_slice.get("interaction_points", [])):
 		if typeof(point_variant) != TYPE_DICTIONARY or String(Dictionary(point_variant).get("interaction_id", "")) != interaction_id:
@@ -521,13 +524,37 @@ func get_interaction_grants(interaction_id: String) -> Array:
 		_validate_grants_items(Dictionary(point_variant), "interaction_points[%s]" % interaction_id, errors)
 		if not errors.is_empty():
 			return []
-		for entry_variant in Array(Dictionary(point_variant).get("grants_items", [])):
+		var source: Array = Array(Dictionary(point_variant).get("grants_items", []))
+		var pool: Array = Array(Dictionary(point_variant).get("grants_pool", []))
+		if not pool.is_empty():
+			if roll_seed < 0:
+				return []
+			source = Array(Dictionary(pool[pool_index(roll_seed, pool.size())]).get("items", []))
+		for entry_variant in source:
 			var entry: Dictionary = Dictionary(entry_variant)
 			result.append({"item_id": String(entry.get("item_id", "")).strip_edges(), "quantity": int(entry.get("quantity", 0))})
 	return result
 
 
+## Welche Option eines Zufallsfunds (grants_pool) zu einem Startwert gehoert; fest und wiederholbar.
+static func pool_index(roll_seed: int, size: int) -> int:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("interaction_pool:%d" % roll_seed)
+	return int(rng.randi() % maxi(size, 1))
+
+
 func _validate_grants_items(point: Dictionary, label: String, errors: PackedStringArray) -> void:
+	if point.has("grants_pool"):
+		if not (point.get("grants_pool") is Array) or Array(point.get("grants_pool")).is_empty():
+			errors.append("%s.grants_pool must be a non-empty list of {id, items}" % label)
+		else:
+			var option_index: int = 0
+			for option_variant in Array(point.get("grants_pool")):
+				if typeof(option_variant) != TYPE_DICTIONARY or not Dictionary(option_variant).has("items"):
+					errors.append("%s.grants_pool[%d] must be {id, items}" % [label, option_index])
+				else:
+					_validate_grants_items({"grants_items": Dictionary(option_variant).get("items")}, "%s.grants_pool[%d]" % [label, option_index], errors)
+				option_index += 1
 	if not point.has("grants_items"):
 		return
 	var grants: Variant = point.get("grants_items")
