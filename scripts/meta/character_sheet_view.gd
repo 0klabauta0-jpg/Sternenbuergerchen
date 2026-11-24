@@ -249,7 +249,7 @@ static func _add_carried_inventory(host:VBoxContainer,options:Dictionary)->void:
 		var row:=HBoxContainer.new();section.add_child(row)
 		var icon:=TextureRect.new();icon.name="CarriedInventoryItem_"+item;icon.custom_minimum_size=Vector2(72,72);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.texture=load("res://scripts/ui/menu_equipment_icons.gd").get_icon(item);row.add_child(icon)
-		var labels:Dictionary={"satellite_chip":"Satellitendatenträger","outpost_chip":"Außenposten-Datenträger","a_benit":"A-Benit","b_benit":"B-Benit","c_benit":"C-Benit","food":"Nahrung","medical_supplies":"Medizinische Güter","bandage":"Verbandsmaterial","luxury_goods":"Genussmittel","stim":"Stims"}
+		var labels:Dictionary={"satellite_chip":"Satellitendatenträger","outpost_chip":"Außenposten-Datenträger","a_benit":"A-Benit","b_benit":"B-Benit","c_benit":"C-Benit","food":"Nahrung","medical_supplies":"Medizinische Güter","bandage":"Verbandsmaterial","luxury_goods":"Genussmittel","stim":"Stims","heilkraeuter":"Heilkräuter","duenger":"Dünger","aufputschmittel":"Aufputschmittel"}
 		_overview_label(row,"CarriedInventoryLabel_"+item,"%s × %d"%[String(labels.get(item,item)),int(items[item])],16)
 
 

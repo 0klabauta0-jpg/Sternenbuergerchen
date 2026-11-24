@@ -23,20 +23,35 @@
       "c_benit": {"buy_price": 15}
     },
     "muellers_farm": {
-      "food": {"sell_price": 5, "stock": 16}
+      "food": {"sell_price": 5, "stock": 16},
+      "heilkraeuter": {"sell_price": 20, "stock": 12},
+      "duenger": {"buy_price": 34, "buy_limit": 12},
+      "aufputschmittel": {"buy_price": 34, "buy_limit": 12}
     },
     "templanon": {
       "medical_supplies": {"sell_price": 12, "stock": 16},
-      "bandage": {"sell_price": 6, "stock": 16}
+      "bandage": {"sell_price": 6, "stock": 16},
+      "aufputschmittel": {"sell_price": 20, "stock": 12},
+      "heilkraeuter": {"buy_price": 34, "buy_limit": 12},
+      "duenger": {"buy_price": 34, "buy_limit": 12}
     },
     "shady_lab": {
       "luxury_goods": {"sell_price": 9, "stock": 16},
-      "stim": {"sell_price": 14, "stock": 8}
+      "stim": {"sell_price": 14, "stock": 8},
+      "duenger": {"sell_price": 20, "stock": 12},
+      "heilkraeuter": {"buy_price": 34, "buy_limit": 12},
+      "aufputschmittel": {"buy_price": 34, "buy_limit": 12}
     },
     "polisa": {
       "a_benit": {"buy_price": 15},
       "b_benit": {"buy_price": 15},
       "c_benit": {"buy_price": 15}
     }
+  },
+  "post_goods_note": "Gueter-Dreieck (24.11.2026): An den drei kleinen Aussenposten wird nur mit den hier genannten Gueter gehandelt (Heilkraeuter, Duenger, Aufputschmittel); die frueheren Handelsgueter dieser Orte (Nahrung usw.) bleiben in den Daten, werden dort aber nicht gehandelt. buy_limit = so viele Stuecke nimmt der Haendler je Heimlandung ab; Vorrat und Abnahme fuellen sich mit der Heimlandung wieder auf. Zeile des Ortes in post_goods loeschen = alle Gueter des Ortes wieder handelbar.",
+  "post_goods": {
+    "muellers_farm": {"goods": ["heilkraeuter", "duenger", "aufputschmittel"], "text": "Das Gewächshaus verkauft Heilkräuter und sucht Dünger und Aufputschmittel."},
+    "shady_lab": {"goods": ["heilkraeuter", "duenger", "aufputschmittel"], "text": "Das Labor verkauft Dünger und sucht Heilkräuter und Aufputschmittel."},
+    "templanon": {"goods": ["heilkraeuter", "duenger", "aufputschmittel"], "text": "Die Templer verkaufen Aufputschmittel und suchen Heilkräuter und Dünger."}
   }
 }

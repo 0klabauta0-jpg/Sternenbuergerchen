@@ -53,9 +53,12 @@ var _standing_box: VBoxContainer
 var _standing_buttons: Dictionary = {}
 var _standing_abandon: Button
 var _standing_note: Label
-const MARKET_ITEMS: Array = ["a_benit", "b_benit", "c_benit", "food", "medical_supplies", "bandage", "luxury_goods", "stim"]
-const MARKET_SELL_ORDER: Array = ["b_benit", "c_benit", "a_benit", "food", "medical_supplies", "bandage", "luxury_goods", "stim"]
-const MARKET_NAMES: Dictionary = {"a_benit": "A-Benit", "b_benit": "B-Benit", "c_benit": "C-Benit", "food": "Nahrung", "medical_supplies": "Medizinische Güter", "bandage": "Verbandsmaterial", "luxury_goods": "Genussmittel", "stim": "Stims"}
+const MARKET_ITEMS: Array = ["a_benit", "b_benit", "c_benit", "food", "medical_supplies", "bandage", "luxury_goods", "stim", "heilkraeuter", "duenger", "aufputschmittel"]
+const MARKET_SELL_ORDER: Array = ["b_benit", "c_benit", "a_benit", "food", "medical_supplies", "bandage", "luxury_goods", "stim", "heilkraeuter", "duenger", "aufputschmittel"]
+const MARKET_NAMES: Dictionary = {"a_benit": "A-Benit", "b_benit": "B-Benit", "c_benit": "C-Benit", "food": "Nahrung", "medical_supplies": "Medizinische Güter", "bandage": "Verbandsmaterial", "luxury_goods": "Genussmittel", "stim": "Stims", "heilkraeuter": "Heilkräuter", "duenger": "Dünger", "aufputschmittel": "Aufputschmittel"}
+## Gueter-Dreieck: die drei kleinen Aussenposten handeln nur mit Heilkraeutern, Duenger und Aufputschmitteln (Daten: post_goods).
+const POST_IDS: Array = ["muellers_farm", "shady_lab", "templanon"]
+var _post_note: Label
 var _campaign_buttons: Dictionary = {}
 var _section: String = "all"
 var _heading: Label
@@ -132,6 +135,10 @@ func _build() -> void:
 		ship_content.add_child(extra)
 		extra.pressed.connect(_submit_sell.bind(extra_index + 1))
 		_sell_extra.append(extra)
+	_post_note = _label("", 15)
+	_post_note.name = "PostTradeNote"
+	_post_note.visible = false
+	ship_content.add_child(_post_note)
 	for market_item: String in MARKET_ITEMS:
 		var market_button: Button = _button("%s kaufen" % MARKET_NAMES[market_item], "BuyMarket_" + market_item)
 		ship_content.add_child(market_button)
@@ -355,16 +362,24 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		var sell_button: Button = sell_buttons[slot]
 		var slot_item: String = String(bought_items[slot]) if slot < bought_items.size() else ""
 		sell_button.set_meta("item", slot_item)
-		sell_button.visible = not slot_item.is_empty() and location in ["satellite_crash","trade_outpost"]
+		sell_button.visible = not slot_item.is_empty() and (location in ["satellite_crash","trade_outpost"] or location in POST_IDS)
 		if slot_item.is_empty(): continue
 		var sell_price: int = _market_buy_price(supply, location, slot_item)
 		sell_button.text = "1 × %s verkaufen · %d Cr" % [MARKET_NAMES.get(slot_item, slot_item), sell_price]
 		sell_button.disabled = not trade_ready or int(cargo.get(slot_item,0)) < 1
 		sell_button.tooltip_text = "Verkauf aus lokaler Schiffsfracht oder dem Frachtaufzug" if not sell_button.disabled else ("Keine %s im Schiff oder Frachtaufzug" % MARKET_NAMES.get(slot_item, slot_item) if trade_ready else trade_reason)
+		# Gueter-Dreieck: der Haendler nimmt je Heimlandung nur eine feste Menge ab; die Zahl steht am Knopf.
+		var demand_entry: Dictionary = Dictionary(market_here.get(slot_item, {}))
+		if demand_entry.has("buy_limit"):
+			var demand: int = int(demand_entry.get("demand", 0))
+			sell_button.text += " · nimmt noch %d" % demand
+			if demand <= 0:
+				sell_button.disabled = true
+				sell_button.tooltip_text = "Der Händler nimmt davon nichts mehr ab – nach der Heimlandung wieder"
 	for market_item: String in MARKET_ITEMS:
 		var market_button: Button = _market_buttons[market_item]
 		var market_entry: Dictionary = Dictionary(market_here.get(market_item, {}))
-		market_button.visible = market_entry.has("sell_price") and location in ["satellite_crash","trade_outpost"]
+		market_button.visible = market_entry.has("sell_price") and (location in ["satellite_crash","trade_outpost"] or location in POST_IDS) and _post_allows(supply, location, market_item)
 		if not market_button.visible: continue
 		var market_price: int = int(market_entry.sell_price)
 		var market_stock: int = int(market_entry.get("stock", 0))
@@ -375,6 +390,13 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		elif int(supply.get("credits", 0)) < market_price: market_reason = "Kredite reichen für den Kauf nicht"
 		market_button.disabled = not market_reason.is_empty() or _pending.has("buy")
 		market_button.tooltip_text = market_reason if not market_reason.is_empty() else ("Wird im Frachtaufzug bereitgestellt; anschließend ins Schiff laden." if not lift.is_empty() else "Wird in die Schiffsfracht geliefert.")
+	# Gueter-Dreieck: ein kurzer Satz je Ort (Daten: post_goods.text) und kein Ausruestungsangebot an den drei kleinen Aussenposten.
+	var post_text: String = String(Dictionary(Dictionary(supply.get("post_goods", {})).get(location, {})).get("text", ""))
+	if _post_note != null:
+		_post_note.text = post_text
+		_post_note.visible = location in POST_IDS and not post_text.is_empty() and _section != "build"
+	if location in POST_IDS:
+		for post_control in [_buy, _items]+_tool_buttons.values(): post_control.visible = false
 	_refresh_standing(supply, location, trade_ready, trade_reason)
 	var amount: float = _amount.value
 	var cost: float = amount * float(supply.get("fuel_price_per_unit", 0.0))
@@ -430,15 +452,17 @@ func _apply_section() -> void:
 	for control in [_craft_selector,_fuel,_buy,_sell,_repair,_cargo_load,_cargo_unload,_amount.get_parent(),_refuel,_return]+_tool_buttons.values():
 		control.visible = ship
 	var trade_context:Dictionary=Dictionary(_snapshot.get("service_contexts_by_craft_id",{})).get(_selected_craft_id,{})
-	var trading:bool=String(trade_context.get("location_id","")) in ["trade_outpost","satellite_crash"]
+	var trading:bool=String(trade_context.get("location_id","")) in ["trade_outpost","satellite_crash"]+POST_IDS
 	_cargo_load.visible=ship and String(trade_context.get("location_id",""))=="trade_outpost"
 	_cargo_unload.visible=_cargo_load.visible
-	for control in [_buy,_sell]+_tool_buttons.values():control.visible=ship and trading
+	var at_post:bool=String(trade_context.get("location_id","")) in POST_IDS
+	for control in [_buy,_sell]+_tool_buttons.values():control.visible=ship and trading and not (at_post and control != _sell)
+	if _post_note != null and not (ship and at_post): _post_note.visible = false
 	# Handel H2: die Knoepfe der Warenboerse zeigt refresh() je nach Daten; hier werden sie nur ausgeblendet, wenn kein Handelsort offen ist.
 	for control in _sell_extra+_market_buttons.values():
 		if not (ship and trading): control.visible = false
 	_tool_buttons["backpack_supply"].visible = ship and String(trade_context.get("location_id", "")) == "trade_outpost" and String(_snapshot.get("mode", "")) == "campaign"
-	_items.visible = ship and trading
+	_items.visible = ship and trading and not at_post
 	_standing_box.visible = ship
 	_refuel.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 	_refuel.custom_minimum_size.x=180
@@ -707,7 +731,12 @@ func _submit_campaign(key: String) -> void:
 	refresh()
 
 ## Handel H2: Ankaufspreis des Haendlers am Ort aus den Daten (Warenboerse vor den Handelsdaten); 0 = kauft nicht. Gleiche Regel wie der Versorgungszustand.
+func _post_allows(supply: Dictionary, location: String, item: String) -> bool:
+	var post: Dictionary = Dictionary(Dictionary(supply.get("post_goods", {})).get(location, {}))
+	return post.is_empty() or Array(post.get("goods", [])).has(item)
+
 func _market_buy_price(supply: Dictionary, location: String, item: String) -> int:
+	if not _post_allows(supply, location, item): return 0
 	var entry: Dictionary = Dictionary(Dictionary(Dictionary(supply.get("market", {})).get(location, {})).get(item, {}))
 	if entry.has("sell_price"): return 0
 	if entry.has("buy_price"): return int(entry.buy_price)
