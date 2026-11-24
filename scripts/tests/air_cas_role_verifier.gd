@@ -652,6 +652,21 @@ func _case_22() -> void:
 	env.flow.free()
 
 
+## Luftrollen 4b, Nachbesserung 1 (K2): Wechsel CAS -> nur kreisen beendet den Angriffsbefehl, den CAS selbst gegeben hat; danach kein Schuss mehr, cas_order_id geloescht.
+func _case_23() -> void:
+	var tag := "[23 CAS -> kreisen] "
+	var env: Dictionary = _build({"foe":Vector2i(13, 10)}, ["foe"])
+	_check(bool(_circle(env, "cas", "c23").get("ok", false)), tag + "Aufbau: CAS an (10,10)")
+	_tick(env, 3.0)
+	_check(_order(env).get("target_id") == "foe" and String(_sortie(env).get("cas_order_id", "")) != "", tag + "Aufbau: CAS hat selbst den Befehl auf foe gegeben: " + str(_order(env)))
+	_check(bool(_circle(env, "none", "c23b").get("ok", false)), tag + "Spieler setzt nur kreisen")
+	_check(_order(env).get("verb") != "attack_target" and _target(env) == "" and not _sortie(env).has("cas_order_id"), tag + "Befehl beendet, Ziel leer, cas_order_id geloescht: " + str(_order(env)))
+	var shots_before: int = env.shots.size()
+	_tick(env, 5.0)
+	_check(env.shots.size() == shots_before and _order(env).get("verb") != "attack_target", tag + "danach kein Schuss mehr (%d -> %d)" % [shots_before, env.shots.size()])
+	env.flow.free()
+
+
 ## Nur zur Diagnose (Nachbesserung 2, B): Zustand der Ausrichtung alle 0,2 s.
 func _trace(env: Dictionary, label: String) -> void:
 	var pose: Dictionary = _pose(env, "ship")
@@ -701,5 +716,6 @@ func _initialize() -> void:
 	_case_20()
 	_case_21()
 	_case_22()
+	_case_23()
 	print("AIR_CAS_ROLE passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)

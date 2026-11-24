@@ -8696,6 +8696,16 @@ func _air_end_role(craft_id: String, text: String) -> void:
 	for key in ["cas_hold", "cas_hold_reported", "cas_order_id", "air_order_id", "air_pursuit", "air_last_shot"]: sortie.erase(key)
 	if had: _air_emit_role_event(craft_id, "role_ended", text)
 
+## Luftrollen 4b, Nachbesserung 1 (W1, K2): setzt der Spieler eine neue Rolle, endet der Angriffsbefehl, den die ALTE Rolle selbst gab (Kennung = cas_order_id oder
+## air_order_id), mit Systemkennung "air-role-" (kein cas_hold); die Schluessel der alten Rolle werden geloescht. Ein Befehl des Spielers bleibt stehen.
+func _air_drop_role_order(craft_id: String, request_id: String) -> void:
+	var sortie: Dictionary = _air_support_sorties.get(craft_id, {})
+	if sortie.is_empty(): return
+	var order_id := String(_air_wing_order(craft_id).get("order_id", ""))
+	if not order_id.is_empty() and (order_id == String(sortie.get("cas_order_id", "")) or order_id == String(sortie.get("air_order_id", ""))):
+		request_air_support_cease_fire(craft_id, "air-role-switch:%s:%s" % [craft_id, request_id])
+	for key in ["cas_order_id", "air_order_id", "air_pursuit", "air_last_shot"]: sortie.erase(key)
+
 func request_air_support_circle(command: Dictionary) -> Dictionary:
 	if _air_support_source == null or not is_instance_valid(_air_support_source.get_ref()): return {"ok":false, "reason":"air_source_unavailable"}
 	if _should_skip_local_tick_processing() or _air_ground_registry() == null: return {"ok":false, "reason":"ground_unavailable"}
@@ -8749,6 +8759,7 @@ func request_air_support_circle(command: Dictionary) -> Dictionary:
 		var failure: Dictionary = ring.duplicate()
 		failure["took_off"] = false
 		return failure
+	_air_drop_role_order(id, request_id)
 	var message: String = {"none":"Kreist an Feld (%d, %d).", "cas":"Luftnahunterstützung an Feld (%d, %d).", "air_defense":"Luftschutz an Feld (%d, %d)."}[role] % [center.x, center.y]
 	var result := {"ok":true, "replayed":false, "craft_id":id, "role":role, "center_hex":center, "waypoint_index":int(ring.waypoint_index), "took_off":took_off, "message":message}
 	_air_role_receipts[request_id] = {"signature":signature, "result":result.duplicate(true)}
@@ -9083,6 +9094,11 @@ func _air_defense_tick(craft_id: String, sortie: Dictionary) -> void:
 	var order: Dictionary = _air_wing_order(craft_id)
 	var ordered := String(order.get("target_id", "")) if order.get("verb") == "attack_target" else ""
 	var mine: bool = not ordered.is_empty() and String(order.get("order_id", "")) == String(sortie.get("air_order_id", ""))
+	# Nachbesserung 1 (W1): ein Befehl der Rolle CAS (cas_order_id) ist kein Spielerbefehl; er endet, danach waehlt der Luftschutz selbst.
+	if not ordered.is_empty() and not mine and String(order.get("order_id", "")) == String(sortie.get("cas_order_id", "")):
+		request_air_support_cease_fire(craft_id, "air-role-ad-lost:%s:%d:%s" % [craft_id, tick_counter, ordered])
+		sortie.erase("cas_order_id")
+		ordered = ""
 	if not ordered.is_empty() and not mine:
 		var unit = _resolve_unit(ordered)
 		if is_instance_valid(unit) and unit.has_method("get_health") and int(unit.call("get_health")) > 0:

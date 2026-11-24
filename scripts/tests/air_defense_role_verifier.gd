@@ -325,6 +325,88 @@ func _case_8() -> void:
 	env.flow.free()
 
 
+## Nachbesserung 1 (W1): Wechsel CAS -> Luftschutz. Der Bodenbefehl, den CAS selbst gegeben hat, endet; das Schiff nimmt den Flieger. Ein Spielerbefehl bleibt.
+func _case_9() -> void:
+	var tag := "[9 CAS -> Luftschutz] "
+	var env: Dictionary = _build(Vector2i(17, 10), {"gfoe":Vector2i(13, 10)})
+	var ground_shots := [0]
+	env.mission_root.air_support_ground_fired.connect(func(_event: Dictionary) -> void: ground_shots[0] += 1)
+	_check(_spawned(env, "cas", "c9"), tag + "Aufbau: CAS, Gegner erscheint")
+	_tick(env, 1.0)
+	_check(_order(env).get("target_id") == "gfoe" and String(_sortie(env).get("cas_order_id", "")) != "", tag + "Aufbau: CAS hat selbst den Bodenbefehl auf gfoe gegeben: " + str(_order(env)))
+	_check(bool(_circle(env, "air_defense", "c9b").get("ok", false)), tag + "Spieler setzt Luftschutz")
+	_check(_order(env).get("target_id") != "gfoe" and not _sortie(env).has("cas_order_id"), tag + "der Bodenbefehl der alten Rolle ist weg, cas_order_id geloescht: " + str(_order(env)))
+	var shots_at_switch: int = ground_shots[0]
+	for _i in range(60):
+		if _target(env) == FOE: break
+		_tick(env, 0.25)
+	_check(_target(env) == FOE and _order(env).get("target_id") == FOE, tag + "das Schiff nimmt den Flieger als Ziel: '%s' / %s" % [_target(env), str(_order(env))])
+	_tick(env, 3.0)
+	_check(ground_shots[0] == shots_at_switch, tag + "kein weiterer Schuss auf das Bodenziel (%d -> %d)" % [shots_at_switch, ground_shots[0]])
+	env.flow.free()
+	# Gegenfall: ein Befehl des Spielers auf das Bodenziel bleibt beim Wechsel stehen.
+	var env2: Dictionary = _build(Vector2i(17, 10), {"gfoe":Vector2i(13, 10)})
+	_check(_spawned(env2, "cas", "c9c"), tag + "Aufbau 2: CAS")
+	var manual: Dictionary = env2.mission_root.request_air_support_attack_order({"craft_id":"ship", "target_unit_id":"gfoe", "request_id":"man9"})
+	_check(bool(manual.get("ok", false)), tag + "Aufbau 2: Spielerbefehl auf gfoe: " + str(manual))
+	var manual_id := String(_order(env2).get("order_id", ""))
+	_check(bool(_circle(env2, "air_defense", "c9d").get("ok", false)), tag + "Spieler setzt Luftschutz (Gegenfall)")
+	_tick(env2, 3.0)
+	_check(_order(env2).get("target_id") == "gfoe" and String(_order(env2).get("order_id", "")) == manual_id and _target(env2) == "", tag + "Spielerbefehl bleibt stehen, kein Luftziel: " + str(_order(env2)))
+	env2.flow.free()
+
+
+## Nachbesserung 1 (K2): Wechsel Luftschutz -> nur kreisen beendet den Luft-Luft-Befehl; danach kein Schuss mehr, die Schluessel der Rolle sind weg.
+func _case_10() -> void:
+	var tag := "[10 Luftschutz -> kreisen] "
+	var env: Dictionary = _build(Vector2i(17, 10))
+	_check(_spawned(env, "air_defense", "c10"), tag + "Aufbau")
+	for _i in range(60):
+		if _target(env) == FOE: break
+		_tick(env, 0.25)
+	_check(_target(env) == FOE and String(_sortie(env).get("air_order_id", "")) != "", tag + "Aufbau: Luftschutz hat den Flieger im Befehl")
+	_tick(env, 2.0)
+	_check(bool(_circle(env, "none", "c10b").get("ok", false)), tag + "Spieler setzt nur kreisen")
+	var sortie: Dictionary = _sortie(env)
+	_check(_order(env).get("verb") != "attack_target" and _target(env) == "", tag + "Angriffsbefehl beendet, Ziel leer: " + str(_order(env)))
+	_check(not sortie.has("air_order_id") and not sortie.has("air_pursuit") and not sortie.has("air_last_shot"), tag + "air_order_id / air_pursuit / air_last_shot geloescht")
+	var strength := _foe_strength(env)
+	_tick(env, 5.0)
+	_check(_foe_strength(env) >= strength - 0.0001 and not _sortie(env).has("air_last_shot") and _order(env).get("verb") != "attack_target", tag + "danach kein Luft-Luft-Schuss (%.1f -> %.1f)" % [strength, _foe_strength(env)])
+	env.flow.free()
+
+
+## Nachbesserung 1: Datenwerte der Luft-Luft-Schuesse und das Spielerintervall (hoechstens ein Schuss je Sekunde und Waffe).
+func _case_11() -> void:
+	var tag := "[11 Daten, Schussfolge] "
+	var file := FileAccess.open("res://data/combat/air_roles.json", FileAccess.READ)
+	var parsed: Variant = JSON.parse_string(file.get_as_text()) if file != null else null
+	var cfg: Dictionary = Dictionary(Dictionary(parsed).get("player_air_to_air", {})) if typeof(parsed) == TYPE_DICTIONARY else {}
+	_check(is_equal_approx(float(cfg.get("accuracy", -1.0)), 0.6) and is_equal_approx(float(cfg.get("fire_interval_seconds", -1.0)), 1.0), tag + "player_air_to_air aus air_roles.json: " + str(cfg))
+	var env: Dictionary = _build(Vector2i(17, 10))
+	_check(_spawned(env, "air_defense", "c11"), tag + "Aufbau")
+	for _i in range(60):
+		if _target(env) == FOE: break
+		_tick(env, 0.25)
+	var seen := {}
+	var total := 0
+	var worst := 0
+	for _window in range(3):
+		var per_slot := {}
+		for _i in range(int(round(5.0 / DT))):
+			_tick(env, DT)
+			var last: Dictionary = Dictionary(_sortie(env).get("air_last_shot", {}))
+			for slot in last.keys():
+				if seen.get(slot, null) != last[slot]:
+					seen[slot] = last[slot]
+					per_slot[slot] = int(per_slot.get(slot, 0)) + 1
+					total += 1
+		for slot in per_slot.keys(): worst = maxi(worst, int(per_slot[slot]))
+	_check(total >= 1, tag + "in 15 s fallen Luft-Luft-Schuesse (%d)" % total)
+	_check(worst <= 6, tag + "in jedem 5-s-Fenster hoechstens 5 (+1) Schuesse je Waffe (groesster Wert %d)" % worst)
+	env.flow.free()
+
+
 func _initialize() -> void:
 	_case_1()
 	_case_2()
@@ -334,5 +416,8 @@ func _initialize() -> void:
 	_case_6()
 	_case_7()
 	_case_8()
+	_case_9()
+	_case_10()
+	_case_11()
 	print("AIR_DEFENSE_ROLE passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)

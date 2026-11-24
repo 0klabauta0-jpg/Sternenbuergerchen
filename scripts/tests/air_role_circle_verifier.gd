@@ -287,6 +287,34 @@ func _case_4() -> void:
 	env2.flow.free()
 
 
+## Fall 4b (Nachbesserung 1, K1): voller Umlauf der Cutlass mit Mitte (10,10), dem engsten angenommenen Fall: 6 besuchte Wegpunkte, keine Notbremse
+## (Flugstatus map_edge), nie ausserhalb des Pruefrasters 5..19. Wird dieser Fall rot, ist K1 echt (nicht die Randregel umbauen, sondern berichten).
+func _case_4b() -> void:
+	var tag := "[4b Cutlass-Umlauf] "
+	var env: Dictionary = _build("cutlass", ["ship"])
+	env.transport.parked["ship"] = true
+	var res: Dictionary = _circle(env, "ship", Vector2i(10, 10), "none", "c4bx")
+	_check(bool(res.get("ok", false)), tag + "Aufbau: Mitte (10,10) angenommen: " + str(res))
+	var visited := {}
+	var edge_stops := 0
+	var off_map := 0
+	var outside := ""
+	for _i in range(int(round(300.0 / DT))):
+		_tick(env, DT)
+		visited[int(_sortie(env, "ship").get("waypoint_index", -1))] = true
+		var reason := String(env.combat.get_flight_status("ship").get("reason", ""))
+		if reason == "map_edge": edge_stops += 1
+		var cell: Vector2i = GRID.HEX.round_axial(GRID.HEX.plane_to_axial(Vector2(_pose(env, "ship").position_plane)))
+		if cell.x < 5 or cell.x > 19 or cell.y < 5 or cell.y > 19:
+			off_map += 1
+			if outside.is_empty(): outside = str(cell)
+	_check(visited.size() == 6, tag + "6 Wegpunkte besucht (%d)" % visited.size())
+	_check(edge_stops == 0, tag + "keine Notbremse am Kartenrand (map_edge-Schritte: %d)" % edge_stops)
+	_check(off_map == 0, tag + "nie ausserhalb des Rasters 5..19 (Schritte draussen: %d, erstes Feld %s)" % [off_map, outside])
+	_check(_count(env, "ship", "role_blocked") == 0 and bool(env.combat.get_flight_status("ship").get("ok", true)), tag + "nie blockiert, Flugstatus ok")
+	env.flow.free()
+
+
 ## Fall 5: dieselbe Kennung erneut, und dieselbe Kennung mit anderem Inhalt.
 func _case_5() -> void:
 	var tag := "[5 Kennung] "
@@ -739,6 +767,7 @@ func _initialize() -> void:
 	_case_2()
 	_case_3()
 	_case_4()
+	_case_4b()
 	_case_5()
 	_case_6()
 	_case_7()
