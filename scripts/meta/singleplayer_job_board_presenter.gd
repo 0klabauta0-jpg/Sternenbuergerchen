@@ -35,6 +35,7 @@ var _standing_box: VBoxContainer
 var _standing_signature: String = ""
 var _standing_entries: Array = []
 var _standing_id: String = ""
+var _standing_buttons: Dictionary = {}
 var _selector: VBoxContainer
 const CARD_WIDTH := 230
 const CARD_HEIGHT := 72
@@ -215,6 +216,8 @@ func refresh() -> void:
 	var jobs: Dictionary = campaign.get("jobs", {})
 	var availability: Dictionary = campaign.get("job_availability", {})
 	_refresh_standing_orders(Array(campaign.get("standing_orders", [])))
+	# Verschwindet der gewaehlte Dauerauftrag, wird die Wahl zurueckgesetzt (sonst blieben alle Auftragsfelder grau).
+	if not _standing_id.is_empty() and _standing_entry(_standing_id).is_empty(): _standing_id = ""
 	var signature: String = JSON.stringify([jobs, availability])
 	if signature != _signature:
 		_signature = signature
@@ -253,6 +256,9 @@ func refresh() -> void:
 	for index in range(_jobs.item_count):
 		if String(_jobs.get_item_metadata(index)) == _job_id:
 			_jobs.select(index)
+	# Dauerauftrag offen: keine Auswahl im Feld, damit man in der schmalen Ansicht auch denselben Auftrag wieder waehlen kann (item_selected kommt dann).
+	if not _standing_id.is_empty() and _jobs.selected != -1:
+		_jobs.select(-1)
 	var job: Dictionary = jobs.get(_job_id, {})
 	for id:String in _card_buttons:
 		_card_buttons[id].modulate=Color.WHITE if id==_job_id and _standing_id.is_empty() else Color("b0c1c3")
@@ -307,10 +313,23 @@ func refresh() -> void:
 ## Dauerauftraege (H3) unter den normalen Auftraegen: Titel, darunter der Satz des Besitzers; gesperrt und nicht verfuegbar mit "Gesperrt: ".
 ## Baut nur neu, wenn sich der Snapshot aendert (die Sperrzeit tickt im Sekundentakt). Ohne Eintraege (Skirmish, alter Stand) bleibt der Block leer.
 func _refresh_standing_orders(entries: Array) -> void:
-	var signature: String = JSON.stringify(entries)
-	if signature == _standing_signature: return
-	_standing_signature = signature
 	_standing_entries = entries.duplicate(true)
+	# Die Felder werden nur neu gebaut, wenn sich Reihenfolge/Kennungen aendern. Tickende Werte (Sperrzeit) aendern Text und Zustand
+	# der vorhandenen Felder an Ort und Stelle: dieselben Knoten, kein verlorener Klick, kein Flackern.
+	var ids: Array = []
+	for entry: Dictionary in entries: ids.append(String(entry.get("id", "")))
+	var signature: String = JSON.stringify(ids)
+	if signature == _standing_signature:
+		for entry: Dictionary in entries:
+			var existing: Button = _standing_buttons.get(String(entry.get("id", "")), null)
+			if existing == null: continue
+			var text: String = String(entry.get("title", "")) + "\n" + _standing_message(entry)
+			if existing.text != text: existing.text = text
+			var locked: bool = String(entry.get("status", "")) in ["locked", "unavailable"]
+			if locked != bool(existing.get_meta("locked", false)): _style_card(existing, locked)
+		return
+	_standing_signature = signature
+	_standing_buttons.clear()
 	var focused_standing := ""
 	for child: Node in _standing_box.get_children():
 		if child is Button and (child as Button).has_focus(): focused_standing = String(child.name)
@@ -334,6 +353,7 @@ func _refresh_standing_orders(entries: Array) -> void:
 		_style_card(line, String(entry.get("status", "")) in ["locked", "unavailable"])
 		line.pressed.connect(_open_standing.bind(entry_id))
 		_standing_box.add_child(line)
+		_standing_buttons[entry_id] = line
 		if String(line.name) == focused_standing: line.call_deferred("grab_focus")
 
 ## Satz des Besitzers; gesperrt und nicht verfuegbar mit "Gesperrt: " davor (wie bisher).
@@ -359,7 +379,8 @@ func _standing_facts(entry: Dictionary) -> String:
 	return text
 
 func _open_standing(id: String) -> void:
-	_details_expanded = true
+	# Zweiter Klick auf dasselbe Feld schliesst die grosse Ansicht (wie bei den Auftragsfeldern).
+	_details_expanded = not _details_expanded if id == _standing_id else true
 	_standing_id = id
 	refresh()
 
@@ -376,7 +397,9 @@ func _style_card(card: Button, locked: bool) -> void:
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	card.focus_mode = Control.FOCUS_ALL
+	card.set_meta("locked", locked)
 	if locked: card.add_theme_color_override("font_color", Color("b0c1c3"))
+	else: card.remove_theme_color_override("font_color")
 
 func _card_box(background: Color, border: Color) -> StyleBoxFlat:
 	var box := StyleBoxFlat.new()

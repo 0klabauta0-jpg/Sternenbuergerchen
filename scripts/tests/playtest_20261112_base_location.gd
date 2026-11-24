@@ -10,6 +10,7 @@ func _run() -> void:
  presenter.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  await process_frame; presenter.call("refresh"); await process_frame
  var label: Label = presenter.find_child("HomebaseLocation",true,false)
- var ok: bool = label != null and label.visible and label.text.contains("Mare Nostrum C")
+ # Seit 24.11. steht der Standort im Titel der Kopfzeile; die Zeile "Standort: ..." bleibt als Text erhalten, ist im Kopf aber ausgeblendet (Platz fuer die Statuszeile).
+ var ok: bool = label != null and not label.visible and label.text.contains("Mare Nostrum C")
  if not ok: printerr("FAIL: Heimatstandort fehlt")
  owner.free(); print("PLAYTEST_BASE_LOCATION checks=1 failed=%d" % (0 if ok else 1)); quit(0 if ok else 1)

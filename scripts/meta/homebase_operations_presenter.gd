@@ -17,6 +17,7 @@ const MUTED := Color("a8c0ca")
 const CYAN := Color("29e1e7")
 const GOLD := Color("ffd348")
 const REFRESH_SECONDS: float = 0.25
+const HEADER_REFRESH_SECONDS: float = 0.5
 const EQUIPMENT_LABELS: Dictionary = {"suit": "Anzug", "light": "Leicht", "medium": "Mittel", "heavy": "Schwer", "rifle": "Sturmgewehr", "smg": "Maschinenpistole", "sniper": "Scharfschützengewehr", "rail_gun": "Railgun", "rocket_launcher": "Raketenwerfer", "medictool": "Sanitätsgerät", "none": "Keine"}
 const SHIP_BACKDROP_SCRIPT: GDScript = preload("res://scripts/meta/ship_context_backdrop.gd")
 # PC density, user decision 14.11.2026: mouse and keyboard sizes at 1920x1080.
@@ -49,6 +50,7 @@ var _workspace: Control
 var _homebase_location: Label
 var _header_title: Label
 var _header_status: Label
+var _status_variants: Array[String] = []
 var _roster_list: VBoxContainer
 var _search: LineEdit
 var _sort_selector: OptionButton
@@ -147,9 +149,15 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if not is_visible_in_tree() or _mode == "base":
+	if not is_visible_in_tree():
 		return
 	_elapsed += delta
+	if _mode == "base":
+		# Auf dem Basisbild laeuft nicht die ganze Ansicht, aber die Kopfzeile bleibt aktuell (hoechstens zweimal je Sekunde).
+		if _elapsed >= HEADER_REFRESH_SECONDS:
+			_elapsed = 0.0
+			_refresh_header_only()
+		return
 	if _elapsed >= REFRESH_SECONDS:
 		_elapsed = 0.0
 		refresh()
@@ -214,6 +222,8 @@ func _build() -> void:
 	_header_status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_header_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_header_status.clip_text = true
+	_header_status.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_header_status.resized.connect(_fit_header_status)
 	header.add_child(_header_status)
 	_homebase_location = _label("", 16, MUTED)
 	_homebase_location.name = "HomebaseLocation"
@@ -863,7 +873,8 @@ func refresh() -> void:
 	var home_body := DISPLAY.body_name("moon", bodies.moon) if bodies.has("moon") else ""
 	var home_location: Dictionary = Dictionary(Dictionary(singleplayer.get("campaign", {})).get("locations", {})).get("homebase", {})
 	_homebase_location.text = "Standort: %s · %s" % [DISPLAY.location_name("homebase", home_location), home_body] if not home_body.is_empty() else ""
-	_homebase_location.visible = _mode == "base" and not home_body.is_empty()
+	# Der Standort steht jetzt im Titel (System / Himmelskoerper / HEIMATBASIS); die Zeile bleibt als Text vorhanden, nimmt im Kopf aber keinen Platz.
+	_homebase_location.visible = false
 	var inventory: Dictionary=Dictionary(singleplayer.get("supply",{})).get("inventory",{})
 	_inventory_panel.visible=not inventory.is_empty()
 	_identity_row.visible=inventory.is_empty()
@@ -904,35 +915,77 @@ func _update_header(snapshot: Dictionary, singleplayer: Dictionary) -> void:
 		parts.append(place_name.to_upper())
 	parts.append("HEIMATBASIS")
 	_header_title.text = "  /  ".join(parts)
+	# "Unterwegs" nur, wer/was die Basis wirklich verlassen hat (Feld "away"); an Bord eines Schiffs, das noch am Pad steht, zaehlt als in der Basis.
 	var people_in := 0
 	var people_out := 0
 	for unit_variant in Array(snapshot.get("roster", [])):
-		if bool(Dictionary(unit_variant).get("busy", false)):
+		if bool(Dictionary(unit_variant).get("away", false)):
 			people_out += 1
 		else:
 			people_in += 1
 	var crafts_in := 0
 	var crafts_out := 0
 	for craft_variant in Array(snapshot.get("crafts", [])):
-		if bool(Dictionary(craft_variant).get("busy", false)):
+		if bool(Dictionary(craft_variant).get("away", false)):
 			crafts_out += 1
 		else:
 			crafts_in += 1
 	var supply: Dictionary = Dictionary(singleplayer.get("supply", {}))
-	var entries: PackedStringArray = PackedStringArray()
-	if supply.has("credits"):
-		entries.append("Credits %s" % CREDIT_TEXT.format(int(supply.credits)))
-	entries.append("Personal %d in der Basis, %d unterwegs" % [people_in, people_out])
-	entries.append("Schiffe %d in der Basis, %d unterwegs" % [crafts_in, crafts_out])
+	var credits_text := "Credits %s" % CREDIT_TEXT.format(int(supply.credits)) if supply.has("credits") else ""
+	var fuel_long := ""
+	var fuel_short := ""
 	var fuel_values: Dictionary = Dictionary(supply.get("fuel_by_craft_id", {}))
 	if not fuel_values.is_empty():
 		var fuel_sum := 0.0
 		for craft_id in fuel_values:
 			fuel_sum += float(fuel_values[craft_id])
 		var capacity: float = float(supply.get("fuel_capacity", 0.0)) * fuel_values.size()
-		entries.append("Treibstoff %d / %d" % [roundi(fuel_sum), roundi(capacity)] if capacity > 0.0 else "Treibstoff %d" % roundi(fuel_sum))
-	_header_status.text = "  ·  ".join(entries)
-	_header_status.tooltip_text = "Treibstoff: Summe der registrierten Schiffe / Gesamtfassungsvermögen. Unterwegs = im Einsatz oder nicht in der Basis."
+		fuel_long = "Treibstoff %d / %d" % [roundi(fuel_sum), roundi(capacity)] if capacity > 0.0 else "Treibstoff %d" % roundi(fuel_sum)
+		fuel_short = "Tank %d/%d" % [roundi(fuel_sum), roundi(capacity)] if capacity > 0.0 else "Tank %d" % roundi(fuel_sum)
+	# Drei Fassungen, von ausfuehrlich bis kurz; gewaehlt wird die erste, die in die Zeile passt (_fit_header_status).
+	_status_variants = [
+		_join_status([credits_text, "Personal %d in der Basis, %d unterwegs" % [people_in, people_out], "Schiffe %d in der Basis, %d unterwegs" % [crafts_in, crafts_out], fuel_long]),
+		_join_status([credits_text, "Personal %d Basis / %d weg" % [people_in, people_out], "Schiffe %d Basis / %d weg" % [crafts_in, crafts_out], fuel_long]),
+		_join_status([credits_text, "Personal %d/%d" % [people_in, people_out], "Schiffe %d/%d" % [crafts_in, crafts_out], fuel_short]),
+	]
+	_header_status.tooltip_text = "%s\nTreibstoff: Summe der registrierten Schiffe / Gesamtfassungsvermögen. Unterwegs/weg = hat die Basis verlassen (Flug, Orbit, Einsatz, anderer Ort); in der Kurzform steht Basis/weg." % _status_variants[0]
+	_fit_header_status()
+
+
+func _join_status(entries: Array) -> String:
+	var kept: PackedStringArray = PackedStringArray()
+	for entry in entries:
+		if not String(entry).is_empty():
+			kept.append(String(entry))
+	return "  ·  ".join(kept)
+
+
+## Waehlt die laengste Fassung der Statuszeile, die ganz in die Zeile passt (kein Abschneiden der vier Angaben).
+func _fit_header_status() -> void:
+	if _header_status == null or _status_variants.is_empty():
+		return
+	var font: Font = _header_status.get_theme_font("font")
+	var font_size: int = _header_status.get_theme_font_size("font_size")
+	var available: float = _header_status.size.x
+	var chosen: String = _status_variants[_status_variants.size() - 1]
+	if available <= 1.0:
+		chosen = _status_variants[0]
+	else:
+		for variant in _status_variants:
+			if font.get_string_size(String(variant), HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x <= available:
+				chosen = String(variant)
+				break
+	if _header_status.text != chosen:
+		_header_status.text = chosen
+
+
+## Nur die Kopfzeile neu (Basisbild): kein Neuaufbau der Ansicht.
+func _refresh_header_only() -> void:
+	var screen: Control = _owner_screen()
+	if screen == null or not _built or not is_visible_in_tree():
+		return
+	var snapshot: Dictionary = screen.call("get_operations_snapshot")
+	_update_header(snapshot, Dictionary(snapshot.get("singleplayer", {})))
 
 
 func _update_roster(roster: Array) -> void:

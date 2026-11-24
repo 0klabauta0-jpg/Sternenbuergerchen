@@ -72,7 +72,8 @@ func _capture(id: String, view: Node = null, settle_frames: int = 8) -> void:
 	leave.keycode = KEY_ESCAPE
 	leave.physical_keycode = KEY_ESCAPE
 	leave.pressed = true
-	base.call("_unhandled_key_input", leave)
+	# Echte Eingabe: Esc kommt zuerst bei der Basisansicht an (deren _input vor dem Autoload GlobalEscapeMenu), unabhaengig vom Fokus.
+	root.push_input(leave, true)
 	await _frames(2)
 	_check(not bool(base.call("get_exploration_snapshot").get("active", true)), "Visible base exit deactivates its local runtime")
 	_check(String(presenter.call("get_presentation_snapshot").get("mode", "")) == "squad", "Visible base exit returns to team/equipment")

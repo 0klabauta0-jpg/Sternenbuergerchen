@@ -33,6 +33,24 @@ func _find_labels(node: Node, result: Array) -> void:
 		_find_labels(child, result)
 
 
+## Taste druecken und loslassen ueber die echte Eingabe des Fensters. Gibt zurueck, ob der Druck von jemandem angenommen wurde.
+func _key(code: Key) -> bool:
+	var down := InputEventKey.new()
+	down.keycode = code
+	down.physical_keycode = code
+	down.pressed = true
+	root.push_input(down)
+	var handled: bool = root.is_input_handled()
+	await process_frame
+	var up := InputEventKey.new()
+	up.keycode = code
+	up.physical_keycode = code
+	up.pressed = false
+	root.push_input(up)
+	await process_frame
+	return handled
+
+
 func _by_text(buttons: Array) -> Dictionary:
 	var result: Dictionary = {}
 	for button: Button in buttons:
@@ -148,16 +166,42 @@ func _run() -> void:
 	var exits := [0]
 	var host: Control = base.get("_host")
 	base.connect("exploration_exit_requested", func(): exits[0] += 1)
-	if host != null:
-		host.grab_focus()
-	var esc := InputEventKey.new()
-	esc.keycode = KEY_ESCAPE
-	esc.physical_keycode = KEY_ESCAPE
-	esc.pressed = true
-	# Der Handler der Basisansicht wird direkt gerufen: Im echten Spiel nimmt der Autoload GlobalEscapeMenu Esc (in _input) vor der
-	# Basisansicht an und oeffnet das Spielmenue; das war schon vor diesem Umbau so und ist hier nicht Gegenstand.
-	base.call("_unhandled_key_input", esc)
-	_check(exits[0] == 1, "Esc-Handler der Basisansicht loest weiter den Wechsel aus der Basisansicht aus (Zaehler %d)" % exits[0])
+	# Esc und E ueber ECHTE Eingabe (root.push_input durch Oberflaeche, Fokus-Weitergabe und Autoload), mit dem Fokus auf dem
+	# Basisbild und auf Leistenknoepfen (nach einem Klick auf Bauen/Lager hat der Knopf den Fokus). Wirkung wie vorher die zwei Knoepfe.
+	var menu: Node = root.get_node_or_null("GlobalEscapeMenu")
+	_check(menu != null, "Autoload GlobalEscapeMenu ist im Baum (Esc geht durch denselben Weg wie im Spiel)")
+	for focus_case: String in ["Basisbild", "Bauen", "Lager"]:
+		if menu != null and bool(menu.call("is_overlay_open")):
+			menu.call("close_menu")
+		# Jeder Fall beginnt frisch auf dem Basisbild (Esc fuehrt aus der Basisansicht heraus).
+		screen.call("request_operation", "navigate", {"mode": "base"})
+		for i in 12:
+			await process_frame
+		if focus_case == "Basisbild":
+			if host != null:
+				host.grab_focus()
+		else:
+			(by_text[focus_case] as Button).grab_focus()
+		await process_frame
+		var e_handled: bool = await _key(KEY_E)
+		_check(e_handled, "E mit Fokus auf %s: erreicht die Basisansicht (Konsole aufsuchen)" % focus_case)
+		var before: int = exits[0]
+		await _key(KEY_ESCAPE)
+		var menu_opened: bool = menu != null and bool(menu.call("is_overlay_open"))
+		_check(exits[0] == before + 1 and not menu_opened, "Esc mit Fokus auf %s: zurueck aus der Basisansicht, Spielmenue bleibt zu (Zaehler %d, Menue offen %s)" % [focus_case, exits[0] - before, str(menu_opened)])
+		if menu_opened:
+			menu.call("close_menu")
+	# Ausserhalb der Basisansicht (Uebersicht Trupp) bleibt Esc beim Spielmenue wie bisher.
+	screen.call("request_operation", "navigate", {"mode": "squad"})
+	for i in 10:
+		await process_frame
+	var exits_before_squad: int = exits[0]
+	await _key(KEY_ESCAPE)
+	var squad_menu: bool = menu != null and bool(menu.call("is_overlay_open"))
+	_check(squad_menu and exits[0] == exits_before_squad, "Esc ausserhalb der Basisansicht oeffnet weiter das Spielmenue (Menue offen %s, Wechsel %d)" % [str(squad_menu), exits[0] - exits_before_squad])
+	if squad_menu:
+		menu.call("close_menu")
+		await process_frame
 	# --- Kopfzeile
 	screen.call("request_operation", "navigate", {"mode": "base"})
 	for i in 6:
@@ -193,14 +237,14 @@ func _run() -> void:
 	var people_in := 0
 	var people_out := 0
 	for unit: Dictionary in snapshot.get("roster", []):
-		if bool(unit.get("busy", false)):
+		if bool(unit.get("away", false)):
 			people_out += 1
 		else:
 			people_in += 1
 	var crafts_in := 0
 	var crafts_out := 0
 	for craft: Dictionary in snapshot.get("crafts", []):
-		if bool(craft.get("busy", false)):
+		if bool(craft.get("away", false)):
 			crafts_out += 1
 		else:
 			crafts_in += 1
@@ -212,11 +256,52 @@ func _run() -> void:
 	var owner_supply: RefCounted = flow.get("_singleplayer_runtime").get("_supply")
 	owner_supply.set("_credits", 4321)
 	owner_supply.set("_revision", int(owner_supply.get("_revision")) + 1)
-	presenter.call("refresh")
-	for i in 20:
-		await process_frame
+	# W1: KEIN refresh() von aussen. Auf dem Basisbild muss sich die Kopfzeile von selbst nachfuehren (Takt der Anzeige).
+	_check(String(presenter.get("_mode")) == "base", "Testlage: Modus 'base' (Kopfzeile laeuft ueber den eigenen Takt)")
+	await create_timer(1.3).timeout
 	status = presenter.find_child("HomebaseStatus", true, false) as Label
-	_check(status != null and status.text.contains("Credits 4321"), "Statuszeile aktualisiert sich nach Aenderung des Guthabens (beobachtet \"%s\")" % (status.text if status != null else "-"))
+	_check(status != null and status.text.contains("Credits 4321"), "Statuszeile aktualisiert sich von selbst auf dem Basisbild, ohne refresh() (beobachtet \"%s\")" % (status.text if status != null else "-"))
+	# K1: Ein Schiff, das die Basis verlassen hat (Orbit), zaehlt als unterwegs; das Anzeigen geschieht ebenfalls ohne refresh().
+	var craft_list: Array = snapshot.get("crafts", [])
+	var away_craft_id := String(Dictionary(craft_list[0]).get("id", "")) if not craft_list.is_empty() else ""
+	# Ortsangabe der Schiffe kommt vom Ablauf (flow) in den Bildschirm; so wie der Ablauf es tut, mit dem Schiff im Orbit.
+	var locations: Dictionary = Dictionary(flow.get("_aircraft_location_by_craft")).duplicate(true)
+	locations[away_craft_id] = "orbit"
+	screen.call("set_transport_state", flow.get("_homebase_aircraft_definitions"), flow.get("_assigned_aircraft_pilot_by_craft"), [], [], locations, {}, {}, [])
+	await create_timer(1.3).timeout
+	status = presenter.find_child("HomebaseStatus", true, false) as Label
+	_check(not away_craft_id.is_empty() and status.text.contains("Schiffe %d in der Basis, %d unterwegs" % [crafts_in - 1, crafts_out + 1]), "Schiff im Orbit zaehlt als unterwegs (erwartet %d/%d, beobachtet \"%s\")" % [crafts_in - 1, crafts_out + 1, status.text])
+	locations[away_craft_id] = "homebase"
+	screen.call("set_transport_state", flow.get("_homebase_aircraft_definitions"), flow.get("_assigned_aircraft_pilot_by_craft"), [], [], locations, {}, {}, [])
+	# K1: an Bord eines Schiffs, das noch am Pad steht, ist in der Basis (Besetzung ist 'busy', aber nicht 'away'); Schiff mit Beladung am Pad ebenso.
+	var fake: Dictionary = {"roster": [{"id": "a", "busy": true, "away": false}, {"id": "b", "busy": true, "away": true}, {"id": "c", "busy": false, "away": false}],
+		"crafts": [{"id": "x", "busy": true, "away": false}, {"id": "y", "busy": true, "away": true}]}
+	presenter.call("_update_header", fake, Dictionary(snapshot.get("singleplayer", {})))
+	status = presenter.find_child("HomebaseStatus", true, false) as Label
+	_check(status.text.contains("Personal 2 in der Basis, 1 unterwegs") and status.text.contains("Schiffe 1 in der Basis, 1 unterwegs"), "an Bord am Pad = in der Basis; nur wer weg ist, zaehlt unterwegs (beobachtet \"%s\")" % status.text)
+	var real_entry_keys: bool = true
+	for unit: Dictionary in snapshot.get("roster", []):
+		real_entry_keys = real_entry_keys and unit.has("away")
+	for craft: Dictionary in snapshot.get("crafts", []):
+		real_entry_keys = real_entry_keys and craft.has("away")
+	_check(real_entry_keys, "Besitzer-Eintraege von Personal und Schiffen tragen das Feld 'away'")
+	# K2: Standort-Zeile ist im Kopf weg; alle vier Angaben passen vollstaendig in die Statuszeile bei 1920 und bei 1280.
+	for resolution: Vector2i in [Vector2i(1920, 1080), Vector2i(1280, 720)]:
+		root.size = resolution
+		root.content_scale_size = resolution
+		presenter.call("refresh")
+		for i in 8:
+			await process_frame
+		status = presenter.find_child("HomebaseStatus", true, false) as Label
+		var location_label: Label = presenter.find_child("HomebaseLocation", true, false) as Label
+		_check(location_label != null and not location_label.visible, "%s: Standort-Zeile nimmt im Kopf keinen Platz" % str(resolution))
+		var font: Font = status.get_theme_font("font")
+		var text_width: float = font.get_string_size(status.text, HORIZONTAL_ALIGNMENT_LEFT, -1, status.get_theme_font_size("font_size")).x
+		_check(text_width <= status.size.x + 0.5, "%s: Statuszeile ist ganz lesbar (Text %.0f px, Feld %.0f px, \"%s\")" % [str(resolution), text_width, status.size.x, status.text])
+		_check(status.text.contains("Credits ") and status.text.contains("Personal ") and status.text.contains("Schiffe ") and (status.text.contains("Treibstoff") or status.text.contains("Tank")), "%s: Credits, Personal, Schiffe und Treibstoff stehen in der Zeile" % str(resolution))
+		_check(status.text_overrun_behavior == TextServer.OVERRUN_TRIM_ELLIPSIS, "%s: zu lange Zeile wird mit Auslassungspunkten gekuerzt" % str(resolution))
+	root.size = Vector2i(1920, 1080)
+	root.content_scale_size = Vector2i(1920, 1080)
 	flow.queue_free()
 	await process_frame
 	print("HOMEBASE_MENU_LAYOUT passed=%d failed=%d" % [passed, failed])

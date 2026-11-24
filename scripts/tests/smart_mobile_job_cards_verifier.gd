@@ -56,6 +56,24 @@ func _click(point: Vector2) -> void:
 	await process_frame
 
 
+## Maus bewegen (pressed == null), druecken (true) oder loslassen (false), mit Pause je Schritt.
+func _mouse(point: Vector2, pressed) -> void:
+	if pressed == null:
+		var motion := InputEventMouseMotion.new()
+		motion.position = point
+		motion.global_position = point
+		root.push_input(motion, true)
+	else:
+		var button := InputEventMouseButton.new()
+		button.button_index = MOUSE_BUTTON_LEFT
+		button.pressed = bool(pressed)
+		button.position = point
+		button.global_position = point
+		button.button_mask = MOUSE_BUTTON_MASK_LEFT if bool(pressed) else 0
+		root.push_input(button, true)
+	await process_frame
+
+
 func _reset(board: Control) -> void:
 	board.set("_details_expanded", false)
 	board.set("_standing_id", "")
@@ -205,6 +223,83 @@ func _run() -> void:
 		await process_frame
 		var opened: bool = _opened_job(board, "satellite_recovery", String(jobs.satellite_recovery.title)) if target == "job" else String(board.get("_standing_id")) == "freight:trade_outpost:c_benit" and bool(board.get("_details_expanded"))
 		_check(opened, "Fokus + Enter auf dem Feld (%s) wirkt wie ein Klick" % target)
+	# --- Nachbesserung 1, W2: laufende Sperrzeit. Zwischen Druecken und Loslassen tickt die Zeit (Tafel wird neu gelesen);
+	# die Knoten der Felder bleiben dieselben, der Klick geht nicht verloren.
+	await _reset(board)
+	var entries: Array = campaign.standing_orders
+	var ticking: Dictionary = {}
+	for entry: Dictionary in entries:
+		if String(entry.get("status", "")) in ["locked", "unavailable"]:
+			ticking = entry
+			break
+	_check(not ticking.is_empty(), "Testdaten: ein gesperrter Dauerauftrag fuer die laufende Sperrzeit")
+	if not ticking.is_empty():
+		var tid := String(ticking.id)
+		var node_name := "StandingOrder_" + tid.replace(":", "_")
+		ticking["message"] = "Sperrzeit laeuft: noch 3 s"
+		board.call("refresh")
+		await process_frame
+		var field: Button = standing_box.find_child(node_name, true, false) as Button
+		var field_id: int = field.get_instance_id() if field != null else 0
+		var field_point: Vector2 = field.get_global_rect().get_center() if field != null else Vector2.ZERO
+		await _mouse(field_point, null)
+		await _mouse(field_point, true)
+		var rebuilds_before := 0
+		for second in 3:
+			ticking["message"] = "Sperrzeit laeuft: noch %d s" % (2 - second)
+			board.call("refresh")
+			await process_frame
+		var same: Button = standing_box.find_child(node_name, true, false) as Button
+		_check(same != null and same.get_instance_id() == field_id, "Sperrzeit tickt: das Feld ist nach dem Tick derselbe Knoten (Instanz %d)" % field_id)
+		_check(same != null and same.text.contains("noch 0 s"), "Sperrzeit tickt: Text des vorhandenen Felds ist aktualisiert (beobachtet \"%s\")" % (same.text if same != null else "-"))
+		await _mouse(field_point, false)
+		await process_frame
+		_check(_opened_standing(board, tid, String(ticking.title)), "Druecken, zwei Sekunden Spielzeit, Loslassen: die grosse Ansicht oeffnet sich")
+	# --- Nachbesserung 1, K3a: zweiter Klick auf dasselbe Dauerauftrag-Feld schliesst die grosse Ansicht
+	await _reset(board)
+	var toggle_field: Button = standing_box.find_child("StandingOrder_freight_trade_outpost_c_benit", true, false) as Button
+	toggle_field.pressed.emit()
+	await process_frame
+	var first_open: bool = bool(board.get("_details_expanded")) and (board.get("_detail_card") as Control).visible
+	toggle_field.pressed.emit()
+	await process_frame
+	_check(first_open and not bool(board.get("_details_expanded")) and not (board.get("_detail_card") as Control).visible, "zweiter Klick auf dasselbe Dauerauftrag-Feld schliesst die grosse Ansicht")
+	# --- K3b: verschwindet der gewaehlte Eintrag, ist die Wahl zurueckgesetzt und die Auftragsfelder sind nicht grau
+	await _reset(board)
+	toggle_field = standing_box.find_child("StandingOrder_freight_trade_outpost_c_benit", true, false) as Button
+	toggle_field.pressed.emit()
+	await process_frame
+	var kept: Array = []
+	for entry: Dictionary in entries:
+		if String(entry.id) != "freight:trade_outpost:c_benit":
+			kept.append(entry)
+	campaign["standing_orders"] = kept
+	board.call("refresh")
+	await process_frame
+	var current_card: Button = (board.get("_card_buttons") as Dictionary).get(String(board.get("_job_id")))
+	_check(String(board.get("_standing_id")).is_empty() and current_card != null and current_card.modulate == Color.WHITE, "gewaehlter Dauerauftrag verschwindet: Wahl zurueckgesetzt, Auftragsfeld nicht grau (Wahl \"%s\")" % String(board.get("_standing_id")))
+	campaign["standing_orders"] = entries
+	board.call("refresh")
+	# --- K3c: schmale Ansicht, Dauerauftrag offen: im Auswahlfeld ist nichts gewaehlt, also ist jeder Auftrag (auch derselbe) wieder waehlbar
+	root.size = Vector2i(560, 1500)
+	root.content_scale_size = Vector2i(560, 1500)
+	for i in 4:
+		await process_frame
+	await _reset(board)
+	toggle_field = standing_box.find_child("StandingOrder_freight_trade_outpost_c_benit", true, false) as Button
+	toggle_field.pressed.emit()
+	await process_frame
+	var chooser: OptionButton = board.get("_jobs")
+	_check(chooser.visible and chooser.selected == -1, "schmale Ansicht, Dauerauftrag offen: Auswahlfeld sichtbar und ohne Auswahl (sichtbar %s, selected %d, Tafelbreite %.0f)" % [str(chooser.visible), chooser.selected, (board as Control).size.x])
+	if chooser.item_count > 0:
+		chooser.select(0)
+		chooser.item_selected.emit(0)
+		await process_frame
+		_check(String(board.get("_standing_id")).is_empty() and String(board.get("_job_id")) == String(chooser.get_item_metadata(0)), "schmale Ansicht: Wahl im Auswahlfeld fuehrt aus dem Dauerauftrag zurueck zum Auftrag")
+	root.size = Vector2i(1600, 1500)
+	root.content_scale_size = Vector2i(1600, 1500)
+	for i in 4:
+		await process_frame
 	screen.queue_free()
 	await process_frame
 	print("SMART_MOBILE_JOB_CARDS passed=%d failed=%d" % [passed, failed])
