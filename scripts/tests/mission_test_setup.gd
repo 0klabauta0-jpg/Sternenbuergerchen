@@ -1199,6 +1199,9 @@ func _apply_scenario_timer_to_combat_driver() -> void:
 	combat_driver.set("mission_time_limit_seconds", scenario_time_limit)
 
 
+var _wave_enemy_units: Array = []
+
+
 func _setup_enemy_waves(enemy_units: Array) -> void:
 	var enemy_wave_controller = get_node_or_null(enemy_wave_controller_path)
 	if enemy_wave_controller == null or not enemy_wave_controller.has_method("initialize_enemy_units"):
@@ -1212,6 +1215,20 @@ func _setup_enemy_waves(enemy_units: Array) -> void:
 		enemy_wave_controller.call("set_enemy_tactics", _build_enemy_tactics_by_unit_id(enemy_units))
 
 	enemy_wave_controller.call("initialize_enemy_units", enemy_units)
+	# Spaeter startende Wellen werden erst beim Wellenstart in die Hex-Simulation aufgenommen.
+	_wave_enemy_units = enemy_units.duplicate()
+	if enemy_wave_controller.has_signal("wave_started"):
+		var admit_callable := Callable(self, "_on_enemy_wave_started_admit")
+		if not enemy_wave_controller.is_connected("wave_started", admit_callable):
+			enemy_wave_controller.connect("wave_started", admit_callable)
+
+
+func _on_enemy_wave_started_admit(_wave_number: int) -> void:
+	var valid_units: Array = []
+	for unit in _wave_enemy_units:
+		if is_instance_valid(unit):
+			valid_units.append(unit)
+	_admit_hex_setup_nodes(valid_units)
 
 
 func _build_enemy_tactics_by_unit_id(enemy_units: Array) -> Dictionary:
