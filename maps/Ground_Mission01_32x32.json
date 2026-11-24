@@ -111,6 +111,20 @@
 			"x": -305,
 			"y": 568
 		},
+		"ship_return": {
+			"color": {
+				"a": 0.9,
+				"b": 1.0,
+				"g": 0.9,
+				"r": 0.48
+			},
+			"marker_type_id": "interaction_hold_zone",
+			"name": "Rückflug zum Heimatpad",
+			"placement_context": "editor_only",
+			"symbol": "circle",
+			"x": -305,
+			"y": 568
+		},
 		"spawn_bravo": {
 			"color": {
 				"a": 0.98,

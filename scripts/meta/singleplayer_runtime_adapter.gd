@@ -286,6 +286,11 @@ func configure(flow: Node, screen: Control) -> void:
 	# Handel-Nachbesserung W3: friedlicher Besuch des Handelsaussenpostens in der Kampagne ohne Zeitlimit (0 = keins); das Skirmish-Szenario trade_outpost_visit bleibt.
 	if _campaign_mode:
 		catalog.append({"mission_id": "trade_outpost_open_visit", "mission_name": "Handelsaußenposten besuchen", "map_file_path": "res://maps/trade_outpost.json", "scenario_file_path": "res://data/mission_scenarios/trade_outpost_open_visit.json", "slot_count": 4, "time_limit_seconds": 0.0, "win_condition": "objective_capture"})
+	# Handel 2a: friedliche Besuchsszenarien der kleinen Aussenposten (small_outposts.json); ohne Eintrag im Katalog kann der Anflug sie nicht waehlen.
+	for place_id: String in Dictionary(_campaign.get_campaign_snapshot().locations):
+		if _campaign.small_outpost_entry(place_id).is_empty(): continue
+		var place_def: Dictionary = _campaign.get_campaign_snapshot().locations[place_id]
+		catalog.append({"mission_id": String(place_def.scenario_file_path).get_file().get_basename(), "mission_name": String(place_def.name) + " besuchen", "map_file_path": place_def.map_file_path, "scenario_file_path": place_def.scenario_file_path, "slot_count": 4, "time_limit_seconds": 0.0, "win_condition": "objective_capture"})
 	for job: Dictionary in Dictionary(_campaign.get_campaign_snapshot().jobs).values():
 		var found := false
 		for item: Dictionary in catalog:

@@ -10,6 +10,7 @@ const COMMANDS: GDScript = preload("res://scripts/mission/singleplayer_campaign_
 const RETREAT_WIN_CONDITIONS: Array = ["evacuation", "departure"]
 ## Handel H1: Ort -> Szenario des friedlichen Besuchs nach abgeschlossenem Story-Auftrag.
 const OPEN_OUTPOSTS_PATH := "res://data/singleplayer/open_outposts.json"
+const SMALL_OUTPOSTS_PATH := "res://data/singleplayer/small_outposts.json"
 ## Kapitel 2: nur diese Auftragskennungen duerfen in einem aelteren Spielstand fehlen; sie gelten dann als neu (offered).
 const ADDITIVE_JOB_IDS: Array = ["wreck_crater_salvage", "stranded_refuel", "flak_silence", "cutlass_boarding", "hillside_bunker", "prospector_escort"]
 ## Kapitel 2: nur diese Ortskennungen duerfen in einem aelteren Spielstand fehlen (ein Ort, den es heute gar nicht gibt, stoert nicht).
@@ -160,12 +161,26 @@ func get_job_availability(retry_allowed: bool = false) -> Dictionary:
 
 func validate_location_visit(location_id: String, retry_allowed: bool = false) -> Dictionary:
 	if not _locations.has(location_id): return _reject("unknown_location", "Zielort unbekannt")
+	# Handel 2a: kleine Aussenposten (small_outposts.json) sind frei, sobald ihr Freischalt-Auftrag abgeschlossen ist; im freien Spiel immer.
+	var small := small_outpost_entry(location_id)
+	if not small.is_empty():
+		if not _enforce_sequence: return {"ok":true}
+		if _jobs.has(String(small.get("unlock_after_job_id", ""))) and String(_jobs[String(small.unlock_after_job_id)].status) == "completed": return {"ok":true}
+		return _reject("outpost_locked", "Gesperrt: " + String(small.get("locked_hint", "")))
 	if location_id == "homebase" or bool(_locations[location_id].get("free_visit", false)) or not _enforce_sequence: return {"ok":true}
 	var availability := get_job_availability(retry_allowed)
 	for id: String in _jobs:
 		# Ein gesperrt gelisteter Auftrag oeffnet seinen Ort nicht.
 		if String(_jobs[id].location_id) == location_id and bool(availability[id].visible) and not bool(availability[id].shown_as_locked): return {"ok":true}
 	return _reject("tutorial_locked", "Zuerst den vorherigen Kampagnenauftrag abschließen und Chips zuhause hochladen")
+
+## Handel 2a: Eintrag eines kleinen Aussenpostens aus data/singleplayer/small_outposts.json; {} wenn der Ort keiner ist. Nur lesend.
+func small_outpost_entry(location_id: String) -> Dictionary:
+	var file: Variant = JSON.parse_string(FileAccess.get_file_as_string(SMALL_OUTPOSTS_PATH)) if FileAccess.file_exists(SMALL_OUTPOSTS_PATH) else {}
+	if typeof(file) != TYPE_DICTIONARY: return {}
+	var entries: Variant = Dictionary(file).get("locations", {})
+	if typeof(entries) != TYPE_DICTIONARY or typeof(Dictionary(entries).get(location_id)) != TYPE_DICTIONARY: return {}
+	return Dictionary(Dictionary(entries)[location_id]).duplicate(true)
 
 ## Handel H1: Szenario des freien (friedlichen) Besuchs eines Ortes, dessen Story-Auftrag abgeschlossen ist; "" = der Ort ist noch
 ## an seinen Auftrag gebunden (oder hat keinen Besuch). Story-Auftrag = der Auftrag am Ort, dessen Szenario das Ortsszenario ist

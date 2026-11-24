@@ -119,5 +119,53 @@
       "gm02_pad_alpha"
     ],
     "services": []
+  },
+  "muellers_farm": {
+    "id": "muellers_farm",
+    "name": "Müllers Farm",
+    "region_position": [
+      0.86,
+      0.86
+    ],
+    "map_file_path": "res://maps/Ground_Mission01_32x32.json",
+    "scenario_file_path": "res://data/mission_scenarios/muellers_farm_visit.json",
+    "landing_pad_ids": [
+      "muellers_farm_pad_01"
+    ],
+    "services": [
+      "trade"
+    ]
+  },
+  "shady_lab": {
+    "id": "shady_lab",
+    "name": "Shady Research Lab",
+    "region_position": [
+      0.66,
+      0.66
+    ],
+    "map_file_path": "res://maps/Ground_Mission02_128x128.json",
+    "scenario_file_path": "res://data/mission_scenarios/shady_lab_visit.json",
+    "landing_pad_ids": [
+      "gm02_pad_bravo"
+    ],
+    "services": [
+      "trade"
+    ]
+  },
+  "templanon": {
+    "id": "templanon",
+    "name": "Templanon",
+    "region_position": [
+      0.4,
+      0.9
+    ],
+    "map_file_path": "res://maps/windbruch_outpost.json",
+    "scenario_file_path": "res://data/mission_scenarios/templanon_visit.json",
+    "landing_pad_ids": [
+      "windbruch_pad_03"
+    ],
+    "services": [
+      "trade"
+    ]
   }
 }

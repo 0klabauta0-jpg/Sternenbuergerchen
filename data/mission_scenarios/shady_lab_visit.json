@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "scenario_id": "shady_lab_visit",
+  "display_name": "Shady Research Lab",
+  "map_file_path": "res://maps/Ground_Mission02_128x128.json",
+  "time_limit_seconds": 0.0,
+  "mission_slot_count_override": 4,
+  "win_condition": "objective_capture",
+  "objective": {
+    "marker_id": "objective_point",
+    "capture_radius": 80.0
+  },
+  "enemy_groups": [],
+  "wave_config": {
+    "wave_delay_seconds": 0.0,
+    "wave_count": 0,
+    "first_wave_delay_seconds": 0.0,
+    "units_per_wave": 1
+  },
+  "patrol_bindings": [],
+  "briefing": {
+    "summary": "Das Schiff direkt beim Händler landen, handeln und bewusst zurückfliegen.",
+    "minimap_mode": "terrain_only",
+    "objectives": [
+      {
+        "target_id": "spawn_bravo",
+        "text": "Händler aufsuchen"
+      },
+      {
+        "target_id": "ship_return",
+        "text": "Rückflug zur Heimatbasis"
+      }
+    ],
+    "title": "Shady Research Lab"
+  },
+  "vertical_slice": {
+    "scenario_kind": "singleplayer_visit",
+    "team_slots": [
+      {
+        "role": "recovery",
+        "player_assignable_modes": [
+          "singleplayer"
+        ],
+        "spawn_marker_id": "spawn_alpha",
+        "team_id": "team_alpha",
+        "npc_owned": false
+      }
+    ],
+    "play_modes": [
+      "singleplayer"
+    ],
+    "contract_version": 1,
+    "interaction_points": [
+      {
+        "gate_id": "service_visit",
+        "step_id": "service_visit",
+        "duration_seconds": 1.0,
+        "required_state": "service_visited",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "asset_hint": "station_computer",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Händler: Shady Research Lab",
+        "interaction_id": "spawn_bravo",
+        "marker_id": "spawn_bravo"
+      }
+    ],
+    "flow_steps": [
+      {
+        "step_id": "service_visit",
+        "min_hold_seconds": 1.0,
+        "objective_type": "interaction_use",
+        "required_state": "service_visited",
+        "target_marker_id": "spawn_bravo"
+      },
+      {
+        "objective_type": "location_return",
+        "requires_step_id": "service_visit",
+        "step_id": "visit_return",
+        "required_state": "visit_returned",
+        "min_hold_seconds": 0.0,
+        "target_marker_id": "ship_return"
+      }
+    ]
+  },
+  "notes": [
+    "Handel 2a: friedlicher Besuch ohne Auftrag; Handel nur nahe dem Händler-Marker (small_outposts.json).",
+    "Service Use does not finish visit; authoritative explicit return owns visit_return.",
+    "Credits, purchases and fuel belong to persistent supply owner, not this scenario."
+  ]
+}

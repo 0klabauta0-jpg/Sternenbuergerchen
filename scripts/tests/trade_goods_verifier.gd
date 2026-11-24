@@ -133,8 +133,8 @@ func _sell_part() -> void:
 
 func _buy_part() -> void:
 	var s: RefCounted = _sup()
-	var r: Dictionary = s.apply_command(_cmd("buy", {"offer_id": "market:muellers_farm:food", "quantity": 1}), _ctx("muellers_farm"))
-	check(not bool(r.get("ok", true)) and String(r.get("reason", "")) == "trade_unavailable", "Kauf: Nahrung in Muellers Farm ohne Handelsdienst -> trade_unavailable (%s)" % r)
+	var r: Dictionary = s.apply_command(_cmd("buy", {"offer_id": "market:muellers_farm:food", "quantity": 1}), _ctx("relay_ridge"))
+	check(not bool(r.get("ok", true)) and String(r.get("reason", "")) == "trade_unavailable", "Kauf: Nahrung von Muellers Farm an einem Ort ohne Handelsdienst (Relaisgrat) -> trade_unavailable (%s)" % r)
 	var locs: Dictionary = _locs()
 	var want := {"muellers_farm": {"food": [5, 16]}, "templanon": {"medical_supplies": [12, 16], "bandage": [6, 16]}, "shady_lab": {"luxury_goods": [9, 16], "stim": [14, 8]}}
 	var data_ok := true

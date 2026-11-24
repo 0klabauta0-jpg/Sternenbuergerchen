@@ -166,6 +166,8 @@ func _w7_place_to_place() -> void:
 	_runtime.set("_campaign_mode", false)
 
 	var trade_orbit: String = String(Dictionary(_space().get("location_orbits", {})).get("trade_outpost", ""))
+	# Handel 2a: Handelsposten und Muellers Farm teilen einen Orbit; der Sprung gilt dem gewaehlten Ort, also wird er wie im Spiel vorher gewaehlt.
+	_runtime.call("_commit", "singleplayer_campaign", "select_destination", {"location_id": "trade_outpost", "job_id": ""}, "result:select:trade")
 	var jump: Dictionary = _screen.call("request_operation", "space_start_quantum", {"craft_id": _craft_id, "target_orbit_id": trade_orbit})
 	_check(bool(jump.get("ok", false)), "W7: Sprung zum Handelsposten angenommen: %s" % [jump])
 	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == trade_orbit, 60000, "W7: Schiff im Orbit des Handelspostens"): return
