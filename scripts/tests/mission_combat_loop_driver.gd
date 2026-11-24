@@ -2305,6 +2305,7 @@ func _ammo_unit_can_fire(unit_id: String, unit) -> bool:
 	if can_fire:
 		if not _ammo_fully_empty_ids.is_empty():
 			_ammo_fully_empty_ids.erase(unit_id)
+			_ammo_empty_enemy_state.erase(unit_id)
 		return true
 	if not unlimited:
 		_ammo_review_empty_weapon(unit_id, unit)
@@ -2381,6 +2382,7 @@ func _ammo_switch_weapon_slot(unit_id: String, unit, new_slot: int, from_weapon_
 	else:
 		_ammo_slot2_ids.erase(unit_id)
 	_ammo_fully_empty_ids.erase(unit_id)
+	_ammo_empty_enemy_state.erase(unit_id)
 
 
 func _ammo_unit_name(unit, unit_id: String) -> String:
@@ -2417,12 +2419,62 @@ func _ammo_report_to_player(unit, unit_id: String, kind: String, text: String) -
 ## M6c (C3): Ein Gegner ohne Munition (alle Waffen leer) rueckt nicht weiter vor und patrouilliert nicht in den Feind: er sucht
 ## Deckung mit dem vorhandenen Deckungsbefehl (Zielwahl und Abkuehlzeit wie beim Ausweichen unter Feuer). Steht er schon in Deckung,
 ## bleibt er stehen. Eigene Trupps: kein automatischer Rueckzug (kommt mit dem Rueckzugsbefehl).
+## W1/K3 (Nachbesserung): Bewegt wird er NUR, um in Deckung zu gehen; in jedem anderen Fall (Abkuehlzeit laeuft, steht schon in Deckung,
+## kein Deckungsfeld im Radius, Deckungsfeld erreicht) wird sein letzter Bewegungsbefehl (Vorruecken/Patrouille) durch den vorhandenen
+## Haltebefehl (build_limbo_contact_hold_command) beendet. Hat er ein Deckungsfeld einmal gewaehlt, geht er zu GENAU diesem (kein Springen
+## von Feld zu Feld); ist er dort (auch wenn das Feld unter dem Mindestwert liegt), bleibt er. Zustand je Einheit: "target" (gewaehltes
+## Feld), "held" (Haltebefehl ist eingereiht), "settled" (bleibt endgueltig); geloescht zusammen mit der Marke "ganz leer".
+var _ammo_empty_enemy_state: Dictionary = {}
+
+
 func _ammo_enemy_without_ammo_seeks_cover(simulation_root: Node, enemy, unit_id: String) -> void:
-	if _enemy_limbo_cover_on_cooldown(unit_id):
+	var state: Dictionary = _ammo_empty_enemy_state.get(unit_id, {})
+	if bool(state.get("settled", false)):
+		return
+	if state.has("target") and enemy is Node2D:
+		var cover_field: Vector2 = Vector2(state["target"])
+		if (enemy as Node2D).global_position.distance_to(cover_field) > ENEMY_PATROL_WAYPOINT_REACHED_DISTANCE:
+			if not _enemy_limbo_cover_on_cooldown(unit_id):
+				# Noch nicht da, Abkuehlzeit um: weiter zum SELBEN Feld (nicht neu suchen).
+				_enemy_limbo_cover_ready_at_tick[unit_id] = _current_tick + maxi(enemy_limbo_cover_cooldown_ticks, 0)
+				_enqueue_enemy_behavior_command(simulation_root, Dictionary(_enemy_behavior_orchestrator.call(
+					"build_limbo_cover_command", unit_id, cover_field, enemy_reposition_move_speed_factor,
+					ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.ACTION_SEEK_COVER, ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.REASON_SEEK_COVER)))
+			return
+		_ammo_empty_enemy_settle(simulation_root, unit_id, state)
 		return
 	if _get_enemy_limbo_cover_score(enemy) >= enemy_limbo_cover_min_cover_score:
+		_ammo_empty_enemy_settle(simulation_root, unit_id, state)
 		return
-	_try_enqueue_enemy_limbo_cover_move(simulation_root, enemy)
+	if _enemy_limbo_cover_on_cooldown(unit_id):
+		_ammo_empty_enemy_hold_once(simulation_root, unit_id, state)
+		return
+	var new_cover_field: Vector2 = _build_enemy_limbo_cover_target(enemy)
+	if new_cover_field == Vector2.INF:
+		_ammo_empty_enemy_settle(simulation_root, unit_id, state)
+		return
+	if _try_enqueue_enemy_limbo_cover_move(simulation_root, enemy):
+		state["target"] = new_cover_field
+		state.erase("held")
+		_ammo_empty_enemy_state[unit_id] = state
+	else:
+		_ammo_empty_enemy_settle(simulation_root, unit_id, state)
+
+
+func _ammo_empty_enemy_hold_once(simulation_root: Node, unit_id: String, state: Dictionary) -> void:
+	if bool(state.get("held", false)):
+		return
+	state["held"] = true
+	_ammo_empty_enemy_state[unit_id] = state
+	_enqueue_enemy_behavior_command(simulation_root, Dictionary(_enemy_behavior_orchestrator.call(
+		"build_limbo_contact_hold_command", unit_id,
+		ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.ACTION_CONTACT_HOLD, ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.REASON_CONTACT_HOLD)))
+
+
+func _ammo_empty_enemy_settle(simulation_root: Node, unit_id: String, state: Dictionary) -> void:
+	_ammo_empty_enemy_hold_once(simulation_root, unit_id, state)
+	state["settled"] = true
+	_ammo_empty_enemy_state[unit_id] = state
 
 
 ## Munitionszustand einer Einheit (nur lesen): {"state": none|ready|reloading|empty, rounds, magazine_size, reserve, reload_ticks_left}.
@@ -2454,6 +2506,7 @@ func _ammo_respawn_unit(unit_id: String) -> void:
 	_ammo_slot2_ids.erase(unit_id)
 	_ammo_switch_ready_tick.erase(unit_id)
 	_ammo_fully_empty_ids.erase(unit_id)
+	_ammo_empty_enemy_state.erase(unit_id)
 	var simulation_root = get_node_or_null(simulation_root_path)
 	if simulation_root != null and simulation_root.has_method("forget_mission_ammo"):
 		simulation_root.call("forget_mission_ammo", unit_id)
@@ -2469,6 +2522,7 @@ func reset_ammo() -> void:
 	_ammo_slot2_ids.clear()
 	_ammo_switch_ready_tick.clear()
 	_ammo_fully_empty_ids.clear()
+	_ammo_empty_enemy_state.clear()
 	# M6a: der Einsatz-Vorrat gehoert zum Einsatz und wird mit ihm geleert (Start, Neustart, Zwischenstand geladen).
 	var simulation_root = get_node_or_null(simulation_root_path)
 	if simulation_root != null and simulation_root.has_method("reset_mission_ammo"):

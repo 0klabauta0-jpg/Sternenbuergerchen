@@ -8,15 +8,19 @@ extends "res://scripts/tests/ammo_combat_verifier.gd"
 
 const RIFLE_MAG := 40  # wirksam: 20 (Waffendaten) x magazine_scale 2
 const SWITCH_TICKS := 180  # Pistole: reload_ticks 30 x reload_scale 6
+const WALK_STEP := 1.5  # Welt-Einheiten je Tick, mit denen die Test-Attrappe einem laufenden Bewegungsbefehl folgt
 const TEST_UNIT = preload("res://scripts/npc/test_unit.gd")
 
 
-## Treiber, der die Befehle an Gegner mitschreibt (Tick, Befehl), bevor er sie wie gewohnt einreiht.
+## Treiber, der die Befehle an Gegner mitschreibt (Tick, Befehl), bevor er sie wie gewohnt einreiht. `live` = der zuletzt eingereihte Befehl
+## je Einheit (ein laufender Bewegungsbefehl wird zu Ende gegangen, bis ein neuer kommt: so rechnet das Spiel, requeue_until_target false).
 class SwitchDriver extends AmmoDriver:
 	var commands: Array = []
+	var live: Dictionary = {}
 
 	func _enqueue_enemy_behavior_command(simulation_root: Node, command: Dictionary) -> bool:
 		commands.append({"tick": _current_tick, "command": command.duplicate(true)})
+		live[String(command.get("unit_id", ""))] = command.duplicate(true)
 		return super(simulation_root, command)
 
 
@@ -43,13 +47,18 @@ func _run() -> void:
 	_test_m1_message_once()
 	_test_g1_enemy_without_ammo_seeks_cover()
 	_test_g2_own_squad_without_ammo_gets_no_order()
+	_test_g3_no_cover_field_stands_still()
+	_test_g4_cooldown_running_holds_then_seeks_cover()
+	_test_g5_already_in_cover_stands_still()
+	_test_g6_weak_cover_fields_no_hopping()
+	_test_p1_default_second_weapon_is_no_weapon()
+	_test_p2_given_second_weapon_switches_on_real_unit()
+	_test_p3_enemy_spawn_path_has_no_second_weapon()
+	_test_k1_unnormalized_ids_do_not_flutter()
 	await process_frame
 	print("AMMO_WEAPON_SWITCH passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
 
-	_test_p1_default_second_weapon_is_no_weapon()
-	_test_p2_given_second_weapon_switches_on_real_unit()
-	_test_p3_enemy_spawn_path_has_no_second_weapon()
 
 # ---- Hilfen ------------------------------------------------------------------------------------------------------
 
@@ -257,8 +266,64 @@ func _drain(f: Dictionary, unit_id: String, limit: int = 4000) -> int:
 func _run_enemy_decisions(f: Dictionary, ticks: int) -> void:
 	for i in range(ticks):
 		_tick(f)
+		_walk_enemy(f)
 		if f.sim.tick_counter % 3 == 0:
 			f.driver._advance_enemy_units(f.sim)
+
+
+## Die Attrappe "enemy" folgt dem zuletzt eingereihten Bewegungsbefehl (WALK_STEP je Tick) bis zum Ziel; ein Haltebefehl beendet das Gehen.
+func _walk_enemy(f: Dictionary) -> void:
+	var command: Dictionary = f.driver.live.get("enemy", {})
+	if String(command.get("command_type", "")) != "move_to_position":
+		return
+	var unit: Node2D = f.units["enemy"]
+	var offset: Vector2 = Vector2(command.get("target_position", unit.position)) - unit.position
+	if offset.length() <= WALK_STEP:
+		unit.position += offset
+		f.driver.live.erase("enemy")
+	else:
+		unit.position += offset.normalized() * WALK_STEP
+
+
+## Gegner "enemy" weit vom eigenen "own" (kein Kontakt), mit Deckungsfeldern der Staerke `cover_value` an zwei Nachbarfeldern
+## (cover_value 0 = keine Deckung im Radius); `own_tile_cover` > 0: auch der Standort des Gegners ist Deckung dieser Staerke.
+func _cover_rig(cover_value: int, own_tile_cover: int = 0) -> Dictionary:
+	var far_own := Vector2i(CENTER.x - 7, CENTER.y - 7)
+	var far_enemy := Vector2i(CENTER.x + 7, CENTER.y + 7)
+	var specs := _line(far_own, far_enemy, "pistol", "pistol")
+	specs[1]["weapon_1"] = "pistol"
+	var f := _ammo_rig(specs, {})
+	_add_controller(f)
+	var terrain = f.scope.get_node("TerrainRegistry")
+	var fields: Array = []
+	if cover_value > 0:
+		for dir_index in [1, 2]:
+			var cover_grid: Vector2i = far_enemy + HEX.DIRECTIONS[dir_index]
+			terrain.register_tile(TILE.new({"tile_id": str(cover_grid), "grid_position": cover_grid, "world_position": terrain.grid_to_world(cover_grid), "explicit_hex_ramps": true, "cover_value": cover_value}))
+			fields.append(Vector2(terrain.grid_to_world(cover_grid)))
+	if own_tile_cover > 0:
+		terrain.register_tile(TILE.new({"tile_id": str(far_enemy), "grid_position": far_enemy, "world_position": terrain.grid_to_world(far_enemy), "explicit_hex_ramps": true, "cover_value": own_tile_cover}))
+	f["cover_fields"] = fields
+	return f
+
+
+## Der Gegner laeuft erst mit Munition auf den Feind zu (laufender Vorrueck-Befehl), wird dann ganz leer. Gibt den Abstand zum Feind zurueck.
+func _enemy_walking_then_empty(f: Dictionary) -> float:
+	_run_enemy_decisions(f, 120)
+	var live: Dictionary = f.driver.live.get("enemy", {})
+	_check(String(live.get("command_type", "")) == "move_to_position", "Vorbedingung: der Gegner mit Munition hat einen laufenden Bewegungsbefehl (%s)" % str(live.get("source_command_type", "keiner")))
+	var drained := _drain(f, "enemy")
+	_check(drained >= 0 and f.driver._ammo_fully_empty_ids.has("enemy"), "Vorbedingung: der Gegner ist ganz leer (nach %d Ticks)" % drained)
+	f.driver.commands.clear()
+	return f.units["enemy"].position.distance_to(f.units["own"].position)
+
+
+func _enemy_commands(f: Dictionary, source: String = "") -> Array:
+	var found: Array = []
+	for entry in f.driver.commands:
+		if String(entry.command.get("unit_id", "")) == "enemy" and (source.is_empty() or String(entry.command.get("source_command_type", "")) == source):
+			found.append(entry)
+	return found
 
 
 func _cover_commands(f: Dictionary, unit_id: String) -> Array:
@@ -272,17 +337,8 @@ func _cover_commands(f: Dictionary, unit_id: String) -> Array:
 ## G1 (C3): Ein Gegner ganz ohne Munition loest den Deckungsbefehl aus (einmal je Abkuehlzeit), ruecken nicht weiter vor, patrouilliert nicht.
 ## Die Einheiten stehen weit auseinander (kein Kontakt): ein Gegner MIT Munition rueckt dann vor und sucht keine Deckung.
 func _test_g1_enemy_without_ammo_seeks_cover() -> void:
-	var far_own := Vector2i(CENTER.x - 7, CENTER.y - 7)
-	var far_enemy := Vector2i(CENTER.x + 7, CENTER.y + 7)
-	var specs := _line(far_own, far_enemy, "pistol", "pistol")
-	specs[1]["weapon_1"] = "pistol"
-	var f := _ammo_rig(specs, {})
-	_add_controller(f)
-	# Deckung in der Naehe des Gegners (zwei Felder mit Deckungswert), sonst gibt es fuer den Deckungsbefehl kein Ziel.
-	var terrain = f.scope.get_node("TerrainRegistry")
-	for dir_index in [1, 2]:
-		var cover_grid: Vector2i = far_enemy + HEX.DIRECTIONS[dir_index]
-		terrain.register_tile(TILE.new({"tile_id": str(cover_grid), "grid_position": cover_grid, "world_position": terrain.grid_to_world(cover_grid), "explicit_hex_ramps": true, "cover_value": 60}))
+	# Deckung in der Naehe des Gegners (zwei Felder mit Deckungswert 60 >= Mindestwert), sonst gibt es fuer den Deckungsbefehl kein Ziel.
+	var f := _cover_rig(60)
 	_run_enemy_decisions(f, 120)
 	var advancing: Array = f.driver.commands.duplicate()
 	var advance_kinds := {}
@@ -292,19 +348,34 @@ func _test_g1_enemy_without_ammo_seeks_cover() -> void:
 	var drained := _drain(f, "enemy")
 	_check(drained >= 0 and f.driver.get_unit_ammo_text("enemy") == "Keine Munition", "G1: Vorbedingung: der Gegner ist ganz leer (nach %d Ticks)" % drained)
 	f.driver.commands.clear()
+	var enemy: Node2D = f.units["enemy"]
+	var own: Node2D = f.units["own"]
+	var empty_distance: float = enemy.position.distance_to(own.position)
 	var start_tick: int = f.sim.tick_counter
-	_run_enemy_decisions(f, 400)
+	var min_distance := empty_distance
+	var position_at_300 := Vector2.ZERO
+	for step in range(20):
+		_run_enemy_decisions(f, 30)
+		min_distance = minf(min_distance, enemy.position.distance_to(own.position))
+		if step == 9:
+			position_at_300 = enemy.position
 	var kinds := {}
 	for entry in f.driver.commands:
 		kinds[String(entry.command.get("source_command_type", ""))] = true
-		_check(String(entry.command.get("enemy_bt_action", "")) == "seek_cover", "G1: jeder Befehl des leeren Gegners ist der Deckungsbefehl (%s)" % str(entry.command.get("source_command_type", "")))
 	var cover := _cover_commands(f, "enemy")
-	_check(cover.size() >= 2 and kinds.size() == 1, "G1: der leere Gegner sucht Deckung und rueckt nicht weiter vor (%d Deckungsbefehle, Arten %s)" % [cover.size(), str(kinds.keys())])
+	var holds := _enemy_commands(f, "enemy_limbo_contact_hold")
+	_check(kinds.keys().size() <= 2 and not kinds.has("enemy_advance") and not kinds.has("enemy_patrol") and not cover.is_empty() and String(f.driver.commands[0].command.get("enemy_bt_action", "")) == "seek_cover", "G1: der leere Gegner sucht Deckung (zuerst der Deckungsbefehl), rueckt nicht weiter vor (%d Deckungsbefehle, Arten %s)" % [cover.size(), str(kinds.keys())])
+	_check(cover.size() == 1 and holds.size() == 1, "G1: ein Deckungsbefehl, am Feld dann ein Haltebefehl (%d / %d)" % [cover.size(), holds.size()])
 	var spaced := true
 	for i in range(1, cover.size()):
 		if int(cover[i].tick) - int(cover[i - 1].tick) < f.driver.enemy_limbo_cover_cooldown_ticks:
 			spaced = false
-	_check(spaced and cover.size() <= 400 / f.driver.enemy_limbo_cover_cooldown_ticks + 1, "G1: der Deckungsbefehl kommt hoechstens einmal je Abkuehlzeit (%d in 400 Ticks, Ticks %s)" % [cover.size(), str(cover.map(func(e): return int(e.tick) - start_tick))])
+	_check(spaced and cover.size() <= 600 / f.driver.enemy_limbo_cover_cooldown_ticks + 1, "G1: der Deckungsbefehl kommt hoechstens einmal je Abkuehlzeit (%d in 600 Ticks, Ticks %s)" % [cover.size(), str(cover.map(func(e): return int(e.tick) - start_tick))])
+	var at_field := false
+	for field in f.cover_fields:
+		at_field = at_field or enemy.position.distance_to(field) <= 18.0
+	_check(at_field and enemy.position == position_at_300 and String(f.driver.live["enemy"].get("command_type", "")) == "hold_position", "G1: nach 600 Ticks steht er auf dem Deckungsfeld, seit Tick 300 unbewegt, letzter Befehl = Halten")
+	_check(min_distance >= empty_distance - 70.0, "G1: er naehert sich dem Feind nicht weiter an (Abstand %.0f -> kleinster %.0f)" % [empty_distance, min_distance])
 	_check(f.ctl.events.is_empty(), "G1: fuer Gegner gibt es keine Spielermeldung (%s)" % str(f.ctl.events))
 	f.scope.free()
 
@@ -325,6 +396,84 @@ func _test_g2_own_squad_without_ammo_gets_no_order() -> void:
 	_check(own_orders == 0, "G2: kein automatischer Befehl fuer den eigenen Trupp (%d)" % own_orders)
 	_check(f.ctl.events.size() == 1 and String(f.ctl.events[0].text) == "Anna: Keine Munition mehr.", "G2: aber die einmalige Meldung ist da (%s)" % str(f.ctl.events))
 	f.scope.free()
+
+
+## G3 (W1): Gibt es im Radius KEIN Deckungsfeld, steht der leere Gegner: sein laufender Vorrueck-Befehl wird durch den Haltebefehl beendet
+## (vorher lief er einfach weiter auf den Feind zu). Genau ein Befehl, 600 Ticks lang keine Bewegung mehr.
+func _test_g3_no_cover_field_stands_still() -> void:
+	var f := _cover_rig(0)
+	var enemy: Node2D = f.units["enemy"]
+	var own: Node2D = f.units["own"]
+	var empty_distance := _enemy_walking_then_empty(f)
+	var empty_position: Vector2 = enemy.position
+	_run_enemy_decisions(f, 6)
+	var settled_position: Vector2 = enemy.position
+	_run_enemy_decisions(f, 600)
+	var commands := _enemy_commands(f)
+	_check(commands.size() == 1 and String(commands[0].command.get("source_command_type", "")) == "enemy_limbo_contact_hold" and _cover_commands(f, "enemy").is_empty(), "G3: kein Deckungsfeld: genau ein Befehl, der Haltebefehl (%d Befehle)" % commands.size())
+	_check(String(f.driver.live["enemy"].get("command_type", "")) == "hold_position", "G3: der laufende Vorrueck-Befehl ist beendet (letzter Befehl: Halten)")
+	_check(enemy.position == settled_position and settled_position.distance_to(empty_position) <= 3.0 * WALK_STEP + 0.01, "G3: nach dem Entscheidungsschritt keine Bewegung mehr, 600 Ticks lang (%.1f weiter)" % enemy.position.distance_to(settled_position))
+	_check(enemy.position.distance_to(own.position) >= empty_distance - 3.0 * WALK_STEP - 0.01, "G3: er naehert sich dem Feind nicht weiter an (Abstand %.1f -> %.1f)" % [empty_distance, enemy.position.distance_to(own.position)])
+	f.scope.free()
+
+
+## G4 (W1): Laeuft die Abkuehlzeit des Deckungsbefehls, wird er sofort angehalten (nicht weiter vorgerueckt); nach der Abkuehlzeit geht er
+## genau einmal zum Deckungsfeld und bleibt dort.
+func _test_g4_cooldown_running_holds_then_seeks_cover() -> void:
+	var f := _cover_rig(60)
+	var enemy: Node2D = f.units["enemy"]
+	_enemy_walking_then_empty(f)
+	var cooldown_start: int = f.sim.tick_counter
+	f.driver._enemy_limbo_cover_ready_at_tick["enemy"] = cooldown_start + 90
+	var empty_position: Vector2 = enemy.position
+	_run_enemy_decisions(f, 60)
+	var commands := _enemy_commands(f)
+	_check(commands.size() == 1 and String(commands[0].command.get("source_command_type", "")) == "enemy_limbo_contact_hold" and enemy.position.distance_to(empty_position) <= 3.0 * WALK_STEP + 0.01, "G4: waehrend der Abkuehlzeit nur der Haltebefehl, keine Bewegung (%d Befehle, %.1f weiter)" % [commands.size(), enemy.position.distance_to(empty_position)])
+	_run_enemy_decisions(f, 600)
+	var cover := _cover_commands(f, "enemy")
+	var at_field := false
+	for field in f.cover_fields:
+		at_field = at_field or enemy.position.distance_to(field) <= 18.0
+	_check(cover.size() == 1 and int(cover[0].tick) >= cooldown_start + 90 and at_field and String(f.driver.live["enemy"].get("command_type", "")) == "hold_position", "G4: nach der Abkuehlzeit genau ein Deckungsbefehl, dann steht er auf dem Feld, letzter Befehl Halten (%d Deckungsbefehle)" % cover.size())
+	f.scope.free()
+
+
+## G5 (W1): Steht er schon in Deckung (Standort mit Deckungswert >= Mindestwert), bekommt er keinen Deckungsbefehl, aber der laufende
+## Vorrueck-Befehl wird durch den Haltebefehl beendet.
+func _test_g5_already_in_cover_stands_still() -> void:
+	var f := _cover_rig(60, 60)
+	var enemy: Node2D = f.units["enemy"]
+	_run_enemy_decisions(f, 3)
+	var drained := _drain(f, "enemy")
+	_check(drained >= 0, "G5: Vorbedingung: ganz leer")
+	f.driver.commands.clear()
+	f.driver.live["enemy"] = {"command_type": "move_to_position", "unit_id": "enemy", "target_position": enemy.position + Vector2(-300.0, -300.0), "source_command_type": "enemy_advance"}
+	var start: Vector2 = enemy.position
+	_run_enemy_decisions(f, 600)
+	var commands := _enemy_commands(f)
+	_check(commands.size() == 1 and String(commands[0].command.get("source_command_type", "")) == "enemy_limbo_contact_hold" and _cover_commands(f, "enemy").is_empty(), "G5: in Deckung: kein Deckungsbefehl, ein Haltebefehl (%d Befehle)" % commands.size())
+	_check(enemy.position.distance_to(start) <= 3.0 * WALK_STEP + 0.01, "G5: der laufende Vorrueck-Befehl ist beendet, er steht (%.1f weiter)" % enemy.position.distance_to(start))
+	f.scope.free()
+
+
+## G6 (K3): Gibt es nur schwache Deckungsfelder (unter dem Mindestwert), springt er nicht alle 120 Ticks von Feld zu Feld: er geht einmal
+## zu einem Feld und bleibt dort.
+func _test_g6_weak_cover_fields_no_hopping() -> void:
+	var f := _cover_rig(10)
+	var enemy: Node2D = f.units["enemy"]
+	_enemy_walking_then_empty(f)
+	_run_enemy_decisions(f, 300)
+	var position_300: Vector2 = enemy.position
+	_run_enemy_decisions(f, 600)
+	var cover := _cover_commands(f, "enemy")
+	var at_field := false
+	for field in f.cover_fields:
+		at_field = at_field or enemy.position.distance_to(field) <= 18.0
+	_check(cover.size() == 1 and at_field and enemy.position == position_300, "G6: schwache Deckungsfelder: ein Deckungsbefehl in 900 Ticks, er bleibt auf dem Feld (%d Deckungsbefehle)" % cover.size())
+	_check(String(f.driver.live["enemy"].get("command_type", "")) == "hold_position", "G6: letzter Befehl: Halten")
+	f.scope.free()
+
+
 # ---- W2: Zweitwaffe nur, wenn sie wirklich gegeben wurde (echte Einheit TestUnit) ---------------------------------
 
 ## Echte TestUnit ohne Szene (wie die Spielwege sie ausruesten: apply_identity_config). Die Kennung gehoert zu keiner Attrappe des Aufbaus.
@@ -421,3 +570,9 @@ func _test_p3_enemy_spawn_path_has_no_second_weapon() -> void:
 	plain.scope.free()
 
 
+## K1: Kennungen werden wie in der Einheit bereinigt: "RIFLE" als Zweitwaffe ist dieselbe Waffe wie das aktive "rifle" (kein Hin-und-Her).
+func _test_k1_unnormalized_ids_do_not_flutter() -> void:
+	var f := _wrig({"weapon_2": "RIFLE"})
+	var r := _run_until_empty(f, "own")
+	_check(int(r.shots) == RIFLE_MAG and f.units["own"].get_combat_weapon_slot() == 1 and f.ctl.events.size() == 1, "K1: 'RIFLE' als Zweitwaffe ist dieselbe Waffe: 40 Schuesse, kein Wechsel, nur 'Keine Munition mehr.' (%d Schuesse, %d Zeilen)" % [int(r.shots), f.ctl.events.size()])
+	f.scope.free()
