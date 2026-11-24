@@ -30,6 +30,30 @@ uniform bool trail_surface = false;
 uniform vec3 sun_direction_world = vec3(-0.326, 0.788, 0.522);
 // 1.0 paints roads into the ground; lower when a built road deck covers them.
 uniform float road_paint_strength : hint_range(0.0, 1.0) = 1.0;
+// Versuch Bodentexturen: tileable ground photos in WORLD space replace the
+// computed base colour. The default is OFF, so every material that does not
+// get the switch from the art profile keeps the old picture; OFF is exact.
+uniform bool ground_tiles_enabled = false;
+uniform sampler2D ground_tex_normal : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D ground_tex_gravel : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D ground_tex_clay : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D ground_tex_rock : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D ground_tex_base : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D ground_tex_paving : source_color, filter_linear_mipmap, repeat_enable;
+// Edge length of one texture tile in metres (one field is about 1 m).
+uniform float ground_tile_meters : hint_range(1.0, 16.0) = 4.0;
+// The ONE brightness knob for all ground textures (old ground was about 0.43 luminance).
+uniform float ground_tile_brightness : hint_range(0.2, 1.5) = 0.92;
+// The base concrete slabs are far paler than the rest; scaled down on its own.
+uniform float ground_base_tile_gain : hint_range(0.1, 1.0) = 0.45;
+// How much of the old zoom dependent darkening (gravel, cracks, wind ripples) stays on top.
+uniform float ground_detail_keep : hint_range(0.0, 1.0) = 0.35;
+// Wide soft patches of the variants: patches per metre, coverage thresholds of
+// the noise (higher = less area; gravel about a quarter, clay about a tenth) and edge softness.
+uniform float ground_patch_scale : hint_range(0.02, 0.5) = 0.11;
+uniform float ground_patch_gravel : hint_range(0.0, 1.0) = 0.58;
+uniform float ground_patch_clay : hint_range(0.0, 1.0) = 0.70;
+uniform float ground_patch_softness : hint_range(0.02, 0.4) = 0.10;
 varying vec3 ground_world_position;
 varying vec3 ground_world_normal;
 varying float ramp_incline;
@@ -131,6 +155,12 @@ void fragment() {
 		float chip = broad_patch(ground_world_position.xz * 95.0);
 		if (wear_area > 0.45 && chip > mix(0.82, 0.45, wear_area)) { discard; }
 	}
+	// Bodentexturen: what the old code computes anyway is only recorded here
+	// (darkening factor and the road / rock / water weights); nothing old changes.
+	float tile_detail = 1.0;
+	float tile_road = 0.0;
+	float tile_rock = 0.0;
+	float tile_water = 0.0;
 	// Authored tints are sRGB ratios; a linear target needs the matching power.
 	float tint_gamma = OUTPUT_IS_SRGB ? 1.0 : 2.2;
 	float drift_mask = paved_surface ? 0.30 : 1.0;
@@ -229,6 +259,9 @@ void fragment() {
 		float road = smoothstep(0.12,0.85,weights.r) * mix(road_paint_strength, 1.0, graded);
 		float rock = smoothstep(0.05,0.95,weights.g);
 		float sand = clamp(weights.b+(broad_patch(p*0.21)-0.5)*0.42,0.0,1.0);
+		tile_road = road;
+		tile_rock = rock;
+		tile_water = weights.a;
 		float trail = 0.0;
 		if (trail_surface) {
 			// A second, slowly meandering lookup lets the worn line drift off
@@ -293,6 +326,7 @@ void fragment() {
 		}
 		earth*=1.0-(fissure*(homebase_palette ? 0.055 : 0.14)+shoulder*0.09)*detail_strength;
 		earth=mix(earth,earth*vec3(0.79,0.83,0.86),pebble*(homebase_palette ? 0.22 : 0.38)*detail_strength);
+		tile_detail*=(1.0-(fissure*(homebase_palette ? 0.055 : 0.14)+shoulder*0.09)*detail_strength)*(1.0-pebble*(homebase_palette ? 0.22 : 0.38)*detail_strength*0.17);
 		if (quiet_tactical_surface) { value=mix(0.975,1.025,patch); }
 		// These authored palette literals are sRGB in every location. Only a
 		// linear renderer needs decoding; double decoding made missions red/black.
@@ -332,8 +366,47 @@ void fragment() {
 		float mottle = broad_patch(ripple_p * 0.9 + vec2(41.0, 3.0)) - 0.5;
 		float near = detail_visibility(ripple_p * 4.0) * drift_strength * drift_mask;
 		pigment *= pow(1.0 + (ripple * 0.085 + mottle * 0.07) * near, tint_gamma);
+		tile_detail *= pow(1.0 + (ripple * 0.085 + mottle * 0.07) * near, tint_gamma);
 	}
-	ALBEDO = pigment * value;
+	vec3 old_albedo = pigment * value;
+	vec3 final_albedo = old_albedo;
+	if (ground_tiles_enabled && !marking_surface) {
+		// World-space tiling: hex borders never become texture borders. Gradients
+		// are taken once, so every lookup below may sit inside a branch.
+		vec2 tile_uv = ground_world_position.xz / ground_tile_meters;
+		vec2 tile_dx = dFdx(tile_uv);
+		vec2 tile_dy = dFdy(tile_uv);
+		vec3 tile_color;
+		if (homebase_palette) {
+			tile_color = textureGrad(ground_tex_base, tile_uv, tile_dx, tile_dy).rgb * ground_base_tile_gain;
+		} else {
+			tile_color = textureGrad(ground_tex_normal, tile_uv, tile_dx, tile_dy).rgb;
+			// Fixed, slow world noise: patches over several fields, soft edges.
+			vec2 pw = ground_world_position.xz * ground_patch_scale;
+			float gravel_w = smoothstep(ground_patch_gravel, ground_patch_gravel + ground_patch_softness, broad_patch(pw + vec2(61.0, 23.0)));
+			float clay_w = smoothstep(ground_patch_clay, ground_patch_clay + ground_patch_softness, broad_patch(pw * 1.3 + vec2(7.0, 91.0)));
+			if (gravel_w > 0.001) {
+				tile_color = mix(tile_color, textureGrad(ground_tex_gravel, tile_uv, tile_dx, tile_dy).rgb, gravel_w);
+			}
+			if (clay_w > 0.001) {
+				tile_color = mix(tile_color, textureGrad(ground_tex_clay, tile_uv, tile_dx, tile_dy).rgb, clay_w);
+			}
+		}
+		float paving_w = (paved_surface && !surface_blending) ? 1.0 : clamp(tile_road, 0.0, 1.0);
+		if (paving_w > 0.001) {
+			tile_color = mix(tile_color, textureGrad(ground_tex_paving, tile_uv, tile_dx, tile_dy).rgb, paving_w);
+		}
+		float rock_w = rock_strata ? smoothstep(0.40, 0.88, ground_world_normal.y) : clamp(tile_rock, 0.0, 1.0) * 0.85;
+		if (rock_w > 0.001) {
+			tile_color = mix(tile_color, textureGrad(ground_tex_rock, tile_uv, tile_dx, tile_dy).rgb, rock_w);
+		}
+		float slope_keep = slope_normal_softening > 0.0 ? 1.0 - 0.18 * smoothstep(0.05, 0.32, ramp_incline) : 1.0;
+		vec3 tiled_albedo = tile_color * ground_tile_brightness * slope_keep * mix(1.0, tile_detail, ground_detail_keep);
+		// Cliff walls and water keep their old colour; only the flat tops take the texture.
+		float tiled_amount = rock_strata ? rock_w : 1.0 - clamp(tile_water, 0.0, 1.0);
+		final_albedo = mix(old_albedo, tiled_albedo, tiled_amount);
+	}
+	ALBEDO = final_albedo;
 	if (rock_strata) {
 		// Warm ground bounce keeps shaded cliff faces readable instead of
 		// dropping to black; strongest near the foot, none on the crown.
