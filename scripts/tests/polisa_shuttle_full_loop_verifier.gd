@@ -167,8 +167,13 @@ func _test_complete_return(station: Dictionary, service: RefCounted, recruit: St
 		controller._update_drop_sequence(0.1); station.sim._physics_process(0.1)
 		if service.get_snapshot().phase == "idle": break
 	if service.get_snapshot().phase != "idle":
-		var seq: Dictionary = controller._parallel_drop_sequences_by_craft["shuttle-real"]
-		print("ADAPTER_DIAG: ", load("res://scripts/mission/hex_ground_deployment_adapter.gd").new().advance_phase(station.sim,seq,seq.lz_position + controller._get_unload_offset(0,"NW"),Callable(controller,"get_ground_ship_blocked_cells")))
+		# Diagnose nur, wenn die Landesequenz wirklich existiert (nach einem fehlgeschlagenen Rueckflugstart gibt es sie nicht; der Zugriff brach sonst die letzte Pruefung ab).
+		var seqs: Dictionary = controller.get("_parallel_drop_sequences_by_craft")
+		if seqs.has("shuttle-real"):
+			var seq: Dictionary = seqs["shuttle-real"]
+			print("ADAPTER_DIAG: ", load("res://scripts/mission/hex_ground_deployment_adapter.gd").new().advance_phase(station.sim,seq,seq.lz_position + controller._get_unload_offset(0,"NW"),Callable(controller,"get_ground_ship_blocked_cells")))
+		else:
+			print("ADAPTER_DIAG: keine Landesequenz fuer shuttle-real (Rueckflug nie gestartet)")
 		print("RETURN_DIAG: ", service.get_snapshot().phase, " last=", controller.get("_last_command_text"), " ground=", station.sim.get_hex_ground_planning_snapshot(), " sequence=", controller.get("_parallel_drop_sequences_by_craft"))
 	_check(service.get_snapshot().phase == "idle" and Dictionary(station.scene.get_meta("singleplayer_station_personnel", {})).has(recruit),"return flight completes station landing, resident transfer and teardown")
 	home_adapter = null

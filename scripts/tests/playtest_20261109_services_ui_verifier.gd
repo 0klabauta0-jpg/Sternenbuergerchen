@@ -101,7 +101,7 @@ func _run() -> void:
 ## Das Serviceschiff waehlt die Oberflaeche nicht selbst, sondern liest es aus location_view (a4d5948c5); ohne dieses Feld
 ## steht dort "Serviceschiff auswaehlen" und beide Aktionen bleiben gesperrt.
 func _snapshot() -> Dictionary:
-	return {"campaign": {}, "location_view": {"location_id": _location, "craft_id": "craft_one"}, "supply": _supply.get_supply_snapshot(), "crafts": [{"craft_id": "craft_one", "location_id": _location, "busy": _busy}], "service_contexts_by_craft_id": {"craft_one": {"location_id": _location, "craft_busy": _busy, "ground_service_verified": true, "services": ["trade", "refuel"]}} if not _busy else {}}
+	return {"campaign": {}, "location_view": {"location_id": _location, "craft_id": "craft_one"}, "supply": _supply.get_supply_snapshot(), "crafts": [{"craft_id": "craft_one", "location_id": _location, "busy": _busy}], "service_contexts_by_craft_id": {"craft_one": {"location_id": _location, "craft_busy": _busy, "ground_service_verified": true, "services": (["trade", "refuel", "repair"] if _location == "homebase" else ["trade", "refuel"])}} if not _busy else {}}
 
 func _command(operation: String, payload: Dictionary) -> Dictionary:
 	_calls.append({"operation": operation, "payload": payload.duplicate(true)})
