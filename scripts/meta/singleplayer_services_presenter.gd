@@ -470,6 +470,9 @@ func _apply_section() -> void:
 					break
 				if String(job.get("status",""))=="completed":
 					_section_note.text="%s: Daten bereits hochgeladen und Belohnung erhalten. Keine weiteren Missionsdaten zum Hochladen vorhanden."%String(job.get("title",id))
+			var chip_note:String=String(_snapshot.get("home_services",{}).get("chip_note",""))
+			if not chip_note.is_empty():
+				_section_note.text=chip_note
 		elif _campaign_buttons.campaign_upload.button.disabled:
 			_section_note.text=upload_blocker if not upload_blocker.is_empty() else "Missionsdaten geborgen. Zuerst wieder an der Heimatbasis landen."
 		else:

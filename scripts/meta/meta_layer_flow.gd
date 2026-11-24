@@ -9926,7 +9926,8 @@ func _request_singleplayer_return(craft_id: String) -> Dictionary:
 	var fuel_gate: Dictionary = _singleplayer_runtime.call("authorize_return", craft_id)
 	if not bool(fuel_gate.get("ok", false)):
 		return fuel_gate
-	controller.call("_on_mission_dropship_return_pressed", craft_id)
+	# Die Rueckfrage vor dem Rueckzug gehoert dem Knopf der Schiffskarte; dieser Weg (Adapter, Polisa-Dispatcher) bestaetigt selbst.
+	controller.call("_on_mission_dropship_return_pressed", craft_id, true)
 	return {"ok": true, "message": "Rueckflug angefordert"}
 
 

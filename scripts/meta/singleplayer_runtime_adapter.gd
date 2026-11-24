@@ -3161,7 +3161,20 @@ func _home_services_snapshot() -> Dictionary:
 		if not _local_upload_container(id, job).is_empty(): local_jobs.append(id)
 		elif blocker.is_empty() and bool(job.get("home_upload", false)) and String(job.get("status", "")) in ["pending_upload", "active"]:
 			blocker = _upload_blocker_text(_find_campaign_chip_container("satellite_chip" if id == "satellite_recovery" else "outpost_chip", String(job.get("craft_id", ""))))
-	return {"workshop_available":_home_workshop_available(), "upload_job_ids":local_jobs, "upload_blocker":blocker, "all_at_home":_all_at_home(), "lost_craft_ids":_lost_craft_ids()}
+	return {"workshop_available":_home_workshop_available(), "upload_job_ids":local_jobs, "upload_blocker":blocker, "chip_note":_orphan_chip_note(), "all_at_home":_all_at_home(), "lost_craft_ids":_lost_craft_ids()}
+
+
+## Nur Text fuers Datenterminal: Ein Datenchip liegt bei einer eigenen Person oder im Lager, der zugehoerige Auftrag ist aber nicht mehr
+## aktiv oder wartet auf das Hochladen (abgebrochen: "accepted"/"failed"). Sonst leer.
+func _orphan_chip_note() -> String:
+	if _campaign == null or _supply == null: return ""
+	var jobs: Dictionary = _campaign.get_campaign_snapshot().get("jobs", {})
+	for id: String in ["satellite_recovery", "outpost_chip_recovery"]:
+		var job: Dictionary = jobs.get(id, {})
+		if String(job.get("status", "")) not in ["accepted", "failed"]: continue
+		if _find_campaign_chip_container("satellite_chip" if id == "satellite_recovery" else "outpost_chip", "").is_empty(): continue
+		return "Datenchip vorhanden, aber der Auftrag „%s“ gilt als abgebrochen. Im Smart Mobile den Auftrag erneut annehmen und den Einsatz noch einmal fliegen." % String(job.get("title", id))
+	return ""
 
 
 ## LC2h H5: Kennungen der im Einsatz verlorenen Schiffe (Verlustbelege des Ablaufs).

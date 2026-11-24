@@ -271,6 +271,10 @@ func _scene_pb5_departure() -> void:
 		_check(false, "PB5 Vorbedingung: Pilot ist an Bord (sonst nicht gebucht)")
 		return
 	_controller.call("_on_mission_dropship_return_pressed", _craft_id)
+	# Rueckfrage vor dem Rueckzug: erster Klick fragt nur nach, der zweite (nach 0,4 s) bestaetigt.
+	if bool(_controller.call("_is_retreat_armed", _craft_id)):
+		OS.delay_msec(450)
+		_controller.call("_on_mission_dropship_return_pressed", _craft_id)
 	print("PBINFO PB5 nach Abheben: last_command_text='", _clean(String(_controller.get("_last_command_text"))), "' feedback='", _clean(_feedback()), "'")
 	var released: bool = await _wait(func(): return _flow.get("_active_mission") == null, 120000, "PB5: Einsatz wird nach Abheben ausgewertet und freigegeben")
 	_check(released, "PB5 Abheben: das Gate wertet den Einsatz aus")
