@@ -11,6 +11,9 @@ const ORBIT = preload("res://scripts/mission/orbit_intent_checkpoint.gd")
 
 static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	if not is_instance_valid(flow) or not is_instance_valid(runtime) or not flow.has_method("is_campaign_start") or not flow.is_campaign_start() or runtime.get("_flow") != flow: return _reject("campaign_unavailable")
+	# Luftrollen 4a: ein fliegender feindlicher Flieger wird bis Aufgabe 5a nicht mitgespeichert; eigener Grund statt allgemeiner Meldung.
+	var hostile_owner: Variant = runtime.get("_simulation")
+	if is_instance_valid(hostile_owner) and hostile_owner.has_method("has_air_hostile") and hostile_owner.has_air_hostile(): return _reject("air_hostile_present")
 	var world_guard: Dictionary = runtime.get_world_checkpoint_guard()
 	if not world_guard.get("ok",false) and world_guard.get("reason") != "world_active": return world_guard
 	# The home hex owner has independent occupancy/movement/base state. The

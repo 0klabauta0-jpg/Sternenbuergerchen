@@ -274,6 +274,37 @@ func get_air_asset_risk_config() -> Dictionary:
 	return Dictionary(get_tactical_authoring_config().get("air_asset_risk", {})).duplicate(true)
 
 
+## Luftrollen 4a: feindliche Flieger des Einsatzes (tactical_authoring.enemy_aircraft). Ungueltige Eintraege fallen mit Diagnose weg; ohne Block [].
+func get_enemy_aircraft_config() -> Array:
+	var result: Array = []
+	var raw: Variant = get_tactical_authoring_config().get("enemy_aircraft", [])
+	if typeof(raw) != TYPE_ARRAY:
+		return result
+	var seen: Dictionary = {}
+	for entry_variant in Array(raw):
+		var entry: Dictionary = Dictionary(entry_variant) if typeof(entry_variant) == TYPE_DICTIONARY else {}
+		var aircraft_id: String = String(entry.get("aircraft_id", "")).strip_edges()
+		var model_id: String = String(entry.get("model_id", "")).strip_edges()
+		var hex: Variant = entry.get("spawn_hex")
+		var delay: Variant = entry.get("delay_seconds", 20.0)
+		var problem := ""
+		if aircraft_id.is_empty() or seen.has(aircraft_id):
+			problem = "aircraft_id fehlt oder doppelt"
+		elif model_id not in ["buccaneer", "cutlass"]:
+			problem = "model_id unbekannt: %s" % model_id
+		elif typeof(hex) != TYPE_DICTIONARY or typeof(Dictionary(hex).get("x")) not in [TYPE_INT, TYPE_FLOAT] or typeof(Dictionary(hex).get("y")) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(Dictionary(hex).x)) or not is_finite(float(Dictionary(hex).y)) or float(Dictionary(hex).x) != floorf(float(Dictionary(hex).x)) or float(Dictionary(hex).y) != floorf(float(Dictionary(hex).y)):
+			problem = "spawn_hex ungueltig"
+		elif typeof(delay) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(delay)) or float(delay) < 0.0:
+			problem = "delay_seconds ungueltig"
+		if not problem.is_empty():
+			push_warning("enemy_aircraft: Eintrag '%s' verworfen (%s)" % [aircraft_id, problem])
+			continue
+		seen[aircraft_id] = true
+		var faction: String = String(entry.get("faction_id", "pirates")).strip_edges()
+		result.append({"aircraft_id": aircraft_id, "model_id": model_id, "faction_id": faction if not faction.is_empty() else "pirates", "spawn_hex": Vector2i(int(Dictionary(hex).x), int(Dictionary(hex).y)), "delay_seconds": float(delay)})
+	return result
+
+
 func get_briefing() -> Dictionary:
 	return _coerce_briefing(briefing).duplicate(true)
 
@@ -643,6 +674,9 @@ func _coerce_tactical_authoring(raw_data: Dictionary) -> Dictionary:
 	risk["warning_required_before_damage"] = bool(risk.get("warning_required_before_damage", true))
 	risk["loss_consequence"] = String(risk.get("loss_consequence", "replacement_recovery")).strip_edges()
 	result["air_asset_risk"] = risk
+	# Luftrollen 4a: nur wenn vorhanden (ohne Block bleibt das Ergebnis, auch beim Serialisieren, wie bisher).
+	if typeof(raw.get("enemy_aircraft")) == TYPE_ARRAY:
+		result["enemy_aircraft"] = Array(raw.get("enemy_aircraft")).duplicate(true)
 	return result
 
 
