@@ -8609,31 +8609,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 		card_vbox.add_child(payload_panel)
 
 	_configure_homebase_shipcard_wide_fireteam_drop_targets(shipcard, craft_id, not craft_in_transit and not air_asset_unavailable)
-	_make_shipcard_select_on_click(shipcard, craft_id)
 	return shipcard
-
-
-## Die ganze Karte waehlt das Schiff: Beschriftungen, Rahmen und Leerraum lassen den Klick zur Karte durch;
-## Knoepfe, Auswahllisten und Eingabefelder in der Karte behalten ihre eigene Wirkung.
-func _make_shipcard_select_on_click(shipcard: Control, craft_id: String) -> void:
-	shipcard.gui_input.connect(_on_shipcard_gui_input.bind(craft_id))
-	var stack: Array = shipcard.get_children()
-	while not stack.is_empty():
-		var node: Node = stack.pop_back()
-		stack.append_array(node.get_children())
-		var control := node as Control
-		if control == null or control is BaseButton or control is LineEdit or control is TextEdit or control is ScrollBar:
-			continue
-		if control.mouse_filter == Control.MOUSE_FILTER_STOP:
-			control.mouse_filter = Control.MOUSE_FILTER_PASS
-
-
-func _on_shipcard_gui_input(event: InputEvent, craft_id: String) -> void:
-	var click := event as InputEventMouseButton
-	if click == null or click.button_index != MOUSE_BUTTON_LEFT or not click.pressed:
-		return
-	# Aufgeschoben: die Auswahl baut die Karten neu auf, auch diese hier.
-	_on_shipcard_select_requested.call_deferred(craft_id)
 
 
 func _build_homebase_shipcard_payload_summary(craft_id: String, craft_in_transit: bool, air_asset_unavailable: bool) -> String:

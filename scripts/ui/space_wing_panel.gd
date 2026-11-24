@@ -73,7 +73,7 @@ func _build() -> void:
 	_cards.name = "WingCards"
 	_body.add_child(_cards)
 	var manage := Button.new()
-	manage.text = "Rotten verwalten ▸"
+	manage.text = "Schiffsgruppen verwalten ▸"
 	_body.add_child(manage)
 	_management = VBoxContainer.new()
 	_management.name = "WingManagement"
@@ -82,7 +82,7 @@ func _build() -> void:
 	_apply_open_state()
 	manage.pressed.connect(func():
 		_management.visible = not _management.visible
-		manage.text = "Rotten verwalten ▾" if _management.visible else "Rotten verwalten ▸")
+		manage.text = "Schiffsgruppen verwalten ▾" if _management.visible else "Schiffsgruppen verwalten ▸")
 	_wings = OptionButton.new()
 	_wings.name = "WingSelector"
 	_management.add_child(_wings)
@@ -94,9 +94,9 @@ func _build() -> void:
 	_crafts.name = "WingCraftSelector"
 	_management.add_child(_crafts)
 	_name_edit = LineEdit.new()
-	_name_edit.placeholder_text = "Rottenname"
+	_name_edit.placeholder_text = "Name der Schiffsgruppe"
 	_management.add_child(_name_edit)
-	_add_button("Neue Rotte", _create)
+	_add_button("Neue Schiffsgruppe", _create)
 	_add_button("Umbenennen", _rename)
 	_add_button("Schiff zuordnen", func(): _selected_action("wing_assign"))
 	_add_button("Schiff entfernen", func(): _selected_action("wing_remove"))
@@ -105,7 +105,7 @@ func _build() -> void:
 	_feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_management.add_child(_feedback)
 	var notice := Label.new()
-	notice.text = "Rotten werden noch nicht im Spielstand gespeichert."
+	notice.text = "Schiffsgruppen werden noch nicht im Spielstand gespeichert."
 	notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_management.add_child(notice)
 
@@ -298,7 +298,7 @@ func _show_members() -> void:
 	var wings: Dictionary = Dictionary(_snapshot.get("space_wings", {})).get("wings", {})
 	var wing: Dictionary = wings.get(_selected(_wings), {})
 	if wing.is_empty():
-		_members.text = "Noch keine Rotte ausgewählt."
+		_members.text = "Noch keine Schiffsgruppe ausgewählt."
 		return
 	var names: Dictionary = {}
 	for craft: Dictionary in Array(_snapshot.get("crafts", [])):
@@ -315,7 +315,7 @@ func submit(operation: String, payload: Dictionary) -> Dictionary:
 		"request_id":"wing-ui:%s:%d" % [_session, _sequence],
 		"expected_revision":int(Dictionary(_snapshot.get("space_wings", {})).get("revision", 0))}
 	var result: Dictionary = _commands.call("space_wing_command", {"command":command})
-	var reasons := {"craft_already_assigned":"Schiff gehört bereits zu einer Rotte.", "wing_full":"Diese Rotte hat bereits sechs Schiffe.", "pilot_missing":"Dem Schiff ist kein Pilot zugeordnet.", "not_member":"Dieses Schiff gehört nicht zu der ausgewählten Rotte.", "stale_revision":"Der Bestand wurde geändert. Bitte erneut versuchen."}
+	var reasons := {"craft_already_assigned":"Schiff gehört bereits zu einer Schiffsgruppe.", "wing_full":"Diese Schiffsgruppe hat bereits sechs Schiffe.", "pilot_missing":"Dem Schiff ist kein Pilot zugeordnet.", "not_member":"Dieses Schiff gehört nicht zu der ausgewählten Schiffsgruppe.", "stale_revision":"Der Bestand wurde geändert. Bitte erneut versuchen."}
 	_feedback.text = "" if result.get("ok", false) else String(result.get("message", reasons.get(result.get("reason", ""), result.get("reason", "Aktion abgelehnt"))))
 	refresh(_read())
 	return result
@@ -338,7 +338,7 @@ func _create() -> void:
 func _rename() -> void:
 	var id := _selected(_wings)
 	if id.is_empty() or _name_edit.text.strip_edges().is_empty():
-		_feedback.text = "Rotte und Namen auswählen."
+		_feedback.text = "Schiffsgruppe und Namen auswählen."
 		return
 	submit("wing_rename", {"wing_id":id, "name":_name_edit.text})
 
@@ -346,7 +346,7 @@ func _selected_action(operation: String) -> void:
 	var wing := _selected(_wings)
 	var craft := _selected(_crafts)
 	if wing.is_empty() or craft.is_empty():
-		_feedback.text = "Rotte und Schiff auswählen."
+		_feedback.text = "Schiffsgruppe und Schiff auswählen."
 		return
 	var payload := {"wing_id":wing}
 	payload["leader_craft_id" if operation == "wing_leader_set" else "craft_id"] = craft

@@ -8,7 +8,9 @@ const MENU_ICONS=preload("res://scripts/ui/menu_equipment_icons.gd")
 var _screen: WeakRef
 var _content: VBoxContainer
 var _device: PanelContainer
-var _actions: HFlowContainer
+var _actions: HBoxContainer
+var _footer_slot: MarginContainer
+var _footer_align_pending := false
 var _jobs: OptionButton
 var _details: Label
 var _accept: Button
@@ -147,14 +149,23 @@ func configure(screen: Control) -> void:
 	_objectives.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_illustration_column.add_child(_objectives)
 	_detail_card.resized.connect(_layout_dossier)
-	_actions = HFlowContainer.new()
+	# Fussleiste: ohne eigenen Rahmen und Innenabstand, damit NUR die Knoepfe als Felder sichtbar sind.
+	# Die Knoepfe sind gleich breit (gleiches Streckverhaeltnis, Text wird gekuerzt) und schliessen links und rechts
+	# buendig mit dem Inhalt der Karte darueber ab (der Platzhalter folgt der Karte, siehe _align_footer).
+	_actions = HBoxContainer.new()
 	_actions.name = "JobActions"
-	_actions.add_theme_constant_override("h_separation", 8)
+	_actions.add_theme_constant_override("separation", 8)
+	_footer_slot = MarginContainer.new()
+	_footer_slot.name = "JobActionFooterSlot"
+	layout.add_child(_footer_slot)
 	_footer = PanelContainer.new()
 	_footer.name = "JobActionFooter"
-	_footer.add_theme_stylebox_override("panel", SKIN.box())
-	layout.add_child(_footer)
+	_footer.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	_footer_slot.add_child(_footer)
+	_footer.visibility_changed.connect(func(): _footer_slot.visible = _footer.visible)
 	_footer.add_child(_actions)
+	_detail_card.item_rect_changed.connect(_align_footer_later)
+	item_rect_changed.connect(_align_footer_later)
 	_accept = _button("AcceptJob", "Auftrag annehmen")
 	SKIN.primary(_accept)
 	_accept.pressed.connect(func(): _request("accept_job", {"job_id": _job_id}))
@@ -184,10 +195,31 @@ func _button(node_name: String, text: String) -> Button:
 	button.name = node_name
 	button.text = text
 	button.custom_minimum_size.y = 34
-	# Der Knopf fuellt die Fussleiste (mehrere teilen sich die Breite): sichtbare Flaeche = Klickflaeche.
+	# Der Knopf fuellt die Fussleiste (mehrere teilen sich die Breite gleichmaessig): sichtbare Flaeche = Klickflaeche.
+	# Langer Text wird mit Auslassungspunkten gekuerzt und steht voll im Tooltip.
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.size_flags_stretch_ratio = 1.0
+	button.clip_text = true
+	button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	button.tooltip_text = text
 	_actions.add_child(button)
 	return button
+
+func _align_footer_later() -> void:
+	if _footer_align_pending: return
+	_footer_align_pending = true
+	_align_footer.call_deferred()
+
+func _align_footer() -> void:
+	_footer_align_pending = false
+	if _footer_slot == null or _detail_card == null or not is_inside_tree(): return
+	var style: StyleBox = _detail_card.get_theme_stylebox("panel")
+	var host: Rect2 = (_footer_slot.get_parent() as Control).get_global_rect()
+	var card: Rect2 = _detail_card.get_global_rect()
+	var left := maxi(0, roundi(card.position.x + style.get_margin(SIDE_LEFT) - host.position.x))
+	var right := maxi(0, roundi(host.end.x - (card.end.x - style.get_margin(SIDE_RIGHT))))
+	if _footer_slot.get_theme_constant("margin_left") != left: _footer_slot.add_theme_constant_override("margin_left", left)
+	if _footer_slot.get_theme_constant("margin_right") != right: _footer_slot.add_theme_constant_override("margin_right", right)
 
 func _request(operation: String, payload: Dictionary) -> Dictionary:
 	var screen: Control = _screen.get_ref()
@@ -291,10 +323,13 @@ func refresh() -> void:
 	_objectives.text="ZIELE\n" + "\n".join(objectives) if not objectives.is_empty() else ""
 	var campaign_mode := String(singleplayer.get("mode", "")) == "campaign"
 	_accept.disabled = not bool(Dictionary(availability.get(_job_id, {})).get("can_accept", false))
-	_accept.tooltip_text = String(Dictionary(availability.get(_job_id, {})).get("message", ""))
 	_accept.text = "Erneut annehmen" if campaign_mode and status == "failed" else "Auftrag annehmen"
+	# Der Text kann gekuerzt erscheinen: der Tooltip nennt ihn voll; ist der Knopf gesperrt, steht dort der Grund (bestehende Zusage).
+	var accept_message := String(Dictionary(availability.get(_job_id, {})).get("message", ""))
+	_accept.tooltip_text = _accept.text if accept_message.is_empty() else accept_message
 	_show_map.disabled = not status in ["accepted", "active", "completed"]
 	_show_map.text = "Ort erneut besuchen" if status == "completed" else "Auf Karte zeigen"
+	_show_map.tooltip_text = _show_map.text
 	_abandon.disabled = not status in ["accepted", "active"]
 	# Dauerauftrag gewaehlt: dieselbe grosse Ansicht, gefuellt aus dem Eintrag des Besitzers; keine Annehmen-Knoepfe (Annahme beim Haendler).
 	var standing_entry: Dictionary = _standing_entry(_standing_id)
