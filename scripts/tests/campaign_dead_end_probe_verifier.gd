@@ -214,14 +214,20 @@ func _fall_1_haendler_verpasst() -> bool:
 	var selected: Dictionary = _runtime.call("request_operation", "select_destination", {"location_id":"trade_outpost", "job_id":""})
 	print("K2_FALL1_REVISIT_SELECT %s fuel=%s" % [_msg(selected), str(fuel_before_revisit)])
 	if not _check(bool(selected.get("ok", false)), "Fall 1.3: der Spieler kann den Handelsaussenposten ohne Auftrag wieder ansteuern (beobachtet: %s)" % _msg(selected)): return true
-	var scenario := String(Dictionary(Dictionary(_campaign().get("locations", {})).get("trade_outpost", {})).get("scenario_file_path", "")).get_file().get_basename()
-	print("K2_FALL1_REVISIT_SCENARIO from_location=%s selected_mission_id=%s" % [scenario, String(_flow.get("_selected_mission_id"))])
+	# Seit Handel H1/W3 (df700a832, 5720ddf1c; 24.11.) bleibt ein abgeschlossener Aussenposten als friedlicher Besuch offen: Der Wiederbesuch ohne Auftrag
+	# laedt das Besuchsszenario aus open_outposts.json (trade_outpost_open_visit, ohne Gegner, ohne Zeitlimit), nicht mehr das Auftragsszenario outpost_recovery.
+	# Die Sackgassenfrage bleibt dieselbe: Kann der Spieler den verpassten Haendler nachholen und die Person aufnehmen? Dazu wird der Besuch ueber dieses Szenario geflogen.
+	var location_scenario := String(Dictionary(Dictionary(_campaign().get("locations", {})).get("trade_outpost", {})).get("scenario_file_path", "")).get_file().get_basename()
+	var scenario := String(Dictionary(JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/open_outposts.json"))).get("trade_outpost", ""))
+	print("K2_FALL1_REVISIT_SCENARIO from_location=%s open_visit=%s selected_mission_id=%s" % [location_scenario, scenario, String(_flow.get("_selected_mission_id"))])
+	_check(scenario == "trade_outpost_open_visit" and String(_flow.get("_selected_mission_id")) == scenario, "Fall 1.3: der Wiederbesuch ohne Auftrag waehlt das friedliche Besuchsszenario trade_outpost_open_visit (beobachtet: gewaehlt %s, Datei %s)" % [String(_flow.get("_selected_mission_id")), scenario])
 	if not await _launch_and_land_again(scenario, OUTPOST_MAP, "wiederbesuch"): return false
 	mission = _flow.get("_active_mission")
 	controller = mission.get_node("TacticalController")
 	controller.call("_set_selected_fireteams", PackedStringArray([_team_id]), false)
 	var guards := _hostile_alive_count(mission)
 	print("K2_FALL1_GUARDS_AT_REVISIT scenario=%s hostile_alive=%d" % [String(mission.get_node("MissionSetup").get("scenario_file_path")), guards])
+	_check(guards == 0, "Fall 1.3: der friedliche Wiederbesuch hat keine Gegner (beobachtet: %d)" % guards)
 	if guards > 0:
 		if not await _fight_through_guards(mission, controller, "Besuch 2", OUTPOST_MAP): return false
 	var contexts_before: Dictionary = Dictionary(_flow.call("get_singleplayer_snapshot").get("service_contexts_by_craft_id", {}))
