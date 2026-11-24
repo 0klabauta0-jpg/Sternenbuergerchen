@@ -45,6 +45,200 @@ func _press(code: Key) -> void:
 		await process_frame
 
 
+## Hoehe der obersten Flaeche des Modells an einem Weltpunkt (x, z), per Strahl von oben auf das Dreiecksnetz.
+func _floor_world_y(holder: Node3D, x: float, z: float) -> float:
+	var best := -INF
+	for n in holder.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		var tm: TriangleMesh = mi.mesh.generate_triangle_mesh()
+		var inv: Transform3D = mi.global_transform.affine_inverse()
+		var hit: Dictionary = tm.intersect_ray(inv * Vector3(x, 20.0, z), (inv.basis * Vector3.DOWN).normalized())
+		if not hit.is_empty():
+			best = maxf(best, (mi.global_transform * Vector3(hit["position"])).y)
+	return best
+
+
+func _plane_to_grid(p: Vector2) -> Vector2i:
+	var gy: int = roundi(p.y * 4.0 / (sqrt(3.0) * 0.5))
+	return Vector2i(roundi(p.x * 4.0 - float(gy) * 0.5), gy)
+
+
+func _check_replace(base: Control, stage: Node3D, layout: Dictionary, entry: Dictionary, holder: Node3D, old_nodes: Dictionary, person_height: float) -> void:
+	var id := String(entry.get("id", ""))
+	var old_id := String(entry.get("replaces", ""))
+	var s: float = float(entry.get("scale", 1.0))
+	var plane := Vector2.INF
+	for a in layout.get("assets", []):
+		if String(Dictionary(a).get("id", "")) == old_id:
+			var p: Array = Dictionary(a).get("plane", [0, 0])
+			plane = Vector2(float(p[0]), float(p[1]))
+	_check(plane != Vector2.INF, "ersetztes Bestandsgebaeude im Layout: %s" % old_id)
+	var off: Array = entry.get("offset", [0, 0, 0])
+	var o := Vector2(plane.x + float(off[0]), plane.y + float(off[2]))
+	_check(holder.position.distance_to(Vector3(o.x, float(off[1]), o.y)) < 0.001, "%s steht an der Stelle von %s plus Versatz (%.2f / %.2f)" % [id, old_id, o.x, o.y])
+	_check(absf(holder.rotation.y) < 0.001, "%s: Eingang zur selben Seite (+z) wie das Habitat (Drehung 0)" % id)
+	_check(Vector2(float(off[0]), float(off[2])).length() <= 0.6 + 0.0001, "%s: Versatz gegen die alte Mitte hoechstens 0,6 m (%.3f m)" % [id, Vector2(float(off[0]), float(off[2])).length()])
+	_check(not old_nodes.has(old_id) and holder.visible, "%s: altes %s nicht in der Szene, neues Modell sichtbar" % [id, old_id])
+	base.set("_capacity_visual_signature", "")
+	base.call("_sync_capacity_visuals", stage)
+	_check(not old_nodes.has(old_id) and stage.find_children("*" + old_id + "*", "", true, false).is_empty() and holder.visible, "%s: auch nach einem Sync kommt das alte %s nicht zurueck (kein Knoten, auch kein Bauplatz)" % [id, old_id])
+	# Innenboden auf Lauf-Hoehe der Navigation (0,165 m).
+	var probe: Array = entry.get("floor_probe_model", [0.1, -0.1])
+	var floor_y: float = _floor_world_y(holder, holder.position.x + float(probe[0]) * s, holder.position.z - float(probe[1]) * s)
+	_check(absf(floor_y - BASE_NAV.standing_y(Vector3(plane.x, 0.0, plane.y))) <= 0.03, "%s: Innenboden %.3f m auf Lauf-Hoehe %.3f m (+-0,03)" % [id, floor_y, BASE_NAV.standing_y(Vector3(plane.x, 0.0, plane.y))])
+	# Grundriss innen (Rahmen aus der Vermessung, Modellmasse).
+	var interior: Array = entry.get("interior_model", [])
+	var rect := Rect2(Vector2(holder.position.x + float(interior[0]) * s, holder.position.z - float(interior[3]) * s), Vector2((float(interior[1]) - float(interior[0])) * s, (float(interior[3]) - float(interior[2])) * s))
+	print("INFO %s Innenraum x %.2f..%.2f  z %.2f..%.2f" % [id, rect.position.x, rect.end.x, rect.position.y, rect.end.y])
+	var targets: Dictionary = {}
+	for t in layout.get("terminals", []):
+		var td: Dictionary = t
+		if String(td.get("id", "")) in ["personnel", "jobs"]:
+			var anchor: Array = td.get("model_anchor_plane", [])
+			if anchor.size() == 2:
+				targets["Terminal %s Anker" % td.id] = Vector2(float(anchor[0]), float(anchor[1]))
+			var tg: Array = td.get("grid", [])
+			var tpl: Vector3 = BASE_NAV.plane_at_grid(Vector2i(int(tg[0]), int(tg[1])))
+			targets["Terminal %s Benutzen-Stelle" % td.id] = Vector2(tpl.x, tpl.z)
+	for b in layout.get("beds", []):
+		var bd: Dictionary = b
+		if String(bd.get("room_id", "")) != old_id:
+			continue
+		for key in ["sleep_plane", "rest_plane"]:
+			var bp: Array = bd.get(key, [])
+			if bp.size() == 2:
+				targets["%s %s" % [bd.get("id", "bed"), key]] = Vector2(float(bp[0]), float(bp[1]))
+	_check(targets.size() >= 6, "Ziele gesammelt: 2 Terminals mit je 2 Punkten, Schlafplaetze (%d)" % targets.size())
+	var inner := rect.grow(-0.05)
+	for key in targets:
+		var q: Vector2 = targets[key]
+		var edge: float = minf(minf(q.x - rect.position.x, rect.end.x - q.x), minf(q.y - rect.position.y, rect.end.y - q.y))
+		_check(inner.has_point(q), "%s innerhalb des Pod-Grundrisses, nicht in einer Wand (Abstand zur Wand %.2f m)" % [key, edge])
+	# Schlafplaetze auf den zwei Pod-Betten, Auftrags-Terminal am Bildschirm des Pods.
+	var bed_centers: Array = entry.get("bed_model", [])
+	var bed_index := 0
+	for b in layout.get("beds", []):
+		var bd2: Dictionary = b
+		if String(bd2.get("room_id", "")) != old_id or bed_index >= bed_centers.size():
+			continue
+		var bc: Array = bed_centers[bed_index]
+		var bed_world := Vector2(holder.position.x + float(bc[0]) * s, holder.position.z - float(bc[1]) * s)
+		var sp: Array = bd2.get("sleep_plane", [0, 0])
+		var d_bed: float = Vector2(float(sp[0]), float(sp[1])).distance_to(bed_world)
+		_check(d_bed <= 0.1, "%s liegt auf einem Pod-Bett (Abstand %.3f m zur Bettmitte)" % [bd2.get("id", "bed"), d_bed])
+		_check(absf(float(bd2.get("surface_y", 0.0)) - (float(entry.get("bed_top_model", 0.0)) * s + holder.position.y)) <= 0.05, "%s: Bettflaeche %.3f m auf Hoehe der Pod-Betten" % [bd2.get("id", "bed"), float(bd2.get("surface_y", 0.0))])
+		bed_index += 1
+	_check(bed_index == bed_centers.size() and bed_index == 2, "genau zwei Betten zugeordnet (%d)" % bed_index)
+	var tv: Array = entry.get("tv_model", [0.0, 0.0])
+	var tv_world := Vector2(holder.position.x + float(tv[0]) * s, holder.position.z - float(tv[1]) * s)
+	var jobs_anchor := Vector2.INF
+	for t in layout.get("terminals", []):
+		if String(Dictionary(t).get("id", "")) == "jobs":
+			var ja: Array = Dictionary(t).get("model_anchor_plane", [])
+			jobs_anchor = Vector2(float(ja[0]), float(ja[1]))
+	_check(jobs_anchor != Vector2.INF and jobs_anchor.distance_to(tv_world) <= 0.25, "jobs (Smart Mobile) liegt am Pod-Bildschirm (Abstand %.2f m)" % (jobs_anchor.distance_to(tv_world) if jobs_anchor != Vector2.INF else -1.0))
+	# Beleg: der Kampagnenstart laedt die neuen Lagen aus base_interior_navigation.json (die groben Karten werden nicht gelesen).
+	var jobs_grid: Array = []
+	var coarse_layout: Dictionary = BASE_NAV.layout("res://maps/campaign_intro_base.json")
+	for t in coarse_layout.get("terminals", []):
+		if String(Dictionary(t).get("id", "")) == "jobs":
+			jobs_grid = Dictionary(t).get("grid", [])
+	var live_jobs_grid: Array = []
+	for t in layout.get("terminals", []):
+		if String(Dictionary(t).get("id", "")) == "jobs":
+			live_jobs_grid = Dictionary(t).get("grid", [])
+	_check(jobs_grid == live_jobs_grid and not live_jobs_grid.is_empty() and int(live_jobs_grid[0]) == 41, "Kampagnenstart-Pfad (campaign_intro_base.json) liefert die neue jobs-Lage %s, nicht die alte der groben Karte" % str(live_jobs_grid))
+	# Erreichbarkeit vom Startpunkt der Figur aus (Wegsuche der Basis-Navigation).
+	var personnel: Node = base.call("_personnel_runtime")
+	var nav_graph: Object = personnel.get("_navigation_graph") if personnel != null else null
+	var terrain0: Node = base.get("_terrain")
+	if nav_graph != null:
+		var spawn_cell: Array = layout.get("avatar_spawn_grid", [36, 40])
+		var from_world: Vector2 = terrain0.call("grid_to_world", Vector2i(int(spawn_cell[0]), int(spawn_cell[1])))
+		var goals: Dictionary = {}
+		for t in layout.get("terminals", []):
+			var tg2: Array = Dictionary(t).get("grid", [])
+			if String(Dictionary(t).get("id", "")) == "flightdeck":
+				continue  # liegt auf dem Landepad; war schon vor diesem Auftrag nicht ueber die Wegsuche erreichbar
+			goals["Terminal %s" % Dictionary(t).get("id", "")] = Vector2i(int(tg2[0]), int(tg2[1]))
+		for b in layout.get("beds", []):
+			var bg: Array = Dictionary(b).get("grid", [])
+			if bg.size() == 2 and String(Dictionary(b).get("room_id", "")) == old_id:
+				goals["Bett %s" % Dictionary(b).get("id", "")] = Vector2i(int(bg[0]), int(bg[1]))
+		for key in goals:
+			var cell3: Vector2i = goals[key]
+			var tile3: Variant = terrain0.call("get_tile_at_grid", cell3)
+			var path: Array = nav_graph.call("find_world_path", from_world, terrain0.call("grid_to_world", cell3))
+			_check(tile3 != null and bool(tile3.walkable) and not path.is_empty(), "%s: Benutzen-Stelle %s begehbar und vom Startpunkt erreichbar (Weg %d Punkte)" % [key, str(cell3), path.size()])
+	else:
+		_check(false, "Wegsuche der Basis-Navigation erreichbar")
+	# Tuer: Mitte gegen das Feld des alten Eingangs, begehbare Felder bis hinter die Tuer.
+	var door: Array = entry.get("door_model", [0.0, 0.07])
+	var door_x: float = holder.position.x + float(door[0]) * s
+	var door_half: float = float(door[1]) * s
+	var door_grid: Array = []
+	for it in layout.get("interiors", []):
+		if String(Dictionary(it).get("id", "")) == old_id:
+			door_grid = Dictionary(it).get("door_grid", [])
+	var door_plane3: Vector3 = BASE_NAV.plane_at_grid(Vector2i(int(door_grid[0]), int(door_grid[1])))
+	_check(absf(door_x - door_plane3.x) <= door_half - 0.05, "%s: Tuermitte x %.3f liegt am alten Eingangsfeld x %.3f (Tuerhalbbreite %.2f m)" % [id, door_x, door_plane3.x, door_half])
+	var terrain: Node = base.get("_terrain")
+	var tile: Variant = terrain.call("get_tile_at_grid", Vector2i(int(door_grid[0]), int(door_grid[1])))
+	_check(tile != null and bool(tile.walkable), "%s: Eingangsfeld %s ist begehbar" % [id, str(door_grid)])
+	var waypoint := Vector2(door_x, rect.end.y - 0.1)
+	_check(inner.has_point(waypoint), "%s: Punkt hinter der Tuer liegt im Innenraum" % id)
+	var walk_ok := true
+	var steps := 12
+	for i in steps + 1:
+		var pt: Vector2 = Vector2(door_x, door_plane3.z).lerp(waypoint, float(i) / float(steps))
+		var cell: Variant = terrain.call("get_tile_at_grid", _plane_to_grid(pt))
+		if cell == null or not bool(cell.walkable):
+			walk_ok = false
+			print("INFO nicht begehbar bei %s" % str(pt))
+	_check(walk_ok, "%s: Weg Eingangsfeld -> Punkt hinter der Tuer nur ueber begehbare Felder" % id)
+	# Trennwaende und Tuer: der echte Weg (Wegsuche) vom Eingangsfeld zu Betten und Terminals muss durch die Luecken fuehren.
+	var part_x: Array = entry.get("partition_x_model", [])
+	var gap_y: Array = entry.get("partition_door_y_model", [0.0, 0.0])
+	var personnel2: Node = base.call("_personnel_runtime")
+	var nav2: Object = personnel2.get("_navigation_graph") if personnel2 != null else null
+	if nav2 != null:
+		var door_world: Vector2 = terrain.call("grid_to_world", Vector2i(int(door_grid[0]), int(door_grid[1])))
+		var front_z: float = rect.end.y
+		for key in targets:
+			if not (String(key).contains("Benutzen-Stelle") or String(key).contains("rest_plane")):
+				continue
+			var q3: Vector2 = targets[key]
+			var goal_cell: Vector2i = _plane_to_grid(q3)
+			var goal_world: Vector2 = terrain.call("grid_to_world", goal_cell)
+			var way: Array = nav2.call("find_world_path", door_world, goal_world)
+			var bad := ""
+			if way.is_empty():
+				bad = "kein Weg"
+			var prev := Vector2.INF
+			for w in way:
+				var cell4: Vector2i = terrain.call("world_to_grid", Vector2(w))
+				var pl: Vector3 = BASE_NAV.plane_at_grid(cell4)
+				var cur := Vector2(pl.x, pl.z)
+				if prev != Vector2.INF:
+					# Vordere Wand: Kreuzung der Linie z = Innenkante vorn nur durch die Tuer.
+					if (prev.y - front_z) * (cur.y - front_z) < 0.0:
+						var tt: float = (front_z - prev.y) / (cur.y - prev.y)
+						var xc: float = lerpf(prev.x, cur.x, tt)
+						if absf(xc - door_x) > door_half:
+							bad += " Vorderwand bei x=%.2f" % xc
+					for px in part_x:
+						var wx: float = holder.position.x + float(px) * s
+						if (prev.x - wx) * (cur.x - wx) < 0.0:
+							var t2: float = (wx - prev.x) / (cur.x - prev.x)
+							var zc: float = lerpf(prev.y, cur.y, t2)
+							var gz0: float = holder.position.z - float(gap_y[1]) * s
+							var gz1: float = holder.position.z - float(gap_y[0]) * s
+							if zc < gz0 - 0.05 or zc > gz1 + 0.05:
+								bad += " Trennwand x=%.2f bei z=%.2f" % [wx, zc]
+				prev = cur
+			_check(bad.is_empty(), "Weg Eingang -> %s fuehrt nur durch Tuer und Tuerluecken (%d Punkte)%s" % [key, way.size(), (" FEHLER:" + bad) if not bad.is_empty() else ""])
+
+
 func _terminal_ids(base: Control) -> Array:
 	var ids: Array = []
 	for t in base.get("_terminals"):
@@ -57,7 +251,8 @@ func _run() -> void:
 	var config: Dictionary = OVERRIDES.load_config()
 	var entries: Array = Array(config.get("entries", []))
 	_check(not config.is_empty() and entries.size() == 2, "Zuordnung laedt, zwei Eintraege (%d)" % entries.size())
-	_check(String(config.get("toggle_key", "")) == "F7" and bool(config.get("enabled", false)), "Vorgabe AN, Taste F7")
+	_check(entries.any(func(e: Dictionary) -> bool: return String(e.get("id", "")) == "home_pod" and String(e.get("mode", "")) == "replace" and String(e.get("replaces", "")) == "habitat_cutaway_01"), "Pod ersetzt das Habitat (mode=replace, replaces=habitat_cutaway_01)")
+	_check(bool(config.get("enabled", false)) and not config.has("toggle_key"), "Vorgabe AN, keine Umschalt-Taste mehr (Karten und Begehbarkeit haengen an AN)")
 	_check(absf(float(config.get("brightness", 0.0)) - 1.0) < 0.0001, "Helligkeits-Stellschraube vorhanden, Vorgabe 1,0")
 	for entry_variant in entries:
 		var entry: Dictionary = entry_variant
@@ -91,8 +286,13 @@ func _run() -> void:
 	var old_nodes: Dictionary = base.get("_asset_visual_nodes")
 	var old_boxes: Dictionary = {}
 	for id in old_ids:
-		_check(old_nodes.has(id) and (old_nodes[id] as Node3D).visible, "Bestandsgebaeude sichtbar bei AN: %s" % id)
-		old_boxes[id] = _bounds(old_nodes[id])
+		var replaced: bool = entries.any(func(e: Dictionary) -> bool: return String(e.get("mode", "")) == "replace" and String(e.get("replaces", "")) == id)
+		if replaced:
+			var loaded_sources: String = JSON.stringify(base.get("_asset_sources"))
+			_check(not old_nodes.has(id) and stage.find_children("*" + id + "*", "", true, false).is_empty() and not loaded_sources.contains(id) and not Dictionary(base.get("_structure_visual_nodes")).has(id), "altes Gebaeude %s ist nicht geladen: kein Knoten in der Szene, Modellpfad nicht geladen" % id)
+		else:
+			_check(old_nodes.has(id) and (old_nodes[id] as Node3D).visible, "Bestandsgebaeude bei AN sichtbar: %s" % id)
+			old_boxes[id] = _bounds(old_nodes[id])
 	var anchors: Array = []
 	var spots: Array = []
 	var map_data_early: Object = base.get("_map_data")
@@ -129,6 +329,9 @@ func _run() -> void:
 		_check(holders.size() == 1, "genau EIN neues Modell je Zuordnung: %s (%d)" % [id, holders.size()])
 		if holders.size() != 1:
 			continue
+		if String(entry.get("mode", "additional")) == "replace":
+			_check_replace(base, stage, layout, entry, holders[0], old_nodes, person_height)
+			continue
 		var box: AABB = _bounds(holders[0])
 		var center: Vector2 = OVERRIDES.site_center(layout, String(entry.get("site", "")))
 		var size: Vector2 = OVERRIDES.site_size(layout, String(entry.get("site", "")))
@@ -159,7 +362,7 @@ func _run() -> void:
 			if other != null:
 				_check(not rect.intersects(_rect_xz(_bounds(other))), "ueberdeckt nicht %s: %s" % [other_name, id])
 		_check(absf(box.position.y) <= 0.1, "Unterkante auf Bodenhoehe (+-0,1 m): %s (%.3f)" % [id, box.position.y])
-		for old_id in old_ids:
+		for old_id in old_boxes:
 			_check(not _rect_xz(box).intersects(_rect_xz(old_boxes[old_id])), "ueberdeckt kein Bestandsgebaeude: %s gegen %s" % [id, old_id])
 		var covers_anchor := false
 		for a in anchors:
@@ -179,15 +382,26 @@ func _run() -> void:
 	for t in map_data.call("get_tiles"):
 		if bool(t.walkable):
 			walkable_before += 1
-	# Taste F7 (echte Eingabe): AUS
-	await _press(KEY_F7)
-	_check(not group.visible and not bool(base.get("_structure_models").call("is_enabled")), "F7: neue Modelle AUS")
-	for id in old_ids:
+	# Sicht-Schalter ueber die Programmschnittstelle (keine Taste): AUS zeigt das alte Bild.
+	base.get("_structure_models").call("set_enabled", false)
+	await process_frame
+	_check(not group.visible and not bool(base.get("_structure_models").call("is_enabled")), "Sicht AUS: neue Modelle weg")
+	for id in old_boxes:
 		_check((old_nodes[id] as Node3D).visible and _bounds(old_nodes[id]).is_equal_approx(old_boxes[id]), "AUS: Bestandsbild unveraendert: %s" % id)
 	_check(_terminal_ids(base) == terminals_before and terminals_before.size() == 6, "Terminals unveraendert (%s)" % str(terminals_before))
-	await _press(KEY_F7)
-	_check(group.visible and bool(base.get("_structure_models").call("is_enabled")), "F7 nochmal: neue Modelle wieder AN")
+	base.get("_structure_models").call("set_enabled", true)
+	await process_frame
+	_check(group.visible and bool(base.get("_structure_models").call("is_enabled")), "Sicht wieder AN: neue Modelle da")
 	_check(_terminal_ids(base) == terminals_before, "Terminals nach Rueckschalten gleich")
+	_check(not old_nodes.has("habitat_cutaway_01") and (old_nodes["freihafen_hall_01"] as Node3D).visible, "nach Rueckschalten: Habitat weiter nicht geladen, Halle sichtbar")
+	# Platz future_workshop ist leer: kein neues Modell steht dort.
+	var ws_center: Vector2 = OVERRIDES.site_center(layout, "future_workshop")
+	var ws_rect := Rect2(ws_center - Vector2(2.5, 2.0), Vector2(5.0, 4.0))
+	var ws_hit := false
+	for holder in group.get_children():
+		if holder.has_meta("structure_model_id") and ws_rect.intersects(_rect_xz(_bounds(holder))):
+			ws_hit = true
+	_check(not ws_hit, "Platz future_workshop ist wieder leer")
 	var walkable_after := 0
 	for t in map_data.call("get_tiles"):
 		if bool(t.walkable):
@@ -198,6 +412,6 @@ func _run() -> void:
 	for id in ["personnel", "jobs", "mission", "team"]:
 		if not base.has_method("request_terminal"):
 			reachable = false
-	_check(reachable and (old_nodes["habitat_cutaway_01"] as Node3D).visible, "Benutzen-Stellen: Zugang (request_terminal) und Bestandsraeume vorhanden")
+	_check(reachable, "Benutzen-Stellen: Zugang (request_terminal) vorhanden")
 	print("STRUCTURE_MODELS passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)

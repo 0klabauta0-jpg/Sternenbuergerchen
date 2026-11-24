@@ -4,6 +4,7 @@ extends RefCounted
 const MAP = preload("res://scripts/terrain/terrain_map_data.gd")
 const NAV_PATH := "res://maps/base_interior_navigation.json"
 const SCALE := 4
+const STRUCTURE_BLOCKING = preload("res://scripts/meta/structure_model_blocking.gd")
 const MODULAR_GEOMETRY = preload("res://scripts/meta/modular_base_geometry.gd")
 static func supports(base_path: String) -> bool:
  return base_path.get_file() in ["campaign_intro_base.json", "homebase_frontier_exploration.json"]
@@ -11,6 +12,7 @@ static func load_map(base_path: String):
  var data = MAP.load_from_file(NAV_PATH if supports(base_path) else base_path)
  if base_path.get_file() == "campaign_intro_base.json":
   preload("res://scripts/terrain/homebase_rock_rules.gd").apply_fine(data)
+ if supports(base_path): STRUCTURE_BLOCKING.apply_to_map(data)
  return data
 static func layout(base_path: String) -> Dictionary:
  var source: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(base_path))
@@ -112,7 +114,10 @@ func _apply_field_beds() -> void:
     if MODULAR_GEOMETRY.bed_blocks(bed,_graph.get_point_position(id)):
      _graph.set_point_disabled(id,true)
      _field_disabled.append(id)
- for rect: Rect2 in _craft_rectangles:
+ # Neue Gebaeudemodelle (data/visual/structure_model_overrides.json): Waende/Grundrisse sperren.
+ var blocking_rects: Array[Rect2] = _craft_rectangles.duplicate()
+ blocking_rects.append_array(STRUCTURE_BLOCKING.blocked_rects())
+ for rect: Rect2 in blocking_rects:
   # Raster only the conservative local AABB, not the complete base graph.
   var first := rect.position
   var last := rect.end

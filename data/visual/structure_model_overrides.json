@@ -1,24 +1,50 @@
 {
-	"schema_version": 1,
+	"schema_version": 2,
 	"enabled": true,
-	"toggle_key": "F7",
 	"brightness": 1.0,
 	"human_height_m": 1.8,
-	"note": "Erster Schritt: neue Modelle stehen ZUSAETZLICH auf den im Layout vorgesehenen freien Bauplaetzen (expansion_areas), im Menschenmass (Spielfigur ca. 0,61 m = 1,8 m). Die begehbaren Bestandsgebaeude (habitat_cutaway_01, freihafen_hall_01) bleiben unveraendert: Betten, Terminals und Schlafplaetze der Navigation sind an ihre Einrichtung gebunden. Karten und Navigation werden nicht beruehrt.",
+	"note": "Neue Gebaeudemodelle im Menschenmass (Spielfigur ca. 0,61 m = 1,8 m). mode=replace: das Modell steht an der Stelle des Bestandsgebaeudes (replaces), das Bestandsgebaeude ist ausgeblendet. mode=additional: Zusatzgebaeude auf einem Bauplatz (site). Alle *_model-Masse sind Rohmasse des Modells (Blender, x rechts, y hinten, z oben).",
 	"entries": [
 		{
 			"id": "home_pod",
+			"mode": "replace",
+			"replaces": "habitat_cutaway_01",
 			"model": "res://art/tripo_models_20261124/basis_home_pod_4k_01.glb",
 			"role": "Wohn-/Hauptmodul (Start-Pod, home_pod_4k)",
-			"relates_to": "habitat_cutaway_01",
-			"site": "future_workshop",
 			"scale": 4.5,
 			"door_height_model": 0.168,
 			"rotation_y_deg": 0.0,
-			"offset": [0.0, 0.0, 0.0]
+			"offset": [-0.045, -0.134, -0.512],
+			"floor_probe_model": [0.1, -0.1],
+			"interior_model": [-0.439, 0.450, -0.273, 0.198],
+			"door_model": [0.01, 0.07],
+			"partition_x_model": [-0.10, 0.27],
+			"partition_door_y_model": [-0.07, 0.04],
+			"bed_model": [[-0.34, 0.085], [-0.34, -0.095]],
+			"bed_top_model": 0.114,
+			"tv_model": [0.17, 0.165],
+			"block_note": "Gesperrt fuer Figuren (Ebene x, z, Breite, Tiefe): Aussenwaende, Trennwaende ausser der Tuerluecke (z 5,37 bis 5,865), Vorderwand ausser der Tuer (x 12,165 bis 12,765).",
+			"walk_note": "Innenraum des Pods wird fuer Figuren begehbar gemacht (die alte Habitat-Karte hatte dort nur eine kleine Insel).",
+			"walk_rects": [
+				[10.6, 4.76, 3.78, 1.92]
+			],
+			"block_rects": [
+				[10.565, 4.965, 0.72, 0.405],
+				[10.565, 5.775, 0.72, 0.405],
+				[11.85, 4.55, 0.31, 0.82],
+				[11.85, 5.865, 0.31, 0.995],
+				[13.52, 4.55, 0.31, 0.82],
+				[13.52, 5.865, 0.31, 0.995],
+				[10.3, 4.40, 4.4, 0.30],
+				[10.28, 4.40, 0.28, 2.60],
+				[14.42, 4.40, 0.28, 2.60],
+				[10.28, 6.74, 1.885, 0.31],
+				[12.765, 6.74, 1.935, 0.31]
+			]
 		},
 		{
 			"id": "lager_werkstatt",
+			"mode": "additional",
 			"model": "res://art/tripo_models_20261124/basis_lager_werkstatt_01.glb",
 			"role": "Lager/Werkstatt",
 			"relates_to": "freihafen_hall_01",
