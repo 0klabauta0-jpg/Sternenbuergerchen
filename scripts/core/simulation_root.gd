@@ -9301,7 +9301,10 @@ var _air_hostile_since_poll := 0.0
 var _air_hostile_alone := 0.0
 var _air_hostile_last_own := ""
 
+## Zaehler der Aufrufe (auch mit leerer Liste): belegt in Pruefern, dass der Adapter die Konfiguration wirklich versucht hat.
+var _air_hostile_config_calls := 0
 func configure_enemy_aircraft(entries: Array) -> Dictionary:
+	_air_hostile_config_calls += 1
 	if _air_hostile_configured: return {"ok":true, "already_configured":true, "count":_air_hostile_pending.size() + _air_hostile_ids.size()}
 	var kept: Array = []
 	for entry_variant in entries:
@@ -9389,7 +9392,8 @@ func _air_hostile_check_spotted(source: Node, id: String, own: Array) -> void:
 		var radar: Dictionary = source.call("get_space_radar_contacts", craft_id)
 		if radar.get("ok", false) and Array(radar.get("contacts", [])).has(id):
 			_air_hostile_state[id]["spotted"] = true
-			_air_emit_role_event(String(craft_id), "hostile_spotted", "Feindlicher Flieger gesichtet: %s." % _air_hostile_model_name(id))
+			if bool(_air_hostile_state[id].get("returned", false)): _air_emit_role_event(String(craft_id), "hostile_returned", "Feindlicher Flieger kehrt zurück: %s." % _air_hostile_model_name(id))
+			else: _air_emit_role_event(String(craft_id), "hostile_spotted", "Feindlicher Flieger gesichtet: %s." % _air_hostile_model_name(id))
 			return
 
 ## Treffer auf ein eigenes Sortie-Schiff: Luftrumpf (AirAssetStatus) sinkt um den Rumpfschaden in Prozent; bei 0 der Abschuss wie beim Bodenbeschuss.
@@ -9504,7 +9508,7 @@ func _advance_air_hostile(delta: float) -> void:
 			if _air_hostile_spawn(source, combat, entry):
 				_air_hostile_pending.erase(entry)
 				_air_hostile_ids.append(String(entry.aircraft_id))
-				_air_hostile_state[String(entry.aircraft_id)] = {"spotted":false, "model_id":String(entry.model_id), "entry":entry.duplicate(true), "target":"", "holding":false, "shots":{}, "last_shot":{}}
+				_air_hostile_state[String(entry.aircraft_id)] = {"spotted":false, "returned":entry.has("base_delay"), "model_id":String(entry.model_id), "entry":entry.duplicate(true), "target":"", "holding":false, "shots":{}, "last_shot":{}}
 				_air_hostile_poll = maxf(float(_air_role_config("hostile_aircraft").get("fire_poll_seconds", 0.2)), 0.05)
 				_air_hostile_since_poll = 0.0
 				_air_hostile_alone = 0.0
@@ -10044,7 +10048,9 @@ func resolve_local_ship_shot(shooter_id: String, target_id: String, weapon_slot:
 	if weapon.is_empty(): return {"ok":false, "reason":"unknown_weapon"}
 	var config: Dictionary = _air_role_config("hostile_aircraft")
 	weapon["range"] = AIR_FLIGHT_ENV.weapon_range(float(weapon.range), area_id)
-	weapon["accuracy"] = clampf(float(config.get("accuracy", 1.0)), 0.0, 1.0)
+	# Trefferquote je Schuetze: eigene Schiffe (control_domain player) schiessen mit player_air_to_air, der Gegner mit hostile_aircraft.
+	var accuracy_config: Dictionary = _air_role_config("player_air_to_air" if shooter_domain == "player" else "hostile_aircraft")
+	weapon["accuracy"] = clampf(float(accuracy_config.get("accuracy", 1.0)), 0.0, 1.0)
 	var ids: Array = _space_combat_state.get_area_actor_ids(area_id)
 	if ids.size() > 256: return {"ok":false, "reason":"contact_capacity"}
 	var actors := {}
@@ -10070,7 +10076,11 @@ func resolve_local_ship_shot(shooter_id: String, target_id: String, weapon_slot:
 	var proposal: Dictionary = SPACE_WEAPON.resolve_shot(actors[shooter_id], actors[target_id], weapon, {"fire_rule":"free"}, world, event_id, _space_fire_rng)
 	if not proposal.get("ok", false): return proposal
 	# Luft-Luft: Beleg im nicht gespeicherten, begrenzten Speicher; eigene Schiffe verlieren in der Atmosphaere nur Schild, ihren Rumpf fuehrt der Luftrumpf.
-	var hit: Dictionary = _space_combat_state._commit_ship_impact(proposal.event, true, target_domain == "player")
+	# Rumpfregel nach dem tatsaechlich getroffenen Schiff: nur ein eigenes Schiff (control_domain player) behaelt den Raumrumpf, sein Luftrumpf fuehrt;
+	# ein getroffener Gegner (auch vom anderen Gegner) nimmt normalen Rumpfschaden.
+	var hit_id := String(proposal.event.get("hit_craft_id", ""))
+	var keep_hull: bool = not hit_id.is_empty() and String(_space_combat_state.get_metadata(hit_id).get("control_domain", "")) == "player"
+	var hit: Dictionary = _space_combat_state._commit_ship_impact(proposal.event, true, keep_hull)
 	if not hit.get("ok", false): return hit
 	_space_fire_rng = int(proposal.rng_state)
 	return {"ok":true, "event":proposal.event.duplicate(true), "impact":hit.duplicate(true)}
