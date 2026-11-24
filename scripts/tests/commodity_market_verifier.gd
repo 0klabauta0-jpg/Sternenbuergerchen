@@ -6,6 +6,8 @@ const SUPPLY = preload("res://scripts/core/singleplayer_supply_state.gd")
 const OFFER_PATH := "res://data/singleplayer/trade_offers.json"
 const MARKET_PATH := "res://data/singleplayer/commodity_market.json"
 const BENIT := ["a_benit", "b_benit", "c_benit"]
+## Handel 2a: die fuenf Handelsgueter, ausdruecklich benannt (nichts anderes ausser Benit ist zulaessig).
+const TRADE_GOODS := ["food", "medical_supplies", "bandage", "luxury_goods", "stim"]
 const PRESENTER = preload("res://scripts/meta/singleplayer_services_presenter.gd")
 var _ui_supply: RefCounted
 var _ui_location := "trade_outpost"
@@ -105,12 +107,13 @@ func _data_part() -> void:
 	for loc: String in locs:
 		for item: String in Dictionary(locs[loc]):
 			var e: Dictionary = locs[loc][item]
-			if not item in BENIT: shape_ok = false
+			if not item in BENIT and not item in TRADE_GOODS: shape_ok = false
+			if loc == "polisa" and item in TRADE_GOODS: shape_ok = false # Polisa kauft die Handelsgueter in 2a nicht
 			if e.has("sell_price") and e.has("buy_price"): rule_ok = false # kein Haendler kauft, was er selbst verkauft
 			if e.has("sell_price") and (int(e.sell_price) < 1 or not e.has("stock") or int(e.stock) < 0): shape_ok = false
 			if e.has("buy_price") and int(e.buy_price) < 1: shape_ok = false
 	check(rule_ok, "Regel: in keinem Ort steht dieselbe Ware sowohl als Verkauf als auch als Ankauf")
-	check(shape_ok, "Daten: nur Benit-Waren, Preise >= 1, Bestand nur beim Verkauf")
+	check(shape_ok, "Daten: nur Benit oder eines der fuenf Handelsgueter, Preise >= 1, Bestand nur beim Verkauf")
 	var s: RefCounted = _sup()
 	for loc: String in locs:
 		var snap_ok := true
@@ -398,6 +401,37 @@ func _btn(panel: Control, node_name: String) -> Button:
 func _shown(b: Button) -> bool:
 	return b != null and b.is_visible_in_tree()
 
+## Handel 2a, Nachbesserung 1: Verkaufsknoepfe der fuenf Handelsgueter erscheinen nur, wenn davon etwas im Schiff liegt (sonst verborgen).
+func _goods_buttons(panel: Control, loc: String, m: Dictionary) -> void:
+	_ui_supply = _sup()
+	_ui_location = loc
+	_ui_far = false
+	panel.call("refresh")
+	var names := ["SellBenit", "SellBenit2", "SellBenit3", "SellBenit4", "SellBenit5", "SellBenit6", "SellBenit7", "SellBenit8"]
+	var shown_texts: Array = []
+	for n: String in names:
+		if _shown(_btn(panel, n)): shown_texts.append(_btn(panel, n).text)
+	check(shown_texts.size() == 1 and String(shown_texts[0]).contains("Benit"), "Anzeige %s: ohne Handelsware ist nur der Benit-Verkaufsknopf sichtbar (%s)" % [loc, shown_texts])
+	_load_ship(_ui_supply, "food", 1)
+	panel.call("refresh")
+	shown_texts.clear()
+	for n: String in names:
+		if _shown(_btn(panel, n)): shown_texts.append(_btn(panel, n).text)
+	var food_price: int = int(m[loc].food.buy_price)
+	check(shown_texts.size() == 2 and String(shown_texts[1]).contains("Nahrung") and String(shown_texts[1]).contains("%d Cr" % food_price), "Anzeige %s: mit Nahrung im Schiff kommt genau der Nahrung-Knopf dazu (%s)" % [loc, shown_texts])
+	for item: String in ["medical_supplies", "bandage", "luxury_goods", "stim"]: _load_ship(_ui_supply, item, 1)
+	panel.call("refresh")
+	shown_texts.clear()
+	for n: String in names:
+		if _shown(_btn(panel, n)): shown_texts.append(_btn(panel, n).text)
+	var all_named := true
+	for word: String in ["Benit", "Nahrung", "Medizinische Güter", "Verbandsmaterial", "Genussmittel", "Stims"]:
+		var found := false
+		for t: Variant in shown_texts:
+			if String(t).contains(word): found = true
+		if not found: all_named = false
+	check(shown_texts.size() == 6 and all_named, "Anzeige %s: mit allen fuenf Gueterarten im Schiff sind alle sechs Verkaufsknoepfe sichtbar (%s)" % [loc, shown_texts])
+
 func _ui_part() -> void:
 	var m: Dictionary = _market_file().locations
 	_ui_supply = _sup()
@@ -420,7 +454,7 @@ func _ui_part() -> void:
 	check(_shown(buy_a) and _shown(buy_c) and not _shown(buy_b), "Anzeige Handelsaussenposten: Kaufknopf fuer A- und C-Benit, keiner fuer B-Benit")
 	check(buy_a.text.contains("%d Cr" % pa) and buy_a.text.contains("%d verfügbar" % stock), "Anzeige: Kaufknopf nennt Preis und Bestand aus der Datei (%s)" % buy_a.text)
 	var pb: int = int(m.trade_outpost.b_benit.buy_price)
-	check(_shown(sell1) and sell1.text.contains("B-Benit") and sell1.text.contains("%d Cr" % pb) and not _shown(sell2), "Anzeige Handelsaussenposten: ein Verkaufsknopf B-Benit mit Preis aus der Datei (%s)" % sell1.text)
+	check(_shown(sell1) and sell1.text.contains("B-Benit") and sell1.text.contains("%d Cr" % pb) and not _shown(sell2), "Anzeige Handelsaussenposten: ohne Handelsware im Schiff nur der Verkaufsknopf B-Benit mit Preis aus der Datei (%s)" % sell1.text)
 	check(sell1.disabled, "Anzeige: Verkaufsknopf ohne B-Benit im Schiff ist gesperrt")
 	var c0: int = _ui_supply.get_credits()
 	buy_a.pressed.emit()
@@ -452,8 +486,12 @@ func _ui_part() -> void:
 	_ui_location = "satellite_crash"
 	panel.call("refresh")
 	check(_shown(buy_a) and _shown(buy_b) and not _shown(buy_c), "Anzeige Absturzstelle: Kaufknopf fuer A- und B-Benit, keiner fuer C-Benit")
-	check(_shown(sell1) and sell1.text.contains("C-Benit") and sell1.text.contains("%d Cr" % int(m.satellite_crash.c_benit.buy_price)) and not _shown(sell2), "Anzeige Absturzstelle: ein Verkaufsknopf C-Benit mit Datenpreis")
+	check(_shown(sell1) and sell1.text.contains("C-Benit") and sell1.text.contains("%d Cr" % int(m.satellite_crash.c_benit.buy_price)) and not _shown(sell2), "Anzeige Absturzstelle: ohne Handelsware im Schiff nur der Verkaufsknopf C-Benit mit Datenpreis")
+	_goods_buttons(panel, "satellite_crash", m)
 	# Nachbesserung W2: Schiff an der Absturzstelle gelandet, aber zu weit vom Haendler (Dienst "trade" fehlt) -> gesperrt, Text sagt, was zu tun ist.
+	_goods_buttons(panel, "trade_outpost", m)
+	_ui_supply = _sup()
+	_ui_location = "satellite_crash"
 	_ui_far = true
 	panel.call("refresh")
 	check(buy_a.disabled and buy_a.tooltip_text.contains("in Sichtweite des Händlers landen, aber nicht direkt neben ihm") and not buy_a.tooltip_text.contains("256"), "Anzeige Absturzstelle, Schiff zu weit vom Haendler: Kaufknopf gesperrt, Text nennt die Abhilfe ohne Zahl (%s)" % buy_a.tooltip_text)

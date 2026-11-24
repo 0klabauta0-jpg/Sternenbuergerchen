@@ -19,7 +19,7 @@ const SLOT_ICON := Vector2(48, 48)
 const STORAGE_TILE_SIZE := Vector2(110, 64)
 const STORAGE_TILE_ICON := 28
 const STORAGE_TILE_PADDING := Vector2(6, 4)
-const LABELS := {"suit":"Anzug","armor_light":"Leichte Rüstung","armor_medium":"Mittlere Rüstung","armor_heavy":"Schwere Rüstung","rifle":"Sturmgewehr","smg":"Maschinenpistole","sniper":"Scharfschützengewehr","rail_gun":"Railgun","rocket_launcher":"Raketenwerfer","medictool":"Sanitätsgerät","ore":"Erz","salvage":"Bergungsgut","pistol":"Pistole","a_benit":"A-Benit","b_benit":"B-Benit","c_benit":"C-Benit","satellite_chip":"Satellitenchip","outpost_chip":"Außenpostenchip","c_benit_crate":"C-Benit-Kiste","mining_tool":"Hand-Mining-Tool","salvage_tool":"Bergungswerkzeug","backpack":"Rucksack","ammo_light":"Magazin leicht","ammo_rifle":"Magazin Gewehr","ammo_rail":"Schienenladung","ammo_rocket":"Rakete","none":"Leer","cargo_crate":"Frachtkiste"}
+const LABELS := {"suit":"Anzug","armor_light":"Leichte Rüstung","armor_medium":"Mittlere Rüstung","armor_heavy":"Schwere Rüstung","rifle":"Sturmgewehr","smg":"Maschinenpistole","sniper":"Scharfschützengewehr","rail_gun":"Railgun","rocket_launcher":"Raketenwerfer","medictool":"Sanitätsgerät","ore":"Erz","salvage":"Bergungsgut","pistol":"Pistole","a_benit":"A-Benit","b_benit":"B-Benit","c_benit":"C-Benit","satellite_chip":"Satellitenchip","outpost_chip":"Außenpostenchip","c_benit_crate":"C-Benit-Kiste","mining_tool":"Hand-Mining-Tool","salvage_tool":"Bergungswerkzeug","backpack":"Rucksack","ammo_light":"Magazin leicht","ammo_rifle":"Magazin Gewehr","ammo_rail":"Schienenladung","ammo_rocket":"Rakete","none":"Leer","cargo_crate":"Frachtkiste","food":"Nahrung","medical_supplies":"Medizinische Güter","bandage":"Verbandsmaterial","luxury_goods":"Genussmittel","stim":"Stims"}
 var _rest: CheckButton
 var _signature := ""
 var _unit_id := ""
@@ -408,7 +408,7 @@ func _wear(data: Dictionary, slot: String) -> void:
 func _item_icon_path(item: String) -> String:
 	const KIT := "res://Assets/curated/versorgung_kit_20261124/"
 	if item in ["ammo_light","ammo_rifle","ammo_rail","ammo_rocket"]: return KIT+"icon_magazine.png"
-	if item in ["cargo_crate","c_benit_crate"]: return KIT+"icon_cargo_crate.png"
+	if item in ["cargo_crate","c_benit_crate","food","medical_supplies","bandage","luxury_goods","stim"]: return KIT+"icon_cargo_crate.png"
 	return ""
 func _item_icon(item: String) -> Texture2D:
 	var own:=_item_icon_path(item)
