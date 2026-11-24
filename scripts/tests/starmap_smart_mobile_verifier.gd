@@ -192,7 +192,12 @@ func run() -> void:
 	fuel_projection.space_travel.fuel_reachability = {"satellite_crash":{"ok":true},"trade_outpost":{"ok":false,"message":"Zu wenig Treibstoff"},"fortified_outpost":{"ok":true},"distress_orbit":{"ok":true}}
 	view.refresh(fuel_projection)
 	var fuel_text: String = view.get("_fuel_help").text
-	check(fuel_text.contains("Aschental") and fuel_text.contains("Kestrel · Zu wenig Treibstoff") and not fuel_text.contains("Bastion Silex") and not fuel_text.contains("Fernwacht"), "fuel display retains real visible locations and exact supply outcome without revealing future jobs")
+	check(fuel_text.contains("Aschental") and fuel_text.contains("Kestrel · Zu wenig Treibstoff") and not fuel_text.contains("Windbruch") and not fuel_text.contains("Fernwacht"), "fuel display retains real visible locations and exact supply outcome without revealing future jobs")
+	# Spielerwunsch 24.11.: der Ort fortified_outpost heisst im Spiel Windbruch; der alte Name steht in keinem Anzeigenamen mehr.
+	var windbruch_names_ok: bool = String(DISPLAY.location_name("fortified_outpost")) == "Windbruch"
+	for location_id: String in DISPLAY.LOCATION_NAMES:
+		if String(DISPLAY.LOCATION_NAMES[location_id]).contains("Bastion Silex") or String(DISPLAY.location_name(location_id)).contains("Bastion Silex"): windbruch_names_ok = false
+	check(windbruch_names_ok, "display name of fortified_outpost is Windbruch and Bastion Silex no longer appears in any catalog display name")
 	view.refresh()
 	for dimensions: Vector2i in [Vector2i(1280,720),Vector2i(1920,1080)]:
 		root.size = dimensions; root.content_scale_size = dimensions

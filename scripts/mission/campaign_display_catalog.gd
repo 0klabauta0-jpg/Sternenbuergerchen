@@ -3,7 +3,7 @@ extends RefCounted
 const SYSTEM_NAME := "Börner"
 const BODY_NAMES := {"sun":"Börner", "planet":"Mare Nostrum", "glut_1a":"Neralis", "glut_1b":"Vesper", "moon":"Asterholm", "glut_2":"Eidolon"}
 const BODY_LEGACY := {"sun":"Börner", "planet":"Mare Nostrum", "glut_1a":"Mare Nostrum A", "glut_1b":"Mare Nostrum B", "moon":"Mare Nostrum C · Heimatbasis", "glut_2":"Börner II"}
-const LOCATION_NAMES := {"homebase":"Heimathafen", "satellite_crash":"Aschental", "trade_outpost":"Kestrel", "fortified_outpost":"Bastion Silex", "distress_orbit":"Fernwacht", "polisa":"Polisa"}
+const LOCATION_NAMES := {"homebase":"Heimathafen", "satellite_crash":"Aschental", "trade_outpost":"Kestrel", "fortified_outpost":"Windbruch", "distress_orbit":"Fernwacht", "polisa":"Polisa"}
 const LOCATION_LEGACY := {"homebase":"Heimatbasis", "satellite_crash":"Satelliten-Absturzstelle", "trade_outpost":"Handelsaussenposten", "fortified_outpost":"Gesicherter Außenposten", "distress_orbit":"Notruf im Planetenorbit", "polisa":"Polisa / Freie Raumstation"}
 const STATUS := {"offered":"Verfügbar", "accepted":"Angenommen", "active":"Im Einsatz", "completed":"Abgeschlossen", "failed":"Erneut verfügbar", "pending_upload":"Chip geborgen · zuhause hochladen"}
 
