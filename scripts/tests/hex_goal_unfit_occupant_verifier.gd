@@ -90,7 +90,49 @@ func _run()->void:
 	_test_fit_occupant_still_waits()
 	_test_chain_behind_stuck_waiter()
 	_test_chain_behind_stuck_waiter(false)
+	_test_no_free_neighbour_keeps_waiting()
+	_test_two_units_one_fallen_goal_take_different_cells()
 	_finish()
+
+## K1: Alle Zellen im Umkreis von 2 um das Ziel sind von Fitten belegt: es gibt keine Ausweichzelle. Die Einheit wartet weiter auf das
+## Ziel (target_occupied), das Ziel bleibt das befohlene (kein Umlenken, kein Pendeln), und nichts stuerzt ab.
+func _test_no_free_neighbour_keeps_waiting()->void:
+	var rig:Dictionary=_rig(Vector2i(5,1),_tiles(5,1),[{"id":"a","grid":Vector2i(0,0)},{"id":"g","grid":Vector2i(2,0)},{"id":"f","grid":Vector2i(3,0)},{"id":"d","grid":Vector2i(4,0),"vital":"down"}])
+	var sim=rig.sim
+	sim.enqueue_command(_command("a",rig.terrain.grid_to_world(Vector2i(4,0)),"move_a"))
+	var goals:Array=[]
+	for round in range(8):
+		_run_ticks(rig,15)
+		goals.append(sim.get_hex_movement_readout("a").get("goal_grid"))
+	var readout:Dictionary=sim.get_hex_movement_readout("a")
+	print("INFO K1 readout=",readout," grid=",sim.get_hex_unit_state("a").grid," goals=",goals)
+	_check(String(readout.get("status",""))=="waiting_reservation" and String(readout.get("reason",""))=="target_occupied","K1: with no free neighbour the unit keeps waiting on target_occupied")
+	_check(sim.get_hex_unit_state("a").grid==Vector2i(0,0),"K1: the waiting unit does not move")
+	var steady:=true
+	for goal in goals:steady=steady and goal==Vector2i(4,0)
+	_check(steady,"K1: the goal stays the commanded cell (no redirect to nowhere, no oscillation)")
+	_check(not sim.has_hex_position_arrived("a",rig.terrain.grid_to_world(Vector2i(4,0)),"move_a"),"K1: a waiting unit is not reported as arrived")
+	_free_rig(rig)
+
+## K2: Zwei Einheiten schicken sich auf dieselbe Zelle, auf der ein Gefallener liegt. Sie duerfen nicht dieselbe Ausweichzelle waehlen
+## (die zweite wuerde sonst ewig auf die erste warten): beide kommen an, auf verschiedenen Zellen neben dem Gefallenen.
+func _test_two_units_one_fallen_goal_take_different_cells()->void:
+	var rig:Dictionary=_rig(Vector2i(6,3),_tiles(6,3),[{"id":"a","grid":Vector2i(0,1)},{"id":"b","grid":Vector2i(0,0)},{"id":"d","grid":Vector2i(3,1),"vital":"down"}])
+	var sim=rig.sim
+	var target:Vector2=rig.terrain.grid_to_world(Vector2i(3,1))
+	sim.enqueue_command(_command("a",target,"move_a"))
+	sim.enqueue_command(_command("b",target,"move_b"))
+	for i in range(240):
+		sim._physics_process(0.25)
+		if sim.has_hex_destination_arrived("a","move_a") and sim.has_hex_destination_arrived("b","move_b"):break
+	var grid_a:Vector2i=sim.get_hex_unit_state("a").grid
+	var grid_b:Vector2i=sim.get_hex_unit_state("b").grid
+	print("INFO K2 a=",grid_a," b=",grid_b," readout a=",sim.get_hex_movement_readout("a")," b=",sim.get_hex_movement_readout("b"))
+	_check(sim.has_hex_destination_arrived("a","move_a") and sim.has_hex_destination_arrived("b","move_b"),"K2: both units arrive")
+	_check(grid_a!=grid_b,"K2: they stand on different cells")
+	_check(HEX.distance(grid_a,Vector2i(3,1))<=2 and HEX.distance(grid_b,Vector2i(3,1))<=2 and grid_a!=Vector2i(3,1) and grid_b!=Vector2i(3,1),"K2: both stand close to the fallen, neither on it")
+	_check(sim.has_hex_position_arrived("a",target,"move_a") and sim.has_hex_position_arrived("b",target,"move_b"),"K2: both count as arrived for the commanded cell")
+	_free_rig(rig)
 
 func _test_unfit_goal_redirected()->void:
 	var rig:Dictionary=_rig(Vector2i(6,2),_tiles(6,2),[{"id":"a","grid":Vector2i(0,0)},{"id":"d","grid":Vector2i(3,0),"vital":"down"}])

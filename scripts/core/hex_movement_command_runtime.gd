@@ -302,7 +302,7 @@ func tick(delta:float)->void:
 	for grid in snapshot.get("admission_slots_by_grid",{}):blockers[grid]=true
 	for id in snapshot.units_by_id:
 		# A unit waiting on an occupied goal stands still until the holder leaves: others must route around it.
-		if not _orders.has(id) or _orders[id].status in ["arrived","canceled","blocked","waiting_speed","waiting_clearance"] or (owner.hex_waiting_units_block and _orders[id].status=="waiting_reservation" and _orders[id].reason=="target_occupied"):blockers[snapshot.units_by_id[id].grid]=true
+		if not _orders.has(id) or _orders[id].status in ["arrived","canceled","blocked","waiting_speed","waiting_clearance"] or (owner.get("hex_waiting_units_block")==true and _orders[id].status=="waiting_reservation" and _orders[id].reason=="target_occupied"):blockers[snapshot.units_by_id[id].grid]=true
 	var blocker_keys:Array=blockers.keys()
 	blocker_keys.sort_custom(func(a:Vector2i,b:Vector2i)->bool:return a.x<b.x or (a.x==b.x and a.y<b.y))
 	var blocker_signature:String=JSON.stringify(blocker_keys)
@@ -433,6 +433,10 @@ func _redirect_goal_held_by_unfit(id:String,order:Dictionary,state:Dictionary,ow
 	if holder.is_empty() or holder==id:return false
 	var actor=_owner()._resolve_known_unit_for_contract(holder)
 	if not is_instance_valid(actor) or not actor.has_method("get_vital_state") or actor.call("get_vital_state")=="fit":return false
+	# Ziele anderer Auftraege sind keine Ausweichzellen: sonst warten zwei Einheiten mit demselben belegten Ziel auf dieselbe Zelle.
+	var claimed:Dictionary={}
+	for other_id in _orders:
+		if other_id!=id and _orders[other_id].status!="canceled":claimed[_orders[other_id].goal_grid]=true
 	var ring:Array=[goal]
 	var seen:Dictionary={goal:true}
 	for depth in range(2):
@@ -443,7 +447,7 @@ func _redirect_goal_held_by_unfit(id:String,order:Dictionary,state:Dictionary,ow
 				if seen.has(neighbor):continue
 				seen[neighbor]=true
 				next_ring.append(neighbor)
-				if own_blockers.has(neighbor):continue
+				if own_blockers.has(neighbor) or claimed.has(neighbor):continue
 				if best==null or _redirect_candidate_better(neighbor,best,state.grid):best=neighbor
 		if best!=null:
 			# Die Ausweichzelle ist ab hier das wirksame Ziel; die befohlene Zelle merken (effective_goal_for).
