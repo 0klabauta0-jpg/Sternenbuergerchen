@@ -277,8 +277,12 @@ func configure(flow: Node, screen: Control) -> void:
 	for entry in [
 		{"mission_id": "satellite_recovery", "mission_name": "Satellitenbergung", "map_file_path": "res://maps/satellite_crash_site.json", "scenario_file_path": "res://data/mission_scenarios/satellite_recovery.json", "slot_count": 4, "time_limit_seconds": 1200.0, "win_condition": "objective_capture"},
 		{"mission_id": "polisa_visit", "mission_name": "Polisa besuchen", "map_file_path": "res://maps/polisa_station.json", "scenario_file_path": "res://data/mission_scenarios/polisa_visit.json", "slot_count": 4, "time_limit_seconds": 1200.0, "win_condition": "objective_capture"},
-		{"mission_id": "trade_outpost_visit", "mission_name": "Handelsaußenposten besuchen", "map_file_path": "res://maps/trade_outpost.json", "scenario_file_path": "res://data/mission_scenarios/trade_outpost_visit.json", "slot_count": 4, "time_limit_seconds": 1200.0, "win_condition": "objective_capture"}]:
+		{"mission_id": "trade_outpost_visit", "mission_name": "Handelsaußenposten besuchen", "map_file_path": "res://maps/trade_outpost.json", "scenario_file_path": "res://data/mission_scenarios/trade_outpost_visit.json", "slot_count": 4, "time_limit_seconds": 1200.0, "win_condition": "objective_capture"},
+		{"mission_id": "satellite_crash_visit", "mission_name": "Absturzstelle besuchen", "map_file_path": "res://maps/satellite_crash_site.json", "scenario_file_path": "res://data/mission_scenarios/satellite_crash_visit.json", "slot_count": 4, "time_limit_seconds": 0.0, "win_condition": "objective_capture"}]:
 		catalog.append(entry)
+	# Handel-Nachbesserung W3: friedlicher Besuch des Handelsaussenpostens in der Kampagne ohne Zeitlimit (0 = keins); das Skirmish-Szenario trade_outpost_visit bleibt.
+	if _campaign_mode:
+		catalog.append({"mission_id": "trade_outpost_open_visit", "mission_name": "Handelsaußenposten besuchen", "map_file_path": "res://maps/trade_outpost.json", "scenario_file_path": "res://data/mission_scenarios/trade_outpost_open_visit.json", "slot_count": 4, "time_limit_seconds": 0.0, "win_condition": "objective_capture"})
 	for job: Dictionary in Dictionary(_campaign.get_campaign_snapshot().jobs).values():
 		var found := false
 		for item: Dictionary in catalog:
@@ -905,7 +909,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 			if location_id != "homebase":
 				var snap: Dictionary = _campaign.get_campaign_snapshot()
 				var selected_job: Dictionary = Dictionary(snap.jobs.get(String(snap.selected_job_id),{}))
-				var scenario := String(selected_job.get("scenario_id",String(snap.locations[location_id].scenario_file_path).get_file().get_basename()))
+				var scenario := _destination_scenario_id(snap, location_id, selected_job)
 				_flow.call("_on_homebase_mission_selection_changed",scenario)
 		return result
 	if operation in ["station_buy_ship", "station_build_home_pad", "station_install_ship_component"]:
@@ -1195,7 +1199,7 @@ func _validate_departure_gates(craft_id: String, observe_progress: bool, reuse_d
 	if _campaign_mode and String(selected_job_definition.get("id","")) == "benit_delivery":
 		var container: Dictionary = Dictionary(_supply.get_supply_snapshot().inventory).get("craft:"+craft_id,{})
 		if int(Dictionary(container.get("items",{})).get("c_benit_crate",0)) < 1: return _reject("missing_delivery_cargo","C-Benit-Kiste muss im gewählten Schiff geladen sein")
-	var expected_id := String(selected_job_definition.get("scenario_id",String(selected.locations[destination].scenario_file_path).get_file().get_basename()))
+	var expected_id := _destination_scenario_id(selected, destination, selected_job_definition)
 	var mission_definition: Dictionary = _flow.call("_get_selected_mission_definition")
 	var selected_location: Dictionary = selected.locations[destination]
 	if String(_flow.get("_selected_mission_id")) != expected_id or String(mission_definition.get("map_file_path", "")) != String(selected_location.map_file_path) or String(mission_definition.get("scenario_file_path", "")) != "res://data/mission_scenarios/"+expected_id+".json":
@@ -2268,6 +2272,28 @@ func grant_ammo_start_if_missing() -> bool:
 	for unit in Array(_flow.get("_all_team_units")): ids.append(String(Dictionary(unit).get("unit_id", "")))
 	return bool(_supply.grant_ammo_start_if_missing(ids))
 
+## Handel H1: Szenario, das beim Anflug von `location_id` geladen wird: das des gewaehlten Auftrags; ohne Auftrag in der Kampagne an einem Ort
+## mit abgeschlossenem Story-Auftrag das friedliche Besuchsszenario (open_outposts.json), sonst das Ortsszenario.
+func _destination_scenario_id(selected: Dictionary, location_id: String, selected_job: Dictionary) -> String:
+	if selected_job.has("scenario_id"): return String(selected_job.scenario_id)
+	if _campaign_mode and _campaign != null:
+		var visit: String = String(_campaign.open_visit_scenario_id(location_id))
+		if not visit.is_empty(): return visit
+	return String(Dictionary(selected.locations[location_id]).scenario_file_path).get_file().get_basename()
+
+## Handel H2: Ankaufspreise der Station Polisa fuer die Stationsanzeige: die Preise der Warenboerse (Benit) ueber den Handelsdaten (Erz, Bergungsgut).
+func _polisa_buy_orders(supply: Dictionary) -> Dictionary:
+	var orders: Dictionary = Dictionary(Dictionary(supply.get("commodity_buy_orders", {})).get("polisa", {})).duplicate()
+	var market: Dictionary = Dictionary(Dictionary(supply.get("market", {})).get("polisa", {}))
+	for item: Variant in market:
+		if Dictionary(market[item]).has("buy_price"): orders[item] = int(market[item].buy_price)
+	return orders
+
+## Handel H2 (D4): Heimlandung eines Spielerschiffs -> Marktbestaende der Benit-Warenboerse wieder voll (Kampagne und Skirmish). Liefert die Zahl nachgefuellter Stuecke.
+func replenish_market() -> int:
+	if _supply == null: return 0
+	return int(_supply.replenish_market_stock())
+
 ## M6b (B1): KEIN automatisches Auffuellen mehr (weder beim Abflug noch bei der Heimkehr): Magazine kommen von Hand per Drag and Drop
 ## ins Fach. Beim bestaetigten Abflug von der Heimatbasis nur der Hinweis, wie viele Faecher der Mitfliegenden (an Bord plus zugeteilter
 ## Pilot) leer sind: {"empty": n, "short_message": "Munition knapp: n Fächer leer." oder ""}. Es wird nichts bewegt.
@@ -2991,7 +3017,7 @@ func get_polisa_snapshot(snapshot: Dictionary = {}) -> Dictionary:
 		"fuel_capacity":float(supply.get("fuel_capacity", 0.0)),"fuel_price_per_unit":float(supply.get("fuel_price_per_unit", 0.0)),
 		"credits":int(supply.get("credits", 0)),"offers":offers,"stock":supply.get("stock_by_offer_id", {}),"inventory":supply.get("inventory", {}),
 		"people":people,"station_residents":station_residents,"blueprints":supply.get("blueprints", []),"require_blueprints":_campaign_mode,"revision":int(supply.get("revision", 0)),
-		"cargo_transfer":_cargo_transfer.get_snapshot(),"free_home_pad":_polisa_free_home_pad(),"home_pad_count":int(supply.get("station_home_pads", 2)),"campaign_mode":_campaign_mode,"buy_orders":Dictionary(supply.get("commodity_buy_orders", {})).get("polisa", {})}
+		"cargo_transfer":_cargo_transfer.get_snapshot(),"free_home_pad":_polisa_free_home_pad(),"home_pad_count":int(supply.get("station_home_pads", 2)),"campaign_mode":_campaign_mode,"buy_orders":_polisa_buy_orders(supply)}
 
 
 func _build_polisa_home_pad(count: int) -> Dictionary:
