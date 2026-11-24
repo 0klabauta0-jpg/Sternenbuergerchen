@@ -105,5 +105,19 @@
       "ships"
     ],
     "free_visit": true
+  },
+  "relay_ridge": {
+    "id": "relay_ridge",
+    "name": "Relaisgrat",
+    "region_position": [
+      0.62,
+      0.55
+    ],
+    "map_file_path": "res://maps/Ground_Mission02_128x128.json",
+    "scenario_file_path": "res://data/mission_scenarios/flak_silence.json",
+    "landing_pad_ids": [
+      "gm02_pad_alpha"
+    ],
+    "services": []
   }
 }

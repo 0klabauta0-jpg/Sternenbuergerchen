@@ -1,5 +1,5 @@
 {
-  "planet": ["fortified_outpost"],
+  "planet": ["fortified_outpost", "relay_ridge"],
   "glut_1a": ["satellite_crash"],
   "glut_1b": ["trade_outpost"],
   "moon": ["homebase"]

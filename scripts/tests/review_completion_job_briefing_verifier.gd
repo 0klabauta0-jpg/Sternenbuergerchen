@@ -36,7 +36,7 @@ func _run() -> void:
 	var before: String = JSON.stringify([campaign,travel],"",true)
 	var expected := {"satellite_recovery":["glut_1a","Mond"], "outpost_recovery":["glut_1b","Mond"], "benit_delivery":["glut_1a","Mond"], "outpost_chip_recovery":["planet","Planet"], "buccaneer_rescue":["planet","Planet"]}
 	var authored: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/job_briefings.json"))
-	_check(campaign.jobs.size() == 5 and expected.size() == campaign.jobs.size(), "all five actual campaign jobs are covered")
+	_check(Dictionary(campaign.jobs).has_all(expected.keys()), "all five chapter-one campaign jobs are covered")
 	for id: String in expected:
 		var briefing: Dictionary = JOBS.get_briefing(id,campaign,travel)
 		var location_id: String = String(campaign.jobs[id].location_id)

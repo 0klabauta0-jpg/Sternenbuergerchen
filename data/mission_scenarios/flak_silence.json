@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "scenario_id": "flak_silence",
+  "display_name": "Relaisgrat",
+  "map_file_path": "res://maps/Ground_Mission02_128x128.json",
+  "time_limit_seconds": 0.0,
+  "mission_slot_count_override": 4,
+  "win_condition": "objective_capture",
+  "objective": {
+    "marker_id": "objective_point",
+    "capture_radius": 128.0
+  },
+  "enemy_groups": [],
+  "wave_config": {
+    "wave_delay_seconds": 0.0,
+    "wave_count": 0,
+    "first_wave_delay_seconds": 0.0,
+    "units_per_wave": 1
+  },
+  "patrol_bindings": [],
+  "briefing": {
+    "summary": "Platzhalter bis Aufgabe 3 (Flak zum Schweigen bringen).",
+    "minimap_mode": "terrain_only",
+    "objectives": [
+      {
+        "target_id": "objective_point",
+        "text": "Platzhalter"
+      }
+    ],
+    "title": "Relaisgrat"
+  },
+  "vertical_slice": {
+    "scenario_kind": "singleplayer_visit",
+    "team_slots": [
+      {
+        "role": "recovery",
+        "player_assignable_modes": [
+          "singleplayer"
+        ],
+        "spawn_marker_id": "spawn_alpha",
+        "team_id": "team_alpha",
+        "npc_owned": false
+      }
+    ],
+    "play_modes": [
+      "singleplayer"
+    ],
+    "contract_version": 1,
+    "interaction_points": [
+      {
+        "gate_id": "placeholder_use",
+        "step_id": "placeholder_use",
+        "duration_seconds": 1.0,
+        "required_state": "placeholder_use_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "asset_hint": "station_computer",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Platzhalter",
+        "interaction_id": "objective_point",
+        "marker_id": "objective_point"
+      }
+    ],
+    "flow_steps": [
+      {
+        "step_id": "placeholder_use",
+        "min_hold_seconds": 1.0,
+        "objective_type": "interaction_use",
+        "required_state": "placeholder_use_done",
+        "target_marker_id": "objective_point"
+      }
+    ]
+  },
+  "notes": [
+    "Platzhalter bis Aufgabe 3 (Flak zum Schweigen bringen): Aufgabe 3 ersetzt diese Datei durch das echte Szenario. Der Ort ist ohne Auftrag nicht anfliegbar, diese Datei wird nie gespielt.",
+    "Kein Gegner, keine Wellen. Der Lader verlangt eine Benutzen-Stelle auf einem vorhandenen Marker (GM02 hat nur objective_point und spawn_*); sie liegt auf objective_point."
+  ]
+}

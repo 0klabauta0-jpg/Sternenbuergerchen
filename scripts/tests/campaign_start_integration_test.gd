@@ -39,7 +39,18 @@ func _run() -> void:
 	var base: Control = screen.get("_operations_presenter").get("_base")
 	base.call("set_transport_snapshot", state)
 	_check(String(base.get("_map_path")) == "res://maps/campaign_intro_base.json", "Campaign uses its full-size homebase map")
-	_check(Array(flow.get("_mission_catalog")).size() == 6, "Campaign offers five jobs plus free trader visit")
+	# Katalog der Kampagne: fuenf feste Besuchs-/Startszenarien plus jeder Auftrag, dessen Szenario dort noch fehlt (Adapter).
+	var catalog_ids: Array = []
+	for item: Dictionary in Array(flow.get("_mission_catalog")):
+		catalog_ids.append(String(item.get("mission_id", "")))
+	var campaign_jobs: Dictionary = Dictionary(flow.get("_singleplayer_runtime").get("_campaign").get_campaign_snapshot().get("jobs", {}))
+	var expected_ids: Array = ["satellite_recovery", "polisa_visit", "trade_outpost_visit", "satellite_crash_visit", "trade_outpost_open_visit"]
+	for job: Dictionary in campaign_jobs.values():
+		if not expected_ids.has(String(job.scenario_id)):
+			expected_ids.append(String(job.scenario_id))
+	_check(campaign_jobs.size() >= 5 and catalog_ids.size() == expected_ids.size(), "Campaign offers every job plus the free visits (Auftraege %d, Katalog %d)" % [campaign_jobs.size(), catalog_ids.size()])
+	for id in expected_ids:
+		_check(catalog_ids.has(id), "Campaign catalog offers " + String(id))
 	flow.queue_free()
 	await process_frame
 	print("CAMPAIGN_START_RESULTS passed=%d failed=%d" % [passed, failed])

@@ -15,8 +15,8 @@ func _check(value: bool, label: String) -> void:
 	print("PASS: " if value else "FAIL: ", label)
 func _run() -> void:
 	var jobs: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/jobs.json"))
-	_check(jobs.size() == 5, "five authored campaign jobs")
 	var ids := ["satellite_recovery", "outpost_recovery", "benit_delivery", "outpost_chip_recovery", "buccaneer_rescue"]
+	_check(jobs.size() >= 5 and jobs.has_all(ids), "five authored chapter-one jobs present")
 	for id in ids:
 		var path: String = "res://data/mission_scenarios/%s.json" % id
 		_check(FileAccess.file_exists(path), "scenario exists: " + id)

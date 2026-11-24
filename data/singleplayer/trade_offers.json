@@ -401,7 +401,8 @@
     "polisa": [
       "trade",
       "refuel"
-    ]
+    ],
+    "relay_ridge": []
   },
   "route_fuel_costs": {
     "homebase>satellite_crash": 12.0,
@@ -415,7 +416,9 @@
     "homebase>distress_orbit": 10.0,
     "distress_orbit>homebase": 10.0,
     "homebase>polisa": 10.0,
-    "polisa>homebase": 10.0
+    "polisa>homebase": 10.0,
+    "homebase>relay_ridge": 10.0,
+    "relay_ridge>homebase": 10.0
   },
   "leg_fuel_costs": {
     "homebase>satellite_crash": {"launch": 1.0, "jump": 10.0, "approach": 1.0},
@@ -429,7 +432,9 @@
     "homebase>distress_orbit": {"launch": 1.0, "jump": 8.0, "approach": 1.0},
     "distress_orbit>homebase": {"surface_exit": 2.0, "jump": 8.0, "landing": 0.0},
     "homebase>polisa": {"launch": 1.0, "jump": 8.0, "approach": 1.0},
-    "polisa>homebase": {"surface_exit": 2.0, "jump": 8.0, "landing": 0.0}
+    "polisa>homebase": {"surface_exit": 2.0, "jump": 8.0, "landing": 0.0},
+    "homebase>relay_ridge": {"launch": 1.0, "jump": 8.0, "approach": 1.0},
+    "relay_ridge>homebase": {"surface_exit": 2.0, "jump": 8.0, "landing": 0.0}
   },
   "emergency_fuel": {
     "callout_fee": 100,
