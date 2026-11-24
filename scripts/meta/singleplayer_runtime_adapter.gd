@@ -373,10 +373,16 @@ func _fuel_reachability(craft_id: String, locations: Dictionary) -> Dictionary:
 static func _location_for_orbit(location_orbits: Dictionary, orbit_id: String, preferred: String = "") -> String:
 	if orbit_id.is_empty(): return ""
 	if not preferred.is_empty() and String(location_orbits.get(preferred, "")) == orbit_id: return preferred
+	# Handel 2a-2, Nachbesserung 1: ohne Vorwahl zuerst ein Ort, der NICHT in ADDITIVE_LOCATION_IDS steht; erst danach alphabetisch.
 	var ids: Array = []
+	var additive: Array = []
 	for id in location_orbits:
-		if String(location_orbits[id]) == orbit_id: ids.append(String(id))
+		if String(location_orbits[id]) != orbit_id: continue
+		if CAMPAIGN.ADDITIVE_LOCATION_IDS.has(String(id)): additive.append(String(id))
+		else: ids.append(String(id))
 	ids.sort()
+	additive.sort()
+	ids.append_array(additive)
 	return "" if ids.is_empty() else String(ids[0])
 
 ## Etappen, die einem Schiff bis zum Ziel noch bevorstehen: [{leg, origin, destination}].

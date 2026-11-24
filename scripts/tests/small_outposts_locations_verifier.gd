@@ -42,6 +42,7 @@ func _run() -> void:
 	_case_unlock()
 	_case_supply()
 	_case_surface()
+	_case_orbit_resolution()
 	print("SMALL_OUTPOSTS_LOCATIONS passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
 
@@ -175,6 +176,8 @@ func _case_unlock() -> void:
 	free.configure({}, {}, false)
 	for id: String in PLACES:
 		_check(bool(free.validate_location_visit(id).get("ok", false)), "Freies Spiel %s: ohne Reihenfolge-Zwang offen" % id)
+	var free_relay: Dictionary = free.validate_location_visit("relay_ridge")
+	_check(not bool(free_relay.get("ok", true)) and String(free_relay.get("reason", "")) == "tutorial_locked", "Freies Spiel: relay_ridge bleibt gesperrt, obwohl die drei kleinen Posten offen sind (%s)" % str(free_relay))
 
 func _case_supply() -> void:
 	var supply: RefCounted = SUPPLY.new()
@@ -193,3 +196,36 @@ func _case_surface() -> void:
 	var planet: Dictionary = {"id": "planet", "kind": "planet"}
 	_check(SURFACE.contains(glut, "trade_outpost") and SURFACE.contains(glut, "muellers_farm"), "Landung: Muellers Farm und Handelsposten am Mond glut_1b")
 	_check(SURFACE.contains(planet, "shady_lab") and SURFACE.contains(planet, "templanon") and SURFACE.contains(planet, "relay_ridge") and SURFACE.contains(planet, "fortified_outpost"), "Landung: Shady Lab, Templanon, Relaisgrat, Gesicherter Aussenposten am Planeten")
+
+
+## Nachbesserung 1 (K1): Orte, die sich einen Orbit teilen. Wer aus einem Orbit auf EINEN Ort schliesst (SimulationRoot._location_at_orbit
+## fuer Sprungkosten, SingleplayerRuntimeAdapter._location_for_orbit fuer Reichweite und Nottanker), muss ohne passende Vorwahl denselben Ort
+## liefern wie VOR den neuen Orten (Stand 78910d8dd). Die Liste unten ist fest; die Vorwahl (selected_location_id) gilt weiter nur im eigenen Orbit.
+func _case_orbit_resolution() -> void:
+	var location_orbits: Dictionary = Dictionary(_json("res://data/singleplayer/star_system.json").get("location_orbits", {}))
+	var before := {"moon_orbit": "homebase", "glut_1a_orbit": "satellite_crash", "glut_1b_orbit": "trade_outpost", "planet_orbit": "distress_orbit", "polisa_orbit": "polisa"}
+	var distinct := {}
+	for place in location_orbits: distinct[String(location_orbits[place])] = true
+	_check(distinct.size() == before.size(), "Orbit-Aufloesung: die feste Liste deckt alle %d Orbits der Sternkarte ab" % distinct.size())
+	var simulation = load("res://scripts/core/simulation_root.gd")
+	var adapter = load("res://scripts/meta/singleplayer_runtime_adapter.gd")
+	for orbit: String in before:
+		var from_simulation := String(simulation.call("_location_at_orbit", location_orbits, orbit, ""))
+		var from_adapter := String(adapter.call("_location_for_orbit", location_orbits, orbit, ""))
+		_check(from_simulation == String(before[orbit]), "Orbit-Aufloesung %s ohne Vorwahl (Sprungkosten): %s, wie vor den neuen Orten (%s)" % [orbit, before[orbit], from_simulation])
+		_check(from_adapter == String(before[orbit]), "Orbit-Aufloesung %s ohne Vorwahl (Reichweite, Nottanker): %s, wie vor den neuen Orten (%s)" % [orbit, before[orbit], from_adapter])
+	# Der Spielweg: Sprung Absturzstelle -> Orbit des Handelspostens, ohne Vorwahl (die Sternkarte bietet fremde Orbits gar nicht zur Wahl an).
+	var supply: RefCounted = SUPPLY.new()
+	supply.configure([{"craft_id": "ship"}])
+	var origin := String(simulation.call("_location_at_orbit", location_orbits, "glut_1a_orbit", ""))
+	var target := String(simulation.call("_location_at_orbit", location_orbits, "glut_1b_orbit", ""))
+	_check(origin == "satellite_crash" and target == "trade_outpost", "Sprung Absturzstelle -> Handelsposten ohne Vorwahl: Ziel ist trade_outpost (%s > %s)" % [origin, target])
+	_check(is_equal_approx(supply.get_leg_fuel_cost(origin, target, "jump"), 7.0), "Sprung Absturzstelle -> Handelsposten ohne Vorwahl kostet 7 (Wert vor den neuen Orten, %s)" % str(supply.get_leg_fuel_cost(origin, target, "jump")))
+	# Die Vorwahl im eigenen Orbit gilt weiter: die Farm ist ueber ihren Weg erreichbar und kostet, was die Daten sagen.
+	var chosen := String(simulation.call("_location_at_orbit", location_orbits, "glut_1b_orbit", "muellers_farm"))
+	_check(chosen == "muellers_farm", "Vorwahl Muellers Farm im Orbit glut_1b_orbit: Ziel ist die Farm (%s)" % chosen)
+	_check(String(adapter.call("_location_for_orbit", location_orbits, "glut_1b_orbit", "muellers_farm")) == "muellers_farm", "Vorwahl Muellers Farm (Adapter): Ziel ist die Farm")
+	_check(is_equal_approx(supply.get_leg_fuel_cost("satellite_crash", chosen, "jump"), 8.0) and is_equal_approx(supply.get_leg_fuel_cost("homebase", chosen, "jump"), 7.0), "Muellers Farm ueber die Vorwahl: Sprung ab Absturzstelle 8, ab Heimat 7 (Daten)")
+	_check(String(simulation.call("_location_at_orbit", location_orbits, "glut_1b_orbit", "shady_lab")) == "trade_outpost", "Vorwahl eines Ortes aus einem anderen Orbit (shady_lab) aendert den Orbit glut_1b_orbit nicht")
+	for place: String in ["shady_lab", "templanon"]:
+		_check(String(simulation.call("_location_at_orbit", location_orbits, "planet_orbit", place)) == place and String(adapter.call("_location_for_orbit", location_orbits, "planet_orbit", place)) == place, "Vorwahl %s im Planetenorbit: Ziel ist der gewaehlte Ort" % place)

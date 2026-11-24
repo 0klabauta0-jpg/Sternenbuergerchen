@@ -937,13 +937,21 @@ func _surface_exit_fuel_command(route: Dictionary, outward_token: String) -> Dic
 	payload["leg"] = "surface_exit"
 	return {"contract_category":"singleplayer_supply", "operation":"consume_leg_fuel", "payload":payload, "request_id":"return:" + outward_token + ":fuel"}
 
+## Handel 2a-2, Nachbesserung 1: ohne passende Vorwahl gilt bei mehreren Orten im selben Orbit zuerst ein Ort, der NICHT in
+## ADDITIVE_LOCATION_IDS steht (die vorhandene Kampagne rechnet wie vor den neuen Orten); erst danach alphabetisch.
+const ADDITIVE_LOCATION_SOURCE = preload("res://scripts/core/singleplayer_campaign_state.gd")
 static func _location_at_orbit(locations: Dictionary, orbit_id: String, preferred: String) -> String:
 	if orbit_id.is_empty(): return ""
 	if not preferred.is_empty() and String(locations.get(preferred, "")) == orbit_id: return preferred
 	var ids: Array = []
+	var additive: Array = []
 	for id in locations:
-		if String(locations[id]) == orbit_id: ids.append(String(id))
+		if String(locations[id]) != orbit_id: continue
+		if ADDITIVE_LOCATION_SOURCE.ADDITIVE_LOCATION_IDS.has(String(id)): additive.append(String(id))
+		else: ids.append(String(id))
 	ids.sort()
+	additive.sort()
+	ids.append_array(additive)
 	return "" if ids.is_empty() else String(ids[0])
 
 ## Merker je Schiff fuer den zuletzt bezahlten, noch offenen Sprung: {origin, destination, paid}. Wird nur fuer den Neustart aus

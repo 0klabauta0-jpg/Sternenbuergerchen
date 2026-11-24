@@ -93,20 +93,49 @@ func _visit_part() -> void:
 	_check(landed_at.distance_to(trader) <= 256.0, "C3: das Schiff steht beim Haendler (%s Einheiten, erlaubt 256)" % str(snappedf(landed_at.distance_to(trader), 0.1)))
 	if not await _move_and_use(mission, _sv_marker, "service_visit", _sv_map):
 		return
+	_no_trade_part(place)
 	job.status = original_status
 	print("SV_PREPARE outpost_recovery status zurueck auf %s" % original_status)
 	if not await _prepare_visit_return(mission):
 		return
-	# Der Rueckflug-Knopf der Versorgung gehoert zum Haendlerdienst (Aufgabe 3); hier geht der Rueckflug ueber denselben Befehl, den der Knopf absetzt.
-	var reply: Dictionary = _runtime.call("request_operation", "return_homebase", {"craft_id": _craft_id})
-	print("SV_RETURN_COMMAND ", reply)
-	_check(bool(reply.get("ok", false)), "C4: Rueckflug ueber den Befehl return_homebase angenommen (%s)" % str(reply))
+	# Der Versorgungsknopf "Rueckflug" gehoert zum Haendlerdienst (Aufgabe 3) und erscheint hier nicht. Der Weg des Spielers an einem Ort ohne
+	# Dienst: die Besatzung geht zum Schiff und steigt ein (_prepare_visit_return), dann der Knopf "Abheben" der Schiffskarte.
+	var service_button: Button = _flow.find_child("ServiceReturnHomebase", true, false) as Button
+	_check(service_button == null or not service_button.is_visible_in_tree(), "C4: der Versorgungsknopf Rueckflug ist am Posten nicht da (kein Dienst bis Aufgabe 3)")
+	if not await _wait(func():
+		var candidate: Button = _ship_card_return_button()
+		return candidate != null and not candidate.disabled, 5000, "C4: der Knopf Abheben der Schiffskarte ist nach dem Einsteigen frei"):
+		_dump("small_outpost_card_return")
+		return
+	var card_button: Button = _ship_card_return_button()
+	_check(card_button.text == "Abheben", "C4: der Knopf der Schiffskarte heisst Abheben (%s)" % card_button.text)
+	card_button.pressed.emit()
+	print("SV_RETURN_BUTTON Abheben der Schiffskarte gedrueckt")
 	if not await _wait_homebase():
 		return
 	_flow.call("_show_homebase")
 	_check(String(Dictionary(_campaign().jobs).get("outpost_recovery", {}).get("status", "")) == original_status, "C5: nach der Heimkehr hat der Besuch den Auftragsstatus nicht veraendert")
 	var again: Dictionary = _runtime.get("_campaign").validate_location_visit(place)
 	_check(String(again.get("reason", "")) == "outpost_locked", "C5: Gegenprobe: mit echtem Auftragsstatus ist der Ort wieder gesperrt")
+
+## Der Knopf "return" (Beschriftung "Abheben") der Schiffskarte des eigenen Schiffs; null, solange keine Karte sichtbar ist.
+func _ship_card_return_button() -> Button:
+	for node in _flow.find_children("return", "Button", true, false):
+		var button := node as Button
+		if button != null and String(button.get_meta("mission_dropship_craft_id", "")) == _craft_id and button.is_visible_in_tree(): return button
+	return null
+
+## Kl1: vor Aufgabe 3 ist am Posten ueber die Spielwege kein Kauf und kein Verkauf moeglich. Der Kaufbefehl und der Verkaufsbefehl, die das Spiel
+## absetzt (Anfrage mit Versorgungsort), werden vom Laufzeit-Adapter abgelehnt, weil das Schiff dort keinen Versorgungskontext hat.
+func _no_trade_part(place: String) -> void:
+	var item := {"muellers_farm": "food", "shady_lab": "stim", "templanon": "bandage"}.get(place, "food") as String
+	var before_credits := int(Dictionary(_runtime.call("get_snapshot").get("supply", {})).get("credits", -1))
+	var buy: Dictionary = _runtime.call("request_operation", "buy", {"craft_id": _craft_id, "service_location_id": place, "offer_id": "market:%s:%s" % [place, item], "quantity": 1, "request_id": "sv:buy"})
+	var sell: Dictionary = _runtime.call("request_operation", "sell", {"craft_id": _craft_id, "service_location_id": place, "source_container_id": "craft:" + _craft_id, "item_id": "c_benit", "quantity": 1, "request_id": "sv:sell"})
+	print("SV_NO_TRADE buy=", buy, " sell=", sell)
+	_check(not bool(buy.get("ok", true)) and String(buy.get("reason", "")) == "service_location_changed", "Kl1: Kauf am Posten %s abgelehnt, Grund %s" % [place, String(buy.get("reason", "?"))])
+	_check(not bool(sell.get("ok", true)) and String(sell.get("reason", "")) == "service_location_changed", "Kl1: Verkauf am Posten %s abgelehnt, Grund %s" % [place, String(sell.get("reason", "?"))])
+	_check(int(Dictionary(_runtime.call("get_snapshot").get("supply", {})).get("credits", -2)) == before_credits, "Kl1: die Credits haben sich am Posten nicht bewegt (%d)" % before_credits)
 
 func _finish() -> void:
 	print("SMALL_OUTPOSTS_VISIT_FLIGHT place=%s passed=%d failed=%d" % [_place_id(), _passed, _failed])

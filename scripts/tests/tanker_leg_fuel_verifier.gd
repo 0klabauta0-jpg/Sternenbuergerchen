@@ -403,10 +403,6 @@ func _stopped_after_jump(initial_fuel: float, first_location: String) -> Diction
 	var s: Dictionary = await _session(initial_fuel)
 	_launch(s)
 	var first_orbit: String = _orbit_of(s, first_location)
-	# Handel 2a: Handelsposten und Muellers Farm teilen einen Orbit; ein Sprung gilt dem gewaehlten Ort (sonst dem ersten Ort der Orbit-Liste).
-	# Wie im Spiel (Sternkarte) wird das Ziel vor dem Sprung gewaehlt; die Kampagnensperre ist fuer diese Treibstoffrechnung abgeschaltet.
-	# (Direkt am Kampagnenbesitzer gesetzt: die Anflugwahl der Oberflaeche wird im Flug vom falschen Orbit abgelehnt.)
-	s.runtime.call("_commit", "singleplayer_campaign", "select_destination", {"location_id": first_location, "job_id": ""}, "leg:select:" + first_location)
 	var jump: Dictionary = _jump(s, first_orbit)
 	s["first_jump"] = jump
 	if jump.get("ok", false):
