@@ -548,6 +548,27 @@ func _case_15() -> void:
 	env.flow.free()
 
 
+## Fall 16 (Pruefung Aufgabe 2, K3 Rest): Kennung mit dem Abflugzeichen der Mission (Meta singleplayer_mission_identity.departure_token, wie ein echter Start es setzt)
+## und die Uhr mit dem echten 0,2-s-Abstand des Rollen-Takts: nach 59,8 s keine Buchung, nach 60,0 s genau eine. Ein Start ueber den echten Kampagnenweg liegt
+## ausserhalb dieses Aufbaus (dort laeuft campaign_air_support_real_mission_verifier).
+func _case_16() -> void:
+	var tag := "[16 Zeichen und 0,2-s-Takt] "
+	var env: Dictionary = _build(["ship"], {"ship":14.0})
+	var mission_root: Node = env.mission_root
+	mission_root.get_parent().set_meta("singleplayer_mission_identity", {"departure_token":"dep_real_1"})
+	_check(bool(_circle(env, "ship", Vector2i(10, 10), "none", "f16").get("ok", false)), tag + "Aufbau: Kreisen")
+	var source: Node = env.source
+	for i in range(300):
+		env.tick = int(env.tick) + 1
+		source.tick_counter = int(env.tick)
+		source._advance_space_flights(0.2, int(env.tick))
+		mission_root._advance_air_support_orders(0.2)
+		if i == 298: _check(is_equal_approx(_fuel(env, "ship"), 14.0) and _air_receipts(env).is_empty(), tag + "nach 59,8 s noch keine Buchung (%s)" % str(_fuel(env, "ship")))
+	var ids: Array = _air_receipts(env)
+	_check(is_equal_approx(_fuel(env, "ship"), 13.0) and ids.size() == 1 and String(ids[0]).begins_with("air-fuel:ship:dep_real_1:"), tag + "nach 60,0 s genau eine Buchung mit dem Abflugzeichen: " + str(ids))
+	env.flow.free()
+
+
 func _initialize() -> void:
 	_case_1()
 	_case_2()
@@ -563,5 +584,6 @@ func _initialize() -> void:
 	_case_13()
 	_case_14()
 	_case_15()
+	_case_16()
 	print("AIR_FUEL passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
