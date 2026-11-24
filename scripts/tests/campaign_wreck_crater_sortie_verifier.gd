@@ -19,7 +19,8 @@ var _driver: Node = null
 var _registry: Node = null
 var _game_s := 0.0
 var _t0 := 0.0
-var _attach_offset := 0.0  # Sekunden Einsatzzeit, die beim Anhaengen der Beobachtung schon vergangen waren (Wellenverzoegerung minus Restzeit)
+var _sim_s_at_start := -1.0  # Einsatzzeit (Uhr der Simulation: Takte x Taktlaenge ab Einsatzbeginn) beim ersten beobachteten Takt
+var _first_near_s := -1.0  # Einsatzzeit, zu der der erste lebende Pluenderer auf <= 400 Welteinheiten an den Truppfuehrer heran war
 var _tick_count := 0
 var _last_wave := 0
 var _wave_at: Dictionary = {}
@@ -117,7 +118,10 @@ func _attach_watch(mission: Node) -> void:
 	_registry = mission.get_node("UnitRegistry")
 	_game_s = 0.0
 	_t0 = 0.0
-	if _waves != null: _attach_offset = maxf(float(_waves.get("first_wave_delay_seconds")) - float(_waves.get("_time_until_next_wave")), 0.0)
+	# Gegenfall zur Messung (nur zum Beweis, dass eine sofort erscheinende erste Welle die Pruefung rot macht): Verzoegerung auf 0.
+	if _waves != null and OS.get_environment("SB_WRECK_WAVE_DELAY0") == "1":
+		_waves.set("first_wave_delay_seconds", 0.0)
+		_waves.set("_time_until_next_wave", 0.0)
 	_wreck_pos = MAP.load_from_file(MAP_PATH).get_marker_position("objective_point")
 	_sim.connect("tick_processed", _on_wreck_tick)
 	var setup: Node = mission.get_node_or_null("MissionSetup")
@@ -130,6 +134,7 @@ func _on_wreck_tick(_tick: int) -> void:
 	if not is_instance_valid(_sim): return
 	_tick_count += 1
 	_game_s += float(_sim.call("get_last_tick_delta"))
+	if _sim_s_at_start < 0.0: _sim_s_at_start = float(_sim.get("tick_counter")) * float(_sim.call("get_last_tick_delta"))
 	var wave: int = int(_waves.call("get_current_wave_number")) if is_instance_valid(_waves) else 0
 	if wave != _last_wave:
 		_last_wave = wave
@@ -169,10 +174,23 @@ func _on_wreck_tick(_tick: int) -> void:
 			if String(unit.call("get_vital_state")) != "fit": _looter_fell_before_40[id] = wreck_dist
 			elif _game_s - float(_looter_t_first[id]) >= 40.0: _looter_dwreck_40[id] = wreck_dist
 		var distance: float = unit.global_position.distance_to(leader.global_position) if leader != null else -1.0
+		if distance >= 0.0 and distance <= 400.0 and _first_near_s < 0.0 and String(unit.call("get_vital_state")) == "fit": _first_near_s = _game_s - _t0
 		if not _looter_first.has(id): _looter_first[id] = distance
 		_looter_best[id] = minf(float(_looter_best.get(id, distance)), distance)
 	if _game_s >= _next_log:
-		_next_log = _game_s + 10.0
+		_next_log = _game_s + 20.0
+		_obs_looter_lines()
+
+## Nur lesend, alle 20 s Spielzeit: je Pluenderer Lage, Befehlsquelle, Bewegungsstand, Wegpunkt-Index und Kontaktsperre des Treibers.
+func _obs_looter_lines() -> void:
+	var leader: Node2D = _registry.get_unit("campaign_leader") as Node2D if _registry.has_unit("campaign_leader") else null
+	for id in LOOTERS:
+		var unit: Node2D = _registry.get_unit(id) as Node2D if _registry.has_unit(id) else null
+		if unit == null or not is_instance_valid(unit): continue
+		var cmd = unit.call("get_current_unit_command") if unit.has_method("get_current_unit_command") else null
+		var readout: Dictionary = _sim.call("get_hex_movement_readout", id)
+		var hex: Dictionary = _sim.call("get_hex_unit_state", id)
+		print("WRECK_LOOTER t=%.0f %s vital=%s grid=%s d_leader=%.0f src=%s goal=%s status=%s/%s wp=%s locked=%s once=%s stil=%s halten=%s" % [_game_s - _t0, id, str(unit.call("get_vital_state")), str(hex.get("grid", "-")), unit.global_position.distance_to(leader.global_position) if leader != null else -1.0, str(cmd.get("source_command_type")) if cmd != null else "-", str(readout.get("goal_grid", "-")), str(readout.get("status", "")), str(readout.get("reason", "")), str(_driver.get("_enemy_patrol_waypoint_index_by_unit_id").get(id, "-")), str(_driver.get("_enemy_patrol_contact_locked").get(id, "-")), str(_driver.get("_enemy_patrol_once_by_unit_id").get(id, false)), str(Dictionary(_driver.call("get_enemy_team_tactics_state_for_unit", id)).get("advance_style", "-")), str(_driver.call("_enemy_should_hold_position", unit))])
 
 ## Eine knappe Zeile je Welle (und beim Nachsetzen): Truppleben, lebende Pluenderer, kleinster Abstand Trupp - Pluenderer, Befehlsquelle der Pluenderer.
 func _obs_line(label: String) -> void:
@@ -337,7 +355,11 @@ func _await_looters(controller: Node) -> void:
 	while Time.get_ticks_msec() - started < 100000 and not _cleared_now() and _leader_fit():
 		await physics_frame
 	var came_alone := _cleared_now()
-	print("WRECK_QUESTION looters_came_alone=%s seit_t0=%.1f s waves=%s seen=%s" % [str(came_alone), _game_s - _t0, str(_wave_at), str(_looter_seen.keys())])
+	print("WRECK_QUESTION looters_came_alone=%s seit_t0=%.1f s waves=%s seen=%s erster_Pluenderer_nahe_seit_t0=%.1f s" % [str(came_alone), _game_s - _t0, str(_wave_at), str(_looter_seen.keys()), _first_near_s])
+	# W6 (1g): Soll: die Pluenderer laufen ihren Weg einmal ab und ruecken dann von selbst auf den Trupp vor (came_alone=true).
+	# OFFEN (siehe Bericht kapitel2-1g-report.md): Sie bleiben ~500 Welteinheiten vor dem Trupp stehen, weil _enemy_should_hold_position
+	# mit der Waffenreichweite (716) haelt, geschossen wird vermutlich erst innerhalb der wirksamen Reichweite (165; WRECK_STALL_PAIR "detect"). Deshalb hier nur gemeldet, keine PRUEFUNG.
+	print("WRECK_OPEN looters_came_alone=%s (Soll true)" % str(came_alone))
 	if not came_alone and _leader_fit():
 		# Wie ein Spieler: alle 10 s Spielzeit beide Truppmitglieder neu auf den naechsten lebenden Pluenderer schicken, bis alle besiegt sind.
 		var real_start := Time.get_ticks_msec()
@@ -350,7 +372,7 @@ func _await_looters(controller: Node) -> void:
 				if controller.issue_right_click_command_for_test(target, "take", false) and bool(controller.call("execute_selected_fireteam_orders")):
 					orders += 1
 					if orders == 1 or orders % 6 == 0: _obs_line("befehl%d" % orders)
-					if orders == 14 or orders == 40: _obs_stall()
+					if orders == 1 or orders == 14 or orders == 40: _obs_stall()
 			await physics_frame
 		_check(_cleared_now() or not _leader_fit(), "Trupp besiegt die Plünderer (%d Befehle, %.0f s Spielzeit)" % [orders, _game_s - _t0])
 		_check(orders > 0, "Trupp hat die Plünderer angegriffen (Befehle: %d)" % orders)
@@ -363,7 +385,10 @@ func _final_checks(credits_before: int, salvage_before: int, armor_before: int) 
 	_check(_credits() == credits_before + 200, "Credits +200 (vorher %d, jetzt %d)" % [credits_before, _credits()])
 	_check(_item_total("salvage") == salvage_before + 8, "Schrott +8 im Schiff oder Lager (vorher %d, jetzt %d)" % [salvage_before, _item_total("salvage")])
 	_check(_item_total("armor_medium") == armor_before + 1, "mittlere Rüstung +1 (vorher %d, jetzt %d)" % [armor_before, _item_total("armor_medium")])
-	_check(_wave_at.has(1) and float(_wave_at.get(1, 0.0)) + _attach_offset >= 74.0, "erste Welle erscheint erst >= 75 s nach Einsatzbeginn (seit Anhaengen %s, schon vergangen %.1f s)" % [str(_wave_at), _attach_offset])
+	# W5 (1g): gegen die EINSATZZEIT messen (Uhr der Simulation ab Einsatzbeginn), nicht gegen den Wert, den der Wellenregler selbst nennt.
+	var wave1_mission_s: float = float(_wave_at.get(1, 0.0)) + _sim_s_at_start
+	print("WRECK_WAVE1_CLOCK seit_Anhaengen=%.1f s Einsatzzeit_beim_Anhaengen=%.1f s Einsatzzeit_Welle1=%.1f s" % [float(_wave_at.get(1, 0.0)), _sim_s_at_start, wave1_mission_s])
+	_check(_wave_at.has(1) and wave1_mission_s >= 74.0, "erste Welle erscheint erst >= 75 s nach Einsatzbeginn (Einsatzzeit der Welle %.1f s; seit Anhaengen %s, Einsatzzeit beim Anhaengen %.1f s)" % [wave1_mission_s, str(_wave_at), _sim_s_at_start])
 	_check(_wave_at.has(2) and absf(float(_wave_at.get(2, 0.0)) - float(_wave_at.get(1, 0.0)) - 60.0) < 3.0, "zweite Welle 60 s nach der ersten (%s)" % str(_wave_at))
 	_check(not _cleared_early, "clear_looters war vor dem Erscheinen der zweiten Welle NICHT fertig")
 	_check(_looter_seen.size() == 4, "alle vier Plünderer sind aufgetreten (%s)" % str(_looter_seen.keys()))
