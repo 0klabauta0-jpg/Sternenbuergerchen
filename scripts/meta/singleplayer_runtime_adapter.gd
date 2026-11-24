@@ -267,8 +267,11 @@ func configure(flow: Node, screen: Control) -> void:
 		{"mission_id": "satellite_recovery", "mission_name": "Satellitenbergung", "map_file_path": "res://maps/satellite_crash_site.json", "scenario_file_path": "res://data/mission_scenarios/satellite_recovery.json", "slot_count": 4, "time_limit_seconds": 1200.0, "win_condition": "objective_capture"},
 		{"mission_id": "polisa_visit", "mission_name": "Polisa besuchen", "map_file_path": "res://maps/polisa_station.json", "scenario_file_path": "res://data/mission_scenarios/polisa_visit.json", "slot_count": 4, "time_limit_seconds": 1200.0, "win_condition": "objective_capture"},
 		{"mission_id": "trade_outpost_visit", "mission_name": "Handelsaußenposten besuchen", "map_file_path": "res://maps/trade_outpost.json", "scenario_file_path": "res://data/mission_scenarios/trade_outpost_visit.json", "slot_count": 4, "time_limit_seconds": 1200.0, "win_condition": "objective_capture"},
-		{"mission_id": "satellite_crash_visit", "mission_name": "Absturzstelle besuchen", "map_file_path": "res://maps/satellite_crash_site.json", "scenario_file_path": "res://data/mission_scenarios/satellite_crash_visit.json", "slot_count": 4, "time_limit_seconds": 1200.0, "win_condition": "objective_capture"}]:
+		{"mission_id": "satellite_crash_visit", "mission_name": "Absturzstelle besuchen", "map_file_path": "res://maps/satellite_crash_site.json", "scenario_file_path": "res://data/mission_scenarios/satellite_crash_visit.json", "slot_count": 4, "time_limit_seconds": 0.0, "win_condition": "objective_capture"}]:
 		catalog.append(entry)
+	# Handel-Nachbesserung W3: friedlicher Besuch des Handelsaussenpostens in der Kampagne ohne Zeitlimit (0 = keins); das Skirmish-Szenario trade_outpost_visit bleibt.
+	if _campaign_mode:
+		catalog.append({"mission_id": "trade_outpost_open_visit", "mission_name": "Handelsaußenposten besuchen", "map_file_path": "res://maps/trade_outpost.json", "scenario_file_path": "res://data/mission_scenarios/trade_outpost_open_visit.json", "slot_count": 4, "time_limit_seconds": 0.0, "win_condition": "objective_capture"})
 	for job: Dictionary in Dictionary(_campaign.get_campaign_snapshot().jobs).values():
 		var found := false
 		for item: Dictionary in catalog:

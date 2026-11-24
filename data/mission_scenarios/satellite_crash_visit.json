@@ -3,7 +3,7 @@
   "scenario_id": "satellite_crash_visit",
   "display_name": "Satelliten-Absturzstelle",
   "map_file_path": "res://maps/satellite_crash_site.json",
-  "time_limit_seconds": 1200.0,
+  "time_limit_seconds": 0.0,
   "mission_slot_count_override": 4,
   "win_condition": "objective_capture",
   "objective": {
