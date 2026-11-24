@@ -326,6 +326,9 @@ func tick(delta:float)->void:
 		if own_blockers.has(navigation_goal):
 			if not order.recovery.is_empty():_abort_recovery(id,order,"backoff_target_invalidated");continue
 			_clear_route(order)
+			if ship_mask.get("blocked_cells",[]).has(navigation_goal):
+				order.status="blocked";order.reason="target_ship_occupied";order.terrain_revision=revision;order.last_attempt_epoch=_traffic_epoch
+				continue
 			order.status="waiting_reservation";order.reason="target_occupied"
 			continue
 		if order.status=="blocked" and order.terrain_revision==revision and order.blocker_signature==blocker_signature:
