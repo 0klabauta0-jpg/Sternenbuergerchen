@@ -89,6 +89,10 @@ func reconcile_restored_hex_footprint()->void:
 	_refresh_home_craft_blockers()
 	var mask:Dictionary=get_ground_ship_blocked_cells()
 	if not mask.get("ok",false):return
+	# Maske und Hex-Lauf muessen dasselbe Gitter meinen (wie simulation_root.gd beim Schiffsmasken-Abgleich), sonst nichts versetzen.
+	if int(mask.get("registry_id",0))!=_sim._hex_ground_registry.get_instance_id():
+		push_warning("reconcile_restored_hex_footprint: Sperrmaske und Hex-Lauf meinen nicht dasselbe Gitter; niemand wird versetzt")
+		return
 	var blocked:={}
 	for cell in mask.blocked_cells:blocked[cell]=true
 	var moved:=false
@@ -108,9 +112,12 @@ func reconcile_restored_hex_footprint()->void:
 					if not found and not blocked.has(neighbor) and not snapshot.occupant_by_grid.has(neighbor) and not snapshot.admission_slots_by_grid.has(neighbor):found=true;target=neighbor
 			if found:break
 			frontier=next
-		if not found:continue
+		if not found:
+			push_warning("reconcile_restored_hex_footprint: keine freie Zelle fuer %s (Zelle %s in der Sperrmaske); Person bleibt dort stehen" % [id,here])
+			continue
 		var result:Dictionary=_sim._hex_ground_runtime.relocate_unit(String(id),target,_sim.get_hex_ground_revision())
 		if result.get("ok",false):moved=true
+		else:push_warning("reconcile_restored_hex_footprint: Versetzen von %s von Zelle %s nach %s abgelehnt (%s); Person bleibt dort stehen" % [id,here,target,str(result.get("reason",""))])
 	if moved:_sim._project_hex_ground_actors(0.0)
 
 func preview_home_craft_arrival(craft:Dictionary,pad_id:String)->Dictionary:
@@ -482,10 +489,10 @@ func _build_hex_container(count: int) -> Dictionary:
 		if String(Dictionary(_states[id]).get("status", "")) == "moving": _cancel(String(id), false)
 	return {"ok":true,"housing_count":count}
 
-## Bett-Auswahl fuer die Erreichbarkeitspruefung beim Kauf: die zwei alten Betten (Anfang der Liste) und
-## das erste Bett je neuer Kopie.
+## Bett-Auswahl fuer die Erreichbarkeitspruefung beim Kauf: die zwei alten Betten (ueber ihre Bett-Id
+## habitat_bed_01/02, nicht ueber die Listenposition) und das erste Bett je neuer Kopie.
 func _hex_purchase_probe_beds(beds: Array, fresh: Array) -> Array:
-	var probes: Array = beds.slice(0, 2)
+	var probes: Array = beds.filter(func(bed: Dictionary) -> bool: return String(bed.get("id", "")) in ["habitat_bed_01", "habitat_bed_02"])
 	for house: Dictionary in fresh:
 		for bed: Dictionary in beds:
 			if String(bed.get("room_id", "")) == String(house.get("id", "")):

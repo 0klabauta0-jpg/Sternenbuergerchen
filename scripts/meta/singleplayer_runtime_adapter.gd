@@ -216,8 +216,9 @@ func configure(flow: Node, screen: Control) -> void:
 					push_error("Invalid Warp equipment checkpoint")
 					return
 	if _campaign_mode:
-		# Heimatbasis auf Hex-Boden (Stand mit hex_tactical): Betten der Versorgung auf die echten Stellplaetze begrenzen.
-		if Dictionary(_flow.get("_campaign_start").get("checkpoint")).has("hex_tactical"): _supply.set_housing_site_limit(load("res://scripts/meta/base_capacity_layout.gd").hex_container_site_count())
+		# Heimatbasis auf Hex-Boden (die Kampagnenbasis ist immer Hex-Boden, auch bei einem Altstand ohne hex_tactical):
+		# Betten der Versorgung auf die echten Stellplaetze begrenzen.
+		_supply.set_housing_site_limit(load("res://scripts/meta/base_capacity_layout.gd").hex_container_site_count())
 		_flow.set_meta("campaign_built_beds", _supply.get_campaign_bed_count())
 		_flow.set_meta("campaign_built_housing", _supply.get_campaign_housing_count())
 		_flow.set_meta("campaign_built_housing_beds", _supply.get_campaign_housing_beds())
