@@ -149,7 +149,13 @@ func _case_load() -> void:
 	_check(bool(verdict_five.get("ok", false)), "Fall 5: Stand mit neuem Auftrag laedt (beobachtet %s)" % str(verdict_five))
 	# K1: ein Beleg fuer einen Auftrag, den der Stand nicht kennt, ist widerspruechlich.
 	var receipt_state: Dictionary = old_state.duplicate(true)
-	receipt_state.completion_receipts[PROBE_ID + ":completed"] = receipt_state.completion_receipts["satellite_recovery:completed"].duplicate(true)
+	# In sich stimmiger Beleg (Kennung, Szenario und Belohnung des Pruefauftrags): nur die K1-Pruefung kann ihn noch ablehnen.
+	var consistent_receipt: Dictionary = receipt_state.completion_receipts["satellite_recovery:completed"].duplicate(true)
+	consistent_receipt["job_id"] = PROBE_ID
+	consistent_receipt["completion_id"] = PROBE_ID + ":completed"
+	consistent_receipt["scenario_id"] = Dictionary(load_jobs[PROBE_ID]).get("scenario_id")
+	consistent_receipt["reward"] = Dictionary(load_jobs[PROBE_ID]).get("reward").duplicate(true)
+	receipt_state.completion_receipts[PROBE_ID + ":completed"] = consistent_receipt
 	_check(String(_load(receipt_state, load_jobs).get("reason", "")) == "stale_campaign_definitions", "Fall 5k: Abschlussbeleg fuer einen im Stand fehlenden neuen Auftrag -> stale_campaign_definitions")
 
 func _case_definition_exempt() -> void:
