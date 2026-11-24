@@ -89,6 +89,7 @@ func _run()->void:
 	_test_unfit_goal_redirected()
 	_test_fit_occupant_still_waits()
 	_test_chain_behind_stuck_waiter()
+	_test_chain_behind_stuck_waiter(false)
 	_finish()
 
 func _test_unfit_goal_redirected()->void:
@@ -132,9 +133,21 @@ func _test_fit_occupant_still_waits()->void:
 ## Kette (Ergaenzung D): c wartet mit target_occupied auf einen fitten, haltenden d.
 ## a soll hinter c vorbei; die kuerzeste Strecke fuehrt durch c, ein laengerer Umweg existiert.
 ## c blockiert dauerhaft, also muss die Wegsuche c wie eine ruhende Einheit behandeln.
-func _test_chain_behind_stuck_waiter()->void:
+func _test_chain_behind_stuck_waiter(switch_on:bool=true)->void:
 	var rig:Dictionary=_rig(Vector2i(5,3),_tiles(5,3),[{"id":"a","grid":Vector2i(0,1)},{"id":"c","grid":Vector2i(1,1)},{"id":"d","grid":Vector2i(1,2)}])
 	var sim=rig.sim
+	sim.hex_waiting_units_block=switch_on
+	if not switch_on:
+		# W2: ohne Schalter (Heimatbasis) gilt das alte Verhalten: der Wartende ist kein Hindernis, a plant durch ihn.
+		sim.enqueue_command(_command("c",rig.terrain.grid_to_world(Vector2i(1,2)),"move_c"))
+		_run_ticks(rig,8)
+		sim.enqueue_command(_command("a",rig.terrain.grid_to_world(Vector2i(3,1)),"move_a"))
+		_run_ticks(rig,200,"move_a")
+		var off_readout:Dictionary=sim.get_hex_movement_readout("a")
+		print("INFO switch off readout a=",off_readout," grid=",sim.get_hex_unit_state("a").grid)
+		_check(not sim.has_hex_destination_arrived("a","move_a"),"W2: with the switch off a waiting unit is NOT an obstacle (old behaviour: a does not take the detour)")
+		_free_rig(rig)
+		return
 	sim.enqueue_command(_command("c",rig.terrain.grid_to_world(Vector2i(1,2)),"move_c"))
 	_run_ticks(rig,8)
 	_check(String(sim.get_hex_movement_readout("c").get("reason",""))=="target_occupied","chain: c waits on the fit holder d")

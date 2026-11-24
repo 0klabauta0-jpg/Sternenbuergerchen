@@ -2617,6 +2617,9 @@ var _hex_facing_replay_keys: Array[String] = []
 var _hex_facing_replay_cursor := 0
 var _last_hex_ground_events: Array[Dictionary] = []
 var _hex_movement_runtime=HEX_MOVEMENT_RUNTIME_SCRIPT.new()
+## Kapitel 2, 1g (W2): Wartende (Ziel von einem Fitten besetzt) gelten fuer andere Wege als Hindernis. Nur die Einsatz-Simulation
+## (mission_test_setup) schaltet das ein; die Heimatbasis behaelt das alte Verhalten (ihre Gaenge sind eng, Aktionen brechen bei "blocked" ab).
+var hex_waiting_units_block:=false
 var _hex_visual_unit_ids:Dictionary={}
 var _hex_projection_terrain_revision:=-1
 var _hex_boundary_facing:Dictionary={}

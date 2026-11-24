@@ -302,7 +302,7 @@ func tick(delta:float)->void:
 	for grid in snapshot.get("admission_slots_by_grid",{}):blockers[grid]=true
 	for id in snapshot.units_by_id:
 		# A unit waiting on an occupied goal stands still until the holder leaves: others must route around it.
-		if not _orders.has(id) or _orders[id].status in ["arrived","canceled","blocked","waiting_speed","waiting_clearance"] or (_orders[id].status=="waiting_reservation" and _orders[id].reason=="target_occupied"):blockers[snapshot.units_by_id[id].grid]=true
+		if not _orders.has(id) or _orders[id].status in ["arrived","canceled","blocked","waiting_speed","waiting_clearance"] or (owner.hex_waiting_units_block and _orders[id].status=="waiting_reservation" and _orders[id].reason=="target_occupied"):blockers[snapshot.units_by_id[id].grid]=true
 	var blocker_keys:Array=blockers.keys()
 	blocker_keys.sort_custom(func(a:Vector2i,b:Vector2i)->bool:return a.x<b.x or (a.x==b.x and a.y<b.y))
 	var blocker_signature:String=JSON.stringify(blocker_keys)

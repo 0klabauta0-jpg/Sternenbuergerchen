@@ -221,6 +221,7 @@ func _finish_ready_after_scenario_loaded(runtime_leader: Node, unit_registry: No
 		return
 	if _loaded_terrain_map_data!=null:
 		_hex_setup_required=not String(_loaded_terrain_map_data.get_tactical_grid_rules()).is_empty()
+		simulation_root.hex_waiting_units_block=true # nur der Einsatz: Wartende sind fuer andere Wege ein Hindernis (Heimatbasis: aus)
 		var configured:Dictionary=simulation_root.configure_hex_ground_runtime(_loaded_terrain_map_data,terrain_registry)
 		_hex_setup_presentation_only=_hex_setup_required and configured.get("reason","")=="not_authority"
 		if not configured.ok and configured.get("reason","")!="not_authority":
