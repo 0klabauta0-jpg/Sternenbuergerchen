@@ -2,6 +2,7 @@ extends SceneTree
 ## Verifies the pure casualty resolver scripts/core/campaign_casualty_rules.gd
 ## against data/singleplayer/casualty_rules.json. No scene, no user data.
 const R = preload("res://scripts/core/campaign_casualty_rules.gd")
+const BLEED = preload("res://scripts/combat/bleedout_stages.gd")
 var passed := 0
 var failed := 0
 
@@ -15,6 +16,11 @@ func check(ok: bool, label: String) -> void:
 
 func ts(id: String, vital: String, was_downed := false, near := false, aboard := false) -> Dictionary:
 	return {"unit_id": id, "vital_state": vital, "health_points": 0 if vital != "fit" else 100, "was_downed": was_downed, "near_ship": near, "aboard": aboard}
+
+func ts_down(id: String, down_seconds: float, near := false, aboard := false) -> Dictionary:
+	var state: Dictionary = ts(id, "down", true, near, aboard)
+	state["down_seconds"] = down_seconds
+	return state
 
 func unit(id: String, role: String, leadership := 0.0, piloting := 0.0) -> Dictionary:
 	return {"unit_id": id, "roster_role_category": role, "skill_values": {"leadership": leadership}, "dropship_piloting": piloting}
@@ -30,6 +36,35 @@ func _run() -> void:
 	var severe: Dictionary = R.classify_unit(ts("a", "bleedout", true, true), "aborted")
 	check(severe.outcome == "wounded" and severe.severity == "severe", "critical near the ship on retreat is recovered, severe")
 	check(R.classify_unit(ts("a", "down", true, false, true), "lost").severity == "medium", "aboard counts as recovered")
+	# Verbluten in Stufen, N2 (24.11.2026): wer am Einsatzende schon bis zur ersten Stufe liegt, zaehlt als schwer verwundet.
+	var first_stage: float = float(BLEED.stages()[0].get("at_seconds", BLEED.FALLBACK_AT_SECONDS))
+	check(first_stage == 180.0, "N2: die erste Stufe liegt bei 180 s (%s)" % str(first_stage))
+	check(R.classify_unit(ts_down("a", first_stage - 1.0), "won").severity == "medium", "N2: liegt 179 s, Einsatz gewonnen: mittelschwer")
+	var long_down: Dictionary = R.classify_unit(ts_down("a", first_stage), "won")
+	check(long_down.outcome == "wounded" and long_down.severity == "severe", "N2: liegt 180 s, Einsatz gewonnen: schwer verwundet")
+	check(R.classify_unit(ts_down("a", first_stage + 100.0, true), "aborted").severity == "severe", "N2: liegt lange, am Schiff beim Rueckzug: schwer")
+	check(R.classify_unit(ts("a", "down"), "won").severity == "medium", "N2: ohne Liegezeit (alter Aufrufer): wie bisher mittelschwer")
+	var odd_ok := true
+	for odd in ["180", null, [1], -5.0, NAN, INF]:
+		var odd_state: Dictionary = ts("a", "down")
+		odd_state["down_seconds"] = odd
+		if str(R.classify_unit(odd_state, "won").severity) != "medium":
+			odd_ok = false
+	check(odd_ok, "N2: eine unbrauchbare Liegezeit (Text, null, Liste, negativ, NAN, INF) zaehlt nicht, mittelschwer")
+	var fit_long: Dictionary = ts("a", "fit")
+	fit_long["down_seconds"] = 999.0
+	check(R.classify_unit(fit_long, "won").outcome == "unharmed", "N2: eine Liegezeit macht eine kampffaehige Person nicht verwundet")
+	check(R.classify_unit(ts_down("a", 999.0), "aborted").outcome == "dead", "N2: wer lange liegt und zurueckbleibt, ist weiter tot")
+	check(R.classify_unit(ts("a", "bleedout"), "won").severity == "severe", "N2: verblutet bleibt schwer")
+	var rescue_roster: Array = [unit("lead", "operator", 0.6), unit("pilot", "pilot", 0.0, 0.7), unit("two", "operator", 0.4)]
+	var rescue_states: Array = [ts("lead", "fit"), ts_down("two", first_stage + 5.0), ts("pilot", "fit", false, true, true)]
+	var rescue: Dictionary = R.resolve_mission(rescue_states, "lost", rescue_roster, "pilot", rules, {"craft_lost": true})
+	var rescue_two: Dictionary = {}
+	for entry in rescue.casualties:
+		if entry.unit_id == "two":
+			rescue_two = entry
+	check(not rescue.total_loss and Array(rescue.fatality_unit_ids).is_empty() and rescue_two.get("outcome", "") == "wounded" and rescue_two.get("severity", "") == "severe", "N2: die Notrettung holt eine lange Liegende weiter, sie ist schwer verwundet und nicht tot (%s)" % str(rescue_two))
+	check(R.classify_unit(ts("a", "down", true, false, true), "lost").severity == "medium", "N2: aboard ohne Liegezeit bleibt mittelschwer")
 	check(R.classify_unit(ts("a", "down"), "aborted").outcome == "dead", "down and left behind on retreat is dead")
 	check(R.classify_unit(ts("a", "bleedout"), "lost").outcome == "dead", "critical and left behind on defeat is dead")
 	var roster: Array = [unit("lead", "operator", 0.6), unit("pilot", "pilot", 0.0, 0.7), unit("two", "operator", 0.4), unit("three", "operator", 0.0)]

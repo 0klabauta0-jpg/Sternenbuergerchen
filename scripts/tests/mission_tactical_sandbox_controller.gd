@@ -5370,6 +5370,7 @@ func _refresh_selected_fireteam_cards() -> void:
 		if not card.card_open_requested.is_connected(_on_fireteam_card_open_requested):
 			card.card_open_requested.connect(_on_fireteam_card_open_requested)
 		card_row.add_child(card)
+		_append_give_up_button(card, unit)
 
 
 func _filter_ground_fireteam_card_units(units: Array) -> Array:
@@ -8138,6 +8139,62 @@ func _get_unit_respawn_remaining_seconds(unit: Node) -> int:
 	if unit.has_meta("respawn_remaining_seconds"):
 		return maxi(int(unit.get_meta("respawn_remaining_seconds", 0)), 0)
 	return 0
+
+
+## Knopf "Aufgeben" an einer liegenden eigenen Person: erster Klick bewaffnet 4 s Echtzeit (unit_id -> Ablauf in ms, ueberlebt den Kartenneuaufbau), zweiter Klick (frueh. 400 ms spaeter) ruft request_unit_give_up.
+var _give_up_armed_until: Dictionary = {}
+
+
+func _append_give_up_button(card: Control, unit: Node) -> void:
+	var driver = _get_combat_loop_driver()
+	var row := card.get_node_or_null("Margin/HBox/TextVBox/NameRow") as Control
+	var unit_id: String = String(unit.call("get_unit_id")) if unit != null and unit.has_method("get_unit_id") else ""
+	var now: int = Time.get_ticks_msec()
+	for armed_id in _give_up_armed_until.keys():
+		if int(_give_up_armed_until[armed_id]) <= now: _give_up_armed_until.erase(armed_id)
+	if row == null or driver == null or unit_id.is_empty() or not unit.has_method("get_vital_state") or String(unit.call("get_vital_state")) != "down" or not _can_issue_local_commands() or String(unit.call("get_team_id")) != String(driver.get("friendly_team_id")) or _campaign_casualty_rules_active() or _is_connected_network_snapshot_client() or (driver.has_method("is_combat_finished") and bool(driver.call("is_combat_finished"))):
+		_give_up_armed_until.erase(unit_id)
+		return
+	var button := Button.new()
+	button.name = "GiveUpButton"
+	button.text = "Aufgeben"
+	button.tooltip_text = "Diese Person nicht mehr retten: Sie verblutet sofort und kehrt früher zurück."
+	button.flat = true
+	button.focus_mode = Control.FOCUS_NONE
+	button.add_theme_font_size_override("font_size", 9)
+	button.pressed.connect(_on_give_up_button_pressed.bind(button, unit_id))
+	row.add_child(button)
+	if _give_up_armed_until.has(unit_id): _arm_give_up_button(button, float(int(_give_up_armed_until[unit_id]) - now) / 1000.0)
+
+
+func _arm_give_up_button(button: Button, seconds: float) -> void:
+	button.text = "Wirklich aufgeben?"
+	for color_name in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_hover_pressed_color"]:
+		button.add_theme_color_override(color_name, TACTICAL_UI_THEME_SCRIPT.COLOR_WARNING)
+	get_tree().create_timer(seconds, true, false, true).timeout.connect(_on_give_up_arm_expired.bind(button.get_instance_id()))
+
+
+func _on_give_up_arm_expired(button_id: int) -> void:
+	var button := instance_from_id(button_id) as Button
+	if button == null: return
+	button.text = "Aufgeben"
+	for color_name in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_hover_pressed_color"]:
+		button.remove_theme_color_override(color_name)
+
+
+func _on_give_up_button_pressed(button: Button, unit_id: String) -> void:
+	if not is_instance_valid(button): return
+	var now: int = Time.get_ticks_msec()
+	var armed_until: int = int(_give_up_armed_until.get(unit_id, 0))
+	if armed_until <= now:
+		_give_up_armed_until[unit_id] = now + 4000
+		_arm_give_up_button(button, 4.0)
+		return
+	if now - (armed_until - 4000) < 400: return
+	var driver = _get_combat_loop_driver()
+	var result: Dictionary = driver.call("request_unit_give_up", unit_id, String(driver.get("friendly_team_id"))) if driver != null else {}
+	if not result.get("ok", false):
+		_last_command_text = String(result.get("message", "Aufgeben nicht möglich."))
 
 
 func _on_fireteam_card_open_requested(unit_id: String, _profile, _source_context: String) -> void:

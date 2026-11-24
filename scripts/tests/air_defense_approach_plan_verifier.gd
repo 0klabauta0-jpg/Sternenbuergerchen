@@ -133,7 +133,8 @@ func _style_checks(vehicles: Array, start: Vector2, near_corner: Vector2) -> voi
 	for raw in ["", "  ", "kamikaze", "aggressive", "LOW"]:
 		unknown = unknown and PLAN.sanitize_style(raw) == "normal" and PLAN.profile_for_style(raw) == "normal" and PLAN.decision_for_style(raw) == AD.DECISION_PRESS_ON and PLAN.normalize_style(raw).is_empty()
 	check(unknown and PLAN.sanitize_style(" Aggressiv ") == "aggressiv", "unknown or empty style behaves as normal; case and spaces are tolerated")
-	check(is_equal_approx(PLAN.lz_radius_factor_for_style("vorsichtig"), 1.5) and is_equal_approx(PLAN.lz_radius_factor_for_style("normal"), 1.0) and is_equal_approx(PLAN.lz_radius_factor_for_style("aggressiv"), 1.0) and is_equal_approx(PLAN.lz_radius_factor_for_style("x"), 1.0), "landing scatter factor is 1.5 only for vorsichtig")
+	check(is_equal_approx(PLAN.lz_radius_factor_for_style("vorsichtig"), 0.75) and is_equal_approx(PLAN.lz_radius_factor_for_style("normal"), 1.0) and is_equal_approx(PLAN.lz_radius_factor_for_style("aggressiv"), 1.5) and is_equal_approx(PLAN.lz_radius_factor_for_style("x"), 1.0), "landing scatter factor: vorsichtig 0.75, normal 1.0, aggressiv 1.5, unknown 1.0")
+	check(PLAN.profile_for_style("vorsichtig") == "low" and PLAN.profile_for_style("normal") == "normal" and PLAN.profile_for_style("aggressiv") == "normal", "the style flight profile is unchanged: only vorsichtig flies low")
 	var base: Dictionary = ACCURACY.resolve_lz_command(Vector2(100.0, 50.0), "seed", 0.5, 0.5, true)
 	var same: Dictionary = ACCURACY.resolve_lz_command(Vector2(100.0, 50.0), "seed", 0.5, 0.5, true, 1.0)
 	var low: Dictionary = ACCURACY.resolve_lz_command(Vector2(100.0, 50.0), "seed", 0.5, 0.5, true, 1.5)

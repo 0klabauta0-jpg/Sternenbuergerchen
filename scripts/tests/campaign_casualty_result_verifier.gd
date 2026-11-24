@@ -80,6 +80,17 @@ func _campaign_part(radius: float) -> bool:
 	for state: Dictionary in Array(near.get("team_states", [])):
 		for key: String in EXTRA_KEYS:
 			_check(state.has(key) and typeof(state.get(key)) == TYPE_BOOL, "Kampagneneintrag %s hat bool %s" % [state.get("unit_id"), key])
+	# Verbluten in Stufen, N2: der echte Abrechnungsweg (_build_mission_result) traegt die Liegezeit aus der Uhr des Treibers.
+	var started: Dictionary = driver.get("_down_state_started_tick_by_unit_id")
+	for lying_seconds: int in [100, 200]:
+		started["campaign_leader"] = int(driver.call("get_game_tick")) - lying_seconds * 60
+		var lying: Dictionary = _flow.call("_build_mission_result", mission, {})
+		var lying_leader: Dictionary = _entry(lying, "campaign_leader")
+		var lying_class: Dictionary = CASUALTY_RULES.classify_unit(lying_leader, "won")
+		var wanted: String = "severe" if lying_seconds >= 180 else "medium"
+		_check(float(lying_leader.get("down_seconds", -1.0)) >= float(lying_seconds) and float(lying_leader.get("down_seconds", -1.0)) < float(lying_seconds) + 5.0, "Ergebnis: liegt %d s, down_seconds steht im Teamzustand (%s)" % [lying_seconds, str(lying_leader.get("down_seconds", "fehlt"))])
+		_check(String(lying_class.get("severity", "")) == wanted, "Ergebnis: liegt %d s beim Einsatzende, die Abrechnung wertet %s (%s)" % [lying_seconds, wanted, str(lying_class)])
+	_check(not _entry(near, "campaign_pilot").has("down_seconds"), "Ergebnis: wer nicht liegt, hat keine Liegezeit")
 	_check(radius > 0.0, "Radius kam aus den Regeln, nicht aus dem Code")
 	_flow.queue_free()
 	await process_frame

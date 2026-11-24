@@ -5,6 +5,7 @@ extends SceneTree
 ## direkt (_current_tick), wie _on_tick_processed es je Physik-Tick tut.
 const DRIVER_SCRIPT := preload("res://scripts/tests/mission_combat_loop_driver.gd")
 const SECURITY_SCRIPT := preload("res://scripts/tactical/fireteam_security_controller.gd")
+const STAGES := preload("res://scripts/combat/bleedout_stages.gd")
 const START_TICK := 1000
 
 class StubUnit:
@@ -88,10 +89,17 @@ func _test_down_linger_default() -> void:
 	_check(not bool(driver.call("_has_down_state_linger_elapsed", "unit_1", unit)), "Liegen: erster Aufruf startet nur die Frist")
 	_wall_wait()
 	_check(not bool(driver.call("_has_down_state_linger_elapsed", "unit_1", unit)), "Liegen: Wanduhrzeit allein beendet die Frist nicht")
-	driver.set("_current_tick", START_TICK + 179)
-	_check(not bool(driver.call("_has_down_state_linger_elapsed", "unit_1", unit)), "Liegen: 179 Ticks (3 s - 1) noch nicht")
+	# Verbluten in Stufen (24.11.2026): 180 Ticks (3 s) sind NICHT mehr die ganze Wartezeit. Die erste Stufe gilt bei 180 s
+	# = 10800 Ticks; Wurf zustandslos aus Seed (hier 0: der Stub hat keinen combat_rng_seed), Kennung und Stufe.
+	var stage_list: Array = STAGES.stages()
 	driver.set("_current_tick", START_TICK + 180)
-	_check(bool(driver.call("_has_down_state_linger_elapsed", "unit_1", unit)), "Liegen: nach 180 Ticks (3 s) ohne Wanduhrzeit fertig")
+	_check(not bool(driver.call("_has_down_state_linger_elapsed", "unit_1", unit)), "Liegen: nach 180 Ticks (3 s) liegt die Person noch (frueher: fertig)")
+	driver.set("_current_tick", START_TICK + 10799)
+	_check(not bool(driver.call("_has_down_state_linger_elapsed", "unit_1", unit)), "Liegen: 10799 Ticks (180 s - 1) noch keine Stufe")
+	driver.set("_current_tick", START_TICK + 10800)
+	_check(bool(driver.call("_has_down_state_linger_elapsed", "unit_1", unit)) == STAGES.stage_hits(stage_list, 0, 0, "unit_1", START_TICK), "Liegen: bei 10800 Ticks (180 s) wird Stufe 1 ausgewertet, ohne Wanduhrzeit (Ergebnis = zustandsloser Wurf)")
+	driver.set("_current_tick", START_TICK + 23400)
+	_check(bool(driver.call("_has_down_state_linger_elapsed", "unit_1", unit)), "Liegen: bei 23400 Ticks (390 s) verblutet jede Person sicher")
 	rig.scene.free()
 
 
@@ -103,10 +111,13 @@ func _test_down_linger_campaign_window() -> void:
 	var unit := StubUnit.new()
 	rig.scene.add_child(unit)
 	driver.call("_has_down_state_linger_elapsed", "unit_1", unit)
+	# Das Aufricht-Fenster der Kampagne (down_revive_window_seconds) steuert das Verbluten nicht mehr: dieselben Stufen wie ueberall.
 	driver.set("_current_tick", START_TICK + 299)
-	_check(not bool(driver.call("_has_down_state_linger_elapsed", "unit_1", unit)), "Aufricht-Fenster 5 s: 299 Ticks noch nicht")
+	_check(not bool(driver.call("_has_down_state_linger_elapsed", "unit_1", unit)), "Kampagne: 299 Ticks noch nicht")
 	driver.set("_current_tick", START_TICK + 300)
-	_check(bool(driver.call("_has_down_state_linger_elapsed", "unit_1", unit)), "Aufricht-Fenster 5 s: nach 300 Ticks fertig")
+	_check(not bool(driver.call("_has_down_state_linger_elapsed", "unit_1", unit)), "Kampagne: das Fenster von 5 s (300 Ticks) beendet das Liegen nicht mehr")
+	driver.set("_current_tick", START_TICK + 23400)
+	_check(bool(driver.call("_has_down_state_linger_elapsed", "unit_1", unit)), "Kampagne: bei 23400 Ticks (390 s) verblutet sie sicher")
 	rig.scene.free()
 
 
