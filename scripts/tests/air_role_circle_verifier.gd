@@ -192,7 +192,7 @@ func _case_1() -> void:
 		hdev = maxf(hdev, absf(wrapf(float(p.heading_rad) - heading0, -PI, PI)))
 		vmax = maxf(vmax, p.velocity_plane.length())
 	_check(switches >= 3, tag + "in 60 s mindestens 3 Wegpunktwechsel: %d" % switches)
-	_check(dmin >= 2.0 and dmax <= 6.0, tag + "Abstand zur Mitte ab dem ersten Wechsel zwischen 2,0 und 6,0: %.2f bis %.2f" % [dmin, dmax])
+	_check(dmin >= 3.0 and dmax <= 5.0, tag + "Abstand zur Mitte ab dem ersten Wechsel zwischen 3,0 und 5,0 (Ring-Radius 4): %.2f bis %.2f" % [dmin, dmax])
 	_check(vmax > 0.5, tag + "das Schiff fliegt wirklich (Hoechsttempo %.2f)" % vmax)
 	_check(hdev < deg_to_rad(1.0), tag + "Ausrichtung bleibt unveraendert (groesste Abweichung %.3f Grad)" % rad_to_deg(hdev))
 	_check(mission_root.is_air_support_craft_airborne("ship") and _count(env, "ship", "role_ended") == 0, tag + "weiter in der Luft, Rolle nicht beendet")
@@ -205,16 +205,24 @@ func _case_2() -> void:
 	var env: Dictionary = _build("cutlass", ["ship"])
 	var mission_root: Node = env.mission_root
 	env.transport.parked["ship"] = true
-	var start_plane: Vector2 = _pose(env, "ship").position_plane
 	var res: Dictionary = _circle(env, "ship", Vector2i(10, 10), "air_defense", "c2")
 	_check(bool(res.get("ok", false)) and bool(res.get("took_off", false)), tag + "Befehl angenommen mit Start: " + str(res))
 	_check(String(res.get("message", "")) == "Luftschutz an Feld (10, 10).", tag + "Meldung wortlich: " + String(res.get("message", "")))
 	var sortie: Dictionary = _sortie(env, "ship")
 	_check(not sortie.is_empty() and mission_root.is_air_support_craft_airborne("ship") and Dictionary(sortie.air_role).get("role") == "air_defense" and Dictionary(sortie.air_role).get("contact_response") == "engage" and Dictionary(sortie.air_role).get("fire_rule") == "free" and Dictionary(sortie.air_role).get("stance") == "normal", tag + "in der Luft, Sortie besteht, Rolle Luftschutz (patrol / engage / free / normal)")
-	_check(int(sortie.get("sortie_serial", 0)) >= 1 and sortie.get("returning") == "" and sortie.get("role_target_id") == "" and sortie.get("landing_blocked_reported") == false and float(sortie.get("fuel_seconds", -1.0)) == 0.0 and int(sortie.get("fuel_steps", -1)) == 0 and sortie.get("fuel_warned") == false, tag + "vorbelegte Sortie-Schluessel")
-	_tick(env, 20.0)
+	_check(int(sortie.get("sortie_serial", 0)) >= 1 and sortie.get("returning") == "" and sortie.get("role_target_id") == "" and sortie.get("landing_blocked_reported") == false and float(sortie.get("fuel_seconds", -1.0)) == 0.0 and int(sortie.get("fuel_steps", -1)) == 0 and sortie.get("fuel_warned") == false and sortie.has("ring_blocked_seconds") and float(sortie.get("ring_blocked_seconds", -1.0)) == 0.0 and sortie.get("ring_blocked_reported") == false, tag + "vorbelegte Sortie-Schluessel")
+	_check(not Array(sortie.get("waypoints", [])).is_empty() and Array(sortie.waypoints).size() == 6, tag + "Wegpunkte der Rundbahn gesetzt: " + str(sortie.get("waypoints")))
+	var idx2: int = int(sortie.waypoint_index)
+	var switches2 := 0
+	for _i in range(600):
+		_tick(env, DT)
+		var s2: Dictionary = _sortie(env, "ship")
+		if int(s2.waypoint_index) != idx2:
+			idx2 = int(s2.waypoint_index)
+			switches2 += 1
 	var p: Dictionary = _pose(env, "ship")
-	_check(p.position_plane.distance_to(start_plane) > 1.0 or int(_sortie(env, "ship").waypoint_index) != int(res.waypoint_index), tag + "die Rundbahn laeuft")
+	_check(switches2 >= 1, tag + "nach 30 s mindestens ein Wegpunktwechsel: %d" % switches2)
+	_check(p.position_plane.distance_to(_plane(Vector2i(10, 10))) > 2.0, tag + "Abstand zur Mitte nach 30 s ueber 2,0: %.2f" % p.position_plane.distance_to(_plane(Vector2i(10, 10))))
 	var cas_env: Dictionary = _build("cutlass", ["ship"])
 	cas_env.transport.parked["ship"] = true
 	var cas: Dictionary = _circle(cas_env, "ship", Vector2i(10, 10), "cas", "c2b")
@@ -306,14 +314,22 @@ func _case_7() -> void:
 	var bad := 0
 	var moved := 0.0
 	var start_b: Vector2 = _pose(env, "ship2").position_plane
+	var last_idx := {"ship":int(_sortie(env, "ship").waypoint_index), "ship2":int(_sortie(env, "ship2").waypoint_index)}
+	var switches := {"ship":0, "ship2":0}
 	for _i in range(600):
 		_tick(env, DT)
+		for id in ["ship", "ship2"]:
+			var now_idx: int = int(_sortie(env, id).waypoint_index)
+			if now_idx != int(last_idx[id]):
+				last_idx[id] = now_idx
+				switches[id] = int(switches[id]) + 1
 		for id in ["ship", "ship2"]:
 			var reason := String(env.combat.get_flight_status(id).get("reason", ""))
 			if reason == "occupied" or reason == "navigation_claimed":
 				bad += 1
 		moved = maxf(moved, _pose(env, "ship2").position_plane.distance_to(start_b))
 	_check(bad == 0, tag + "30 s ohne occupied/navigation_claimed im Flugstatus (%d Meldungen)" % bad)
+	_check(int(switches.ship) >= 2 and int(switches.ship2) >= 2, tag + "in 30 s wechseln beide Schiffe mindestens zweimal den Wegpunkt: %s" % str(switches))
 	_check(moved > 1.0 and env.mission_root.is_air_support_craft_airborne("ship") and env.mission_root.is_air_support_craft_airborne("ship2"), tag + "beide kreisen")
 	var fuel_ids: Array = [_sortie(env, "ship").sortie_serial, _sortie(env, "ship2").sortie_serial]
 	_check(fuel_ids[0] != fuel_ids[1], tag + "jede Sortie hat eine eigene Seriennummer")
@@ -329,7 +345,7 @@ func _case_8() -> void:
 	_circle(env, "ship", Vector2i(10, 10), "cas", "c8")
 	_tick(env, 10.0)
 	var res: Dictionary = mission_root.request_air_support_role_clear("ship", "clear8")
-	_check(bool(res.get("ok", false)) and not bool(res.get("already_clear", false)) and String(res.get("message", "")) == "Kreisen beendet; das Schiff hält die Position.", tag + "angenommen, Meldung wortlich: " + str(res))
+	_check(bool(res.get("ok", false)) and not bool(res.get("already_clear", false)) and String(res.get("message", "")) == "Kreisen beendet; das Schiff hält die Position." and not res.has("cease_fire_reason"), tag + "angenommen, Meldung wortlich, ohne cease_fire_reason: " + str(res))
 	_tick(env, 3.0)
 	var speed: float = _pose(env, "ship").velocity_plane.length()
 	_check(speed < 0.1, tag + "nach 3 s Tempo unter 0,1 (%.3f)" % speed)
@@ -391,10 +407,22 @@ func _case_10() -> void:
 	_check(bool(res.get("ok", false)), tag + "Ankunft angenommen: " + str(res))
 	var sortie: Dictionary = _sortie(env, "ship")
 	var role: Dictionary = Dictionary(sortie.get("air_role", {}))
-	_check(role.get("role") == "none" and role.get("center_hex") == Vector2i(10, 10) and Array(sortie.get("waypoints", [])).size() == 6, tag + "Rolle none um die Landezone, 6 Wegpunkte")
-	_tick(env, 20.0)
-	_check(_pose(env, "ship").position_plane.distance_to(_plane(Vector2i(10, 10))) > 2.0 or _count(env, "ship", "role_started") == 1, tag + "das Schiff steht nicht still ueber der Landezone")
-	_check(_pose(env, "ship").velocity_plane.length() > 0.2 or _pose(env, "ship").position_plane.distance_to(_plane(Vector2i(10, 10))) > 1.0, tag + "es ist in Bewegung auf der Rundbahn")
+	var wps: Array = Array(sortie.get("waypoints", []))
+	var same := wps.size() == 6
+	for cell in _ring(Vector2i(10, 10)):
+		same = same and wps.has(cell)
+	_check(role.get("role") == "none" and role.get("center_hex") == Vector2i(10, 10), tag + "Rolle none, Mitte = Landezone: " + str(role))
+	_check(same, tag + "Wegpunkte = die Ringzellen um die Landezone: " + str(wps))
+	var idx: int = int(sortie.waypoint_index)
+	var switches := 0
+	for _i in range(600):
+		_tick(env, DT)
+		var s: Dictionary = _sortie(env, "ship")
+		if int(s.waypoint_index) != idx:
+			idx = int(s.waypoint_index)
+			switches += 1
+	_check(switches >= 1, tag + "nach 30 s mindestens ein Wegpunktwechsel: %d" % switches)
+	_check(mission_root.is_air_support_craft_airborne("ship") and _pose(env, "ship").position_plane.distance_to(_plane(Vector2i(10, 10))) > 2.0, tag + "das Schiff fliegt auf der Rundbahn, nicht ueber der Mitte (Abstand %.2f)" % _pose(env, "ship").position_plane.distance_to(_plane(Vector2i(10, 10))))
 	env.flow.free()
 
 
@@ -416,6 +444,218 @@ func _case_11() -> void:
 	var far: Dictionary = mission_root.request_air_support_landing("ship")
 	_check(not bool(far.get("ok", true)) and String(far.get("reason", "")) == "not_at_landing_site" and String(_sortie(env, "ship").get("returning", "x")) == "", tag + "von Hand weggeflogen: Landen bleibt not_at_landing_site, kein Rueckflug")
 	env.flow.free()
+
+
+## Hilfen fuer 13-15: ein zweites Schiff ("blocker") startet von Hand und beansprucht auf Wunsch alle Felder der Karte.
+func _blocked_env(ship_parked: bool) -> Dictionary:
+	var env: Dictionary = _build("cutlass", ["ship", "blocker"], {"ship":Vector2i(10, 10), "blocker":Vector2i(15, 15)})
+	env.transport.parked["blocker"] = true
+	_check(bool(env.mission_root.request_air_support_takeoff("blocker").get("ok", false)), "Aufbau: Blocker startet von Hand")
+	env.transport.parked["blocker"] = false
+	env.transport.parked["ship"] = ship_parked
+	return env
+
+
+## mode "all": alle Felder; "band": alle Felder im Abstand 3 bis 5 um (10,10) (die Rundbahn, nicht die Landezone); "none": nur ein fernes Feld.
+func _claim(env: Dictionary, mode: String) -> void:
+	var cells: Array[Vector2i] = []
+	if mode == "none":
+		cells.append(Vector2i(19, 19))
+	else:
+		for q in range(5, 20):
+			for r in range(5, 20):
+				var d: int = maxi(maxi(absi(q - 10), absi(r - 10)), absi(q + r - 20))
+				if mode == "all" or (d >= 3 and d <= 5):
+					cells.append(Vector2i(q, r))
+	_check(bool(env.combat.record_navigation_claim("blocker", "atmosphere:moon_site", cells).get("ok", false)), "Aufbau: Anspruch des Blockers (%s)" % mode)
+
+
+## Fall 13 (W1): gelandetes Schiff, Rundbahn nicht moeglich -> Ablehnung OHNE Start, nichts veraendert.
+func _case_13() -> void:
+	var tag := "[13 kein Start ohne Rundbahn] "
+	var env: Dictionary = _blocked_env(true)
+	var mission_root: Node = env.mission_root
+	_claim(env, "band")
+	var pose_before: Dictionary = _pose(env, "ship")
+	var sorties_before: Array = mission_root.get("_air_support_sorties").keys()
+	var wings_before: Dictionary = env.source.get("_space_wing_state").get_snapshot()
+	var res: Dictionary = _circle(env, "ship", Vector2i(10, 10), "cas", "c13")
+	_check(not bool(res.get("ok", true)) and String(res.get("reason", "")) == "navigation_claimed" and not bool(res.get("took_off", false)), tag + "abgelehnt mit dem Grund der Rundbahn, kein took_off: " + str(res))
+	_check(_pose(env, "ship") == pose_before and not mission_root.is_air_support_craft_airborne("ship") and mission_root.get("_air_support_sorties").keys() == sorties_before, tag + "Pose und Sortie-Bestand unveraendert, kein Start")
+	_check(Dictionary(mission_root.get("_air_role_receipts")).is_empty() and env.events.is_empty() and env.source.get("_space_wing_state").get_snapshot() == wings_before, tag + "kein Beleg, kein Ereignis, Rotte unveraendert")
+	_claim(env, "none")
+	var retry: Dictionary = _circle(env, "ship", Vector2i(10, 10), "cas", "c13")
+	_check(bool(retry.get("ok", false)) and bool(retry.get("took_off", false)) and mission_root.is_air_support_craft_airborne("ship"), tag + "Rundbahn frei: dieselbe Kennung startet und kreist: " + str(retry))
+	env.flow.free()
+
+
+## Fall 13b (W1, Nachlauf): scheitert die Rundbahn trotzdem erst nach dem Start, landet das Schiff sofort wieder.
+func _case_13b() -> void:
+	var tag := "[13b Rueckwaerts landen] "
+	var env: Dictionary = _build("cutlass", ["ship"])
+	var mission_root: Node = env.mission_root
+	env.transport.parked["ship"] = true
+	var pose_before: Dictionary = _pose(env, "ship")
+	_check(bool(mission_root.request_air_support_takeoff("ship").get("ok", false)) and mission_root.is_air_support_craft_airborne("ship"), tag + "Aufbau: das Schiff ist gestartet")
+	env.transport.parked["ship"] = false
+	var out: Dictionary = mission_root._air_undo_circle_start("ship", {"ok":false, "reason":"navigation_claimed"})
+	_check(not bool(out.get("ok", true)) and String(out.get("reason", "")) == "navigation_claimed" and out.has("took_off") and not bool(out.took_off), tag + "ok:false mit dem Grund der Rundbahn und took_off:false: " + str(out))
+	_check(not mission_root.is_air_support_craft_airborne("ship") and not mission_root.get("_air_support_sorties").has("ship") and _pose(env, "ship").position_plane == pose_before.position_plane and _pose(env, "ship").space_area_id == pose_before.space_area_id, tag + "das Schiff steht wieder am Boden, keine Sortie")
+	_check(_count(env, "ship", "role_ended") == 1 and _count(env, "ship", "landed") == 0 and env.events.size() == 1 and env.events[0].text == "Rundbahn nicht möglich – Schiff bleibt gelandet.", tag + "genau ein Ereignis role_ended mit dem Wortlaut (kein landed): " + str(env.events))
+	env.flow.free()
+
+
+## Fall 14 (K2): dauerhaft blockierte Rundbahn meldet sich genau einmal; frei -> weiter; erneut blockiert -> wieder einmal.
+func _case_14() -> void:
+	var tag := "[14 blockierte Rundbahn] "
+	var env: Dictionary = _blocked_env(true)
+	var mission_root: Node = env.mission_root
+	var res: Dictionary = _circle(env, "ship", Vector2i(10, 10), "none", "c14")
+	_check(bool(res.get("ok", false)), tag + "Aufbau: Rundbahn laeuft: " + str(res))
+	_tick(env, 6.0)
+	_check(_count(env, "ship", "role_blocked") == 0, tag + "frei: keine Blockiermeldung")
+	_claim(env, "all")
+	_tick(env, 40.0)
+	var first: Array = []
+	for event in env.events:
+		if event.kind == "role_blocked":
+			first.append(event)
+	_check(first.size() == 1 and first[0].craft_id == "ship" and first[0].text == "Rundbahn blockiert – das Schiff hält die Position.", tag + "nach 5 s Blockade genau ein Ereignis mit dem Wortlaut: " + str(first))
+	var sortie: Dictionary = _sortie(env, "ship")
+	_check(bool(sortie.get("ring_blocked_reported", false)) and float(sortie.get("ring_blocked_seconds", 0.0)) >= 5.0 and mission_root.is_air_support_craft_airborne("ship"), tag + "Merker gesetzt, Schiff weiter in der Luft")
+	_tick(env, 30.0)
+	_check(_count(env, "ship", "role_blocked") == 1, tag + "nach weiteren 30 s weiter genau eins: %d" % _count(env, "ship", "role_blocked"))
+	_claim(env, "none")
+	var idx: int = int(_sortie(env, "ship").waypoint_index)
+	var switches := 0
+	for _i in range(400):
+		_tick(env, DT)
+		var s: Dictionary = _sortie(env, "ship")
+		if int(s.waypoint_index) != idx:
+			idx = int(s.waypoint_index)
+			switches += 1
+	_check(switches >= 1, tag + "Ring frei: Wegpunktwechsel laufen wieder (%d in 20 s)" % switches)
+	_check(not bool(_sortie(env, "ship").get("ring_blocked_reported", true)) and float(_sortie(env, "ship").get("ring_blocked_seconds", 1.0)) == 0.0, tag + "Merker und Zaehler zurueckgesetzt")
+	_claim(env, "all")
+	_tick(env, 60.0)
+	_check(_count(env, "ship", "role_blocked") == 2, tag + "erneut blockiert: meldet sich wieder genau einmal (insgesamt %d)" % _count(env, "ship", "role_blocked"))
+	env.flow.free()
+
+
+## Fall 15 (K3): Kreisen eines fliegenden Schiffs prueft Quelle, Quellen-Gleichheit und Flug-Instanz wie das Fliegen von Hand.
+func _case_15() -> void:
+	var tag := "[15 Kontext] "
+	var env: Dictionary = _build("cutlass", ["ship"])
+	var mission_root: Node = env.mission_root
+	env.transport.parked["ship"] = true
+	_check(bool(_circle(env, "ship", Vector2i(10, 10), "none", "c15").get("ok", false)), tag + "Aufbau: Rundbahn laeuft")
+	var sortie: Dictionary = _sortie(env, "ship")
+	var wps_before: Array = Array(sortie.waypoints).duplicate()
+	var started_before: int = _count(env, "ship", "role_started")
+	var receipts_before: int = Dictionary(mission_root.get("_air_role_receipts")).size()
+	# a) die Quelle rechnet gerade einen Takt
+	env.source.is_processing_tick = true
+	var busy: Dictionary = _circle(env, "ship", Vector2i(12, 10), "cas", "c15a")
+	var busy_move: Dictionary = mission_root.request_air_support_move({"craft_id":"ship", "target_hex":Vector2i(12, 10), "request_id":"mv15a"})
+	env.source.is_processing_tick = false
+	_check(String(busy.get("reason", "")) == "sortie_context_changed" and String(busy_move.get("reason", "")) == String(busy.get("reason", "")), tag + "Quelle im Takt: sortie_context_changed wie beim Fliegen: " + str(busy) + " / " + str(busy_move))
+	# b) andere Quelle in der Sortie
+	var own_source: Variant = sortie["source"]
+	sortie["source"] = weakref(env.flow)
+	var other_source: Dictionary = _circle(env, "ship", Vector2i(12, 10), "cas", "c15b")
+	var other_move: Dictionary = mission_root.request_air_support_move({"craft_id":"ship", "target_hex":Vector2i(12, 10), "request_id":"mv15b"})
+	sortie["source"] = own_source
+	_check(String(other_source.get("reason", "")) == "sortie_context_changed" and String(other_move.get("reason", "")) == String(other_source.get("reason", "")), tag + "andere Quelle: sortie_context_changed wie beim Fliegen: " + str(other_source))
+	# c) andere Flug-Instanz in der Sortie
+	var own_flight: Variant = sortie["flight"]
+	sortie["flight"] = RefCounted.new()
+	var other_flight: Dictionary = _circle(env, "ship", Vector2i(12, 10), "cas", "c15c")
+	var other_flight_move: Dictionary = mission_root.request_air_support_move({"craft_id":"ship", "target_hex":Vector2i(12, 10), "request_id":"mv15c"})
+	sortie["flight"] = own_flight
+	_check(String(other_flight.get("reason", "")) == "sortie_context_changed" and String(other_flight_move.get("reason", "")) == String(other_flight.get("reason", "")), tag + "andere Flug-Instanz: sortie_context_changed wie beim Fliegen: " + str(other_flight))
+	_check(Array(_sortie(env, "ship").waypoints) == wps_before and _count(env, "ship", "role_started") == started_before and Dictionary(mission_root.get("_air_role_receipts")).size() == receipts_before and Dictionary(_sortie(env, "ship").air_role).get("center_hex") == Vector2i(10, 10), tag + "alle drei Ablehnungen lassen Rundbahn, Rolle, Belege und Ereignisse unveraendert")
+	var good: Dictionary = _circle(env, "ship", Vector2i(12, 10), "cas", "c15d")
+	_check(bool(good.get("ok", false)) and Dictionary(_sortie(env, "ship").air_role).get("center_hex") == Vector2i(12, 10), tag + "mit unversehrtem Kontext geht derselbe Befehl: " + str(good))
+	env.flow.free()
+
+
+## Fall 16 (K6, K7): Kreisen aus prueft die Form; ein gescheiterter Feuerstopp steht als cease_fire_reason in der Antwort; Adapter-Zweige.
+func _case_16() -> void:
+	var tag := "[16 Kreisen aus: Form und Adapter] "
+	var env: Dictionary = _build("cutlass", ["ship"])
+	var mission_root: Node = env.mission_root
+	env.transport.parked["ship"] = true
+	_check(bool(_circle(env, "ship", Vector2i(10, 10), "cas", "c16").get("ok", false)), tag + "Aufbau: Rolle laeuft")
+	var no_craft: Dictionary = mission_root.request_air_support_role_clear("", "clear16")
+	var no_request: Dictionary = mission_root.request_air_support_role_clear("ship", "")
+	var long_request: Dictionary = mission_root.request_air_support_role_clear("ship", "x".repeat(129))
+	_check(String(no_craft.get("reason", "")) == "invalid_command" and String(no_request.get("reason", "")) == "invalid_command" and String(long_request.get("reason", "")) == "invalid_command" and not bool(no_craft.get("ok", true)) and not bool(no_request.get("ok", true)) and not bool(long_request.get("ok", true)), tag + "ohne Schiff, ohne Kennung, Kennung zu lang: invalid_command")
+	_check(not Dictionary(_sortie(env, "ship").air_role).is_empty() and not Array(_sortie(env, "ship").waypoints).is_empty() and _count(env, "ship", "role_ended") == 0, tag + "die Rolle laeuft unveraendert weiter")
+	var long_ok: Dictionary = mission_root.request_air_support_role_clear("ship", "y".repeat(128))
+	_check(bool(long_ok.get("ok", false)) and not bool(long_ok.get("already_clear", true)), tag + "128 Zeichen sind erlaubt: " + str(long_ok))
+	# Adapter: Form
+	var adapter: Node = env.adapter
+	var a_none: Dictionary = adapter.request_operation("air_support_role_clear", {"request_id":"r16"})
+	var a_type: Dictionary = adapter.request_operation("air_support_role_clear", {"craft_id":5, "request_id":"r16"})
+	_check(not bool(a_none.get("ok", true)) and String(a_none.get("reason", "")) == "invalid_command" and not bool(a_type.get("ok", true)) and String(a_type.get("reason", "")) == "invalid_command", tag + "Adapter: fehlende oder falsche craft_id -> invalid_command: " + str(a_none) + " / " + str(a_type))
+	# Adapter: Kreisen (Erfolg und Ablehnung) und Kreisen aus (Erfolg)
+	var a_ok: Dictionary = adapter.request_operation("air_support_circle", {"craft_id":"ship", "center_hex":Vector2i(12, 10), "role":"air_defense", "request_id":"a16"})
+	_check(bool(a_ok.get("ok", false)) and String(a_ok.get("message", "")) == "Luftschutz an Feld (12, 10)." and Dictionary(_sortie(env, "ship").air_role).get("role") == "air_defense", tag + "Adapter air_support_circle: Erfolg: " + str(a_ok))
+	var a_bad: Dictionary = adapter.request_operation("air_support_circle", {"craft_id":"ship", "center_hex":Vector2i(40, 40), "role":"cas", "request_id":"a16b"})
+	_check(not bool(a_bad.get("ok", true)) and String(a_bad.get("reason", "")) == "role_point_off_map" and Dictionary(_sortie(env, "ship").air_role).get("center_hex") == Vector2i(12, 10), tag + "Adapter air_support_circle: Ablehnung role_point_off_map, Rolle bleibt: " + str(a_bad))
+	var a_clear: Dictionary = adapter.request_operation("air_support_role_clear", {"craft_id":"ship", "request_id":"a16c"})
+	_check(bool(a_clear.get("ok", false)) and not bool(a_clear.get("already_clear", true)) and Array(_sortie(env, "ship").waypoints).is_empty(), tag + "Adapter air_support_role_clear: Erfolg: " + str(a_clear))
+	env.flow.free()
+	# Feuerstopp scheitert (Rotte haelt eine Anweisung, die kein Angriff ist) -> cease_fire_reason, Antwort bleibt ok.
+	var env2: Dictionary = _build("cutlass", ["ship"])
+	var root2: Node = env2.mission_root
+	env2.transport.parked["ship"] = true
+	_check(bool(_circle(env2, "ship", Vector2i(10, 10), "none", "c16b").get("ok", false)), tag + "Aufbau 2: Rundbahn laeuft")
+	var binding: Dictionary = root2._resolve_air_support_craft("ship")
+	var patrol: Array[Vector2i] = [Vector2i(10, 6), Vector2i(14, 10), Vector2i(10, 14)]
+	var revision: int = binding.wings.get_snapshot().revision
+	var issued: Dictionary = binding.wings.apply_command({"contract_category":"space_combat", "operation":"order_issue", "request_id":"order16", "expected_revision":revision, "payload":{"wing_ids":[binding.wing_id], "verb":"patrol", "stance":"normal", "contact_response":"observe", "fire_rule":"hold", "protect_radius":8.0, "pursuit_limit":4.0, "waypoints":patrol}}, {"authorized":true, "actor_id":"singleplayer", "phase":"tactical"})
+	_check(bool(issued.get("ok", false)), tag + "Aufbau 2: Patrouille in der Rotte: " + str(issued))
+	var cleared: Dictionary = root2.request_air_support_role_clear("ship", "clear16b")
+	_check(bool(cleared.get("ok", false)) and not bool(cleared.get("already_clear", true)) and String(cleared.get("cease_fire_reason", "")) == "no_attack_order", tag + "Feuerstopp gescheitert: ok bleibt, cease_fire_reason = no_attack_order: " + str(cleared))
+	env2.flow.free()
+
+
+## Fall 17 (K10): Abschuss beendet Rolle und Rueckflug mit role_ended (kein landed); ohne Rolle kein Ereignis.
+func _case_17() -> void:
+	var tag := "[17 Abschuss] "
+	var status := {"asset_id":"ship", "asset_type":"dropship", "state":"crashed", "integrity":0, "max_integrity":100}
+	var env: Dictionary = _build("cutlass", ["ship"])
+	var mission_root: Node = env.mission_root
+	env.transport.parked["ship"] = true
+	_check(bool(_circle(env, "ship", Vector2i(10, 10), "cas", "c17").get("ok", false)), tag + "Aufbau: Rolle laeuft")
+	_tick(env, 3.0)
+	var down: Dictionary = mission_root.resolve_air_shootdown("ship", 0.0, "Cutlass", status)
+	_check(bool(down.get("ok", false)) and not mission_root.get("_air_support_sorties").has("ship"), tag + "Abschuss aufgeloest, Sortie weg: " + str(down.get("outcome")))
+	var ended: Array = []
+	for event in env.events:
+		if event.kind == "role_ended":
+			ended.append(event)
+	_check(ended.size() == 1 and ended[0].text == "Rolle beendet – Schiff nicht mehr in der Luft." and _count(env, "ship", "landed") == 0, tag + "genau ein role_ended mit dem Wortlaut, kein landed: " + str(env.events))
+	env.flow.free()
+	# Rueckflug
+	var env2: Dictionary = _build("cutlass", ["ship"])
+	var root2: Node = env2.mission_root
+	env2.transport.parked["ship"] = true
+	_circle(env2, "ship", Vector2i(10, 10), "none", "c17b")
+	_tick(env2, 5.0)
+	_check(bool(root2.request_air_support_landing("ship").get("ok", false)) and String(_sortie(env2, "ship").get("returning", "")) == "player", tag + "Aufbau 2: Rueckflug laeuft")
+	var down2: Dictionary = root2.resolve_air_shootdown("ship", 0.0, "Cutlass", status)
+	_check(bool(down2.get("ok", false)) and _count(env2, "ship", "role_ended") == 1 and _count(env2, "ship", "landed") == 0, tag + "im Rueckflug abgeschossen: genau ein role_ended, kein landed")
+	env2.flow.free()
+	# Ohne Rolle und ohne Rueckflug: kein Ereignis
+	var env3: Dictionary = _build("cutlass", ["ship"])
+	var root3: Node = env3.mission_root
+	env3.transport.parked["ship"] = true
+	_check(bool(root3.request_air_support_takeoff("ship").get("ok", false)), tag + "Aufbau 3: Start von Hand")
+	var down3: Dictionary = root3.resolve_air_shootdown("ship", 0.0, "Cutlass", status)
+	_check(bool(down3.get("ok", false)) and env3.events.is_empty(), tag + "ohne Rolle und Rueckflug kein Ereignis")
+	env3.flow.free()
 
 
 ## Fall 12: ohne gebundene Luftunterstuetzung (Skirmish).
@@ -440,5 +680,11 @@ func _initialize() -> void:
 	_case_10()
 	_case_11()
 	_case_12()
+	_case_13()
+	_case_13b()
+	_case_14()
+	_case_15()
+	_case_16()
+	_case_17()
 	print("AIR_ROLE_CIRCLE passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)

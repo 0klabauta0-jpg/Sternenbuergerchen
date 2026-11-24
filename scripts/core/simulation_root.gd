@@ -8137,8 +8137,10 @@ var _air_support_fire_poll := 0.0
 signal air_role_event(event: Dictionary)
 const AIR_ROLES_PATH := "res://data/combat/air_roles.json"
 const AIR_ROLE_NAMES := ["none", "cas", "air_defense"]
+const AIR_RING_BLOCKED_REPORT_SECONDS := 5.0
 var _air_role_receipts: Dictionary = {}
 var _air_role_poll := 0.0
+var _air_role_elapsed := 0.0
 var _air_sortie_serial := 0
 var _air_role_data_cache: Dictionary = {}
 const AIR_GROUND_DISPERSION = preload("res://scripts/mission/air_support_dispersion.gd")
@@ -8322,7 +8324,7 @@ func _begin_air_sortie(craft_id: String, arriving: bool, arrival_position: Vecto
 	assert(systems.get("ok", false))
 	var no_waypoints: Array[Vector2i] = []
 	_air_sortie_serial += 1
-	_air_support_sorties[craft_id] = {"flight":flight, "source":weakref(source), "previous_pose":old, "landing_position":position, "landing_grid":grid, "was_inactive":admission.was_inactive, "sortie_serial":_air_sortie_serial, "air_role":{}, "waypoints":no_waypoints, "waypoint_index":0, "role_target_id":"", "returning":"", "landing_blocked_reported":false, "fuel_seconds":0.0, "fuel_steps":0, "fuel_warned":false}
+	_air_support_sorties[craft_id] = {"flight":flight, "source":weakref(source), "previous_pose":old, "landing_position":position, "landing_grid":grid, "was_inactive":admission.was_inactive, "sortie_serial":_air_sortie_serial, "air_role":{}, "waypoints":no_waypoints, "waypoint_index":0, "role_target_id":"", "returning":"", "landing_blocked_reported":false, "fuel_seconds":0.0, "fuel_steps":0, "fuel_warned":false, "ring_blocked_seconds":0.0, "ring_blocked_reported":false}
 	if arriving and bool(_air_role_config("circle").get("arrival_starts_ring", false)): _air_start_arrival_ring(craft_id, grid)
 	return {"ok":true, "craft_id":craft_id}
 
@@ -8519,6 +8521,44 @@ func _air_apply_ring(craft_id: String, sortie: Dictionary, entry: Dictionary, ce
 		for key in previous: sortie[key] = previous[key]
 	return started
 
+## Trockenlauf der Rundbahn fuer ein gelandetes Schiff: mindestens ein Wegpunkt muss so frei sein, wie _air_set_goal_plane es nach dem Start verlangt
+## (Fussabdruck auf der Karte, kein fremder Belegter, kein fremder Navigationsanspruch). Der Start setzt die Ausrichtung auf 0, wie in _air_ring_waypoints.
+func _air_ring_dry_run(binding: Dictionary, craft_id: String, waypoints: Array[Vector2i]) -> Dictionary:
+	var profile: Dictionary = binding.equipment.get_space_flight_profile(craft_id)
+	if not profile.get("ok", false): return {"ok":false, "reason":"flight_profile_changed"}
+	var area := "atmosphere:" + _air_support_location_id
+	var last := {"ok":false, "reason":"circle_blocked"}
+	for cell in waypoints:
+		var cells: Array[Vector2i] = binding.combat.preview_footprint({"position_plane":SPACE_GRID.HEX.axial_to_plane(Vector2(cell)), "heading_rad":0.0, "coordinate_frame":"local", "space_area_id":area}, profile.footprint_hexes)
+		var reason := ""
+		if not _air_support_cells_on_map(cells): reason = "invalid_target"
+		if reason.is_empty():
+			for occupant in binding.combat.query_cells(cells, area):
+				if occupant != craft_id: reason = "occupied"
+		if reason.is_empty():
+			for claimant in binding.combat.query_navigation_claims(cells, area):
+				if claimant != craft_id: reason = "navigation_claimed"
+		if reason.is_empty(): return {"ok":true}
+		last = {"ok":false, "reason":reason}
+	return last
+
+## Die Rundbahn scheiterte erst nach dem Start (zwischen Pruefung und Start hat sich etwas geaendert): das Schiff steht ueber seiner Landezone
+## und landet sofort wieder (gemeinsames Endstueck des Landens). Antwort ok:false mit dem Grund der Rundbahn und took_off:false.
+func _air_undo_circle_start(craft_id: String, failure: Dictionary) -> Dictionary:
+	var result: Dictionary = failure.duplicate()
+	result["ok"] = false
+	result["took_off"] = true
+	var sortie: Dictionary = _air_support_sorties.get(craft_id, {})
+	var binding: Dictionary = _resolve_air_support_craft(craft_id)
+	if sortie.is_empty() or not binding.get("ok", false): return result
+	var source: Node = sortie.source.get_ref()
+	if not is_instance_valid(source): return result
+	var ended: Dictionary = _end_air_sortie(craft_id, sortie, binding, source, binding.flight.get_snapshot())
+	if not ended.get("ok", false): return result
+	result["took_off"] = false
+	_air_emit_role_event(craft_id, "role_ended", "Rundbahn nicht möglich – Schiff bleibt gelandet.")
+	return result
+
 ## Ankunft im Modus Kreisen: Rolle none um die Landezone (gleiche Pruefungen, ohne Beleg). Misslingt der Ring, bleibt das Schiff wie bisher stehen.
 func _air_start_arrival_ring(craft_id: String, grid: Vector2i) -> void:
 	var binding: Dictionary = _resolve_air_support_craft(craft_id)
@@ -8567,6 +8607,11 @@ func request_air_support_circle(command: Dictionary) -> Dictionary:
 	if not pilot.get("ok", false): return pilot
 	var binding: Dictionary = _resolve_air_support_craft(id)
 	if not binding.get("ok", false): return binding
+	if _air_support_sorties.has(id):
+		# Wie request_air_support_move: Quelle im Takt, andere Quelle, andere Flug-Instanz.
+		var flying: Dictionary = _air_support_sorties[id]
+		var air_source: Node = _air_support_source.get_ref()
+		if not is_instance_valid(air_source) or air_source.get("is_processing_tick") or flying.source.get_ref() != air_source or binding.flight != flying.flight or not is_air_support_craft_airborne(id): return {"ok":false, "reason":"sortie_context_changed"}
 	if GROUND_FIRE_VS_AIR.is_broken_off(get_air_asset_status_snapshot(id), _air_attack_style(id)): return GROUND_FIRE_VS_AIR.refusal()
 	var terrain: Node = _air_ground_registry()
 	if terrain.call("get_tile_at_grid", center) == null: return {"ok":false, "reason":"role_point_off_map"}
@@ -8576,6 +8621,9 @@ func request_air_support_circle(command: Dictionary) -> Dictionary:
 	if not entry.get("ok", false): return entry
 	var took_off := false
 	if not is_air_support_craft_airborne(id):
+		# Kein Start, wenn die Rundbahn danach nicht moeglich waere (dieselbe Pruefung und Ausrichtung wie nach dem Start).
+		var dry: Dictionary = _air_ring_dry_run(binding, id, waypoints)
+		if not dry.get("ok", false): return dry
 		var started: Dictionary = _begin_air_sortie(id, false, Vector2.INF)
 		if not started.get("ok", false): return started
 		took_off = true
@@ -8584,8 +8632,9 @@ func request_air_support_circle(command: Dictionary) -> Dictionary:
 	elif not _air_support_sorties.has(id): return {"ok":false, "reason":"sortie_unavailable"}
 	var ring: Dictionary = _air_apply_ring(id, _air_support_sorties[id], entry, center, waypoints, binding.flight.get_snapshot().position_plane)
 	if not ring.get("ok", false):
+		if took_off: return _air_undo_circle_start(id, ring)
 		var failure: Dictionary = ring.duplicate()
-		failure["took_off"] = took_off
+		failure["took_off"] = false
 		return failure
 	var message: String = {"none":"Kreist an Feld (%d, %d).", "cas":"Luftnahunterstützung an Feld (%d, %d).", "air_defense":"Luftschutz an Feld (%d, %d)."}[role] % [center.x, center.y]
 	var result := {"ok":true, "replayed":false, "craft_id":id, "role":role, "center_hex":center, "waypoint_index":int(ring.waypoint_index), "took_off":took_off, "message":message}
@@ -8596,6 +8645,7 @@ func request_air_support_circle(command: Dictionary) -> Dictionary:
 func request_air_support_role_clear(craft_id: String, request_id: String) -> Dictionary:
 	if _air_support_source == null or not is_instance_valid(_air_support_source.get_ref()): return {"ok":false, "reason":"air_source_unavailable"}
 	if _should_skip_local_tick_processing() or is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
+	if craft_id.strip_edges().is_empty() or request_id.strip_edges().is_empty() or request_id.length() > 128: return {"ok":false, "reason":"invalid_command"}
 	var sortie: Dictionary = _air_support_sorties.get(craft_id, {})
 	if sortie.is_empty() or (Dictionary(sortie.get("air_role", {})).is_empty() and Array(sortie.get("waypoints", [])).is_empty() and String(sortie.get("returning", "")).is_empty()): return {"ok":true, "already_clear":true}
 	var binding: Dictionary = _resolve_air_support_craft(craft_id)
@@ -8604,8 +8654,10 @@ func request_air_support_role_clear(craft_id: String, request_id: String) -> Dic
 	if not hold.get("ok", false): return hold
 	var text := "Kreisen beendet; das Schiff hält die Position."
 	_air_end_role(craft_id, text)
-	request_air_support_cease_fire(craft_id, request_id)
-	return {"ok":true, "already_clear":false, "message":text}
+	var ceased: Dictionary = request_air_support_cease_fire(craft_id, request_id)
+	var cleared := {"ok":true, "already_clear":false, "message":text}
+	if not ceased.get("ok", false): cleared["cease_fire_reason"] = String(ceased.get("reason", ""))
+	return cleared
 
 func get_air_support_role_snapshot(craft_id: String) -> Dictionary:
 	var sortie: Dictionary = _air_support_sorties.get(craft_id, {})
@@ -8633,8 +8685,11 @@ func _air_begin_return(craft_id: String, reason: String) -> Dictionary:
 ## Takt 0,2 s (kehrt sofort zurueck, wenn keine Sortie fliegt): naechster Wegpunkt der Rundbahn bzw. Landung am Ende des Rueckflugs.
 func _advance_air_roles(delta: float) -> void:
 	_air_role_poll -= maxf(delta, 0.0)
+	_air_role_elapsed += maxf(delta, 0.0)
 	if _air_role_poll > 0.0: return
 	_air_role_poll = 0.2
+	var elapsed: float = _air_role_elapsed
+	_air_role_elapsed = 0.0
 	var source: Node = _air_support_source.get_ref() if _air_support_source != null else null
 	if not is_instance_valid(source): return
 	var combat: RefCounted = source.get("_space_combat_state")
@@ -8668,8 +8723,19 @@ func _advance_air_roles(delta: float) -> void:
 			continue
 		var index: int = int(sortie.get("waypoint_index", 0)) % waypoints.size()
 		var arrived: bool = pose.position_plane.distance_to(SPACE_GRID.HEX.axial_to_plane(Vector2(waypoints[index]))) <= switch_distance
+		var ring_blocked := false
 		if (arrived or not has_control) and _resolve_air_support_pilot(craft_id).get("ok", false):
-			_air_goto_waypoint(craft_id, sortie, (index + 1) if arrived else index)
+			var stepped: Dictionary = _air_goto_waypoint(craft_id, sortie, (index + 1) if arrived else index)
+			# Blockiert: kein Wegpunkt frei, oder am Wegpunkt angekommen und kein anderer ausser dem eigenen frei (kein Fortschritt).
+			ring_blocked = not stepped.get("ok", false) or (arrived and int(stepped.get("waypoint_index", index)) == index)
+		if ring_blocked:
+			sortie["ring_blocked_seconds"] = float(sortie.get("ring_blocked_seconds", 0.0)) + elapsed
+			if float(sortie.ring_blocked_seconds) >= AIR_RING_BLOCKED_REPORT_SECONDS and not bool(sortie.get("ring_blocked_reported", false)):
+				sortie["ring_blocked_reported"] = true
+				_air_emit_role_event(craft_id, "role_blocked", "Rundbahn blockiert – das Schiff hält die Position.")
+		else:
+			sortie["ring_blocked_seconds"] = 0.0
+			sortie["ring_blocked_reported"] = false
 
 func _advance_air_support_orders(delta: float) -> void:
 	if _air_support_sorties.is_empty(): return
@@ -8982,6 +9048,9 @@ func resolve_air_shootdown(craft_id: String, pilot_skill: float, display_name: S
 	var controller: Node = get_parent().get_node_or_null("TacticalController") if get_parent() != null else null
 	# Notlandung nur, wenn die Landezone frei ist; sonst wird der Ausgang als Bruchlandung behandelt.
 	if outcome == "emergency_landing" and not _air_landing_zone_free(craft_id, sortie, binding): outcome = "crash"
+	# Luftrollen 1b: Rolle und Rueckflug enden mit dem Schiff in der Luft (nicht "landed"); die Sortie wird gleich entfernt.
+	if not Dictionary(sortie.get("air_role", {})).is_empty() or not Array(sortie.get("waypoints", [])).is_empty() or not String(sortie.get("returning", "")).is_empty():
+		_air_emit_role_event(craft_id, "role_ended", "Rolle beendet – Schiff nicht mehr in der Luft.")
 	if degraded:
 		push_warning("Abschuss: %s ohne gueltigen Wurf/Kontext, Bruchlandung mit Standardwerten" % craft_id)
 		_air_support_sorties.erase(craft_id)

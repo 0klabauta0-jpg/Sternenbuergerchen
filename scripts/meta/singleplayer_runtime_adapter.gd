@@ -812,7 +812,8 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		var mission_root: Node = mission.get_node_or_null("SimulationRoot") if is_instance_valid(mission) else null
 		if mission_root == null: return _reject("runtime_unavailable", "Bodenmission ist nicht bereit")
 		if operation == "air_support_circle": return mission_root.request_air_support_circle(payload)
-		return mission_root.request_air_support_role_clear(String(payload.get("craft_id", "")), String(payload.get("request_id", "")))
+		if payload.size() != 2 or typeof(payload.get("craft_id")) != TYPE_STRING or typeof(payload.get("request_id")) != TYPE_STRING: return _reject("invalid_command", "Schiff oder Kennung fehlt")
+		return mission_root.request_air_support_role_clear(payload.craft_id, payload.request_id)
 	if operation in ["air_support_takeoff", "air_support_landing"]:
 		if payload.size() != 1 or typeof(payload.get("craft_id")) != TYPE_STRING: return _reject("invalid_command", "Schiff fehlt")
 		var mission: Node = _flow.call("get_active_mission") if is_instance_valid(_flow) else null
