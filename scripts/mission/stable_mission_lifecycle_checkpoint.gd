@@ -19,6 +19,9 @@ func _guard(sim: Node, driver: Node) -> Dictionary:
 	if is_instance_valid(sim) and sim.has_method("get_air_crash_sites") and not Array(sim.get_air_crash_sites()).is_empty(): return _reject("mission_lifecycle_unsupported")
 	if not is_instance_valid(sim) or not is_instance_valid(driver) or not sim.has_method("get_unit_registry") or not sim.has_method("is_hex_ground_runtime_active") or not is_instance_valid(sim.get_unit_registry()) or sim.is_processing_tick or not sim.command_queue.is_empty() or not sim.effects_queue.is_empty() or driver._combat_finished or driver._current_tick != sim.tick_counter or driver._objective_owned_since_tick >= 0: return _reject("mission_lifecycle_busy")
 	if sim.is_hex_ground_runtime_active() and not sim.get_hex_checkpoint_guard().get("ok",false): return _reject("mission_lifecycle_busy")
+	# Kapitel 2, 1g (W4): Der Wellenregler hat keinen Speicherstand. Solange eine spaete Gegnerwelle aussteht, ist der Einsatz nicht sicher speicherbar.
+	var waves: Node = driver.call("_get_enemy_wave_controller") if driver.has_method("_get_enemy_wave_controller") else null
+	if waves != null and waves.has_method("get_total_wave_count") and waves.has_method("are_all_waves_started") and int(waves.call("get_total_wave_count")) > 0 and not bool(waves.call("are_all_waves_started")): return _reject("enemy_wave_pending")
 	for key in BLOCKING_DICTS:
 		var value: Variant = driver.get(key)
 		if not value is Dictionary or not value.is_empty(): return _reject("mission_lifecycle_unsupported")
