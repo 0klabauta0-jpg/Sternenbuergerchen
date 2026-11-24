@@ -30,11 +30,15 @@ var _source_layout: Dictionary = {}
 var _building_blockers: Dictionary = {}
 var _hex_required:=false
 var _hex_admission_waiting:=false
+## Obergrenze je Wegsuche beim Container-Kauf (aufgeklappte Zellen); darueber gilt das Bett als nicht erreichbar.
+const HEX_PURCHASE_SEARCH_EXPANSION_LIMIT := 14000
+var _hex_purchase_stats := {"searches":0, "expanded":0, "max_expanded":0}
 const BUILDING_BOUNDS := {
 	"habitat": Rect2(7.0, 2.0, 10.0, 6.3),
 	"workshop": Rect2(22.0, 2.0, 11.0, 6.5),
 }
 const CAPACITY_LAYOUT = preload("res://scripts/meta/base_capacity_layout.gd")
+const HEX_PATHFINDER = preload("res://scripts/terrain/terrain_pathfinder.gd")
 const HOME_CRAFT_FOOTPRINT = preload("res://scripts/meta/home_craft_footprint.gd")
 const MODULAR_GEOMETRY = preload("res://scripts/meta/modular_base_geometry.gd")
 const PERSONNEL_RECOVERY = preload("res://scripts/core/personnel_recovery_runtime.gd")
@@ -77,6 +81,44 @@ func reconcile_restored_ship_overlap(checkpoint:Dictionary)->void:
 				var delta:=candidate.distance_squared_to(actor.position)
 				if delta<distance:distance=delta;best=candidate
 		if best.is_finite():actor.position=best
+
+## Hex-Boden, nach dem Laden: Wer ausserhalb eines Bettes in der Sperrmaske steht (alter Stand, dessen Alt-Gebaeude
+## jetzt auf Stellplatz 1 steht), wird auf die naechste freie, begehbare Zelle ausserhalb der Maske gesetzt.
+func reconcile_restored_hex_footprint()->void:
+	if not _requires_hex_ground() or _navigation_graph==null or not _sim.is_hex_ground_runtime_active():return
+	_refresh_home_craft_blockers()
+	var mask:Dictionary=get_ground_ship_blocked_cells()
+	if not mask.get("ok",false):return
+	# Maske und Hex-Lauf muessen dasselbe Gitter meinen (wie simulation_root.gd beim Schiffsmasken-Abgleich), sonst nichts versetzen.
+	if int(mask.get("registry_id",0))!=_sim._hex_ground_registry.get_instance_id():
+		push_warning("reconcile_restored_hex_footprint: Sperrmaske und Hex-Lauf meinen nicht dasselbe Gitter; niemand wird versetzt")
+		return
+	var blocked:={}
+	for cell in mask.blocked_cells:blocked[cell]=true
+	var moved:=false
+	for id in _states:
+		if String(_states[id].get("status",""))!="outside" or not _unit_is_home(String(id)) or not _sim._hex_ground_runtime.has_unit(String(id)):continue
+		var here:Vector2i=_sim._hex_ground_runtime.get_unit_grid(String(id))
+		if not blocked.has(here):continue
+		var snapshot:Dictionary=_sim.get_hex_ground_planning_snapshot()
+		var seen:={here:true};var frontier:Array[Vector2i]=[here];var target:=here;var found:=false
+		for ring in range(30):
+			var next:Array[Vector2i]=[]
+			for cell:Vector2i in frontier:
+				for direction:Vector2i in load("res://scripts/terrain/hex_grid.gd").DIRECTIONS:
+					var neighbor:=cell+direction
+					if seen.has(neighbor) or not _terrain.is_walkable(neighbor):continue
+					seen[neighbor]=true;next.append(neighbor)
+					if not found and not blocked.has(neighbor) and not snapshot.occupant_by_grid.has(neighbor) and not snapshot.admission_slots_by_grid.has(neighbor):found=true;target=neighbor
+			if found:break
+			frontier=next
+		if not found:
+			push_warning("reconcile_restored_hex_footprint: keine freie Zelle fuer %s (Zelle %s in der Sperrmaske); Person bleibt dort stehen" % [id,here])
+			continue
+		var result:Dictionary=_sim._hex_ground_runtime.relocate_unit(String(id),target,_sim.get_hex_ground_revision())
+		if result.get("ok",false):moved=true
+		else:push_warning("reconcile_restored_hex_footprint: Versetzen von %s von Zelle %s nach %s abgelehnt (%s); Person bleibt dort stehen" % [id,here,target,str(result.get("reason",""))])
+	if moved:_sim._project_hex_ground_actors(0.0)
 
 func preview_home_craft_arrival(craft:Dictionary,pad_id:String)->Dictionary:
 	var pad:=_find_layout("landing_pads",pad_id)
@@ -165,6 +207,8 @@ func configure(flow: Node, screen: Node, simulation: Node, checkpoint: Dictionar
 	var navigation = load(NAV_PATH)
 	var base_path := "res://maps/campaign_intro_base.json"
 	var map_data = navigation.load_map(base_path)
+	# Frueh setzen: das erste Kapazitaets-Layout (Wohncontainer) haengt davon ab.
+	_hex_required = not String(map_data.get_tactical_grid_rules()).is_empty()
 	_visible_base_map = load("res://scripts/terrain/terrain_map_data.gd").load_from_file(base_path)
 	_layout = navigation.layout(base_path)
 	_source_layout = _layout.duplicate(true)
@@ -273,11 +317,17 @@ func _refresh_capacity() -> void:
 	if _flow.call("is_campaign_start") and Array(_layout.get("landing_pads",[])).size()>1:
 		_layout.landing_pads[1]["built"]=bool(_flow.get_meta("campaign_pad2_built",false))
 
+## Angebot fuer den Unterkunftskauf: auf Hex-Boden ein Wohncontainer je gepruefter Stellplatz.
+func get_housing_offer() -> Dictionary:
+	return {"container":_requires_hex_ground(), "sites":CAPACITY_LAYOUT.hex_container_site_count()}
+
 func _capacity_infrastructure() -> Dictionary:
 	var infrastructure: Dictionary = Dictionary(_flow.get_meta("skirmish_infrastructure", {})).duplicate(true)
 	if _flow.call("is_campaign_start"):
 		infrastructure["campaign_beds"] = int(_flow.get_meta("campaign_built_beds", 2))
 		infrastructure["campaign_housing"] = int(_flow.get_meta("campaign_built_housing", 0))
+		infrastructure["campaign_housing_beds"] = Array(_flow.get_meta("campaign_built_housing_beds", []))
+		infrastructure["hex_containers"] = _requires_hex_ground()
 	return infrastructure
 
 func _modular_bed_layout(layout: Dictionary) -> Array:
@@ -362,7 +412,7 @@ func validate_modular_base(candidate: Dictionary) -> Dictionary:
 func build_campaign_housing(count: int) -> Dictionary:
 	if _flow == null or not _flow.call("is_campaign_start") or count != int(_flow.get_meta("campaign_built_housing", 0)) + 1 or count > 9:
 		return _reject("invalid_housing_construction", "Unterkunftsbau nicht verfügbar")
-	if _requires_hex_ground(): return _reject("housing_site_blocked", "Unterkunftsbau ist auf dieser Karte noch nicht verfügbar")
+	if _requires_hex_ground(): return _build_hex_container(count)
 	for state: Dictionary in _states.values():
 		if String(state.get("status", "")) == "moving": return _reject("housing_site_busy", "Unterkunftsbau während laufender Wege nicht möglich")
 	var infrastructure := _capacity_infrastructure()
@@ -389,6 +439,107 @@ func build_campaign_housing(count: int) -> Dictionary:
 	_flow.set_meta("campaign_built_beds", 2 + 2 * count)
 	_refresh_capacity()
 	return {"ok":true,"housing_count":count}
+
+## Wohncontainer auf Hex-Boden: zwei Habitat-Kopien mit vier Betten auf dem geprueften Stellplatz
+## `count`. Nichts wird veraendert, solange eine Pruefung fehlschlaegt; die Abbuchung macht der
+## Versorgungs-Besitzer erst nach dieser Bestaetigung.
+func _build_hex_container(count: int) -> Dictionary:
+	if count > CAPACITY_LAYOUT.hex_container_site_count(): return _reject("housing_limit", "Kein freier Stellplatz für einen weiteren Wohncontainer")
+	if not _sim.is_hex_ground_runtime_active(): return _reject("hex_ground_unavailable", "Die Bodenplanung der Basis ist nicht verfügbar")
+	_refresh_home_craft_blockers()
+	if not _home_craft_geometry_valid: return _reject("home_craft_geometry_unavailable", "Schiffsfläche ist noch nicht verfügbar")
+	_hex_purchase_stats = {"searches":0, "expanded":0, "max_expanded":0}
+	var kinds: Array = Array(_flow.get_meta("campaign_built_housing_beds", [])).duplicate()
+	while kinds.size() < count - 1: kinds.append(2)
+	kinds = kinds.slice(0, count - 1)
+	kinds.append(4)
+	var total_beds := 2
+	for kind in kinds: total_beds += int(kind)
+	var infrastructure := _capacity_infrastructure()
+	infrastructure["campaign_housing"] = count
+	infrastructure["campaign_housing_beds"] = kinds
+	infrastructure["campaign_beds"] = total_beds
+	var candidate: Dictionary = CAPACITY_LAYOUT.expand(_source_layout, _terrain, _navigation_graph, Array(_flow.get("_all_team_units")).size(), infrastructure)
+	var fresh: Array = Array(candidate.get("campaign_housing", [])).filter(func(house: Dictionary) -> bool: return String(house.get("id", "")).begins_with("campaign_habitat_c%02d" % count))
+	if bool(candidate.get("campaign_housing_failed", false)) or fresh.size() != 2 or Array(candidate.get("beds", [])).size() != total_beds: return _reject("housing_site_blocked", "Kein erreichbarer Stellplatz für den Wohncontainer")
+	if _hex_site_busy(fresh): return _reject("housing_site_busy", "Der Stellplatz ist belegt. Person zuerst vom Platz bewegen")
+	var previous: Array = Array(_layout.get("campaign_housing", []))
+	_navigation_graph.set_campaign_housing(Array(candidate.get("campaign_housing", [])))
+	var mask: Dictionary = _navigation_graph.get_ground_clearance_mask()
+	var reachable: bool = bool(mask.get("ok", false))
+	if reachable:
+		var blocked := {}
+		for cell in mask.blocked_cells: blocked[cell] = true
+		var origin := Vector2i(int(_layout.avatar_spawn_grid[0]), int(_layout.avatar_spawn_grid[1]))
+		var pathfinder = HEX_PATHFINDER.new()
+		# Hoechstens vier begrenzte Suchen je Kauf (keine Standbilder): die zwei alten Betten und je ein Bett
+		# jeder neuen Habitat-Kopie (beide Betten einer Kopie liegen im selben Raum hinter derselben Tuer).
+		# Fruehere Container sind durch den Pruefer ueber alle vier belegten Stellplaetze belegt.
+		for bed: Dictionary in _hex_purchase_probe_beds(candidate.beds, fresh):
+			var cell := Vector2i(int(bed.grid[0]), int(bed.grid[1]))
+			if blocked.has(cell) or not _hex_bed_reachable(pathfinder, origin, cell, blocked): reachable = false; break
+	_navigation_graph.set_campaign_housing(previous)
+	if not reachable: return _reject("housing_site_blocked", "Der Wohncontainer wäre nicht begehbar angebunden")
+	_flow.set_meta("campaign_built_housing", count)
+	_flow.set_meta("campaign_built_housing_beds", kinds)
+	_flow.set_meta("campaign_built_beds", total_beds)
+	_refresh_capacity()
+	# Die Sperrmaske hat sich geaendert: laufende Wege wie bei Schiffen abbrechen, neu befehlbar.
+	for id in _states:
+		if String(Dictionary(_states[id]).get("status", "")) == "moving": _cancel(String(id), false)
+	return {"ok":true,"housing_count":count}
+
+## Bett-Auswahl fuer die Erreichbarkeitspruefung beim Kauf: die zwei alten Betten (ueber ihre Bett-Id
+## habitat_bed_01/02, nicht ueber die Listenposition) und das erste Bett je neuer Kopie.
+func _hex_purchase_probe_beds(beds: Array, fresh: Array) -> Array:
+	var probes: Array = beds.filter(func(bed: Dictionary) -> bool: return String(bed.get("id", "")) in ["habitat_bed_01", "habitat_bed_02"])
+	for house: Dictionary in fresh:
+		for bed: Dictionary in beds:
+			if String(bed.get("room_id", "")) == String(house.get("id", "")):
+				probes.append(bed)
+				break
+	return probes
+
+## Eine begrenzte Wegsuche (A*, hoechstens HEX_PURCHASE_SEARCH_EXPANSION_LIMIT Zellen). Wird die Grenze
+## erreicht, gilt das Ziel als nicht erreichbar. Zaehlt Suchen und Zellen als reine Lese-Statistik.
+func _hex_bed_reachable(pathfinder, origin: Vector2i, cell: Vector2i, blocked: Dictionary) -> bool:
+	_hex_purchase_stats["searches"] = int(_hex_purchase_stats.get("searches", 0)) + 1
+	if origin == cell: return true
+	var search = HEX_PATHFINDER.RegionalHexSearch.new(origin, cell, 0, {"blocked_grids":blocked}, _terrain)
+	var used: int = search.advance(pathfinder, _terrain, HEX_PURCHASE_SEARCH_EXPANSION_LIMIT)
+	_hex_purchase_stats["expanded"] = int(_hex_purchase_stats.get("expanded", 0)) + used
+	_hex_purchase_stats["max_expanded"] = maxi(int(_hex_purchase_stats.get("max_expanded", 0)), used)
+	return search.finished and not search.path.is_empty() and Vector2i(search.path[-1]) == cell
+
+## Nur lesen: Wegsuchen des letzten Wohncontainer-Kaufs {searches, expanded, max_expanded, limit}.
+func get_hex_purchase_search_stats() -> Dictionary:
+	var stats := _hex_purchase_stats.duplicate()
+	stats["limit"] = HEX_PURCHASE_SEARCH_EXPANSION_LIMIT
+	return stats
+
+## Steht eine Person auf dem Stellplatz oder ist ein Feld dort fuer einen Weg reserviert?
+func _hex_site_busy(houses: Array) -> bool:
+	var rects: Array[Rect2] = []
+	for house: Dictionary in houses: rects.append(Rect2(float(house.plane[0]) - 2.1, float(house.plane[1]) - 2.1, 4.2, 4.2))
+	for id in _states:
+		var actor := get_actor(String(id))
+		if not is_instance_valid(actor) or not actor.visible or not _unit_is_home(String(id)): continue
+		var plane: Vector3 = load(NAV_PATH).plane_at_grid(_terrain.world_to_grid(actor.position))
+		for rect: Rect2 in rects:
+			if rect.has_point(Vector2(plane.x, plane.z)): return true
+	var snapshot: Dictionary = _sim.get_hex_ground_planning_snapshot()
+	var claimed: Dictionary = snapshot.occupant_by_grid.duplicate()
+	claimed.merge(snapshot.admission_slots_by_grid)
+	for segment: Dictionary in snapshot.committed_segments:
+		claimed[segment.from_grid] = true
+		claimed[segment.to_grid] = true
+	for grant: Dictionary in snapshot.committed_corridor_grants:
+		for cell in grant.get("cells", []): claimed[cell] = true
+	for cell: Vector2i in claimed:
+		var plane: Vector3 = load(NAV_PATH).plane_at_grid(cell)
+		for rect: Rect2 in rects:
+			if rect.has_point(Vector2(plane.x, plane.z)): return true
+	return false
 
 func build_campaign_bed(count: int) -> Dictionary:
 	if _flow == null or not _flow.call("is_campaign_start") or count != int(_flow.get_meta("campaign_built_beds", 2)) + 1 or count > 20:
@@ -1528,6 +1679,7 @@ func _checkpoint_candidate(state:Dictionary,target,movement:Dictionary)->Diction
 		var value:Variant=state.units[id]
 		if not _checkpoint_keys(value,["status","craft_id","bed_id","action","auto_rest_enabled","rest_automatic","idle_seconds","manual_priority_seconds"]) or value.status not in ["outside","moving","sleeping","aboard","station"] or typeof(value.auto_rest_enabled)!=TYPE_BOOL or typeof(value.rest_automatic)!=TYPE_BOOL or not _checkpoint_number(value.idle_seconds) or not _checkpoint_number(value.manual_priority_seconds) or typeof(value.craft_id)!=TYPE_STRING or typeof(value.bed_id)!=TYPE_STRING or typeof(value.action)!=TYPE_DICTIONARY:return _checkpoint_reject("base_checkpoint_invalid_unit")
 		var action:Dictionary={}
+		var woken:=false
 		if value.status=="aboard":
 			var home_member := _checkpoint_home_craft(value.craft_id) and _checkpoint_craft_member(id,value.craft_id)
 			if (not home_member and not _checkpoint_away_craft_member(id,value.craft_id,state)) or target.has_unit(id) or intents.has(id) or not value.action.is_empty() or not value.bed_id.is_empty():return _checkpoint_reject("base_checkpoint_aboard_context")
@@ -1563,18 +1715,29 @@ func _checkpoint_candidate(state:Dictionary,target,movement:Dictionary)->Diction
 		elif not value.action.is_empty():return _checkpoint_reject("base_checkpoint_action_status")
 		if value.status=="sleeping" or action.get("type")=="sleep":
 			var bed:Dictionary=_find_layout("beds",value.bed_id)
-			if not _checkpoint_id(value.bed_id) or bed.is_empty() or beds.has(value.bed_id):return _checkpoint_reject("base_checkpoint_bed_mismatch")
+			# Alt-Bett, das es bei den vier Stellplaetzen nicht mehr gibt (field_bed_09 ff. aus einem Altstand mit mehr als vier
+			# Alt-Gebaeuden): der Schlaefer wird wie bei einer abweichenden Lage geweckt. Andere unbekannte Bett-Ids bleiben Fehler.
+			var gone_bed:bool=value.status=="sleeping" and _checkpoint_id(value.bed_id) and bed.is_empty() and String(value.bed_id).begins_with("field_bed_")
+			if not _checkpoint_id(value.bed_id) or (bed.is_empty() and not gone_bed) or beds.has(value.bed_id):return _checkpoint_reject("base_checkpoint_bed_mismatch")
 			if value.status=="sleeping":
 				var pose:Dictionary=target.read_unit(id)
-				if pose.grid!=_terrain.world_to_grid(_world(bed.grid)) or pose.route_state.has_commitments or pose.movement_state.moving:return _checkpoint_reject("base_checkpoint_bed_pose")
+				if pose.route_state.has_commitments or pose.movement_state.moving:return _checkpoint_reject("base_checkpoint_bed_pose")
+				if gone_bed:woken=true
+				elif pose.grid!=_terrain.world_to_grid(_world(bed.grid)):
+					# Alt-Bett (field_bed_*): ein Stand vor dem Wohncontainer-Umbau hat den Schlaefer an der alten Bettlage
+					# gespeichert, das Bett steht jetzt auf Stellplatz 1. Dann wird die Person geweckt statt den Stand abzulehnen.
+					# Habitat- und Container-Betten bleiben streng.
+					if not String(value.bed_id).begins_with("field_bed_"):return _checkpoint_reject("base_checkpoint_bed_pose")
+					woken=true
 			elif action.target!=_world(bed.grid):return _checkpoint_reject("base_checkpoint_bed_mismatch")
-			beds[value.bed_id]=id
+			if not woken:beds[value.bed_id]=id
 		elif not value.bed_id.is_empty():return _checkpoint_reject("base_checkpoint_bed_mismatch")
 		if intents.has(id):
 			var intent:Dictionary=intents[id]
 			if intent.status not in ["arrived","canceled"] and value.status!="moving":return _checkpoint_reject("base_checkpoint_missing_action")
 		var restored:Dictionary=_states[id].duplicate(true)
 		for key in ["status","craft_id","bed_id","auto_rest_enabled","rest_automatic"]:restored[key]=value[key]
+		if woken:restored.status="outside";restored.bed_id="";restored.rest_automatic=false
 		restored.action=action;restored.idle_seconds=float(value.idle_seconds);restored.manual_priority_seconds=float(value.manual_priority_seconds);restored.last_result={}
 		states[id]=restored
 	for id in target.get_unit_ids():
