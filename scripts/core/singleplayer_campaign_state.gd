@@ -12,6 +12,9 @@ const RETREAT_WIN_CONDITIONS: Array = ["evacuation", "departure"]
 const OPEN_OUTPOSTS_PATH := "res://data/singleplayer/open_outposts.json"
 ## Kapitel 2: nur diese Auftragskennungen duerfen in einem aelteren Spielstand fehlen; sie gelten dann als neu (offered).
 const ADDITIVE_JOB_IDS: Array = ["wreck_crater_salvage", "stranded_refuel", "flak_silence", "cutlass_boarding", "hillside_bunker", "prospector_escort"]
+## Kapitel 2: nur diese Ortskennungen duerfen in einem aelteren Spielstand fehlen (ein Ort, den es heute gar nicht gibt, stoert nicht).
+## Gleich singleplayer_supply_state.gd.
+const ADDITIVE_LOCATION_IDS: Array = ["relay_ridge", "asteroid_belt", "muellers_farm", "shady_lab", "templanon"]
 
 var _locations: Dictionary = {}
 var _jobs: Dictionary = {}
@@ -525,6 +528,9 @@ const LOCATION_MAP_FIELD := "map_file_path"
 func _compare_locations(saved: Dictionary) -> Dictionary:
 	var current := _locations.duplicate(true)
 	if not saved.has("polisa") and bool(Dictionary(current.get("polisa", {})).get("free_visit", false)): current.erase("polisa")
+	# Kapitel 2: ein neuer Ort, der im Stand fehlt, gilt als unbesucht; ein gespeicherter Eintrag wird unten streng verglichen.
+	for additive_id in ADDITIVE_LOCATION_IDS:
+		if current.has(additive_id) and not saved.has(additive_id): current.erase(additive_id)
 	if saved.size() != current.size(): return {"ok":false}
 	var relocated: Array = []
 	for id in saved:

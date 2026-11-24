@@ -1214,6 +1214,13 @@ func _collect_resource(payload: Dictionary,context: Dictionary) -> Dictionary:
 	var quantity:=int(site.remaining); owner.consume(id); _revision+=1
 	return {"ok":true,"item_id":site.item_id,"quantity":quantity,"message":"Geborgen: %d" % quantity}
 
+# Kapitel 2: neue Orte, die in einem aelteren Stand fehlen duerfen (gleich singleplayer_campaign_state.gd).
+const ADDITIVE_LOCATION_IDS: Array = ["relay_ridge", "asteroid_belt", "muellers_farm", "shady_lab", "templanon"]
+
+## Strecke "start>ziel": nennt sie den Ort als Start oder als Ziel?
+func _route_names_place(route: String, place: String) -> bool:
+	return place in route.split(">")
+
 func _compatible_definitions(saved: Dictionary,current: Dictionary) -> bool:
 	var left := saved.duplicate(true)
 	var right := current.duplicate(true)
@@ -1233,6 +1240,15 @@ func _compatible_definitions(saved: Dictionary,current: Dictionary) -> bool:
 		right.service_locations.erase("polisa")
 	for route: String in Dictionary(right.get("route_fuel_costs", {})).keys():
 		if route.contains("polisa") and not Dictionary(left.get("route_fuel_costs", {})).has(route): right.route_fuel_costs.erase(route)
+	# Kapitel 2: Dienste und Strecken eines neuen Ortes, den der Stand nicht kennt, gelten als neu; ein gespeicherter Eintrag bleibt streng.
+	for place: String in ADDITIVE_LOCATION_IDS:
+		if not Dictionary(left.get("service_locations", {})).has(place) and Dictionary(right.get("service_locations", {})).has(place):
+			right.service_locations.erase(place)
+		for route: String in Dictionary(right.get("route_fuel_costs", {})).keys():
+			if _route_names_place(route, place) and not Dictionary(left.get("route_fuel_costs", {})).has(route): right.route_fuel_costs.erase(route)
+		if left.has("leg_fuel_costs") and right.has("leg_fuel_costs"):
+			for route: String in Dictionary(right.leg_fuel_costs).keys():
+				if _route_names_place(route, place) and not Dictionary(left.leg_fuel_costs).has(route): right.leg_fuel_costs.erase(route)
 	if not left.has("commodity_buy_orders"): right.erase("commodity_buy_orders")
 	# Etappenkosten (T1 Tanker, 21.11.2026) sind rein hinzugekommen: Staende davor kennen den Block nicht und bleiben ladbar.
 	# Ein gespeicherter Block muss dagegen exakt dem aktuellen entsprechen (der strenge Vergleich unten).
