@@ -49,9 +49,9 @@ var _standing_box: VBoxContainer
 var _standing_buttons: Dictionary = {}
 var _standing_abandon: Button
 var _standing_note: Label
-const MARKET_ITEMS: Array = ["a_benit", "b_benit", "c_benit"]
-const MARKET_SELL_ORDER: Array = ["b_benit", "c_benit", "a_benit"]
-const MARKET_NAMES: Dictionary = {"a_benit": "A-Benit", "b_benit": "B-Benit", "c_benit": "C-Benit"}
+const MARKET_ITEMS: Array = ["a_benit", "b_benit", "c_benit", "food", "medical_supplies", "bandage", "luxury_goods", "stim"]
+const MARKET_SELL_ORDER: Array = ["b_benit", "c_benit", "a_benit", "food", "medical_supplies", "bandage", "luxury_goods", "stim"]
+const MARKET_NAMES: Dictionary = {"a_benit": "A-Benit", "b_benit": "B-Benit", "c_benit": "C-Benit", "food": "Nahrung", "medical_supplies": "Medizinische Güter", "bandage": "Verbandsmaterial", "luxury_goods": "Genussmittel", "stim": "Stims"}
 var _campaign_buttons: Dictionary = {}
 var _section: String = "all"
 var _heading: Label

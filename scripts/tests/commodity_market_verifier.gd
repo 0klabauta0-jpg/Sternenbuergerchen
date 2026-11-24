@@ -6,6 +6,8 @@ const SUPPLY = preload("res://scripts/core/singleplayer_supply_state.gd")
 const OFFER_PATH := "res://data/singleplayer/trade_offers.json"
 const MARKET_PATH := "res://data/singleplayer/commodity_market.json"
 const BENIT := ["a_benit", "b_benit", "c_benit"]
+## Handel 2a: die fuenf Handelsgueter, ausdruecklich benannt (nichts anderes ausser Benit ist zulaessig).
+const TRADE_GOODS := ["food", "medical_supplies", "bandage", "luxury_goods", "stim"]
 const PRESENTER = preload("res://scripts/meta/singleplayer_services_presenter.gd")
 var _ui_supply: RefCounted
 var _ui_location := "trade_outpost"
@@ -105,12 +107,12 @@ func _data_part() -> void:
 	for loc: String in locs:
 		for item: String in Dictionary(locs[loc]):
 			var e: Dictionary = locs[loc][item]
-			if not item in BENIT: shape_ok = false
+			if not item in BENIT and not item in TRADE_GOODS: shape_ok = false
 			if e.has("sell_price") and e.has("buy_price"): rule_ok = false # kein Haendler kauft, was er selbst verkauft
 			if e.has("sell_price") and (int(e.sell_price) < 1 or not e.has("stock") or int(e.stock) < 0): shape_ok = false
 			if e.has("buy_price") and int(e.buy_price) < 1: shape_ok = false
 	check(rule_ok, "Regel: in keinem Ort steht dieselbe Ware sowohl als Verkauf als auch als Ankauf")
-	check(shape_ok, "Daten: nur Benit-Waren, Preise >= 1, Bestand nur beim Verkauf")
+	check(shape_ok, "Daten: nur Benit oder eines der fuenf Handelsgueter, Preise >= 1, Bestand nur beim Verkauf")
 	var s: RefCounted = _sup()
 	for loc: String in locs:
 		var snap_ok := true
@@ -420,7 +422,7 @@ func _ui_part() -> void:
 	check(_shown(buy_a) and _shown(buy_c) and not _shown(buy_b), "Anzeige Handelsaussenposten: Kaufknopf fuer A- und C-Benit, keiner fuer B-Benit")
 	check(buy_a.text.contains("%d Cr" % pa) and buy_a.text.contains("%d verfügbar" % stock), "Anzeige: Kaufknopf nennt Preis und Bestand aus der Datei (%s)" % buy_a.text)
 	var pb: int = int(m.trade_outpost.b_benit.buy_price)
-	check(_shown(sell1) and sell1.text.contains("B-Benit") and sell1.text.contains("%d Cr" % pb) and not _shown(sell2), "Anzeige Handelsaussenposten: ein Verkaufsknopf B-Benit mit Preis aus der Datei (%s)" % sell1.text)
+	check(_shown(sell1) and sell1.text.contains("B-Benit") and sell1.text.contains("%d Cr" % pb) and _shown(sell2) and sell2.text.contains("Nahrung") and sell2.text.contains("%d Cr" % int(m.trade_outpost.food.buy_price)) and not _shown(_btn(panel, "SellBenit7")), "Anzeige Handelsaussenposten: erster Verkaufsknopf B-Benit mit Preis aus der Datei, danach die Handelsgueter (%s | %s)" % [sell1.text, sell2.text])
 	check(sell1.disabled, "Anzeige: Verkaufsknopf ohne B-Benit im Schiff ist gesperrt")
 	var c0: int = _ui_supply.get_credits()
 	buy_a.pressed.emit()
@@ -452,7 +454,7 @@ func _ui_part() -> void:
 	_ui_location = "satellite_crash"
 	panel.call("refresh")
 	check(_shown(buy_a) and _shown(buy_b) and not _shown(buy_c), "Anzeige Absturzstelle: Kaufknopf fuer A- und B-Benit, keiner fuer C-Benit")
-	check(_shown(sell1) and sell1.text.contains("C-Benit") and sell1.text.contains("%d Cr" % int(m.satellite_crash.c_benit.buy_price)) and not _shown(sell2), "Anzeige Absturzstelle: ein Verkaufsknopf C-Benit mit Datenpreis")
+	check(_shown(sell1) and sell1.text.contains("C-Benit") and sell1.text.contains("%d Cr" % int(m.satellite_crash.c_benit.buy_price)) and _shown(sell2) and sell2.text.contains("Nahrung") and not _shown(_btn(panel, "SellBenit7")), "Anzeige Absturzstelle: erster Verkaufsknopf C-Benit mit Datenpreis, danach die Handelsgueter")
 	# Nachbesserung W2: Schiff an der Absturzstelle gelandet, aber zu weit vom Haendler (Dienst "trade" fehlt) -> gesperrt, Text sagt, was zu tun ist.
 	_ui_far = true
 	panel.call("refresh")
