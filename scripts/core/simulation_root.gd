@@ -8143,6 +8143,7 @@ var _air_role_poll := 0.0
 var _air_fuel_retry := 0.0
 var _air_target_poll := 0.0
 var _air_fuel_book_failures := 0
+var _air_cas_clock := 0.0
 const AIR_FUEL_STOP_TEXT := "Treibstoff reicht nur noch für den Abflug vom Ort – das Schiff landet."
 var _air_role_elapsed := 0.0
 var _air_sortie_serial := 0
@@ -8484,8 +8485,10 @@ func _air_role_config(section: String) -> Dictionary:
 		_air_role_data_cache = parsed if typeof(parsed) == TYPE_DICTIONARY else {"circle":{"radius_hex":4, "waypoint_switch_distance":1.0, "arrival_starts_ring":true}, "cas":{"protect_radius":8.0, "pursuit_limit":4.0}, "air_defense":{"protect_radius":8.0, "pursuit_limit":4.0}}
 	return Dictionary(_air_role_data_cache.get(section, {}))
 
-func _air_emit_role_event(craft_id: String, kind: String, text: String) -> void:
-	air_role_event.emit({"craft_id":craft_id, "kind":kind, "text":text})
+func _air_emit_role_event(craft_id: String, kind: String, text: String, extra: Dictionary = {}) -> void:
+	var event := {"craft_id":craft_id, "kind":kind, "text":text}
+	for key in extra: event[key] = extra[key]
+	air_role_event.emit(event)
 
 static func _air_ring_cells(center: Vector2i, radius: int) -> Array[Vector2i]:
 	var cells: Array[Vector2i] = []
@@ -8556,6 +8559,7 @@ func _air_goto_waypoint(craft_id: String, sortie: Dictionary, start_index: int, 
 		var index: int = (start_index + k) % waypoints.size()
 		var face: Variant = null
 		if allow_turn: face = _air_attack_target_plane(craft_id)
+		if face != null: sortie["aim_attack"] = true  # Luftrollen 3, Nachbesserung 1 (K5): _air_reaim loest die Ausrichtung nach Angriffsende sofort
 		if allow_turn and face == null: face = _air_ring_face(craft_id, SPACE_GRID.HEX.axial_to_plane(Vector2(waypoints[index])), SPACE_GRID.HEX.axial_to_plane(Vector2(waypoints[(index + waypoints.size() - 1) % waypoints.size()])))
 		var result: Dictionary = _air_set_goal(craft_id, waypoints[index], face)
 		if result.get("ok", false):
@@ -8640,6 +8644,7 @@ func _air_end_role(craft_id: String, text: String) -> void:
 	sortie["role_target_id"] = ""
 	sortie["returning"] = ""
 	sortie["landing_blocked_reported"] = false
+	for key in ["cas_hold", "cas_hold_reported", "cas_order_id"]: sortie.erase(key)
 	if had: _air_emit_role_event(craft_id, "role_ended", text)
 
 func request_air_support_circle(command: Dictionary) -> Dictionary:
@@ -8697,6 +8702,8 @@ func request_air_support_circle(command: Dictionary) -> Dictionary:
 	var message: String = {"none":"Kreist an Feld (%d, %d).", "cas":"Luftnahunterstützung an Feld (%d, %d).", "air_defense":"Luftschutz an Feld (%d, %d)."}[role] % [center.x, center.y]
 	var result := {"ok":true, "replayed":false, "craft_id":id, "role":role, "center_hex":center, "waypoint_index":int(ring.waypoint_index), "took_off":took_off, "message":message}
 	_air_role_receipts[request_id] = {"signature":signature, "result":result.duplicate(true)}
+	# Rolle neu gesetzt: ein Feuerhalt des Spielers (cas_hold) endet.
+	for key in ["cas_hold", "cas_hold_reported", "break_off_blocked_reported"]: Dictionary(_air_support_sorties.get(id, {})).erase(key)
 	_air_emit_role_event(id, "role_started", message)
 	return result
 
@@ -8712,7 +8719,7 @@ func request_air_support_role_clear(craft_id: String, request_id: String) -> Dic
 	# Luftrollen 3: die Nase zeigt jetzt in Flugrichtung, gebremst wird nur noch mit dem schwachen Rueckwaertsschub. Haltepunkt daher ein Stueck voraus
 	# (Auslauf), sonst pendelt das Schiff mehrere Sekunden um den Punkt; ist er nicht frei, gilt wie bisher die jetzige Lage.
 	var hold_pose: Dictionary = binding.flight.get_snapshot()
-	var hold: Dictionary = _air_set_goal_plane(craft_id, Vector2(hold_pose.position_plane) + Vector2(hold_pose.velocity_plane) * 0.7)
+	var hold: Dictionary = _air_set_goal_plane(craft_id, Vector2(hold_pose.position_plane) + _air_brake_offset(binding, craft_id, hold_pose))
 	if not hold.get("ok", false): hold = _air_set_goal_plane(craft_id, hold_pose.position_plane)
 	if not hold.get("ok", false): return hold
 	var text := "Kreisen beendet; das Schiff hält die Position."
@@ -8721,6 +8728,22 @@ func request_air_support_role_clear(craft_id: String, request_id: String) -> Dic
 	var cleared := {"ok":true, "already_clear":false, "message":text}
 	if not ceased.get("ok", false): cleared["cease_fire_reason"] = String(ceased.get("reason", ""))
 	return cleared
+
+## Luftrollen 3, Nachbesserung 1 (K1): Bremsweg v^2 / (2 a) in Flugrichtung; a = schwaechster Schub (Haupt, Rueckwaerts, Seite) * Leistungsanteil / Masse * Atmosphaerenfaktor,
+## wie in space_guidance_resolver.gd. Ohne Flugprofil oder Masse bleibt die alte Faustformel Tempo * 0,7.
+func _air_brake_offset(binding: Dictionary, craft_id: String, pose: Dictionary) -> Vector2:
+	var velocity := Vector2(pose.get("velocity_plane", Vector2.ZERO))
+	var fallback: Vector2 = velocity * 0.7
+	var profile: Dictionary = binding.equipment.get_space_flight_profile(craft_id)
+	var mass := float(pose.get("mass", 0.0))
+	if not profile.get("ok", false) or mass <= 0.0 or velocity.length() < 0.001: return fallback
+	var hull: Dictionary = profile.hull
+	var power: Dictionary = profile.power
+	var thrust := minf(float(hull.get("main_thrust", 0.0)), minf(float(hull.get("reverse_thrust", 0.0)), float(hull.get("side_thrust", 0.0))))
+	var acceleration := thrust * clampf(float(power.get("thrust_fraction", 1.0)), 0.0, 1.0) / mass
+	acceleration *= float(preload("res://scripts/tactical/flight_environment.gd").factors("atmosphere").acceleration_factor)
+	if acceleration <= 0.0: return fallback
+	return velocity.normalized() * velocity.length_squared() / (2.0 * acceleration)
 
 func get_air_support_role_snapshot(craft_id: String) -> Dictionary:
 	var sortie: Dictionary = _air_support_sorties.get(craft_id, {})
@@ -8859,8 +8882,10 @@ func _air_pick_ground_target(craft_id: String, sortie: Dictionary, visible: Arra
 	if not pilot.get("ok", false) or role.is_empty() or typeof(role.get("center_hex")) != TYPE_VECTOR2I: return ""
 	var team := String(pilot.pilot.call("get_team_id"))
 	var radius := float(role.get("protect_radius", 8.0))
+	var safety := int(_air_role_config("cas").get("friendly_safety_hex", 0))
 	var best := ""
 	var best_distance := INF
+	sortie["cas_friendly_blocked"] = false
 	for unit_variant in visible:
 		var unit_id := String(unit_variant)
 		var unit = _resolve_unit(unit_id)
@@ -8868,13 +8893,31 @@ func _air_pick_ground_target(craft_id: String, sortie: Dictionary, visible: Arra
 		if not is_instance_valid(unit) or typeof(grid) != TYPE_VECTOR2I or not unit.has_method("get_health") or int(unit.call("get_health")) <= 0 or not unit.has_method("get_team_id") or String(unit.call("get_team_id")) == team: continue
 		var distance := float(SPACE_GRID.HEX.distance(grid, role.center_hex))
 		if distance > radius: continue
+		# K6: kein selbst gewaehltes Ziel mit eigenen Leuten im Umkreis (Handfeuer bleibt davon unberuehrt).
+		if safety > 0 and _air_friendly_near(grid, safety, team):
+			sortie["cas_friendly_blocked"] = true
+			continue
 		if distance < best_distance - 0.0001 or (absf(distance - best_distance) <= 0.0001 and unit_id < best):
 			best = unit_id
 			best_distance = distance
 	return best
 
+## Steht in einem Umkreis von radius Feldern um grid eine lebende Einheit desselben Teams wie der Pilot?
+func _air_friendly_near(grid: Vector2i, radius: int, team: String) -> bool:
+	for dq in range(-radius, radius + 1):
+		for dr in range(-radius, radius + 1):
+			var cell := grid + Vector2i(dq, dr)
+			if SPACE_GRID.HEX.distance(cell, grid) > radius: continue
+			var occupant: Dictionary = _air_ground_occupant(cell)
+			var unit_id := String(occupant.get("unit_id", "")) if occupant.get("ok", false) else ""
+			if unit_id.is_empty(): continue
+			var unit = _resolve_unit(unit_id)
+			if is_instance_valid(unit) and unit.has_method("get_team_id") and String(unit.call("get_team_id")) == team and (not unit.has_method("get_health") or int(unit.call("get_health")) > 0): return true
+	return false
+
 ## Takt 0,5 s fuer Rollen in der Luft: Abdrehen nach Stil (alle Rollen), Zielwahl der Rolle CAS. Nicht im Rueckflug.
 func _advance_air_cas(delta: float) -> void:
+	_air_cas_clock += maxf(delta, 0.0)
 	_air_target_poll -= maxf(delta, 0.0)
 	if _air_target_poll > 0.0: return
 	_air_target_poll = maxf(float(_air_role_config("cas").get("target_poll_seconds", 0.5)), 0.05)
@@ -8884,10 +8927,7 @@ func _advance_air_cas(delta: float) -> void:
 		var role: Dictionary = Dictionary(sortie.get("air_role", {}))
 		if role.is_empty() or not String(sortie.get("returning", "")).is_empty() or not is_air_support_craft_airborne(craft_id): continue
 		if GROUND_FIRE_VS_AIR.is_broken_off(get_air_asset_status_snapshot(craft_id), _air_attack_style(craft_id)):
-			if not bool(sortie.get("break_off_reported", false)):
-				sortie["break_off_reported"] = true
-				_air_emit_role_event(craft_id, "break_off_return", "%s bricht den Einsatz ab und fliegt zur Landezone." % _air_craft_label(craft_id))
-			_air_begin_return(craft_id, "break_off")
+			_air_cas_break_off(craft_id, sortie)
 			continue
 		if String(role.get("role", "")) != "cas": continue
 		var pilot: Dictionary = _resolve_air_support_pilot(craft_id)
@@ -8897,25 +8937,62 @@ func _advance_air_cas(delta: float) -> void:
 			var driver: Node = get_parent().get_node_or_null("CombatLoopDriver") if get_parent() != null else null
 			visible_by_team[team] = Array(driver.call("get_multiplayer_visible_unit_ids", team)) if driver != null and driver.has_method("get_multiplayer_visible_unit_ids") else []
 		var visible: Array = visible_by_team[team]
-		var current := String(sortie.get("role_target_id", ""))
-		# Ein von Hand gegebener Angriffsbefehl auf eine Bodeneinheit ersetzt das Ziel; die Rolle bleibt.
+		# W2: der Spieler hat Vorrang. "Feuer einstellen" haelt die Zielwahl an, bis "Feuer frei" kommt oder die Rolle neu gesetzt wird.
+		if bool(sortie.get("cas_hold", false)):
+			sortie["role_target_id"] = ""
+			if not bool(sortie.get("cas_hold_reported", false)):
+				sortie["cas_hold_reported"] = true
+				_air_emit_role_event(craft_id, "cas_hold", "%s hält das Feuer – Luftnahunterstützung wartet." % _air_craft_label(craft_id))
+			continue
 		var order: Dictionary = _air_wing_order(craft_id)
 		var ordered := String(order.get("target_id", "")) if order.get("verb") == "attack_target" else ""
-		if not ordered.is_empty() and typeof(_air_ground_unit_grid(ordered)) == TYPE_VECTOR2I: current = ordered
-		elif ordered.is_empty(): current = ""
+		var player_order: bool = not ordered.is_empty() and String(order.get("order_id", "")) != String(sortie.get("cas_order_id", ""))
+		var current := ordered
+		if player_order:
+			# Ein vom Spieler befohlenes Ziel bleibt, auch ausserhalb von Radius + Verfolgung; erst wenn es tot oder nicht mehr sichtbar ist, waehlt CAS wieder selbst.
+			if _air_cas_target_alive(ordered, visible):
+				sortie["role_target_id"] = ordered
+				continue
+			request_air_support_cease_fire(craft_id, "air-role-cas-lost:%s:%d:%s" % [craft_id, tick_counter, ordered])
+			current = ""
 		sortie["role_target_id"] = current
 		if not current.is_empty():
-			var held = _resolve_unit(current)
 			var grid: Variant = _air_ground_unit_grid(current)
-			if is_instance_valid(held) and held.has_method("get_health") and int(held.call("get_health")) > 0 and visible.has(current) and typeof(grid) == TYPE_VECTOR2I and float(SPACE_GRID.HEX.distance(grid, role.center_hex)) <= float(role.get("protect_radius", 8.0)) + float(role.get("pursuit_limit", 4.0)): continue
+			if _air_cas_target_alive(current, visible) and typeof(grid) == TYPE_VECTOR2I and float(SPACE_GRID.HEX.distance(grid, role.center_hex)) <= float(role.get("protect_radius", 8.0)) + float(role.get("pursuit_limit", 4.0)): continue
 			request_air_support_cease_fire(craft_id, "air-role-cas-lost:%s:%d:%s" % [craft_id, tick_counter, current])
 			sortie["role_target_id"] = ""
 		var picked := _air_pick_ground_target(craft_id, sortie, visible)
-		if picked.is_empty(): continue
-		var ordered_now: Dictionary = request_air_support_attack_order({"craft_id":craft_id, "target_unit_id":picked, "request_id":"air-role-cas:%s:%d:%s" % [craft_id, tick_counter, picked]})
+		if picked.is_empty():
+			if bool(sortie.get("cas_friendly_blocked", false)) and _air_cas_clock >= float(sortie.get("cas_friendly_until", 0.0)):
+				sortie["cas_friendly_until"] = _air_cas_clock + 10.0
+				_air_emit_role_event(craft_id, "cas_friendly_close", "%s: Ziel zu nah an eigenen Leuten – kein Angriff." % _air_craft_label(craft_id))
+			continue
+		var ordered_now: Dictionary = request_air_support_attack_order({"craft_id":craft_id, "target_unit_id":picked, "request_id":AIR_CAS_REQUEST_PREFIX + "%s:%d:%s" % [craft_id, tick_counter, picked]})
 		if not ordered_now.get("ok", false): continue
 		sortie["role_target_id"] = picked
 		_air_emit_role_event(craft_id, "target_engaged", "%s greift %s an." % [_air_craft_label(craft_id), picked])
+
+func _air_cas_target_alive(unit_id: String, visible: Array) -> bool:
+	var unit = _resolve_unit(unit_id)
+	return is_instance_valid(unit) and unit.has_method("get_health") and int(unit.call("get_health")) > 0 and visible.has(unit_id) and typeof(_air_ground_unit_grid(unit_id)) == TYPE_VECTOR2I
+
+## W1: Abbruch nach Stil. Erst Angriffsbefehl loeschen und Zielwahl beenden, dann den Rueckflug versuchen. "break_off_return" nur, wenn er wirklich begann;
+## sonst faellt die Rolle auf reines Kreisen zurueck (role "none"), das Schiff schiesst nicht mehr und meldet role_blocked (einmal, Grund des Rueckflugs im Ereignis).
+func _air_cas_break_off(craft_id: String, sortie: Dictionary) -> void:
+	request_air_support_cease_fire(craft_id, "air-break-off:%s:%d" % [craft_id, tick_counter])
+	sortie["role_target_id"] = ""
+	var back: Dictionary = _air_begin_return(craft_id, "break_off")
+	if back.get("ok", false):
+		if not bool(sortie.get("break_off_reported", false)):
+			sortie["break_off_reported"] = true
+			_air_emit_role_event(craft_id, "break_off_return", "%s bricht den Einsatz ab und fliegt zur Landezone." % _air_craft_label(craft_id))
+		return
+	var fallback: Dictionary = Dictionary(sortie.get("air_role", {}))
+	fallback["role"] = "none"
+	sortie["air_role"] = fallback
+	if not bool(sortie.get("break_off_blocked_reported", false)):
+		sortie["break_off_blocked_reported"] = true
+		_air_emit_role_event(craft_id, "role_blocked", "%s bricht den Angriff ab und kreist weiter – Rückflug nicht möglich." % _air_craft_label(craft_id), {"reason":String(back.get("reason", ""))})
 
 ## Nase aufs Ziel: ist ein Angriffsbefehl auf eine Bodeneinheit aktiv, bekommt das laufende Ziel der Rundbahn face_plane = Ziel (nur auf freiem Platz,
 ## sonst wird beim naechsten Takt neu versucht); endet der Angriff, kehrt das Ziel zur Ausrichtung der Rundbahn zurueck.
@@ -8930,6 +9007,19 @@ func _air_reaim(craft_id: String, sortie: Dictionary, control: Dictionary) -> vo
 	elif bool(sortie.get("aim_attack", false)):
 		sortie.erase("aim_attack")
 		_air_goto_waypoint(craft_id, sortie, int(sortie.get("waypoint_index", 0)))
+
+## Luftrollen 3, Nachbesserung 1 (Luecke B): ein schwebendes Schiff ohne Rundbahn dreht die Nase aufs Ziel eines Angriffsbefehls (auch Handfeuer), wenn der gedrehte
+## Platz frei ist. Ein Ziel auf der eigenen Stelle wuerde sofort als "angekommen" geloescht und nie drehen; darum ein Punkt 0,3 Felder in Zielrichtung.
+func _air_hover_aim(craft_id: String, sortie: Dictionary, combat: RefCounted, fleet: RefCounted) -> void:
+	var desired: Variant = _air_attack_target_plane(craft_id)
+	if desired == null or not is_air_support_craft_airborne(craft_id) or combat.get_flight_controls().has(craft_id): return
+	var flight: RefCounted = fleet.get_flight_state(craft_id)
+	if flight == null or flight != sortie.flight or not _resolve_air_support_pilot(craft_id).get("ok", false): return
+	var pose: Dictionary = flight.get_snapshot()
+	if pose.get("motion_mode") != "tactical" or pose.get("space_area_id") != "atmosphere:" + _air_support_location_id or not bool(combat.get_flight_status(craft_id).get("ok", true)): return
+	var to_target: Vector2 = Vector2(desired) - Vector2(pose.position_plane)
+	if to_target.length() < 1.0 or absf(wrapf(to_target.angle() - float(pose.get("heading_rad", 0.0)), -PI, PI)) <= deg_to_rad(8.0): return
+	_air_set_goal_plane(craft_id, Vector2(pose.position_plane) + to_target.normalized() * 0.3, desired)
 
 ## Takt 0,2 s (kehrt sofort zurueck, wenn keine Sortie fliegt): naechster Wegpunkt der Rundbahn bzw. Landung am Ende des Rueckflugs.
 func _advance_air_roles(delta: float) -> void:
@@ -8953,7 +9043,9 @@ func _advance_air_roles(delta: float) -> void:
 		var sortie: Dictionary = _air_support_sorties[craft_id]
 		var returning := String(sortie.get("returning", ""))
 		var waypoints: Array = sortie.get("waypoints", [])
-		if waypoints.is_empty() and returning.is_empty(): continue
+		if waypoints.is_empty() and returning.is_empty():
+			_air_hover_aim(craft_id, sortie, combat, fleet)
+			continue
 		var flight: RefCounted = fleet.get_flight_state(craft_id)
 		if flight == null or flight != sortie.flight: continue
 		var pose: Dictionary = flight.get_snapshot()
@@ -9048,11 +9140,35 @@ func request_air_support_attack_order(command: Dictionary) -> Dictionary:
 	var revision: int = binding.wings.get_snapshot().revision
 	var order := {"contract_category":"space_combat", "operation":"order_issue", "request_id":"air-ground-order:" + id, "expected_revision":revision, "payload":{"wing_ids":[binding.wing_id], "verb":"attack_target", "target_id":command.target_unit_id, "fire_rule":"free"}}
 	var result: Dictionary = binding.wings.apply_command(order, {"authorized":true, "actor_id":"singleplayer", "phase":"tactical", "known_targets":[command.target_unit_id], "coordinate_frame":"local", "space_area_id":pose.space_area_id})
-	if result.get("ok", false): _air_ground_order_receipts[id] = {"craft_id":command.craft_id, "target_unit_id":command.target_unit_id, "result":result.duplicate(true)}
+	if result.get("ok", false):
+		_air_ground_order_receipts[id] = {"craft_id":command.craft_id, "target_unit_id":command.target_unit_id, "result":result.duplicate(true)}
+		_air_note_attack_order(String(command.craft_id), id)
 	return result
+
+## Luftrollen 3, Nachbesserung 1 (W2): Unterscheidung Spielerziel / CAS-Ziel. Ein Angriffsbefehl mit Kennung "air-role-cas:" stammt von der Zielwahl, ihre
+## order_id steht im Sortie-Eintrag (cas_order_id); jeder andere Befehl ist ein Spielerbefehl (cas_order_id leer) und hebt einen Feuerhalt auf ("Feuer frei").
+const AIR_CAS_REQUEST_PREFIX := "air-role-cas:"
+func _air_note_attack_order(craft_id: String, request_id: String) -> void:
+	var sortie: Dictionary = Dictionary(_air_support_sorties.get(craft_id, {}))
+	if sortie.is_empty(): return
+	if request_id.begins_with(AIR_CAS_REQUEST_PREFIX):
+		sortie["cas_order_id"] = String(_air_wing_order(craft_id).get("order_id", ""))
+	else:
+		sortie["cas_order_id"] = ""
+		for key in ["cas_hold", "cas_hold_reported"]: sortie.erase(key)
+
+## Kennungen, die das Spiel selbst vergibt (Rolle, Rueckflug, Abbruch, Abschuss); alles andere ist ein Befehl des Spielers.
+func _air_system_request(request_id: String) -> bool:
+	for prefix in ["air-", "ground-fire-", "shootdown-"]:
+		if request_id.begins_with(prefix): return true
+	return false
 
 func request_air_support_cease_fire(craft_id: String, request_id: String) -> Dictionary:
 	if _should_skip_local_tick_processing() or is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
+	# Luftrollen 3, Nachbesserung 1 (W2): "Feuer einstellen" des Spielers (jede Kennung ausser denen des Spiels selbst) haelt die CAS-Zielwahl an.
+	if not _air_system_request(request_id):
+		var held: Dictionary = Dictionary(_air_support_sorties.get(craft_id, {}))
+		if String(Dictionary(held.get("air_role", {})).get("role", "")) == "cas": held["cas_hold"] = true
 	var binding: Dictionary = _resolve_air_support_craft(craft_id)
 	if not binding.get("ok", false): return binding
 	var snapshot: Dictionary = binding.wings.get_snapshot()
