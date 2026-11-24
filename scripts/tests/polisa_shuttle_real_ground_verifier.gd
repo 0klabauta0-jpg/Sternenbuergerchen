@@ -6,6 +6,13 @@ class ServiceController extends "res://scripts/tests/mission_tactical_sandbox_co
 	func _process(_delta: float) -> void: pass
 	func preview_station_craft_admission(_craft: Dictionary, _pad: String = "", _reentry: bool = false) -> Dictionary:
 		return {"ok":true,"pad_id":"fixture-pad","position":fixture_lz,"ground_body_profile":{}}
+	## Fixture-Eingabe: Das Einsteigen misst in Hex-Besuchen gegen den Zugangspunkt am Schiffsrumpf (seit b5227ab21), nicht gegen die
+	## Landeposition. Das gebundene ground_body_profile gibt es in dieser Attrappe nicht; der Zugangspunkt liegt hier auf der Landeposition (Feld (1,0)).
+	func get_campaign_ground_ship_access(_id: String) -> Dictionary: return {"ok":true,"position":fixture_lz}
+	## Wie in polisa_shuttle_full_loop_verifier: Die echte Funktion verlangt ein gebundenes ground_body_profile je Schiff (read_bound) und
+	## liefert in dieser Attrappe einen Fehler; ohne diese Eingabe laeuft die Besatzung nicht zum Schiff zurueck. Hier: keine Rumpfzellen.
+	func get_ground_ship_blocked_cells(_craft: String = "") -> Dictionary:
+		return {"ok":true,"registry_id":get_node("../SimulationRoot").get_hex_ground_terrain_registry().get_instance_id(),"source_signature":"fixture","blocked_cells":[]}
 	func finalize_station_craft_update() -> void: pass
 	func _emit_planning_state_changed() -> void: pass
 	func _store_selected_mission_dropship_plan() -> void: pass
