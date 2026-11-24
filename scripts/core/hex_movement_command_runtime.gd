@@ -75,7 +75,9 @@ func stage_move(command:Dictionary,actor:Node2D)->Dictionary:
 			"status":"active","reason":"","path":[],"path_index":{},"cursor":0,"search":null,"terrain_revision":-1,"blocker_signature":"","wait_ticks":0,"navigation_jobs":0,"last_nav_tick":-1,
 			"last_attempt_epoch":-1,"next_attempt_tick":0,"last_faced_segment":"","cost_options":{},"base_step_seconds":[],"duration_estimates":[],"recovery":{}}
 		_traffic_epoch+=1
-	else:previous.command=stored
+	else:
+		previous.command=stored
+		if previous.goal_grid!=goal:previous.command.target_position=_registry.call("grid_to_world",previous.goal_grid)
 	if actor.has_method("set_target_position"):actor.call("set_target_position",_registry.call("grid_to_world",goal))
 	return {"ok":true,"command_id":_orders[id].command_id}
 
@@ -323,6 +325,8 @@ func tick(delta:float)->void:
 		# A stationary occupant cannot be crossed at the destination. Keep the
 		# accepted intent, but do not spend the shared path budget searching an
 		# impossible goal. Its release/movement changes blockers on the next tick.
+		if own_blockers.has(navigation_goal) and _redirect_goal_held_by_unfit(id,order,state,own_blockers):
+			navigation_goal=_navigation_goal(order)
 		if own_blockers.has(navigation_goal):
 			if not order.recovery.is_empty():_abort_recovery(id,order,"backoff_target_invalidated");continue
 			_clear_route(order)
@@ -406,6 +410,47 @@ func tick(delta:float)->void:
 						order.last_attempt_epoch=_traffic_epoch;order.next_attempt_tick=now+4
 				_stage_backoff(plan,requests,blocker_signature,delta)
 	_face_active_segments()
+
+## A downed/dead occupant keeps its cell (it may recover or respawn) but must not
+## hold a goal forever. Redirect the accepted goal to the nearest free neighbour
+## cell; fit occupants still make the order wait.
+func _redirect_goal_held_by_unfit(id:String,order:Dictionary,state:Dictionary,own_blockers:Dictionary)->bool:
+	if not order.recovery.is_empty():return false
+	# Fireteam stage orders (they carry a phase) keep the controller-side repair R-A:
+	# the stage target it tracks must stay the cell the member is really sent to.
+	if order.command.has("phase"):return false
+	var goal:Vector2i=order.goal_grid
+	var holder:String=_ground.get_occupant_at(goal)
+	if holder.is_empty() or holder==id:return false
+	var actor=_owner()._resolve_known_unit_for_contract(holder)
+	if not is_instance_valid(actor) or not actor.has_method("get_vital_state") or actor.call("get_vital_state")=="fit":return false
+	var ring:Array=[goal]
+	var seen:Dictionary={goal:true}
+	for depth in range(2):
+		var best:Variant=null
+		var next_ring:Array=[]
+		for cell in ring:
+			for neighbor in _registry.call("get_legal_hex_neighbors",cell):
+				if seen.has(neighbor):continue
+				seen[neighbor]=true
+				next_ring.append(neighbor)
+				if own_blockers.has(neighbor):continue
+				if best==null or _redirect_candidate_better(neighbor,best,state.grid):best=neighbor
+		if best!=null:
+			order.goal_grid=best
+			# Save validation requires the stored target to name the goal cell.
+			order.command.target_position=_registry.call("grid_to_world",best)
+			_clear_route(order)
+			_traffic_epoch+=1
+			return true
+		ring=next_ring
+	return false
+
+func _redirect_candidate_better(candidate:Vector2i,best:Vector2i,origin:Vector2i)->bool:
+	var dc:int=HEX.distance(origin,candidate)
+	var db:int=HEX.distance(origin,best)
+	if dc!=db:return dc<db
+	return candidate.x<best.x or (candidate.x==best.x and candidate.y<best.y)
 
 func _cached_reservation_request(id:String,order:Dictionary,factor:float,delta:float)->Dictionary:
 	var tail:Array=order.path.slice(int(order.cursor))
