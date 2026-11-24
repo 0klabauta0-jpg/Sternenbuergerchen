@@ -7,6 +7,9 @@ class ServiceController extends "res://scripts/tests/mission_tactical_sandbox_co
 	func preview_station_craft_admission(_craft: Dictionary, _pad: String = "", _reentry: bool = false) -> Dictionary:
 		return {"ok":true,"pad_id":"fixture-pad","position":fixture_lz,"ground_body_profile":{}}
 	func _ground_ship_touchdown_ready(_craft: String, _position: Vector2, _visual: bool) -> bool: return true
+	## Fixture-Eingabe: Das Einsteigen misst in Hex-Besuchen gegen den Zugangspunkt am Schiffsrumpf (seit b5227ab21), nicht gegen die
+	## Landeposition. Das gebundene ground_body_profile gibt es in dieser Attrappe nicht; der Zugangspunkt liegt hier auf der Landeposition (Feld (1,0)).
+	func get_campaign_ground_ship_access(_id: String) -> Dictionary: return {"ok":true,"position":fixture_lz}
 	func get_ground_ship_blocked_cells(_craft: String = "") -> Dictionary:
 		return {"ok":true,"registry_id":get_node("../SimulationRoot").get_hex_ground_terrain_registry().get_instance_id(),"source_signature":"fixture","blocked_cells":[]}
 	func finalize_station_craft_update() -> void: pass
@@ -30,6 +33,8 @@ var home_adapter: Node
 class BaseFlow extends Node:
 	var _all_team_units: Array = []
 	var _aircraft_location_by_craft := {}
+	## Die Basis liest die Heimat-Schiffsdefinitionen fuer ihre Sperrflaechen (_refresh_home_craft_blockers); hier gibt es keine ausser dem Shuttle.
+	var _homebase_aircraft_definitions: Array = []
 	var _location_registry = preload("res://scripts/mission/location_runtime_registry.gd").new()
 	func _find_pending_mission_craft_transfer(_id: String) -> Dictionary: return {}
 	func is_campaign_start() -> bool: return true
@@ -131,8 +136,14 @@ func _test_complete_return(station: Dictionary, service: RefCounted, recruit: St
 	flow._location_registry.register_location("polisa", station.scene)
 	var base = load("res://scripts/core/base_personnel_runtime.gd").new(); home.scene.add_child(base)
 	base._flow = flow; base._sim = home.sim; base._terrain = home.terrain; base._registry = home.units
-	base._layout = {"avatar_spawn_grid":[0,0],"interiors":[{"id":"habitat_cutaway_01","door_grid":[0,0]}],"beds":[],"landing_pads":[{"id":"homebase_pad_01","grid":[3,0],"interaction_grid":[3,0],"built":true}]}
+	# Eine echte Basis-Landeflaeche traegt ihre Lage ("plane", wie base_capacity_layout.gd sie erzeugt); ohne sie meldet
+	# preview_home_craft_arrival home_craft_geometry_unavailable und der Shuttle bekommt keinen Heimlandeplatz.
+	var pad_plane: Vector3 = load("res://scripts/meta/base_interior_navigation.gd").plane_at_grid(Vector2i(3,0))
+	base._layout = {"avatar_spawn_grid":[0,0],"interiors":[{"id":"habitat_cutaway_01","door_grid":[0,0]}],"beds":[],"landing_pads":[{"id":"homebase_pad_01","grid":[3,0],"plane":[pad_plane.x,pad_plane.z],"size":[8.0,6.0],"interaction_grid":[3,0],"built":true}]}
 	base._source_layout = {"beds":[]}; base._hex_required = true
+	# Die echte Basis besitzt einen Begehbarkeitsgraphen (base_personnel_runtime.gd Z. 238); das Einsteigen am Heimlandeplatz fragt ihn ab.
+	base._navigation_graph = load("res://scripts/meta/base_interior_navigation.gd").new()
+	base._navigation_graph.call("configure_graph", home.terrain)
 	var actor = load("res://scripts/core/base_personnel_actor.gd").new(); actor.unit_id=recruit; actor.visible=false; base.add_child(actor)
 	home.units.register_unit(recruit,actor); home.sim.register_known_unit(recruit,actor)
 	base._states[recruit] = {"unit_id":recruit,"name":"Recruit","status":"station","craft_id":"","bed_id":"","action":{},"last_result":{},"auto_rest_enabled":true}
