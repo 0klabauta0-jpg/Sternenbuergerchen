@@ -8,7 +8,10 @@ func run() -> void:
  view.configure(func(): return state, func(op, payload): calls.append([op,payload]); return {"ok":payload.get("craft_id", "") != "b", "message":"Kein Treibstoff"})
  var panel = view.find_child("SpaceWingPanel", true, false)
  panel.select_wing("one",false); panel.select_wing("two",true); calls.clear()
- view.call("_jump", "glut_1a_orbit", "orbit_1")
+ # Stufe 1: Klick merkt vor, erst Start springt (fuer das ganze Geschwader).
+ view.call("_preview_jump", "glut_1a_orbit", "orbit_1")
+ if not calls.is_empty(): printerr("FAIL: Vormerken darf noch keinen Sprung senden")
+ view.call("_start_pending")
  var ids := []
  for call in calls:
   if call[0] == "space_start_quantum": ids.append(call[1].craft_id)

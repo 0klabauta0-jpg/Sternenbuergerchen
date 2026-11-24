@@ -5,7 +5,12 @@ const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const WORLD = preload("res://scripts/ui/star_map_world_view.gd")
 const SYSTEM = preload("res://scripts/core/singleplayer_space_travel_state.gd")
 signal body_selected(body_id: String)
+## Bleibt als Signal erhalten (Altweg); Klicks auf der Karte senden seit Stufe 1 nur noch orbit_previewed. Erst "Start" der Sternkarte fliegt los.
 signal orbit_requested(orbit_id: String, marker_id: String)
+## Klick (links oder rechts) auf einen Orbitmarker: das Ziel wird nur vorgemerkt, der Kurs gezeigt.
+signal orbit_previewed(orbit_id: String, marker_id: String)
+## Rechtsklick ohne Ziehen auf freier Flaeche: ein vorgemerktes Ziel verwerfen.
+signal preview_cleared
 signal location_selected(location_id: String)
 signal craft_selected(craft_id: String)
 signal crafts_box_selected(craft_ids: Array, additive: bool)
@@ -33,6 +38,10 @@ var _warp_afterglow: float = 0.0
 var _drag_button: int = 0
 var _drag_position := Vector2.ZERO
 var _recenter: Button
+var _drag_moved := 0.0
+var _preview_points := PackedVector2Array()
+var _preview_target := Vector2.ZERO
+var _preview_cells := 0
 const MIN_ZOOM := 0.55
 const MAX_ZOOM := 32.0
 const MIN_ORBIT_RADIUS_PX := 10.0
@@ -213,6 +222,30 @@ func focus_body(body_id: String) -> void:
 	_camera_pan = (Vector2(0.5, 0.5) - GRID.pair(body.position)) * _screen_scale()
 	_layout_buttons()
 
+## Kurs-Vorschau (vor dem Start): Linie vom Schiff zum vorgemerkten Ziel, beides in Kartenkoordinaten (0..1).
+func set_preview_course(origin: Vector2, destination: Vector2) -> void:
+	var control := GRID.route_control(origin, destination)
+	var points := PackedVector2Array()
+	for index in range(65):
+		points.append(GRID.route_point(origin, control, destination, float(index) / 64.0))
+	_preview_points = points
+	_preview_target = destination
+	_preview_cells = GRID.route(origin, control, destination).size()
+	queue_redraw()
+
+func clear_preview_course() -> void:
+	if _preview_points.is_empty(): return
+	_preview_points = PackedVector2Array()
+	_preview_cells = 0
+	queue_redraw()
+
+func get_preview_course() -> PackedVector2Array:
+	return _preview_points
+
+## Anzahl Felder der Vorschau-Strecke (Start- und Zielfeld eingeschlossen).
+func get_preview_cell_count() -> int:
+	return _preview_cells
+
 func body_at(point: Vector2) -> String:
 	for id: String in _bodies:
 		var body: Dictionary = _bodies[id]
@@ -234,14 +267,15 @@ func _gui_input(event: InputEvent) -> void:
 			if event.ctrl_pressed: crafts_box_selected.emit([craft_id], true)
 			else: craft_selected.emit(craft_id)
 		else:
+			# Marker zuerst: Kleine Koerper haben einen Mindest-Klickradius, der bei kleinem Zoom ihre Marker verdecken wuerde.
+			var target := orbit_marker_at(event.position)
+			if not target.is_empty() and GRID.can_jump_to_marker(_travel, target.orbit_id, target.marker_id):
+				orbit_previewed.emit(target.orbit_id, target.marker_id)
+				accept_event()
+				return
 			var body_id := body_at(event.position)
 			if not body_id.is_empty():
 				body_selected.emit(body_id)
-				accept_event()
-				return
-			var target := orbit_marker_at(event.position)
-			if not target.is_empty() and GRID.can_jump_to_marker(_travel, target.orbit_id, target.marker_id):
-				orbit_requested.emit(target.orbit_id, target.marker_id)
 				accept_event()
 				return
 		_selection_start = event.position
@@ -340,19 +374,24 @@ func _input(event: InputEvent) -> void:
 				if event.button_index == MOUSE_BUTTON_RIGHT:
 					var target := orbit_marker_at(point)
 					if not target.is_empty() and GRID.can_jump_to_marker(_travel, target.orbit_id, target.marker_id):
-						orbit_requested.emit(target.orbit_id, target.marker_id)
+						orbit_previewed.emit(target.orbit_id, target.marker_id)
 						get_viewport().set_input_as_handled()
 						return
 				_drag_button = event.button_index
 				_drag_position = point
+				_drag_moved = 0.0
 				# Intercept before Button receives press and captures GUI mouse focus.
 				get_viewport().set_input_as_handled()
 		return
 	if event is InputEventMouseButton and event.button_index == _drag_button and not event.pressed:
+		# Rechtsklick ohne Ziehen auf freier Flaeche verwirft ein vorgemerktes Ziel.
+		if _drag_button == MOUSE_BUTTON_RIGHT and _drag_moved < 4.0:
+			preview_cleared.emit()
 		_drag_button = 0
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion:
 		var cursor: Vector2 = get_global_transform_with_canvas().affine_inverse() * event.global_position
+		_drag_moved += cursor.distance_to(_drag_position)
 		pan_by(cursor - _drag_position)
 		_drag_position = cursor
 		get_viewport().set_input_as_handled()
@@ -418,6 +457,7 @@ func _draw() -> void:
 	for factor in [2.6, 2.1, 1.65, 1.3]:
 		draw_circle(sun_center, sun_radius * factor, Color(0.99, 0.48, 0.1, 0.036), true, -1, true)
 	_draw_route()
+	_draw_preview_course()
 	_draw_warp_effect()
 	_draw_cutlass_exhaust()
 	draw_texture_rect(_world.get_texture(), Rect2(Vector2.ZERO, size), false)
@@ -460,6 +500,20 @@ func _draw() -> void:
 		var box := Rect2(_selection_start, _selection_end - _selection_start).abs()
 		draw_rect(box, Color(0.3, 0.85, 0.95, 0.18), true)
 		draw_rect(box, Color("77dce9"), false, 1.0)
+
+
+func _draw_preview_course() -> void:
+	if _preview_points.size() < 2: return
+	var line := PackedVector2Array()
+	for point in _preview_points: line.append(map_to_screen(point))
+	var gold := Color("f2c47c")
+	draw_polyline(line, Color(gold, 0.85), 2.0, true)
+	var end := line[line.size() - 1]
+	draw_arc(end, 13.0, 0.0, TAU, 28, gold, 2.0, true)
+	var back := line[line.size() - 4]
+	var tangent := (end - back).normalized()
+	var side := tangent.orthogonal()
+	draw_colored_polygon(PackedVector2Array([end + tangent * 6.0, end - tangent * 8.0 + side * 6.0, end - tangent * 8.0 - side * 6.0]), gold)
 
 
 ## Rechteck des Auftragsmarkers ("!" mit Strich ueber dem Ort), im Leinwandraum. Leer, wenn der Ort keinen angenommenen Auftrag hat.
