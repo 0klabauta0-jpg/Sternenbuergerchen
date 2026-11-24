@@ -35,6 +35,10 @@ var _refuel: Button
 var _return: Button
 var _feedback: Label
 var _availability_feedback:=false
+## Rueckfrage vor einem Rueckzug ("Zur Heimatbasis" mit offenen Auftragsschritten): bis dahin (Echtzeit-Millisekunden) heisst der Knopf "Rückzug?".
+## Die Regel selbst (4 s, fruehestens nach 0,4 s, welche Schritte offen sind) liegt beim Missions-Controller; hier steht nur die Anzeige.
+const RETREAT_ASK_MSEC := 4000
+var _return_asked_until_msec: int = 0
 
 var _sell: Button
 ## Handel H2: Benit aus der Warenboerse. _market_buttons: Ware -> Kaufknopf; _sell_extra: weitere Verkaufsknoepfe (der erste Verkaufsknopf ist _sell).
@@ -396,6 +400,8 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	_return.visible = not craft.is_empty() and String(craft.get("location_id", "homebase")) != "homebase"
 	var space: Dictionary = _snapshot.get("space_travel", {})
 	_return.text = "Zum Ortsorbit abheben" if String(space.get("phase", "")) == "surface" and String(space.get("craft_id", "")) == _selected_craft_id else "Zur Heimatbasis"
+	if Time.get_ticks_msec() < _return_asked_until_msec:
+		_return.text = "Rückzug?"
 	_return.disabled = bool(craft.get("busy", true)) or not available or _pending.has("return_homebase")
 	_return.tooltip_text = "Rückflug erst nach bestätigter Landung am Versorgungsort" if _return.disabled else "Rückflug für dieses Schiff anfordern"
 	if not available:
@@ -751,10 +757,25 @@ func _submit(operation: String, offer_id: String=OFFER_ID) -> void:
 		payload["quantity"] = 1
 	elif operation == "refuel":
 		payload["amount"] = _amount.value
+	elif operation == "return_homebase":
+		# Der Spielerknopf fragt vor einem Rueckzug nach (der Befehl return_homebase selbst bleibt unveraendert).
+		payload["ask_retreat"] = true
 	var pending: Dictionary = {"request_id": request_id, "payload": payload.duplicate(true), "revision": int(Dictionary(_snapshot.get("supply", {})).get("revision", -1)), "elapsed": false}
 	_pending[operation] = pending
 	button.disabled = true
 	var result: Dictionary = _command_handler.call(operation, payload)
+	if operation == "return_homebase":
+		if String(result.get("reason", "")) == "retreat_confirm_needed":
+			# Nur nachgefragt: kein Befehl ist offen, der Knopf bleibt druckbar und heisst "Rückzug?" (Frist laeuft im Controller).
+			_pending.erase(operation)
+			if Time.get_ticks_msec() >= _return_asked_until_msec:
+				_return_asked_until_msec = Time.get_ticks_msec() + RETREAT_ASK_MSEC
+				get_tree().create_timer(float(RETREAT_ASK_MSEC) / 1000.0 + 0.1, true, false, true).timeout.connect(refresh)
+			_feedback.text = String(result.get("message", "Rückzug? Auftrag gilt als abgebrochen."))
+			_availability_feedback = false
+			refresh()
+			return
+		_return_asked_until_msec = 0
 	pending["result"] = result.duplicate(true)
 	_feedback.text = String(result.get("message", result.get("reason", "Anfrage gesendet")))
 	_availability_feedback=false

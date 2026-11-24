@@ -1014,6 +1014,9 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		if _polisa_shuttle_dispatcher != null:
 			var service: Dictionary = request_polisa_service_departure(String(data.get("craft_id", "")))
 			if not service.get("ok", false) or service.get("handled", false): return service
+		# ask_retreat: nur der Knopf "Zur Heimatbasis" der Versorgung fragt vor einem Rueckzug nach; der Befehl selbst bleibt sonst unveraendert.
+		if bool(data.get("ask_retreat", false)):
+			return _flow.call("_request_singleplayer_return", String(data.get("craft_id", "")), true)
 		return _flow.call("_request_singleplayer_return", String(data.get("craft_id", "")))
 	return _reject("unknown_operation", "Kampagnenaktion nicht verfuegbar")
 
@@ -3173,6 +3176,9 @@ func _orphan_chip_note() -> String:
 		var job: Dictionary = jobs.get(id, {})
 		if String(job.get("status", "")) not in ["accepted", "failed"]: continue
 		if _find_campaign_chip_container("satellite_chip" if id == "satellite_recovery" else "outpost_chip", "").is_empty(): continue
+		# K4: "accepted" heisst, der Auftrag ist schon angenommen und noch offen (nichts erneut annehmen); nur "failed" muss neu angenommen werden.
+		if String(job.get("status", "")) == "accepted":
+			return "Datenchip vorhanden, aber der Auftrag „%s“ ist noch offen: Einsatz erneut fliegen und abschließen." % String(job.get("title", id))
 		return "Datenchip vorhanden, aber der Auftrag „%s“ gilt als abgebrochen. Im Smart Mobile den Auftrag erneut annehmen und den Einsatz noch einmal fliegen." % String(job.get("title", id))
 	return ""
 

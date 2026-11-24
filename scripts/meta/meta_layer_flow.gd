@@ -4546,6 +4546,9 @@ func _apply_campaign_casualty_rules(mission_instance: Node, preview_mode: bool) 
 	# Task 5c: der Abflug-Knopf der Schiffskarte laeuft ueber dieselbe Auswertung wie _request_singleplayer_return.
 	if tactical_controller != null and tactical_controller.has_method("set_campaign_departure_gate"):
 		tactical_controller.call("set_campaign_departure_gate", Callable(self, "_campaign_departure_gate") if not casualty_rules.is_empty() else Callable())
+	# Rueckflug-Knopf, K1: der Controller fragt lesend, ob der Treibstoff fuer den Abflug reicht, bevor er "Rueckflug laeuft" meldet.
+	if tactical_controller != null and tactical_controller.has_method("set_campaign_departure_fuel_check"):
+		tactical_controller.call("set_campaign_departure_fuel_check", Callable(self, "_departure_fuel_block") if is_campaign_start() and not preview_mode else Callable())
 
 
 func _sync_active_homebase_direct_selection_from_mission_setup() -> void:
@@ -9901,7 +9904,10 @@ func _refresh_singleplayer_services() -> void:
 		_singleplayer_services.call("fit_to_viewport")
 
 
-func _request_singleplayer_return(craft_id: String) -> Dictionary:
+## ask_retreat (nur die Bedienung "Zur Heimatbasis" der Versorgung setzt es): ein Abflug, der den Auftrag abbricht, fragt erst nach
+## (derselbe Zustand wie am Knopf der Schiffskarte: zweiter Druck innerhalb von 4 s, fruehestens nach 0,4 s). Ohne das Flag (Adapter-Befehl,
+## Polisa-Dispatcher) bleibt das Verhalten unveraendert.
+func _request_singleplayer_return(craft_id: String, ask_retreat: bool = false) -> Dictionary:
 	var visit: Node=get_mission_for_craft(craft_id)
 	if visit == null:
 		return {"ok": false, "reason": "no_active_visit", "message": "Kein laufender Ortsbesuch"}
@@ -9911,6 +9917,10 @@ func _request_singleplayer_return(craft_id: String) -> Dictionary:
 	var card: Dictionary = controller.call("_find_mission_dropship_card_entry", craft_id)
 	if not bool(controller.call("_can_request_mission_dropship_return", card)):
 		return {"ok": false, "reason": "return_blocked", "message": "Trupp und Schiff fuer Rueckflug vorbereiten"}
+	if ask_retreat and is_campaign_start() and controller.has_method("request_player_retreat_confirmation"):
+		var asked: Dictionary = controller.call("request_player_retreat_confirmation", craft_id)
+		if not bool(asked.get("confirmed", true)):
+			return {"ok": false, "reason": "retreat_confirm_needed", "retreat_confirm": true, "message": String(asked.get("message", "Rückzug? Auftrag gilt als abgebrochen."))}
 	if is_campaign_start():
 		var boarding: Dictionary = controller.call("request_campaign_crew_boarding", craft_id)
 		if not bool(boarding.get("ok", false)):
