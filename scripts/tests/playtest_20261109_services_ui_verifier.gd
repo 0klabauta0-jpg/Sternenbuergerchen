@@ -96,8 +96,12 @@ func _run() -> void:
 	await process_frame
 	_finish()
 
+## Der Dienstkontext hat den Aufbau des echten Adapters (singleplayer_runtime_adapter.gd _service_context): Kauf und Tanken schalten
+## nur frei, wenn "services" den Dienst nennt und der Platz bestaetigt ist (ground_service_verified), seit 8571be32c.
+## Das Serviceschiff waehlt die Oberflaeche nicht selbst, sondern liest es aus location_view (a4d5948c5); ohne dieses Feld
+## steht dort "Serviceschiff auswaehlen" und beide Aktionen bleiben gesperrt.
 func _snapshot() -> Dictionary:
-	return {"campaign": {}, "supply": _supply.get_supply_snapshot(), "crafts": [{"craft_id": "craft_one", "location_id": _location, "busy": _busy}], "service_contexts_by_craft_id": {"craft_one": {"location_id": _location, "craft_busy": _busy}} if not _busy else {}}
+	return {"campaign": {}, "location_view": {"location_id": _location, "craft_id": "craft_one"}, "supply": _supply.get_supply_snapshot(), "crafts": [{"craft_id": "craft_one", "location_id": _location, "busy": _busy}], "service_contexts_by_craft_id": {"craft_one": {"location_id": _location, "craft_busy": _busy, "ground_service_verified": true, "services": ["trade", "refuel"]}} if not _busy else {}}
 
 func _command(operation: String, payload: Dictionary) -> Dictionary:
 	_calls.append({"operation": operation, "payload": payload.duplicate(true)})
