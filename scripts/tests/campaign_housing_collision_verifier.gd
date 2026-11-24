@@ -12,12 +12,15 @@ func run() -> void:
 	await process_frame
 	var adapter: Node = flow.get("_singleplayer_runtime")
 	var base: Node = adapter.get_base_personnel_runtime()
-	var result: Dictionary = adapter.request_operation("campaign_build_housing", {"request_id":"housing-geometry"})
-	if not result.get("ok", false): check(false, "construct housing"); flow.queue_free(); await process_frame; quit(1); return
+	adapter._supply._credits = 10000 # Fixture only: the new campaign starts with fewer credits than one container.
+	# Alle vier Stellplaetze belegen: die Kapsel muss zu jedem Bett jedes Containers an den echten Modellen vorbeikommen.
+	for number in range(1, int(load("res://scripts/meta/base_capacity_layout.gd").hex_container_site_count()) + 1):
+		var result: Dictionary = adapter.request_operation("campaign_build_housing", {"request_id":"housing-geometry-%d" % number})
+		if not result.get("ok", false): check(false, "construct housing %d: %s" % [number, str(result)]); flow.queue_free(); await process_frame; quit(1); return
 	var layout: Dictionary = base.get_snapshot().layout
 	var stage := Node3D.new(); root.add_child(stage)
 	for asset: Dictionary in layout.assets:
-		if String(asset.id) not in ["habitat_cutaway_01", "freihafen_hall_01", "utility_fuel_01", "campaign_habitat_01"]: continue
+		if String(asset.id) not in ["habitat_cutaway_01", "freihafen_hall_01", "utility_fuel_01"] and not String(asset.id).begins_with("campaign_habitat_"): continue
 		var model: Node3D = load(asset.path).instantiate(); stage.add_child(model)
 		model.scale = Vector3.ONE * float(asset.scale); model.position = Vector3(asset.plane[0], 0, asset.plane[1])
 	await process_frame
@@ -30,12 +33,16 @@ func run() -> void:
 	var shape := CapsuleShape3D.new(); shape.radius = 0.18; shape.height = 0.65
 	var query := PhysicsShapeQueryParameters3D.new(); query.shape = shape
 	var terrain: Node = base.get_terrain_registry()
-	var nav = base._navigation_graph
 	var start: Vector2 = base.get_actor("campaign_leader").position
-	for index in range(2,4):
+	# Hex-Boden: der echte Hex-Wegfinder mit der echten Sperrmaske, nicht der alte Graph.
+	var blocked := {}
+	for cell in base.get_ground_ship_blocked_cells().blocked_cells: blocked[cell] = true
+	var pathfinder = load("res://scripts/terrain/terrain_pathfinder.gd").new()
+	for index in range(2, layout.beds.size()):
 		var bed: Dictionary = layout.beds[index]
 		var grid := Vector2i(int(bed.grid[0]), int(bed.grid[1]))
-		var path: Array = nav.find_world_path(start, terrain.grid_to_world(grid))
+		var path: Array = []
+		for cell: Vector2i in pathfinder.find_path_with_options(terrain.world_to_grid(start), grid, terrain, {"blocked_grids":blocked}): path.append(terrain.grid_to_world(cell))
 		var clear := not path.is_empty()
 		var previous := NAV.plane_at_grid(terrain.world_to_grid(start))
 		for point: Vector2 in path:
@@ -45,7 +52,8 @@ func run() -> void:
 			if not space.intersect_shape(query, 1).is_empty() or space.cast_motion(query)[0] < 0.99999:
 				print("BLOCKED at ", previous, " to ", current); clear = false; break
 			previous = current
-		check(clear, "capsule path avoids actual building meshes to indoor bed %d" % index)
+		check(clear, "capsule path avoids actual building meshes to indoor bed %d (%s)" % [index, String(bed.id)])
+	check(layout.beds.size() == 2 + 4 * int(load("res://scripts/meta/base_capacity_layout.gd").hex_container_site_count()), "alle Stellplaetze belegt, alle Betten geprueft (%d)" % layout.beds.size())
 	stage.queue_free(); flow.queue_free(); await process_frame
 	if failed == 0: print("CAMPAIGN_HOUSING_COLLISION_PASS")
 	quit(0 if failed == 0 else 1)

@@ -16,6 +16,10 @@ var _selected_craft_id: String = ""
 var _snapshot: Dictionary = {}
 var _pending: Dictionary = {}
 var _sequence: int = 0
+## Sitzungskennzeichen: Zeit plus Zufallszahl, einmal je Programmlauf (wie _request_session im Adapter). Der Zaehler
+## beginnt nach jedem Neustart wieder bei 1 und die Instanz-Id kann sich wiederholen; ohne Kennzeichen faende die
+## Versorgung den GESPEICHERTEN Beleg mit gleicher Id und meldete den neuen Kauf als Wiederholung (nichts gebaut).
+var _request_session: String = "%d-%d" % [int(Time.get_unix_time_from_system() * 1000.0), randi()]
 var _built: bool = false
 var _credits: Label
 var _items: Label
@@ -171,7 +175,8 @@ func _build() -> void:
 		var title_text:String=String(action[1]).trim_suffix(" herstellen")
 		if String(action[0])=="campaign_upload":title_text="Missionsdaten"
 		if String(action[0])=="campaign_build_pad":title_text="Zweites Landepad"
-		body.add_child(_label(title_text,18))
+		var title_label:=_label(title_text,18)
+		body.add_child(title_label)
 		var icon:=TextureRect.new();icon.custom_minimum_size=Vector2(80,80);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;body.add_child(icon)
 		var blueprint:String=String(Dictionary(action[2]).get("blueprint_id",""))
 		var paths:Dictionary={"light_armor":"res://Assets/curated/ui/campaign_inventory/armor_light.svg","mining_tool":"res://Assets/curated/ui/campaign_inventory/benit.svg","assault_rifle":"res://Assets/used/npc/blaster_kit/previews/blaster-a.png"}
@@ -189,7 +194,7 @@ func _build() -> void:
 		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;body.add_child(button);SKIN.button(button,true)
 		if String(action[0])=="campaign_fabricate":button.text="Herstellen"
 		if String(action[0])=="campaign_research":button.text="Entwickeln"
-		_campaign_buttons[key] = {"button":button,"operation":action[0],"payload":action[2],"card":card,"state_label":state}
+		_campaign_buttons[key] = {"button":button,"operation":action[0],"payload":action[2],"card":card,"state_label":state,"title_label":title_label}
 		button.pressed.connect(_submit_campaign.bind(key))
 	_feedback = _label("", 14)
 	_feedback.name = "ServiceFeedback"
@@ -403,7 +408,25 @@ func _apply_section() -> void:
 		action.state_label.text=String(action.button.tooltip_text) if action.button.disabled else (("Ohne Erwerbserlaubnis verfügbar" if free_recipe else "Erwerbserlaubnis freigeschaltet") if String(action.operation)=="campaign_fabricate" else "Aktion verfügbar")
 		if action.button.disabled and action.state_label.text.is_empty():action.state_label.text="Derzeit nicht verfügbar"
 		if String(action.operation)=="campaign_fabricate" and action.button.disabled:action.state_label.text="Gesperrt · Erwerbserlaubnis fehlt" if not (free_recipe or Array(_snapshot.get("supply",{}).get("blueprints",[])).has(String(action.payload.blueprint_id))) else String(action.button.tooltip_text)
-		if String(action.operation)=="campaign_build_housing":action.state_label.text="Gebaut: %d / 20 Betten" % int(_snapshot.get("supply", {}).get("campaign_beds", 2))
+		if String(action.operation)=="campaign_build_housing":
+			var offer:Dictionary=_snapshot.get("housing_offer",{})
+			var built_beds:int=int(_snapshot.get("supply", {}).get("campaign_beds", 2))
+			if bool(offer.get("container",false)):
+				var supply_script:GDScript=load("res://scripts/core/singleplayer_supply_state.gd")
+				var title:String="Wohncontainer mit vier Betten – %d Cr" % int(supply_script.CONTAINER_HOUSING_COST)
+				action.title_label.text="Wohncontainer mit vier Betten"
+				action.button.text=title
+				# Vorhandene Alt-Gebaeude haben nur zwei Betten; nur die freien Stellplaetze bringen je vier dazu.
+				var placed:Array=Array(_snapshot.get("supply", {}).get("campaign_housing_beds", [])).slice(0,int(offer.get("sites",0)))
+				var max_beds:int=2+int(supply_script.CONTAINER_HOUSING_BEDS)*maxi(0,int(offer.get("sites",0))-placed.size())
+				for placed_beds in placed:max_beds+=int(placed_beds)
+				action.state_label.text="Gebaut: %d / %d Betten" % [built_beds,max_beds]
+				var blocker:String=_housing_container_blocker(offer)
+				if action.button.disabled and not blocker.is_empty():
+					action.state_label.text+="\n"+blocker
+					action.button.tooltip_text=blocker
+			else:
+				action.state_label.text="Gebaut: %d / 20 Betten" % built_beds
 	for craft:Dictionary in _snapshot.get("crafts",[]):
 		if String(craft.get("craft_id",""))==_selected_craft_id:_ship_image.texture=SHIP_VISUALS.get_ui_preview_texture(craft)
 	_layout_cards()
@@ -446,6 +469,14 @@ func set_selected_craft(craft_id: String) -> bool:
 			return true
 	return false
 
+## Leer = Kauf moeglich, sonst der Grund als Text fuer den Spieler.
+func _housing_container_blocker(offer: Dictionary) -> String:
+	var supply: Dictionary = _snapshot.get("supply", {})
+	var supply_script: GDScript = load("res://scripts/core/singleplayer_supply_state.gd")
+	if int(supply.get("campaign_housing", 0)) >= int(offer.get("sites", 0)): return "Kein freier Stellplatz für einen weiteren Wohncontainer"
+	if int(supply.get("credits", 0)) < int(supply_script.CONTAINER_HOUSING_COST): return "Ein Wohncontainer kostet %d Credits" % int(supply_script.CONTAINER_HOUSING_COST)
+	return ""
+
 func _refresh_campaign_actions(supply: Dictionary) -> void:
 	var campaign: Dictionary = _snapshot.get("campaign",{})
 	var jobs: Dictionary = campaign.get("jobs",{})
@@ -481,7 +512,11 @@ func _refresh_campaign_actions(supply: Dictionary) -> void:
 				show = show and bool(progress.get("recruited_pilot",false)) and not bool(progress.get("second_pad_built",false))
 				enabled = bool(home_services.get("all_at_home", false))
 			"campaign_build_housing":
-				enabled = int(supply.get("credits", 0)) >= 500 and int(supply.get("campaign_housing", 0)) < 9
+				var housing_offer:Dictionary=_snapshot.get("housing_offer",{})
+				if bool(housing_offer.get("container",false)):
+					enabled = _housing_container_blocker(housing_offer).is_empty()
+				else:
+					enabled = int(supply.get("credits", 0)) >= 500 and int(supply.get("campaign_housing", 0)) < 9
 			"campaign_fabricate":
 				show = Array(supply.get("blueprints",[])).has(String(action.payload.blueprint_id)) or load("res://scripts/core/singleplayer_supply_state.gd").is_free_recipe(String(action.payload.blueprint_id))
 				var quote: Dictionary = supply.get("research", {}).get("fabrication", {}).get(String(action.payload.blueprint_id), {})
@@ -503,7 +538,7 @@ func _submit_campaign(key: String) -> void:
 	var payload: Dictionary = Dictionary(action.payload).duplicate(true)
 	payload["craft_id"] = _selected_craft_id
 	_sequence += 1
-	payload["request_id"] = "campaign-service:%d:%d" % [get_instance_id(),_sequence]
+	payload["request_id"] = "campaign-service:%d:%s:%d" % [get_instance_id(),_request_session,_sequence]
 	var result: Dictionary = _command_handler.call(String(action.operation),payload)
 	_feedback.text = String(result.get("message",result.get("reason","Aktion bestätigt")))
 	refresh()

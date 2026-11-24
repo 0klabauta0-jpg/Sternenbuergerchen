@@ -125,7 +125,7 @@ func register_craft(craft_id: String, initial_fuel: float = -1.0) -> bool:
 	return true
 
 func get_supply_snapshot() -> Dictionary:
-	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "emergency_fuel": Dictionary(_definitions.get("emergency_fuel", {})).duplicate(true), "debt": Dictionary(_definitions.get("debt", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory_view(), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "station_home_pads": get_station_home_pads()}
+	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "campaign_housing_beds":get_campaign_housing_beds(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "emergency_fuel": Dictionary(_definitions.get("emergency_fuel", {})).duplicate(true), "debt": Dictionary(_definitions.get("debt", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory_view(), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "station_home_pads": get_station_home_pads()}
 
 func get_research_snapshot() -> Dictionary:
 	if _research_snapshot_revision != _revision:
@@ -774,7 +774,8 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_sync_compartments(false)
 	return {"ok":true}
 
-func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: bool = false) -> void:
+## `bag_capacity` >= 0: Rucksackplaetze fuer neue Personen trotz Fach (Skirmish behaelt die 12); -1 = Kampagnenregel (0).
+func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: bool = false, bag_capacity: int = -1) -> void:
 	if not _inventory.has("station:trade_outpost:lift"):
 		_inventory["station:trade_outpost:lift"]={"capacity":256,"items":{}}
 	if not _inventory.has("station:polisa:lift"):
@@ -789,7 +790,7 @@ func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: 
 	for id in unit_ids:
 		var key := "unit:"+String(id)+":backpack"
 		if not _inventory.has(key):
-			_inventory[key] = {"capacity": 0 if campaign_personnel else INVENTORY.BACKPACK_CAPACITY, "items": {}}
+			_inventory[key] = {"capacity": bag_capacity if bag_capacity >= 0 else (0 if campaign_personnel else INVENTORY.BACKPACK_CAPACITY), "items": {}}
 			if campaign_personnel:
 				_inventory[key].armor_chip_capacity = INVENTORY.ARMOR_CHIP_CAPACITY
 		elif campaign_personnel and not _inventory[key].has("armor_chip_capacity"):
@@ -904,6 +905,9 @@ func _inventory_transfer(payload: Dictionary, context: Dictionary) -> Dictionary
 	var destination: Dictionary = _inventory[target]
 	var fits := INVENTORY.has_space(destination, item, amount) if destination.has("armor_chip_capacity") else INVENTORY.used(to) + amount <= int(destination.capacity)
 	if not fits:
+		# M6b (B5): Magazin, Fach voll, kein Rucksack getragen -> der Hinweis nennt den Ausweg.
+		if destination.has("armor_chip_capacity") and int(destination.capacity) <= 0 and INVENTORY.AMMO_RULES.is_ammo_item(item, INVENTORY.ammo_rules()) and INVENTORY.compartment_used(destination) >= int(destination.armor_chip_capacity):
+			return _reject("container_full", "Fach voll – mit einem Rucksack passen mehr Magazine hinein.")
 		return _reject("container_full", "Kein freier Platz im Zielcontainer")
 	from[item]=int(from[item])-amount
 	if from[item]==0: from.erase(item)
@@ -1130,8 +1134,8 @@ func person_magazine_count(unit_id: String, ammo_class: String) -> int:
 func person_has_container(unit_id: String) -> bool:
 	return _inventory.has("unit:" + unit_id + ":backpack")
 
-## Kampagnenmodus der Munition (nicht gespeichert, vom Adapter je Lauf gesetzt): NUR dort zaehlt der Magazinvorrat der Person.
-## Ausserhalb (Skirmish, Mehrspieler, Testlagen ohne Kampagnenstand) gibt es weder Startausstattung noch Auffuellen, also
+## Magazinmodus der Munition (nicht gespeichert, vom Adapter je Lauf gesetzt): nur dort zaehlt der Magazinvorrat der Person.
+## Er gilt in Kampagne UND Skirmish (Startausstattung, Auffuellen von Hand). Ausserhalb (Mehrspieler, Testlagen ohne Kampagnenstand)
 ## haben alle Einheiten unbegrenzte Reserve wie die Gegner (nachladen muessen sie weiter, die Magazingroesse gilt weiter).
 var _campaign_magazine_mode: bool = false
 
@@ -1208,6 +1212,20 @@ func fill_person_compartments(unit_ids: Array, from_base: bool) -> Dictionary:
 	var short_text := ("Munition knapp: %d %s." % [short, "Fach blieb leer" if short == 1 else "Fächer blieben leer"]) if from_base and short > 0 else ""
 	if not short_text.is_empty(): parts.append(short_text)
 	return {"added": added, "short": short, "message": " ".join(parts), "short_message": short_text}
+
+## M6b (B1): Wie viele der Personen haben ein LEERES Fach (gar kein Magazin, gleich welcher Sorte, in Fach oder Rucksack)? Nur lesen, nichts bewegen.
+## Personen ohne Behaelter, ohne Fach oder ohne Waffe mit Munitionsbedarf zaehlen nicht.
+func count_empty_compartments(unit_ids: Array) -> int:
+	_sync_compartments()
+	var empty := 0
+	for id in unit_ids:
+		var key := "unit:" + String(id) + ":backpack"
+		if not _inventory.has(key) or not Dictionary(_inventory[key]).has("armor_chip_capacity"): continue
+		if int(Dictionary(_inventory[key]).armor_chip_capacity) <= 0: continue
+		var item := _ammo_class_of_person(String(id))
+		if item.is_empty(): continue
+		if INVENTORY.count_ammo(Dictionary(_inventory[key]).items) <= 0: empty += 1
+	return empty
 
 ## Einmal je Spielstand: 16 leichte und 8 Gewehr-Magazine ins Basislager (Zahlen: ammo_rules.json start_base_stock, soweit sie
 ## ins Lager passen) und volle Faecher fuer die Personen. Gibt true zurueck, wenn jetzt gewaehrt wurde; mit dem Merker nie wieder.
@@ -1515,6 +1533,31 @@ func _campaign_set_room_door(payload: Dictionary, context: Dictionary) -> Dictio
 	_revision += 1
 	return {"ok":true, "sequence":int(replay.sequence)+1, "cost":0, "room_id":payload.room_id, "side":int(payload.side), "open":bool(payload.open), "message":"Türöffnung gebaut" if payload.open else "Türöffnung entfernt"}
 
+## Wohncontainer auf Hex-Boden: ein Kauf, vier Betten. Der Preis ist vorlaeufig.
+const CONTAINER_HOUSING_COST := 1000
+const CONTAINER_HOUSING_BEDS := 4
+## Alte Unterkunft (verschobene Habitat-Kopie): 500 Credits, zwei Betten, Beleg ohne Bettenangabe.
+const LEGACY_HOUSING_COST := 500
+const LEGACY_HOUSING_BEDS := 2
+
+## Betten je Gebaeude in der Reihenfolge der Gebaeudenummer. Beleg ohne Angabe = alte Unterkunft = 2.
+func get_campaign_housing_beds() -> Array:
+	var count := get_campaign_housing_count()
+	var result: Array = []
+	for index in range(count): result.append(LEGACY_HOUSING_BEDS)
+	for entry: Dictionary in _requests.values():
+		var receipt: Dictionary = entry.get("result", {})
+		if receipt.get("operation") != "campaign_build_housing": continue
+		var number := int(receipt.get("housing_count", 0))
+		if number >= 1 and number <= count: result[number - 1] = int(receipt.get("beds", LEGACY_HOUSING_BEDS))
+	# Hex-Basis: nur so viele Gebaeude, wie Stellplaetze existieren (Belege darueber bleiben gueltig, zaehlen aber nicht).
+	if _housing_site_limit >= 0 and result.size() > _housing_site_limit: result = result.slice(0, _housing_site_limit)
+	return result
+
+## Laufzeit-Grenze (nicht gespeichert): Zahl der Gebaeude-Stellplaetze der Heimatbasis; -1 = unbegrenzt.
+var _housing_site_limit := -1
+func set_housing_site_limit(limit: int) -> void: _housing_site_limit = limit
+
 func get_campaign_housing_count() -> int:
 	var count := 0
 	var legacy_beds := 2
@@ -1528,22 +1571,33 @@ func _campaign_build_housing(payload: Dictionary, context: Dictionary) -> Dictio
 	if not payload.is_empty(): return _reject("invalid_housing_request", "Ungültiger Bauauftrag")
 	if context.get("campaign_authorized") != true or context.get("at_home") != true: return _reject("home_required", "Unterkunftsbau nur an der Heimatbasis")
 	var count := get_campaign_housing_count()
-	if count >= 9: return _reject("housing_limit", "Alle Unterkunftsbauplätze sind belegt")
-	if _credits < 500: return _reject("insufficient_credits", "Eine Unterkunft kostet 500 Credits")
+	var container: bool = context.get("campaign_housing_container") == true
+	if container:
+		if count >= int(context.get("campaign_housing_limit", 0)): return _reject("housing_limit", "Kein freier Stellplatz für einen weiteren Wohncontainer")
+		if _credits < CONTAINER_HOUSING_COST: return _reject("insufficient_credits", "Ein Wohncontainer kostet %d Credits" % CONTAINER_HOUSING_COST)
+	else:
+		if count >= 9: return _reject("housing_limit", "Alle Unterkunftsbauplätze sind belegt")
+		if _credits < LEGACY_HOUSING_COST: return _reject("insufficient_credits", "Eine Unterkunft kostet 500 Credits")
 	var builder: Callable = context.get("campaign_housing_builder", Callable())
 	if not builder.is_valid(): return _reject("base_unavailable", "Bauplatz ist nicht verfügbar")
 	var result: Dictionary = builder.call(count + 1)
 	if not result.get("ok", false): return result
 	if result.get("housing_count") != count + 1: return _reject("housing_build_mismatch", "Unterkunftsbau konnte nicht bestätigt werden")
-	_credits -= 500; _revision += 1
-	return {"ok":true,"housing_count":count + 1,"cost":500,"message":"Unterkunft gebaut"}
+	if container:
+		_credits -= CONTAINER_HOUSING_COST; _revision += 1
+		return {"ok":true,"housing_count":count + 1,"cost":CONTAINER_HOUSING_COST,"beds":CONTAINER_HOUSING_BEDS,"message":"Wohncontainer mit vier Betten gebaut"}
+	_credits -= LEGACY_HOUSING_COST; _revision += 1
+	return {"ok":true,"housing_count":count + 1,"cost":LEGACY_HOUSING_COST,"message":"Unterkunft gebaut"}
 
 func get_campaign_bed_count() -> int:
-	var count := 2 + 2 * get_campaign_housing_count()
+	var count := 2
+	for housing_beds in get_campaign_housing_beds(): count += int(housing_beds)
+	var buildable := count
 	for entry: Dictionary in _requests.values():
 		var result: Dictionary = entry.get("result", {})
 		if result.get("operation") == "campaign_build_bed": count = maxi(count, int(result.get("bed_count", 2)))
-	return count
+	# Nie mehr Betten melden, als auf den Stellplaetzen wirklich gebaut werden koennen.
+	return mini(count, buildable) if _housing_site_limit >= 0 else count
 
 func _campaign_build_bed(payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not payload.is_empty(): return _reject("invalid_bed_request", "Ungültiger Bauauftrag")
@@ -1569,7 +1623,11 @@ func _valid_campaign_bed_requests(requests: Dictionary) -> bool:
 		if result.get("operation") == "campaign_build_housing":
 			var housing_signature: Variant = JSON.parse_string(String(entry.get("signature", "")))
 			if typeof(housing_signature) != TYPE_DICTIONARY or not Dictionary(housing_signature.get("payload", {})).is_empty(): return false
-			if not _valid_nonnegative_integer(result.get("housing_count")) or result.get("cost") != 500: return false
+			if not _valid_nonnegative_integer(result.get("housing_count")): return false
+			# Alter Beleg: 500 Credits ohne Bettenangabe. Neuer Beleg: 1000 Credits und genau vier Betten.
+			var legacy_receipt: bool = result.get("cost") == LEGACY_HOUSING_COST and not result.has("beds")
+			var container_receipt: bool = result.get("cost") == CONTAINER_HOUSING_COST and result.get("beds") == CONTAINER_HOUSING_BEDS
+			if not legacy_receipt and not container_receipt: return false
 			var house := int(result.housing_count)
 			if house < 1 or house > 9 or houses.has(house): return false
 			houses.append(house)

@@ -66,7 +66,13 @@ var _identity_model_write_only:=false
 @export_multiline var loadout_summary: String = ""
 @export var armor_id: String = "medium"
 @export var weapon_1_id: String = "rifle"
+## M6c (W2): "rifle" ist nur die Vorgabe (Rueckfall, wenn Waffe 1 keine Angriffswaffe ist) und KEINE ausgeruestete Zweitwaffe. Das Merkmal
+## _weapon_2_explicit wird wahr, sobald die Ausruestung / die Spawn-Daten Waffe 2 ueber apply_identity_config setzen (der einzige Weg im Spiel;
+## bewusst KEIN Setter an weapon_2_id: Node.duplicate() schriebe sonst die Vorgabe zurueck und machte sie zur "gesetzten" Waffe). Nur der
+## Waffenwechsel im Gefecht fragt es ab (is_weapon_2_explicit). get_active_weapon_id bleibt davon unberuehrt.
 @export var weapon_2_id: String = "rifle"
+var _weapon_2_explicit: bool = false
+var _combat_weapon_slot: int = 1
 @export var team_id: String = "team_test":
 	set(value):
 		if team_id == value:
@@ -228,8 +234,27 @@ func get_weapon_2_id() -> String:
 	return weapon_2_id
 
 
+## M6c (W2): wurde Waffe 2 ausdruecklich gesetzt (false = nur die Vorgabe)? Nur dann darf der Gefechtstreiber darauf wechseln.
+func is_weapon_2_explicit() -> bool:
+	return _weapon_2_explicit
+
+
 func get_active_weapon_id() -> String:
 	return _resolve_active_combat_weapon_id()
+
+
+## M6c: aktiver Waffenplatz im Gefecht (1 = Hauptwaffe, 2 = Zweitwaffe). Vorgabe 1 = Verhalten wie bisher. Den Platz setzt der
+## Gefechtstreiber, wenn die Hauptwaffe ganz leer ist; er ist fluechtig (nicht im Speicherstand, nicht im Netz-Snapshot).
+func get_combat_weapon_slot() -> int:
+	return _combat_weapon_slot
+
+
+func set_combat_weapon_slot(slot: int) -> void:
+	var normalized: int = 2 if slot == 2 else 1
+	if normalized == _combat_weapon_slot:
+		return
+	_combat_weapon_slot = normalized
+	_refresh_weapon_visual()
 
 
 func has_loadout_item(item_id: String) -> bool:
@@ -622,6 +647,7 @@ func apply_identity_config(identity_config: Dictionary, publish_visuals:bool=tru
 
 	if identity_config.has("weapon_2") or identity_config.has("weapon_2_id"):
 		weapon_2_id = WEAPON_DATA_SCRIPT.sanitize_weapon_id(String(identity_config.get("weapon_2_id", identity_config.get("weapon_2", WEAPON_DATA_SCRIPT.DEFAULT_WEAPON_ID))))
+		_weapon_2_explicit = true
 
 	if identity_config.has("team_id"):
 		team_id = String(identity_config["team_id"]).strip_edges()
@@ -1289,6 +1315,10 @@ func _refresh_weapon_visual() -> void:
 
 
 func _resolve_active_combat_weapon_id() -> String:
+	if _combat_weapon_slot == 2:
+		var switched_weapon_id: String = WEAPON_DATA_SCRIPT.sanitize_weapon_id(weapon_2_id)
+		if WEAPON_DATA_SCRIPT.is_attack_weapon_id(switched_weapon_id):
+			return switched_weapon_id
 	var primary_weapon_id: String = WEAPON_DATA_SCRIPT.sanitize_weapon_id(weapon_1_id)
 	if WEAPON_DATA_SCRIPT.is_attack_weapon_id(primary_weapon_id):
 		return primary_weapon_id
@@ -1299,6 +1329,8 @@ func _resolve_active_combat_weapon_id() -> String:
 
 
 func _resolve_visual_weapon_id() -> String:
+	if _combat_weapon_slot == 2:
+		return _resolve_active_combat_weapon_id()
 	var primary_weapon_id: String = WEAPON_DATA_SCRIPT.sanitize_weapon_id(weapon_1_id)
 	if WEAPON_DATA_SCRIPT.is_valid_weapon_id(primary_weapon_id):
 		return primary_weapon_id

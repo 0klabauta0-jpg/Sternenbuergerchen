@@ -426,7 +426,19 @@ func _run() -> void:
 	_check(await _wait(func(): return String(_campaign().jobs.satellite_recovery.status)=="pending_upload",10000,"real chip recovered awaits upload"),"pending status")
 	_check(int(_supply().credits)==int(before.credits),"no reward before physical home upload")
 	if not await _wait_homebase(): await _finish(); return
-	if not _drain_person.is_empty(): _check(_bag_count(_drain_person, _drain_class) > 0, "M4e: Heimkehr fuellt das leergeschossene Fach aus dem Lager wieder auf (%d Magazine)" % _bag_count(_drain_person, _drain_class))
+	if not _drain_person.is_empty():
+		# M6b (alt: "Heimkehr fuellt das Fach wieder auf"): die Heimkehr bewegt nichts; von Hand 1 Magazin vom Basislager ins Fach, echter Befehlsweg des Inventar-Fensters.
+		_check(_bag_count(_drain_person, _drain_class) == 0, "M6b: Heimkehr fuellt das leergeschossene Fach NICHT mehr auf (%d Magazine)" % _bag_count(_drain_person, _drain_class))
+		var base_items: Dictionary = Dictionary(Dictionary(Dictionary(_supply().get("inventory", {})).get("base:homebase", {})).get("items", {}))
+		var base_before := int(base_items.get(_drain_class, 0))
+		# Die Besatzung sitzt nach der Landung an Bord: der Zug geht ueber den echten Bildschirmweg des Inventar-Fensters (request_operation), ohne Aussteigen.
+		var transfer := {"unit_id": _drain_person, "craft_id": _craft_id, "item_id": _drain_class, "amount": 1, "source_container_id": "base:homebase", "destination_container_id": "unit:%s:backpack" % _drain_person, "request_id": "m6b-handfill"}
+		# Vorbedingung des K1-Wegs: die Person ist wirklich AN BORD und das Schiff steht an der Heimatbasis gelandet (sonst wuerde der alte Weg gelten).
+		_check(String(_runtime.call("_aboard_status_craft", _drain_person)) == _craft_id, "M6b: vor dem Handauffuellen ist die Person an Bord ihres Schiffs")
+		_check(bool(_runtime.call("_craft_grounded_at_home", _craft_id)), "M6b: vor dem Handauffuellen steht das Schiff an der Heimatbasis gelandet")
+		var hand: Dictionary = _screen.call("request_operation", "inventory_transfer", transfer)
+		var base_after := int(Dictionary(Dictionary(Dictionary(_supply().get("inventory", {})).get("base:homebase", {})).get("items", {})).get(_drain_class, 0))
+		_check(bool(hand.get("ok", false)) and _bag_count(_drain_person, _drain_class) == 1 and base_after == base_before - 1, "M6b: von Hand 1 Magazin %s vom Basislager ins Fach (Fach %d, Lager %d -> %d, %s)" % [_drain_class, _bag_count(_drain_person, _drain_class), base_before, base_after, str(hand.get("reason", "ok"))])
 	_flow.call("_show_homebase")
 	var result: Dictionary=_runtime.call("request_operation","campaign_upload",{"job_id":"satellite_recovery"})
 	print("UPLOAD_RESULT ",result)

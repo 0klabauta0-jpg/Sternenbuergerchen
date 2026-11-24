@@ -65,8 +65,10 @@ static func preflight_campaign_hex_checkpoint(flow: Node, payload: Dictionary) -
 	if not restored.get("ok", false):
 		candidate.member_reader.free(); candidate.free()
 		return restored
+	supply.set_housing_site_limit(load("res://scripts/meta/base_capacity_layout.gd").hex_container_site_count())
 	candidate.set_meta("campaign_built_beds", supply.get_campaign_bed_count())
 	candidate.set_meta("campaign_built_housing", supply.get_campaign_housing_count())
+	candidate.set_meta("campaign_built_housing_beds", supply.get_campaign_housing_beds())
 	if supply.get_station_home_pads() > 2: candidate.set_meta("skirmish_infrastructure", {"pads":supply.get_station_home_pads()})
 	# No main scene or live Flow configure. The new isolated subtree is freed
 	# synchronously, without a tick, whether candidate preparation succeeds or fails.
@@ -141,6 +143,8 @@ var _recruit_candidate_signature := ""
 var _recruit_candidates: Array = []
 var _resource_owners: Dictionary = {}
 var _campaign_mode := false
+## M6b (B3): offenes Skirmish (Preset-Start). Es teilt mit der Kampagne den Magazinvorrat in der Versorgung (Fach, Startausstattung, Drag and Drop).
+var _skirmish_mode := false
 var _space_route_requested := false
 var _local_warp_arrival_enabled := false
 ## Enabled only after the local-flight checkpoint join supports safe resume.
@@ -165,7 +169,8 @@ func configure(flow: Node, screen: Control) -> void:
 	_travel.configure()
 	_space_encounter = load("res://scripts/core/campaign_space_encounter.gd").new()
 	_campaign_mode = bool(_flow.call("is_campaign_start"))
-	_supply.set_campaign_magazine_mode(_campaign_mode)  # M4c: Magazinvorrat der Person zaehlt nur in der Kampagne
+	_skirmish_mode = not _campaign_mode and _flow.has_meta("skirmish_preset_id")
+	_supply.set_campaign_magazine_mode(_campaign_mode or _skirmish_mode)  # M4c/M6b: Magazinvorrat der Person zaehlt in Kampagne und Skirmish
 	if _campaign_mode:
 		_onboarding = load("res://scripts/core/campaign_onboarding_state.gd").new()
 		_onboarding.configure()
@@ -218,8 +223,12 @@ func configure(flow: Node, screen: Control) -> void:
 					push_error("Invalid Warp equipment checkpoint")
 					return
 	if _campaign_mode:
+		# Heimatbasis auf Hex-Boden (die Kampagnenbasis ist immer Hex-Boden, auch bei einem Altstand ohne hex_tactical):
+		# Betten der Versorgung auf die echten Stellplaetze begrenzen.
+		_supply.set_housing_site_limit(load("res://scripts/meta/base_capacity_layout.gd").hex_container_site_count())
 		_flow.set_meta("campaign_built_beds", _supply.get_campaign_bed_count())
 		_flow.set_meta("campaign_built_housing", _supply.get_campaign_housing_count())
+		_flow.set_meta("campaign_built_housing_beds", _supply.get_campaign_housing_beds())
 	if _campaign_mode or _flow.has_meta("skirmish_preset_id"):
 		_base_personnel = load("res://scripts/core/base_personnel_runtime.gd").new()
 		_base_personnel.name = "BasePersonnelRuntime"
@@ -237,7 +246,7 @@ func configure(flow: Node, screen: Control) -> void:
 	var inventory_crafts: Array = []
 	for unit in Array(_flow.get("_all_team_units")): inventory_units.append(String(unit.get("unit_id","")))
 	for craft in Array(_flow.get("_homebase_aircraft_definitions")): inventory_crafts.append(String(craft.get("craft_id","")))
-	_supply.configure_inventory(inventory_units, inventory_crafts, _campaign_mode or _skirmish_economy != null)
+	_supply.configure_inventory(inventory_units, inventory_crafts, _campaign_mode or _skirmish_mode or _skirmish_economy != null, _skirmish_bag_capacity())
 	if _campaign_mode and Dictionary(_flow.get("_campaign_start").get("checkpoint")).is_empty():
 		_supply.call("configure_start_inventory","campaign")
 	if _flow.has_meta("skirmish_preset_id") and not _flow.has_meta("skirmish_restore_payload"):
@@ -261,6 +270,7 @@ func configure(flow: Node, screen: Control) -> void:
 			_simulation.set_physics_process(not bool(_flow.get("_campaign_start").get("active_restore_in_progress")))
 	if _campaign_mode and is_instance_valid(_base_personnel):
 		_base_personnel.reconcile_restored_ship_overlap(Dictionary(_flow.get("_campaign_start").get("checkpoint")))
+		_base_personnel.reconcile_restored_hex_footprint()
 	if _screen.has_method("configure_singleplayer_bridge"):
 		_screen.call("configure_singleplayer_bridge", get_snapshot, request_operation)
 	var catalog: Array = [] if _campaign_mode else Array(_flow.get("_mission_catalog")).duplicate(true)
@@ -628,7 +638,7 @@ func get_snapshot() -> Dictionary:
 		var context: Dictionary = _service_context(id)
 		if not context.is_empty():
 			service_contexts[id] = context
-	return {"space_wings": _simulation.get_space_wing_snapshot(), "ship_equipment": _ship_equipment.get_snapshot() if _ship_equipment != null else {}, "location_view": _flow.call("get_location_view_snapshot") if _flow.has_method("get_location_view_snapshot") else {}, "home_services": _home_services_snapshot(), "skirmish_economy": economy, "campaign": campaign, "supply": _supply.get_supply_snapshot(), "emergency_tanker": _tanker.get_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "base_personnel": _base_personnel.get_snapshot() if _base_personnel != null else {}, "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}, "space_travel": travel, "space_encounter":_space_encounter.get_snapshot(), "space_launch_readiness_by_craft_id": launch_readiness,"location_runtimes":_flow.call("get_location_runtime_snapshot"),"checkpoint_guard":get_world_checkpoint_guard()}
+	return {"space_wings": _simulation.get_space_wing_snapshot(), "ship_equipment": _ship_equipment.get_snapshot() if _ship_equipment != null else {}, "location_view": _flow.call("get_location_view_snapshot") if _flow.has_method("get_location_view_snapshot") else {}, "home_services": _home_services_snapshot(), "skirmish_economy": economy, "campaign": campaign, "supply": _supply.get_supply_snapshot(), "housing_offer": _housing_offer(), "emergency_tanker": _tanker.get_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "base_personnel": _base_personnel.get_snapshot() if _base_personnel != null else {}, "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}, "space_travel": travel, "space_encounter":_space_encounter.get_snapshot(), "space_launch_readiness_by_craft_id": launch_readiness,"location_runtimes":_flow.call("get_location_runtime_snapshot"),"checkpoint_guard":get_world_checkpoint_guard()}
 
 func sync_crafts() -> void:
 	# Lifecycle event only, called when real craft definitions change. Read paths
@@ -652,7 +662,7 @@ func sync_crafts() -> void:
 			_departure_token_by_craft.erase(craft_id)
 	var inventory_units: Array=[]
 	for unit in Array(_flow.get("_all_team_units")): inventory_units.append(String(unit.get("unit_id","")))
-	_supply.configure_inventory(inventory_units, actual.keys(), _campaign_mode or _skirmish_economy != null)
+	_supply.configure_inventory(inventory_units, actual.keys(), _campaign_mode or _skirmish_mode or _skirmish_economy != null, _skirmish_bag_capacity())
 	for craft_id in actual:
 		_supply.register_craft(String(craft_id))
 		_travel.register_craft(String(craft_id))
@@ -712,7 +722,7 @@ func bind_mission_air_support(mission: Node) -> Dictionary:
 	var mission_root: Node = mission.get_node_or_null("SimulationRoot")
 	if mission_root == null or _simulation == null: return {"ok":false, "reason":"runtime_unavailable"}
 	# M4e: nur in der Kampagne zaehlt der Magazinvorrat der Person auch im Einsatz (schmaler Verweis, kein Besitzerwechsel).
-	if _campaign_mode and _supply != null and mission_root.has_method("bind_mission_magazine_supply"): mission_root.call("bind_mission_magazine_supply", _supply)
+	if (_campaign_mode or _skirmish_mode) and _supply != null and mission_root.has_method("bind_mission_magazine_supply"): mission_root.call("bind_mission_magazine_supply", _supply)
 	return mission_root.bind_air_support_source(_simulation, self, String(mission.get_meta("location_id", "")))
 
 func get_campaign_entry_feedback() -> Dictionary:
@@ -917,7 +927,10 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 	if operation in ["inventory_transfer","inventory_equip"]:
 		var unit_id := String(data.get("unit_id",""))
 		var context := _inventory_context(unit_id,String(data.get("craft_id","")))
-		if context.is_empty(): return _reject("inventory_access","Person muss an der Basis verfuegbar sein")
+		if context.is_empty():
+			# Person an Bord, Schiff nicht gelandet an der Heimatbasis: sagt, was fehlt.
+			if not _aboard_status_craft(unit_id).is_empty(): return _reject("inventory_access","Schiff muss an der Heimatbasis gelandet sein")
+			return _reject("inventory_access","Person muss an der Basis verfuegbar sein")
 		var result := _commit("singleplayer_supply",operation,data,request_id,context)
 		if bool(result.get("ok",false)) and operation=="inventory_equip" and not bool(result.get("replayed",false)):
 			if _base_personnel!=null and not bool(context.get("station_context", false)): _base_personnel.call("claim_manual_control",unit_id)
@@ -994,6 +1007,9 @@ func _apply_skirmish_transaction(operation: String, payload: Dictionary) -> Dict
 				_simulation.request_personnel_loadout_command("configure_roster", {"roster": [person]})
 				_simulation.request_personnel_loadout_command("set_loadout", {"unit_id": person.unit_id,
 					"loadout": {"armor": person.armor, "weapon_1": person.weapon_1, "weapon_2": person.weapon_2}})
+				# W3: wie die Startleute - einmaliges volles Fach (nur wenn die Startausstattung des Standes gewaehrt ist).
+				_supply.configure_inventory([String(person.unit_id)], [], true, _skirmish_bag_capacity())
+				_supply.provision_new_person(String(person.unit_id))
 				result["message"] = "%s rekrutiert" % String(person.display_name)
 			return result
 		"dismiss":
@@ -1832,8 +1848,8 @@ func launch_to_moon_orbit(craft_id: String) -> Dictionary:
 		# edit pilot or payload using the old homebase transport projection.
 		_flow.call("_refresh_homebase_screen")
 		if not result.get("replayed", false): call_deferred("_publish_space_launch_event", request_id)
-		# M4c (W2): der Abflug von der Heimatbasis ist bestaetigt -> die Faecher der Mitfliegenden aus dem Basislager auffuellen.
-		var ammo_departure: Dictionary = {} if result.get("replayed", false) else replenish_ammo_for_departure(craft_id, ammo_crew)
+		# M6b (B1): der Abflug ist bestaetigt -> nur melden, wie viele Faecher der Mitfliegenden leer sind (nichts wird aufgefuellt).
+		var ammo_departure: Dictionary = {} if result.get("replayed", false) else departure_ammo_notice(craft_id, ammo_crew)
 		var travel: Dictionary = Dictionary(result.travel_result)
 		if not String(ammo_departure.get("short_message", "")).is_empty():
 			travel = travel.duplicate()
@@ -2247,25 +2263,23 @@ func is_person_protected_from_death(unit_id: String) -> bool:
 
 ## M4b: Startausstattung mit Magazinen (Basislager + volle Faecher), einmal je Stand; true = jetzt gewaehrt (Kampagne, neu oder alt).
 func grant_ammo_start_if_missing() -> bool:
-	if not _campaign_mode: return false
+	if not (_campaign_mode or _skirmish_mode): return false
 	var ids: Array = []
 	for unit in Array(_flow.get("_all_team_units")): ids.append(String(Dictionary(unit).get("unit_id", "")))
 	return bool(_supply.grant_ammo_start_if_missing(ids))
 
-## M4b: Faecher der heimgekehrten Personen aus dem Basislager auffuellen (feste Reihenfolge); Ergebnis mit "message".
-func replenish_ammo(unit_ids: Array) -> Dictionary:
-	if not _campaign_mode: return {"added": 0, "short": 0, "message": ""}
-	return Dictionary(_supply.fill_person_compartments(unit_ids, true))
-
-## M4c (W2): Faecher der mitfliegenden Personen (an Bord des Schiffs plus zugeteilter Pilot) beim bestaetigten Abflug von der
-## Heimatbasis aus dem Basislager auffuellen; dieselbe Funktion und Reihenfolge wie bei der Heimkehr. Wiederholbar (ergaenzt nur Fehlendes).
+## M6b (B1): KEIN automatisches Auffuellen mehr (weder beim Abflug noch bei der Heimkehr): Magazine kommen von Hand per Drag and Drop
+## ins Fach. Beim bestaetigten Abflug von der Heimatbasis nur der Hinweis, wie viele Faecher der Mitfliegenden (an Bord plus zugeteilter
+## Pilot) leer sind: {"empty": n, "short_message": "Munition knapp: n Fächer leer." oder ""}. Es wird nichts bewegt.
 ## Aufgerufen von launch_to_moon_orbit (der einzigen verbindlichen Abflugstelle von der Heimatbasis), nie beim Oeffnen eines Dialogs.
-func replenish_ammo_for_departure(craft_id: String, crew_ids: Array = []) -> Dictionary:
-	if not _campaign_mode or _flow == null or _supply == null: return {"added": 0, "short": 0, "message": "", "short_message": ""}
+func departure_ammo_notice(craft_id: String, crew_ids: Array = []) -> Dictionary:
+	if not (_campaign_mode or _skirmish_mode) or _flow == null or _supply == null: return {"empty": 0, "short_message": ""}
 	var ids: Array = crew_ids.duplicate() if not crew_ids.is_empty() else Array(_flow.call("_aboard_unit_ids_of_craft", craft_id)).duplicate()
 	var pilot := String(Dictionary(_flow.get("_assigned_aircraft_pilot_by_craft")).get(craft_id, ""))
 	if not pilot.is_empty() and not ids.has(pilot): ids.append(pilot)
-	return Dictionary(_supply.fill_person_compartments(ids, true))
+	var empty := int(_supply.count_empty_compartments(ids))
+	var text := "" if empty <= 0 else "Munition knapp: %d %s leer." % [empty, "Fach" if empty == 1 else "Fächer"]
+	return {"empty": empty, "short_message": text}
 
 ## Rucksack und Ausruestung einer gefallenen Person verwerfen (Auftragsfracht siehe SingleplayerSupplyState.discard_person_equipment).
 func discard_person_equipment(unit_id: String) -> Dictionary:
@@ -2333,6 +2347,14 @@ func _reject(reason: String, message: String) -> Dictionary:
 func _inventory_context(unit_id: String, craft_id: String) -> Dictionary:
 	var field:=_field_inventory_context(unit_id,craft_id)
 	if not field.is_empty(): return field
+	# Besatzung an Bord eines Schiffs, das an der Heimatbasis gelandet steht (nicht unterwegs, nicht im Start-/Landeablauf, nicht im Einsatz):
+	# fuer das Inventar-Fenster erreichbar wie eine Person an der Basis, ohne Aussteigen.
+	var aboard := _aboard_status_craft(unit_id)
+	if not aboard.is_empty():
+		if not _craft_grounded_at_home(aboard): return {}
+		var aboard_access: Array = ["base:homebase","unit:"+unit_id+":backpack"]
+		if craft_id==aboard and not _service_context(craft_id).is_empty(): aboard_access.append("craft:"+craft_id)
+		return {"accessible_containers":aboard_access,"unit_id":unit_id}
 	var snapshot: Dictionary = _screen.call("get_operations_snapshot",false)
 	var unit: Dictionary = {}
 	for entry in Array(snapshot.get("roster",[])):
@@ -2347,6 +2369,20 @@ func _inventory_context(unit_id: String, craft_id: String) -> Dictionary:
 	var access: Array = ["base:homebase","unit:"+unit_id+":backpack"]
 	if not craft_id.is_empty() and String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id,""))=="homebase" and not _service_context(craft_id).is_empty(): access.append("craft:"+craft_id)
 	return {"accessible_containers":access,"unit_id":unit_id}
+
+## Rucksackplaetze im Skirmish der Voreinstellungen: wie vor M6b (12); das Munitionsfach nach Ruestung kommt dazu.
+## Kampagne und Punkte-Skirmish (mit Wirtschaft) behalten ihre Regel (-1 = 0 Plaetze).
+func _skirmish_bag_capacity() -> int:
+	if _skirmish_mode and _skirmish_economy == null: return int(load("res://scripts/mission/inventory_transfer_contract.gd").BACKPACK_CAPACITY)
+	return -1
+
+## Schiff, auf dem die Person laut Personalstand an Bord ist ("" wenn sie nicht an Bord ist).
+func _aboard_status_craft(unit_id: String) -> String:
+	if _base_personnel==null: return ""
+	for actor in Array(_base_personnel.get_snapshot().get("units",[])):
+		if String(actor.get("unit_id",""))==unit_id:
+			return String(actor.get("craft_id","")) if String(actor.get("status",""))=="aboard" else ""
+	return ""
 
 func get_world_checkpoint_guard() -> Dictionary:
 	if not bool(_cargo_transfer.get_snapshot().get("checkpoint_safe",true)):return _reject("cargo_transfer_active","Speichern wartet auf den Frachttransfer oder seinen Abbruch")
@@ -2529,7 +2565,12 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 		return result
 	if operation == "campaign_build_housing":
 		if not _has_live_base_owner(): return _reject("base_unavailable", "Heimatbasis nicht verfügbar")
-		var result := _commit("singleplayer_supply", operation, {}, request_id, {"at_home":true,"campaign_authorized":true,"campaign_housing_builder":Callable(_base_personnel, "build_campaign_housing")})
+		var housing_context := {"at_home":true,"campaign_authorized":true,"campaign_housing_builder":Callable(_base_personnel, "build_campaign_housing")}
+		var housing_offer := _housing_offer()
+		if bool(housing_offer.get("container", false)):
+			housing_context["campaign_housing_container"] = true
+			housing_context["campaign_housing_limit"] = int(housing_offer.get("sites", 0))
+		var result := _commit("singleplayer_supply", operation, {}, request_id, housing_context)
 		if bool(result.get("ok", false)):
 			_base_personnel.state_changed.emit()
 			_flow.call("_refresh_homebase_screen")
@@ -2980,6 +3021,11 @@ func _craft_grounded_at_home(craft_id: String) -> bool:
 
 func _has_live_base_owner() -> bool:
 	return is_instance_valid(_base_personnel) and _base_personnel.is_inside_tree() and _base_personnel.get_parent() == self and is_instance_valid(_simulation) and _simulation.get("_base_personnel_owner") == _base_personnel and String(Dictionary(_base_personnel.call("get_snapshot")).get("runtime_authority", "")) == "SimulationRoot"
+
+## Was die Heimatbasis fuer den Unterkunftskauf anbietet: Wohncontainer (Hex-Boden) oder alte Unterkunft.
+func _housing_offer() -> Dictionary:
+	if not is_instance_valid(_base_personnel) or not _base_personnel.has_method("get_housing_offer"): return {"container":false}
+	return Dictionary(_base_personnel.call("get_housing_offer"))
 
 func _home_workshop_available() -> bool:
 	if not _has_live_base_owner():

@@ -46,6 +46,14 @@ func _fp_attempts() -> int:
 func _fp_successes() -> int:
 	return int(_flow.get_meta("campaign_save_successes", 0))
 
+## M6b (W5): die erwartete Zeile des Abflugs = Speichertext, plus GENAU EIN Munitionshinweis, wenn Mitfliegende ein leeres Fach haben.
+## Format "Munition knapp: 1 Fach leer." / "Munition knapp: n Fächer leer."; n ist die tatsaechliche Zahl leerer Faecher der Besatzung an Bord (aus dem Zustand).
+func _fp_expected_line(base: String) -> String:
+	var crew: Array = Array(_flow.call("_aboard_unit_ids_of_craft", _craft_id))
+	var empty := int(_runtime.get("_supply").call("count_empty_compartments", crew))
+	if empty <= 0: return base
+	return base + (" Munition knapp: 1 Fach leer." if empty == 1 else " Munition knapp: %d Fächer leer." % empty)
+
 ## Wie oft der Flow eine Zeile am Bildschirmrand gezeigt hat (Meta campaign_save_feedback_count, gesetzt von _show_save_feedback).
 func _fp_feedback_count() -> int:
 	return int(_flow.get_meta("campaign_save_feedback_count", 0))
@@ -148,12 +156,15 @@ func _fp_d() -> void:
 	_check(_fp_grant_chip("fp:d:chip"), "D: Fixture: Ausruestung der ersten Minute (ein Chip mehr im Lager)")
 	_check(_fp_disk_chips() == chips_on_disk, "D: Fixture: die Aenderung ist noch nicht auf der Platte (Drossel)")
 	var attempts_before := _fp_attempts()
+	# Die Besatzung steht vor dem Abheben an Bord: daraus (Zustand) folgt, ob und mit welcher Zahl der Munitionshinweis an der Zeile haengt.
+	var expected_line := _fp_expected_line("Gespeichert.")
 	if await _fp_launch_to_moon_orbit("D") != "": return
 	var launch_save: Dictionary = Dictionary(_flow.get_meta("campaign_launch_save_result", {}))
 	_check(bool(launch_save.get("ok", false)), "D: vor dem Abheben wurde gespeichert (%s)" % [launch_save])
 	_check(_fp_attempts() - attempts_before == 1, "D: genau ein Speicherversuch beim Abheben (+%d)" % (_fp_attempts() - attempts_before))
 	# Fix-Runde 1 (W1): auch das Abhebe-Speichern meldet sich: kurze Zeile "Gespeichert.".
-	_check(String(_flow.get_meta("campaign_save_feedback", "")) == "Gespeichert." and _fp_feedback_count() == 1, "D W1: nach dem gelungenen Abhebe-Speichern steht genau einmal die Zeile 'Gespeichert.' (%s, %d)" % [_flow.get_meta("campaign_save_feedback", ""), _fp_feedback_count()])
+	# M6b: der Abflug haengt "Munition knapp: n Fach/Fächer leer." an dieselbe Zeile, wenn Mitfliegende leere Faecher haben (kein Auffuellen mehr).
+	_check(String(_flow.get_meta("campaign_save_feedback", "")) == expected_line and _fp_feedback_count() == 1, "D W1: nach dem gelungenen Abhebe-Speichern steht genau einmal die Zeile '%s' (ist: '%s', %d)" % [expected_line, _flow.get_meta("campaign_save_feedback", ""), _fp_feedback_count()])
 	_check(_fp_disk_chips() > chips_on_disk, "D: die Platte enthaelt die Ausruestung (Chips %d gegen %d)" % [_fp_disk_chips(), chips_on_disk])
 	# Das Programm "stirbt": die Kampagne wird ohne Speichern verlassen.
 	await _end_sortie()
@@ -257,13 +268,13 @@ func _fp_h() -> void:
 	# Fixture: die Basis meldet beim Speichern "Einsatz wird noch geladen" (ein Uebergangsgrund). Der Start selbst laeuft ueber den echten Bildschirmweg.
 	campaign_start.set("active_restore_in_progress", true)
 	var count_before := _fp_feedback_count()
+	var expected: String = _fp_expected_line("Vor dem Abheben nicht gespeichert: " + FP_PROJECTION.blocked_text("active_restore_pending"))
 	var launched := await _fp_launch_to_moon_orbit("H")
 	campaign_start.set("active_restore_in_progress", false)
 	if launched != "": return
 	var refused: Dictionary = Dictionary(_flow.get_meta("campaign_launch_save_result", {}))
 	_check(not bool(refused.get("ok", true)) and String(refused.get("reason", "")) == "active_restore_pending", "H: das Speichern vor dem Abheben wurde abgelehnt (%s)" % [refused])
 	_check(String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(_craft_id, "")) == "starmap", "H: das Schiff ist trotzdem abgehoben")
-	var expected: String = "Vor dem Abheben nicht gespeichert: " + FP_PROJECTION.blocked_text("active_restore_pending")
 	_check(String(_flow.get_meta("campaign_save_feedback", "")) == expected, "H W1: der Spieler liest den Grund: '%s' (ist: '%s')" % [expected, _flow.get_meta("campaign_save_feedback", "")])
 	_check(_fp_feedback_count() == count_before + 1, "H W1: genau eine Zeile (+%d)" % (_fp_feedback_count() - count_before))
 	var toast: Node = _flow.get_node_or_null("CampaignSaveToast")
