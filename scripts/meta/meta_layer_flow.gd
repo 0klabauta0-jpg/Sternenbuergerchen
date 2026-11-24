@@ -4310,6 +4310,20 @@ func _continue_campaign_after_failed_extraction() -> bool:
 	return true
 
 
+## Freies Lager (data/singleplayer/open_garrisons.json): jeder NEUE Besuch ohne Auftrag baut Besatzung und Kiste frisch auf, statt die alte
+## Ortsinstanz (tote Gegner, benutzte Kiste) wieder aufzunehmen. Das gilt nur, wenn kein anderes eigenes Schiff mehr am Ort steht.
+func _is_fresh_garrison_visit(existing: Node, location_id: String, incoming_scenario: String) -> bool:
+	if not String(_active_singleplayer_identity.get("job_id", "")).is_empty() or _singleplayer_runtime == null: return false
+	var campaign = _singleplayer_runtime.get("_campaign")
+	if campaign == null or not campaign.has_method("open_garrison_scenario_id") or String(campaign.call("open_garrison_scenario_id", location_id)) != incoming_scenario: return false
+	var controller: Node = existing.get_node_or_null("TacticalController")
+	var cards = controller.get("_mission_drop_cards") if controller != null else null
+	var own_craft := String(_active_singleplayer_identity.get("craft_id", ""))
+	for card in Array(cards if cards != null else []):
+		if typeof(card) == TYPE_DICTIONARY and String(card.get("craft_id", "")) != own_craft and not ["ready", ""].has(String(card.get("state", ""))): return false
+	return true
+
+
 func _start_mission(prepared_map = null, prepared_cache: RefCounted = null) -> void:
 	if not get_surface_departure_retirement_guard(String(_active_singleplayer_identity.get("craft_id", "")), String(_active_singleplayer_identity.get("location_id", ""))).ok:
 		return
@@ -4327,7 +4341,7 @@ func _start_mission(prepared_map = null, prepared_cache: RefCounted = null) -> v
 			var incoming_scenario := String(_active_singleplayer_identity.get("scenario_id",""))
 			var prior_driver: Node=existing.get_node_or_null("CombatLoopDriver")
 			var resolved_retry := prior_driver != null and bool(prior_driver.get("_combat_finished")) and not String(_active_singleplayer_identity.get("job_id","")).is_empty()
-			if is_campaign_start() and (previous_scenario != incoming_scenario or resolved_retry):
+			if is_campaign_start() and (previous_scenario != incoming_scenario or resolved_retry or _is_fresh_garrison_visit(existing, location_id, incoming_scenario)):
 				# A new job at the same place gets fresh scenario gates while finite
 				# discoveries/depletion remain with the persistent resource owner.
 				_singleplayer_runtime.call("release_location_resources",location_id)

@@ -197,6 +197,10 @@ func _verify_final_state(initial: Dictionary) -> void:
 	_check(String(final.campaign.get("selected_job_id", "")) == "", "Peaceful second sortie leaves no stale selected combat job")
 	_check(Array(final.crafts).size() == Array(initial.crafts).size() and String(_craft(final).get("landing_pad_id", "")) == String(_craft(initial).get("landing_pad_id", "")), "Both sorties reuse original craft and original pad without clone")
 
+## Anhang an die Belegnummern der Flugbefehle: leer = unveraendert; ein Pruefer, der denselben Einsatz ein zweites Mal fliegt, setzt hier eine Marke
+## (sonst gelten die Befehle des ersten Fluges als schon gebucht und der zweite Flug bewegt sich nicht).
+var _launch_tag := ""
+
 func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 	_screen.call("request_operation", "craft", {"craft_id": _craft_id})
 	_screen.call("request_operation", "focus_fireteam", {"fireteam_id": _team_id})
@@ -237,7 +241,7 @@ func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 	if not _check(not destination_orbit.is_empty(), "Selected destination has an orbit"): return false
 	var premature: Dictionary = _screen.call("request_operation", "space_begin_approach", {"craft_id": _craft_id, "location_id": destination})
 	_check(not bool(premature.get("ok", false)) and _flow.get("_active_mission") == null, "Planet map approach is blocked from moon orbit")
-	var jump: Dictionary = _screen.call("request_operation", "space_start_quantum", {"craft_id": _craft_id, "target_orbit_id": destination_orbit, "request_id": "loop:jump:" + scenario_id})
+	var jump: Dictionary = _screen.call("request_operation", "space_start_quantum", {"craft_id": _craft_id, "target_orbit_id": destination_orbit, "request_id": "loop:jump:" + scenario_id + _launch_tag})
 	if not _check(bool(jump.get("ok", false)), scenario_id + " actual target click begins quantum"):
 		print("JUMP_RESULT:", jump)
 		_dump("quantum_start")
@@ -245,12 +249,12 @@ func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 	if not await _wait(func(): return float(_space().get("progress", 0.0)) > 0.05, 1500, "Quantum visibly progresses through normal runtime ticks"):
 		return false
 	var moving_position: Array = Array(_space().get("position", [])).duplicate()
-	var abort: Dictionary = _screen.call("request_operation", "space_abort_quantum", {"craft_id": _craft_id, "request_id": "loop:abort:" + scenario_id})
+	var abort: Dictionary = _screen.call("request_operation", "space_abort_quantum", {"craft_id": _craft_id, "request_id": "loop:abort:" + scenario_id + _launch_tag})
 	_check(bool(abort.get("ok", false)) and String(_space().get("phase", "")) == "stopped" and Array(_space().get("position", [])) == moving_position, "Actual abort holds the reached midpoint without teleport")
 	var stopped_position: Array = Array(_space().get("position", [])).duplicate()
 	await physics_frame
 	_check(Array(_space().get("position", [])) == stopped_position, "Aborted runtime trip remains still on subsequent tick")
-	var restart: Dictionary = _screen.call("request_operation", "space_start_quantum", {"craft_id": _craft_id, "target_orbit_id": destination_orbit, "request_id": "loop:restart:" + scenario_id})
+	var restart: Dictionary = _screen.call("request_operation", "space_start_quantum", {"craft_id": _craft_id, "target_orbit_id": destination_orbit, "request_id": "loop:restart:" + scenario_id + _launch_tag})
 	if not _check(bool(restart.get("ok", false)) and Array(_space().get("origin_position", [])) == stopped_position, "Restart begins at the actual stopped position"):
 		return false
 	if not await _wait(func(): return String(_space().get("phase", "")) == "orbit" and String(_space().get("orbit_id", "")) == destination_orbit, 5000, scenario_id + " short real quantum reaches destination orbit"):
@@ -261,7 +265,7 @@ func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 	# Regel 8 / Auftrag 21.11.: Abheben und der eine Sprung dieser Strecke sind bezahlt; Abbruch und Neustart aus "stopped" kosten nichts dazu.
 	var paid_so_far: float = float(_runtime.get("_supply").call("get_leg_fuel_cost", "homebase", "", "launch")) + float(_runtime.get("_supply").call("get_leg_fuel_cost", "homebase", destination, "jump"))
 	_check(is_equal_approx(float(Dictionary(_supply().get("fuel_by_craft_id", {})).get(_craft_id, -1.0)), float(before_launch_fuel.get(_craft_id, 0.0)) - paid_so_far), "Quantum, abort and restart debit exactly the takeoff and one jump leg (%s), no approach fuel" % str(paid_so_far))
-	var approach: Dictionary = _screen.call("request_operation", "space_begin_approach", {"craft_id": _craft_id, "location_id": destination, "request_id": "loop:approach:" + scenario_id})
+	var approach: Dictionary = _screen.call("request_operation", "space_begin_approach", {"craft_id": _craft_id, "location_id": destination, "request_id": "loop:approach:" + scenario_id + _launch_tag})
 	if not _check(bool(approach.get("ok", false)), scenario_id + " explicit approach accepts from planet orbit"):
 		print("APPROACH_RESULT:", approach)
 		_dump("approach")
