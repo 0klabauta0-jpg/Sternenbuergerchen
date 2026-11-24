@@ -11,6 +11,7 @@ var state: Dictionary = {}
 var calls: Array = []
 var previewed: Array = []
 var requested: Array = []
+var reject_quantum := false
 var view: Control
 var canvas: Control
 
@@ -40,7 +41,15 @@ func _command(operation: String, payload: Dictionary = {}) -> Dictionary:
 	calls.append({"operation": operation, "payload": payload.duplicate(true)})
 	if operation == "space_set_orbit_automatic":
 		state.space_travel.orbit_transit_automatic = bool(payload.get("enabled", true))
+	if operation == "space_start_quantum" and reject_quantum:
+		return {"ok": false, "message": "Befehlsweg lehnt ab: Treibstoff reicht nicht"}
 	return {"ok": true}
+
+
+## Lokaler Orbitbereich fuer "Selbst fliegen": ein Schiff in der Orbit-Ansicht.
+func _area(craft_id: String) -> Dictionary:
+	var area_id := "orbit_approach:planet"
+	return {"ok": true, "space_area_id": area_id, "actors": [{"craft_id": craft_id, "flight": {"craft_id": craft_id, "coordinate_frame": "local", "space_area_id": area_id, "motion_mode": "tactical", "position_plane": Vector2(256, 100), "heading_rad": 0.0}}]}
 
 
 func _quantum_calls() -> Array:
@@ -136,15 +145,19 @@ func _press_start() -> void:
 		button.pressed.emit()
 
 
-func _open(test_state: Dictionary) -> void:
+func _open(test_state: Dictionary, with_area: bool = false) -> void:
 	state = test_state
+	reject_quantum = false
 	calls.clear()
 	previewed.clear()
 	requested.clear()
 	view = SCREEN.new()
 	root.add_child(view)
 	view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	view.configure(_snapshot, _command)
+	if with_area:
+		view.configure(_snapshot, _command, _area)
+	else:
+		view.configure(_snapshot, _command)
 	if view.has_signal("orbit_previewed"):
 		view.connect("orbit_previewed", func(orbit_id: String, marker_id: String): previewed.append(orbit_id + "/" + marker_id))
 	if view.has_signal("orbit_requested"):
@@ -303,6 +316,7 @@ func _run() -> void:
 		manual = view.find_child("OrbitModeManual", true, false) as Button
 		_check(manual != null and manual.button_pressed and automatic != null and not automatic.button_pressed, "Nach erneutem Oeffnen der Karte steht die Wahl weiter auf Selbst fliegen")
 	await _close()
+	await _nachbesserung_1()
 	await process_frame
 	print("STARMAP_COURSE_PREVIEW passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed else 0)
@@ -315,3 +329,179 @@ func _width_check(node_name: String, label: String) -> void:
 		return
 	var parent: Control = button.get_parent() as Control
 	_check(absf(button.size.x - parent.size.x) <= 2.0 and parent.size.x > 100.0, "%s fuellt die Spaltenbreite (Knopf %.1f, Spalte %.1f)" % [label, button.size.x, parent.size.x])
+
+
+func _orbit_position(orbit_id: String) -> Array:
+	var position: Vector2 = GRID.normalized(GRID.cell_from_record(definition.orbits[orbit_id].markers[0]))
+	return [position.x, position.y]
+
+
+## Enter bei vorgemerktem Ziel mit dem Fokus auf einem bestimmten Bedienelement. Gibt Sprungzahl und Restziel zurueck.
+func _enter_with_focus(kind: String) -> Dictionary:
+	await _open(_build_state("orbit", "moon_orbit", "satellite_crash"))
+	_click(_marker_point("planet_orbit"))
+	await _frames(2)
+	var target: Control = null
+	match kind:
+		"name":
+			for edit in view.find_children("*", "LineEdit", true, false):
+				if (edit as LineEdit).placeholder_text == "Rottenname":
+					target = edit
+			if target != null:
+				var node: Node = target
+				while node != null and node != view:
+					if node is CanvasItem:
+						node.show()
+					node = node.get_parent()
+		"tree":
+			target = view.get("_navigation")
+		"button":
+			target = view.find_child("FuelReachabilityToggle", true, false)
+		"start":
+			target = _start_button()
+	if target != null:
+		target.grab_focus()
+	else:
+		var owner: Control = root.gui_get_focus_owner()
+		if owner != null:
+			owner.release_focus()
+	await _frames(2)
+	var focused: Control = root.gui_get_focus_owner()
+	var focus_ok: bool = (focused == target) if target != null else (focused == null)
+	_key(KEY_ENTER)
+	await _frames(2)
+	var result := {"focus_ok": focus_ok, "jumps": _quantum_calls().size(), "pending": not _pending().is_empty()}
+	if not focus_ok:
+		result["debug"] = "Ziel %s sichtbar %s Fokusmodus %s, Fokus liegt auf %s" % [str(target.get_path()) if target != null else "keins", str(target.is_visible_in_tree()) if target != null else "-", str(target.focus_mode) if target != null else "-", str(focused.get_path()) if focused != null else "nichts"]
+	await _close()
+	return result
+
+
+func _nachbesserung_1() -> void:
+	# --- W1: Enter startet nur, wenn es gemeint ist
+	var named: Dictionary = await _enter_with_focus("name")
+	_check(bool(named.focus_ok) and int(named.jumps) == 0 and bool(named.pending), "W1: Fokus im Rottennamen-Feld + Enter: kein Sprung, Ziel bleibt (%s)" % str(named))
+	var tree_case: Dictionary = await _enter_with_focus("tree")
+	_check(bool(tree_case.focus_ok) and int(tree_case.jumps) == 0 and bool(tree_case.pending), "W1: Fokus im Systembaum + Enter: kein Sprung (%s)" % str(tree_case))
+	var button_case: Dictionary = await _enter_with_focus("button")
+	_check(bool(button_case.focus_ok) and int(button_case.jumps) == 0 and bool(button_case.pending), "W1: Fokus auf anderem Knopf + Enter: kein Sprung (%s)" % str(button_case))
+	var none_case: Dictionary = await _enter_with_focus("none")
+	_check(bool(none_case.focus_ok) and int(none_case.jumps) == 1 and not bool(none_case.pending), "W1: ohne Fokus + Enter: genau ein Sprung (%s)" % str(none_case))
+	var start_case: Dictionary = await _enter_with_focus("start")
+	_check(bool(start_case.focus_ok) and int(start_case.jumps) == 1 and not bool(start_case.pending), "W1: Fokus auf Start + Enter: genau ein Sprung (%s)" % str(start_case))
+
+	# --- K1: abgelehnter Start behaelt den Kurs
+	await _open(_build_state("orbit", "moon_orbit", "satellite_crash"))
+	reject_quantum = true
+	_click(_marker_point("planet_orbit"))
+	await _frames(2)
+	_press_start()
+	await _frames(2)
+	var error_node: Label = view.find_child("CommandError", true, false) as Label
+	_check(_quantum_calls().size() == 1, "K1: der Befehlsweg wurde gefragt (%d)" % _quantum_calls().size())
+	_check(String(_pending().get("orbit_id", "")) == "planet_orbit" and int(_course().get("line_points", 0)) >= 2, "K1: abgelehnter Start behaelt Ziel und Kurslinie (%s, %s Punkte)" % [str(_pending()), str(_course().get("line_points", 0))])
+	_check(error_node != null and error_node.visible and error_node.text.contains("Treibstoff reicht nicht"), "K1: der Grund wird gezeigt (%s)" % (error_node.text if error_node != null else "kein Feld"))
+	_check(_start_button() != null and _start_button().visible, "K1: Start bleibt sichtbar")
+	reject_quantum = false
+	_press_start()
+	await _frames(2)
+	_check(_pending().is_empty() and int(_course().get("line_points", -1)) == 0 and _quantum_calls().size() == 2, "K1: beim zweiten Versuch (Erfolg) wird geleert (%s, %d Befehle)" % [str(_pending()), _quantum_calls().size()])
+	await _close()
+
+	# --- K2: Schiffswechsel / Schiffsgruppenwechsel verwirft das Ziel
+	await _open(_build_state("orbit", "moon_orbit", "satellite_crash"))
+	_click(_marker_point("planet_orbit"))
+	await _frames(2)
+	_check(not _pending().is_empty(), "K2: Vorbereitung, Ziel vorgemerkt")
+	state.space_travel.craft_id = "ship_two"
+	view.call("refresh")
+	await _frames(2)
+	_check(_pending().is_empty() and int(_course().get("line_points", -1)) == 0, "K2: Schiffswechsel verwirft das Ziel, Kurslinie leer (%s)" % str(_pending()))
+	_check(_start_button() == null or not _start_button().visible, "K2: Start ist nach dem Schiffswechsel weg")
+	await _close()
+	var wing_state := _build_state("orbit", "moon_orbit", "satellite_crash")
+	wing_state["space_wings"] = {"wings": {"w1": {"name": "Rotte A", "craft_ids": ["ship"], "leader_craft_id": ""}}}
+	await _open(wing_state)
+	_click(_marker_point("planet_orbit"))
+	await _frames(2)
+	_check(not _pending().is_empty(), "K2: Vorbereitung (Rotte), Ziel vorgemerkt")
+	view.get("_wing_panel").call("select_wing", "w1")
+	view.call("refresh")
+	await _frames(2)
+	_check(_pending().is_empty() and int(_course().get("line_points", -1)) == 0, "K2: Wechsel der Schiffsgruppe verwirft das Ziel (%s)" % str(_pending()))
+	await _close()
+
+	# --- K3/K4: ehrlicher Text
+	var multi := _build_state("orbit", "moon_orbit", "fortified_outpost")
+	multi.space_travel.fuel_reachability = {"fortified_outpost": {"ok": true, "route_ok": true}, "relay_ridge": {"ok": true, "route_ok": false, "needed_total": 120.0, "available": 80.0}}
+	await _open(multi)
+	_click(_marker_point("planet_orbit"))
+	await _frames(2)
+	var shown := String(_course().get("text", ""))
+	_check(shown.contains("Bastion Silex") and shown.contains("Treibstoff") and not shown.contains("Reicht nur bis zum Orbit"), "K3: Orbit mit zwei Orten nennt den Ort der Treibstoffzahl, keine Warnung bei gedecktem Hinweg (%s)" % shown.replace("\n", " | "))
+	state.campaign.selected_location_id = "relay_ridge"
+	view.call("refresh")
+	await _frames(2)
+	shown = String(_course().get("text", ""))
+	_check(shown.contains("Relaisgrat") and not shown.contains("Bastion Silex"), "K3: gewaehlter Ort wechselt, der Text folgt (%s)" % shown.replace("\n", " | "))
+	_check(shown.contains("Reicht nur bis zum Orbit – dort tanken oder den Nottankdienst rufen."), "K4: nur die naechste Etappe bezahlbar: zweite Zeile warnt (%s)" % shown.replace("\n", " | "))
+	_check(shown.contains("120") and _start_button() != null and not _start_button().disabled, "K4: Zahl steht da, Start bleibt frei")
+	await _close()
+
+	# --- K6: Selbst fliegen oeffnet die Orbit-Ansicht auch nach verdeckter Karte
+	var manual_state := _build_state("orbit", "moon_orbit", "satellite_crash")
+	manual_state.space_travel.orbit_transit_automatic = false
+	await _open(manual_state, true)
+	_click(_marker_point("planet_orbit"))
+	await _frames(2)
+	_press_start()
+	await _frames(2)
+	_check(_quantum_calls().size() == 1 and not bool(_course().get("orbit_view_open", true)), "K6: Start gesendet, Orbit-Ansicht noch zu (%d Befehle)" % _quantum_calls().size())
+	view.hide()
+	state.space_travel.phase = "quantum"
+	state.space_travel.target_orbit_id = "planet_orbit"
+	await _frames(3)
+	state.space_travel.phase = "orbit"
+	state.space_travel.orbit_id = "planet_orbit"
+	state.space_travel.orbit_marker_id = "orbit_1"
+	state.space_travel.position = _orbit_position("planet_orbit")
+	state.space_travel.target_orbit_id = ""
+	await _frames(3)
+	view.show()
+	await _frames(3)
+	await create_timer(0.4).timeout
+	_check(bool(_course().get("orbit_view_open", false)), "K6: Karte war beim Sprung verdeckt, beim Sichtbarwerden oeffnet sich die Orbit-Ansicht")
+	await _close()
+
+	# --- Esc bei vorgemerktem Ziel, mit dem echten Autoload GlobalEscapeMenu
+	await _open(_build_state("orbit", "moon_orbit", "satellite_crash"))
+	var menu: Node = root.get_node_or_null("GlobalEscapeMenu")
+	_check(menu != null and menu.has_method("is_overlay_open"), "Esc: der echte Autoload GlobalEscapeMenu steht im Pruefbaum")
+	if menu != null and menu.has_method("is_overlay_open"):
+		_click(_marker_point("planet_orbit"))
+		await _frames(2)
+		_check(not _pending().is_empty() and not bool(menu.call("is_overlay_open")), "Esc: Ziel vorgemerkt, Menue zu")
+		_key(KEY_ESCAPE)
+		await _frames(2)
+		_check(_pending().is_empty() and not bool(menu.call("is_overlay_open")), "Esc 1 (Ziel vorgemerkt): Ziel verworfen, Spielmenue NICHT offen")
+		_key(KEY_ESCAPE)
+		await _frames(2)
+		_check(bool(menu.call("is_menu_visible")), "Esc 2 (nichts vorgemerkt): Spielmenue oeffnet wie bisher")
+		view.call("_preview_jump", "planet_orbit", "orbit_1")
+		await _frames(2)
+		_key(KEY_ENTER)
+		await _frames(2)
+		_check(_quantum_calls().is_empty() and not _pending().is_empty(), "Enter bei offenem Spielmenue startet nichts, Ziel bleibt")
+		# Enter bedient im Menue den fokussierten Menueknopf (kann es schliessen): fuer die Esc-Pruefung neu oeffnen.
+		if not bool(menu.call("is_overlay_open")):
+			menu.call("open_menu")
+		await _frames(2)
+		_key(KEY_ESCAPE)
+		await _frames(2)
+		_check(not bool(menu.call("is_overlay_open")) and not _pending().is_empty(), "Esc bei offenem Spielmenue schliesst das Menue, das Ziel bleibt (Menue offen %s, Ziel %s)" % [str(menu.call("is_overlay_open")), str(_pending())])
+		_key(KEY_ESCAPE)
+		await _frames(2)
+		_check(_pending().is_empty() and not bool(menu.call("is_overlay_open")), "Esc danach verwirft das Ziel, Menue bleibt zu (Menue offen %s, Ziel %s)" % [str(menu.call("is_overlay_open")), str(_pending())])
+		if bool(menu.call("is_overlay_open")):
+			menu.call("close_menu")
+	await _close()
