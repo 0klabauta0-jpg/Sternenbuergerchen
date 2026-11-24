@@ -81,8 +81,16 @@ func _run() -> void:
 		await process_frame
 		_finish()
 		return
+	# Der Sanitaeter der Szene heilt Liegende; er selbst ist A (liegt er, heilt niemand dazwischen).
 	var a = units[0]
-	var b = units[1]
+	for candidate in units:
+		if String(candidate.call("get_role_name")) == "Combat Medic":
+			a = candidate
+	var b = units[1] if units[1] != a else units[0]
+	var c = null
+	for candidate in units:
+		if candidate != a and candidate != b:
+			c = candidate
 	var a_id := String(a.call("get_unit_id"))
 	var b_id := String(b.call("get_unit_id"))
 
@@ -128,24 +136,44 @@ func _run() -> void:
 	_check(String(a.call("get_vital_state")) == "down" and String(b.call("get_vital_state")) == "down", "Beide liegen weiter")
 
 	_rebuild(probe)
-	_check(_text(_button(row, a_id)) == IDLE_TEXT and _text(_button(row, b_id)) == IDLE_TEXT, "Karte neu aufgebaut: Knoepfe wieder 'Aufgeben'")
+	_check(_text(_button(row, a_id)) == ARMED_TEXT and _text(_button(row, b_id)) == ARMED_TEXT, "Neuaufbau nach dem Klick: beide neuen Knoepfe zeigen weiter '%s'" % ARMED_TEXT)
 	_check(not _queued(driver, a_id) and not _queued(driver, b_id) and String(a.call("get_vital_state")) == "down", "Neuaufbau loest nichts aus")
 
-	_press(_button(row, a_id))
 	paused = true
-	await create_timer(4.1, true, false, true).timeout
+	await create_timer(4.3, true, false, true).timeout
 	paused = false
-	_check(_text(_button(row, a_id)) == IDLE_TEXT, "Nach 4,1 s ohne zweiten Klick: Text wieder 'Aufgeben' (%s)" % _text(_button(row, a_id)))
-	_check(not _queued(driver, a_id) and String(a.call("get_vital_state")) == "down", "Ablauf der Frist loest nichts aus (queued=%s vital=%s)" % [str(_queued(driver, a_id)), String(a.call("get_vital_state"))])
+	_check(_text(_button(row, a_id)) == IDLE_TEXT and _text(_button(row, b_id)) == IDLE_TEXT, "Nach 4,3 s ohne zweiten Klick (Baum pausiert): Text wieder 'Aufgeben'")
+	_rebuild(probe)
+	_check(_text(_button(row, a_id)) == IDLE_TEXT and _text(_button(row, b_id)) == IDLE_TEXT, "Nach Ablauf und Neuaufbau: wieder 'Aufgeben'")
+	_check(not _queued(driver, a_id) and not _queued(driver, b_id) and String(a.call("get_vital_state")) == "down" and String(b.call("get_vital_state")) == "down", "Ablauf der Frist loest nichts aus")
 
 	_press(_button(row, a_id))
 	_press(_button(row, a_id))
-	_check(_queued(driver, a_id), "Zweiter Klick: Aufgeben beim Treiber eingereiht")
+	_check(not _queued(driver, a_id) and _text(_button(row, a_id)) == ARMED_TEXT and String(a.call("get_vital_state")) == "down", "Zweiter Klick unter 400 ms wird ignoriert, Knopf bleibt bewaffnet")
+	await create_timer(0.45, true, false, true).timeout
+	var old_button = _button(row, a_id)
+	var old_id: int = old_button.get_instance_id() if old_button != null else 0
+	if c != null:
+		c.call("apply_damage", 5, {})
+	probe.call("_refresh_selected_fireteam_cards")
+	var new_button = _button(row, a_id)
+	_check(new_button != null and new_button.get_instance_id() != old_id, "Aenderung bei einer ANDEREN Person baut die Karten von selbst neu (neuer Knopf)")
+	_check(_text(new_button) == ARMED_TEXT, "Neuer Knopf derselben Person zeigt weiter '%s'" % ARMED_TEXT)
+	_check(_text(_button(row, b_id)) == IDLE_TEXT, "Zwei Liegende: B blieb unbewaffnet")
+	_press(_button(row, b_id))
+	_check(_text(_button(row, b_id)) == ARMED_TEXT and not _queued(driver, b_id), "Erster Klick bei B bewaffnet nur B")
+	_press(_button(row, a_id))
+	_check(_queued(driver, a_id), "Zweiter Klick nach dem Neuaufbau gibt A auf (beim Treiber eingereiht)")
 	_check(not _queued(driver, b_id) and String(b.call("get_vital_state")) == "down", "B bleibt unberuehrt")
-	a.call("advance_bleedout")
-	_check(String(a.call("get_vital_state")) in ["bleedout", "respawning"], "Person A ist verblutet (%s)" % String(a.call("get_vital_state")))
+	var start_ms: int = Time.get_ticks_msec()
+	while Time.get_ticks_msec() - start_ms < 8000 and not String(a.call("get_vital_state")) in ["bleedout", "respawning"]:
+		await process_frame
+	_check(String(a.call("get_vital_state")) in ["bleedout", "respawning"], "Person A verblutet von selbst, ohne advance_bleedout (%s)" % String(a.call("get_vital_state")))
+	b.call("apply_heal", 1000, {})
+	_check(String(b.call("get_vital_state")) == "fit", "B steht wieder auf (%s)" % String(b.call("get_vital_state")))
 	_rebuild(probe)
-	_check(_button(row, a_id) == null and _button(row, b_id) != null, "Nach dem Aufgeben: Knopf von A weg, der von B bleibt")
+	_check(_button(row, a_id) == null and _button(row, b_id) == null, "Nach Aufgeben und Heilen: kein Knopf mehr")
+	_check(not Dictionary(probe.get("_give_up_armed_until")).has(b_id), "Geheilte Person: Eintrag ist weg")
 
 	probe.free()
 	scene.queue_free()
