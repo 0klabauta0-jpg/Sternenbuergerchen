@@ -16,6 +16,10 @@ var _selected_craft_id: String = ""
 var _snapshot: Dictionary = {}
 var _pending: Dictionary = {}
 var _sequence: int = 0
+## Sitzungskennzeichen: Zeit plus Zufallszahl, einmal je Programmlauf (wie _request_session im Adapter). Der Zaehler
+## beginnt nach jedem Neustart wieder bei 1 und die Instanz-Id kann sich wiederholen; ohne Kennzeichen faende die
+## Versorgung den GESPEICHERTEN Beleg mit gleicher Id und meldete den neuen Kauf als Wiederholung (nichts gebaut).
+var _request_session: String = "%d-%d" % [int(Time.get_unix_time_from_system() * 1000.0), randi()]
 var _built: bool = false
 var _credits: Label
 var _items: Label
@@ -531,7 +535,7 @@ func _submit_campaign(key: String) -> void:
 	var payload: Dictionary = Dictionary(action.payload).duplicate(true)
 	payload["craft_id"] = _selected_craft_id
 	_sequence += 1
-	payload["request_id"] = "campaign-service:%d:%d" % [get_instance_id(),_sequence]
+	payload["request_id"] = "campaign-service:%d:%s:%d" % [get_instance_id(),_request_session,_sequence]
 	var result: Dictionary = _command_handler.call(String(action.operation),payload)
 	_feedback.text = String(result.get("message",result.get("reason","Aktion bestätigt")))
 	refresh()
