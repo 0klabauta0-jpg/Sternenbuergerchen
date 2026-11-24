@@ -210,11 +210,15 @@ var _mission_catalog: Array = HOMEBASE_MISSION_CATALOG.duplicate(true)
 var _selected_mission_id: String = SINGLEPLAYER_RELEASE_DEFAULT_MISSION_ID
 var _selected_mission_map_path: String = DEFAULT_META_MAP_PATH
 var _homebase_aircraft_definitions: Array = []
+## LC2i I2: Nach einem Schiffsverlust im Einsatz gibt _run_location_callback die Ortsinstanz frei, wenn der Hintergrund-Rueckweg sie wieder festhaelt.
+var _release_location_after_craft_loss: bool = false
 var _pending_campaign_mission_result: Dictionary = {}
 var _assigned_aircraft_pilot_by_craft: Dictionary = {}
 var _aircraft_location_by_craft: Dictionary = {}
 var _selected_aircraft_cargo_by_craft: Dictionary = {}
 var _loaded_aircraft_cargo_by_craft: Dictionary = {}
+## LC2e B1: Verlustbelege durch Absturz verlorener Schiffe ({craft_id, definition, ship_name, outcome, equipment_kept}); additiv im Basisstand ("lost_craft").
+var _lost_craft_records: Array = []
 var _pending_homebase_team_transfers: Array = []
 var _pending_homebase_pilot_transfers: Array = []
 var _pending_homebase_cargo_loads: Array = []
@@ -4347,6 +4351,8 @@ func _start_mission(prepared_map = null, prepared_cache: RefCounted = null) -> v
 	_configure_mission_instance(mission_instance, _selected_unit_ids, _selected_fireteam_ids, false, prepared_map, prepared_cache)
 	mission_host.add_child(mission_instance)
 	_active_mission = mission_instance
+	# LC2h: Der Einsatz fragt hier nach Schiffsname und Notrettungsgebuehr, wenn ein Schiff verloren geht (Meldung, EVAC-Knopf).
+	mission_instance.set_meta("campaign_craft_loss_quote", Callable(self, "_craft_loss_quote"))
 	_bind_context_overlay_signals()
 	if not location_id.is_empty():
 		mission_instance.set_meta("location_id",location_id)
@@ -4590,8 +4596,13 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 	# Nur Kampagne und nur mit gueltigen Regeln ({} sonst): dann gelten Verwundung, Tod und Totalverlust.
 	var casualty_rules: Dictionary = _get_campaign_casualty_rules() if is_campaign_start() else {}
 	var casualty_resolution: Dictionary = {}
+	# LC2c: Ist das Schiff dieses Einsatzes verloren (Bruchlandung/Explosion), gibt es kein Einschiffen und keinen Rueckflug: die Notrettung
+	# holt alle Lebenden ab. Das Ergebnis wird so gebucht, wie es ist (Sieg bleibt Sieg); die Einstufung laeuft mit craft_lost.
+	var craft_lost: bool = is_campaign_start() and bool(_active_mission.get_node("TacticalController").call("_is_air_craft_crashed", String(_active_singleplayer_identity.get("craft_id", ""))))
+	# LC2g W3: Auch jedes andere eigene Schiff, das in diesem Einsatz abgeschossen wurde (nicht die Einsatzidentitaet), geht verloren.
+	var other_craft_losses: Array = _other_craft_losses_of_mission() if is_campaign_start() else []
 	if is_campaign_start():
-		var crew_boarding: Dictionary = _active_mission.get_node("TacticalController").call("request_campaign_crew_boarding", String(_active_singleplayer_identity.get("craft_id", "")))
+		var crew_boarding: Dictionary = {"ok": true} if craft_lost else _active_mission.get_node("TacticalController").call("request_campaign_crew_boarding", String(_active_singleplayer_identity.get("craft_id", "")))
 		if not bool(crew_boarding.get("ok", false)):
 			if String(crew_boarding.get("reason", "")) in ["pilot_unavailable", "crew_unavailable"]:
 				# A terminal casualty cannot walk/board. Finish the existing result
@@ -4607,7 +4618,13 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 				return
 		elif not casualty_rules.is_empty():
 			# Einschiffen ist durch: team_states (inkl. aboard/near_ship) entscheiden ueber Verluste.
-			casualty_resolution = _resolve_campaign_casualties(mission_result, casualty_rules)
+			casualty_resolution = _resolve_campaign_casualties(mission_result, casualty_rules, craft_lost, _lost_craft_occupant_ids(other_craft_losses))
+			# LC2f W1: Machte das Entfernen der Toten den Kader unspielbar, gilt der bestehende Totalverlust (nie "Tote bleiben im Kader").
+			if craft_lost and not bool(casualty_resolution.get("total_loss", false)):
+				var roster_problem: String = _craft_loss_roster_problem(casualty_resolution)
+				if not roster_problem.is_empty():
+					casualty_resolution["total_loss"] = true
+					casualty_resolution["total_loss_reason"] = roster_problem
 			if bool(casualty_resolution.get("total_loss", false)):
 				failed_extraction = true
 				_mark_campaign_total_loss(resolved_result, mission_result, {"ok": false, "reason": "crew_unavailable", "total_loss_reason": String(casualty_resolution.get("total_loss_reason", ""))})
@@ -4615,7 +4632,18 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 				resolved_result["total_loss_reason"] = String(casualty_resolution.get("total_loss_reason", ""))
 			else:
 				resolved_result["casualty_total_loss"] = false
-	if not failed_extraction and _singleplayer_runtime != null and not _active_singleplayer_identity.is_empty():
+	# LC2i I1: Wuerde die Flotte nach dem Raeumen der verlorenen Schiffe leer sein, gilt der Einsatz als Totalverlust (Stand vor dem Einsatz,
+	# Totalverlust-Strafe (sie enthaelt die Rettungsgebuehr; keine zweite Gebuehr fuer den Schiffsverlust), kein Pleite-Bildschirm "no_craft").
+	var last_craft_lost: bool = craft_lost and _fleet_empty_after_losses(other_craft_losses + [String(_active_singleplayer_identity.get("craft_id", ""))])
+	if last_craft_lost and not failed_extraction:
+		failed_extraction = true
+		_mark_campaign_total_loss(resolved_result, mission_result, {"ok": false, "reason": "last_craft_lost"})
+		if not casualty_rules.is_empty():
+			resolved_result["casualty_total_loss"] = true
+			resolved_result["total_loss_reason"] = "last_craft_lost"
+	# LC2i I2: Nach einem Schiffsverlust landet nichts mehr, das die Ortsinstanz freigaebe wie eine Heimlandung; _run_location_callback holt das nach.
+	_release_location_after_craft_loss = (craft_lost or not other_craft_losses.is_empty()) and not failed_extraction
+	if not failed_extraction and not craft_lost and _singleplayer_runtime != null and not _active_singleplayer_identity.is_empty():
 		var return_gate: Dictionary = _singleplayer_runtime.call("authorize_return", String(_active_singleplayer_identity.get("craft_id", "")))
 		if not bool(return_gate.get("ok", false)):
 			# Das Ergebnis haengt nie am Treibstoff (Regel 8 / Auftrag 21.11., Fix-Runde 1 K1): Reicht der Tank nicht fuer den Ortsabflug
@@ -4641,6 +4669,8 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 		var casualty_driver: Node = _active_mission.get_node_or_null("CombatLoopDriver")
 		if casualty_driver != null and casualty_driver.has_method("clear_casualty_flags"):
 			casualty_driver.call("clear_casualty_flags")
+	if last_craft_lost:
+		_last_mission_result["last_craft_lost"] = true
 	if casualty_resolution.has("team_states"):
 		_last_mission_result["team_states"] = Array(casualty_resolution.get("team_states", [])).duplicate(true)
 	if not casualty_resolution.is_empty() and not failed_extraction:
@@ -4648,11 +4678,25 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 		_last_mission_result["fatality_unit_ids"] = PackedStringArray(casualty_resolution.get("fatality_unit_ids", PackedStringArray()))
 		_last_mission_result["respawn_unit_ids"] = PackedStringArray(casualty_resolution.get("respawn_unit_ids", PackedStringArray()))
 		_last_mission_result["respawn_limit"] = int(casualty_resolution.get("respawn_limit", 0))
-	if not failed_extraction:
+	if not failed_extraction and not craft_lost:
 		_return_homebase_direct_craft_after_mission()
 	_last_mission_result = _apply_mission_progression_to_roster(_last_mission_result)
 	# Nach der Fortschrittsrechnung, damit die Stufe "wounded" den dort gesetzten Status "recovering" ueberschreibt.
 	_last_mission_result = _apply_campaign_casualties(_last_mission_result)
+	if craft_lost and not failed_extraction:
+		_last_mission_result["craft_loss"] = _book_craft_loss_rescue(_last_mission_result, casualty_rules)
+	elif not failed_extraction and not Array(casualty_resolution.get("stranded_rescued_ids", [])).is_empty():
+		# LC2k K2: Einsatzschiff heil, aber Insassen eines verlorenen zweiten Schiffs sind nicht an Bord heimgekehrt: die Notrettung holt sie, Gebuehr einmal.
+		_book_stranded_rescue_fee(_last_mission_result, casualty_rules, other_craft_losses)
+	if not other_craft_losses.is_empty() and not failed_extraction:
+		_last_mission_result["other_craft_losses"] = other_craft_losses.duplicate(true)
+	if not failed_extraction and _singleplayer_runtime != null and (craft_lost or not other_craft_losses.is_empty()):
+		# LC2i I5: Auftragsfracht in einem verlorenen Schiff (die C-Benit-Kiste): sie steht am Ladeort wieder bereit; die Nachbesprechung sagt es.
+		var lost_cargo: Array = []
+		var lost_ids: Array = [String(_active_singleplayer_identity.get("craft_id", ""))] if craft_lost else []
+		for other_loss in other_craft_losses: lost_ids.append(String(Dictionary(other_loss).get("craft_id", "")))
+		for lost_id in lost_ids: lost_cargo.append_array(Array(_singleplayer_runtime.call("lost_craft_cargo_names", lost_id)))
+		if not lost_cargo.is_empty(): _last_mission_result["cargo_lost"] = lost_cargo
 	if failed_extraction and bool(_last_mission_result.get("casualty_total_loss", false)):
 		# Task 5b: Notrettung. Der Malus wird jetzt mit dem Basisstand gesichert und beim Wiederherstellen angewendet.
 		var total_loss_penalty: Dictionary = _stage_total_loss_penalty(_last_mission_result)
@@ -4669,6 +4713,11 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 		debrief_screen.set_mission_result(_last_mission_result)
 
 	_release_active_mission()
+	if not failed_extraction:
+		for other_loss in other_craft_losses:
+			_retire_lost_craft(Dictionary(other_loss))
+	if craft_lost and not failed_extraction:
+		_retire_lost_craft(Dictionary(_last_mission_result.get("craft_loss", {})))
 	var drop_source := _get_mission_drop_source()
 	_mission_planning_state = DEFAULT_MISSION_PLANNING_STATE.duplicate(true)
 	_mission_planning_state["mission_drop_source"] = drop_source
@@ -4679,6 +4728,198 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 		_show_star_map()
 	else:
 		_show_debrief()
+
+
+## LC2c: Notrettung nach Schiffsverlust. Die Rettungsgebuehr kommt aus casualty_rules.json (wie beim Totalverlust: Anteil am Guthaben,
+## mindestens die Mindestgebuehr), wird voll gebucht, darf ins Minus fuehren und wird nie abgelehnt. Gibt den Verlustbeleg fuers Ergebnis zurueck:
+## {craft_id, ship_name, outcome ("crash"|"explosion"), rescue_fee}. Genau einmal je Einsatz (der Aufruf liegt hinter der Pruefung
+## _active_mission == null von _on_mission_combat_resolved).
+func _book_craft_loss_rescue(mission_result: Dictionary, rules: Dictionary) -> Dictionary:
+	var craft_id: String = String(_active_singleplayer_identity.get("craft_id", ""))
+	var simulation: Node = _active_mission.get_node_or_null("SimulationRoot")
+	var outcome := "crash"
+	if simulation != null and simulation.has_method("get_air_crash_sites"):
+		for site in Array(simulation.call("get_air_crash_sites")):
+			if String(Dictionary(site).get("craft_id", "")) == craft_id:
+				outcome = String(Dictionary(site).get("outcome", "crash"))
+	var card: Dictionary = Dictionary(_active_mission.get_node("TacticalController").call("_find_mission_dropship_card_entry", craft_id))
+	var ship_name: String = String(card.get("display_name", "")).strip_edges()
+	var fee := 0
+	if not rules.is_empty() and _singleplayer_runtime != null:
+		fee = _craft_loss_rescue_fee(Array(mission_result.get("team_states", [])), rules)
+		if fee > 0:
+			# LC2d A5: Das Ergebnis der Abbuchung wird geprueft; scheitert sie, steht im Beleg keine Gebuehr, die nie gebucht wurde.
+			var charged: Dictionary = Dictionary(_singleplayer_runtime.call("charge_campaign_rescue_fee", fee))
+			if not bool(charged.get("ok", false)):
+				push_warning("Notrettung: Gebuehr %d nicht gebucht (%s)" % [fee, String(charged.get("reason", ""))])
+				fee = 0
+	return {"craft_id": craft_id, "ship_name": ship_name if not ship_name.is_empty() else craft_id, "outcome": outcome, "rescue_fee": fee}
+
+
+## LC2h: Die Rettungsgebuehr nach Schiffsverlust (eine Rechnung fuer Buchung und Ansage): Anteil am heutigen Guthaben, mindestens die Mindestgebuehr.
+func _craft_loss_rescue_fee(team_states: Array, rules: Dictionary) -> int:
+	var credits: int = int(_singleplayer_runtime.call("get_campaign_credits"))
+	var penalty: Dictionary = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("build_total_loss_penalty", team_states, credits, rules))
+	return maxi(int(penalty.get("rescue_fee", 0)), 0)
+
+
+## LC2h H4: Detail fuer den Speichersatz, wenn im laufenden Einsatz Schiffe abgestuerzt sind: "lost:<Name>|<Name>" (sonst "").
+func crash_save_detail() -> String:
+	var simulation: Node = _active_mission.get_node_or_null("SimulationRoot") if is_instance_valid(_active_mission) else null
+	if simulation == null or not simulation.has_method("get_air_crash_sites"): return ""
+	var controller: Node = _active_mission.get_node_or_null("TacticalController")
+	var names: Array = []
+	for site in Array(simulation.call("get_air_crash_sites")):
+		var craft_id: String = String(Dictionary(site).get("craft_id", ""))
+		var ship_name: String = String(Dictionary(_craft_loss_quote(craft_id)).get("ship_name", craft_id))
+		if controller != null and controller.has_method("_find_mission_dropship_card_entry"):
+			var card_name: String = String(Dictionary(controller.call("_find_mission_dropship_card_entry", craft_id)).get("display_name", "")).strip_edges()
+			if not card_name.is_empty(): ship_name = card_name
+		if not craft_id.is_empty() and not names.has(ship_name): names.append(ship_name)
+	return "lost:" + "|".join(PackedStringArray(names)) if not names.is_empty() else ""
+
+
+## LC2h: Auskunft fuer den laufenden Einsatz ueber ein verlorenes Schiff: {"ship_name", "is_mission_craft", "fee"}. fee = Gebuehr, die die
+## Notrettung buchen wird (heutiges Guthaben; die Buchung folgt nach dem Einsatz), nur fuers Einsatzschiff, sonst 0. Leer ausserhalb der Kampagne.
+## LC2m W1: Fuer ein anderes verlorenes Schiff (nicht das letzte) zusaetzlich "stranded_count"/"stranded_fee" aus _stranded_rescue_quote.
+func _craft_loss_quote(craft_id: String) -> Dictionary:
+	if not is_campaign_start() or _active_mission == null: return {}
+	var ship_name := craft_id
+	for craft_variant in _homebase_aircraft_definitions:
+		if String(Dictionary(craft_variant).get("craft_id", "")).strip_edges() == craft_id:
+			var named: String = String(Dictionary(craft_variant).get("display_name", "")).strip_edges()
+			if not named.is_empty(): ship_name = named
+	var is_mission_craft: bool = craft_id == String(_active_singleplayer_identity.get("craft_id", ""))
+	# LC2i I1: Bleibt nach den bisher abgestuerzten Schiffen (und diesem) keines uebrig, ist es das letzte Schiff: Totalverlust (die Rettungsgebuehr steckt in der Totalverlust-Strafe, fee hier 0).
+	var lost_ids: Array = [craft_id]
+	var simulation: Node = _active_mission.get_node_or_null("SimulationRoot") if is_instance_valid(_active_mission) else null
+	if simulation != null and simulation.has_method("get_air_crash_sites"):
+		for site in Array(simulation.call("get_air_crash_sites")):
+			lost_ids.append(String(Dictionary(site).get("craft_id", "")).strip_edges())
+	var is_last_craft: bool = _fleet_empty_after_losses(lost_ids)
+	var rules: Dictionary = _get_campaign_casualty_rules()
+	var fee := 0
+	if is_mission_craft and not is_last_craft and not rules.is_empty() and _singleplayer_runtime != null:
+		fee = _craft_loss_rescue_fee([], rules)
+	var quote: Dictionary = {"ship_name": ship_name, "is_mission_craft": is_mission_craft, "fee": fee, "is_last_craft": is_last_craft}
+	if not is_mission_craft and not is_last_craft:
+		# LC2m W1: Ansage vor dem Abheben fuer Insassen verlorener zweiter Schiffe (Daten; den Text baut der EVAC-Knopf).
+		quote.merge(_stranded_rescue_quote())
+	return quote
+
+
+## LC2m W1: Wie viele Insassen verlorener zweiter Schiffe stehen JETZT weder an Bord noch am Einsatzschiff, und welche Gebuehr wuerde
+## _book_stranded_rescue_fee beim Abflug dafuer buchen: {"stranded_count", "stranded_fee"} (0/0, wenn niemand abseits steht). Misst wie das Einsatzende.
+func _stranded_rescue_quote() -> Dictionary:
+	var quote: Dictionary = {"stranded_count": 0, "stranded_fee": 0}
+	if not is_campaign_start() or not is_instance_valid(_active_mission) or _singleplayer_runtime == null: return quote
+	var others: Array = _other_craft_losses_of_mission()
+	var rules: Dictionary = _get_campaign_casualty_rules()
+	if others.is_empty() or rules.is_empty(): return quote
+	var team_states: Array = Array(_build_mission_result(_active_mission, {}).get("team_states", []))
+	var stranded: Array = _stranded_lost_craft_occupants(team_states, _lost_craft_occupant_ids(others))
+	if stranded.is_empty(): return quote
+	var fee: int = _craft_loss_rescue_fee(team_states, rules)
+	# LC2m M3: der Satz der Ansage (EVAC-Tooltip und Schiffskarte) und der Schluessel des Stands ("Anzahl|Gebuehr") fuer "schon angesagt".
+	var text: String = ("1 Person des abgeschossenen Schiffs ist nicht am Schiff. Notrettung: %d Credits." % fee) if stranded.size() == 1 else ("%d Personen des abgeschossenen Schiffs sind nicht am Schiff. Notrettung: %d Credits." % [stranded.size(), fee])
+	return {"stranded_count": stranded.size(), "stranded_fee": fee, "stranded_text": text, "stranded_key": "%d|%d" % [stranded.size(), fee]}
+
+
+## LC2i I1: Ist die Flotte leer, wenn genau die Schiffe der Liste (craft_id-Texte oder Verlustbelege) verloren sind? Eine Flotte ohne Schiffe
+## gilt nicht als "leer nach dem Verlust" (dann greift der Pleite-Grund no_craft).
+func _fleet_empty_after_losses(lost: Array) -> bool:
+	var ids: Dictionary = {}
+	for entry in lost:
+		ids[String(Dictionary(entry).get("craft_id", "")).strip_edges() if typeof(entry) == TYPE_DICTIONARY else String(entry).strip_edges()] = true
+	if _homebase_aircraft_definitions.is_empty(): return false
+	for craft_variant in _homebase_aircraft_definitions:
+		if not ids.has(String(Dictionary(craft_variant).get("craft_id", "")).strip_edges()):
+			return false
+	return true
+
+
+## LC2g W3: Verlustbelege fuer jedes abgeschossene Schiff dieses Einsatzes, das nicht das Einsatzschiff ist und noch in der Flotte steht
+## ({craft_id, ship_name, outcome, rescue_fee:0}; die Rettungsgebuehr bucht nur das Einsatzschiff). Raeumung und Insassen ueber _retire_lost_craft.
+func _other_craft_losses_of_mission() -> Array:
+	var losses: Array = []
+	var simulation: Node = _active_mission.get_node_or_null("SimulationRoot") if is_instance_valid(_active_mission) else null
+	if simulation == null or not simulation.has_method("get_air_crash_sites"):
+		return losses
+	var own_id: String = String(_active_singleplayer_identity.get("craft_id", ""))
+	var seen: Dictionary = {}
+	for site in Array(simulation.call("get_air_crash_sites")):
+		var craft_id: String = String(Dictionary(site).get("craft_id", "")).strip_edges()
+		if craft_id.is_empty() or craft_id == own_id or seen.has(craft_id):
+			continue
+		for craft_variant in _homebase_aircraft_definitions:
+			var definition: Dictionary = Dictionary(craft_variant)
+			if String(definition.get("craft_id", "")).strip_edges() == craft_id:
+				seen[craft_id] = true
+				var ship_name: String = String(definition.get("display_name", "")).strip_edges()
+				losses.append({"craft_id": craft_id, "ship_name": ship_name if not ship_name.is_empty() else craft_id, "outcome": String(Dictionary(site).get("outcome", "crash")), "rescue_fee": 0})
+				break
+	return losses
+
+
+## LC2e B1: Das durch Absturz verlorene Schiff verlaesst die Flotte dauerhaft: Definition, Pilotenzuordnung, Ort, Fracht-Auswahl, Reisezustand,
+## Landeplatz, Treibstoff/Schiffslager, Ausruestung (Adapter). Ein Verlustbeleg bleibt (Basisstand, Schluessel "lost_craft"). Danach meldet der
+## Basisspeicherstand wieder "grounded"; die Flotte darf leer sein. Genau einmal je Einsatz (Aufruf hinter _on_mission_combat_resolved).
+func _retire_lost_craft(loss: Dictionary) -> void:
+	var craft_id: String = String(loss.get("craft_id", "")).strip_edges()
+	if craft_id.is_empty(): return
+	var definition: Dictionary = {}
+	var remaining: Array = []
+	for craft_variant in _homebase_aircraft_definitions:
+		if String(Dictionary(craft_variant).get("craft_id", "")).strip_edges() == craft_id:
+			definition = Dictionary(craft_variant).duplicate(true)
+		else:
+			remaining.append(craft_variant)
+	if definition.is_empty(): return
+	# Die Notrettung hat die Lebenden heimgeholt: sie stehen an der Basis, nicht mehr an Bord des verlorenen Schiffs; dessen Trupp-Zuladung entfaellt.
+	var base_personnel: Node = _singleplayer_runtime.call("get_base_personnel_runtime") if _singleplayer_runtime != null else null
+	if base_personnel != null and base_personnel.has_method("rescue_crew_from_lost_craft"):
+		set_meta("campaign_lost_craft_rescue_result", Dictionary(base_personnel.call("rescue_crew_from_lost_craft", craft_id)).duplicate(true))
+	var homebase_screen: Node = _get_homebase_screen()
+	if homebase_screen != null and homebase_screen.has_method("_get_homebase_direct_payload_fireteam_ids_for_craft_raw"):
+		for team_id in Array(homebase_screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw", craft_id)).duplicate():
+			homebase_screen.call("_remove_homebase_direct_payload_fireteam", String(team_id), craft_id)
+	_homebase_aircraft_definitions = remaining
+	_aircraft_location_by_craft.erase(craft_id)
+	_assigned_aircraft_pilot_by_craft.erase(craft_id)
+	_selected_aircraft_cargo_by_craft.erase(craft_id)
+	_loaded_aircraft_cargo_by_craft.erase(craft_id)
+	_craft_location_runtime.erase(craft_id)
+	_air_asset_recovery_by_craft.erase(craft_id)
+	var equipment_kept := false
+	if _singleplayer_runtime != null:
+		equipment_kept = bool(Dictionary(_singleplayer_runtime.call("retire_lost_craft", craft_id)).get("equipment_kept", false))
+	_lost_craft_records.append({"craft_id": craft_id, "definition": definition, "ship_name": String(loss.get("ship_name", craft_id)), "outcome": String(loss.get("outcome", "crash")), "equipment_kept": equipment_kept})
+
+
+## LC2f W1: Wuerde das Entfernen der endgueltig Gefallenen (ohne Geschuetzte, wie _remove_campaign_fatalities) den Kader unspielbar machen
+## (kein Anfuehrer mehr, kein Pilot mehr, weniger als zwei Personen)? Gibt dann den Totalverlust-Grund ("no_leader_left", "no_pilot_left",
+## "roster_too_small") zurueck, sonst "". War der Kader schon vorher mangelhaft, bleibt es bei "" (wie in _remove_campaign_fatalities).
+func _craft_loss_roster_problem(casualty_resolution: Dictionary) -> String:
+	var dead_units: Dictionary = {}
+	for raw_id in PackedStringArray(casualty_resolution.get("fatality_unit_ids", PackedStringArray())):
+		var dead_id: String = String(raw_id).strip_edges()
+		if dead_id.is_empty() or dead_units.has(dead_id) or _is_campaign_person_protected(dead_id):
+			continue
+		for unit_variant in _all_team_units:
+			if typeof(unit_variant) == TYPE_DICTIONARY and String(Dictionary(unit_variant).get("unit_id", "")) == dead_id:
+				dead_units[dead_id] = true
+				break
+	if dead_units.is_empty() or not _campaign_roster_problems(_all_team_units).is_empty():
+		return ""
+	var problems: PackedStringArray = _campaign_roster_problems(_campaign_roster_without(dead_units))
+	if problems.is_empty():
+		return ""
+	var text: String = "; ".join(problems)
+	if text.contains("Platz 0"):
+		return "no_leader_left"
+	if text.contains("Platz 1"):
+		return "no_pilot_left"
+	return "roster_too_small"
 
 
 ## Gemeinsamer Totalverlust-Pfad (wie bisher bei nicht einsatzfaehiger Besatzung): Niederlage, kein Erfolg, Checkpoint-Retry.
@@ -4743,8 +4984,8 @@ func _stage_total_loss_penalty(mission_result: Dictionary) -> Dictionary:
 
 
 ## Task 5b: Notrettung nach Totalverlust, Schritt 2 (beim Wiederherstellen des Basisstands, nach dem Aufbau der Laufzeit).
-## Gibt es die Zusatzdatei und bezieht sie sich auf genau den geladenen Stand, wird der Malus angewendet: Gebuehr (hoechstens das
-## Guthaben) ueber den Besitzer der Credits, leichte Verwundung mit der Regel "nie kuerzer, nie leichter", Moral der Beteiligten
+## Gibt es die Zusatzdatei und bezieht sie sich auf genau den geladenen Stand, wird der Malus angewendet: Gebuehr (voll gebucht, auch
+## ins Minus) ueber den Besitzer der Credits, leichte Verwundung mit der Regel "nie kuerzer, nie leichter", Moral der Beteiligten
 ## (auf 0..1 begrenzt). _ready schreibt den Basis-Checkpoint danach sofort und loescht DANACH die Zusatzdatei; der neu
 ## gespeicherte Stand hat eine andere Pruefsumme, eine nach einem Abbruch uebrige Zusatzdatei ist dann veraltet und wirkungslos.
 ## Veraltete oder unlesbare Zusatzdatei: push_warning, ohne Wirkung geloescht. Neue Kampagne: Zusatzdatei geloescht.
@@ -4803,15 +5044,56 @@ func _apply_pending_total_loss_penalty() -> bool:
 	return true
 
 
+## LC2k K2: Einheiten, die Basisseite an Bord der verlorenen Schiffe (Verlustbelege) gefuehrt werden. Nur lesen.
+func _lost_craft_occupant_ids(losses: Array) -> Array:
+	var ids: Array = []
+	var base_personnel: Node = _singleplayer_runtime.call("get_base_personnel_runtime") if _singleplayer_runtime != null else null
+	if base_personnel == null or not base_personnel.has_method("unit_ids_aboard_craft"): return ids
+	for loss in losses:
+		ids.append_array(Array(base_personnel.call("unit_ids_aboard_craft", String(Dictionary(loss).get("craft_id", "")))))
+	return ids
+
+
+## LC2k K2: Von den Insassen verlorener Schiffe die, die leben und am Einsatzende NICHT an Bord eines heimkehrenden Schiffs sind (team_states.aboard
+## falsch): sie holt die Notrettung heim, dafuer faellt die Gebuehr an. Tote (killed_in_crash, verblutet) bleiben aussen vor.
+## LC2m W1 (Uebergang, bis fremde Trupps echt zusteigen koennen): Wer am Einsatzschiff steht (team_states.near_ship), gilt als mitgenommen, keine Gebuehr.
+func _stranded_lost_craft_occupants(team_states: Array, occupant_ids: Array) -> Array:
+	var stranded: Array = []
+	for raw in team_states:
+		var state: Dictionary = raw
+		var unit_id := String(state.get("unit_id", ""))
+		if not occupant_ids.has(unit_id) or bool(state.get("aboard", false)) or bool(state.get("near_ship", false)) or bool(state.get("killed_in_crash", false)): continue
+		var vital := String(state.get("vital_state", "fit"))
+		if (vital == "fit" and float(state.get("health_points", 1.0)) > 0.0) or vital == "down": stranded.append(unit_id)
+	return stranded
+
+
+## LC2k K2: Die Gebuehr der Notrettung fuer Insassen eines verlorenen zweiten Schiffs, einmal je Einsatz (Einsatzschiff heil); steht beim ersten Verlustbeleg.
+func _book_stranded_rescue_fee(mission_result: Dictionary, rules: Dictionary, other_losses: Array) -> void:
+	if rules.is_empty() or _singleplayer_runtime == null or other_losses.is_empty(): return
+	var fee: int = _craft_loss_rescue_fee(Array(mission_result.get("team_states", [])), rules)
+	if fee > 0:
+		var charged: Dictionary = Dictionary(_singleplayer_runtime.call("charge_campaign_rescue_fee", fee))
+		if not bool(charged.get("ok", false)):
+			push_warning("Notrettung: Gebuehr %d nicht gebucht (%s)" % [fee, String(charged.get("reason", ""))])
+			fee = 0
+	Dictionary(other_losses[0])["rescue_fee"] = fee
+
+
 ## Verluste des laufenden Einsatzes aus den team_states (Task 1 Resolver). Nur nach erfolgreichem Einschiffen aufrufen.
-func _resolve_campaign_casualties(mission_result: Dictionary, rules: Dictionary) -> Dictionary:
+func _resolve_campaign_casualties(mission_result: Dictionary, rules: Dictionary, craft_lost: bool = false, lost_occupant_ids: Array = []) -> Dictionary:
 	var measured: Dictionary = _build_mission_result(_active_mission, mission_result)
+	# LC2l L3: Bei einem Sieg mit heilem Einsatzschiff sammelt der Spieler die Leute am Feld selbst ein: keine Notrettung, keine Gebuehr fuer
+	# Insassen eines verlorenen zweiten Schiffs (wie vor LC2k fuer Liegende bei "won"). Die Gebuehr gilt nur ohne Sieg (Rueckzug/EVAC).
+	var victory: bool = String(mission_result.get("mission_outcome", "")) == "won"
+	var rescued_ids: Array = [] if (craft_lost or victory) else _stranded_lost_craft_occupants(Array(measured.get("team_states", [])), lost_occupant_ids)
 	var craft_id: String = String(_active_singleplayer_identity.get("craft_id", ""))
 	var pilot_unit_id: String = String(_assigned_aircraft_pilot_by_craft.get(craft_id, _mission_planning_state.get("mission_drop_pilot_unit_id", ""))).strip_edges()
 	# Respawn (R3): Die Grenze je Person kommt aus den Einstellungen und gilt fuer diesen ganzen Einsatz (Grenze 0 = wie bisher).
 	var respawn_limit: int = int(GAME_SETTINGS_CONTRACT_SCRIPT.call("load_campaign_respawn_limit"))
-	var resolution: Dictionary = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("resolve_mission", Array(measured.get("team_states", [])), String(mission_result.get("mission_outcome", "")), _all_team_units, pilot_unit_id, rules, {"respawn_limit": respawn_limit}))
+	var resolution: Dictionary = Dictionary(CAMPAIGN_CASUALTY_RULES_SCRIPT.call("resolve_mission", Array(measured.get("team_states", [])), String(mission_result.get("mission_outcome", "")), _all_team_units, pilot_unit_id, rules, {"respawn_limit": respawn_limit, "craft_lost": craft_lost, "rescued_unit_ids": rescued_ids}))
 	resolution["respawn_limit"] = respawn_limit
+	resolution["stranded_rescued_ids"] = rescued_ids
 	# Genau diese Messung steht spaeter im Ergebnis; casualties und team_states koennen nicht auseinanderlaufen.
 	resolution["team_states"] = Array(measured.get("team_states", [])).duplicate(true)
 	return resolution
@@ -5468,6 +5750,8 @@ func _campaign_casualty_fields_for_unit(unit: Node, unit_id: String, context: Di
 		"was_downed": bool(flag.get("was_downed", false)),
 		"near_ship": near_ship,
 		"aboard": bool(unit.get_meta("dropship_embarked", false)),
+		# LC2b/W1: beim Absturz eines Schiffs gestorben (Merkmal am Akteur); classify_unit wertet es zuerst.
+		"killed_in_crash": bool(unit.get_meta("killed_in_crash", false)),
 	}
 
 
@@ -9474,6 +9758,7 @@ func request_campaign_save() -> Dictionary:
 		var reason := String(result.get("reason",""))
 		# Speichern, erster Teil / 21.11.: der Satz nennt Grund und Zeitpunkt; "home" trennt den Basis-Satz vom Einsatz-Satz.
 		var detail := String(result.get("detail", "")) if result.has("detail") else ("" if is_instance_valid(_active_mission) else "home")
+		if reason == "mission_lifecycle_unsupported" and detail.is_empty(): detail = crash_save_detail()
 		result["message"] = load("res://scripts/meta/campaign_save_projection.gd").blocked_text(reason, detail)
 	return result
 
@@ -9726,6 +10011,12 @@ func _campaign_departure_gate_casualties(craft_id: String) -> Dictionary:
 		var return_check: Dictionary = _departure_return_preflight(craft_id)
 		if not bool(return_check.get("ok", false)):
 			return {"handled": true, "ok": false, "reason": String(return_check.get("reason", "return_unavailable")), "message": _departure_fuel_message(String(return_check.get("reason", ""))) if String(return_check.get("reason", "")) in DEPARTURE_FUEL_REASONS else String(return_check.get("message", "Rückflug gerade nicht möglich"))}
+		# LC2m M3: Vor dem Abflug frisch gemessen. Steht ein Insasse eines verlorenen zweiten Schiffs abseits und ist genau dieser Stand (Anzahl, Gebuehr)
+		# noch nicht angesagt (EVAC-Knopf oder hier), fliegt das Schiff dieses eine Mal nicht ab; die Schiffskarte nennt den Satz. Der naechste Versuch fliegt.
+		var stranded: Dictionary = _stranded_rescue_quote()
+		if int(stranded.get("stranded_fee", 0)) > 0 and String(visit.get_meta("campaign_stranded_rescue_announced", "")) != String(stranded.get("stranded_key", "")):
+			visit.set_meta("campaign_stranded_rescue_announced", String(stranded.get("stranded_key", "")))
+			return {"handled": true, "ok": false, "reason": "rescue_fee_announced", "message": String(stranded.get("stranded_text", ""))}
 	# Orte laufen ueber _run_location_callback; ist der Flow gerade in einem Ortsrueckruf, wuerde er die Aufloesung still verwerfen.
 	if not String(visit.get_meta("location_id", "")).is_empty() and _location_callback_active:
 		return {"handled": true, "ok": false, "reason": "flow_busy", "message": "Abflug gerade nicht möglich, bitte erneut versuchen"}
@@ -10124,10 +10415,16 @@ func _run_location_callback(instance: Node, callback: Callable, payload: Diction
 	var old_view:=_current_meta_view
 	var focused: bool=instance==_active_mission and old_view=="mission"
 	_enter_location_context(instance)
+	_release_location_after_craft_loss = false
 	callback.call(payload)
 	_remember_location(instance)
 	if not focused:
 		_restore_location_view_context(previous, old_view, instance)
+	if _release_location_after_craft_loss:
+		# LC2i I2: Hintergrund-Ende nach Schiffsverlust: die Rueckstellung hat _active_mission wieder auf die Instanz gesetzt; ohne Heimlandung
+		# wuerde sie nie freigegeben (Speichern bliebe mit away_from_checkpoint gesperrt). Derselbe Weg wie nach einer Heimlandung.
+		_release_location_after_craft_loss = false
+		_release_location_for_waiting_retreat(instance)
 	_location_callback_active=false
 
 func _admit_existing_location(instance: Node) -> void:

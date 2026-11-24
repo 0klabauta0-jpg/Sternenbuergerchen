@@ -1269,6 +1269,29 @@ func remove_skirmish_craft(craft_id: String) -> void:
 	_revision += 1
 
 
+## LC2e B1: Ein durch Absturz verlorenes Schiff verlaesst den Versorgungsstand: Treibstoff und Schiffslager gehen mit dem Schiff verloren.
+## Liegen im Schiffslager Schiffskomponenten (oder wird die Ausruestung des Schiffs weitergefuehrt), bleibt das Lager stehen, damit die
+## Komponentenbilanz des Standes aufgeht; Treibstoff verschwindet immer. Gibt an, ob das Lager erhalten blieb.
+func retire_lost_craft(craft_id: String, keep_container: bool = false) -> Dictionary:
+	_fuel_by_craft_id.erase(craft_id)
+	# LC2f K2: Der Kaufbeleg eines verlorenen Schiffs behaelt seinen Heimlandeplatz, wird aber als verloren gekennzeichnet (additives Feld
+	# "craft_lost" im Ergebnis); die Platzpruefung der Belege zaehlt ihn dann nicht mehr (validate_station_receipts).
+	for request_id: String in _requests:
+		var receipt_result: Variant = Dictionary(_requests[request_id]).get("result", {})
+		if typeof(receipt_result) == TYPE_DICTIONARY and receipt_result.get("operation", "") == "station_buy_ship" and String(receipt_result.get("craft_id", "")) == craft_id:
+			_requests[request_id].result["craft_lost"] = true
+	var key := "craft:" + craft_id
+	var kept := keep_container
+	if _inventory.has(key) and not kept:
+		for item_id in Dictionary(Dictionary(_inventory[key]).get("items", {})).keys():
+			if int(Dictionary(_inventory[key].items)[item_id]) > 0 and (SHIP_COMPONENTS.known(String(item_id)) or SPACE_COMPONENTS.known(String(item_id))):
+				kept = true
+	if _inventory.has(key) and not kept:
+		_inventory.erase(key)
+	_revision += 1
+	return {"ok": true, "container_kept": kept}
+
+
 func return_skirmish_person_equipment(unit_id: String, loadout: Dictionary) -> Dictionary:
 	var storage: Dictionary = _inventory["base:homebase"]
 	var bag_key := "unit:" + unit_id + ":backpack"
@@ -1563,8 +1586,8 @@ func _campaign_build(_payload: Dictionary, context: Dictionary) -> Dictionary:
 func get_credits() -> int:
 	return _credits
 
-## Notrettung nach einem Totalverlust: bucht hoechstens das vorhandene Guthaben ab, das Guthaben wird nie negativ.
-## Gibt die tatsaechlich abgezogene Summe zurueck.
+## Bucht hoechstens das vorhandene Guthaben ab, das Guthaben wird nie negativ (Aufrufer nur noch die Tanker-Tests). Die Notrettung bucht
+## NICHT hierueber, sondern voll ueber charge_rescue_fee, auch ins Minus. Gibt die tatsaechlich abgezogene Summe zurueck.
 func charge_credits_capped(amount: int) -> Dictionary:
 	if amount < 0:
 		return _reject("invalid_amount", "Betrag darf nicht negativ sein")
@@ -2109,7 +2132,7 @@ func validate_station_receipts(requests: Dictionary) -> Dictionary:
 			var model := String(offer.get("model_id", ""))
 			var id := "polisa_"+model+"_"+request_id.sha256_text().substr(0,12)
 			var pad := String(result.get("landing_pad_id", ""))
-			if offer.get("kind", "") != "ship" or model not in ["cutlass", "buccaneer"] or result.get("craft_id") != id or result.get("offer_id") != offer_id or result.get("cost") != offer.get("unit_price") or used_pads.has(pad) or pad not in ["homebase_pad_01", "homebase_pad_02", "homebase_pad_03", "homebase_pad_04", "homebase_pad_05", "homebase_pad_06"]: return _reject("invalid_station_ship_receipt", "Schiffskaufbeleg ungueltig")
+			if offer.get("kind", "") != "ship" or model not in ["cutlass", "buccaneer"] or result.get("craft_id") != id or result.get("offer_id") != offer_id or result.get("cost") != offer.get("unit_price") or (used_pads.has(pad) and result.get("craft_lost", false) != true) or pad not in ["homebase_pad_01", "homebase_pad_02", "homebase_pad_03", "homebase_pad_04", "homebase_pad_05", "homebase_pad_06"]: return _reject("invalid_station_ship_receipt", "Schiffskaufbeleg ungueltig")
 			var mode := String(signature.get("payload", {}).get("delivery_mode", "homebase"))
 			if mode not in ["homebase", "local"]: return _reject("invalid_station_ship_receipt", "Lieferart ungültig")
 			var local_pad := String(result.get("acquisition_pad_id", ""))
@@ -2120,7 +2143,8 @@ func validate_station_receipts(requests: Dictionary) -> Dictionary:
 			elif result.get("delivery_location_id") != "homebase" or result.has("origin_kind") or result.has("acquisition_pad_id") or result.has("receipt_schema_version"):
 				return _reject("invalid_station_ship_receipt", "Heimatlieferbeleg ungültig")
 			ships[id] = {"craft_id":id,"model_id":model,"craft_type":String(offer.craft_type),"pad":pad,"landing_pad_id":pad,"delivery_mode":mode,"delivery_location_id":"polisa" if mode == "local" else "homebase","acquisition_pad_id":local_pad,"origin_kind":"local_station_purchase" if mode == "local" else "home_delivery","origin_location_id":"polisa" if mode == "local" else "homebase","origin_receipt_id":request_id}
-			used_pads.append(pad)
+			# LC2f K2: Ein als verloren gekennzeichneter Beleg belegt keinen Platz mehr (auch nicht gegen spaetere Belege).
+			if result.get("craft_lost", false) != true: used_pads.append(pad)
 	pads.sort()
 	for index in range(pads.size()):
 		if pads[index] != index + 3: return _reject("invalid_station_pad_sequence", "Landeplatzbaubelege unvollstaendig")

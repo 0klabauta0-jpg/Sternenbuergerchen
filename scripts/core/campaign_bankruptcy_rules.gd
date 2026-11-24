@@ -14,10 +14,15 @@ extends RefCounted
 ##  - eine Folgeetappe in next_legs ist bezahlbar (affordable) - am Boden zaehlt der Abflug als Folgeetappe,
 ##  - refuel_affordable: Tanken ist hier bezahlbar,
 ##  - tanker_available: der Nottankdienst wuerde bestellbar liefern.
-## Grund (reason): "bankrupt", "no_debt_limit" (Daten ohne Kreditrahmen), "no_craft" (keine Schiffe),
+## Leere Flotte (LC2g): bankrupt mit cause "no_craft". Grund (reason): "bankrupt", "no_debt_limit" (Daten ohne Kreditrahmen), "no_craft" (nur ungueltige Eintraege),
 ## "tanker_order_open", "tanker_available", "craft_can_fly".
 
 static func is_bankrupt(_reachable_credits: int, debt_limit: int, craft_fuel_states: Array) -> Dictionary:
+	# LC2g: Leere Flotte (Liste ohne jeden Eintrag) ist ein Kampagnenende wie die Pleite, unabhaengig von Schulden und Kreditrahmen: ohne Schiff
+	# kommt man nicht von der Basis weg, und ein Schiff laesst sich nur angedockt in Polisa kaufen. cause "no_craft" gibt dem Bildschirm den Satz.
+	# Eine Liste nur aus ungueltigen Eintraegen ist keine leere Flotte (unten: nicht pleite).
+	if craft_fuel_states.is_empty():
+		return {"bankrupt": true, "reason": "bankrupt", "cause": "no_craft"}
 	if debt_limit <= 0:
 		return {"bankrupt": false, "reason": "no_debt_limit"}
 	var counted := 0

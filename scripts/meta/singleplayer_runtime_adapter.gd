@@ -216,7 +216,11 @@ func configure(flow: Node, screen: Control) -> void:
 				push_error("Invalid Polisa recruitment market checkpoint")
 				return
 			if checkpoint.has("ship_equipment"):
-				var equipment_restore: Dictionary = _ship_equipment.restore_state(checkpoint.ship_equipment, Array(_flow.get("_homebase_aircraft_definitions")), checkpoint.supply.requests, checkpoint.supply.get("inventory", {}))
+				# LC2e B1: Verlorene Schiffe mit Umbauten bleiben in der Ausruestungsverwaltung (Verlustbeleg traegt die Definition).
+				var equipment_definitions: Array = Array(_flow.get("_homebase_aircraft_definitions")).duplicate()
+				for lost: Variant in Array(checkpoint.get("lost_craft", [])):
+					if typeof(lost) == TYPE_DICTIONARY and bool(lost.get("equipment_kept", false)) and typeof(lost.get("definition")) == TYPE_DICTIONARY: equipment_definitions.append(lost.definition)
+				var equipment_restore: Dictionary = _ship_equipment.restore_state(checkpoint.ship_equipment, equipment_definitions, checkpoint.supply.requests, checkpoint.supply.get("inventory", {}))
 				if not equipment_restore.get("ok", false):
 					push_error("Invalid Warp equipment checkpoint")
 					return
@@ -684,6 +688,35 @@ func sync_crafts() -> void:
 
 	if _base_personnel != null: _base_personnel.call("_refresh_capacity")
 	sync_space_wings()
+
+## LC2e B1: Ein durch Absturz verlorenes Schiff verlaesst alle Besitzer: Reisezustand, Landeplatz, Treibstoff/Schiffslager, Ausruestung.
+## Die Flotte (Definition, Pilot, Ort) raeumt der Aufrufer (MetaLayerFlow) vorher. Danach meldet all_grounded() wieder wahr, wenn kein anderes Schiff unterwegs ist.
+## equipment_kept: das Schiff hat Umbauten (Belege), die Ausruestungsverwaltung behaelt seinen Eintrag, damit der Komponentenverlauf stimmt.
+func retire_lost_craft(craft_id: String) -> Dictionary:
+	if _supply == null or craft_id.is_empty(): return {"ok": false, "reason": "supply_unavailable"}
+	# LC2i I5: Lag die Auftragsfracht (C-Benit-Kiste) im Schiffslager, steht sie nach dem Verlust wieder am Ladeort bereit: der Lade-Merker geht zurueck.
+	var cargo_lost: Array = lost_craft_cargo_names(craft_id)
+	_travel.unregister_craft(craft_id)
+	_pad_by_craft.erase(craft_id)
+	_departure_token_by_craft.erase(craft_id)
+	var equipment_kept := false
+	if _ship_equipment != null:
+		equipment_kept = not bool(_ship_equipment.unregister_unmodified_craft(craft_id).get("ok", false))
+	_supply.retire_lost_craft(craft_id, equipment_kept)
+	if _campaign_mode and not cargo_lost.is_empty():
+		_commit("singleplayer_campaign", "unload_crate", {}, "unload:" + craft_id, {"runtime_authorized": true})
+	sync_crafts()
+	return {"ok": true, "equipment_kept": equipment_kept, "cargo_lost": cargo_lost}
+
+## LC2i I5: Namen der Auftragsfracht, die im Schiffslager von craft_id liegt (heute nur die C-Benit-Kiste, solange sie geladen und nicht geliefert ist).
+func lost_craft_cargo_names(craft_id: String) -> Array:
+	var names: Array = []
+	if _supply == null or not _campaign_mode or craft_id.is_empty(): return names
+	var progress: Dictionary = Dictionary(Dictionary(_campaign.call("get_campaign_snapshot")).get("progress", {})) if _campaign != null else {}
+	var container: Dictionary = Dictionary(Dictionary(_supply.get_supply_snapshot().inventory).get("craft:" + craft_id, {}))
+	if bool(progress.get("crate_loaded", false)) and not bool(progress.get("crate_delivered", false)) and int(Dictionary(container.get("items", {})).get("c_benit_crate", 0)) >= 1:
+		names.append("C-Benit-Kiste")
+	return names
 
 func _home_pad_for(craft_id: String) -> String:
 	return String(_pad_by_craft.get(craft_id, ""))
@@ -2127,11 +2160,6 @@ func export_campaign_checkpoint() -> Dictionary:
 func get_campaign_credits() -> int:
 	return _supply.get_credits() if _supply != null else 0
 
-## Task 5b: Rettungsgebuehr nach Totalverlust. Zieht hoechstens das vorhandene Guthaben ab (nie ins Minus).
-func charge_campaign_credits_capped(amount: int) -> Dictionary:
-	if _supply == null: return _reject("supply_unavailable", "Versorgungsstand ist nicht bereit")
-	return _supply.charge_credits_capped(amount)
-
 ## Abschnitt K: Rettungsgebuehr der Notrettung, voll gebucht (auch ins Minus und ueber den Kreditrahmen hinaus).
 func charge_campaign_rescue_fee(amount: int) -> Dictionary:
 	if _supply == null: return _reject("supply_unavailable", "Versorgungsstand ist nicht bereit")
@@ -2202,7 +2230,9 @@ func get_bankruptcy_check() -> Dictionary:
 		if status.is_empty(): continue
 		status["tanker_order_open"] = ordered.has(craft_id)
 		states.append(status)
-	var verdict: Dictionary = rules.is_bankrupt(credits, limit, states)
+	# LC2g: Nur eine wirklich leere Flotte ist "kein Schiff mehr" (Pleite mit cause no_craft); Schiffe ohne Treibstoffzustand zaehlen nicht als leer.
+	var fleet_empty: bool = Array(_flow.get("_homebase_aircraft_definitions")).is_empty()
+	var verdict: Dictionary = rules.is_bankrupt(credits, limit, states) if (not states.is_empty() or fleet_empty) else {"bankrupt": false, "reason": "no_craft"}
 	var reachable := credits
 	if bool(verdict.get("bankrupt", false)):
 		reachable += _bankruptcy_sellable_proceeds(craft_ids)
@@ -2217,7 +2247,8 @@ func get_bankruptcy_check() -> Dictionary:
 			status["tanker_available"] = bool(offer.get("ok", false))
 			status["tanker_refused"] = String(offer.get("reason", "")) == "debt_limit_reached" # Grund fuer den Satz auf dem Bildschirm
 			states.append(status)
-		verdict = rules.is_bankrupt(reachable, limit, states)
+		if not states.is_empty() or fleet_empty:
+			verdict = rules.is_bankrupt(reachable, limit, states)
 	result.merge(verdict, true)
 	result["credits"] = credits
 	result["reachable_credits"] = reachable
@@ -2655,7 +2686,7 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 		var key := "recruited_pilot" if pilot else "recruited_outpost"
 		if bool(snapshot.progress.get(key,false)): return {"ok":true,"changed":false,"message":"Person bereits im Team"}
 		var job_craft := String(Dictionary(snapshot.jobs.get("buccaneer_rescue" if pilot else "outpost_recovery", {})).get("craft_id", ""))
-		if craft_id.is_empty() or craft_id != job_craft: return _reject("recruit_craft_required", "Das Schiff des zugehörigen Auftrags auswählen")
+		if not _job_craft_accepts(job_craft, craft_id): return _reject("recruit_craft_required", "Ein Schiff der Flotte auswählen" if _lost_craft_ids().has(job_craft) else "Das Schiff des zugehörigen Auftrags auswählen")
 		if pilot and not _has_verified_pilot_rescue(craft_id): return _reject("rescue_not_here", "Bestätigte Rettung dieses Schiffs fehlt")
 		var outpost_cleared := false
 		if not pilot:
@@ -2684,10 +2715,12 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 		if bool(snapshot.progress.crate_loaded): return {"ok":true,"changed":false}
 		if not _job_complete("outpost_recovery"): return _reject("crate_not_ready","Kiste zuerst am Außenposten bergen")
 		var job_craft := String(Dictionary(snapshot.jobs.get("outpost_recovery", {})).get("craft_id", ""))
-		if craft_id.is_empty() or craft_id != job_craft or String(_service_context(craft_id).get("location_id", "")) not in ["homebase", "trade_outpost"]: return _reject("crate_not_here","Auftragsschiff am gesicherten Außenposten oder nach Rückkehr auswählen")
-		var cargo := _campaign_cargo(craft_id,"c_benit_crate",1,"load:outpost_recovery")
+		if not _job_craft_accepts(job_craft, craft_id) or String(_service_context(craft_id).get("location_id", "")) not in ["homebase", "trade_outpost"]: return _reject("crate_not_here","Ein Schiff am gesicherten Außenposten oder nach Rückkehr auswählen" if _lost_craft_ids().has(job_craft) else "Auftragsschiff am gesicherten Außenposten oder nach Rückkehr auswählen")
+		# LC2k K1: Nach einem Verlust der Kiste ist das Laden eine eigene Buchung (Kennung mit Verlustzaehler), sonst meldet die Versorgung request_id_conflict.
+		var load_id := "load:outpost_recovery" + ("" if int(_campaign.call("crate_loss_count")) == 0 else ":" + str(int(_campaign.call("crate_loss_count"))))
+		var cargo := _campaign_cargo(craft_id,"c_benit_crate",1,load_id)
 		if not bool(cargo.get("ok",false)): return cargo
-		return _commit("singleplayer_campaign","load_crate",{},"load:outpost_recovery",{"runtime_authorized":true})
+		return _commit("singleplayer_campaign","load_crate",{},load_id,{"runtime_authorized":true})
 	return _reject("delivery_requires_use","C-Benit am Handelsposten über die Weltinteraktion abgeben")
 
 func get_location_resource_stock(location_id: String) -> RefCounted:
@@ -3104,14 +3137,32 @@ func _home_services_snapshot() -> Dictionary:
 		if not _local_upload_container(id, job).is_empty(): local_jobs.append(id)
 		elif blocker.is_empty() and bool(job.get("home_upload", false)) and String(job.get("status", "")) in ["pending_upload", "active"]:
 			blocker = _upload_blocker_text(_find_campaign_chip_container("satellite_chip" if id == "satellite_recovery" else "outpost_chip", String(job.get("craft_id", ""))))
-	return {"workshop_available":_home_workshop_available(), "upload_job_ids":local_jobs, "upload_blocker":blocker, "all_at_home":_all_at_home()}
+	return {"workshop_available":_home_workshop_available(), "upload_job_ids":local_jobs, "upload_blocker":blocker, "all_at_home":_all_at_home(), "lost_craft_ids":_lost_craft_ids()}
+
+
+## LC2h H5: Kennungen der im Einsatz verlorenen Schiffe (Verlustbelege des Ablaufs).
+func _lost_craft_ids() -> Array:
+	var ids: Array = []
+	for record: Variant in Array(_flow.get("_lost_craft_records")):
+		ids.append(String(Dictionary(record).get("craft_id", "")))
+	return ids
+
+
+## LC2h H5: Erfuellt craft_id die Schiffsbindung eines Story-Schritts (Kiste laden, Anwerben)? Das Auftragsschiff immer; ist es verloren
+## (steht im Verlustbeleg), jedes Schiff der Flotte. Ob es am richtigen Ort steht, prueft der Aufrufer wie bisher.
+func _job_craft_accepts(job_craft: String, craft_id: String) -> bool:
+	if craft_id.is_empty(): return false
+	if craft_id == job_craft: return true
+	if job_craft.is_empty() or not _lost_craft_ids().has(job_craft): return false
+	return not Dictionary(_flow.call("_find_homebase_aircraft_definition", craft_id)).is_empty()
 
 func _has_verified_pilot_rescue(craft_id: String) -> bool:
 	# get_completed_result consumes its delivery flag before automatic recruitment.
 	# The authoritative read-only state retains the exact victorious craft.
 	if _space_encounter == null: return false
 	var encounter: Dictionary = _space_encounter.get_snapshot()
-	return not craft_id.is_empty() and String(encounter.get("craft_id", "")) == craft_id and String(encounter.get("phase", "")) == "victory"
+	# LC2i I5: Ging das Schiff der Rettung inzwischen verloren, gilt die Rettung fuer jedes Schiff der Flotte (wie Kiste laden), sonst stuende die Kampagne.
+	return String(encounter.get("phase", "")) == "victory" and _job_craft_accepts(String(encounter.get("craft_id", "")), craft_id)
 
 
 func show_polisa_cargo_delivery(craft_id: String, request_id: String) -> bool:

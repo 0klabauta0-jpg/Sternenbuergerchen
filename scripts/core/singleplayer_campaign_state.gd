@@ -76,6 +76,15 @@ func get_campaign_snapshot() -> Dictionary:
 		snapshot.jobs[id]["locked"] = _enforce_sequence and not prior.is_empty() and String(Dictionary(_jobs.get(prior,{})).get("status","")) != "completed"
 	return snapshot
 
+## LC2k K1: Wie oft ist die Auftragskiste schon mit ihrem Schiff verloren gegangen? Abgeleitet aus den vorhandenen Belegen ("unload:<Schiff>"),
+## kein eigener Schluessel im Spielstand. Das erneute Laden haengt die Zahl an seine Anfrage-Kennung (je Verlust eine eigene Buchung).
+func crate_loss_count() -> int:
+	var count := 0
+	for request_id in _requests:
+		if String(request_id).begins_with("unload:") and bool(Dictionary(Dictionary(_requests[request_id]).get("result", {})).get("changed", false)):
+			count += 1
+	return count
+
 func get_completion_receipt(completion_id: String) -> Dictionary:
 	return Dictionary(_completion_receipts.get(completion_id, {})).duplicate(true)
 
@@ -102,7 +111,7 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		"retry_failed_job": result = _retry_failed(payload)
 		"reopen_retreated_job": result = _reopen_retreated(payload)
 		"upload_job": result = _upload(payload, authority_context)
-		"claim_recruit", "load_crate", "deliver_crate", "build_pad": result = _progress_action(String(command.operation),payload,authority_context)
+		"claim_recruit", "load_crate", "unload_crate", "deliver_crate", "build_pad": result = _progress_action(String(command.operation),payload,authority_context)
 		_: result = _reject("unknown_operation", "Aktion unbekannt")
 	if bool(result.get("ok", false)):
 		result["request_id"] = request_id
@@ -294,6 +303,13 @@ func _progress_action(operation: String, payload: Dictionary, context: Dictionar
 			if String(Dictionary(_jobs.get("outpost_recovery",{})).get("status","")) != "completed":
 				return _reject("crate_not_ready","Zuerst den Außenposten sichern")
 			key = "crate_loaded"
+		"unload_crate":
+			# LC2i I5: Ging das Schiff mit der Auftragsfracht verloren, steht die Kiste wieder am Ladeort bereit (Merker zurueck; kein neuer Schluessel).
+			if not _progress.crate_loaded or bool(_progress.crate_delivered):
+				return {"ok":true,"changed":false}
+			_progress.crate_loaded = false
+			_revision += 1
+			return {"ok":true,"changed":true,"progress_key":"crate_loaded"}
 		"deliver_crate":
 			if not _progress.crate_loaded or String(Dictionary(_jobs.get("benit_delivery",{})).get("status","")) != "active":
 				return _reject("crate_not_loaded","Lieferauftrag aktivieren und C-Benit-Kiste mitbringen")

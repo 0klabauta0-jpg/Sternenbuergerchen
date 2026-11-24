@@ -108,6 +108,10 @@ static func _is_fit(team_state: Dictionary) -> bool:
 static func classify_unit(team_state: Dictionary, mission_outcome: String) -> Dictionary:
 	var unit_id := str(team_state.get("unit_id", ""))
 	var was_downed := bool(team_state.get("was_downed", false))
+	# LC2b: Wer beim Absturz eines Schiffs gestorben ist (Merkmal killed_in_crash, Quelle der Absturz), ist tot - zuerst gewertet,
+	# sonst rettet "an Bord", "nahe am Schiff" oder ein gewonnener Einsatz ihn. Danach gelten die Respawn-Regeln unveraendert.
+	if bool(team_state.get("killed_in_crash", false)):
+		return {"unit_id": unit_id, "outcome": "dead", "severity": ""}
 	if _is_fit(team_state):
 		if was_downed:
 			return {"unit_id": unit_id, "outcome": "wounded", "severity": "light"}
@@ -138,12 +142,21 @@ static func resolve_mission(team_states: Array, mission_outcome: String, roster_
 	var respawn_ids := PackedStringArray()
 	var pilot_fit := true
 	var other_fit := false
+	# LC2c: Ist das Schiff verloren (context.craft_lost), holt die Notrettung alle Lebenden ab: Liegende gelten als gerettet
+	# (aboard), ausser wer beim Absturz gestorben ist. Fuer dieses Schiff gibt es die Kette pilot_down nicht mehr (nichts mehr zu fliegen).
+	var craft_lost: bool = bool(context.get("craft_lost", false))
+	var rescued_unit_ids: Array = Array(context.get("rescued_unit_ids", [])) if typeof(context.get("rescued_unit_ids", [])) == TYPE_ARRAY else []
 	for raw in team_states:
 		var state: Dictionary = raw
+		# LC2d A1: nur wer noch lebt (fit oder am Boden, "down") wird gerettet; wer verblutet ist oder auf den Respawn wartet, bleibt nach den vorhandenen Regeln.
+		# LC2k K2: Insassen eines anderen verlorenen Schiffs, die nicht an Bord eines heimkehrenden Schiffs sind (context.rescued_unit_ids), holt die Notrettung ebenso.
+		if (craft_lost or rescued_unit_ids.has(str(state.get("unit_id", "")))) and not bool(state.get("killed_in_crash", false)) and (_is_fit(state) or str(state.get("vital_state", "down")) == "down"):
+			state = state.duplicate()
+			state["aboard"] = true
 		var unit_id := str(state.get("unit_id", ""))
 		var fit := _is_fit(state)
 		if unit_id == pilot_unit_id:
-			pilot_fit = fit
+			pilot_fit = fit or craft_lost
 		elif fit:
 			other_fit = true
 		var result: Dictionary = classify_unit(state, mission_outcome)
@@ -157,10 +170,19 @@ static func resolve_mission(team_states: Array, mission_outcome: String, roster_
 			if final_death:
 				dead_ids.append(unit_id)
 			else:
-				result["respawn_state"] = build_respawn_state(int(result["death_number"]), "left_behind", rules)
+				result["respawn_state"] = build_respawn_state(int(result["death_number"]), "crash" if bool(state.get("killed_in_crash", false)) else "left_behind", rules)
 				respawn_ids.append(unit_id)
 	var reason := ""
-	if not pilot_fit:
+	if craft_lost:
+		# LC2d A2: Nach einem Schiffsverlust ist es nur dann ein Totalverlust, wenn niemand mehr lebt. Lebt mindestens eine Person,
+		# bringt die Notrettung die Lebenden heim, das Schiff ist verloren, die Toten sind tot - auch wenn Anfuehrer oder Pilot fehlen.
+		var anyone_alive := false
+		for entry in classified:
+			if str(entry.outcome) != "dead":
+				anyone_alive = true
+		if not anyone_alive:
+			reason = "ground_team_down"
+	elif not pilot_fit:
 		reason = "pilot_down"
 	elif not other_fit:
 		reason = "ground_team_down"

@@ -1920,11 +1920,19 @@ func get_mission_evacuation_snapshot() -> Dictionary:
 
 func request_selected_fireteam_evacuation() -> Dictionary:
 	var evacuation: Dictionary = get_mission_evacuation_snapshot()
-	if not bool(evacuation.get("eligible", false)):
+	# LC2i I1: Ist das letzte Schiff verloren, bricht der Knopf den Einsatz ab, ohne dass der Trupp an der Landezone stehen muss.
+	if not bool(evacuation.get("eligible", false)) and not bool(_craft_loss_mission_craft_quote().get("is_last_craft", false)):
 		var blocked_reason: String = String(evacuation.get("reason", "blocked"))
 		_last_command_text = "EVAC BLOCKED: %s" % blocked_reason.to_upper()
 		_update_ui()
 		return {"accepted": false, "reason": blocked_reason, "mission_result": {}}
+	# LC2m M3: Vor dem Abflug frisch gemessen; ein noch nicht angesagter Stand der Notrettung wird erst gezeigt, der naechste Druck fliegt ab.
+	var stranded_quote: Dictionary = _craft_loss_stranded_quote()
+	if int(stranded_quote.get("stranded_fee", 0)) > 0 and String(get_parent().get_meta("campaign_stranded_rescue_announced", "")) != String(stranded_quote.get("stranded_key", "")):
+		_refresh_mission_evacuation_button()
+		_last_command_text = String(stranded_quote.get("stranded_text", ""))
+		_update_ui()
+		return {"accepted": false, "reason": "rescue_fee_announced", "mission_result": {}}
 	var combat_driver = _get_combat_loop_driver()
 	if combat_driver == null or not combat_driver.has_method("request_mission_evacuation"):
 		_last_command_text = "EVAC BLOCKED: COMBAT AUTHORITY"
@@ -14384,6 +14392,7 @@ func _campaign_unit_near_boarding_ship(craft_id:String,unit_position:Vector2,shi
 
 
 func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: String = "", boarding_pilot_id: String = "") -> Dictionary:
+	if _is_air_craft_crashed(craft_id):return {"ok":false,"reason":"craft_lost","message":"Schiff verloren: Einsteigen ist nicht mehr möglich"}
 	var visit:Dictionary=Dictionary(get_parent().get_meta("singleplayer_visit_identities",{})).get(craft_id,{})
 	var live_polisa_visit:bool=String(get_parent().get_meta("location_id",""))=="polisa" and String(visit.get("craft_id",""))==craft_id and not craft_id.is_empty()
 	if not get_parent().has_meta("campaign_ground_pilot_id") and not _requires_exact_station_crew(craft_id) and not live_polisa_visit:return {"ok":true}
@@ -14527,6 +14536,8 @@ func _can_request_mission_dropship_return(card: Dictionary) -> bool:
 	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
 	if craft_id.is_empty():
 		return false
+	if _is_air_craft_crashed(craft_id):
+		return false
 	if _is_parked_campaign_dropship(craft_id):
 		return true
 	if _has_live_drop_sequence_for_craft(craft_id):
@@ -14550,7 +14561,7 @@ func _should_keep_campaign_dropship_landed() -> bool:
 
 
 func _is_parked_campaign_dropship(craft_id: String) -> bool:
-	if not _should_keep_campaign_dropship_landed():
+	if _is_air_craft_crashed(craft_id) or not _should_keep_campaign_dropship_landed():
 		return false
 	var simulation: Node = get_node_or_null("../SimulationRoot")
 	if simulation != null and simulation.has_method("is_air_support_craft_airborne") and simulation.call("is_air_support_craft_airborne", craft_id): return false
@@ -14798,7 +14809,43 @@ func _refresh_mission_evacuation_button() -> void:
 			button.tooltip_text = "Only host authority can evacuate the shared mission."
 		_:
 			button.tooltip_text = "Evacuation unavailable: %s." % reason.replace("_", " ")
-	META_UI_SKIN_SCRIPT.style_tactical_button(button, bool(snapshot.get("eligible", false)))
+	# LC2h: Ist das Einsatzschiff verloren, heisst EVAC Notrettung (mit Gebuehr) und der Hinweis ist deutsch.
+	button.text = "EVAC"
+	var loss_quote: Dictionary = _craft_loss_mission_craft_quote()
+	var button_enabled: bool = bool(snapshot.get("eligible", false))
+	if not loss_quote.is_empty():
+		button.text = "Notrettung rufen (%d Credits)" % int(loss_quote.get("fee", 0))
+		button.tooltip_text = "Die Notrettung holt den Trupp von der Landezone ab." if bool(snapshot.get("eligible", false)) else "Der Trupp muss erst an der Landezone stehen."
+		if bool(loss_quote.get("is_last_craft", false)):
+			# LC2i I1: Das letzte Schiff ist verloren: keine Notrettung, der Einsatz endet als Totalverlust; sofort nutzbar (kein Marsch zur Landezone).
+			button.text = "Einsatz abbrechen (Totalverlust)"
+			button.tooltip_text = "Ohne Schiff ist der Einsatz verloren. Ihr kehrt zum Stand vor dem Einsatz zurück."
+			button.visible = true
+			var last_driver = _get_combat_loop_driver()
+			button_enabled = last_driver != null and last_driver.has_method("get_mission_evacuation_authority_snapshot") and bool(Dictionary(last_driver.call("get_mission_evacuation_authority_snapshot")).get("accepted", false))
+			button.disabled = not button_enabled
+	else:
+		# LC2m W1: Einsatzschiff heil, aber Insassen eines abgeschossenen zweiten Schiffs stehen weder an Bord noch am Schiff: die Gebuehr vor dem Abheben nennen.
+		# LC2m M3: Der Satz haengt am bisherigen Hinweis; was der Knopf zeigt, gilt als angesagt (Schluessel am Einsatz, liest auch der Abflug).
+		var stranded_quote: Dictionary = _craft_loss_stranded_quote()
+		if int(stranded_quote.get("stranded_count", 0)) > 0:
+			button.text = "EVAC · Notrettung %d Cr" % int(stranded_quote.get("stranded_fee", 0))
+			button.tooltip_text += "\n" + String(stranded_quote.get("stranded_text", ""))
+			# LC2n M3-W1: Nur ein sichtbarer Knopf sagt die Gebuehr an; ein unsichtbarer setzt den Merker nicht.
+			if button.visible:
+				get_parent().set_meta("campaign_stranded_rescue_announced", String(stranded_quote.get("stranded_key", "")))
+	META_UI_SKIN_SCRIPT.style_tactical_button(button, button_enabled)
+
+
+## LC2m W1/M3: Frische Auskunft der Kampagne ueber Insassen abgeschossener zweiter Schiffe, die weder an Bord noch am Einsatzschiff sind
+## ({stranded_count, stranded_fee, stranded_text, stranded_key} oder {}); {} auch, wenn das Einsatzschiff selbst verloren ist.
+func _craft_loss_stranded_quote() -> Dictionary:
+	var crash_simulation: Node = get_node_or_null("../SimulationRoot")
+	if crash_simulation == null or not crash_simulation.has_method("get_air_crash_sites") or not _craft_loss_mission_craft_quote().is_empty(): return {}
+	for site in Array(crash_simulation.call("get_air_crash_sites")):
+		var site_quote: Dictionary = _craft_loss_quote(String(Dictionary(site).get("craft_id", "")))
+		if int(site_quote.get("stranded_count", 0)) > 0: return site_quote
+	return {}
 
 
 func _on_mission_evacuation_pressed() -> void:
@@ -19994,10 +20041,273 @@ func apply_air_asset_threat(context: Dictionary = {}, options: Dictionary = {}) 
 func report_ground_fire_vs_air(craft_id: String, status_snapshot: Dictionary, texts: Array) -> void:
 	if not status_snapshot.is_empty() and _air_asset_status != null and String(_air_asset_status.asset_id) == craft_id:
 		_air_asset_status = AIR_ASSET_STATUS_SCRIPT.call("from_dict", status_snapshot)
+	# LC2h: Ist das Schiff verloren, sagt die Meldung dem Spieler, was nun gilt (nur in der Kampagne; sonst gibt es keine Auskunft).
+	var loss_text: String = _craft_loss_notice(craft_id, texts)
+	if not loss_text.is_empty():
+		texts = texts.duplicate()
+		texts.append(loss_text)
+		_refresh_mission_evacuation_button()
 	if not texts.is_empty():
 		_last_command_text = " ".join(PackedStringArray(texts))
 		_set_mission_dropship_card_feedback(craft_id, _last_command_text)
 	_refresh_mission_dropship_panel()
+
+
+## LC2h: Auskunft der Kampagne ueber ein verlorenes Schiff ({ship_name, is_mission_craft, fee}) oder {} (kein Verlust, keine Kampagne).
+func _craft_loss_quote(craft_id: String) -> Dictionary:
+	if not _is_air_craft_crashed(craft_id): return {}
+	var owner_node: Node = get_parent()
+	if owner_node == null or not owner_node.has_meta("campaign_craft_loss_quote"): return {}
+	var provider: Variant = owner_node.get_meta("campaign_craft_loss_quote")
+	if not (provider is Callable) or not Callable(provider).is_valid(): return {}
+	var quote: Dictionary = Dictionary(Callable(provider).call(craft_id))
+	if quote.is_empty(): return {}
+	var card_name: String = String(Dictionary(_find_mission_dropship_card_entry(craft_id)).get("display_name", "")).strip_edges()
+	if not card_name.is_empty(): quote["ship_name"] = card_name
+	return quote
+
+
+## LC2h: Auskunft ueber den Verlust des Einsatzschiffs der Kampagne (sonst {}): das erste verlorene Schiff, das die Kampagne als Einsatzschiff kennt.
+func _craft_loss_mission_craft_quote() -> Dictionary:
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	if simulation == null or not simulation.has_method("get_air_crash_sites"): return {}
+	for site in Array(simulation.call("get_air_crash_sites")):
+		var quote: Dictionary = _craft_loss_quote(String(Dictionary(site).get("craft_id", "")))
+		if bool(quote.get("is_mission_craft", false)): return quote
+	return {}
+
+
+## LC2h: Der Meldetext zum Schiffsverlust: "<Schiff> ist verloren." und beim Einsatzschiff der Weg heim samt Gebuehr.
+func _craft_loss_notice(craft_id: String, texts: Array = []) -> String:
+	var quote: Dictionary = _craft_loss_quote(craft_id)
+	if quote.is_empty(): return ""
+	# LC2k K3: Steht "ist verloren" schon in der Absturzmeldung ("Bruchlandung! X ist verloren."), wird es nicht wiederholt (bei "X explodiert." fehlt es).
+	var said_lost := false
+	for text in texts:
+		if String(text).contains("ist verloren"): said_lost = true
+	if bool(quote.get("is_last_craft", false)):
+		# LC2i I1: Das letzte Schiff: keine Notrettung, der Einsatz gilt als Totalverlust.
+		if said_lost: return "Es war euer letztes Schiff. Der Einsatz gilt als Totalverlust."
+		return "%s ist verloren – es war euer letztes Schiff. Der Einsatz gilt als Totalverlust." % String(quote.get("ship_name", craft_id))
+	if bool(quote.get("is_mission_craft", false)):
+		# LC2i I6: "<Schiff> ist verloren." steht schon in der Absturzmeldung; hier folgt nur der Weg heim (keine Wiederholung).
+		return "Bring den Trupp zur Landezone – dort holt euch die Notrettung ab (%d Credits)." % int(quote.get("fee", 0))
+	return "" if said_lost else "%s ist verloren." % String(quote.get("ship_name", craft_id))
+
+
+## LC2b: Das Schiff ist durch Bodenbeschuss abgestuerzt oder explodiert (SimulationRoot.resolve_air_shootdown); es ist aus dem Einsatz.
+func _is_air_craft_crashed(craft_id: String) -> bool:
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	return simulation != null and simulation.has_method("is_air_craft_crashed") and bool(simulation.call("is_air_craft_crashed", craft_id))
+
+
+## LC2b: Insassen des Schiffs beim Absturz = Pilot und alle Eingeschifften seiner Besatzung; Pilot zuerst, dann nach Kennung sortiert.
+## Das ist die feste Reihenfolge der Wuerfe (AirCrashRules.resolve_occupants).
+func get_air_crash_occupant_ids(craft_id: String) -> Array:
+	var pilot_id: String = String(_find_raw_mission_dropship_card_entry(craft_id).get("pilot_unit_id", ""))
+	var pilot_aboard := false
+	var rest: Array = []
+	for id_variant in _campaign_craft_crew_ids(craft_id):
+		var id: String = String(id_variant)
+		var unit = _get_campaign_sortie_unit(id)
+		if unit == null or _deployed_unit_ids.has(id) or not bool(unit.get_meta("dropship_embarked", false)):
+			continue
+		if id == pilot_id:
+			pilot_aboard = true
+		elif not rest.has(id):
+			rest.append(id)
+	rest.sort()
+	return ([pilot_id] if pilot_aboard else []) + rest
+
+
+## LC2b: Setzt die Insassen an der Absturzstelle ab und bucht ihr Schicksal (results aus AirCrashRules.resolve_occupants):
+## unhurt/light stehen (light verliert health_loss_fraction der VOLLEN Gesundheit, mindestens 1 Punkt bleibt, zaehlt nach dem Einsatz
+## als leicht verwundet), severe und dead liegen am Boden (Zustand down; dead zusaetzlich mit dem Merkmal killed_in_crash).
+## Alle Insassen tragen crashed_aboard. Abgesetzt wird mit admit_hex_ground_setup_actors(allow_staged) und derselben Buchfuehrung wie in
+## _advance_hex_drop_unit (nicht eingeschifft, abgesetzt, Position, Runtime-Aktivierung der Gruppe).
+func apply_air_crash(craft_id: String, site: Dictionary, results: Dictionary, order: Array) -> Dictionary:
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	var units: Dictionary = {}
+	var ids := PackedStringArray()
+	for id_variant in order:
+		var id: String = String(id_variant)
+		var unit = _get_campaign_sortie_unit(id)
+		if unit == null or units.has(id):
+			continue
+		units[id] = unit
+		ids.append(id)
+		var state: String = String(Dictionary(results.get(id, {})).get("state", "unhurt"))
+		unit.set_meta("crashed_aboard", true)
+		unit.set_meta("air_crash_state", state)
+		if state == "dead":
+			unit.set_meta("killed_in_crash", true)
+	if ids.is_empty() or simulation == null:
+		return {"ok": true, "placed": PackedStringArray()}
+	var grid: Vector2i = site.get("grid", Vector2i.ZERO)
+	var positions: Dictionary = {}
+	var placed := false
+	var reason := ""
+	var no_cell: Dictionary = {}
+	if _requires_hex_deployment_owner():
+		if _has_live_hex_deployment_owner():
+			# Eingeschiffte Personen sind noch "staged": darum die Setup-Aufnahme mit allow_staged (wie die Absetz-Pruefung des
+			# Adapters), alle am selben Ankerfeld; der Planer verteilt Kollisionen auf freie Nachbarfelder.
+			var admitted: Dictionary = _air_crash_admit_people(simulation, ids, grid)
+			placed = bool(admitted.get("ok", false)) or not Array(admitted.get("placements", [])).is_empty()
+			reason = String(admitted.get("reason", ""))
+			var registry: Node = simulation.get_hex_ground_terrain_registry()
+			for entry in Array(admitted.get("placements", [])):
+				positions[String(entry.unit_id)] = registry.grid_to_world(entry.grid)
+			# LC2d A5: Die Suche reicht ueber die ganze Karte; wer trotzdem kein freies Feld findet (praktisch nur bei vollstaendig belegter Karte),
+			# wird NICHT "tot gebucht", sondern verlaesst das verlorene Schiff ohne Feld: er behaelt sein Schicksal (Verletzung) und wird mit der
+			# Notrettung heimgebracht (Einsatzende rettet alle Lebenden).
+			for id in Array(admitted.get("unplaced", [])):
+				_leave_lost_craft_without_cell(units[id], id)
+				no_cell[id] = true
+			if not Array(admitted.get("unplaced", [])).is_empty():
+				_last_command_text = "Absturz: %d Person(en) fanden kein freies Feld" % Array(admitted.get("unplaced", [])).size()
+		else:
+			reason = "hex_ground_unavailable"
+			# Ohne lebenden Feld-Besitzer bleibt niemand an Bord des verlorenen Schiffs zurueck.
+			for id in ids:
+				_leave_lost_craft_without_cell(units[id], id)
+	else:
+		var registry: Node = _get_terrain_registry()
+		var base: Vector2 = registry.call("grid_to_world", grid) if registry != null else Vector2.ZERO
+		for index in range(ids.size()):
+			var position: Vector2 = base + _get_unload_offset(index, "NW")
+			_enqueue_dropship_deploy_effect(units[ids[index]], ids[index], position)
+			positions[ids[index]] = position
+		placed = true
+	if placed:
+		var active_sequence: bool = _is_active_drop_sequence_for_craft(craft_id)
+		for id in ids:
+			if no_cell.has(id):
+				continue
+			_embarked_unit_ids.erase(id)
+			if active_sequence:
+				_drop_sequence_embarked_unit_ids.erase(id)
+			elif _parallel_drop_sequences_by_craft.has(craft_id):
+				Dictionary(_parallel_drop_sequences_by_craft[craft_id].get("embarked_unit_ids", {})).erase(id)
+			_deployed_unit_ids[id] = true
+			_deployed_unit_positions[id] = positions.get(id, Vector2.ZERO)
+			var unit: Node = units[id]
+			var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower() if unit.has_method("get_fireteam_id") else ""
+			if not fireteam_id.is_empty():
+				_post_drop_security_pending_fireteam_ids[fireteam_id] = true
+				_runtime_activation_pending_fireteam_ids[fireteam_id] = true
+			if unit.has_method("show_event_text"):
+				unit.call("show_event_text", "ABSTURZ", Color(1.0, 0.55, 0.35, 1.0), 1.5)
+			# W2: wie beim normalen Absetzen (_advance_hex_drop_unit): Ausruestungs-Modifikatoren der Person einreihen.
+			_enqueue_initial_loadout_effect_for_unit(id)
+		_fireteam_runtime_ui_refresh_frames_remaining = 6
+		_mission_drop_passenger_count = _embarked_unit_ids.size()
+		_store_active_drop_sequence_card()
+		_store_selected_mission_dropship_plan()
+		_emit_planning_state_changed()
+	# Schicksal: unabhaengig davon, ob das Absetzen gelang, damit Tote nie "an Bord" gerettet werden.
+	for id in ids:
+		var unit: Node = units[id]
+		var entry: Dictionary = Dictionary(results.get(id, {}))
+		var state: String = String(entry.get("state", "unhurt"))
+		if state == "severe" or state == "dead":
+			unit.call("apply_damage", maxi(int(unit.call("get_health")), 1), {"source": "air_crash", "craft_id": craft_id})
+			# W3: Wer beim Absturz stirbt, ist wirklich tot: der Zustand "bleedout" (der, in den ein Verbluteter uebergeht) laesst keine Behandlung zu.
+			if state == "dead" and unit.has_method("advance_bleedout"):
+				unit.call("advance_bleedout")
+		elif state == "light":
+			var max_health: int = int(unit.call("get_max_health_points")) if unit.has_method("get_max_health_points") else 100
+			var loss: int = mini(roundi(float(entry.get("health_loss_fraction", 0.0)) * float(max_health)), int(unit.call("get_health")) - 1)
+			if loss > 0:
+				unit.call("apply_damage", loss, {"source": "air_crash", "craft_id": craft_id})
+			_mark_unit_was_downed(id)
+	return {"ok": placed, "reason": reason, "placed": ids if placed else PackedStringArray()}
+
+
+## LC2d A5: Wer beim Absturz kein Feld bekommt, ist nicht mehr an Bord des verlorenen Schiffs (eingeschifft = nein), aber auch nicht abgesetzt.
+func _leave_lost_craft_without_cell(unit: Node, id: String) -> void:
+	unit.set_meta("dropship_embarked", false)
+	_embarked_unit_ids.erase(id)
+
+
+## LC2b Nachbesserung (K2): Felder rund um die Absturzstelle, ringfoermig nach aussen (Breitensuche ueber die Nachbarn, hoechstens 64 Felder,
+## nur begehbare). Das Absturzfeld selbst steht vorn, auch wenn es nicht begehbar ist (der Planer lehnt es dann ab, die Suche geht weiter).
+func _air_crash_anchor_cells(registry: Node, start: Vector2i, max_cells: int = 64, max_visited: int = 256) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	var queue: Array[Vector2i] = [start]
+	var seen: Dictionary = {start: true}
+	var cursor := 0
+	while cursor < queue.size() and queue.size() < max_visited and cells.size() < max_cells:
+		var cell: Vector2i = queue[cursor]
+		cursor += 1
+		if bool(registry.call("is_walkable", cell)):
+			cells.append(cell)
+		# Rohe Hex-Nachbarn (nicht nur "legale"): von einem unbegehbaren Feld aus gibt es keine legalen, die Suche muss trotzdem nach aussen.
+		for direction in POLISA_GLOBE_HEX.DIRECTIONS:
+			var next: Vector2i = cell + direction
+			if not seen.has(next):
+				seen[next] = true
+				queue.append(next)
+	return cells
+
+
+## LC2b Nachbesserung (K2): Setzt Personen (noch "staged") ab. Erst alle zusammen an einem Anker; lehnt der Planer ab (Anker belegt, Platz
+## zu knapp), wird der naechste freie Anker versucht, zuletzt jede Person einzeln. Ein Fehlschlag aendert nichts am Zustand, Wiederholen ist sicher.
+## Rueckgabe: {ok (alle gesetzt), reason, placements:[{unit_id, grid}], unplaced:[ids]}.
+func _air_crash_admit_people(simulation: Node, ids: PackedStringArray, grid: Vector2i) -> Dictionary:
+	var registry: Node = simulation.get_hex_ground_terrain_registry()
+	var anchors: Array[Vector2i] = _air_crash_anchor_cells(registry, grid)
+	var excluded: Array[Vector2i] = []
+	var reason := "no_free_cell"
+	for anchor in anchors:
+		var candidates: Array[Dictionary] = []
+		for id in ids:
+			candidates.append({"unit_id": id, "grid": anchor, "facing_dir": 0, "posture_key": "standing"})
+		var admitted: Dictionary = simulation.admit_hex_ground_setup_actors(candidates, true, true, excluded)
+		if bool(admitted.get("ok", false)):
+			return {"ok": true, "reason": "", "placements": Array(admitted.get("placements", [])), "unplaced": []}
+		reason = String(admitted.get("reason", reason))
+	var placements: Array = []
+	var unplaced: Array = []
+	for id in ids:
+		var done := false
+		for anchor in anchors:
+			var single: Dictionary = simulation.admit_hex_ground_setup_actors([{"unit_id": id, "grid": anchor, "facing_dir": 0, "posture_key": "standing"}] as Array[Dictionary], true, true, excluded)
+			if bool(single.get("ok", false)):
+				placements.append_array(Array(single.get("placements", [])))
+				done = true
+				break
+		if not done:
+			unplaced.append(id)
+	if not unplaced.is_empty():
+		# LC2d A5: Nahbereich voll oder unbegehbar: die Suche weitet sich ueber die ganze Karte aus, bis ein begehbares freies Feld gefunden ist.
+		var wide: Array[Vector2i] = _air_crash_anchor_cells(registry, grid, 100000, 120000)
+		var still_unplaced: Array = []
+		for id in unplaced:
+			var done_wide := false
+			for anchor in wide:
+				var single_wide: Dictionary = simulation.admit_hex_ground_setup_actors([{"unit_id": id, "grid": anchor, "facing_dir": 0, "posture_key": "standing"}] as Array[Dictionary], true, true, excluded)
+				if bool(single_wide.get("ok", false)):
+					placements.append_array(Array(single_wide.get("placements", [])))
+					done_wide = true
+					break
+			if not done_wide:
+				still_unplaced.append(id)
+		unplaced = still_unplaced
+	return {"ok": unplaced.is_empty(), "reason": reason, "placements": placements, "unplaced": unplaced}
+
+
+## LC2b: Eine leicht verletzte Person zaehlt nach dem Einsatz als "leicht verwundet" (classify_unit: fit und was_downed). Der Driver
+## besitzt die Merker; hier nur ueber seine oeffentliche Ausfall-Schnittstelle (Kampagnenregeln vorausgesetzt).
+func _mark_unit_was_downed(unit_id: String) -> void:
+	var driver = _get_combat_loop_driver()
+	if driver == null or not _campaign_casualty_rules_active() or not driver.has_method("export_casualty_state") or not driver.has_method("restore_casualty_state"):
+		return
+	var flagged: Array = Array(Dictionary(driver.call("export_casualty_state")).get("was_downed_unit_ids", []))
+	if not flagged.has(unit_id):
+		flagged.append(unit_id)
+		flagged.sort()
+		driver.call("restore_casualty_state", {"was_downed_unit_ids": flagged})
 
 
 func record_tactical_breakout(trigger: String, fireteam_id: String = "", context: Dictionary = {}, options: Dictionary = {}) -> Dictionary:

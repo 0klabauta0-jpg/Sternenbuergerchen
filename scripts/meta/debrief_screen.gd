@@ -874,18 +874,47 @@ func _apply_player_readout_texts() -> void:
 	_native_review_confirmation.text = "Laut Einsatzbericht bereits übernommen." if confirmed else "Keine bestätigten Entwicklungsfolgen gemeldet."
 	var checkpoint_retry := bool(_mission_result.get("campaign_checkpoint_retry_required", false))
 	if checkpoint_retry:
-		_native_review_confirmation.text = "Heimkehr nicht moeglich: Pilot oder Besatzung nicht boardingfaehig. Fortsetzen laedt den letzten sicheren Basis-Checkpoint mit dessen Personal und Ressourcen; dieser Ausflug wird nicht gespeichert."
-		# Task 5b: Notrettung nach Totalverlust, nur aus dem Ergebnis gelesen.
+		_native_review_confirmation.text = "Heimkehr nicht möglich: Pilot oder Besatzung nicht boardingfaehig. Fortsetzen lädt den letzten sicheren Basis-Checkpoint mit dessen Personal und Ressourcen; dieser Ausflug wird nicht gespeichert."
+		# LC2i I1: Das letzte Schiff ging verloren: der Grund steht allein (kein Rueckfalltext "Heimkehr nicht moeglich").
+		var last_craft_lost: bool = bool(_mission_result.get("last_craft_lost", false))
+		if last_craft_lost:
+			_native_review_confirmation.text = "Das letzte Schiff ist verloren. Der Einsatz gilt als Totalverlust. Fortsetzen lädt den letzten sicheren Basis-Checkpoint mit dessen Personal und Ressourcen; dieser Ausflug wird nicht gespeichert."
+		# Task 5b: Notrettung nach Totalverlust, nur aus dem Ergebnis gelesen. LC2l L1: auch beim letzten Schiff - die Strafe wird beim Ruecksprung gebucht,
+		# also steht ihre Zeile mit dem tatsaechlichen Betrag da.
 		if bool(_mission_result.get("casualty_total_loss", false)) and typeof(_mission_result.get("total_loss_penalty")) == TYPE_DICTIONARY:
 			_native_review_confirmation.text += "\nNotrettung · %d Credits Rettungsgebühr" % int(Dictionary(_mission_result.get("total_loss_penalty")).get("rescue_fee", 0))
 	var loot_text := build_loot_text(_mission_result)
 	if not loot_text.is_empty():
 		_native_review_confirmation.text += "\n" + loot_text
+	var craft_loss_text := build_craft_loss_text(_mission_result)
+	if not craft_loss_text.is_empty():
+		_native_review_confirmation.text += "\n" + craft_loss_text
 	for pair in [["ReturnToFOBButton", "Zur FOB"], ["ReturnToHomebaseButton", "Zur Heimatbasis"]]:
 		var button := vbox.get_node("ButtonRow/" + pair[0]) as Button
 		if not button.has_meta("debrief_original_text"):
 			button.set_meta("debrief_original_text", button.text)
 		button.text = "Letzten sicheren Checkpoint fortsetzen" if checkpoint_retry else pair[1]
+
+
+## LC2h: Verlorene Schiffe des Einsatzes (craft_loss: das Einsatzschiff, other_craft_losses: weitere) je eine Zeile; dazu die gebuchte Notrettung.
+static func build_craft_loss_text(mission_result: Dictionary) -> String:
+	var lines := PackedStringArray()
+	var losses: Array = []
+	if typeof(mission_result.get("craft_loss")) == TYPE_DICTIONARY and not Dictionary(mission_result.get("craft_loss")).is_empty():
+		losses.append(Dictionary(mission_result.get("craft_loss")))
+	if typeof(mission_result.get("other_craft_losses")) == TYPE_ARRAY:
+		for other in Array(mission_result.get("other_craft_losses")):
+			if typeof(other) == TYPE_DICTIONARY: losses.append(Dictionary(other))
+	for loss in losses:
+		var ship_name: String = String(loss.get("ship_name", loss.get("craft_id", ""))).strip_edges()
+		lines.append("Schiff verloren: %s" % ship_name)
+		var fee: int = int(loss.get("rescue_fee", 0))
+		if fee > 0: lines.append("Notrettung: −%d Credits" % fee)
+	# LC2i I5: Auftragsfracht im verlorenen Schiff steht am Ladeort wieder bereit.
+	if typeof(mission_result.get("cargo_lost")) == TYPE_ARRAY:
+		for cargo in Array(mission_result.get("cargo_lost")):
+			lines.append("Auftragsfracht verloren: %s. Sie steht am Ladeort wieder bereit." % String(cargo))
+	return "\n".join(lines)
 
 
 ## Beute aus optionalen Ausruestungskisten (Feld loot_items des Abschlussergebnisses, vom Adapter gebucht); ohne Beute leer.

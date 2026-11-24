@@ -8,15 +8,19 @@ extends RefCounted
 ##   eine Aufschaltung in laufender Einsatzzeit (Raketenwerfer 4,0 s, Schienenkanone 2,5 s); nach jedem Schuss
 ##   beginnt eine neue. Hat die Einheit ein Bodenziel in Kontakt, geht der Boden vor.
 ## - Schaden je Treffer: fest in Rumpf-Prozentpunkten aus den Daten (hit_damage_hull_percent, nach Waffe und Schiffsart:
-##   Raketenwerfer Jaeger 50 / Landefaehre 34, Schienenkanone Jaeger 37 / Landefaehre 25), nie unter 1 % Rumpf.
+##   Raketenwerfer Jaeger 50 / Landefaehre 34, Schienenkanone Jaeger 37 / Landefaehre 25), mindestens 1 Punkt.
 ##   Ablauf, Meldung und Zustand kommen weiter vom Baustein air_asset_threat_resolver.gd. Die Trefferchance ist die
 ##   base_hit_chance der Waffe x (1 - Ausweichen des Piloten, air_defense_engagement.pilot_profile), begrenzt auf
 ##   hit_chance_min..hit_chance_max (0,05..0,60).
 ## - Zufall aus dem Strom des Luft-Boden-Feuers der SimulationRoot (Callable "roll"), kein eigener Strom.
-## - Rumpf (AirAssetStatus.integrity) faellt durch Bodenbeschuss nie unter 1 %. Unter
+## - LC2b: Rumpf (AirAssetStatus.integrity) darf durch Bodenbeschuss 0 erreichen. Dann ist das Schiff abgeschossen: genau ein
+##   Ereignis "shootdown" je Schiff (Liste "shootdowns" im Ergebnis), danach schiesst niemand mehr auf dieses Schiff. Den Ausgang
+##   (Notlandung, Bruchlandung, Explosion) wuerfelt die SimulationRoot (resolve_air_shootdown), Flak im Landeanflug und der
+##   Anflug-Unfall behalten ihre Untergrenze 1 %. Unter
 ##   der Grenze seines Anflugstils (echt kleiner; vorsichtig 65 %, normal 50 %, aggressiv 10 % Rumpf, Daten; ohne Stil normal) dreht
 ##   das Schiff ab: Feuerstopp, kein Angriffsbefehl und kein Bodenfeuer bis zur Reparatur oder bis ein Stil mit tieferer
-##   Grenze gewaehlt ist und der Rumpf darueber liegt.
+##   Grenze gewaehlt ist und der Rumpf darueber liegt. Wer rechtzeitig abdreht, wird nicht abgeschossen; er kann aber auf dem
+##   Abflug oder vor Erreichen der Schwelle noch getroffen werden.
 ## Die Klasse haelt nur Takt- und Meldungsgedaechtnis; die Spielwahrheit (Rumpf) schreibt die SimulationRoot.
 
 const RESOLVER_SCRIPT: GDScript = preload("res://scripts/combat/air_asset_threat_resolver.gd")
@@ -26,7 +30,6 @@ const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd"
 const COMBAT_FIRE_DECISION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/combat_fire_decision_resolver.gd")
 const HEX = preload("res://scripts/terrain/hex_grid.gd")
 
-const HULL_FLOOR: int = 1
 const REFUSAL_REASON: String = "hull_too_damaged"
 const REFUSAL_TEXT: String = "Schiff schwer beschädigt: kein Angriff mehr möglich."
 const MESSAGE_FIRST_HIT: String = "%s wird vom Boden beschossen."
@@ -127,10 +130,11 @@ func mark_cease_done(craft_id: String) -> void:
 ## ctx: tick:int, targets:Array (je {craft_id, display_name, status:Dictionary, pilot_skill:float, position:Vector2}),
 ## shooters:Array, id_of(unit)->String, weapon_of(unit)->String, is_fit(unit)->bool, has_ground_contact(unit)->bool,
 ## sees(unit, target)->{visible:bool, range_tiles:float}, roll()->float.
-## Rueckgabe: events (Schuesse, Warnungen), messages ({craft_id,text}), updates ({craft_id: {snapshot, effect}}),
-## cease (Schiffe, fuer die ein Feuerstopp aussteht).
+## Rueckgabe: events (Schuesse, Warnungen, Abschuesse), messages ({craft_id,text}), updates ({craft_id: {snapshot, effect}}),
+## cease (Schiffe, fuer die ein Feuerstopp aussteht), shootdowns (je abgeschossenes Schiff genau ein Eintrag
+## {craft_id, pilot_skill, display_name}; der Rumpf ist dann 0 und der Zustand ein Endzustand).
 func step(ctx: Dictionary) -> Dictionary:
-	var out: Dictionary = {"events": [], "messages": [], "updates": {}, "cease": []}
+	var out: Dictionary = {"events": [], "messages": [], "updates": {}, "cease": [], "shootdowns": []}
 	var tick: int = int(ctx.get("tick", 0))
 	var targets: Array = Array(ctx.get("targets", []))
 	_forget_departed(targets)
@@ -185,7 +189,7 @@ func step(ctx: Dictionary) -> Dictionary:
 				"weapon_id": weapon_id, "attacker_unit_id": unit_id, "attacker_label": unit_id, "asset_id": craft_id,
 				"range_tiles": range_tiles, "asset_position": target.get("position", Vector2.ZERO),
 				"sequence": str(tick), "has_line_of_sight": true, "visible_in_fow": true, "altitude_layer": "low",
-				"allow_destroy": false,
+				"allow_destroy": true,
 			}
 			if not _locks.has(key):
 				# Beginn einer Aufschaltung (die Zeit laeuft in laufender Einsatzzeit). Die Meldung erscheint beim
@@ -238,8 +242,8 @@ func step(ctx: Dictionary) -> Dictionary:
 			if hit:
 				var before: int = int(status.get("integrity", 100))
 				# Feste Prozentpunkte je Waffe und Schiffsart (Daten), nicht die abstandsabhaengige Zahl des Bausteins.
-				var points: int = roundi(float(hit_damage_percent(weapon_id, String(target.get("craft_type", "")))) * float(status.get("max_integrity", 100)) / 100.0)
-				threat_context["damage"] = mini(points, maxi(before - HULL_FLOOR, 0))
+				var points: int = maxi(roundi(float(hit_damage_percent(weapon_id, String(target.get("craft_type", "")))) * float(status.get("max_integrity", 100)) / 100.0), 1)
+				threat_context["damage"] = mini(points, maxi(before, 0))
 				var applied: Dictionary = Dictionary(_resolver.call("evaluate_threat", status, threat_context))
 				if bool(applied.get("eligible", false)):
 					status = Dictionary(applied.get("next_status", status)).duplicate(true)
@@ -250,11 +254,18 @@ func step(ctx: Dictionary) -> Dictionary:
 				if not _hit_reported.has(craft_id):
 					_hit_reported[craft_id] = true
 					out.messages.append({"craft_id": craft_id, "text": MESSAGE_FIRST_HIT % display_name})
-				if is_broken_off(status, style) and not _break_off_reported.has(craft_id):
+				if is_broken_off(status, style) and not _break_off_reported.has(craft_id) and not _is_terminal(status):
 					_break_off_reported[craft_id] = true
 					_cease_pending[craft_id] = true
 					out.messages.append({"craft_id": craft_id, "text": MESSAGE_BREAK_OFF % [display_name, int(status.get("integrity", 0))]})
 			out.events.append(event)
+			if hit and _is_terminal(status):
+				# LC2b: Rumpf 0 = abgeschossen, genau einmal. Kein weiterer Schuetze schiesst in diesem Takt auf das Schiff.
+				out.events.append({"type": "shootdown", "craft_id": craft_id, "attacker_id": unit_id, "weapon_id": weapon_id, "tick": tick})
+				out.shootdowns.append({"craft_id": craft_id, "pilot_skill": float(target.get("pilot_skill", 0.5)) if bool(target.get("pilot_known", true)) else 0.0, "display_name": display_name})
+				_break_off_reported.erase(craft_id)
+				_cease_pending.erase(craft_id)
+				break
 		if changed:
 			out.updates[craft_id] = {"snapshot": status, "effect": last_effect}
 	for craft_id in _cease_pending.keys():
@@ -313,19 +324,40 @@ func advance(driver: Node, root: Node, controller: Node, tick: int) -> Dictionar
 		craft_ids[craft_id] = true
 	for craft_id in texts_by_craft.keys():
 		craft_ids[craft_id] = true
+	var shot_down: Dictionary = {}
+	for entry in Array(result.get("shootdowns", [])):
+		shot_down[String(Dictionary(entry).get("craft_id", ""))] = Dictionary(entry)
+	var resolutions: Dictionary = {}
 	for craft_id in craft_ids.keys():
 		var update: Dictionary = Dictionary(result.updates.get(craft_id, {}))
 		var effect: Dictionary = Dictionary(update.get("effect", {}))
-		if not effect.is_empty():
+		var snapshot: Dictionary = Dictionary(update.get("snapshot", {}))
+		var texts: Array = Array(texts_by_craft.get(craft_id, []))
+		var resolved: Dictionary = {}
+		if shot_down.has(craft_id) and root.has_method("resolve_air_shootdown"):
+			# LC2b: Abschuss. Die SimulationRoot wuerfelt den Ausgang und bucht den Endstand des Schiffs selbst (ein Status-Effekt
+			# mit Rumpf 0 wuerde den Endstand einer Notlandung ueberschreiben).
+			var down: Dictionary = Dictionary(shot_down[craft_id])
+			resolved = Dictionary(root.call("resolve_air_shootdown", craft_id, float(down.get("pilot_skill", 0.0)), String(down.get("display_name", craft_id)), snapshot))
+		if bool(resolved.get("ok", false)):
+			resolutions[craft_id] = resolved
+			snapshot = Dictionary(resolved.get("status", snapshot))
+			texts.append_array(Array(resolved.get("messages", [])))
+		elif not effect.is_empty():
 			root.call("enqueue_effect", effect)
 		if controller != null and controller.has_method("report_ground_fire_vs_air"):
-			controller.call("report_ground_fire_vs_air", craft_id, Dictionary(update.get("snapshot", {})), Array(texts_by_craft.get(craft_id, [])))
+			controller.call("report_ground_fire_vs_air", craft_id, snapshot, texts)
+	result["shootdown_results"] = resolutions
 	for craft_id in result.cease:
 		var ceased: Dictionary = Dictionary(root.call("request_air_support_cease_fire", craft_id, "ground-fire-break-off:%s:%d" % [craft_id, tick]))
 		if bool(ceased.get("ok", false)) or String(ceased.get("reason", "")) != "simulation_busy":
 			mark_cease_done(craft_id)
 	last_result = result
 	return result
+
+
+static func _is_terminal(status: Dictionary) -> bool:
+	return bool(AIR_ASSET_STATUS_SCRIPT.call("is_terminal_state", String(status.get("state", ""))))
 
 
 ## Munition des Gefechts-Drivers (M4a Nachbesserung): Raketenwerfer und Schienenkanone laden nach wie am Boden.
