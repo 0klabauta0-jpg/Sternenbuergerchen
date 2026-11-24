@@ -8546,6 +8546,22 @@ func _air_ring_waypoints(binding: Dictionary, craft_id: String, center: Vector2i
 		if _air_support_cells_on_map(cells) and _air_support_cells_on_map(followed): kept.append(cell)
 	return kept
 
+## Kartenrand-Regel: an JEDEM Wegpunkt der Rundbahn muss die Huelle samt Rand (Flugschritt-Huelle, preview_swept_cells wie in _air_turned_cells) in der Ausrichtung
+## "Nase in Richtung der Strecke vom vorigen Wegpunkt" auf der Karte liegen; sonst darf die Rundbahn gar nicht erst gesetzt werden. Besetzung und Ansprueche zaehlen hier nicht.
+func _air_ring_turns_on_map(binding: Dictionary, craft_id: String, center: Vector2i) -> bool:
+	var profile: Dictionary = binding.equipment.get_space_flight_profile(craft_id)
+	if not profile.get("ok", false): return false
+	var pose: Dictionary = binding.flight.get_snapshot()
+	var ring: Array[Vector2i] = _air_ring_cells(center, int(_air_role_config("circle").get("radius_hex", 4)))
+	for i in ring.size():
+		var plane: Vector2 = SPACE_GRID.HEX.axial_to_plane(Vector2(ring[i]))
+		var follow: Vector2 = plane - SPACE_GRID.HEX.axial_to_plane(Vector2(ring[(i + ring.size() - 1) % ring.size()]))
+		var at_goal: Dictionary = pose.duplicate()
+		at_goal.merge({"position_plane":plane, "heading_rad":follow.angle(), "footprint_hexes":profile.footprint_hexes, "coordinate_frame":"local", "space_area_id":"atmosphere:" + _air_support_location_id}, true)
+		var swept: Dictionary = SPACE_NAVIGATION.preview_swept_cells(at_goal, at_goal)
+		if not swept.get("ok", false) or not _air_support_cells_on_map(swept.cells): return false
+	return true
+
 ## Ausrichtung der Rundbahn: ohne Angriffsziel zeigt die Nase auf den angeflogenen Wegpunkt (Flugrichtung); nahe am Wegpunkt kein Drehen (die Nase bliebe nicht ruhig).
 func _air_ring_face(craft_id: String, goal_plane: Vector2, previous_plane: Vector2) -> Variant:
 	var binding: Dictionary = _resolve_air_support_craft(craft_id)
@@ -8713,6 +8729,7 @@ func request_air_support_circle(command: Dictionary) -> Dictionary:
 	if terrain.call("get_tile_at_grid", center) == null: return {"ok":false, "reason":"role_point_off_map"}
 	var waypoints: Array[Vector2i] = _air_ring_waypoints(binding, id, center)
 	if waypoints.size() < 3: return {"ok":false, "reason":"circle_off_map"}
+	if not _air_ring_turns_on_map(binding, id, center): return {"ok":false, "reason":"circle_near_map_edge", "message":"Zu nah am Kartenrand – Mittelpunkt weiter innen wählen."}
 	var entry: Dictionary = _air_role_entry(binding, id, role, center, waypoints, request_id)
 	if not entry.get("ok", false): return entry
 	var took_off := false

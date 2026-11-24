@@ -262,10 +262,29 @@ func _case_4() -> void:
 	var res: Dictionary = _circle(env, "ship", Vector2i(5, 5), "none", "c4a")
 	_check(not bool(res.get("ok", true)) and String(res.get("reason", "")) == "circle_off_map", tag + "Mitte (5,5): nur 2 Wegpunkte auf der Karte -> circle_off_map: " + str(res))
 	_check(_pose(env, "ship") == pose_before and Dictionary(mission_root.get("_air_support_sorties")).is_empty() and env.source.get("_space_wing_state").get_snapshot() == wings_before, tag + "nichts hat sich geaendert (Pose, Rotte, kein Start)")
-	var ok: Dictionary = _circle(env, "ship", Vector2i(7, 10), "none", "c4b")
+	# Kartenrand-Regel (Entscheidung des Besitzers): eine Rundbahn, deren Wegpunkte mit gedrehter Huelle samt Rand nicht alle auf die Karte passen, wird gar nicht erst gesetzt
+	# (frueher blieben bei Mitte (7,10) nur 4 Wegpunkte; dieser Fall wurde nicht aufgeweicht, sondern ist jetzt die Ablehnung).
+	var near: Dictionary = _circle(env, "ship", Vector2i(7, 10), "none", "c4b")
+	_check(not bool(near.get("ok", true)) and String(near.get("reason", "")) == "circle_near_map_edge" and String(near.get("message", "")) == "Zu nah am Kartenrand – Mittelpunkt weiter innen wählen.", tag + "Mitte (7,10): circle_near_map_edge mit Meldung: " + str(near))
+	_check(_pose(env, "ship") == pose_before and Dictionary(mission_root.get("_air_support_sorties")).is_empty() and env.source.get("_space_wing_state").get_snapshot() == wings_before and env.events.is_empty(), tag + "Ablehnung ohne Wirkung: Pose, Rotte, Sortie, keine Ereignisse")
+	var edge: Dictionary = _circle(env, "ship", Vector2i(8, 10), "none", "c4c")
+	_check(not bool(edge.get("ok", true)) and String(edge.get("reason", "")) == "circle_near_map_edge", tag + "Buccaneer, Mitte (8,10) (einen Schritt zu nah): abgelehnt: " + str(edge))
+	var inside: Dictionary = _circle(env, "ship", Vector2i(9, 10), "none", "c4d")
 	var wps: Array = _sortie(env, "ship").get("waypoints", [])
-	_check(bool(ok.get("ok", false)) and wps.size() == 4 and wps.has(Vector2i(11, 10)) and wps.has(Vector2i(11, 6)) and wps.has(Vector2i(7, 6)) and wps.has(Vector2i(7, 14)), tag + "Mitte (7,10): genau 4 Wegpunkte: " + str(wps))
+	_check(bool(inside.get("ok", false)) and wps.size() == 6, tag + "Buccaneer, Mitte (9,10) (gerade weit genug innen): angenommen, 6 Wegpunkte: " + str(inside))
+	var visited := {}
+	for _i in range(480):
+		_tick(env, 0.5)
+		visited[int(_sortie(env, "ship").get("waypoint_index", -1))] = true
+	_check(visited.size() == 6 and _count(env, "ship", "role_blocked") == 0 and bool(env.combat.get_flight_status("ship").get("ok", true)), tag + "das Schiff dreht an jedem der 6 Wegpunkte (besucht %d), nie blockiert" % visited.size())
 	env.flow.free()
+	# Cutlass: Mitte (9,10) zu nah, (10,10) gerade weit genug.
+	var env2: Dictionary = _build("cutlass", ["ship"])
+	env2.transport.parked["ship"] = true
+	var cut_bad: Dictionary = _circle(env2, "ship", Vector2i(9, 10), "none", "c4e")
+	_check(not bool(cut_bad.get("ok", true)) and String(cut_bad.get("reason", "")) == "circle_near_map_edge", tag + "Cutlass, Mitte (9,10): abgelehnt: " + str(cut_bad))
+	_check(bool(_circle(env2, "ship", Vector2i(10, 10), "none", "c4f").get("ok", false)), tag + "Cutlass, Mitte (10,10): angenommen")
+	env2.flow.free()
 
 
 ## Fall 5: dieselbe Kennung erneut, und dieselbe Kennung mit anderem Inhalt.
