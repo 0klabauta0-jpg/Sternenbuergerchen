@@ -1,9 +1,10 @@
 extends "res://scripts/tests/campaign_five_actual_sorties_verifier.gd"
-## ACHTUNG - KEIN EIGENSTAENDIGER TEST: Dieses Skript setzt den Pruefpunkt (Checkpoint) fort, den campaign_five_actual_sorties_verifier
-## (oder campaign_chapter_one_sortie_verifier) im SELBEN Benutzerprofil hinterlassen hat. Es ist nur sinnvoll, wenn es DIREKT NACH
-## campaign_five_actual_sorties_verifier im selben Profil laeuft. Allein oder mit frischem Wegwerfprofil (z. B. ueber nachlauf.ps1) findet es
-## keinen Pruefpunkt, prueft NICHTS und endet mit der Zeile "campaign_remaining_actual_sorties_verifier SKIPPED: Vorbedingung fehlt"
-## (kein Fehlschlag, aber auch kein bestandener Lauf). Eine Lauf-Zusammenfassung ohne "passed=" ist hier kein Erfolg.
+## ACHTUNG - KEIN EIGENSTAENDIGER TEST: Dieses Skript setzt den Pruefpunkt (Checkpoint) im SELBEN Benutzerprofil fort, und zwar nur, wenn dort
+## genau der Stand nach dem ersten Meilenstein liegt (satellite_recovery abgeschlossen, die drei Restauftraege offen). Echt laeuft er direkt nach
+## campaign_chapter_one_sortie_verifier (hinterlaesst diesen Stand, dort Z. 36) oder nach einem ABGEBROCHENEN campaign_five_actual_sorties_verifier.
+## Nach einem vollstaendigen Five-Lauf ueberschreiben dessen spaetere Meilenstein-Speicherungen (Z. 580, 603) den Pruefpunkt; dann endet er mit
+## "CAMPAIGN_REMAINING_ACTUAL_SORTIES SKIPPED reason=state_not_left_by_five_actual_sorties". Allein oder mit frischem Wegwerfprofil (z. B. ueber
+## nachlauf.ps1) findet er keinen Pruefpunkt (reason=no_checkpoint). Ueberspringen prueft NICHTS (kein Fehlschlag, aber auch kein bestandener Lauf).
 func _run() -> void:
 	var existing:Dictionary=STORE.load_checkpoint()
 	# Enge Vorbedingung: genau der Stand, den campaign_five_actual_sorties_verifier nach seinem ersten Meilenstein-Pruefpunkt (save_home_checkpoint
