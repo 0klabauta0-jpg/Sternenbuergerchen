@@ -416,7 +416,8 @@ func _terminal_ids(base: Control) -> Array:
 func _run() -> void:
 	var config: Dictionary = OVERRIDES.load_config()
 	var entries: Array = Array(config.get("entries", []))
-	_check(not config.is_empty() and entries.size() == 3, "Zuordnung laedt, drei Eintraege (%d)" % entries.size())
+	_check(not config.is_empty() and entries.size() == 4, "Zuordnung laedt, vier Eintraege (%d)" % entries.size())
+	_check(entries.any(func(e: Dictionary) -> bool: return String(e.get("id", "")) == "frachtaufzug" and String(e.get("mode", "")) == "additional" and String(e.get("site", "")) == "future_storage" and bool(e.get("decoration_only", false))), "Frachtaufzug steht als Schmuck auf future_storage (mode=additional, decoration_only)")
 	_check(entries.any(func(e: Dictionary) -> bool: return String(e.get("id", "")) == "treibstofftank" and String(e.get("mode", "")) == "replace" and String(e.get("replaces", "")) == "utility_fuel_01"), "Tankstation ersetzt die alte Zapfstelle (mode=replace, replaces=utility_fuel_01)")
 	_check(entries.any(func(e: Dictionary) -> bool: return String(e.get("id", "")) == "home_pod" and String(e.get("mode", "")) == "replace" and String(e.get("replaces", "")) == "habitat_cutaway_01"), "Pod ersetzt das Habitat (mode=replace, replaces=habitat_cutaway_01)")
 	_check(entries.any(func(e: Dictionary) -> bool: return String(e.get("id", "")) == "lager_werkstatt" and String(e.get("mode", "")) == "replace" and String(e.get("replaces", "")) == "freihafen_hall_01"), "Lager ersetzt die Halle (mode=replace, replaces=freihafen_hall_01)")
@@ -514,8 +515,28 @@ func _run() -> void:
 		print("INFO %s Ueberstand ueber den Bauplatz (m, negativ = innen): links %.2f rechts %.2f vorn(z-) %.2f hinten(z+) %.2f" % [id, raw_site.position.x - rect.position.x, rect.end.x - raw_site.end.x, raw_site.position.y - rect.position.y, rect.end.y - raw_site.end.y])
 		# Menschenmass: Spielfigur (Hoehe aus dem Spiel) entspricht 1,8 m; Tuerhoehe muss dann 2,0 bis 2,3 m ergeben.
 		var ratio: float = person_height / float(config.get("human_height_m", 1.8))
-		var door_real: float = float(entry.get("door_height_model", 0.0)) * float(entry.get("scale", 1.0)) / ratio
-		_check(door_real >= 1.95 and door_real <= 2.35, "Menschenmass: Tuer wirkt %.2f m hoch (Figur %.3f m, Faktor %.3f): %s" % [door_real, person_height, ratio, id])
+		if entry.has("door_height_model"):
+			var door_real: float = float(entry.get("door_height_model", 0.0)) * float(entry.get("scale", 1.0)) / ratio
+			_check(door_real >= 1.95 and door_real <= 2.35, "Menschenmass: Tuer wirkt %.2f m hoch (Figur %.3f m, Faktor %.3f): %s" % [door_real, person_height, ratio, id])
+		if entry.has("real_height_range"):
+			var range_m: Array = entry.get("real_height_range", [0.0, 0.0])
+			var height_real: float = box.size.y / ratio
+			_check(height_real >= float(range_m[0]) and height_real <= float(range_m[1]), "Menschenmass: %s wirkt %.2f m hoch (erlaubt %.1f bis %.1f m, Figur %.3f m = 1,8 m)" % [id, height_real, float(range_m[0]), float(range_m[1]), person_height])
+		# Reiner Schmuck: Grundriss gesperrt (Sperrflaechen decken den Rahmen), keine Funktion (kein Terminal, keine Benutzen-Stelle im Rahmen).
+		if bool(entry.get("decoration_only", false)):
+			var covered := true
+			for ix in range(0, 6):
+				for iz in range(0, 6):
+					var sample := Vector2(rect.position.x + rect.size.x * float(ix) / 5.0, rect.position.y + rect.size.y * float(iz) / 5.0)
+					var in_block := false
+					for br_variant in Array(entry.get("block_rects", [])):
+						var br: Array = br_variant
+						if Rect2(float(br[0]), float(br[1]), float(br[2]), float(br[3])).has_point(sample):
+							in_block = true
+					if not in_block:
+						covered = false
+			_check(covered and not Array(entry.get("block_rects", [])).is_empty(), "%s: Grundriss gesperrt (Sperrflaechen decken den ganzen Rahmen)" % id)
+			_check(not entry.has("outside_terminals") and not entry.has("keep_free_terminals"), "%s: nur Schmuck, keine Funktion" % id)
 		# Keine Benutzen-Stelle, kein Terminal, kein Feld der Karte, kein Landepad/Weg im Rahmen.
 		var spots_inside := 0
 		for s in spots:

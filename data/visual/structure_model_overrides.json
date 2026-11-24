@@ -83,6 +83,23 @@
 			"block_rects": [
 				[26.05, 10.75, 1.30, 0.80]
 			]
+		},
+		{
+			"id": "frachtaufzug",
+			"mode": "additional",
+			"model": "res://art/tripo_models_20261124/basis_frachtaufzug_01.glb",
+			"role": "Frachtaufzug (nur Schmuck, keine Funktion) auf dem frei gewordenen Bauplatz future_storage am Ostrand des Flugdecks",
+			"site": "future_storage",
+			"decoration_only": true,
+			"raw_size_model": [5.714, 2.256, 8.0],
+			"scale": 0.2538,
+			"real_height_range": [1.2, 2.5],
+			"scale_note": "Rohmass der GLB (x breit, y hoch, z tief) 5,71 x 2,26 x 8,00 (die facts.json nennt dieselben Teile um den Faktor 8 kleiner). Gewaehlt: Plattform 6,0 m tief (8,0 Einheiten = 6,0 m, also 0,75 m je Einheit), damit 4,3 m breit und 1,7 m hoch (Gelaender, Steuerpult). Spielfaktor = 0,75 * 0,338 = 0,2538.",
+			"rotation_y_deg": 0.0,
+			"offset": [0.0, 0.0, 0.0],
+			"block_rects": [
+				[38.25, 18.0, 1.52, 2.10]
+			]
 		}
 	],
 	"terminal_note": "Lage der Terminals als Ueberlagerung beim Laden (statt in der 27-MB-Karte). plane = Benutzen-Stelle in Ebenenmetern (wird auf das naechste Feld gerundet). new=true legt den Eintrag an.",
