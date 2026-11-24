@@ -74,7 +74,8 @@ func get_snapshot(owned_items: Dictionary) -> Array:
 		result.append(_entry(_orders[id], owned_items))
 	return result
 
-## ok/reason/message. owned_items nur angeben, wenn die Besitzpruefung (requires_item) mitlaufen soll.
+## ok/reason/message. owned_items = Stueckzahlen je Gegenstand; fehlt die Angabe (null), gilt NICHTS als im Besitz, die Werkzeugpflicht
+## (requires_item) laesst sich also nicht durch Weglassen umgehen (item_missing statt not_playable).
 func can_accept(id: String, owned_items: Variant = null) -> Dictionary:
 	if not _orders.has(id):
 		return {"ok": false, "reason": "unknown_order", "message": "Unbekannter Auftrag."}
@@ -111,6 +112,14 @@ func finish(id: String, _delivered: bool) -> bool:
 	_active.erase(kind)
 	_locks[id] = _clock + float(_lock_seconds)
 	return true
+
+## Definition eines Auftrags aus den Daten (Kopie) oder {}.
+func get_order(id: String) -> Dictionary:
+	return Dictionary(_orders[id]).duplicate(true) if _orders.has(id) else {}
+
+## Anzeigename eines Ortes (ohne Katalog die Rohkennung), fuer Ablehnungstexte.
+func place_name(id: String) -> String:
+	return _place(id)
 
 ## Der laufende Auftrag der Art (Definition samt id und number = laufende Nummer seiner Annahme) oder {}.
 func get_active(kind: String) -> Dictionary:
@@ -157,6 +166,12 @@ func _restore_plan(data: Dictionary) -> Dictionary:
 	var saved_active: Variant = data.get("standing_active", {})
 	if typeof(saved_locks) != TYPE_DICTIONARY or typeof(saved_active) != TYPE_DICTIONARY:
 		return {}
+	# Ein laufender Eintrag ohne Nummer (nur id) braucht einen Zaehler von mindestens 1: Nummer = 1, Zaehler wird angehoben.
+	var counter_value: int = int(counter)
+	for raw_kind: Variant in saved_active:
+		var raw_entry: Variant = saved_active[raw_kind]
+		if typeof(raw_entry) == TYPE_DICTIONARY and not Dictionary(raw_entry).has("number") and typeof(Dictionary(raw_entry).get("id")) == TYPE_STRING and _orders.has(Dictionary(raw_entry).id):
+			counter_value = maxi(counter_value, 1)
 	var locks: Dictionary = {}
 	for id: Variant in saved_locks:
 		if typeof(id) != TYPE_STRING or not _orders.has(id):
@@ -176,11 +191,11 @@ func _restore_plan(data: Dictionary) -> Dictionary:
 		var id: Variant = Dictionary(entry).get("id")
 		if typeof(id) == TYPE_STRING and _orders.has(id) and String(_orders[id].kind) == kind:
 			# Nummer der Annahme; fehlt sie (Stand ohne Nummer), gilt der Zaehler.
-			var number: Variant = Dictionary(entry).get("number", counter)
-			if not _is_whole(number) or int(number) < 1 or int(number) > int(counter):
+			var number: Variant = Dictionary(entry).get("number", counter_value)
+			if not _is_whole(number) or int(number) < 1 or int(number) > counter_value:
 				return {}
 			active[kind] = {"id": id, "number": int(number)}
-	return {"clock": now, "locks": locks, "active": active, "counter": int(counter)}
+	return {"clock": now, "locks": locks, "active": active, "counter": counter_value}
 
 func _entry(order: Dictionary, owned_items: Variant) -> Dictionary:
 	var id: String = String(order.id)

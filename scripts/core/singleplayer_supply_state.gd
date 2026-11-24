@@ -42,6 +42,8 @@ var _market_stock: Dictionary = {}
 ## Dauerauftraege (Handel H3): eigener Besitzer, nur in der Kampagne angelegt (enable_standing_orders); null = es gibt ihn nicht (Skirmish).
 const STANDING_ORDERS = preload("res://scripts/core/standing_orders_state.gd")
 const STANDING_ORDERS_PATH := "res://data/singleplayer/standing_orders.json"
+## Gegenstand der Frachtauftraege: 1 Lagerplatz je Kiste, nicht verkaeuflich (kein Preis in der Warenboerse).
+const STANDING_CRATE := "cargo_crate"
 var _standing_orders: RefCounted = null
 var _requests: Dictionary = {}
 var _reward_receipts: Dictionary = {}
@@ -201,6 +203,9 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		"campaign_place_room_bed": result = _campaign_build_modular(payload, authority_context, true)
 		"campaign_set_room_door": result = _campaign_set_room_door(payload, authority_context)
 		"sell": result = _sell(payload, authority_context)
+		"standing_accept": result = _standing_accept(payload, authority_context)
+		"standing_deliver": result = _standing_deliver(payload, authority_context)
+		"standing_abandon": result = _standing_abandon(payload)
 		_: result = _reject("unknown_operation", "Aktion unbekannt")
 	if bool(result.get("ok", false)):
 		result["request_id"] = request_id
@@ -728,6 +733,90 @@ func standing_finish_state(id: String, delivered: bool) -> bool:
 	if _standing_orders == null or not _standing_orders.finish(id, delivered): return false
 	_revision += 1
 	return true
+
+## Fracht uebernehmen (Befehl standing_accept): beim Haendler am Startort, Schiff gelandet. Reihenfolge laut Kopf von standing_orders_state.gd:
+## alles Vorpruefbare pruefen, Kisten ins Schiff buchen, dann den Auftrag annehmen; scheitert das, kommen die Kisten wieder raus.
+## Die Revision hebt standing_accept_state (einmal je Befehl genuegt, zwischen Buchung und Annahme laeuft kein anderer Code).
+func _standing_accept(payload: Dictionary, context: Dictionary) -> Dictionary:
+	if _standing_orders == null: return _reject("standing_unavailable", "Daueraufträge sind nicht verfügbar")
+	var id: String = String(payload.get("order_id", ""))
+	var order: Dictionary = _standing_orders.get_order(id)
+	if order.is_empty(): return _reject("unknown_order", "Unbekannter Auftrag.")
+	if String(order.kind) != "freight" or not bool(order.get("playable", true)): return _reject("not_freight", "Das ist kein Frachtauftrag, den man beim Händler übernimmt.")
+	var location: String = String(context.get("location_id", ""))
+	if not _has_service(location, "trade") or bool(context.get("craft_busy", true)): return _reject("trade_unavailable", "Handel nicht erreichbar")
+	if location != String(order.origin): return _reject("wrong_location", "Diesen Auftrag übernimmst du beim Händler in %s." % _standing_orders.place_name(String(order.origin)))
+	var container: String = "craft:" + String(context.get("craft_id", ""))
+	if not _inventory.has(container): return _reject("inventory_access", "Schiffslager nicht verfügbar")
+	var verdict: Dictionary = standing_can_accept(id)
+	if not bool(verdict.get("ok", false)): return verdict
+	var crates: int = int(order.crates)
+	if not INVENTORY.fits(_inventory[container], STANDING_CRATE, crates): return _reject("container_full", "Schiffsfracht ist voll – für %s ist kein Platz." % _standing_crates_text(crates))
+	var items: Dictionary = _inventory[container].items
+	items[STANDING_CRATE] = int(items.get(STANDING_CRATE, 0)) + crates
+	var accepted: Dictionary = standing_accept_state(id)
+	if not bool(accepted.get("ok", false)):
+		_standing_remove_crates(items, crates)
+		return accepted
+	var number: int = int(accepted.number)
+	return {"ok": true, "message": "Fracht übernommen: %s." % _standing_crates_text(crates), "order_id": id, "number": number, "receipt_id": _standing_receipt_id(id, number),
+		"outcome": "accepted", "item_id": STANDING_CRATE, "quantity": crates, "container_id": container, "location_id": location}
+
+## Fracht abliefern (Befehl standing_deliver): beim Haendler am Zielort, alle Kisten nachweislich im gelandeten Schiff. finish ZUERST (zweiter Aufruf
+## lehnt ab), erst bei true werden Kisten entfernt und der Lohn gebucht: genau einmal, in einer Buchung.
+func _standing_deliver(payload: Dictionary, context: Dictionary) -> Dictionary:
+	if _standing_orders == null: return _reject("standing_unavailable", "Daueraufträge sind nicht verfügbar")
+	var id: String = String(payload.get("order_id", ""))
+	var order: Dictionary = _standing_orders.get_order(id)
+	if order.is_empty(): return _reject("unknown_order", "Unbekannter Auftrag.")
+	if String(order.kind) != "freight": return _reject("not_freight", "Das ist kein Frachtauftrag.")
+	var location: String = String(context.get("location_id", ""))
+	if not _has_service(location, "trade") or bool(context.get("craft_busy", true)): return _reject("trade_unavailable", "Handel nicht erreichbar")
+	var active: Dictionary = _standing_orders.get_active("freight")
+	if String(active.get("id", "")) != id: return _reject("not_active", "Dieser Auftrag läuft nicht.")
+	if location != String(order.destination): return _reject("wrong_location", "Abliefern geht nur beim Händler in %s." % _standing_orders.place_name(String(order.destination)))
+	var container: String = "craft:" + String(context.get("craft_id", ""))
+	if not _inventory.has(container): return _reject("inventory_access", "Schiffslager nicht verfügbar")
+	var items: Dictionary = _inventory[container].items
+	var crates: int = int(order.crates)
+	if int(items.get(STANDING_CRATE, 0)) < crates: return _reject("cargo_missing", "Fracht unvollständig – nur Aufgeben möglich.")
+	var number: int = int(active.number)
+	if not standing_finish_state(id, true): return _reject("not_active", "Dieser Auftrag läuft nicht.")
+	_standing_remove_crates(items, crates)
+	var pay: int = int(order.pay)
+	_credits += pay
+	return {"ok": true, "message": "Fracht abgeliefert. Lohn: %d Cr." % pay, "order_id": id, "number": number, "receipt_id": _standing_receipt_id(id, number),
+		"outcome": "delivered", "pay": pay, "credits_added": pay, "crates_removed": crates, "container_id": container, "location_id": location}
+
+## Auftrag aufgeben (Befehl standing_abandon): beendet den laufenden Auftrag ohne Lohn, entfernt die uebrigen Kisten aus ALLEN Behaeltern, Sperrzeit beginnt.
+## Braucht keinen Handelsort: wer die Fracht nicht mehr abliefern kann, soll sie loswerden koennen.
+func _standing_abandon(payload: Dictionary) -> Dictionary:
+	if _standing_orders == null: return _reject("standing_unavailable", "Daueraufträge sind nicht verfügbar")
+	var id: String = String(payload.get("order_id", ""))
+	var order: Dictionary = _standing_orders.get_order(id)
+	if order.is_empty(): return _reject("unknown_order", "Unbekannter Auftrag.")
+	var active: Dictionary = _standing_orders.get_active(String(order.kind))
+	if String(active.get("id", "")) != id: return _reject("not_active", "Dieser Auftrag läuft nicht.")
+	var number: int = int(active.number)
+	if not standing_finish_state(id, false): return _reject("not_active", "Dieser Auftrag läuft nicht.")
+	var removed := 0
+	for container_id: Variant in _inventory:
+		var items: Dictionary = Dictionary(_inventory[container_id]).get("items", {})
+		removed += int(items.get(STANDING_CRATE, 0))
+		items.erase(STANDING_CRATE)
+	return {"ok": true, "message": "Auftrag aufgegeben. Kein Lohn.", "order_id": id, "number": number, "receipt_id": _standing_receipt_id(id, number),
+		"outcome": "abandoned", "pay": 0, "crates_removed": removed}
+
+func _standing_receipt_id(id: String, number: int) -> String:
+	return "standing:%s:%d" % [id, number]
+
+func _standing_crates_text(crates: int) -> String:
+	return "%d Kiste" % crates if crates == 1 else "%d Kisten" % crates
+
+func _standing_remove_crates(items: Dictionary, crates: int) -> void:
+	var left: int = int(items.get(STANDING_CRATE, 0)) - crates
+	if left > 0: items[STANDING_CRATE] = left
+	else: items.erase(STANDING_CRATE)
 
 func _load_standing_orders() -> RefCounted:
 	if not FileAccess.file_exists(STANDING_ORDERS_PATH): return null

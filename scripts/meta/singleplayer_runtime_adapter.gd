@@ -803,7 +803,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		return _request_space_wing_command(payload.command)
 	if operation == "select_location_view_craft":
 		return _flow.call("select_location_view_craft", String(payload.get("location_id", "")), String(payload.get("craft_id", "")))
-	if payload.has("service_location_id") and operation in ["buy", "sell", "refuel", "repair", "inventory_transfer", "inventory_equip", "return_homebase", "station_buy_ship", "station_build_home_pad", "station_install_ship_component", "station_deploy_crew", "station_handoff_crew", "station_board_crew"]:
+	if payload.has("service_location_id") and operation in ["buy", "sell", "standing_accept", "standing_deliver", "standing_abandon", "refuel", "repair", "inventory_transfer", "inventory_equip", "return_homebase", "station_buy_ship", "station_build_home_pad", "station_install_ship_component", "station_deploy_crew", "station_handoff_crew", "station_board_crew"]:
 		var live_context := _service_context(String(payload.get("craft_id", "")))
 		if String(payload.service_location_id).is_empty() or String(live_context.get("location_id", "")) != String(payload.service_location_id):
 			return _reject("service_location_changed", "Schiff ist nicht mehr am gewählten Versorgungsort")
@@ -917,6 +917,8 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		if not bool(context.get("ground_service_verified",false)) or not Array(context.get("services",[])).has("repair"):
 			return _reject("repair_service_required","Reparatur nur am lokalen freigegebenen Servicepad")
 		return _commit("singleplayer_supply","repair",data,request_id,context)
+	if operation in ["standing_accept", "standing_deliver", "standing_abandon"]:
+		return _request_standing(operation, data, request_id)
 	if operation in ["buy", "refuel", "sell"]:
 		if operation == "buy":
 			var offered: Dictionary = Dictionary(_supply.get_supply_snapshot().offers).get(String(data.get("offer_id", "")), {})
@@ -2140,6 +2142,22 @@ func charge_campaign_rescue_fee(amount: int) -> Dictionary:
 func advance_debt_interest(delta: float) -> Dictionary:
 	if _supply == null or not _campaign_mode: return {"ok": true, "charges": [], "credits": 0}
 	return _supply.advance_debt_clock(delta)
+
+## Dauerauftraege (H3, Fracht): Uebernehmen und Abliefern wie ein Verkauf beim Haendler (gelandetes Schiff, Handelsdienst am Ort);
+## Aufgeben braucht keinen Haendler. Nur Kampagne; Zustand, Kisten und Lohn buchen allein die Befehle im Versorgungsstand.
+func _request_standing(operation: String, data: Dictionary, request_id: String) -> Dictionary:
+	if not _campaign_mode or _supply == null or _supply.get_standing_orders() == null:
+		return _reject("standing_unavailable", "Daueraufträge gibt es nur in der Kampagne")
+	if operation == "standing_abandon":
+		return _commit("singleplayer_supply", operation, data, request_id)
+	var craft_id: String = String(data.get("craft_id", ""))
+	var context: Dictionary = _service_context(craft_id)
+	if context.is_empty():
+		return _reject("service_unavailable", "Schiff und Trupp muessen am Serviceort bereit sein")
+	context["craft_id"] = craft_id
+	if String(context.get("location_id", "")) in ["trade_outpost", "satellite_crash"] and not Array(context.get("services", [])).has("trade"):
+		return _reject("local_service_required", "Schiff muss am freigegebenen lokalen Handels- oder Servicepunkt stehen")
+	return _commit("singleplayer_supply", operation, data, request_id, context)
 
 ## Dauerauftraege (H3): den Besitzer nur in der Kampagne anlegen; Namen aus den vorhandenen Anzeige-Katalogen (nur Darstellung).
 func _setup_standing_orders() -> void:

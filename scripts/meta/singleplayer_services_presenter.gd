@@ -40,6 +40,15 @@ var _sell: Button
 ## Handel H2: Benit aus der Warenboerse. _market_buttons: Ware -> Kaufknopf; _sell_extra: weitere Verkaufsknoepfe (der erste Verkaufsknopf ist _sell).
 var _market_buttons: Dictionary = {}
 var _sell_extra: Array = []
+## Dauerauftraege (H3, Fracht): Behaelter fuer die Knoepfe "Fracht uebernehmen" / "Fracht abliefern" (je Frachtauftrag des Snapshots einer, beim ersten Auftauchen gebaut)
+## und der eine Knopf "Auftrag aufgeben (kein Lohn)". Die Zeilen kommen aus campaign.standing_orders; Zahlen und Namen stehen nicht im Code.
+const INVENTORY = preload("res://scripts/mission/inventory_transfer_contract.gd")
+const STANDING_CRATE := "cargo_crate"
+const STANDING_MISSING_TEXT := "Fracht unvollständig – nur Aufgeben möglich."
+var _standing_box: VBoxContainer
+var _standing_buttons: Dictionary = {}
+var _standing_abandon: Button
+var _standing_note: Label
 const MARKET_ITEMS: Array = ["a_benit", "b_benit", "c_benit"]
 const MARKET_SELL_ORDER: Array = ["b_benit", "c_benit", "a_benit"]
 const MARKET_NAMES: Dictionary = {"a_benit": "A-Benit", "b_benit": "B-Benit", "c_benit": "C-Benit"}
@@ -124,6 +133,18 @@ func _build() -> void:
 		ship_content.add_child(market_button)
 		market_button.pressed.connect(_submit_market.bind(market_item))
 		_market_buttons[market_item] = market_button
+	_standing_box = VBoxContainer.new()
+	_standing_box.name = "StandingOrders"
+	_standing_box.add_theme_constant_override("separation", 10)
+	ship_content.add_child(_standing_box)
+	_standing_abandon = _button("Auftrag aufgeben (kein Lohn)", "StandingAbandon")
+	_standing_abandon.visible = false
+	_standing_box.add_child(_standing_abandon)
+	_standing_abandon.pressed.connect(_submit_standing_abandon)
+	_standing_note = _label("", 14)
+	_standing_note.name = "StandingNote"
+	_standing_note.visible = false
+	_standing_box.add_child(_standing_note)
 	var fuel_row := HBoxContainer.new()
 	ship_content.add_child(fuel_row)
 	var amount_label: Label = _label("Tankmenge", 14)
@@ -349,6 +370,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		elif int(supply.get("credits", 0)) < market_price: market_reason = "Kredite reichen für den Kauf nicht"
 		market_button.disabled = not market_reason.is_empty() or _pending.has("buy")
 		market_button.tooltip_text = market_reason if not market_reason.is_empty() else ("Wird im Frachtaufzug bereitgestellt; anschließend ins Schiff laden." if not lift.is_empty() else "Wird in die Schiffsfracht geliefert.")
+	_refresh_standing(supply, location, trade_ready, trade_reason)
 	var amount: float = _amount.value
 	var cost: float = amount * float(supply.get("fuel_price_per_unit", 0.0))
 	_refuel.text = "+%s Treibstoff · %s Cr" % [str(amount), str(cost)]
@@ -410,6 +432,7 @@ func _apply_section() -> void:
 		if not (ship and trading): control.visible = false
 	_tool_buttons["backpack_supply"].visible = ship and String(trade_context.get("location_id", "")) == "trade_outpost" and String(_snapshot.get("mode", "")) == "campaign"
 	_items.visible = ship and trading
+	_standing_box.visible = ship
 	_refuel.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 	_refuel.custom_minimum_size.x=180
 	_return.visible = false
@@ -577,6 +600,87 @@ func _refresh_campaign_actions(supply: Dictionary) -> void:
 			button.tooltip_text = String(supply.get("research", {}).get("nodes", {}).get(String(action.payload.research_id), {}).get("message", "Entwicklung derzeit nicht verfügbar"))
 		if String(action.operation) == "campaign_fabricate" and home:
 			button.tooltip_text = String(supply.get("research", {}).get("fabrication", {}).get(String(action.payload.blueprint_id), {}).get("message", "Herstellung derzeit nicht möglich")) if not enabled else ""
+
+## Dauerauftraege (H3, Fracht): Knoepfe je Frachtauftrag. Uebernehmen steht am Startort, Abliefern am Zielort, Aufgeben ueberall, solange ein Auftrag laeuft.
+## Gesperrte Knoepfe tragen ihren Grund als Hinweistext; der erste Grund steht zusaetzlich als Zeile darunter. Rechnet nur, wenn das Fenster aktualisiert wird.
+func _refresh_standing(supply: Dictionary, location: String, trade_ready: bool, trade_reason: String) -> void:
+	for button: Button in _standing_buttons.values(): button.visible = false
+	_standing_abandon.visible = false
+	var note := ""
+	var entries: Array = Array(Dictionary(_snapshot.get("campaign", {})).get("standing_orders", []))
+	var cargo: Dictionary = Dictionary(Dictionary(supply.get("inventory", {})).get("craft:" + _selected_craft_id, {}))
+	var in_ship: int = int(Dictionary(cargo.get("items", {})).get(STANDING_CRATE, 0))
+	for raw: Variant in entries:
+		var entry: Dictionary = Dictionary(raw)
+		if String(entry.get("kind", "")) != "freight" or _selected_craft_id.is_empty(): continue
+		var id := String(entry.get("id", ""))
+		var status := String(entry.get("status", ""))
+		var crates: int = int(entry.get("crates", 0))
+		var accept: Button = _standing_button("StandingAccept_", id, "standing_accept")
+		var deliver: Button = _standing_button("StandingDeliver_", id, "standing_deliver")
+		if status == "active":
+			_standing_abandon.visible = true
+			_standing_abandon.set_meta("order_id", id)
+			_standing_abandon.disabled = not _command_handler.is_valid()
+			_standing_abandon.tooltip_text = "Beendet den Auftrag ohne Lohn. Die Kisten werden entfernt, die Sperrzeit beginnt."
+		if location == String(entry.get("origin", "")):
+			var accept_reason := ""
+			if not trade_ready: accept_reason = trade_reason
+			elif status != "open": accept_reason = String(entry.get("message", ""))
+			elif not INVENTORY.fits(cargo, STANDING_CRATE, crates): accept_reason = "Schiffsfracht ist voll – für %d Kisten ist kein Platz." % crates
+			accept.visible = true
+			accept.text = "Fracht übernehmen: " + String(entry.get("title", "")).trim_prefix("Fracht: ")
+			accept.disabled = not accept_reason.is_empty()
+			accept.tooltip_text = accept_reason if not accept_reason.is_empty() else "Die Kisten kommen ins Schiff. Lohn gibt es erst bei der Abgabe."
+			if note.is_empty() and not accept_reason.is_empty() and status != "active": note = accept_reason
+		if status == "active" and location == String(entry.get("destination", "")):
+			var deliver_reason := ""
+			if not trade_ready: deliver_reason = trade_reason
+			elif in_ship < crates: deliver_reason = STANDING_MISSING_TEXT
+			deliver.visible = true
+			deliver.text = "Fracht abliefern · %d Cr" % int(entry.get("pay", 0))
+			deliver.disabled = not deliver_reason.is_empty()
+			deliver.tooltip_text = deliver_reason if not deliver_reason.is_empty() else "Die Kisten abgeben und den Lohn bekommen."
+			if not deliver_reason.is_empty(): note = deliver_reason
+	_standing_note.text = note
+	_standing_note.visible = not note.is_empty()
+
+## Der Knopf eines Auftrags (Praefix + Kennung ohne Doppelpunkte als Knotenname); wird beim ersten Bedarf gebaut und danach wiederverwendet.
+func _standing_button(prefix: String, id: String, operation: String) -> Button:
+	var key: String = prefix + id.replace(":", "_")
+	if _standing_buttons.has(key): return _standing_buttons[key]
+	var button: Button = _button("", key)
+	button.visible = false
+	_standing_box.add_child(button)
+	_standing_box.move_child(_standing_abandon, -1)
+	_standing_box.move_child(_standing_note, -1)
+	button.pressed.connect(_submit_standing.bind(operation, id, key))
+	_standing_buttons[key] = button
+	return button
+
+func _submit_standing(operation: String, order_id: String, key: String) -> void:
+	var button: Button = _standing_buttons.get(key)
+	if button == null or not _command_handler.is_valid(): return
+	if button.disabled:
+		_feedback.text = button.tooltip_text
+		return
+	_send_standing(operation, order_id)
+
+func _submit_standing_abandon() -> void:
+	if _standing_abandon.disabled or not _standing_abandon.visible or not _command_handler.is_valid(): return
+	_send_standing("standing_abandon", String(_standing_abandon.get_meta("order_id", "")))
+
+## Jeder Klick bekommt eine eigene Anfragekennung mit der Sitzungskennung (wie campaign-service); dieselbe Kennung zweimal waere eine Wiederholung ohne neue Buchung.
+func _send_standing(operation: String, order_id: String) -> void:
+	if order_id.is_empty(): return
+	var context: Dictionary = Dictionary(_snapshot.get("service_contexts_by_craft_id", {})).get(_selected_craft_id, {})
+	_sequence += 1
+	var payload: Dictionary = {"craft_id": _selected_craft_id, "order_id": order_id, "service_location_id": String(context.get("location_id", "")),
+		"request_id": "%s:%d:%s:%d" % [operation.replace("_", "-"), get_instance_id(), _request_session, _sequence]}
+	var result: Dictionary = _command_handler.call(operation, payload)
+	_feedback.text = String(result.get("message", result.get("reason", "Aktion bestätigt")))
+	_availability_feedback = false
+	refresh()
 
 func _submit_campaign(key: String) -> void:
 	var action: Dictionary = _campaign_buttons.get(key,{})
