@@ -14831,7 +14831,9 @@ func _refresh_mission_evacuation_button() -> void:
 		if int(stranded_quote.get("stranded_count", 0)) > 0:
 			button.text = "EVAC · Notrettung %d Cr" % int(stranded_quote.get("stranded_fee", 0))
 			button.tooltip_text += "\n" + String(stranded_quote.get("stranded_text", ""))
-			get_parent().set_meta("campaign_stranded_rescue_announced", String(stranded_quote.get("stranded_key", "")))
+			# LC2n M3-W1: Nur ein sichtbarer Knopf sagt die Gebuehr an; ein unsichtbarer setzt den Merker nicht.
+			if button.visible:
+				get_parent().set_meta("campaign_stranded_rescue_announced", String(stranded_quote.get("stranded_key", "")))
 	META_UI_SKIN_SCRIPT.style_tactical_button(button, button_enabled)
 
 

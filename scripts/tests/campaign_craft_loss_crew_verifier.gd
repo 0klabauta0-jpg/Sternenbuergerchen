@@ -299,6 +299,12 @@ func _trio_case(variant: String) -> void:
 		else:
 			_check(bool(first.get("accepted", false)), tag + ": niemand abseits: der erste Druck fliegt ab (%s)" % str(first.get("reason")))
 	elif variant == "card":
+		# LC2n M3-W1: Vorher einmal auffrischen, solange der EVAC-Knopf unsichtbar ist (kein Bodentrupp ausgewaehlt, keine Landezone, wie im Spiel nach jedem Befehl):
+		# ein unsichtbarer Knopf sagt nichts an, der erste Versuch ueber die Schiffskarte darf deshalb nicht abheben.
+		# GESTELLT: keine Landezone (der Einsatz-Aufbau hat eine gesetzt, der Knopf waere sonst sichtbar).
+		s.controller.set("_has_lz_position", false)
+		s.controller.call("_refresh_mission_evacuation_button")
+		_check(button != null and not button.visible, tag + ": Aufbau: der EVAC-Knopf ist beim Auffrischen unsichtbar (%s)" % ("kein Knopf" if button == null else str(button.visible)))
 		# Abheben ueber die Schiffskarte (wie _press_return im Abflug-Pruefer); die Liegende ist abseits, alle Fitten steigen ein.
 		s.controller.call("_on_mission_dropship_return_pressed", _craft_id)
 		var card_text: String = String(s.controller.call("_get_mission_dropship_card_feedback_text", s.controller.call("_find_mission_dropship_card_entry", _craft_id)))
