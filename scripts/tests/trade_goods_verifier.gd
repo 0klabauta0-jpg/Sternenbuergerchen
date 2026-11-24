@@ -136,7 +136,7 @@ func _buy_part() -> void:
 	var r: Dictionary = s.apply_command(_cmd("buy", {"offer_id": "market:muellers_farm:food", "quantity": 1}), _ctx("muellers_farm"))
 	check(not bool(r.get("ok", true)) and String(r.get("reason", "")) == "trade_unavailable", "Kauf: Nahrung in Muellers Farm ohne Handelsdienst -> trade_unavailable (%s)" % r)
 	var locs: Dictionary = _locs()
-	var want := {"muellers_farm": {"food": [5, 16]}, "templanon": {"medical_supplies": [12, 8], "bandage": [6, 8]}, "shady_lab": {"luxury_goods": [9, 8], "stim": [14, 4]}}
+	var want := {"muellers_farm": {"food": [5, 16]}, "templanon": {"medical_supplies": [12, 16], "bandage": [6, 16]}, "shady_lab": {"luxury_goods": [9, 16], "stim": [14, 8]}}
 	var data_ok := true
 	for loc: String in want:
 		for item: String in want[loc]:
@@ -159,7 +159,7 @@ func _old_state_part() -> void:
 	loaded.register_craft("ship", 5.0)
 	var r: Dictionary = loaded.restore_state(saved)
 	check(bool(r.get("ok", false)), "Alter Stand: laedt mit der neuen Boerse (%s)" % r)
-	check(int(_entry(loaded, "muellers_farm", "food").get("stock", -1)) == 16 and int(_entry(loaded, "templanon", "bandage").get("stock", -1)) == 8 and int(_entry(loaded, "templanon", "medical_supplies").get("stock", -1)) == 8 and int(_entry(loaded, "shady_lab", "luxury_goods").get("stock", -1)) == 8 and int(_entry(loaded, "shady_lab", "stim").get("stock", -1)) == 4, "Alter Stand: die neuen Gueter stehen mit vollem Startbestand da (16, 8, 8, 8, 4)")
+	check(int(_entry(loaded, "muellers_farm", "food").get("stock", -1)) == 16 and int(_entry(loaded, "templanon", "bandage").get("stock", -1)) == 16 and int(_entry(loaded, "templanon", "medical_supplies").get("stock", -1)) == 16 and int(_entry(loaded, "shady_lab", "luxury_goods").get("stock", -1)) == 16 and int(_entry(loaded, "shady_lab", "stim").get("stock", -1)) == 8, "Alter Stand: die neuen Gueter stehen mit vollem Startbestand da (16, 16, 16, 16, 8)")
 	check(int(_entry(loaded, "trade_outpost", "a_benit").get("stock", -1)) == 5, "Alter Stand: der gespeicherte Benit-Bestand bleibt (5)")
 
 # ---------- 7: Kennungen ----------
