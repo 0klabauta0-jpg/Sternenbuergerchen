@@ -3,6 +3,14 @@ extends RefCounted
 ## Eigener Besitzer mit eigener durchgehender Uhr (Sekunden Spielzeit). Ist ein Auftrag zu Ende (Abgabe oder Aufgabe), beginnt fuer genau
 ## diesen Auftrag (Schluessel = id, also je Ort UND Ware) die Sperrzeit `lock_seconds`. Preise stehen nur in standing_orders.json.
 ## Kein class_name: Einbinden ueber preload("res://scripts/core/standing_orders_state.gd").
+##
+## VERBINDLICHE REIHENFOLGE fuer den Einbau (Aufgabe B), jeweils in EINER Buchung des Versorgungsstands:
+##  - Uebernehmen: 1. can_accept(id, owned) pruefen, 2. Kisten buchen, 3. accept(id, owned). Scheitert Schritt 2, ist noch nichts am
+##    Auftrag geaendert. accept vergibt die Nummer (get_active(kind).number, ueberlebt Speichern/Laden) und zaehlt standing_counter hoch.
+##  - Abliefern/Aufgeben: 1. finish(id, delivered) ZUERST; es lehnt einen zweiten Aufruf ab (false) und verlaengert die Sperre nicht.
+##    Erst bei true: 2. Kisten entfernen und Lohn buchen. So wird der Lohn genau einmal gebucht.
+##  - Im Versorgungsstand aendern standing_accept_state / standing_finish_state Zustand und _revision zusammen; B ruft nur diese.
+##  - Die Uhr (advance_clock) erhoeht die _revision bewusst nicht (sie tickt je Bild).
 const KINDS: Array = ["freight", "mining", "salvage"]
 const MAX_CLOCK := 1.0e9
 const MAX_LOCK_SECONDS := 86400
@@ -70,7 +78,7 @@ func get_snapshot(owned_items: Dictionary) -> Array:
 func can_accept(id: String, owned_items: Variant = null) -> Dictionary:
 	if not _orders.has(id):
 		return {"ok": false, "reason": "unknown_order", "message": "Unbekannter Auftrag."}
-	var entry: Dictionary = _entry(_orders[id], owned_items if typeof(owned_items) == TYPE_DICTIONARY else null)
+	var entry: Dictionary = _entry(_orders[id], owned_items)
 	var status: String = String(entry.status)
 	if status == "open":
 		return {"ok": true, "reason": "", "message": String(entry.message)}
@@ -80,9 +88,18 @@ func can_accept(id: String, owned_items: Variant = null) -> Dictionary:
 func accept(id: String, owned_items: Variant = null) -> bool:
 	if not bool(can_accept(id, owned_items).ok):
 		return false
-	_active[String(_orders[id].kind)] = {"id": id}
 	_counter += 1
+	_active[String(_orders[id].kind)] = {"id": id, "number": _counter}
 	return true
+
+## Namen der Gegenstaende, die ein Auftrag zur Annahme verlangt (requires_item). Nur diese muss der Besitzer zaehlen.
+func required_items() -> Array:
+	var items: Array = []
+	for id: String in _order_ids:
+		var item: String = String(_orders[id].get("requires_item", ""))
+		if not item.is_empty() and not items.has(item):
+			items.append(item)
+	return items
 
 ## Beendet den laufenden Auftrag (delivered: Abgabe oder Aufgabe) und startet seine Sperrzeit. Lohn bucht der Aufrufer.
 func finish(id: String, _delivered: bool) -> bool:
@@ -95,10 +112,14 @@ func finish(id: String, _delivered: bool) -> bool:
 	_locks[id] = _clock + float(_lock_seconds)
 	return true
 
-## Der laufende Auftrag der Art (Definition samt id) oder {}.
+## Der laufende Auftrag der Art (Definition samt id und number = laufende Nummer seiner Annahme) oder {}.
 func get_active(kind: String) -> Dictionary:
-	var id: String = String(Dictionary(_active.get(kind, {})).get("id", ""))
-	return Dictionary(_orders[id]).duplicate(true) if _orders.has(id) else {}
+	var active: Dictionary = Dictionary(_active.get(kind, {}))
+	var id: String = String(active.get("id", ""))
+	if not _orders.has(id): return {}
+	var result: Dictionary = Dictionary(_orders[id]).duplicate(true)
+	result["number"] = int(active.get("number", _counter))
+	return result
 
 func export_state() -> Dictionary:
 	var locks: Dictionary = {}
@@ -154,7 +175,11 @@ func _restore_plan(data: Dictionary) -> Dictionary:
 			return {}
 		var id: Variant = Dictionary(entry).get("id")
 		if typeof(id) == TYPE_STRING and _orders.has(id) and String(_orders[id].kind) == kind:
-			active[kind] = {"id": id}
+			# Nummer der Annahme; fehlt sie (Stand ohne Nummer), gilt der Zaehler.
+			var number: Variant = Dictionary(entry).get("number", counter)
+			if not _is_whole(number) or int(number) < 1 or int(number) > int(counter):
+				return {}
+			active[kind] = {"id": id, "number": int(number)}
 	return {"clock": now, "locks": locks, "active": active, "counter": int(counter)}
 
 func _entry(order: Dictionary, owned_items: Variant) -> Dictionary:
@@ -164,7 +189,9 @@ func _entry(order: Dictionary, owned_items: Variant) -> Dictionary:
 		"status": "open", "lock_remaining_seconds": 0, "reason": "", "message": "", "title": _title(order)}
 	var kind: String = String(order.kind)
 	var required: String = String(order.get("requires_item", ""))
-	var missing: bool = typeof(owned_items) == TYPE_DICTIONARY and not required.is_empty() and int(Dictionary(owned_items).get(required, 0)) < 1
+	# Fehlt owned_items (null), gilt nichts als im Besitz: die Werkzeugpflicht laesst sich nicht umgehen.
+	var owned: Dictionary = owned_items if typeof(owned_items) == TYPE_DICTIONARY else {}
+	var missing: bool = not required.is_empty() and int(owned.get(required, 0)) < 1
 	if not bool(order.get("playable", true)):
 		entry.status = "unavailable"
 		entry.reason = "item_missing" if missing else "not_playable"
@@ -204,7 +231,7 @@ func _title(order: Dictionary) -> String:
 			return "Fracht: %s %s nach %s · %d Cr" % [_crates_text(int(order.crates)), _item(String(order.item)), _place(String(order.destination)), int(order.pay)]
 		"mining":
 			return "Mining: %s (%s) · %d Cr je Stück" % [_item(String(order.item)), where, int(order.pay_per_unit)]
-	return "Bergung: Wrackteile (%s) · %d Cr je Stück" % [where, int(order.pay_per_unit)]
+	return "Bergung: %s (%s) · %d Cr je Stück" % [_item(String(order.item)), where, int(order.pay_per_unit)]
 
 func _crates_text(crates: int) -> String:
 	return "%d Kiste" % crates if crates == 1 else "%d Kisten" % crates

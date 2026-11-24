@@ -696,17 +696,46 @@ func advance_standing_clock(delta: float) -> void:
 ## Snapshot der Dauerauftraege; die Besitzpruefung zaehlt Basislager, Schiffe und Rucksaecke. Rechnet nur, wenn er abgefragt wird.
 func get_standing_orders_snapshot() -> Array:
 	if _standing_orders == null: return []
+	return _standing_orders.get_snapshot(_standing_owned_items())
+
+## Nur die Gegenstaende zaehlen, die ein Dauerauftrag zur Annahme verlangt (requires_item), ueber Basislager, Schiffe und Rucksaecke.
+func _standing_owned_items() -> Dictionary:
 	var owned: Dictionary = {}
-	for container_id: Variant in _inventory:
-		for item_id: Variant in Dictionary(Dictionary(_inventory[container_id]).get("items", {})):
-			owned[item_id] = int(owned.get(item_id, 0)) + int(_inventory[container_id].items[item_id])
-	return _standing_orders.get_snapshot(owned)
+	if _standing_orders == null: return owned
+	for item_id: Variant in _standing_orders.required_items():
+		var total := 0
+		for container_id: Variant in _inventory:
+			total += int(Dictionary(Dictionary(_inventory[container_id]).get("items", {})).get(item_id, 0))
+		owned[item_id] = total
+	return owned
+
+## Wird ein Dauerauftrag angenommen, geschieht das in dieser Reihenfolge (siehe Kopf von standing_orders_state.gd): standing_can_accept,
+## Kisten buchen, standing_accept_state. Zustand und _revision aendern sich zusammen; so sehen Snapshots und Zwischenspeicher die Aenderung.
+func standing_can_accept(id: String) -> Dictionary:
+	if _standing_orders == null: return _reject("standing_unavailable", "Daueraufträge sind nicht verfügbar")
+	return _standing_orders.can_accept(id, _standing_owned_items())
+
+## Nimmt den Auftrag an. Antwort: ok, reason, message und bei ok die vergebene Nummer (number).
+func standing_accept_state(id: String) -> Dictionary:
+	var check: Dictionary = standing_can_accept(id)
+	if not bool(check.get("ok", false)): return check
+	if not _standing_orders.accept(id, _standing_owned_items()): return _reject("standing_refused", "Auftrag nicht annehmbar")
+	_revision += 1
+	return {"ok": true, "reason": "", "message": "", "number": _standing_orders.get_counter()}
+
+## Beendet den laufenden Auftrag (Abgabe oder Aufgabe) und setzt die Sperre; false, wenn er nicht (mehr) laeuft (zweiter Aufruf).
+func standing_finish_state(id: String, delivered: bool) -> bool:
+	if _standing_orders == null or not _standing_orders.finish(id, delivered): return false
+	_revision += 1
+	return true
 
 func _load_standing_orders() -> RefCounted:
 	if not FileAccess.file_exists(STANDING_ORDERS_PATH): return null
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(STANDING_ORDERS_PATH))
 	var owner: RefCounted = STANDING_ORDERS.new()
-	if typeof(parsed) != TYPE_DICTIONARY or not owner.configure(parsed): return null
+	if typeof(parsed) != TYPE_DICTIONARY or not owner.configure(parsed):
+		push_warning("standing_orders.json ist unbrauchbar; das Spiel läuft ohne Daueraufträge weiter.")
+		return null
 	return owner
 
 func _export_state_base() -> Dictionary:

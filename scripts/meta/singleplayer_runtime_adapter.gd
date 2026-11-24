@@ -180,8 +180,7 @@ func configure(flow: Node, screen: Control) -> void:
 		push_error("Singleplayer definitions could not be configured")
 		return
 	# Dauerauftraege (H3): nur in der Kampagne; Namen kommen aus den vorhandenen Anzeige-Katalogen (nur Darstellung).
-	if _campaign_mode and _supply.enable_standing_orders():
-		_supply.set_standing_orders_names(load("res://scripts/mission/campaign_display_catalog.gd").LOCATION_NAMES, load("res://scripts/ui/components/personnel_inventory_panel.gd").LABELS)
+	_setup_standing_orders()
 	_simulation = SIM.new()
 	_simulation.name = "CampaignSimulationRoot"
 	add_child(_simulation)
@@ -612,7 +611,7 @@ func get_snapshot() -> Dictionary:
 	var campaign: Dictionary = _campaign.get_campaign_snapshot()
 	var retry_allowed := _campaign_mode and bool(_retry_failed_home_gate().ok)
 	campaign["job_availability"] = _campaign.get_job_availability(retry_allowed)
-	if _campaign_mode and _supply != null: campaign["standing_orders"] = _supply.get_standing_orders_snapshot()
+	_attach_standing_orders(campaign)
 	var location_availability := {}
 	for location_id: String in campaign.locations:
 		location_availability[location_id] = _campaign.validate_location_visit(location_id, retry_allowed)
@@ -2141,6 +2140,16 @@ func charge_campaign_rescue_fee(amount: int) -> Dictionary:
 func advance_debt_interest(delta: float) -> Dictionary:
 	if _supply == null or not _campaign_mode: return {"ok": true, "charges": [], "credits": 0}
 	return _supply.advance_debt_clock(delta)
+
+## Dauerauftraege (H3): den Besitzer nur in der Kampagne anlegen; Namen aus den vorhandenen Anzeige-Katalogen (nur Darstellung).
+func _setup_standing_orders() -> void:
+	if not _campaign_mode or _supply == null: return
+	if _supply.enable_standing_orders():
+		_supply.set_standing_orders_names(load("res://scripts/mission/campaign_display_catalog.gd").LOCATION_NAMES, load("res://scripts/ui/components/personnel_inventory_panel.gd").LABELS)
+
+## Dauerauftraege (H3): der Schluessel steht nur im Kampagnen-Snapshot (Skirmish und alte Staende: kein Schluessel).
+func _attach_standing_orders(campaign: Dictionary) -> void:
+	if _campaign_mode and _supply != null: campaign["standing_orders"] = _supply.get_standing_orders_snapshot()
 
 ## Dauerauftraege (H3): durchgehende Uhr der Sperrzeiten. Der Aufrufer (meta_layer_flow) deckelt das Delta je Frame.
 func advance_standing_clock(delta: float) -> void:

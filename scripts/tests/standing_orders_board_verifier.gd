@@ -38,7 +38,8 @@ func _run() -> void:
 	_check(campaign_owner.configure().get("ok", false) and travel_owner.configure("ship").get("ok", false), "echte Kampagne und Reise konfigurieren")
 	var standing := STANDING.new()
 	_check(standing.configure(JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/standing_orders.json"))), "echte Daueraufträge konfigurieren")
-	standing.set_names({"trade_outpost": "Kestrel", "satellite_crash": "Aschental"}, {"mining_tool": "Hand-Mining-Tool", "salvage_tool": "Bergungswerkzeug", "a_benit": "A-Benit", "c_benit": "C-Benit", "b_benit": "B-Benit"})
+	# Namen aus den echten Katalogen (wie im Adapter), keine eigenen.
+	standing.set_names(load("res://scripts/mission/campaign_display_catalog.gd").LOCATION_NAMES, load("res://scripts/ui/components/personnel_inventory_panel.gd").LABELS)
 	var screen := SnapshotScreen.new()
 	root.add_child(screen)
 	screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -55,14 +56,21 @@ func _run() -> void:
 	screen.snapshot = project.call(false)
 	board.refresh()
 	_check(_texts(board).is_empty(), "ohne Schluessel steht kein Dauerauftrag auf der Tafel")
+	# Die Pruefungen haengen an der Anzeigezeile: leere Liste = kein Block (Gegenfall), mit Daten stehen die Zeilen (Fall unten).
+	var empty_projection: Dictionary = project.call(false)
+	empty_projection.campaign["standing_orders"] = []
+	screen.snapshot = empty_projection
+	board.refresh()
+	_check(_texts(board).is_empty() and board.get("_standing_box").get_child_count() == 0, "leere Liste: kein Block, keine Ueberschrift")
 	# Kampagne: fuenf Zeilen unter den normalen Auftraegen.
 	screen.snapshot = project.call(true)
 	board.refresh()
 	var texts: Dictionary = _texts(board)
+	_check(texts.has("StandingOrdersHeading") and String(texts.get("StandingOrdersHeading", "")) == "Daueraufträge", "mit Daten: Ueberschrift steht (Gegenprobe zum leeren Fall)")
 	_check(texts.size() == 6, "Ueberschrift und fuenf Zeilen (beobachtet %d)" % texts.size())
 	_check(String(texts.get("StandingOrder_freight_trade_outpost_c_benit", "")) == "Fracht: 4 Kisten C-Benit nach Aschental · 30 Cr\nAnnahme beim Händler in Kestrel.", "Fracht offen: Titel und Satz (beobachtet \"%s\")" % texts.get("StandingOrder_freight_trade_outpost_c_benit", "-"))
 	_check(String(texts.get("StandingOrder_mining_satellite_crash_a_benit", "")) == "Mining: A-Benit (Aschental) · 8 Cr je Stück\nGesperrt: Braucht: Hand-Mining-Tool. Ein Mining-Schiff gibt es noch nicht.", "Mining: Gesperrt mit Grund (beobachtet \"%s\")" % texts.get("StandingOrder_mining_satellite_crash_a_benit", "-"))
-	_check(String(texts.get("StandingOrder_salvage_satellite_crash_salvage", "")) == "Bergung: Wrackteile (Aschental) · 8 Cr je Stück\nGesperrt: Braucht: Bergungswerkzeug.", "Bergung: Gesperrt mit Grund (beobachtet \"%s\")" % texts.get("StandingOrder_salvage_satellite_crash_salvage", "-"))
+	_check(String(texts.get("StandingOrder_salvage_satellite_crash_salvage", "")) == "Bergung: Bergungsgut (Aschental) · 8 Cr je Stück\nGesperrt: Braucht: Bergungswerkzeug.", "Bergung: Gesperrt mit Grund (beobachtet \"%s\")" % texts.get("StandingOrder_salvage_satellite_crash_salvage", "-"))
 	var parent: Node = board.get("_standing_box").get_parent()
 	_check(parent.get_children().find(board.get("_standing_box")) > parent.get_children().find(board.get("_job_cards")), "Dauerauftraege stehen unter den normalen Auftraegen")
 	# Sperrzeit: Annahme und Abgabe, dann steht "Gesperrt: Wieder verfuegbar in 8:00."
