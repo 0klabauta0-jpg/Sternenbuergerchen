@@ -5,6 +5,7 @@ const SOURCES := {
 	"freihafen_hall_01": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb"
 }
 const ORIGINAL_SHA := {"habitat_cutaway_01":"6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f","freihafen_hall_01":"cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"}
+var REPLACED_IDS: Array = preload("res://scripts/meta/structure_model_overrides.gd").replaced_ids()
 var passed := 0
 var failed := 0
 func _init() -> void:
@@ -26,6 +27,10 @@ func _run() -> void:
 		_check(int(snapshot.cutaway_wall_visual_count) == 0, mode + " renders no bare replacement walls")
 		var structures: Dictionary = snapshot.get("structure_visuals", {})
 		for id in SOURCES:
+			# Ersetzt ein neues Modell das Gebaeude (habitat_cutaway_01 -> Pod), wird das alte gar nicht mehr geladen.
+			if String(id) in REPLACED_IDS:
+				_check(not structures.has(id), mode + " does not load replaced furnished source " + id)
+				continue
 			var actual: Dictionary = structures.get(id, {})
 			_check(bool(actual.get("visible", false)), mode + " shows furnished source " + id)
 			var candidate := "res://Assets/curated/base_access_20261109/" + String(id) + ".glb"

@@ -22,6 +22,11 @@
 			"partition_door_y_model": [-0.07, 0.04],
 			"bed_model": [[-0.34, 0.085], [-0.34, -0.095]],
 			"bed_top_model": 0.114,
+			"container_template_note": "Die Wohncontainer sind Kopien des ALTEN Habitats (Modell, Waende, Betten). Ihre Bettvorlage bleibt deshalb die Lage der zwei Betten im alten Habitat, nicht die Betten im Pod.",
+			"container_template_beds": [
+				{"grid": [32, 28], "id": "habitat_bed_01", "rest_plane": [11.125, 4.825], "room_id": "habitat_cutaway_01", "rotation_y": -1.5707963267949, "sleep_plane": [11.125, 5.35], "sleep_y": 0.61, "surface_y": 0.4763},
+				{"grid": [34, 28], "id": "habitat_bed_02", "rest_plane": [11.84, 4.825], "room_id": "habitat_cutaway_01", "rotation_y": -1.5707963267949, "sleep_plane": [11.84, 5.35], "sleep_y": 0.61, "surface_y": 0.4763}
+			],
 			"tv_model": [0.17, 0.165],
 			"block_note": "Gesperrt fuer Figuren (Ebene x, z, Breite, Tiefe): Aussenwaende, Trennwaende ausser der Tuerluecke (z 5,37 bis 5,865), Vorderwand ausser der Tuer (x 12,165 bis 12,765).",
 			"walk_note": "Innenraum des Pods wird fuer Figuren begehbar gemacht (die alte Habitat-Karte hatte dort nur eine kleine Insel).",

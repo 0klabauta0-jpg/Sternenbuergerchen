@@ -5,6 +5,8 @@ const REGISTRY=preload("res://scripts/terrain/terrain_registry.gd")
 const PATHFINDER=preload("res://scripts/terrain/terrain_pathfinder.gd")
 var stage:Node3D
 var failures:Array=[]
+var last_blocker:=""
+var body_shape:=CapsuleShape3D.new()
 var query:=PhysicsShapeQueryParameters3D.new()
 func _init():call_deferred("run")
 func run():
@@ -17,14 +19,20 @@ func run():
  var graph=NAV.new();graph.configure_graph(registry)
  var init_ms=(Time.get_ticks_usec()-started)/1000.0
  stage=Node3D.new();root.add_child(stage)
+ # Ersetzte Gebaeude werden im Spiel nicht geladen: hier ebenfalls nicht; stattdessen die neuen Modelle selbst.
+ var replaced:Array=load("res://scripts/meta/structure_model_overrides.gd").replaced_ids()
  for asset in layout.assets:
+  if asset.id in replaced:continue
   if asset.id not in ["habitat_cutaway_01","freihafen_hall_01","utility_fuel_01"]:continue
   var n:Node3D=load(asset.path).instantiate();stage.add_child(n)
   n.scale=Vector3.ONE*float(asset.scale);n.position=Vector3(asset.plane[0],0,asset.plane[1])
+ var overrides:Node3D=load("res://scripts/meta/structure_model_overrides.gd").new();stage.add_child(overrides)
+ overrides.build(layout)
+ check(overrides.get_models().size()>=1,"new building models are part of the mesh oracle")
  await process_frame
  for n in stage.get_children():
   for m in n.find_children("*","MeshInstance3D",true,false):
-   var b=StaticBody3D.new();stage.add_child(b);b.global_transform=m.global_transform
+   var b=StaticBody3D.new();b.name=String(n.name)+"__"+String(m.name);stage.add_child(b);b.global_transform=m.global_transform
    var c=CollisionShape3D.new();c.shape=m.mesh.create_trimesh_shape();b.add_child(c)
  await physics_frame
  await physics_frame
@@ -32,7 +40,7 @@ func run():
   var plane=bed.sleep_plane
   var hit=stage.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(plane[0],1.0,plane[1]-.3),Vector3(plane[0],0,plane[1]-.3)))
   print("MATTRESS ",bed.id," ",hit.get("position"))
- var body=CapsuleShape3D.new();body.radius=.18;body.height=.65;query.shape=body
+ body_shape.radius=.18;body_shape.height=.65;query.shape=body_shape
  var spawn=grid(layout.avatar_spawn_grid)
  var targets=[]
  for room in layout.interiors:
@@ -51,7 +59,7 @@ func run():
   var previous=NAV.plane_at_grid(spawn)
   for step in path:
    var point=NAV.plane_at_grid(step)
-   check(clear_segment(previous,point),"body crosses mesh "+t.id+" "+str(point))
+   check(clear_segment(previous,point),"body crosses mesh "+t.id+" "+str(point)+" by "+last_blocker)
    previous=point
   paths.append({"id":t.id,"length":path.size(),"end_plane":str(previous),"grid":t.grid})
  # All neighboring walkable edges near original structures, not only authored routes.
@@ -61,7 +69,8 @@ func run():
   if not (Rect2(10,3.5,5,5).has_point(Vector2(p.x,p.z)) or Rect2(24,3.5,7,5).has_point(Vector2(p.x,p.z))):continue
   for dir in [Vector2i(1,0),Vector2i(0,1),Vector2i(-1,1)]:
    var other=tile.grid_position+dir
-   if registry.is_walkable(other):
+   # Nur Kanten, die der Wegegraph des Spiels zulaesst (gesperrte Wand-/Moebelfelder der neuen Modelle sind aus dem Graph genommen).
+   if registry.is_walkable(other) and graph.is_grid_open(tile.grid_position) and graph.is_grid_open(other):
     edge_count+=1
     check(clear_segment(p,NAV.plane_at_grid(other)),"unsafe arbitrary edge "+str(tile.grid_position)+"->"+str(other))
  check(layout.beds[0].grid!=layout.beds[1].grid,"independent bedside approaches")
@@ -75,10 +84,23 @@ func grid(raw)->Vector2i:return Vector2i(int(raw[0]),int(raw[1]))
 func check(ok:bool,message:String):
  if not ok:failures.append(message)
 func clear_segment(a:Vector3,b:Vector3)->bool:
- query.transform=Transform3D(Basis.IDENTITY,a+Vector3.UP*.545)
+ # Koerper: ab 0,22 m ueber der Bezugsebene, 0,65 m hoch (Oberkante 0,87 m). Auf erhoehten Boeden (Pod, Halle) ist die
+ # Oberkante hoechstens so hoch wie die echte Spielfigur (0,609 m) ueber dem Boden; sonst stuende der Koerper im 0,66 m
+ # hohen Pod-Innenraum in der Decke, obwohl die Figur hineinpasst.
+ var top:=minf(.87,minf(NAV.standing_y(a),NAV.standing_y(b))+.609) if minf(NAV.standing_y(a),NAV.standing_y(b))>0.0 else .87
+ body_shape.height=top-.22
+ query.transform=Transform3D(Basis.IDENTITY,a+Vector3.UP*((.22+top)*.5))
  query.motion=Vector3.ZERO
  var space=stage.get_world_3d().direct_space_state
- if not space.intersect_shape(query,1).is_empty():return false
+ var hits=space.intersect_shape(query,1)
+ if not hits.is_empty():
+  last_blocker=str((hits[0].collider as Node).name);return false
  query.motion=b-a
  var result=space.cast_motion(query)
- return result[0]>=.99999
+ if result[0]<.99999:
+  query.transform.origin+=(b-a)*result[1];query.motion=(b-a)*.02
+  var rest=space.get_rest_info(query)
+  last_blocker=str(instance_from_id(int(rest.collider_id)).name) if not rest.is_empty() else "?"
+  query.transform.origin-=(b-a)*result[1];query.motion=b-a
+  return false
+ return true

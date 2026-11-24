@@ -6,6 +6,17 @@ func check(value: bool, label: String) -> void:
 	print(("PASS: " if value else "FAIL: ") + label)
 	if not value: failed += 1
 func _init() -> void: call_deferred("run")
+## Namen der Netze, die die Kapsel am Start oder auf ihrem Schritt beruehren (nur zur Diagnose der Meldung).
+func _blockers(space: PhysicsDirectSpaceState3D, query: PhysicsShapeQueryParameters3D, motion: Vector3) -> Array:
+	var names: Array = []
+	for hit: Dictionary in space.intersect_shape(query, 4): names.append(str((hit.collider as Node).name))
+	if names.is_empty():
+		var fraction: float = space.cast_motion(query)[1]
+		query.transform.origin += motion * fraction; query.motion = motion * 0.02
+		var rest := space.get_rest_info(query)
+		if not rest.is_empty(): names.append(str(instance_from_id(int(rest.collider_id)).name))
+		query.transform.origin -= motion * fraction; query.motion = motion
+	return names
 func run() -> void:
 	START.request_start(self, "campaign", "new")
 	var flow: Node = load("res://scenes/meta/meta_layer_test.tscn").instantiate(); root.add_child(flow)
@@ -19,14 +30,20 @@ func run() -> void:
 		if not result.get("ok", false): check(false, "construct housing %d: %s" % [number, str(result)]); flow.queue_free(); await process_frame; quit(1); return
 	var layout: Dictionary = base.get_snapshot().layout
 	var stage := Node3D.new(); root.add_child(stage)
+	# Ersetzte Gebaeude (neue Modelle) werden im Spiel nicht geladen: hier ebenfalls nicht; stattdessen die neuen Modelle selbst.
+	var replaced: Array = load("res://scripts/meta/structure_model_overrides.gd").replaced_ids()
 	for asset: Dictionary in layout.assets:
+		if String(asset.id) in replaced: continue
 		if String(asset.id) not in ["habitat_cutaway_01", "freihafen_hall_01", "utility_fuel_01"] and not String(asset.id).begins_with("campaign_habitat_"): continue
-		var model: Node3D = load(asset.path).instantiate(); stage.add_child(model)
+		var model: Node3D = load(asset.path).instantiate(); model.name = String(asset.id); stage.add_child(model)
 		model.scale = Vector3.ONE * float(asset.scale); model.position = Vector3(asset.plane[0], 0, asset.plane[1])
+	var overrides: Node3D = load("res://scripts/meta/structure_model_overrides.gd").new(); stage.add_child(overrides)
+	overrides.build(layout)
+	check(overrides.get_models().size() >= 1, "neue Gebaeudemodelle sind Teil der Kollisionsmessung (%d)" % overrides.get_models().size())
 	await process_frame
 	for model in stage.get_children():
 		for mesh: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
-			var body := StaticBody3D.new(); stage.add_child(body); body.global_transform = mesh.global_transform
+			var body := StaticBody3D.new(); body.name = "%s__%s" % [model.name, mesh.name]; stage.add_child(body); body.global_transform = mesh.global_transform
 			var collider := CollisionShape3D.new(); collider.shape = mesh.mesh.create_trimesh_shape(); body.add_child(collider)
 	await physics_frame; await physics_frame
 	var space := stage.get_world_3d().direct_space_state
@@ -50,7 +67,7 @@ func run() -> void:
 			query.transform = Transform3D(Basis.IDENTITY, previous + Vector3.UP * 0.545)
 			query.motion = current - previous
 			if not space.intersect_shape(query, 1).is_empty() or space.cast_motion(query)[0] < 0.99999:
-				print("BLOCKED at ", previous, " to ", current); clear = false; break
+				print("BLOCKED at ", previous, " to ", current, " by ", _blockers(space, query, current - previous)); clear = false; break
 			previous = current
 		check(clear, "capsule path avoids actual building meshes to indoor bed %d (%s)" % [index, String(bed.id)])
 	check(layout.beds.size() == 2 + 4 * int(load("res://scripts/meta/base_capacity_layout.gd").hex_container_site_count()), "alle Stellplaetze belegt, alle Betten geprueft (%d)" % layout.beds.size())

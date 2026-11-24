@@ -3,6 +3,7 @@ extends RefCounted
 ## infrastructure changes, never per frame. Coordinates are fine-grid axial.
 const NAV = preload("res://scripts/meta/base_interior_navigation.gd")
 const MODULAR_GEOMETRY = preload("res://scripts/meta/modular_base_geometry.gd")
+const STRUCTURE_BLOCKING = preload("res://scripts/meta/structure_model_blocking.gd")
 
 ## Gepruefte Stellplaetze fuer Wohncontainer auf Hex-Boden. Ein Platz = ein Container; Wert = Versatz
 ## (Feingitter-Zellen) der ersten Habitat-Kopie gegenueber dem Original-Habitat, die zweite Kopie liegt
@@ -22,6 +23,9 @@ static func hex_container_housing(source: Dictionary, terrain: Node, infrastruct
 	for asset: Dictionary in assets:
 		if asset.get("id") == "habitat_cutaway_01": habitat = asset; break
 	var source_beds: Array = Array(source.get("beds", []))
+	# Container sind Kopien des alten Habitats: Bettvorlage = alte Habitat-Betten, auch wenn ein Pod sie ersetzt.
+	var template_beds: Array = STRUCTURE_BLOCKING.container_template_beds()
+	if template_beds.size() >= 2: source_beds = template_beds
 	var kinds: Array = Array(infrastructure.get("campaign_housing_beds", []))
 	for index in range(mini(int(infrastructure.get("campaign_housing", 0)), HEX_CONTAINER_SITES.size())):
 		var container := index < kinds.size() and int(kinds[index]) >= 4

@@ -70,7 +70,8 @@ func _apply_field_beds() -> void:
     var source_plane := plane_at_grid(source)
     if not Rect2(9.0, 3.0, 7.0, 6.0).has_point(Vector2(source_plane.x, source_plane.z)): continue
     var target := source + delta
-    if _graph_terrain.is_walkable(source) or not _graph_ids.has(target): continue
+    # Wandfelder der alten Habitat-Karte: vom Pod freigegebene Felder zaehlen weiter als Wand der Container.
+    if (_graph_terrain.is_walkable(source) and not STRUCTURE_BLOCKING.was_made_walkable(source)) or not _graph_ids.has(target): continue
     var point: int = _graph_ids[target]
     _graph.set_point_disabled(point, true)
     _field_disabled.append(point)
@@ -141,6 +142,11 @@ func _apply_field_beds() -> void:
    seen[cell] = true
    _clearance_cells.append(cell)
  _clearance_revision += 1
+
+## Ist das Feld im Wegegraph vorhanden und nicht gesperrt (Wand, Moebel, Schiff, Grundriss)?
+func is_grid_open(grid: Vector2i) -> bool:
+ if _graph_terrain == null or not _graph_ids.has(grid): return false
+ return not _graph.is_point_disabled(int(_graph_ids[grid]))
 
 func get_ground_clearance_mask() -> Dictionary:
  if not is_instance_valid(_graph_terrain): return {"ok":false,"reason":"base_clearance_unavailable"}
