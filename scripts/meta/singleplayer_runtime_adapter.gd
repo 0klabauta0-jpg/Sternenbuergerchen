@@ -65,8 +65,10 @@ static func preflight_campaign_hex_checkpoint(flow: Node, payload: Dictionary) -
 	if not restored.get("ok", false):
 		candidate.member_reader.free(); candidate.free()
 		return restored
+	supply.set_housing_site_limit(load("res://scripts/meta/base_capacity_layout.gd").hex_container_site_count())
 	candidate.set_meta("campaign_built_beds", supply.get_campaign_bed_count())
 	candidate.set_meta("campaign_built_housing", supply.get_campaign_housing_count())
+	candidate.set_meta("campaign_built_housing_beds", supply.get_campaign_housing_beds())
 	if supply.get_station_home_pads() > 2: candidate.set_meta("skirmish_infrastructure", {"pads":supply.get_station_home_pads()})
 	# No main scene or live Flow configure. The new isolated subtree is freed
 	# synchronously, without a tick, whether candidate preparation succeeds or fails.
@@ -217,8 +219,12 @@ func configure(flow: Node, screen: Control) -> void:
 					push_error("Invalid Warp equipment checkpoint")
 					return
 	if _campaign_mode:
+		# Heimatbasis auf Hex-Boden (die Kampagnenbasis ist immer Hex-Boden, auch bei einem Altstand ohne hex_tactical):
+		# Betten der Versorgung auf die echten Stellplaetze begrenzen.
+		_supply.set_housing_site_limit(load("res://scripts/meta/base_capacity_layout.gd").hex_container_site_count())
 		_flow.set_meta("campaign_built_beds", _supply.get_campaign_bed_count())
 		_flow.set_meta("campaign_built_housing", _supply.get_campaign_housing_count())
+		_flow.set_meta("campaign_built_housing_beds", _supply.get_campaign_housing_beds())
 	if _campaign_mode or _flow.has_meta("skirmish_preset_id"):
 		_base_personnel = load("res://scripts/core/base_personnel_runtime.gd").new()
 		_base_personnel.name = "BasePersonnelRuntime"
@@ -260,6 +266,7 @@ func configure(flow: Node, screen: Control) -> void:
 			_simulation.set_physics_process(not bool(_flow.get("_campaign_start").get("active_restore_in_progress")))
 	if _campaign_mode and is_instance_valid(_base_personnel):
 		_base_personnel.reconcile_restored_ship_overlap(Dictionary(_flow.get("_campaign_start").get("checkpoint")))
+		_base_personnel.reconcile_restored_hex_footprint()
 	if _screen.has_method("configure_singleplayer_bridge"):
 		_screen.call("configure_singleplayer_bridge", get_snapshot, request_operation)
 	var catalog: Array = [] if _campaign_mode else Array(_flow.get("_mission_catalog")).duplicate(true)
@@ -631,7 +638,7 @@ func get_snapshot() -> Dictionary:
 		var context: Dictionary = _service_context(id)
 		if not context.is_empty():
 			service_contexts[id] = context
-	return {"space_wings": _simulation.get_space_wing_snapshot(), "ship_equipment": _ship_equipment.get_snapshot() if _ship_equipment != null else {}, "location_view": _flow.call("get_location_view_snapshot") if _flow.has_method("get_location_view_snapshot") else {}, "home_services": _home_services_snapshot(), "skirmish_economy": economy, "campaign": campaign, "supply": _supply.get_supply_snapshot(), "emergency_tanker": _tanker.get_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "base_personnel": _base_personnel.get_snapshot() if _base_personnel != null else {}, "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}, "space_travel": travel, "space_encounter":_space_encounter.get_snapshot(), "space_launch_readiness_by_craft_id": launch_readiness,"location_runtimes":_flow.call("get_location_runtime_snapshot"),"checkpoint_guard":get_world_checkpoint_guard()}
+	return {"space_wings": _simulation.get_space_wing_snapshot(), "ship_equipment": _ship_equipment.get_snapshot() if _ship_equipment != null else {}, "location_view": _flow.call("get_location_view_snapshot") if _flow.has_method("get_location_view_snapshot") else {}, "home_services": _home_services_snapshot(), "skirmish_economy": economy, "campaign": campaign, "supply": _supply.get_supply_snapshot(), "housing_offer": _housing_offer(), "emergency_tanker": _tanker.get_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "base_personnel": _base_personnel.get_snapshot() if _base_personnel != null else {}, "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}, "space_travel": travel, "space_encounter":_space_encounter.get_snapshot(), "space_launch_readiness_by_craft_id": launch_readiness,"location_runtimes":_flow.call("get_location_runtime_snapshot"),"checkpoint_guard":get_world_checkpoint_guard()}
 
 func sync_crafts() -> void:
 	# Lifecycle event only, called when real craft definitions change. Read paths
@@ -2553,7 +2560,12 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 		return result
 	if operation == "campaign_build_housing":
 		if not _has_live_base_owner(): return _reject("base_unavailable", "Heimatbasis nicht verfügbar")
-		var result := _commit("singleplayer_supply", operation, {}, request_id, {"at_home":true,"campaign_authorized":true,"campaign_housing_builder":Callable(_base_personnel, "build_campaign_housing")})
+		var housing_context := {"at_home":true,"campaign_authorized":true,"campaign_housing_builder":Callable(_base_personnel, "build_campaign_housing")}
+		var housing_offer := _housing_offer()
+		if bool(housing_offer.get("container", false)):
+			housing_context["campaign_housing_container"] = true
+			housing_context["campaign_housing_limit"] = int(housing_offer.get("sites", 0))
+		var result := _commit("singleplayer_supply", operation, {}, request_id, housing_context)
 		if bool(result.get("ok", false)):
 			_base_personnel.state_changed.emit()
 			_flow.call("_refresh_homebase_screen")
@@ -3002,6 +3014,11 @@ func _craft_grounded_at_home(craft_id: String) -> bool:
 
 func _has_live_base_owner() -> bool:
 	return is_instance_valid(_base_personnel) and _base_personnel.is_inside_tree() and _base_personnel.get_parent() == self and is_instance_valid(_simulation) and _simulation.get("_base_personnel_owner") == _base_personnel and String(Dictionary(_base_personnel.call("get_snapshot")).get("runtime_authority", "")) == "SimulationRoot"
+
+## Was die Heimatbasis fuer den Unterkunftskauf anbietet: Wohncontainer (Hex-Boden) oder alte Unterkunft.
+func _housing_offer() -> Dictionary:
+	if not is_instance_valid(_base_personnel) or not _base_personnel.has_method("get_housing_offer"): return {"container":false}
+	return Dictionary(_base_personnel.call("get_housing_offer"))
 
 func _home_workshop_available() -> bool:
 	if not _has_live_base_owner():
