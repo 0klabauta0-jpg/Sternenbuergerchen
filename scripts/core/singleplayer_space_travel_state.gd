@@ -593,17 +593,36 @@ var _travel_checkpoint_preparations: Dictionary = {}
 func _checkpoint_raw_state() -> Dictionary:
 	return {"phase":_phase, "craft_id":_craft_id, "orbit_id":_orbit_id, "orbit_marker_id":_orbit_marker_id, "origin_position":_origin_position, "target_orbit_id":_target_orbit_id, "target_orbit_marker_id":_target_orbit_marker_id, "duration":_active_jump_duration_seconds, "elapsed":_elapsed_seconds, "progress":_progress, "location_id":_location_id, "revision":_revision, "requests":_requests.duplicate(true), "route_hexes":_route_hexes.duplicate(), "route_control":_route_control, "route_destination":_route_destination}
 
-func export_checkpoint_state() -> Dictionary:
+## allow_atmosphere (Luftrollen 5a): das Schiff hat eine gesicherte Sortie; seine Flugpose darf dann in "atmosphere:<ort>" liegen (Phase surface).
+func export_checkpoint_state(allow_atmosphere: bool = false) -> Dictionary:
 	if _phase == "approach": return {"ok":false, "reason":"travel_transition_pending"}
 	var data := _checkpoint_raw_state()
-	var flight: Dictionary = _flight.export_checkpoint_state()
-	if flight.get("schema") != "space_flight_checkpoint.v1" or not _checkpoint_frame_consistent(data, flight): return {"ok":false, "reason":"travel_flight_checkpoint_mismatch"}
+	var flight: Dictionary = _flight.export_checkpoint_state(allow_atmosphere)
+	if flight.get("schema") != "space_flight_checkpoint.v1" or not _checkpoint_frame_consistent(data, flight, allow_atmosphere): return {"ok":false, "reason":"travel_flight_checkpoint_mismatch"}
 	var encoded := CHECKPOINT_CODEC.encode_value(data)
 	if not encoded.ok: return encoded
 	return {"schema":"space_travel_checkpoint.v1", "craft_id":_flight.get_snapshot().craft_id, "system_fingerprint":JSON.stringify(_definition, "", true).sha256_text(), "travel":encoded.value, "flight":flight}
 
-func prepare_checkpoint_restore(state: Dictionary) -> Dictionary:
-	if state.size() != 5 or not state.has_all(["schema", "craft_id", "system_fingerprint", "travel", "flight"]) or state.schema != "space_travel_checkpoint.v1" or state.craft_id != _flight.get_snapshot().craft_id or state.system_fingerprint != JSON.stringify(_definition, "", true).sha256_text() or not state.flight is Dictionary:
+const ADDITIVE_LOCATION_SOURCE = preload("res://scripts/core/singleplayer_campaign_state.gd")
+
+## Eine Einsatz-Zwischenstand-Pruefsumme gilt, wenn sie der heutigen Sternsystem-Definition entspricht ODER der heutigen
+## OHNE die Umlaufbahn-Eintraege additiver Orte (ADDITIVE_LOCATION_IDS, Liste im Kampagnenstand): ein vor dem Hinzufuegen eines
+## neuen Ortes im Einsatz gespeicherter Stand soll weiter laden. Jede andere Abweichung (alter Ort, Umlaufbahn, Koerper, Version) lehnt weiter ab.
+func _system_fingerprint_accepted(saved: Variant) -> bool:
+	if typeof(saved) != TYPE_STRING: return false
+	if String(saved) == JSON.stringify(_definition, "", true).sha256_text(): return true
+	var present: Array = []
+	for place: String in ADDITIVE_LOCATION_SOURCE.ADDITIVE_LOCATION_IDS:
+		if Dictionary(_definition.get("location_orbits", {})).has(place): present.append(place)
+	for mask in range(1, 1 << present.size()):
+		var candidate: Dictionary = _definition.duplicate(true)
+		for index in present.size():
+			if (mask >> index) & 1 == 1: candidate.location_orbits.erase(present[index])
+		if String(saved) == JSON.stringify(candidate, "", true).sha256_text(): return true
+	return false
+
+func prepare_checkpoint_restore(state: Dictionary, allow_atmosphere: bool = false) -> Dictionary:
+	if state.size() != 5 or not state.has_all(["schema", "craft_id", "system_fingerprint", "travel", "flight"]) or state.schema != "space_travel_checkpoint.v1" or state.craft_id != _flight.get_snapshot().craft_id or not _system_fingerprint_accepted(state.system_fingerprint) or not state.flight is Dictionary:
 		return {"ok":false, "reason":"invalid_travel_checkpoint"}
 	var decoded := CHECKPOINT_CODEC.decode_value(state.travel)
 	if not decoded.ok or not decoded.value is Dictionary: return {"ok":false, "reason":"invalid_travel_checkpoint"}
@@ -636,22 +655,29 @@ func prepare_checkpoint_restore(state: Dictionary) -> Dictionary:
 		if state.flight.get("coordinate_frame") != "strategic" or not pose is Array or pose.size() != 2 or typeof(pose[0]) not in [TYPE_INT, TYPE_FLOAT] or typeof(pose[1]) not in [TYPE_INT, TYPE_FLOAT] or expected_position.distance_to(Vector2(pose[0], pose[1])) > 0.01: return {"ok":false, "reason":"invalid_travel_checkpoint"}
 	for id in data.requests:
 		if typeof(id) != TYPE_STRING or not data.requests[id] is Dictionary or typeof(data.requests[id].get("signature")) != TYPE_STRING or not data.requests[id].get("result") is Dictionary: return {"ok":false, "reason":"invalid_travel_checkpoint"}
-	var flight_prepared: Dictionary = _flight.prepare_checkpoint_restore(state.flight)
+	var flight_prepared: Dictionary = _flight.prepare_checkpoint_restore(state.flight, allow_atmosphere)
 	if not flight_prepared.get("ok", false): return flight_prepared
-	if not _checkpoint_frame_consistent(data, state.flight): return {"ok":false, "reason":"travel_flight_checkpoint_mismatch"}
-	var source: Dictionary = export_checkpoint_state()
+	if not _checkpoint_frame_consistent(data, state.flight, allow_atmosphere): return {"ok":false, "reason":"travel_flight_checkpoint_mismatch"}
+	var source: Dictionary = export_checkpoint_state(allow_atmosphere)
 	if source.get("schema") != "space_travel_checkpoint.v1": return {"ok":false, "reason":"travel_checkpoint_source_unstable"}
 	for id in _travel_checkpoint_preparations.keys():
 		if _travel_checkpoint_preparations[id].handle.get_ref() == null: _travel_checkpoint_preparations.erase(id)
 	if _travel_checkpoint_preparations.size() >= 32: return {"ok":false, "reason":"travel_checkpoint_capacity"}
 	var handle := PreparedTravelCheckpoint.new()
-	_travel_checkpoint_preparations[handle.get_instance_id()] = {"handle":weakref(handle), "source":source, "source_epoch":_space_area_epoch, "data":data, "flight":flight_prepared.prepared}
+	_travel_checkpoint_preparations[handle.get_instance_id()] = {"handle":weakref(handle), "source":source, "source_epoch":_space_area_epoch, "data":data, "flight":flight_prepared.prepared, "allow_atmosphere":allow_atmosphere}
 	return {"ok":true, "prepared":handle}
 
-func _checkpoint_frame_consistent(data: Dictionary, flight: Dictionary) -> bool:
+func _checkpoint_frame_consistent(data: Dictionary, flight: Dictionary, allow_atmosphere: bool = false) -> bool:
 	if flight.get("coordinate_frame") == "strategic":
 		# Existing strategic producers may retain grounded mode during travel.
 		return flight.get("space_area_id") == "" and flight.get("motion_mode") in ["grounded", "travel"]
+	if allow_atmosphere and flight.get("coordinate_frame") == "local" and String(flight.get("space_area_id", "")).begins_with("atmosphere:"):
+		# Luftrollen 5a: ein Schiff in der Luft ueber seinem Ort steht in der Phase surface, die Flugpose liegt im Gebiet "atmosphere:<ort>".
+		if data.phase != "surface" or flight.get("motion_mode") != "tactical" or data.location_id.is_empty() or flight.get("space_area_id") != "atmosphere:" + String(data.location_id): return false
+		if Dictionary(_definition.get("location_orbits", {})).get(data.location_id) != data.orbit_id or not data.target_orbit_id.is_empty() or not data.target_orbit_marker_id.is_empty() or not data.route_hexes.is_empty(): return false
+		var air_pair: Variant = flight.get("position_plane")
+		if not air_pair is Array or air_pair.size() != 2 or typeof(air_pair[0]) not in [TYPE_INT, TYPE_FLOAT] or typeof(air_pair[1]) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(air_pair[0])) or not is_finite(float(air_pair[1])): return false
+		return float(flight.get("tick", -1)) >= 0.0 and float(flight.get("revision", 0)) > 0.0
 	if flight.get("coordinate_frame") != "local" or data.phase not in ["orbit", "surface"] or flight.get("motion_mode") != ("tactical" if data.phase == "orbit" else "inactive"): return false
 	if not data.location_id.is_empty() and data.phase == "orbit": return false
 	if not data.target_orbit_id.is_empty() or not data.target_orbit_marker_id.is_empty() or not data.route_hexes.is_empty(): return false
@@ -672,7 +698,7 @@ func _checkpoint_frame_consistent(data: Dictionary, flight: Dictionary) -> bool:
 func validate_checkpoint_restore(handle: RefCounted) -> Dictionary:
 	if handle == null or not _travel_checkpoint_preparations.has(handle.get_instance_id()): return {"ok":false, "reason":"travel_checkpoint_unknown"}
 	var prepared: Dictionary = _travel_checkpoint_preparations[handle.get_instance_id()]
-	if prepared.handle.get_ref() != handle or prepared.source != export_checkpoint_state() or prepared.source_epoch != _space_area_epoch: return {"ok":false, "reason":"travel_checkpoint_changed"}
+	if prepared.handle.get_ref() != handle or prepared.source != export_checkpoint_state(bool(prepared.get("allow_atmosphere", false))) or prepared.source_epoch != _space_area_epoch: return {"ok":false, "reason":"travel_checkpoint_changed"}
 	return _flight.validate_checkpoint_restore(prepared.flight)
 
 func commit_checkpoint_restore(handle: RefCounted) -> Dictionary:

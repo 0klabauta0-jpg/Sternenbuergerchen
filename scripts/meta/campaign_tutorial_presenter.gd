@@ -8,15 +8,15 @@ const HINT_ARROW = preload("res://scripts/ui/campaign_hint_arrow.gd")
 const HINT_ARROWS = preload("res://scripts/meta/campaign_hint_arrows.gd")
 const STEPS := {
 	"base_ready":["campaign.boarding","Mondbasis vorbereiten: zwei Personen ausrüsten, Satellitenauftrag im Smart Mobile annehmen, Pilot und Trupp an Bord nehmen, abheben."],
-	"satellite_uploaded":["campaign.return","Mission 1: Satellitenchip bergen, zum Schiff zurückbringen und wirklich heimfliegen. An der Basis unter Basis erkunden → Datenterminal / Hochladen den Chip hochladen."],
+	"satellite_uploaded":["campaign.return","Mission 1: Satellitenchip bergen, zum Schiff zurückbringen und wirklich heimfliegen. An der Basis unter Basis → Datenterminal den Chip hochladen."],
 	"outpost_completed":["campaign.movement","Mission 2: Außenpostenauftrag annehmen, auf Karte B einen Gegner besiegen und die C-Benit-Kiste bergen."],
 	"outpost_recruited":["campaign.trade","Den Handelsposten auf Karte B erreichen und ansprechen. Im Versorgungsfenster die neue Person aufnehmen; das Team wächst auf drei."],
 	"crate_loaded":["campaign.use","C-Benit-Kiste am gesicherten Außenposten bergen und ins Schiff bringen."],
 	"delivery_completed":["campaign.trade","Mission 3: Lieferauftrag annehmen, mit der Kiste zur Satellitenkarte zurückkehren und am dortigen Händler abgeben. Belohnung: Hand-Mining-Erwerbserlaubnis."],
-	"outpost_chip_uploaded":["campaign.return","Mission 4: Auf Karte C zwei Gegner besiegen, Chip bergen, heimbringen und unter Basis erkunden → Datenterminal / Hochladen abgeben. Belohnung: Sturmgewehr-Erwerbserlaubnis."],
+	"outpost_chip_uploaded":["campaign.return","Mission 4: Auf Karte C zwei Gegner besiegen, Chip bergen, heimbringen und unter Basis → Datenterminal abgeben. Belohnung: Sturmgewehr-Erwerbserlaubnis."],
 	"rescue_completed":["campaign.movement","Mission 5: Notruf annehmen und im Planetenorbit anfliegen. Feindliche Cutlass bekämpfen; neutrale Buccaneer retten."],
 	"pilot_recruited":["campaign.use","Nach dem Sieg den Buccaneer-Piloten retten. Er schließt sich mit seinem Schiff an; das Team wächst auf vier."],
-	"second_pad_built":["campaign.return","Zur Basis heimkehren: Kein freies Landepad für die Buccaneer. Unter Basis erkunden → Bauen das zweite Landepad für 100 Credits bauen."],
+	"second_pad_built":["campaign.return","Zur Basis heimkehren: Kein freies Landepad für die Buccaneer. Unter Basis → Bauen das zweite Landepad für 100 Credits bauen."],
 	"completed":["campaign.complete","Erstes Kampagnenkapitel abgeschlossen: vier Personen, zwei Schiffe und zwei Landepads. Orte bleiben besuchbar; sichere Basisstände können fortgesetzt werden."]
 }
 var _runtime: Node

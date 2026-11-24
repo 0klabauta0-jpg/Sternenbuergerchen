@@ -4,7 +4,12 @@ extends Control
 signal terminal_open_requested(id: String)
 signal world_selection_changed(kind: String, id: String)
 signal exploration_exit_requested
+## Esc bei offenem Seitenfenster: wirkt wie dessen "x" (der Besitzer schliesst das Fenster), sonst nichts.
+signal side_window_close_requested
 signal command_dock_geometry_changed
+
+## Vom Besitzer gesetzt: liefert wahr, solange ein Seitenfenster (Smart Mobile, Bauen, Lager, ...) ueber dem Basisbild offen ist.
+var side_window_open_probe: Callable = Callable()
 
 const MAP_PATH: String = "res://maps/homebase_frontier_exploration.json"
 const CAMPAIGN_MAP_PATH: String = "res://maps/campaign_intro_base.json"
@@ -551,7 +556,6 @@ var _refuel_service_available: bool = false
 var _map_bounds: Rect2
 var _map_data
 var _hint: Label
-var _interact: Button
 var _nearby_terminal: String = ""
 var _keys: Dictionary = {}
 var _keyboard_move: bool = false
@@ -618,7 +622,6 @@ func set_pad_preview(active: bool, craft_id: String = "", pad_id: String = "") -
 	_host.focus_mode = Control.FOCUS_NONE
 	_host.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	get_node("ExplorationHelp").visible = false
-	get_node("ExitExploration").visible = false
 	if _drone_helper != null:
 		_drone_helper.call("set_operating_visual", false)
 	set_process(true)
@@ -791,7 +794,6 @@ func set_active(active: bool) -> void:
 	_host.focus_mode = Control.FOCUS_ALL
 	_host.mouse_filter = Control.MOUSE_FILTER_STOP
 	get_node("ExplorationHelp").visible = true
-	get_node("ExitExploration").visible = true
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS if active else SubViewport.UPDATE_DISABLED
 	if _drone_helper != null:
 		_drone_helper.call("set_operating_visual", active)
@@ -1108,21 +1110,27 @@ func _on_world_gui_input(event: InputEvent) -> void:
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if not _active or not _initialized or not _host.has_focus() or not event is InputEventKey:
+	if not _active or not _initialized or not event is InputEventKey:
 		return
 	var key: Key = event.physical_keycode
+	# Gehen mit WASD nur, wenn das Basisbild den Fokus hat; E (Konsole) wirkt unabhaengig vom Fokus,
+	# damit es auch nach einem Klick auf einen Leistenknopf (Bauen, Lager, ...) wirkt. Esc gehoert dem Spielmenue (siehe _input).
 	if key in [KEY_W, KEY_A, KEY_S, KEY_D]:
+		if not _host.has_focus():
+			return
 		_keys[key] = event.pressed
 		get_viewport().set_input_as_handled()
 	elif event.pressed and not event.echo and key == KEY_E:
 		request_terminal(_nearby_terminal)
 		get_viewport().set_input_as_handled()
-	elif event.pressed and not event.echo and key == KEY_ESCAPE:
-		if _move_armed:
-			_move_armed = false
-			_person_feedback.text = "Bewegungsauswahl abgebrochen."
-		else: exploration_exit_requested.emit()
-		get_viewport().set_input_as_handled()
+
+
+func _escape_belongs_to_base() -> bool:
+	var menu: Node = get_node_or_null("/root/GlobalEscapeMenu")
+	if menu != null and menu.has_method("is_overlay_open") and bool(menu.call("is_overlay_open")):
+		return false
+	var focus_owner: Control = get_viewport().gui_get_focus_owner()
+	return not (focus_owner is LineEdit or focus_owner is TextEdit)
 
 
 func _physics_process(delta: float) -> void:
@@ -1314,19 +1322,15 @@ func _terminal_distance(terminal: Dictionary) -> float:
 
 func _update_nearby_terminal() -> void:
 	var nearest: String = ""
-	var title: String = ""
 	var distance_value: float = INTERACTION_RADIUS
 	for terminal in _terminals:
 		var distance_candidate: float = _terminal_distance(terminal)
 		if bool(terminal.get("enabled", true)) and distance_candidate <= distance_value:
 			distance_value = distance_candidate
 			nearest = String(terminal["id"])
-			title = String(terminal["title"])
 	if nearest == _nearby_terminal:
 		return
 	_nearby_terminal = nearest
-	_interact.disabled = nearest.is_empty()
-	_interact.text = "E · " + title if not nearest.is_empty() else "Konsole aufsuchen"
 	for id in _terminal_labels:
 		(_terminal_labels[id] as Label3D).modulate = Color("ffe08b") if String(id) == nearest else Color("eaf2df")
 
@@ -1385,13 +1389,8 @@ func _build_overlay() -> void:
 	panel.offset_top = -118.0
 	panel.offset_right = -24.0
 	panel.offset_bottom = -22.0
-	_interact = Button.new()
-	_interact.name = "InteractTerminal"
-	_interact.text = "Konsole aufsuchen"
-	_interact.disabled = true
-	_interact.custom_minimum_size.y = 40.0
-	_interact.pressed.connect(func(): request_terminal(_nearby_terminal))
-	panel.add_child(_interact)
+	# Wunsch 24.11.: Die schwebenden Knoepfe "E · Personal" (Konsole) und "Übersicht · Esc" sind entfernt.
+	# Die Tasten E (Konsole, _unhandled_key_input) und Esc (zurueck zur Uebersicht, _input vor dem Autoload GlobalEscapeMenu) wirken unabhaengig vom Fokus.
 	_hint = Label.new()
 	_hint.text = "?"
 	_hint.tooltip_text = "WASD gehen · Rechtsklick Ziel · E Konsole"
@@ -1399,16 +1398,6 @@ func _build_overlay() -> void:
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	panel.add_child(_hint)
 	_layout_exploration_help()
-	var exit := Button.new()
-	exit.name = "ExitExploration"
-	exit.text = "Übersicht  ·  Esc"
-	exit.pressed.connect(func(): exploration_exit_requested.emit())
-	add_child(exit)
-	exit.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	exit.offset_left = -196.0
-	exit.offset_top = 20.0
-	exit.offset_right = -24.0
-	exit.offset_bottom = 64.0
 
 
 func get_exploration_snapshot() -> Dictionary:
@@ -1567,6 +1556,22 @@ func cancel_modal_input() -> void:
 
 func _input(event: InputEvent) -> void:
 	if not _active or _pad_preview or not is_visible_in_tree(): _camera_dragging=false; return
+	# Esc: Der Autoload GlobalEscapeMenu nimmt Esc in seinem _unhandled_input an (global_escape_menu.gd:146) und oeffnet das Spielmenue.
+	# Szenenknoten bekommen _input vor dem _unhandled_input der Autoloads. Reihenfolge: Ist ein Seitenfenster offen, gehoert das erste Esc
+	# dem Fenster (wie sein "x"); sonst gehoert es einer scharfen Bewegungsauswahl (nur sie wird abgebrochen); erst danach nimmt
+	# das Basisbild Esc NICHT an, es geht an den Autoload und oeffnet das Spielmenue. Tippt man in ein Textfeld
+	# oder ist das Spielmenue schon offen, bleibt Esc bei diesen.
+	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_ESCAPE and _initialized and _escape_belongs_to_base():
+		if side_window_open_probe.is_valid() and bool(side_window_open_probe.call()):
+			side_window_close_requested.emit()
+			get_viewport().set_input_as_handled()
+			return
+		if _move_armed:
+			_move_armed = false
+			if _person_feedback != null:
+				_person_feedback.text = ""
+			get_viewport().set_input_as_handled()
+			return
 	if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_MIDDLE and not event.pressed:
 		_camera_dragging=false
 	elif event is InputEventMouseMotion and _camera_dragging:

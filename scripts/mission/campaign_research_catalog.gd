@@ -14,7 +14,7 @@ static func fabrication(blueprint_id: String) -> Dictionary:
 	return Dictionary(Dictionary(definitions().get("fabrication", {})).get(blueprint_id, {})).duplicate(true)
 
 static func item_label(item: String) -> String:
-	return String({"salvage":"Bergungsgut", "backpack":"Rucksack", "a_benit":"A-Benit", "b_benit":"B-Benit", "c_benit":"C-Benit"}.get(item, item))
+	return String({"salvage":"Bergungsgut", "backpack":"Rucksack", "a_benit":"A-Benit", "b_benit":"B-Benit", "c_benit":"C-Benit", "food":"Nahrung", "medical_supplies":"Medizinische Güter", "bandage":"Verbandsmaterial", "luxury_goods":"Genussmittel", "stim":"Stims"}.get(item, item))
 
 static func fabricated_blueprints(requests: Dictionary) -> Dictionary:
 	var result := {}

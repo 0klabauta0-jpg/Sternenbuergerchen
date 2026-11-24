@@ -90,6 +90,18 @@ func get_space_flight_profile(craft_id: String) -> Dictionary:
 		mass = float(effective.mass); hull = effective.hull; power = effective.power
 	return {"ok":true, "craft_id":craft_id, "model_id":model_id, "equipment_revision":_revision, "mass":mass, "footprint_hexes":footprint, "hull":hull, "power":power}
 
+## Luftrollen 4a: Flugwerte eines Modells mit Standardbestueckung, fuer Schiffe ohne Konto (feindlicher Flieger). Liest nur die Daten, aendert nichts.
+func get_model_flight_profile(model_id: String) -> Dictionary:
+	var profile: Dictionary = CATALOG.flight_profile(model_id)
+	var inputs: Dictionary = SPACE_COMPONENTS.flight_inputs(model_id, SPACE_COMPONENTS.default_loadout(model_id))
+	if profile.is_empty() or not inputs.get("ok", false) or typeof(profile.get("footprint_hexes")) != TYPE_ARRAY or profile.footprint_hexes.is_empty(): return {"ok":false, "reason":"flight_profile_unavailable"}
+	var footprint: Array[Vector2i] = []
+	for raw in profile.footprint_hexes:
+		if typeof(raw) != TYPE_ARRAY or raw.size() != 2: return {"ok":false, "reason":"invalid_flight_profile"}
+		footprint.append(Vector2i(int(raw[0]), int(raw[1])))
+	if not footprint.has(Vector2i.ZERO): return {"ok":false, "reason":"invalid_flight_profile"}
+	return {"ok":true, "model_id":model_id, "mass":float(inputs.mass), "footprint_hexes":footprint, "hull":inputs.hull, "power":inputs.power}
+
 func get_space_combat_stats(craft_id: String) -> Dictionary:
 	if not _crafts.has(craft_id) or not _space_loadouts.has(craft_id): return _reject("space_loadout_unavailable")
 	var result: Dictionary = SPACE_COMPONENTS.effective_stats(String(_crafts[craft_id].model_id), _space_loadouts[craft_id])

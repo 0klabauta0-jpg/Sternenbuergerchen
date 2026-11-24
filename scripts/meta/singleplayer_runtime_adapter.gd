@@ -735,7 +735,18 @@ func bind_mission_air_support(mission: Node) -> Dictionary:
 	if mission_root == null or _simulation == null: return {"ok":false, "reason":"runtime_unavailable"}
 	# M4e: nur in der Kampagne zaehlt der Magazinvorrat der Person auch im Einsatz (schmaler Verweis, kein Besitzerwechsel).
 	if (_campaign_mode or _skirmish_mode) and _supply != null and mission_root.has_method("bind_mission_magazine_supply"): mission_root.call("bind_mission_magazine_supply", _supply)
-	return mission_root.bind_air_support_source(_simulation, self, String(mission.get_meta("location_id", "")))
+	var bound: Dictionary = mission_root.bind_air_support_source(_simulation, self, String(mission.get_meta("location_id", "")))
+	# Luftrollen 4a: feindliche Flieger des Einsatzes (nur Kampagne; ohne Eintrag im Szenario aendert sich nichts).
+	if bound.get("ok", false) and _campaign_mode and mission_root.has_method("configure_enemy_aircraft"):
+		var setup: Node = mission.get_node_or_null("MissionSetup")
+		# Das schon geladene Szenario des Einsatzes hat Vorrang; sonst von der Platte (fehlende Datei: Warnung statt stillem Nichts).
+		var scenario = setup.get("_mission_scenario") if setup != null else null
+		var scenario_path := String(setup.get("scenario_file_path")) if setup != null else ""
+		if scenario == null and not scenario_path.is_empty():
+			scenario = load("res://scripts/mission/mission_scenario_data.gd").load_from_file(scenario_path)
+			if scenario == null: push_warning("Luftrollen 4a: Szenario '%s' nicht lesbar, keine feindlichen Flieger." % scenario_path)
+		if scenario != null and scenario.has_method("get_enemy_aircraft_config"): mission_root.call("configure_enemy_aircraft", scenario.get_enemy_aircraft_config())
+	return bound
 
 func get_campaign_entry_feedback() -> Dictionary:
 	return _encounter_entry_feedback.duplicate(true)
@@ -807,6 +818,14 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		var move_command := payload.duplicate(true)
 		move_command["request_id"] = _request_id("air-support-move", payload)
 		return mission_root.request_air_support_move(move_command)
+	if operation in ["air_support_circle", "air_support_role_clear"]:
+		if not is_instance_valid(_flow) or not _flow.has_method("get_active_mission"): return _reject("runtime_unavailable", "Keine aktive Bodenmission")
+		var mission: Node = _flow.call("get_active_mission")
+		var mission_root: Node = mission.get_node_or_null("SimulationRoot") if is_instance_valid(mission) else null
+		if mission_root == null: return _reject("runtime_unavailable", "Bodenmission ist nicht bereit")
+		if operation == "air_support_circle": return mission_root.request_air_support_circle(payload)
+		if payload.size() != 2 or typeof(payload.get("craft_id")) != TYPE_STRING or typeof(payload.get("request_id")) != TYPE_STRING: return _reject("invalid_command", "Schiff oder Kennung fehlt")
+		return mission_root.request_air_support_role_clear(payload.craft_id, payload.request_id)
 	if operation in ["air_support_takeoff", "air_support_landing"]:
 		if payload.size() != 1 or typeof(payload.get("craft_id")) != TYPE_STRING: return _reject("invalid_command", "Schiff fehlt")
 		var mission: Node = _flow.call("get_active_mission") if is_instance_valid(_flow) else null

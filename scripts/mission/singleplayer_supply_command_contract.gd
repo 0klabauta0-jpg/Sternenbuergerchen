@@ -2,7 +2,7 @@ extends RefCounted
 ## Pure command construction; this contract never changes a balance.
 
 const CATEGORY := "singleplayer_supply"
-const OPERATIONS := ["buy", "refuel", "repair", "consume_route_fuel", "consume_leg_fuel", "emergency_tanker_order", "emergency_tanker_deliver", "emergency_tanker_cancel", "apply_reward", "inventory_transfer", "inventory_equip", "cargo_transfer_start", "campaign_cargo", "campaign_fabricate", "campaign_research", "campaign_build", "campaign_build_bed", "campaign_build_housing", "campaign_build_room", "campaign_place_room_bed", "campaign_set_room_door", "sell", "standing_accept", "standing_deliver", "standing_abandon", "collect_resource", "station_buy_ship", "station_build_home_pad", "station_install_ship_component", "station_recruit_reserve", "station_recruit_finalize", "station_recruit_cancel"]
+const OPERATIONS := ["buy", "refuel", "repair", "consume_route_fuel", "consume_leg_fuel", "consume_air_fuel", "emergency_tanker_order", "emergency_tanker_deliver", "emergency_tanker_cancel", "apply_reward", "inventory_transfer", "inventory_equip", "cargo_transfer_start", "campaign_cargo", "campaign_fabricate", "campaign_research", "campaign_build", "campaign_build_bed", "campaign_build_housing", "campaign_build_room", "campaign_place_room_bed", "campaign_set_room_door", "sell", "standing_accept", "standing_deliver", "standing_abandon", "collect_resource", "station_buy_ship", "station_build_home_pad", "station_install_ship_component", "station_recruit_reserve", "station_recruit_finalize", "station_recruit_cancel"]
 
 static func build_buy_command(offer_id: String, quantity: int, request_id: String) -> Dictionary:
 	return build_command("buy", {"offer_id": offer_id, "quantity": quantity}, request_id)

@@ -14,7 +14,7 @@ const BACKPACK_CAPACITY := 12
 static var _ammo_rules: Dictionary = {}
 const START_STOCK := {"armor_light":2,"armor_medium":2,"armor_heavy":2,"smg":2,"rifle":2,"medictool":1,"mining_tool":1,"salvage_tool":1}
 static func known(item: String) -> bool:
-	return SHIP_COMPONENTS.known(item) or SPACE_COMPONENTS.known(item) or item in ["armor_light","armor_medium","armor_heavy","ore","salvage","a_benit","b_benit","c_benit","satellite_chip","outpost_chip","c_benit_crate","cargo_crate","mining_tool","salvage_tool","backpack","ammo_light","ammo_rifle","ammo_rail","ammo_rocket"] or LOADOUT.HOMEBASE_PRIMARY_WEAPON_IDS.has(item)
+	return SHIP_COMPONENTS.known(item) or SPACE_COMPONENTS.known(item) or item in ["armor_light","armor_medium","armor_heavy","ore","salvage","a_benit","b_benit","c_benit","food","medical_supplies","bandage","luxury_goods","stim","satellite_chip","outpost_chip","c_benit_crate","cargo_crate","mining_tool","salvage_tool","backpack","ammo_light","ammo_rifle","ammo_rail","ammo_rocket"] or LOADOUT.HOMEBASE_PRIMARY_WEAPON_IDS.has(item)
 static func compatible(item: String, slot: String) -> bool:
 	return item in ["armor_light","armor_medium","armor_heavy"] if slot=="armor" else (slot in ["weapon_1","weapon_2"] and LOADOUT.HOMEBASE_PRIMARY_WEAPON_IDS.has(item))
 static func item_from_slot(slot: String, value: String) -> String:

@@ -49,9 +49,9 @@ var _standing_box: VBoxContainer
 var _standing_buttons: Dictionary = {}
 var _standing_abandon: Button
 var _standing_note: Label
-const MARKET_ITEMS: Array = ["a_benit", "b_benit", "c_benit"]
-const MARKET_SELL_ORDER: Array = ["b_benit", "c_benit", "a_benit"]
-const MARKET_NAMES: Dictionary = {"a_benit": "A-Benit", "b_benit": "B-Benit", "c_benit": "C-Benit"}
+const MARKET_ITEMS: Array = ["a_benit", "b_benit", "c_benit", "food", "medical_supplies", "bandage", "luxury_goods", "stim"]
+const MARKET_SELL_ORDER: Array = ["b_benit", "c_benit", "a_benit", "food", "medical_supplies", "bandage", "luxury_goods", "stim"]
+const MARKET_NAMES: Dictionary = {"a_benit": "A-Benit", "b_benit": "B-Benit", "c_benit": "C-Benit", "food": "Nahrung", "medical_supplies": "Medizinische Güter", "bandage": "Verbandsmaterial", "luxury_goods": "Genussmittel", "stim": "Stims"}
 var _campaign_buttons: Dictionary = {}
 var _section: String = "all"
 var _heading: Label
@@ -344,7 +344,8 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	var trade_ready: bool = available and local_service and Array(context.get("services",[])).has("trade")
 	var bought_items: Array = []
 	for sell_item: String in MARKET_SELL_ORDER:
-		if _market_buy_price(supply, location, sell_item) > 0: bought_items.append(sell_item)
+		# Handelsgueter (nicht Benit): der Verkaufsknopf erscheint nur, wenn davon mindestens ein Stueck im Schiff oder Frachtaufzug liegt.
+		if _market_buy_price(supply, location, sell_item) > 0 and (sell_item.ends_with("_benit") or int(cargo.get(sell_item, 0)) > 0): bought_items.append(sell_item)
 	var sell_buttons: Array = [_sell] + _sell_extra
 	for slot in range(sell_buttons.size()):
 		var sell_button: Button = sell_buttons[slot]

@@ -29,7 +29,8 @@ func _texts(board: Control) -> Dictionary:
 	var result: Dictionary = {}
 	var box: Node = board.get("_standing_box")
 	for child: Node in box.get_children():
-		if child is Label: result[String(child.name)] = String(child.text)
+		# Seit 24.11.: Dauerauftraege sind Felder (Knoepfe); die Ueberschrift bleibt ein Label.
+		if child is Label or child is Button: result[String(child.name)] = String(child.text)
 	return result
 
 func _run() -> void:
