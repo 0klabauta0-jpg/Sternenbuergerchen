@@ -1378,8 +1378,8 @@ func _campaign_build(_payload: Dictionary, context: Dictionary) -> Dictionary:
 func get_credits() -> int:
 	return _credits
 
-## Notrettung nach einem Totalverlust: bucht hoechstens das vorhandene Guthaben ab, das Guthaben wird nie negativ.
-## Gibt die tatsaechlich abgezogene Summe zurueck.
+## Bucht hoechstens das vorhandene Guthaben ab, das Guthaben wird nie negativ (Aufrufer nur noch die Tanker-Tests). Die Notrettung bucht
+## NICHT hierueber, sondern voll ueber charge_rescue_fee, auch ins Minus. Gibt die tatsaechlich abgezogene Summe zurueck.
 func charge_credits_capped(amount: int) -> Dictionary:
 	if amount < 0:
 		return _reject("invalid_amount", "Betrag darf nicht negativ sein")

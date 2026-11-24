@@ -110,8 +110,8 @@ func _s2_both_shot_down() -> void:
 	_check(_fleet_ids() == [third] and _lost_ids() == expected and _credits() == 100, "S2: Laden: nur die Reserve, beide Belege, Guthaben 100 (%s / %s / %d)" % [str(_fleet_ids()), str(_lost_ids()), _credits()])
 	await _close()
 
-## S3 (LC2i I1): beide Schiffe der Flotte werden abgeschossen -> das ist der Totalverlust: Stand vor dem Einsatz mit beiden Schiffen, Strafe, keine
-## Notrettungsgebuehr dazu, kein Verlustbeleg, kein Pleite-Bildschirm.
+## S3 (LC2i I1): beide Schiffe der Flotte werden abgeschossen -> das ist der Totalverlust: Stand vor dem Einsatz mit beiden Schiffen, Strafe (sie enthaelt
+## die Rettungsgebuehr, voll gebucht, auch ins Minus), keine zweite Gebuehr fuer den Schiffsverlust, kein Verlustbeleg, kein Pleite-Bildschirm.
 func _s3_both_lost_is_total_loss() -> void:
 	var s: Dictionary = await _begin_funded_sortie(500)
 	if s.is_empty(): return
@@ -121,7 +121,7 @@ func _s3_both_lost_is_total_loss() -> void:
 	s.driver.call("_resolve_combat", "aborted", "", "evacuation")
 	if not await _wait_released("S3: Einsatz wird freigegeben"): return
 	var result: Dictionary = Dictionary(_flow.get("_last_mission_result"))
-	_check(bool(result.get("casualty_total_loss", false)) and String(result.get("total_loss_reason", "")) == "last_craft_lost" and not result.has("craft_loss"), "S3: Totalverlust, Grund last_craft_lost, keine Notrettungsgebuehr (%s)" % str(result.get("total_loss_reason")))
+	_check(bool(result.get("casualty_total_loss", false)) and String(result.get("total_loss_reason", "")) == "last_craft_lost" and not result.has("craft_loss"), "S3: Totalverlust, Grund last_craft_lost, keine Gebuehr fuer den Schiffsverlust (die Strafe ist die Totalverlust-Strafe, voll gebucht) (%s)" % str(result.get("total_loss_reason")))
 	_check(_lost_ids().is_empty() and _fleet_ids().has(_craft_id) and _fleet_ids().has(second), "S3: kein Verlustbeleg, beide Schiffe stehen noch in der Flotte (%s / %s)" % [str(_lost_ids()), str(_fleet_ids())])
 	_flow.call("_check_bankruptcy")
 	await process_frame
