@@ -4,7 +4,12 @@ extends Control
 signal terminal_open_requested(id: String)
 signal world_selection_changed(kind: String, id: String)
 signal exploration_exit_requested
+## Esc bei offenem Seitenfenster: wirkt wie dessen "x" (der Besitzer schliesst das Fenster), sonst nichts.
+signal side_window_close_requested
 signal command_dock_geometry_changed
+
+## Vom Besitzer gesetzt: liefert wahr, solange ein Seitenfenster (Smart Mobile, Bauen, Lager, ...) ueber dem Basisbild offen ist.
+var side_window_open_probe: Callable = Callable()
 
 const MAP_PATH: String = "res://maps/homebase_frontier_exploration.json"
 const CAMPAIGN_MAP_PATH: String = "res://maps/campaign_intro_base.json"
@@ -1566,8 +1571,12 @@ func _input(event: InputEvent) -> void:
 	# Esc: Der Autoload GlobalEscapeMenu nimmt Esc in seinem _input an (vor jedem _unhandled_key_input) und oeffnet das Spielmenue.
 	# Auf dem Basisbild kommt Esc darum zuerst hier an (Szenenknoten bekommen _input vor Autoloads) und fuehrt zurueck zur Uebersicht;
 	# ist das Spielmenue schon offen oder tippt man in ein Textfeld, bleibt Esc bei diesen.
+	# Ist ein Seitenfenster offen, gehoert das erste Esc dem Fenster (wie sein "x"); erst danach gilt das Verhalten des Basisbilds.
 	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_ESCAPE and _initialized and _escape_belongs_to_base():
-		_exit_or_cancel_move()
+		if side_window_open_probe.is_valid() and bool(side_window_open_probe.call()):
+			side_window_close_requested.emit()
+		else:
+			_exit_or_cancel_move()
 		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_MIDDLE and not event.pressed:

@@ -336,6 +336,8 @@ func _build() -> void:
 	_base.connect("terminal_open_requested", _terminal_requested)
 	_base.connect("command_dock_geometry_changed", _on_command_dock_geometry_changed)
 	_base.connect("exploration_exit_requested", func(): _act("navigate", {"mode": "squad"}))
+	_base.set("side_window_open_probe", is_workspace_flyout_open)
+	_base.connect("side_window_close_requested", _close_workspace_flyout)
 	_skirmish_shop = load("res://scripts/ui/skirmish_base_shop.gd").new()
 	_skirmish_shop.name = "SkirmishBaseShop"
 	_skirmish_shop.call("configure", _singleplayer_snapshot, _singleplayer_request)

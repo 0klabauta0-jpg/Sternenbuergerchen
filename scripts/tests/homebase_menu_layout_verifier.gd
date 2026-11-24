@@ -191,6 +191,33 @@ func _run() -> void:
 		_check(exits[0] == before + 1 and not menu_opened, "Esc mit Fokus auf %s: zurueck aus der Basisansicht, Spielmenue bleibt zu (Zaehler %d, Menue offen %s)" % [focus_case, exits[0] - before, str(menu_opened)])
 		if menu_opened:
 			menu.call("close_menu")
+	# N1: Esc bei offenem Seitenfenster (Smart Mobile, Bauen, Lager) schliesst NUR das Fenster, wie das "x"; erst das zweite Esc wirkt wie ohne Fenster.
+	for window_case: String in ["Smart Mobile", "Bauen", "Lager"]:
+		if menu != null and bool(menu.call("is_overlay_open")):
+			menu.call("close_menu")
+		screen.call("request_operation", "navigate", {"mode": "base"})
+		for i in 12:
+			await process_frame
+		(by_text[window_case] as Button).pressed.emit()
+		for i in 12:
+			await process_frame
+		_check(bool(presenter.call("is_workspace_flyout_open")), "Seitenfenster %s: ist offen (Testlage)" % window_case)
+		(by_text[window_case] as Button).grab_focus()
+		await process_frame
+		var exits_win: int = exits[0]
+		await _key(KEY_ESCAPE)
+		for i in 4:
+			await process_frame
+		var win_menu: bool = menu != null and bool(menu.call("is_overlay_open"))
+		_check(not bool(presenter.call("is_workspace_flyout_open")), "Esc bei offenem %s: Seitenfenster ist zu" % window_case)
+		_check(String(presenter.get("_mode")) == "base", "Esc bei offenem %s: Modus ist weiter 'base' (beobachtet '%s')" % [window_case, String(presenter.get("_mode"))])
+		_check(not win_menu, "Esc bei offenem %s: Spielmenue ist NICHT offen" % window_case)
+		_check(exits[0] == exits_win, "Esc bei offenem %s: Trupp-Seite ist NICHT offen (Wechsel %d)" % [window_case, exits[0] - exits_win])
+		await _key(KEY_ESCAPE)
+		win_menu = menu != null and bool(menu.call("is_overlay_open"))
+		_check(exits[0] == exits_win + 1 and not win_menu, "Zweites Esc nach %s: wie ohne Fenster, zurueck aus der Basisansicht (Wechsel %d, Menue offen %s)" % [window_case, exits[0] - exits_win, str(win_menu)])
+		if win_menu:
+			menu.call("close_menu")
 	# Ausserhalb der Basisansicht (Uebersicht Trupp) bleibt Esc beim Spielmenue wie bisher.
 	screen.call("request_operation", "navigate", {"mode": "squad"})
 	for i in 10:
@@ -279,6 +306,50 @@ func _run() -> void:
 	presenter.call("_update_header", fake, Dictionary(snapshot.get("singleplayer", {})))
 	status = presenter.find_child("HomebaseStatus", true, false) as Label
 	_check(status.text.contains("Personal 2 in der Basis, 1 unterwegs") and status.text.contains("Schiffe 1 in der Basis, 1 unterwegs"), "an Bord am Pad = in der Basis; nur wer weg ist, zaehlt unterwegs (beobachtet \"%s\")" % status.text)
+	# N2: dieselbe Regel mit ECHTEN Besitzern (Eintraege aus dem Bildschirm, nicht von Hand): Person an Bord (Truppe der Nutzlast) eines Schiffs
+	# am Heimatpad = in der Basis; dasselbe Schiff im Orbit = Person und Schiff unterwegs; Summe in der Basis + unterwegs = Gesamtzahl.
+	# Gegen den alten Kopf (8ee95cb20, zaehlte 'busy' als unterwegs) ist der Pad-Fall rot; der Orbit-Fall allein waere es nicht.
+	var payload_team := ""
+	var payload_unit := ""
+	for unit: Dictionary in Array(screen.call("get_operations_snapshot").get("roster", [])):
+		if not String(unit.get("fireteam_id", "")).is_empty() and not bool(unit.get("away", false)):
+			payload_team = String(unit.get("fireteam_id", ""))
+			payload_unit = String(unit.get("id", ""))
+			break
+	# Mit dem Schiff reisen die Truppe der Nutzlast und der eingeteilte Pilot des Schiffs.
+	var team_n := 0
+	var assigned_pilot := String(Dictionary(flow.get("_assigned_aircraft_pilot_by_craft")).get(away_craft_id, ""))
+	for unit: Dictionary in Array(screen.call("get_operations_snapshot").get("roster", [])):
+		if String(unit.get("fireteam_id", "")) == payload_team or String(unit.get("id", "")) == assigned_pilot:
+			team_n += 1
+	_check(not payload_team.is_empty() and not away_craft_id.is_empty(), "N2 Testlage: ein Truppmitglied (%s, Truppe %s) und ein Schiff (%s) sind vorhanden" % [payload_unit, payload_team, away_craft_id])
+	screen.set("_homebase_dropship_staged_fireteam_ids_by_craft", {away_craft_id: PackedStringArray([payload_team])})
+	locations[away_craft_id] = "homebase"
+	screen.call("set_transport_state", flow.get("_homebase_aircraft_definitions"), flow.get("_assigned_aircraft_pilot_by_craft"), [], [], locations, {}, {}, [])
+	await create_timer(1.3).timeout
+	var n2_snapshot: Dictionary = screen.call("get_operations_snapshot")
+	var n2_unit: Dictionary = {}
+	for unit: Dictionary in Array(n2_snapshot.get("roster", [])):
+		if String(unit.get("id", "")) == payload_unit:
+			n2_unit = unit
+	_check(bool(n2_unit.get("busy", false)) and not bool(n2_unit.get("away", true)), "N2: Person an Bord am Pad ist 'busy', aber nicht 'away' (Eintrag busy=%s away=%s)" % [str(n2_unit.get("busy")), str(n2_unit.get("away"))])
+	status = presenter.find_child("HomebaseStatus", true, false) as Label
+	_check(status.text.contains("Personal %d in der Basis, %d unterwegs" % [people_in, people_out]) and status.text.contains("Schiffe %d in der Basis, %d unterwegs" % [crafts_in, crafts_out]), "N2: Person an Bord am Pad zaehlt in der Basis, Schiff ebenso (erwartet %d/%d und %d/%d, beobachtet \"%s\")" % [people_in, people_out, crafts_in, crafts_out, status.text])
+	locations[away_craft_id] = "orbit"
+	screen.call("set_transport_state", flow.get("_homebase_aircraft_definitions"), flow.get("_assigned_aircraft_pilot_by_craft"), [], [], locations, {}, {}, [])
+	await create_timer(1.3).timeout
+	n2_snapshot = screen.call("get_operations_snapshot")
+	n2_unit = {}
+	for unit: Dictionary in Array(n2_snapshot.get("roster", [])):
+		if String(unit.get("id", "")) == payload_unit:
+			n2_unit = unit
+	_check(bool(n2_unit.get("away", false)), "N2: dasselbe Schiff im Orbit: die Person an Bord ist 'away'")
+	status = presenter.find_child("HomebaseStatus", true, false) as Label
+	_check(status.text.contains("Personal %d in der Basis, %d unterwegs" % [people_in - team_n, people_out + team_n]) and status.text.contains("Schiffe %d in der Basis, %d unterwegs" % [crafts_in - 1, crafts_out + 1]), "N2: im Orbit sind Truppe (%d) und Schiff unterwegs (erwartet %d/%d und %d/%d, beobachtet \"%s\")" % [team_n, people_in - team_n, people_out + team_n, crafts_in - 1, crafts_out + 1, status.text])
+	_check((people_in - team_n) + (people_out + team_n) == Array(n2_snapshot.get("roster", [])).size() and (crafts_in - 1) + (crafts_out + 1) == Array(n2_snapshot.get("crafts", [])).size(), "N2: in der Basis + unterwegs = Gesamtzahl (Personal %d, Schiffe %d)" % [Array(n2_snapshot.get("roster", [])).size(), Array(n2_snapshot.get("crafts", [])).size()])
+	locations[away_craft_id] = "homebase"
+	screen.set("_homebase_dropship_staged_fireteam_ids_by_craft", {})
+	screen.call("set_transport_state", flow.get("_homebase_aircraft_definitions"), flow.get("_assigned_aircraft_pilot_by_craft"), [], [], locations, {}, {}, [])
 	var real_entry_keys: bool = true
 	for unit: Dictionary in snapshot.get("roster", []):
 		real_entry_keys = real_entry_keys and unit.has("away")
