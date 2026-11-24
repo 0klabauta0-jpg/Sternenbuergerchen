@@ -88,7 +88,8 @@
       "category": "infantry",
       "location_ids": [
         "polisa"
-      ]
+      ],
+      "required_blueprint": "ammo_light"
     },
     "polisa_ammo_rifle": {
       "id": "polisa_ammo_rifle",
@@ -100,7 +101,8 @@
       "category": "infantry",
       "location_ids": [
         "polisa"
-      ]
+      ],
+      "required_blueprint": "ammo_rifle"
     },
     "polisa_ammo_rail": {
       "id": "polisa_ammo_rail",
@@ -112,7 +114,8 @@
       "category": "infantry",
       "location_ids": [
         "polisa"
-      ]
+      ],
+      "required_blueprint": "ammo_rail"
     },
     "polisa_ammo_rocket": {
       "id": "polisa_ammo_rocket",
@@ -124,7 +127,32 @@
       "category": "infantry",
       "location_ids": [
         "polisa"
-      ]
+      ],
+      "required_blueprint": "ammo_rocket"
+    },
+    "polisa_rocket_launcher": {
+      "id": "polisa_rocket_launcher",
+      "item_id": "rocket_launcher",
+      "name": "Raketenwerfer",
+      "unit_price": 260,
+      "stock": 2,
+      "category": "infantry",
+      "location_ids": [
+        "polisa"
+      ],
+      "required_blueprint": "rocket_launcher"
+    },
+    "polisa_rail_gun": {
+      "id": "polisa_rail_gun",
+      "item_id": "rail_gun",
+      "name": "Schienenkanone",
+      "unit_price": 320,
+      "stock": 2,
+      "category": "infantry",
+      "location_ids": [
+        "polisa"
+      ],
+      "required_blueprint": "rail_gun"
     },
     "polisa_armor_light": {
       "id": "polisa_armor_light",

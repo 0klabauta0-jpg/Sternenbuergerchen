@@ -22,6 +22,13 @@ var _modular_plan_cache_revision := -1
 const DATA_PATH := "res://data/singleplayer/trade_offers.json"
 const MARKET_PATH := "res://data/singleplayer/commodity_market.json"
 const MARKET_OFFER_PREFIX := "market:"
+## Start-Erlaubnisse und Paare (Waffe bringt ihre Munition mit): data/singleplayer/blueprint_grants.json.
+const GRANTS_PATH := "res://data/singleplayer/blueprint_grants.json"
+## Die vier Munitionsangebote bekamen spaeter `required_blueprint`; Staende mit der alten Fassung bleiben ladbar.
+const AMMO_OFFER_IDS := ["polisa_ammo_light", "polisa_ammo_rifle", "polisa_ammo_rail", "polisa_ammo_rocket"]
+## Nur fuer Pruefer: anderer Pfad der Datei; leer = Standardpfad.
+static var grants_path_override: String = ""
+static var grants_warned: bool = false
 const CAMPAIGN_RECIPES:Dictionary={"light_armor":{"item":"armor_light","cost":20},"mining_tool":{"item":"mining_tool","cost":30},"assault_rifle":{"item":"rifle","cost":60}}
 
 static func get_campaign_recipe(blueprint_id:String)->Dictionary:
@@ -146,7 +153,7 @@ func register_craft(craft_id: String, initial_fuel: float = -1.0) -> bool:
 	return true
 
 func get_supply_snapshot() -> Dictionary:
-	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "campaign_housing_beds":get_campaign_housing_beds(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "emergency_fuel": Dictionary(_definitions.get("emergency_fuel", {})).duplicate(true), "debt": Dictionary(_definitions.get("debt", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory_view(), "blueprints": _blueprints(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "market": get_market_snapshot(), "station_home_pads": get_station_home_pads()}
+	return {"credits": _credits, "campaign_beds":get_campaign_bed_count(), "campaign_housing":get_campaign_housing_count(), "campaign_housing_beds":get_campaign_housing_beds(), "modular_base":get_modular_base(), "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "leg_fuel_costs": Dictionary(_definitions.get("leg_fuel_costs", {})).duplicate(true), "emergency_fuel": Dictionary(_definitions.get("emergency_fuel", {})).duplicate(true), "debt": Dictionary(_definitions.get("debt", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory_view(), "blueprints": _blueprints(), "blueprint_overview": _blueprint_overview(), "research": get_research_snapshot(), "commodity_buy_orders": _definitions.get("commodity_buy_orders", {}).duplicate(true), "market": get_market_snapshot(), "station_home_pads": get_station_home_pads()}
 
 func get_research_snapshot() -> Dictionary:
 	if _research_snapshot_revision != _revision:
@@ -1213,7 +1220,11 @@ func _compatible_definitions(saved: Dictionary,current: Dictionary) -> bool:
 	for id: String in Dictionary(right.get("offers", {})):
 		if not old_offers.has(id) and id not in ["mining_tool_supply","salvage_tool_supply","backpack_supply"] and not id.begins_with("polisa_"): return false
 	for id in old_offers:
-		if not Dictionary(right.get("offers", {})).has(id) or JSON.stringify(old_offers[id], "", true) != JSON.stringify(right.offers[id], "", true): return false
+		if not Dictionary(right.get("offers", {})).has(id): return false
+		var current_offer: Dictionary = Dictionary(right.offers[id]).duplicate(true)
+		# Alte Fassung der vier Munitionsangebote (ohne Erwerbserlaubnis) bleibt ladbar; die Erlaubnis kommt aus den aktuellen Daten.
+		if id in AMMO_OFFER_IDS and not Dictionary(old_offers[id]).has("required_blueprint"): current_offer.erase("required_blueprint")
+		if JSON.stringify(old_offers[id], "", true) != JSON.stringify(current_offer, "", true): return false
 	left.erase("offers"); right.erase("offers")
 	# Additive station data preserves the exact old economy and existing routes.
 	if not Dictionary(left.get("service_locations", {})).has("polisa"):
@@ -1463,16 +1474,56 @@ func discard_person_equipment(unit_id: String) -> Dictionary:
 	_revision += 1
 	return {"ok": true, "discarded": discarded, "kept_quest_items": kept}
 
+## Start-Erlaubnisse, Paare und Beschriftungen. Datei unbrauchbar: einmal push_warning, Rueckfall auf leichte und
+## Gewehrmunition ohne Paare (nie eine leere Liste, sonst waere Munition unkaufbar).
+static func blueprint_grants() -> Dictionary:
+	var path: String = grants_path_override if not grants_path_override.is_empty() else GRANTS_PATH
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+	if parsed is Dictionary and _grants_valid(parsed):
+		return {"start": Array(parsed.start).duplicate(), "bundles": Dictionary(parsed.bundles).duplicate(true), "labels": Dictionary(parsed.labels).duplicate()}
+	if not grants_warned:
+		grants_warned = true
+		push_warning("blueprint_grants.json fehlt oder ist unbrauchbar; Rueckfall auf leichte und Gewehrmunition")
+	return {"start": ["ammo_light", "ammo_rifle"], "bundles": {}, "labels": {"ammo_light": "Leichte Munition", "ammo_rifle": "Gewehrmunition", "ammo_rail": "Schienenladung", "ammo_rocket": "Raketen", "rocket_launcher": "Raketenwerfer", "rail_gun": "Schienenkanone"}}
+
+static func _grants_valid(data: Dictionary) -> bool:
+	if not (data.get("start") is Array and data.get("bundles") is Dictionary and data.get("labels") is Dictionary) or Array(data.start).is_empty():
+		return false
+	for id: Variant in data.start:
+		if typeof(id) != TYPE_STRING or String(id).is_empty(): return false
+	for key: Variant in data.bundles:
+		if not data.bundles[key] is Array: return false
+		for id: Variant in data.bundles[key]:
+			if typeof(id) != TYPE_STRING or String(id).is_empty(): return false
+	for key: Variant in data.labels:
+		if typeof(data.labels[key]) != TYPE_STRING: return false
+	return true
+
+static func _add_blueprint(result: Array, id: String, bundles: Dictionary) -> void:
+	if id.is_empty(): return
+	if not result.has(id): result.append(id)
+	for paired: Variant in Array(bundles.get(id, [])):
+		if not result.has(String(paired)): result.append(String(paired))
+
 func _blueprints() -> Array:
+	var grants: Dictionary = blueprint_grants()
 	var result: Array = []
+	for id: Variant in grants.start: _add_blueprint(result, String(id), grants.bundles)
 	for receipt: Dictionary in _reward_receipts.values():
-		var id := String(Dictionary(receipt.get("reward",{})).get("blueprint_id",""))
-		if not id.is_empty() and not result.has(id): result.append(id)
+		_add_blueprint(result, String(Dictionary(receipt.get("reward",{})).get("blueprint_id","")), grants.bundles)
 	for id: String in _research_receipts:
 		var node: Dictionary = RESEARCH.definitions().get("nodes", {}).get(id, {})
-		var blueprint := String(node.get("blueprint_id", ""))
-		if not blueprint.is_empty() and not result.has(blueprint): result.append(blueprint)
+		_add_blueprint(result, String(node.get("blueprint_id", "")), grants.bundles)
 	return result
+
+## Fuer die Uebersicht "Meine Erwerbserlaubnisse": je Kennung aus den Beschriftungen {id, name, owned}, Reihenfolge der Datei.
+func _blueprint_overview() -> Array:
+	var owned: Array = _blueprints()
+	var rows: Array = []
+	var labels: Dictionary = blueprint_grants().labels
+	for id: Variant in labels:
+		rows.append({"id": String(id), "name": String(labels[id]), "owned": owned.has(String(id))})
+	return rows
 
 func _campaign_research(payload: Dictionary, context: Dictionary, request_id: String) -> Dictionary:
 	if not bool(context.get("campaign_authorized", false)):

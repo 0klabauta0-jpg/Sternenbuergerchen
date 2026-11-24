@@ -38,6 +38,9 @@ func _run() -> void:
 	_save_part()
 	_receipt_part()
 	_old_state_part()
+	_permit_part()
+	_grants_file_part()
+	_overview_part()
 	await _ui_part()
 	print("AMMO_SUPPLY passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed else 0)
@@ -53,12 +56,16 @@ func _cmd(op: String, payload: Dictionary) -> Dictionary:
 
 ## Versorgung mit den unveraenderten Daten (Startguthaben aus trade_offers.json). Mit `credits` > 0 wird das Guthaben ueber
 ## die echten Wege eingestellt (Einnahme bzw. Rettungsgebuehr); solche Staende werden nicht gespeichert (Beleg ohne Auftrag).
-func _sup(credits: int = -1) -> RefCounted:
+## `heavy` = true: die Erlaubnisse fuer Raketenwerfer und Schienenkanone (mit ihrer Munition) kommen ueber echte Belohnungen dazu,
+## damit die Teile, die Schienenladung und Raketen kaufen/herstellen, wie bisher laufen. `false` = frische Kampagne ohne Fund.
+func _sup(credits: int = -1, heavy: bool = true) -> RefCounted:
 	var s: RefCounted = SUPPLY.new()
 	var cfg: Dictionary = s.configure([], _dat())
 	if not cfg.get("ok", false): print("FAIL: Versorgung nicht konfiguriert: ", cfg)
 	s.register_craft("ship", 5.0)
 	s.configure_inventory([], ["ship"])
+	if heavy:
+		for bp: String in ["rocket_launcher", "rail_gun"]: _reward_bp(s, bp)
 	if credits >= 0:
 		var now: int = s.get_credits()
 		if now > credits: s.charge_rescue_fee(now - credits)
@@ -66,6 +73,16 @@ func _sup(credits: int = -1) -> RefCounted:
 			var up_id: String = "m3:up%d" % (_seq + 1)
 			s.apply_command(_cmd("apply_reward", {"completion_id": up_id}), {"completion_receipt": {"completion_id": up_id, "runtime_verified": true, "job_id": up_id, "reward": {"credits": credits - now}}})
 	return s
+
+## Echte Belohnung mit Erwerbserlaubnis (Weg wie fuer medium_armor).
+func _reward_bp(s: RefCounted, bp: String) -> Dictionary:
+	_seq += 1
+	var cid: String = "erl:bp%d" % _seq
+	return s.apply_command(_cmd("apply_reward", {"completion_id": cid}), {"completion_receipt": {"completion_id": cid, "runtime_verified": true, "job_id": cid, "reward": {"blueprint_id": bp}}})
+
+## Kauf wie in der Kampagne: Erwerbserlaubnisse werden geprueft. `craft` = Schiff, an dem der Kauf haengt.
+func _buy_c(s: RefCounted, offer: String, craft: String = "ship") -> Dictionary:
+	return s.apply_command(_cmd("buy", {"offer_id": offer, "quantity": 1}), {"location_id": "polisa", "craft_busy": false, "craft_id": craft, "require_blueprints": true})
 
 func _buy(s: RefCounted, offer: String) -> Dictionary:
 	return s.apply_command(_cmd("buy", {"offer_id": offer, "quantity": 1}), {"location_id": "polisa", "craft_busy": false, "craft_id": "ship"})
@@ -104,12 +121,12 @@ func _data_part() -> void:
 		var o: Dictionary = Dictionary(offers.get(id, {}))
 		var want: Array = OFFERS[id]
 		check(not o.is_empty() and String(o.get("item_id", "")) == String(want[1]) and int(o.get("unit_price", -1)) == int(want[0]), "Daten: Angebot %s: Gegenstand %s, Preis %d" % [id, want[1], want[0]])
-		check(o.get("location_ids", []) == ["polisa"] and String(o.get("name", "")) == String(names.get(want[1], "?")) and o.get("unlimited", false) == true and not o.has("required_blueprint"), "Daten: Angebot %s: nur Polisa, Name aus ammo_rules.json, unbegrenzt, ohne Erwerbserlaubnis" % id)
+		check(o.get("location_ids", []) == ["polisa"] and String(o.get("name", "")) == String(names.get(want[1], "?")) and o.get("unlimited", false) == true and String(o.get("required_blueprint", "")) == String(want[1]), "Daten: Angebot %s: nur Polisa, Name aus ammo_rules.json, unbegrenzt, Erwerbserlaubnis %s" % [id, want[1]])
 	var fab: Dictionary = Dictionary(Dictionary(JSON.parse_string(FileAccess.get_file_as_string(RESEARCH_PATH))).get("fabrication", {}))
 	for id: String in RECIPES:
 		var r: Dictionary = Dictionary(fab.get(id, {}))
 		var want: Array = RECIPES[id]
-		check(String(r.get("item", "")) == String(want[0]) and int(r.get("output_count", 1)) == int(want[1]) and int(r.get("cost", -1)) == int(want[2]) and _same_inputs(Dictionary(r.get("inputs", {})), want[3]) and r.get("free", false) == true, "Daten: Rezept %s: %d x %s, %d Cr, Zutaten %s, frei" % [id, want[1], want[0], want[2], want[3]])
+		check(String(r.get("item", "")) == String(want[0]) and int(r.get("output_count", 1)) == int(want[1]) and int(r.get("cost", -1)) == int(want[2]) and _same_inputs(Dictionary(r.get("inputs", {})), want[3]) and not r.has("free"), "Daten: Rezept %s: %d x %s, %d Cr, Zutaten %s, nicht mehr frei (Erwerbserlaubnis noetig)" % [id, want[1], want[0], want[2], want[3]])
 	check(not fab.get("medium_armor", {}).has("output_count") and not fab.get("medium_armor", {}).has("free"), "Daten: bestehendes Rezept medium_armor ohne neue Felder")
 
 # ---------- Kaufen ----------
@@ -190,23 +207,26 @@ func _legacy_recipe_part() -> void:
 	var r: Dictionary = _make(s, "medium_armor")
 	check(bool(r.get("ok", false)) and s.get_credits() == credits0 - 40 and int(_base(s).get("armor_medium", 0)) == armor0 + 1 and not r.has("output_count"), "Bestand: medium_armor liefert weiter genau 1 Stueck fuer 40 Cr, ohne neues Belegfeld (%s)" % r)
 	var snap: Dictionary = s.get_supply_snapshot()
-	check(not Array(snap.blueprints).has("ammo_light"), "Bestand: die Liste der Erwerbserlaubnisse bleibt unveraendert (keine Munitionseintraege)")
+	# _sup() hat Raketenwerfer und Schienenkanone schon per Belohnung; dazu die zwei Start-Erlaubnisse und medium_armor, in genau dieser Reihenfolge.
+	check(Array(snap.blueprints) == ["ammo_light", "ammo_rifle", "rocket_launcher", "ammo_rocket", "rail_gun", "ammo_rail", "medium_armor"], "Bestand: Liste der Erwerbserlaubnisse = Start, dann Belohnungen je mit ihrem Paar (%s)" % [snap.blueprints])
 
 func _roundtrip(s: RefCounted) -> Dictionary:
 	return Dictionary(JSON.parse_string(JSON.stringify(s.export_state())))
 
+## Staende mit einer Belohnung ohne echten Auftrag sind nicht speicherbar (Beleg ohne Auftrag): hier daher OHNE Fund (heavy = false);
+## Schiene und Rakete werden gekauft (der Kauf prueft ohne Kampagnen-Kontext nichts), hergestellt werden Gewehr- und leichte Magazine.
 func _save_part() -> void:
-	var s: RefCounted = _sup()
+	var s: RefCounted = _sup(-1, false)
 	_stock_all(s)
 	_buy(s, "polisa_ammo_light")
 	_make(s, "ammo_light")
 	_buy(s, "polisa_ammo_rail")
-	_make(s, "ammo_rocket")
+	_make(s, "ammo_rifle")
 	var loaded: RefCounted = SUPPLY.new()
 	loaded.configure([], _dat())
 	loaded.register_craft("ship", 5.0)
 	var restored: Dictionary = loaded.restore_state(_roundtrip(s))
-	check(bool(restored.get("ok", false)), "Speichern/Laden: Stand nach Kauf und Herstellung (4 und 2 Stueck) laedt ohne Ablehnung (%s)" % restored)
+	check(bool(restored.get("ok", false)), "Speichern/Laden: Stand nach Kauf und Herstellung (je 4 leichte und Gewehr-Magazine) laedt ohne Ablehnung (%s)" % restored)
 	check(loaded.get_credits() == s.get_credits() and _same_inputs(_base(loaded), _base(s)) and _same_inputs(_ship(loaded), _ship(s)) and int(_base(loaded).get("ammo_light", 0)) == 4 and int(_ship(loaded).get("ammo_light", 0)) == 1, "Speichern/Laden: Credits, Basislager und Schiffslager gleich")
 	check(bool(_make(loaded, "ammo_rifle").get("ok", false)) and bool(_buy(loaded, "polisa_ammo_rifle").get("ok", false)), "Speichern/Laden: danach weiter herstellen und kaufen")
 
@@ -231,7 +251,7 @@ func _receipt_part() -> void:
 	check(not _valid("ammo_light", {"item_id": "ammo_light", "recipe_id": "ammo_light", "cost": 5, "materials_consumed": {"a_benit": 1}}), "Beleg neu: fehlende Stueckzahl bei Rezept mit Stueckzahl 4 wird abgelehnt")
 
 func _old_state_part() -> void:
-	var s: RefCounted = _sup()
+	var s: RefCounted = _sup(-1, false)
 	var old: Dictionary = _roundtrip(s)
 	for id: String in OFFERS:
 		old.definitions.offers.erase(id)
@@ -245,6 +265,118 @@ func _old_state_part() -> void:
 	var tampered: Dictionary = _roundtrip(s)
 	tampered.definitions.offers["polisa_pistol"]["unit_price"] = 31
 	check(not bool(SUPPLY.new().restore_state(tampered).get("ok", true)), "Ladeschutz: geaenderter Preis eines bestehenden Angebots macht den Stand weiter unladbar")
+
+# ---------- Erwerbserlaubnis (24.11.2026) ----------
+
+func _locked(r: Dictionary) -> bool:
+	return not bool(r.get("ok", true)) and String(r.get("reason", "")) == "blueprint_locked"
+
+func _permit_part() -> void:
+	var s: RefCounted = _sup(1000, false)
+	var snap: Dictionary = s.get_supply_snapshot()
+	check(Array(snap.blueprints) == ["ammo_light", "ammo_rifle"], "Erlaubnis: neue Kampagne hat genau ammo_light und ammo_rifle in der Liste (%s)" % [snap.blueprints])
+	_stock_all(s)
+	var l1: Dictionary = _buy_c(s, "polisa_ammo_light")
+	var l2: Dictionary = _buy_c(s, "polisa_ammo_rifle")
+	check(bool(l1.get("ok", false)) and bool(l2.get("ok", false)) and int(_ship(s).get("ammo_light", 0)) == 1 and int(_ship(s).get("ammo_rifle", 0)) == 1, "Erlaubnis: leichtes und Gewehr-Magazin sind mit Kampagnenpruefung kaufbar (%s, %s)" % [l1, l2])
+	check(bool(_make(s, "ammo_light").get("ok", false)) and bool(_make(s, "ammo_rifle").get("ok", false)) and int(_base(s).get("ammo_light", 0)) == 4 and int(_base(s).get("ammo_rifle", 0)) == 4, "Erlaubnis: leichtes und Gewehr-Magazin sind herstellbar (je 4 Stueck)")
+	for id: String in ["ammo_rail", "ammo_rocket"]:
+		var key: String = _state_key(s)
+		var b: Dictionary = _buy_c(s, "polisa_" + id)
+		var m: Dictionary = _make(s, id)
+		check(_locked(b) and _locked(m) and _state_key(s) == key, "Erlaubnis: %s ohne Fund: Kauf und Bau abgelehnt mit blueprint_locked, nichts gebucht (%s / %s)" % [id, b.get("reason", "?"), m.get("reason", "?")])
+	for id: String in ["polisa_rocket_launcher", "polisa_rail_gun"]:
+		check(_locked(_buy_c(s, id)), "Erlaubnis: Angebot %s ohne Fund gesperrt (blueprint_locked)" % id)
+	# Echte Belohnung rocket_launcher: Werfer-Angebot, Raketen-Kauf und Raketen-Bau frei, Schiene bleibt gesperrt.
+	var rw: Dictionary = _reward_bp(s, "rocket_launcher")
+	check(bool(rw.get("ok", false)), "Erlaubnis: Belohnung rocket_launcher gebucht (%s)" % rw)
+	var snap2: Dictionary = s.get_supply_snapshot()
+	check(Array(snap2.blueprints) == ["ammo_light", "ammo_rifle", "rocket_launcher", "ammo_rocket"], "Erlaubnis: nach der Belohnung kommt ammo_rocket als Paar dazu, Schiene nicht (%s)" % [snap2.blueprints])
+	var credits0: int = s.get_credits()
+	var gun: Dictionary = _buy_c(s, "polisa_rocket_launcher")
+	check(bool(gun.get("ok", false)) and s.get_credits() == credits0 - 260 and int(_ship(s).get("rocket_launcher", 0)) == 1, "Erlaubnis: Raketenwerfer kostet 260 Cr und liegt danach im Schiffslager (%s)" % gun)
+	var rk: Dictionary = _buy_c(s, "polisa_ammo_rocket")
+	check(bool(rk.get("ok", false)) and int(_ship(s).get("ammo_rocket", 0)) == 1, "Erlaubnis: Raketen kaufbar mit Erlaubnis, auch ohne dass jemand einen Werfer traegt (%s)" % rk)
+	check(bool(_make(s, "ammo_rocket").get("ok", false)) and int(_base(s).get("ammo_rocket", 0)) == 2, "Erlaubnis: Raketen herstellbar (2 Stueck)")
+	var key2: String = _state_key(s)
+	check(_locked(_buy_c(s, "polisa_ammo_rail")) and _locked(_make(s, "ammo_rail")) and _locked(_buy_c(s, "polisa_rail_gun")) and _state_key(s) == key2, "Erlaubnis: Schiene und Schienenkanone weiter gesperrt")
+	# Team-Erlaubnis: gilt fuer die ganze Kampagne, nicht je Schiff. Der Kauf kennt nur das Schiff (craft_id), keine einzelne Person.
+	var t: RefCounted = SUPPLY.new()
+	t.configure([], _dat())
+	t.register_craft("ship", 5.0)
+	t.register_craft("ship2", 5.0)
+	t.configure_inventory([], ["ship", "ship2"])
+	_seq += 1
+	var up: String = "erl:up%d" % _seq
+	t.apply_command(_cmd("apply_reward", {"completion_id": up}), {"completion_receipt": {"completion_id": up, "runtime_verified": true, "job_id": up, "reward": {"credits": 1000}}})
+	_reward_bp(t, "rocket_launcher")
+	var first: Dictionary = _buy_c(t, "polisa_ammo_rocket", "ship")
+	var other: Dictionary = _buy_c(t, "polisa_ammo_rocket", "ship2")
+	check(bool(first.get("ok", false)) and bool(other.get("ok", false)) and int(Dictionary(Dictionary(t.get_supply_snapshot().inventory)["craft:ship"].items).get("ammo_rocket", 0)) == 1 and int(Dictionary(Dictionary(t.get_supply_snapshot().inventory)["craft:ship2"].items).get("ammo_rocket", 0)) == 1, "Erlaubnis: gilt fuer das ganze Team - derselbe Kauf an einem ANDEREN Schiff klappt genauso (%s / %s)" % [first, other])
+	# Danach die zweite Waffe.
+	_reward_bp(s, "rail_gun")
+	check(bool(_buy_c(s, "polisa_rail_gun").get("ok", false)) and bool(_buy_c(s, "polisa_ammo_rail").get("ok", false)) and bool(_make(s, "ammo_rail").get("ok", false)), "Erlaubnis: nach rail_gun sind Schienenkanone, Schienenladung (Kauf) und Bau frei")
+	# Skirmish/Mehrspieler: required_blueprint wird nicht geprueft.
+	var free_ctx: RefCounted = _sup(1000, false)
+	var sk: Dictionary = _buy(free_ctx, "polisa_ammo_rocket")
+	check(bool(sk.get("ok", false)) and int(_ship(free_ctx).get("ammo_rocket", 0)) == 1, "Skirmish: ohne require_blueprints kauft derselbe Kontext Raketen ohne Erlaubnis (%s)" % sk)
+	var sk2: Dictionary = _buy(free_ctx, "polisa_rail_gun")
+	check(bool(sk2.get("ok", false)), "Skirmish: auch die Schienenkanone ohne Erlaubnis kaufbar (%s)" % sk2)
+	# Alter Stand: weder Erlaubnis noch neue Angebote noch das neue Feld an den Munitionsangeboten gespeichert.
+	var old: Dictionary = _roundtrip(_sup(-1, false))
+	for id: String in ["polisa_rocket_launcher", "polisa_rail_gun"]:
+		old.definitions.offers.erase(id)
+		old.stock_by_offer_id.erase(id)
+	for id: String in SUPPLY.AMMO_OFFER_IDS: old.definitions.offers[id].erase("required_blueprint")
+	var loaded: RefCounted = SUPPLY.new()
+	loaded.configure([], _dat())
+	var r: Dictionary = loaded.restore_state(old)
+	check(bool(r.get("ok", false)), "Alter Stand: ohne neue Angebote und ohne required_blueprint an der Munition laedt (%s)" % r)
+	check(Array(loaded.get_supply_snapshot().blueprints) == ["ammo_light", "ammo_rifle"] and bool(_buy_c(loaded, "polisa_ammo_rifle").get("ok", false)) and _locked(_buy_c(loaded, "polisa_ammo_rocket")), "Alter Stand: danach beide Start-Erlaubnisse da, Gewehrmunition kaufbar, Raketen gesperrt")
+	var forged: Dictionary = _roundtrip(_sup(-1, false))
+	forged.definitions.offers["polisa_ammo_rail"]["required_blueprint"] = "light_armor"
+	check(not bool(SUPPLY.new().restore_state(forged).get("ok", true)), "Ladeschutz: eine andere Erlaubnis an einem Munitionsangebot macht den Stand unladbar")
+
+func _grants_file_part() -> void:
+	var text: String = FileAccess.get_file_as_string("res://data/singleplayer/blueprint_grants.json").strip_edges()
+	check(text == '{"version":1,"start":["ammo_light","ammo_rifle"],"bundles":{"rocket_launcher":["ammo_rocket"],"rail_gun":["ammo_rail"]},"labels":{"ammo_light":"Leichte Munition","ammo_rifle":"Gewehrmunition","ammo_rail":"Schienenladung","ammo_rocket":"Raketen","rocket_launcher":"Raketenwerfer","rail_gun":"Schienenkanone"}}', "Datei: blueprint_grants.json hat genau den vorgegebenen Wortlaut")
+	# Kaputte Datei -> Rueckfall auf Start ohne Paare, einmal Warnung; nie eine leere Liste.
+	var bad_path: String = "user://erl_bad_grants.json"
+	var f: FileAccess = FileAccess.open(bad_path, FileAccess.WRITE)
+	f.store_string("{ das ist kein json")
+	f.close()
+	SUPPLY.grants_path_override = bad_path
+	SUPPLY.grants_warned = false
+	var s: RefCounted = _sup(1000, false)
+	check(Array(s.get_supply_snapshot().blueprints) == ["ammo_light", "ammo_rifle"] and SUPPLY.grants_warned == true, "Rueckfall: kaputte Datei loest die Warnung aus und die Liste ist nicht leer")
+	_reward_bp(s, "rocket_launcher")
+	var bl: Array = Array(s.get_supply_snapshot().blueprints)
+	check(bl == ["ammo_light", "ammo_rifle", "rocket_launcher"], "Rueckfall: Start = leichte und Gewehrmunition, ohne Paare (%s)" % [bl])
+	check(bool(_buy_c(s, "polisa_ammo_light").get("ok", false)), "Rueckfall: leichte Munition bleibt kaufbar")
+	var f2: FileAccess = FileAccess.open(bad_path, FileAccess.WRITE)
+	f2.store_string('{"version":1,"start":[],"bundles":{},"labels":{}}')
+	f2.close()
+	check(Array(SUPPLY.blueprint_grants().start) == ["ammo_light", "ammo_rifle"], "Rueckfall: leere Start-Liste gilt als unbrauchbar, nie eine leere Liste")
+	SUPPLY.grants_path_override = "res://data/singleplayer/gibt_es_nicht.json"
+	check(Array(SUPPLY.blueprint_grants().start) == ["ammo_light", "ammo_rifle"], "Rueckfall: fehlende Datei ebenso")
+	SUPPLY.grants_path_override = ""
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(bad_path))
+	check(Array(SUPPLY.blueprint_grants().start) == ["ammo_light", "ammo_rifle"] and Dictionary(SUPPLY.blueprint_grants().bundles).size() == 2, "Rueckfall: Standardpfad wieder hergestellt, Paare sind da")
+
+func _overview_part() -> void:
+	var s: RefCounted = _sup(-1, false)
+	var ov: Array = Array(s.get_supply_snapshot().blueprint_overview)
+	var ids: Array = []
+	for row: Dictionary in ov: ids.append(row.id)
+	check(ov.size() == 6 and ids == ["ammo_light", "ammo_rifle", "ammo_rail", "ammo_rocket", "rocket_launcher", "rail_gun"], "Uebersicht: sechs Eintraege in der Reihenfolge der Datei (%s)" % [ids])
+	var owned: Array = []
+	for row: Dictionary in ov: owned.append(bool(row.owned))
+	check(owned == [true, true, false, false, false, false], "Uebersicht: neue Kampagne - nur leichte und Gewehrmunition gehoert (%s)" % [owned])
+	check(String(ov[0].name) == "Leichte Munition" and String(ov[3].name) == "Raketen" and String(ov[5].name) == "Schienenkanone", "Uebersicht: Namen aus der Datei")
+	_reward_bp(s, "rail_gun")
+	var owned2: Array = []
+	for row: Dictionary in Array(s.get_supply_snapshot().blueprint_overview): owned2.append(bool(row.owned))
+	check(owned2 == [true, true, true, false, false, true], "Uebersicht: nach rail_gun gehoeren auch Schienenladung und Schienenkanone (%s)" % [owned2])
 
 # ---------- Anzeige ----------
 
@@ -277,7 +409,7 @@ func _polisa_part() -> void:
 	var offers: Dictionary = {}
 	for id: String in supply.offers:
 		if Array(supply.offers[id].get("location_ids", [])).has("polisa"): offers[id] = supply.offers[id]
-	var snapshot: Dictionary = {"service_ready": true, "craft_id": "ship", "craft_name": "ship", "credits": 30, "offers": offers, "stock": supply.stock_by_offer_id, "inventory": supply.inventory, "people": [], "blueprints": [], "require_blueprints": true, "fuel": 5.0, "fuel_capacity": 10.0, "fuel_price_per_unit": 1.0, "revision": 1}
+	var snapshot: Dictionary = {"service_ready": true, "craft_id": "ship", "craft_name": "ship", "credits": 30, "offers": offers, "stock": supply.stock_by_offer_id, "inventory": supply.inventory, "people": [], "blueprints": supply.blueprints, "require_blueprints": true, "fuel": 5.0, "fuel_capacity": 10.0, "fuel_price_per_unit": 1.0, "revision": 1}
 	var screen: Control = load("res://scripts/ui/polisa_station_screen.gd").new()
 	root.add_child(screen)
 	screen.call("configure", Node.new())
