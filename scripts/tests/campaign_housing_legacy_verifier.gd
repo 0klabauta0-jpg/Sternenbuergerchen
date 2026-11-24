@@ -15,13 +15,17 @@ func check(value: bool, label: String) -> void:
 	if not value: failed += 1
 func _init() -> void: call_deferred("run")
 
-func _boot(mode: String) -> bool:
+var last_error := ""
+var old_bed_cell := Vector2i.ZERO
+var old_bed_world := Vector2.ZERO
+func _boot(mode: String, expect_failure := false) -> bool:
 	START.request_start(self, "campaign", mode)
 	flow = load("res://scenes/meta/meta_layer_test.tscn").instantiate(); root.add_child(flow)
 	await process_frame
 	adapter = flow.get("_singleplayer_runtime")
 	if adapter == null:
-		check(false, "Stand (%s) laedt (Fehler: %s)" % [mode, String(flow.get("_campaign_start").get("error_message"))])
+		last_error = String(flow.get("_campaign_start").get("error_message"))
+		if not expect_failure: check(false, "Stand (%s) laedt (Fehler: %s)" % [mode, last_error])
 		return false
 	base = adapter.get_base_personnel_runtime()
 	sim = base.get_simulation_root()
@@ -79,6 +83,50 @@ func _place_leader_on_future_wall() -> void:
 	for i in range(3): sim._physics_process(0.05)
 	print("FIXTURE Person auf Wandzelle ", wall, " Actor-Zelle ", terrain.world_to_grid(base.get_actor("campaign_leader").position))
 
+## Stand, wie ihn das ALTE Spiel (vor dem Wohncontainer-Umbau) geschrieben haette: der Schlaefer liegt in `bed_id`
+## und steht an der ALTEN Lage des ersten Alt-Bettes (Quellbett 1 + Versatz (0,120)). Der Stand wird real erzeugt
+## (Laden, Schlafen, Speichern) und dann nur die Zelle der Person im Hex-Stand auf die alte Lage umgeschrieben.
+func _write_old_sleeper_checkpoint(bed_id: String) -> bool:
+	if not await _write_legacy_checkpoint(Callable()): return false
+	if not await _boot("continue"): return false
+	var terrain: Node = base.get_terrain_registry()
+	var source_grid: Array = base._source_layout.beds[0].grid
+	old_bed_cell = Vector2i(int(source_grid[0]), int(source_grid[1])) + Vector2i(0, 120)
+	old_bed_world = terrain.grid_to_world(old_bed_cell)
+	check(terrain.is_walkable(old_bed_cell), "Fixture: alte Bettlage %s ist begehbar" % str(old_bed_cell))
+	var sleep: Dictionary = base.request_operation("base_sleep", {"unit_id":"campaign_leader", "bed_id":bed_id})
+	check(sleep.get("ok", false), "Fixture: Person geht ins Bett %s: %s" % [bed_id, str(sleep)])
+	for i in range(6000):
+		sim._physics_process(0.05)
+		if base._states.campaign_leader.status == "sleeping": break
+	check(base._states.campaign_leader.status == "sleeping", "Fixture: Person schlaeft in %s" % bed_id)
+	var saved: Dictionary = flow.get("_campaign_start").save_home_checkpoint(flow, adapter, true)
+	check(saved.get("ok", false), "Fixture: Schlaefer gespeichert: " + str(saved.get("reason", "")))
+	await _free()
+	var loaded: Dictionary = STORE.load_checkpoint()
+	if not loaded.get("ok", false): check(false, "Fixture: Schlaefer-Stand lesbar"); return false
+	var payload: Dictionary = loaded.payload
+	var unit: Dictionary = payload.hex_tactical.base_personnel.units.campaign_leader
+	check(unit.status == "sleeping" and unit.bed_id == bed_id, "Fixture: im Stand schlaeft die Person in %s" % bed_id)
+	var rewritten := false
+	for ground_unit: Dictionary in payload.hex_tactical.ground.units:
+		if ground_unit.unit_id == "campaign_leader": ground_unit.grid = [old_bed_cell.x, old_bed_cell.y]; rewritten = true
+	check(rewritten, "Fixture: Zelle der Person auf die alte Bettlage %s umgeschrieben" % str(old_bed_cell))
+	# Das alte Spiel haette auch den Schlafbefehl (Ziel = Bett, angekommen) an der alten Lage gespeichert.
+	var intent_rewritten := false
+	for intent: Dictionary in payload.hex_tactical.movement.accepted_intents:
+		if intent.unit_id != "campaign_leader": continue
+		intent.goal_grid = [old_bed_cell.x, old_bed_cell.y]
+		var keys: Array = []
+		for field: Dictionary in intent.command_intent:
+			keys.append(field.key)
+			if field.key == "target_position": field.value = [old_bed_world.x, old_bed_world.y]; intent_rewritten = true
+		print("FIXTURE Schlafbefehl-Felder: ", keys, " Status ", intent.status)
+	check(intent_rewritten, "Fixture: Ziel des Schlafbefehls auf die alte Bettlage umgeschrieben")
+	var modified: Dictionary = STORE.save_checkpoint(payload)
+	check(modified.get("ok", false), "Fixture: Altstand mit Schlaefer an der alten Bettlage akzeptiert: " + str(modified.get("reason", "")))
+	return modified.get("ok", false)
+
 func run() -> void:
 	# A: Schlaefer im Alt-Bett field_bed_01 (Beleg alt, Schlaf im neuen Alt-Gebaeude), Speichern und erneut Laden.
 	if not await _write_legacy_checkpoint(Callable()): quit(1); return
@@ -105,5 +153,26 @@ func run() -> void:
 	print("NACH LADEN Person: Zelle ", leader_cell, " Status ", base._states.campaign_leader.status, " Hex-Zelle ", sim._hex_ground_runtime.get_unit_grid("campaign_leader"))
 	check(not _in_footprint("campaign_leader") and base._states.campaign_leader.status in ["outside", "sleeping"], "Person steht nach dem Laden NICHT im Fussabdruck des Alt-Gebaeudes")
 	await _free()
+	# C: Altstand mit Schlaefer im Alt-Bett an der ALTEN Lage: der Stand laedt, die Person ist geweckt (W3).
+	if not await _write_old_sleeper_checkpoint("field_bed_01"): quit(1); return
+	if not await _boot("continue"): quit(1); return
+	_check_old_purchase()
+	var woken: Dictionary = base._states.campaign_leader
+	check(woken.status == "outside" and String(woken.bed_id) == "" and not bool(woken.rest_automatic) and Dictionary(woken.action).is_empty(), "Schlaefer im Alt-Bett ist beim Laden geweckt (outside, Bett frei, keine Automatik-Ruhe): " + str(woken.status))
+	check(not base.get_snapshot().bed_occupants.has("field_bed_01"), "Alt-Bett field_bed_01 ist nach dem Wecken frei")
+	check(not _in_footprint("campaign_leader"), "Geweckte Person steht nicht in einer Sperrzelle")
+	var again: Dictionary = base.request_operation("base_sleep", {"unit_id":"campaign_leader", "bed_id":"field_bed_01"})
+	check(again.get("ok", false), "Geweckte Person kann per Schlafbefehl ins Alt-Bett: " + str(again))
+	for i in range(6000):
+		sim._physics_process(0.05)
+		if base._states.campaign_leader.status == "sleeping": break
+	check(base._states.campaign_leader.status == "sleeping" and base.get_snapshot().bed_occupants.get("field_bed_01") == "campaign_leader", "Geweckte Person schlaeft danach wieder in field_bed_01")
+	await _free()
+	# D: Gegenprobe: Schlaefer mit falscher Lage in einem HABITAT-Bett bleibt ein kaputter Stand (abgelehnt).
+	if not await _write_old_sleeper_checkpoint("habitat_bed_01"): quit(1); return
+	var booted := await _boot("continue", true)
+	print("GEGENPROBE Habitat-Bett: geladen=", booted, " Fehler=", last_error)
+	check(not booted and last_error.contains("base_checkpoint_bed_pose"), "Schlaefer in Habitat-Bett mit falscher Lage: Stand wird weiter abgelehnt (base_checkpoint_bed_pose)")
+	if flow != null: await _free()
 	if failed == 0: print("CAMPAIGN_HOUSING_LEGACY_PASS")
 	quit(0 if failed == 0 else 1)

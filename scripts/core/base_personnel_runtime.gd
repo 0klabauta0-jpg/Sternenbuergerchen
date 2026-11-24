@@ -1672,6 +1672,7 @@ func _checkpoint_candidate(state:Dictionary,target,movement:Dictionary)->Diction
 		var value:Variant=state.units[id]
 		if not _checkpoint_keys(value,["status","craft_id","bed_id","action","auto_rest_enabled","rest_automatic","idle_seconds","manual_priority_seconds"]) or value.status not in ["outside","moving","sleeping","aboard","station"] or typeof(value.auto_rest_enabled)!=TYPE_BOOL or typeof(value.rest_automatic)!=TYPE_BOOL or not _checkpoint_number(value.idle_seconds) or not _checkpoint_number(value.manual_priority_seconds) or typeof(value.craft_id)!=TYPE_STRING or typeof(value.bed_id)!=TYPE_STRING or typeof(value.action)!=TYPE_DICTIONARY:return _checkpoint_reject("base_checkpoint_invalid_unit")
 		var action:Dictionary={}
+		var woken:=false
 		if value.status=="aboard":
 			var home_member := _checkpoint_home_craft(value.craft_id) and _checkpoint_craft_member(id,value.craft_id)
 			if (not home_member and not _checkpoint_away_craft_member(id,value.craft_id,state)) or target.has_unit(id) or intents.has(id) or not value.action.is_empty() or not value.bed_id.is_empty():return _checkpoint_reject("base_checkpoint_aboard_context")
@@ -1710,15 +1711,22 @@ func _checkpoint_candidate(state:Dictionary,target,movement:Dictionary)->Diction
 			if not _checkpoint_id(value.bed_id) or bed.is_empty() or beds.has(value.bed_id):return _checkpoint_reject("base_checkpoint_bed_mismatch")
 			if value.status=="sleeping":
 				var pose:Dictionary=target.read_unit(id)
-				if pose.grid!=_terrain.world_to_grid(_world(bed.grid)) or pose.route_state.has_commitments or pose.movement_state.moving:return _checkpoint_reject("base_checkpoint_bed_pose")
+				if pose.route_state.has_commitments or pose.movement_state.moving:return _checkpoint_reject("base_checkpoint_bed_pose")
+				if pose.grid!=_terrain.world_to_grid(_world(bed.grid)):
+					# Alt-Bett (field_bed_*): ein Stand vor dem Wohncontainer-Umbau hat den Schlaefer an der alten Bettlage
+					# gespeichert, das Bett steht jetzt auf Stellplatz 1. Dann wird die Person geweckt statt den Stand abzulehnen.
+					# Habitat- und Container-Betten bleiben streng.
+					if not String(value.bed_id).begins_with("field_bed_"):return _checkpoint_reject("base_checkpoint_bed_pose")
+					woken=true
 			elif action.target!=_world(bed.grid):return _checkpoint_reject("base_checkpoint_bed_mismatch")
-			beds[value.bed_id]=id
+			if not woken:beds[value.bed_id]=id
 		elif not value.bed_id.is_empty():return _checkpoint_reject("base_checkpoint_bed_mismatch")
 		if intents.has(id):
 			var intent:Dictionary=intents[id]
 			if intent.status not in ["arrived","canceled"] and value.status!="moving":return _checkpoint_reject("base_checkpoint_missing_action")
 		var restored:Dictionary=_states[id].duplicate(true)
 		for key in ["status","craft_id","bed_id","auto_rest_enabled","rest_automatic"]:restored[key]=value[key]
+		if woken:restored.status="outside";restored.bed_id="";restored.rest_automatic=false
 		restored.action=action;restored.idle_seconds=float(value.idle_seconds);restored.manual_priority_seconds=float(value.manual_priority_seconds);restored.last_result={}
 		states[id]=restored
 	for id in target.get_unit_ids():
