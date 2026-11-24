@@ -279,6 +279,10 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		unavailable_reason = "Serviceschiff auswählen"
 	elif not _command_handler.is_valid():
 		unavailable_reason = "Versorgung noch nicht verbunden"
+	# Handel (Nachbesserung W2): An der Absturzstelle gilt der Handel nur, wenn das gelandete Schiff nah am Haendler steht; sonst sagt der Text, was zu tun ist.
+	var trade_reason: String = unavailable_reason
+	if location == "satellite_crash" and available and not Array(context.get("services", [])).has("trade"):
+		trade_reason = "Schiff muss näher am Händler landen (höchstens 256 Einheiten) – Handel erst dort"
 	var offer: Dictionary = Dictionary(Dictionary(supply.get("offers", {})).get(OFFER_ID, {}))
 	var price: int = int(offer.get("unit_price", 0))
 	var stock: int = int(Dictionary(supply.get("stock_by_offer_id", {})).get(OFFER_ID, 0))
@@ -325,7 +329,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		var sell_price: int = _market_buy_price(supply, location, slot_item)
 		sell_button.text = "1 × %s verkaufen · %d Cr" % [MARKET_NAMES.get(slot_item, slot_item), sell_price]
 		sell_button.disabled = not trade_ready or int(cargo.get(slot_item,0)) < 1
-		sell_button.tooltip_text = "Verkauf aus lokaler Schiffsfracht oder dem Frachtaufzug" if not sell_button.disabled else ("Keine %s im Schiff oder Frachtaufzug" % MARKET_NAMES.get(slot_item, slot_item) if trade_ready else unavailable_reason)
+		sell_button.tooltip_text = "Verkauf aus lokaler Schiffsfracht oder dem Frachtaufzug" if not sell_button.disabled else ("Keine %s im Schiff oder Frachtaufzug" % MARKET_NAMES.get(slot_item, slot_item) if trade_ready else trade_reason)
 	for market_item: String in MARKET_ITEMS:
 		var market_button: Button = _market_buttons[market_item]
 		var market_entry: Dictionary = Dictionary(market_here.get(market_item, {}))
@@ -335,7 +339,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		var market_stock: int = int(market_entry.get("stock", 0))
 		market_button.text = "%s · %d Cr · %d verfügbar" % [MARKET_NAMES.get(market_item, market_item), market_price, market_stock]
 		var market_reason: String = ""
-		if not trade_ready: market_reason = unavailable_reason
+		if not trade_ready: market_reason = trade_reason
 		elif market_stock <= 0: market_reason = "Ausverkauft – füllt sich nach der Heimlandung wieder auf"
 		elif int(supply.get("credits", 0)) < market_price: market_reason = "Kredite reichen für den Kauf nicht"
 		market_button.disabled = not market_reason.is_empty() or _pending.has("buy")

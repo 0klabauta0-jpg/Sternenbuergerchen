@@ -9,6 +9,7 @@ const BENIT := ["a_benit", "b_benit", "c_benit"]
 const PRESENTER = preload("res://scripts/meta/singleplayer_services_presenter.gd")
 var _ui_supply: RefCounted
 var _ui_location := "trade_outpost"
+var _ui_far := false
 var passed := 0
 var failed := 0
 var _seq := 0
@@ -383,7 +384,7 @@ func _ui_snapshot() -> Dictionary:
 	return {"mode": "campaign", "campaign": {"jobs": {}, "progress": {}}, "supply": _ui_supply.get_supply_snapshot(),
 		"crafts": [{"craft_id": "ship", "location_id": _ui_location, "busy": false}],
 		"location_view": {"location_id": _ui_location, "craft_id": "ship"},
-		"service_contexts_by_craft_id": {"ship": {"location_id": _ui_location, "craft_busy": false, "services": ["trade", "refuel"], "ground_service_verified": true}}}
+		"service_contexts_by_craft_id": {"ship": {"location_id": _ui_location, "craft_busy": false, "services": [] if _ui_far else ["trade", "refuel"], "ground_service_verified": true}}}
 
 func _ui_cmd(operation: String, payload: Dictionary) -> Dictionary:
 	var data: Dictionary = payload.duplicate(true)
@@ -452,5 +453,12 @@ func _ui_part() -> void:
 	panel.call("refresh")
 	check(_shown(buy_a) and _shown(buy_b) and not _shown(buy_c), "Anzeige Absturzstelle: Kaufknopf fuer A- und B-Benit, keiner fuer C-Benit")
 	check(_shown(sell1) and sell1.text.contains("C-Benit") and sell1.text.contains("%d Cr" % int(m.satellite_crash.c_benit.buy_price)) and not _shown(sell2), "Anzeige Absturzstelle: ein Verkaufsknopf C-Benit mit Datenpreis")
+	# Nachbesserung W2: Schiff an der Absturzstelle gelandet, aber zu weit vom Haendler (Dienst "trade" fehlt) -> gesperrt, Text sagt, was zu tun ist.
+	_ui_far = true
+	panel.call("refresh")
+	check(buy_a.disabled and buy_a.tooltip_text.contains("näher am Händler landen"), "Anzeige Absturzstelle, Schiff zu weit vom Haendler: Kaufknopf gesperrt, Text nennt die Abhilfe (%s)" % buy_a.tooltip_text)
+	_ui_far = false
+	panel.call("refresh")
+	check(not buy_a.disabled, "Anzeige Absturzstelle: mit Handelsdienst ist der Kaufknopf wieder frei")
 	panel.queue_free()
 	await process_frame
