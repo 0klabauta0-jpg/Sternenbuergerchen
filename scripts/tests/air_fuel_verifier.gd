@@ -212,7 +212,8 @@ func _case_1() -> void:
 		_run(env, 0.5)
 		waited += 0.5
 	_check(not mission_root.get("_air_support_sorties").has("ship") and _count(env, "ship", "landed") == 1, tag + "das Schiff landet selbst (%.1f s nach dem Abbruch)" % waited)
-	_check(is_equal_approx(_fuel(env, "ship"), 3.0) and _air_receipts(env).size() == 11, tag + "danach 3.0 und genau 11 Buchungen (%d)" % _air_receipts(env).size())
+	# Nach Nachbesserung 1 (W1) bleibt je Schiff nur der juengste Beleg; die 11 Buchungen zeigen sich am Rest und am Schritt in der Kennung.
+	_check(is_equal_approx(_fuel(env, "ship"), 3.0) and _air_receipts(env).size() == 1 and String(_air_receipts(env)[0]).contains(":11:r"), tag + "danach 3.0, 11 Buchungen (juengster Beleg Schritt 11): " + str(_air_receipts(env)))
 	# Fall 4
 	var tag4 := "[4 nichts von selbst] "
 	_check(int(supply.get_supply_snapshot().credits) == credits_before, tag4 + "Guthaben unveraendert")
@@ -222,10 +223,8 @@ func _case_1() -> void:
 	for request_id in Dictionary(supply.get("_requests")).keys():
 		new_receipts += 1
 		if not String(request_id).begins_with("air-fuel:"): all_air = false
-	_check(all_air and new_receipts - receipts_before == 11, tag4 + "alle neuen Belege beginnen mit air-fuel: (%d neue)" % (new_receipts - receipts_before))
-	var distinct := {}
-	for request_id in _air_receipts(env): distinct[request_id] = true
-	_check(distinct.size() == 11, tag4 + "alle 11 Kennungen verschieden")
+	_check(all_air and new_receipts - receipts_before == 1, tag4 + "alle neuen Belege beginnen mit air-fuel: (%d neue, nach W1 nur der juengste)" % (new_receipts - receipts_before))
+	_check(_air_receipts(env).size() == 1 and String(_air_receipts(env)[0]).contains(":11:r"), tag4 + "der eine Beleg ist der der 11. Buchung")
 	env.flow.free()
 
 
@@ -281,9 +280,9 @@ func _case_5() -> void:
 	_check(_count(env, "ship", "landing_blocked") == 1 and mission_root.is_air_support_craft_airborne("ship"), tag + "landing_blocked genau einmal, das Schiff schwebt weiter")
 	_run(env, 140.0)
 	_check(is_equal_approx(_fuel(env, "ship"), 0.0) and _fuel(env, "ship") >= 0.0, tag + "nach weiteren 240 s Rest 0.0, nie negativ (%s)" % str(_fuel(env, "ship")))
-	_check(_air_receipts(env).size() == 4, tag + "insgesamt genau 4 Buchungen (%d)" % _air_receipts(env).size())
+	_check(_air_receipts(env).size() == 1 and String(_air_receipts(env)[0]).contains(":4:r"), tag + "insgesamt genau 4 Buchungen (juengster beleg Schritt 4): " + str(_air_receipts(env)))
 	_run(env, 120.0)
-	_check(_air_receipts(env).size() == 4 and is_equal_approx(_fuel(env, "ship"), 0.0) and _count(env, "ship", "landing_blocked") == 1 and mission_root.is_air_support_craft_airborne("ship"), tag + "bei 0 keine Buchung mehr, kein Absturz, weiter genau ein landing_blocked")
+	_check(_air_receipts(env).size() == 1 and String(_air_receipts(env)[0]).contains(":4:r") and is_equal_approx(_fuel(env, "ship"), 0.0) and _count(env, "ship", "landing_blocked") == 1 and mission_root.is_air_support_craft_airborne("ship"), tag + "bei 0 keine Buchung mehr (Beleg unveraendert Schritt 4), kein Absturz, weiter genau ein landing_blocked")
 	var pose: Dictionary = env.fleet.get_flight_state("ship").get_snapshot()
 	_check(pose.position_plane.distance_to(_plane(Vector2i(10, 10))) <= 0.15, tag + "wartet ueber der Landezone")
 	env.transport.landing_clear = true
@@ -308,7 +307,7 @@ func _case_6() -> void:
 	var ids: Array = _air_receipts(env)
 	var distinct := {}
 	for id in ids: distinct[id] = true
-	_check(ids.size() == 4 and distinct.size() == 4, tag + "vier Buchungen mit vier verschiedenen Kennungen: " + str(ids))
+	_check(ids.size() == 2 and distinct.size() == 2 and str(ids).contains("air-fuel:ship:") and str(ids).contains("air-fuel:ship2:") and str(ids).contains(":2:r"), tag + "vier Buchungen (nach W1 je Schiff der juengste Beleg, Schritt 2) mit verschiedenen Kennungen: " + str(ids))
 	_check(_count(env, "ship", "fuel_warning") == 1 and _count(env, "ship2", "fuel_warning") == 1, tag + "jedes Schiff warnt einmal")
 	_check(_texts(env, "ship2", "fuel_warning") == ["ship2: Treibstoff 12 – reicht gerade noch für den Heimflug."], tag + "ohne Kartenname steht die Kennung im Text: " + str(_texts(env, "ship2", "fuel_warning")))
 	env.flow.free()
@@ -360,7 +359,8 @@ func _case_9() -> void:
 	_check(bool(again.get("ok", false)) and bool(again.get("replayed", false)) and is_equal_approx(supply.get_fuel("ship"), 13.0), tag + "gleiche Kennung zweimal: replayed, Rest nur einmal gesenkt")
 	var other_rev: Dictionary = supply.apply_command(_air_command("ship", 1.0, "air-fuel:ship:dep:1:1:r2"), ctx)
 	_check(bool(other_rev.get("ok", false)) and not other_rev.has("replayed") and is_equal_approx(supply.get_fuel("ship"), 12.0), tag + "gleiches Schiff, Abflug, Serial, Schritt, aber andere Revision: zieht ZWEIMAL ab (12.0)")
-	var conflict: Dictionary = supply.apply_command(_air_command("ship", 2.0, "air-fuel:ship:dep:1:1:r1"), ctx)
+	# Nachbesserung 1 (W1): nach der Buchung r2 ist der aeltere Beleg r1 desselben Schiffs weg; der juengste (r2) schuetzt weiter.
+	var conflict: Dictionary = supply.apply_command(_air_command("ship", 2.0, "air-fuel:ship:dep:1:1:r2"), ctx)
 	_check(not bool(conflict.get("ok", true)) and String(conflict.get("reason", "")) == "request_id_conflict" and is_equal_approx(supply.get_fuel("ship"), 12.0), tag + "dieselbe Kennung mit anderer Menge: request_id_conflict")
 	var unknown: Dictionary = supply.apply_command(_air_command("ghost", 1.0, "air-fuel:ghost:1"), ctx)
 	_check(not bool(unknown.get("ok", true)) and String(unknown.get("reason", "")) == "unknown_craft", tag + "unbekanntes Schiff: unknown_craft")
@@ -381,7 +381,7 @@ func _case_9() -> void:
 	var restored = SUPPLY.new()
 	restored.configure([], {})
 	var loaded: Dictionary = restored.restore_state(supply.export_state())
-	_check(bool(loaded.get("ok", false)) and is_equal_approx(restored.get_fuel("ship"), 12.0) and bool(restored.apply_command(_air_command("ship", 1.0, "air-fuel:ship:dep:1:1:r1"), ctx).get("replayed", false)), tag + "Beleg nach Speichern und Laden: Rest 12.0, gleiche Kennung bleibt replayed: " + str(loaded))
+	_check(bool(loaded.get("ok", false)) and is_equal_approx(restored.get_fuel("ship"), 12.0) and bool(restored.apply_command(_air_command("ship", 1.0, "air-fuel:ship:dep:1:1:r2"), ctx).get("replayed", false)), tag + "Beleg nach Speichern und Laden: Rest 12.0, die juengste Kennung bleibt replayed: " + str(loaded))
 
 
 ## Fall 10: scheitert der Rueckflug (Landezone beansprucht), wird bei jedem 0,2-s-Takt neu versucht; fuel_return kommt nur einmal.
@@ -434,6 +434,120 @@ func _case_11() -> void:
 	env.flow.free()
 
 
+## Alle Luftbelege eines Schiffs im Export der Versorgung (Kennungen).
+func _export_air_ids(supply: RefCounted, craft_id: String) -> Array:
+	var ids: Array = []
+	var requests: Dictionary = supply.export_state().requests
+	for request_id in requests:
+		if String(request_id).begins_with("air-fuel:") and String(Dictionary(requests[request_id].result).get("craft_id", "")) == craft_id: ids.append(String(request_id))
+	ids.sort()
+	return ids
+
+
+## Fall 12 (Nachbesserung 1, W1): je Schiff bleibt nur der juengste Luftbeleg; andere Belege bleiben; alte Staende mit vielen Luftbelegen laden.
+func _case_12() -> void:
+	var tag := "[12 Belege begrenzt] "
+	var supply = SUPPLY.new()
+	supply.configure([], {})
+	supply.register_craft("ship", 14.0)
+	supply.register_craft("ship2", 14.0)
+	var ctx := {"air_fuel_authorized":true}
+	var other := {"signature":"x", "result":{"ok":true}}
+	var requests: Dictionary = supply.get("_requests")
+	requests["other-receipt"] = other
+	for n in range(1, 11):
+		supply.apply_command(_air_command("ship", 1.0, "air-fuel:ship:dep:1:%d:r%d" % [n, n]), ctx)
+		if n <= 3: supply.apply_command(_air_command("ship2", 1.0, "air-fuel:ship2:dep:1:%d:r%d" % [n, n + 100]), ctx)
+	_check(_export_air_ids(supply, "ship") == ["air-fuel:ship:dep:1:10:r10"], tag + "nach 10 Buchungen genau ein Luftbeleg des Schiffs, der juengste: " + str(_export_air_ids(supply, "ship")))
+	_check(_export_air_ids(supply, "ship2") == ["air-fuel:ship2:dep:1:3:r103"], tag + "zwei Schiffe: das zweite hat ebenfalls genau einen, den juengsten: " + str(_export_air_ids(supply, "ship2")))
+	_check(Dictionary(supply.get("_requests")).has("other-receipt"), tag + "ein anderer Beleg bleibt unberuehrt")
+	var fuel_before: float = supply.get_fuel("ship")
+	var replay: Dictionary = supply.apply_command(_air_command("ship", 1.0, "air-fuel:ship:dep:1:10:r10"), ctx)
+	_check(bool(replay.get("replayed", false)) and is_equal_approx(supply.get_fuel("ship"), fuel_before) and is_equal_approx(fuel_before, 4.0), tag + "Wiederholung der letzten Kennung: replayed, kein zweiter Abzug (Rest %.1f)" % fuel_before)
+	# Ein alter Stand mit 30 Luftbelegen laedt unveraendert und schrumpft bei der naechsten Buchung.
+	var old = SUPPLY.new()
+	old.configure([], {})
+	old.register_craft("ship", 14.0)
+	var old_requests: Dictionary = old.get("_requests")
+	for n in range(1, 31):
+		var id := "air-fuel:ship:dep:1:%d:r%d" % [n, n]
+		old_requests[id] = {"signature":JSON.stringify({"operation":"consume_air_fuel", "payload":{"craft_id":"ship", "amount":1.0}}, "", true), "result":{"ok":true, "craft_id":"ship", "consumed":1.0, "fuel":14.0, "request_id":id, "operation":"consume_air_fuel"}}
+	var restored = SUPPLY.new()
+	restored.configure([], {})
+	var loaded: Dictionary = restored.restore_state(old.export_state())
+	_check(bool(loaded.get("ok", false)) and _export_air_ids(restored, "ship").size() == 30, tag + "Stand mit 30 alten Luftbelegen laedt unveraendert: " + str(loaded))
+	if bool(loaded.get("ok", false)):
+		restored.apply_command(_air_command("ship", 1.0, "air-fuel:ship:dep:2:1:r99"), ctx)
+		_check(_export_air_ids(restored, "ship") == ["air-fuel:ship:dep:2:1:r99"], tag + "bei der naechsten Buchung schrumpft er auf einen Beleg: " + str(_export_air_ids(restored, "ship").size()))
+
+
+const FUEL_STOP_TEXT := "Treibstoff reicht nur noch für den Abflug vom Ort – das Schiff landet."
+
+
+## Fall 13 (Nachbesserung 1, W2): im Treibstoff-Rueckflug lehnen Fliegen, Kreisen und Kreisen aus ab; der Rueckflug laeuft weiter.
+func _case_13() -> void:
+	var tag := "[13 Befehle im Treibstoff-Rueckflug] "
+	var env: Dictionary = _build(["ship"], {"ship":4.0})
+	var mission_root: Node = env.mission_root
+	_check(bool(_circle(env, "ship", Vector2i(10, 10), "cas", "f13").get("ok", false)), tag + "Aufbau: Kreisen")
+	_run(env, 60.0)
+	_check(String(_sortie(env, "ship").get("returning", "")) == "fuel" and _count(env, "ship", "fuel_return") == 1, tag + "Aufbau: Treibstoff-Rueckflug laeuft (returning fuel)")
+	var moved: Dictionary = mission_root.request_air_support_move({"craft_id":"ship", "target_hex":Vector2i(14, 10), "request_id":"w2m"})
+	var circled: Dictionary = _circle(env, "ship", Vector2i(12, 10), "cas", "w2c")
+	var cleared: Dictionary = mission_root.request_air_support_role_clear("ship", "w2r")
+	for pair in [["Fliegen", moved], ["Kreisen", circled], ["Kreisen aus", cleared]]:
+		var answer: Dictionary = pair[1]
+		_check(not bool(answer.get("ok", true)) and String(answer.get("reason", "")) == "air_fuel_low" and String(answer.get("message", "")) == FUEL_STOP_TEXT, tag + "%s abgelehnt mit air_fuel_low und Text: %s" % [pair[0], str(answer)])
+	_check(Dictionary(mission_root.get("_air_support_move_receipts")).is_empty() and Dictionary(mission_root.get("_air_role_receipts")).keys() == ["f13"] and Dictionary(_sortie(env, "ship").get("air_role", {"x":1})).is_empty(), tag + "kein Beleg, keine Rolle, kein Ziel gesetzt")
+	_run(env, 0.6)
+	_check(String(_sortie(env, "ship").get("returning", "")) == "fuel" and _count(env, "ship", "fuel_return") == 1 and _count(env, "ship", "landing_pending") == 1, tag + "der Rueckflug laeuft ungestoert weiter, fuel_return genau einmal")
+	_run(env, 40.0)
+	_check(not mission_root.is_air_support_craft_airborne("ship") and _count(env, "ship", "fuel_return") == 1, tag + "das Schiff landet, weiter genau ein fuel_return")
+	env.flow.free()
+
+
+## Fall 14 (Nachbesserung 1, K3): die Uhr laeuft auch ohne Rundbahn und bei blockierter Rundbahn.
+func _case_14() -> void:
+	var tag := "[14 Uhr ohne Rundbahn] "
+	var env: Dictionary = _build(["ship"], {"ship":14.0})
+	var mission_root: Node = env.mission_root
+	_check(bool(mission_root.request_air_support_takeoff("ship").get("ok", false)), tag + "Aufbau: Start von Hand (keine Rundbahn)")
+	env.transport.parked["ship"] = false
+	_run(env, 60.0)
+	_check(is_equal_approx(_fuel(env, "ship"), 13.0) and Array(_sortie(env, "ship").get("waypoints", [1])).is_empty(), tag + "schwebend ohne Rundbahn: nach 60 s eine Buchung (13.0)")
+	_check(bool(_circle(env, "ship", Vector2i(10, 10), "none", "f14").get("ok", false)), tag + "Aufbau: Kreisen")
+	_run(env, 1.0)
+	_check(bool(mission_root.request_air_support_role_clear("ship", "f14c").get("ok", false)) and Array(_sortie(env, "ship").get("waypoints", [1])).is_empty(), tag + "Kreisen aus: wieder ohne Rundbahn")
+	_run(env, 59.0)
+	_check(is_equal_approx(_fuel(env, "ship"), 12.0), tag + "auch nach Kreisen aus laeuft die Uhr (12.0)")
+	env.flow.free()
+	var env2: Dictionary = _build(["ship", "blocker"], {"ship":14.0}, {"ship":Vector2i(10, 10), "blocker":Vector2i(15, 15)})
+	var root2: Node = env2.mission_root
+	_check(bool(root2.request_air_support_takeoff("blocker").get("ok", false)), tag + "Aufbau 2: Blocker startet von Hand")
+	env2.transport.parked["blocker"] = false
+	_check(bool(_circle(env2, "ship", Vector2i(10, 10), "none", "f14b").get("ok", false)), tag + "Aufbau 2: Schiff kreist")
+	var cells: Array[Vector2i] = []
+	for q in range(5, 20):
+		for r in range(5, 20): cells.append(Vector2i(q, r))
+	_check(bool(env2.combat.record_navigation_claim("blocker", "atmosphere:" + LOC, cells).get("ok", false)), tag + "Aufbau 2: alle Felder beansprucht (Rundbahn blockiert)")
+	_run(env2, 120.0)
+	_check(_count(env2, "ship", "role_blocked") == 1 and is_equal_approx(_fuel(env2, "ship"), 12.0), tag + "Rundbahn blockiert: die Uhr laeuft weiter (12.0 nach 120 s), eine Blockiermeldung")
+	env2.flow.free()
+
+
+## Fall 15 (Nachbesserung 1, K2): scheitert eine Buchung, verfaellt die Minute nicht stumm (Zaehler _air_fuel_book_failures, push_warning).
+func _case_15() -> void:
+	var tag := "[15 Buchung scheitert] "
+	var env: Dictionary = _build(["ship"], {"ship":14.0})
+	var mission_root: Node = env.mission_root
+	mission_root.set("_air_role_data_cache", {"circle":{"radius_hex":4, "waypoint_switch_distance":1.0, "arrival_starts_ring":true}, "cas":{"protect_radius":8.0, "pursuit_limit":4.0, "target_poll_seconds":0.5}, "air_defense":{"protect_radius":8.0, "pursuit_limit":4.0}, "fuel":{"seconds_per_unit":60.0, "units_per_step":1000.0, "land_margin":1.0}})
+	_check(bool(_circle(env, "ship", Vector2i(10, 10), "none", "f15").get("ok", false)), tag + "Aufbau: Kreisen mit unsinniger Menge je Minute")
+	_run(env, 61.0)
+	var failures: Variant = mission_root.get("_air_fuel_book_failures")
+	_check(is_equal_approx(_fuel(env, "ship"), 14.0) and typeof(failures) == TYPE_INT and int(failures) == 1, tag + "die Buchung scheitert: Rest 14.0 und genau ein gezaehlter Fehlschlag (%s)" % str(failures))
+	env.flow.free()
+
+
 func _initialize() -> void:
 	_case_1()
 	_case_2()
@@ -445,5 +559,9 @@ func _initialize() -> void:
 	_case_9()
 	_case_10()
 	_case_11()
+	_case_12()
+	_case_13()
+	_case_14()
+	_case_15()
 	print("AIR_FUEL passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)

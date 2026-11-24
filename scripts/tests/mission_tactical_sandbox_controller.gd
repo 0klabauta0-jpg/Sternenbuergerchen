@@ -13754,7 +13754,9 @@ func _append_air_support_card_row(host: VBoxContainer, card: Dictionary) -> void
 	var simulation: Node = get_node_or_null("../SimulationRoot")
 	if host != null and host.get_node_or_null("AirSupportCardRow") != null:
 		var shown: Label = host.get_node_or_null("AirSupportFuelLabel") as Label
-		if shown != null: shown.text = _air_support_fuel_line(String(card.get("craft_id", "")))
+		if shown != null:
+			shown.text = _air_support_fuel_line(String(card.get("craft_id", "")))
+			shown.visible = not shown.text.is_empty()
 	if host == null or host.get_node_or_null("AirSupportCardRow") != null or not _is_air_support_offered(): return
 	var craft_id := String(card.get("craft_id", ""))
 	if craft_id.is_empty(): return
@@ -13767,6 +13769,7 @@ func _append_air_support_card_row(host: VBoxContainer, card: Dictionary) -> void
 	var fuel_label := Label.new()
 	fuel_label.name = "AirSupportFuelLabel"
 	fuel_label.text = _air_support_fuel_line(craft_id)
+	fuel_label.visible = not fuel_label.text.is_empty()
 	host.add_child(fuel_label)
 
 

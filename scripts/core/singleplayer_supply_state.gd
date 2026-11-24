@@ -221,7 +221,18 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		result["request_id"] = request_id
 		result["operation"] = String(command.operation)
 		_requests[request_id] = {"signature": signature, "result": result.duplicate(true)}
+		if String(command.operation) == "consume_air_fuel": _prune_air_fuel_receipts(String(result.get("craft_id", "")), request_id)
 	return result
+
+## Luftrollen 2, Nachbesserung 1: je Flugminute entsteht ein Beleg. Aeltere Luftbelege desselben Schiffs sind wertlos (die Revision in der Kennung
+## steigt streng); es bleibt nur der juengste, damit eine sofortige Wiederholung derselben Kennung weiter replayed ergibt. Andere Belege bleiben.
+func _prune_air_fuel_receipts(craft_id: String, keep_id: String) -> void:
+	var stale: Array[String] = []
+	for request_id: String in _requests:
+		if request_id == keep_id or not request_id.begins_with("air-fuel:"): continue
+		var old_result: Dictionary = Dictionary(_requests[request_id].get("result", {}))
+		if old_result.get("operation") == "consume_air_fuel" and String(old_result.get("craft_id", "")) == craft_id: stale.append(request_id)
+	for request_id in stale: _requests.erase(request_id)
 
 func get_purchase_receipt(request_id: String) -> Dictionary:
 	# Visual clients may read only the confirmed result, never mutate inventory.

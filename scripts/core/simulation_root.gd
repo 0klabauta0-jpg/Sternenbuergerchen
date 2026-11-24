@@ -8142,6 +8142,8 @@ var _air_role_receipts: Dictionary = {}
 var _air_role_poll := 0.0
 var _air_fuel_retry := 0.0
 var _air_target_poll := 0.0
+var _air_fuel_book_failures := 0
+const AIR_FUEL_STOP_TEXT := "Treibstoff reicht nur noch für den Abflug vom Ort – das Schiff landet."
 var _air_role_elapsed := 0.0
 var _air_sortie_serial := 0
 var _air_role_data_cache: Dictionary = {}
@@ -8393,6 +8395,7 @@ func request_air_support_move(command: Dictionary) -> Dictionary:
 		return {"ok":true, "replayed":true}
 	if _air_support_move_receipts.size() >= 4096: return {"ok":false, "reason":"receipt_capacity"}
 	if not _air_support_sorties.has(id): return {"ok":false, "reason":"sortie_unavailable"}
+	if _air_fuel_stop_active(id): return _air_fuel_stop_refusal()
 	var binding: Dictionary = _resolve_air_support_craft(id)
 	if not binding.get("ok", false): return binding
 	var pilot: Dictionary = _resolve_air_support_pilot(id)
@@ -8657,6 +8660,7 @@ func request_air_support_circle(command: Dictionary) -> Dictionary:
 		replay["replayed"] = true
 		return replay
 	if _air_role_receipts.size() >= 4096: return {"ok":false, "reason":"receipt_capacity"}
+	if _air_fuel_stop_active(id): return _air_fuel_stop_refusal()
 	var pilot: Dictionary = _resolve_air_support_pilot(id)
 	if not pilot.get("ok", false): return pilot
 	var binding: Dictionary = _resolve_air_support_craft(id)
@@ -8702,6 +8706,7 @@ func request_air_support_role_clear(craft_id: String, request_id: String) -> Dic
 	if craft_id.strip_edges().is_empty() or request_id.strip_edges().is_empty() or request_id.length() > 128: return {"ok":false, "reason":"invalid_command"}
 	var sortie: Dictionary = _air_support_sorties.get(craft_id, {})
 	if sortie.is_empty() or (Dictionary(sortie.get("air_role", {})).is_empty() and Array(sortie.get("waypoints", [])).is_empty() and String(sortie.get("returning", "")).is_empty()): return {"ok":true, "already_clear":true}
+	if _air_fuel_stop_active(craft_id): return _air_fuel_stop_refusal()
 	var binding: Dictionary = _resolve_air_support_craft(craft_id)
 	if not binding.get("ok", false): return binding
 	# Luftrollen 3: die Nase zeigt jetzt in Flugrichtung, gebremst wird nur noch mit dem schwachen Rueckwaertsschub. Haltepunkt daher ein Stueck voraus
@@ -8779,7 +8784,11 @@ func _air_departure_token() -> String:
 func _air_book_fuel(supply: RefCounted, craft_id: String, sortie: Dictionary, units: float) -> void:
 	sortie["fuel_steps"] = int(sortie.get("fuel_steps", 0)) + 1
 	var request_id := "air-fuel:%s:%s:%d:%d:r%d" % [craft_id, _air_departure_token(), int(sortie.get("sortie_serial", 0)), int(sortie.fuel_steps), int(supply.get_revision())]
-	supply.apply_command({"contract_category":"singleplayer_supply", "operation":"consume_air_fuel", "payload":{"craft_id":craft_id, "amount":units}, "request_id":request_id}, {"air_fuel_authorized":true})
+	var booked: Dictionary = supply.apply_command({"contract_category":"singleplayer_supply", "operation":"consume_air_fuel", "payload":{"craft_id":craft_id, "amount":units}, "request_id":request_id}, {"air_fuel_authorized":true})
+	if not booked.get("ok", false):
+		# Die Minute verfaellt wie bisher, aber nicht mehr stumm.
+		_air_fuel_book_failures += 1
+		push_warning("Luftrollen: Treibstoffbuchung fuer %s gescheitert (%s)" % [craft_id, String(booked.get("reason", "unbekannt"))])
 
 ## Treibstoffuhr: je Tick aus delta (Spielzeit), unabhaengig vom 0,2-s-Takt und von Rolle, Rundbahn und Pilot. Je volle 60 s eine Buchung (Rest 0: keine mehr).
 ## Nach jeder Buchung Warnung / Abbruch; scheitert der Abbruch (kein Weg), wird bei jedem 0,2-s-Takt neu versucht (Ereignis nur beim ersten Mal).
@@ -8805,6 +8814,13 @@ func _advance_air_fuel(delta: float) -> void:
 				booked = true
 		if booked or retry_due:
 			_air_fuel_evaluate(supply, craft_id, sortie, booked)
+
+## Luftrollen 2, Nachbesserung 1 (W2): im Treibstoff-Rueckflug lehnen Fliegen, Kreisen und Kreisen aus ab; der Rueckflug laeuft ungestoert weiter.
+func _air_fuel_stop_active(craft_id: String) -> bool:
+	return String(Dictionary(_air_support_sorties.get(craft_id, {})).get("returning", "")) == "fuel"
+
+func _air_fuel_stop_refusal() -> Dictionary:
+	return {"ok":false, "reason":"air_fuel_low", "message":AIR_FUEL_STOP_TEXT}
 
 func _air_fuel_evaluate(supply: RefCounted, craft_id: String, sortie: Dictionary, after_booking: bool) -> void:
 	var rest := float(supply.get_fuel(craft_id))
