@@ -5,7 +5,9 @@ const TILE=preload("res://scripts/terrain/terrain_tile_data.gd")
 const PLANNER=preload("res://scripts/tactical/bottleneck_reservation_resolver.gd")
 class CountingRegistry extends REGISTRY:
 	var processed_total:=0
+	var max_query_budget:=0
 	func get_hex_corridor_topology(points:Array,budget:int=64)->Dictionary:
+		max_query_budget=maxi(max_query_budget,budget)
 		var result:Dictionary=super.get_hex_corridor_topology(points,budget)
 		processed_total+=int(result.get("processed_nodes",0))
 		return result
@@ -134,10 +136,23 @@ func _initialize()->void:
 	var cold_ground=GROUND.new();cold_ground.configure(cold,"cold",0)
 	var cold_state:Dictionary={"schema":"hex_ground_v2","map_id":"cold","topology":"hex_axial_v1","tick":0,"terrain_revision":cold.get_revision(),"units":[{"unit_id":"first","grid":[5,0],"facing_dir":0,"posture_key":"standing"},{"unit_id":"second","grid":[5,10],"facing_dir":0,"posture_key":"standing"}],"active_segments":[],"centering":[],"passage_commitments":[{"cells":cold_cells[0],"unit_ids":["first"]},{"cells":cold_cells[1],"unit_ids":["second"]}]}
 	var cold_result:Dictionary=cold_ground.restore_state(cold_state)
-	check(cold_result.get("reason")=="ground_save_passage_topology_pending" and cold.processed_total<=64 and cold_ground.get_unit_ids().is_empty(),"Cold multicomponent restore shares one64 node budget without partial publish")
+	# Seit affc40ebc (14.11., "Checkpoint export/restore preparation") waermt Restore die Passage-Topologie vorab mit einem GEMEINSAMEN Budget von
+	# 8192 Knoten in Schritten zu je hoechstens 64 (hex_ground_runtime.gd, "normal tick queries retain 64 nodes"). Zwei kalte Komponenten mit
+	# zusammen 80 Knoten sind damit in EINEM Aufruf ganz wiederherstellbar; die alte Erwartung "pending nach 64 Knoten" gilt nicht mehr.
+	# Gleiche Aussagen wie vorher, am heutigen Wert festgemacht: jede Einzelabfrage hoechstens 64 Knoten, Gesamtarbeit genau die 80 Knoten,
+	# beide ganzen Komponenten veroeffentlicht.
+	check(cold_result.get("ok",false) and cold.processed_total==80 and cold.max_query_budget<=64 and cold_ground.get_unit_ids().size()==2,"Cold multicomponent restore shares one 8192 node preparation budget in 64 node steps and publishes both whole components")
 	cold.processed_total=0
-	check(cold_ground.restore_state(cold_state).get("ok",false) and cold.processed_total<=64,"Bounded retry completes remaining topology and restores both whole components")
+	check(cold_ground.restore_state(cold_state).get("ok",false) and cold.processed_total==0,"Repeated restore reuses the warmed topology without further node work")
 	cold.free()
+	# Ueber dem gemeinsamen Vorbereitungsbudget (8192 Knoten) bleibt die alte Schutzaussage bestehen: Rueckweisung ohne Teilveroeffentlichung.
+	var huge=CountingRegistry.new();huge.configure_iso_grid(Vector2.ZERO,64,32,"hex_axial_v1")
+	for q in range(8300):huge.register_tile(TILE.new({"tile_id":"huge%d"%q,"grid_position":Vector2i(q,0),"walkable":true}))
+	var huge_ground=GROUND.new();huge_ground.configure(huge,"huge",0)
+	var huge_state:Dictionary={"schema":"hex_ground_v2","map_id":"huge","topology":"hex_axial_v1","tick":0,"terrain_revision":huge.get_revision(),"units":[{"unit_id":"first","grid":[5,0],"facing_dir":0,"posture_key":"standing"}],"active_segments":[],"centering":[],"passage_commitments":[{"cells":[[5,0],[6,0]],"unit_ids":["first"]}]}
+	var huge_result:Dictionary=huge_ground.restore_state(huge_state)
+	check(huge_result.get("reason")=="ground_save_corridor_topology_budget" and huge.processed_total<=8192 and huge.max_query_budget<=64 and huge_ground.get_unit_ids().is_empty(),"Restore beyond the shared 8192 node preparation budget rejects with the budget reason and no partial publish")
+	huge.free()
 	var dynamic=GROUND.new();dynamic.configure(terrain,"save-fixture",2);assert(dynamic.restore_state(json_copy(saved)).ok)
 	var stale_receiver=GROUND.new();stale_receiver.configure(terrain,"save-fixture",2);assert(stale_receiver.restore_state(json_copy(saved)).ok)
 	for tile in terrain.get_all_tiles():tile.height_level=1

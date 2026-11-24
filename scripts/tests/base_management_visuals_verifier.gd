@@ -42,7 +42,9 @@ func _run()->void:
       count+=1
       check(action.card.is_visible_in_tree(),"visible action has visible card")
       check(root.get_visible_rect().grow(1).encloses(action.button.get_global_rect()),"real action fits visible viewport")
-    if section!="ship":check(count==(3 if section=="workshop" else 1),"existing action count preserved for "+section)
+    # Sollwerte Stand 24.11.2026 (vorher 1 Bauaktion, 3 Werkstattaktionen vom 10.11.): Bau = Zweites Landepad + Wohncontainer mit vier Betten
+    # (f8e667364, 23.11., Unterkunft B); Werkstatt = 11 x Herstellen + 5 x Entwickeln aus den gewachsenen Rezept- und Blaupausendaten; Daten = Hochladen.
+    if section!="ship":check(count==(16 if section=="workshop" else (2 if section=="build" else 1)),"existing action count preserved for "+section+" (observed "+str(count)+")")
     var card_ids:Array=services.get("_cards").get_children().map(func(node:Node):return node.get_instance_id())
     for i in 8:services.refresh()
     check(services.get("_cards").get_children().map(func(node:Node):return node.get_instance_id())==card_ids,"unchanged snapshots preserve service cards")
@@ -60,7 +62,9 @@ func _run()->void:
     check(board.get("_job_cards").get_child_count()==1,"Smart Mobile initially shows only the unlocked satellite mission")
     check(board.get("_details").get_global_rect().size.x>=250,"selected mission retains readable detail column")
     check(root.get_visible_rect().encloses(board.get("_accept").get_global_rect()),"first mission acceptance is visible without scrolling")
-    check(String(board.get("_details").text).contains("Glut (Planet)") and String(board.get("_objectives").text).contains("Absturzstelle finden"),"body destination and actual objective are distinct in briefing")
+    # Der Himmelskoerper heisst im Spiel Neralis (campaign_display_catalog.gd BODY_NAMES; auch review_completion_job_briefing_verifier), nicht mehr "Glut (Planet)".
+    var briefing_text:String=String(board.get("_details").text)
+    check(briefing_text.contains("Himmelskörper: Neralis (Mond)") and briefing_text.contains("Einsatzgebiet: Aschental") and not briefing_text.contains("Glut") and String(board.get("_objectives").text).contains("Satelliten-Absturzstelle finden"),"body destination and actual objective are distinct in briefing")
    if section=="inventory":
     check(presenter.get("_inventory_panel").get("_identity_portrait").is_visible_in_tree(),"original portrait is shown in shared identity and equipment card")
     check(drawer.size.x>=800,"equipment drawer is wider for the enlarged figure and slots")
@@ -71,7 +75,13 @@ func _run()->void:
     await RenderingServer.frame_post_draw
     DirAccess.make_dir_recursive_absolute("C:/dev/SternenBuergerchen/output/base_management_visuals_20261110")
     root.get_texture().get_image().save_png("C:/dev/SternenBuergerchen/output/base_management_visuals_20261110/%s_%d.png"%[section,resolution.x])
- check(supply.export_state()==initial,"visual navigation changes no supply or cargo")
+ # standing_clock ist die Spieluhr der Daueraufträge (6eb30e252, 24.11.; Flow tickt sie je Bild) und laeuft waehrend der Navigation weiter. Sie ist weder
+ # Vorrat noch Fracht: Sie darf nur vorwaerts laufen; jeder andere Eintrag (Credits, Bestand, Fracht, Sperren, Zaehler) muss unveraendert sein.
+ var after_state:Dictionary=supply.export_state().duplicate(true)
+ var clock_after:float=float(after_state.get("standing_clock",-1.0))
+ var clock_before:float=float(initial.get("standing_clock",0.0))
+ after_state["standing_clock"]=initial.get("standing_clock")
+ check(after_state==initial and clock_after>=clock_before,"visual navigation changes no supply or cargo")
  presenter.get("_flyout_close").pressed.emit()
  check(not bool(presenter.get("_right_flyout_active")) and String(presenter.get("_mode"))=="base","drawer closes back to the base")
  var floating:Control=flow.get("_singleplayer_services")
