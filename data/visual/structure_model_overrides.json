@@ -28,7 +28,7 @@
 				{"grid": [34, 28], "id": "habitat_bed_02", "rest_plane": [11.84, 4.825], "room_id": "habitat_cutaway_01", "rotation_y": -1.5707963267949, "sleep_plane": [11.84, 5.35], "sleep_y": 0.61, "surface_y": 0.4763}
 			],
 			"tv_model": [0.17, 0.165],
-			"block_note": "Gesperrt fuer Figuren (Ebene x, z, Breite, Tiefe): Aussenwaende, Trennwaende ausser der Tuerluecke (z 5,37 bis 5,865), Vorderwand ausser der Tuer (x 12,165 bis 12,765).",
+			"block_note": "Gesperrt fuer Figuren (Ebene x, z, Breite, Tiefe): Aussenwaende, Trennwaende ausser der Tuerluecke (z 5,37 bis 5,865), Vorderwand ausser der Tuer (x 12,165 bis 12,765). Moebel: Betten (x 10,565 bis 11,285), Tisch mit Stuehlen (x 12,34 bis 13,08, z 5,22 bis 5,84), Schrank rechts (x 13,70 bis 14,15, z 4,47 bis 5,96). Die Benutzen-Stellen personnel, jobs und die beiden Betten bleiben frei.",
 			"walk_note": "Innenraum des Pods wird fuer Figuren begehbar gemacht (die alte Habitat-Karte hatte dort nur eine kleine Insel).",
 			"walk_rects": [
 				[10.6, 4.76, 3.78, 1.92]
@@ -44,7 +44,9 @@
 				[10.28, 4.40, 0.28, 2.60],
 				[14.42, 4.40, 0.28, 2.60],
 				[10.28, 6.74, 1.885, 0.31],
-				[12.765, 6.74, 1.935, 0.31]
+				[12.765, 6.74, 1.935, 0.31],
+				[12.34, 5.22, 0.74, 0.62],
+				[13.70, 4.47, 0.45, 1.49]
 			]
 		},
 		{

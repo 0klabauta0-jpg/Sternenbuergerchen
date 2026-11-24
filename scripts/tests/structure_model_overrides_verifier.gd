@@ -237,6 +237,11 @@ func _check_replace(base: Control, stage: Node3D, layout: Dictionary, entry: Dic
 								bad += " Trennwand x=%.2f bei z=%.2f" % [wx, zc]
 				prev = cur
 			_check(bad.is_empty(), "Weg Eingang -> %s fuehrt nur durch Tuer und Tuerluecken (%d Punkte)%s" % [key, way.size(), (" FEHLER:" + bad) if not bad.is_empty() else ""])
+		# Moebel im Pod sind fuer Figuren gesperrt (Tisch mit Stuehlen, Betten, Schrank); die Wege oben bleiben frei.
+		var furniture: Dictionary = {"Tisch": Vector2(12.72, 5.52), "Stuhl vorn": Vector2(12.66, 5.64), "Stuhl links": Vector2(12.40, 5.34), "Stuhl rechts": Vector2(12.96, 5.33), "Bett 1": Vector2(10.92, 5.17), "Bett 2": Vector2(10.92, 5.98), "Schrank rechts": Vector2(13.92, 5.2)}
+		for fname in furniture:
+			var fcell: Vector2i = _plane_to_grid(furniture[fname])
+			_check(not bool(nav2.call("is_grid_open", fcell)), "Moebel gesperrt: %s (Zelle %s)" % [fname, str(fcell)])
 
 
 func _nav_of(base: Control) -> Object:
