@@ -1,0 +1,10 @@
+{
+  "lock_seconds": 480,
+  "orders": [
+    {"id": "freight:trade_outpost:c_benit", "kind": "freight", "origin": "trade_outpost", "destination": "satellite_crash", "item": "c_benit", "crates": 4, "pay": 30},
+    {"id": "freight:satellite_crash:b_benit", "kind": "freight", "origin": "satellite_crash", "destination": "trade_outpost", "item": "b_benit", "crates": 4, "pay": 30},
+    {"id": "mining:satellite_crash:a_benit", "kind": "mining", "origin": "satellite_crash", "item": "a_benit", "requires_item": "mining_tool", "pay_per_unit": 8, "playable": false},
+    {"id": "mining:trade_outpost:c_benit", "kind": "mining", "origin": "trade_outpost", "item": "c_benit", "requires_item": "mining_tool", "pay_per_unit": 8, "playable": false},
+    {"id": "salvage:satellite_crash:salvage", "kind": "salvage", "origin": "satellite_crash", "item": "salvage", "requires_item": "salvage_tool", "pay_per_unit": 8, "playable": false}
+  ]
+}

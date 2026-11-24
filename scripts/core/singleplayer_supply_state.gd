@@ -39,6 +39,10 @@ var _stock_by_offer_id: Dictionary = {}
 ## (alte Staende ohne ihn laden mit vollem Bestand).
 var _market: Dictionary = {}
 var _market_stock: Dictionary = {}
+## Dauerauftraege (Handel H3): eigener Besitzer, nur in der Kampagne angelegt (enable_standing_orders); null = es gibt ihn nicht (Skirmish).
+const STANDING_ORDERS = preload("res://scripts/core/standing_orders_state.gd")
+const STANDING_ORDERS_PATH := "res://data/singleplayer/standing_orders.json"
+var _standing_orders: RefCounted = null
 var _requests: Dictionary = {}
 var _reward_receipts: Dictionary = {}
 var _research_receipts: Dictionary = {}
@@ -670,7 +674,40 @@ func export_state() -> Dictionary:
 	if _ammo_start_granted: exported["ammo_start_granted"] = true
 	# Handel H2: Marktbestaende (additiver Schluessel; fehlt er, laedt der Stand mit vollem Bestand).
 	if not _market_stock.is_empty(): exported["market_stock"] = _market_stock.duplicate()
+	# Dauerauftraege (H3): Uhr, Sperren, laufende Auftraege und Zaehler; nur in der Kampagne, alle Schluessel optional.
+	if _standing_orders != null: exported.merge(_standing_orders.export_state())
 	return exported
+
+## Legt den Besitzer der Dauerauftraege an (nur Kampagne). Gibt false zurueck, wenn die Datendatei fehlt oder fehlerhaft ist.
+func enable_standing_orders() -> bool:
+	_standing_orders = _load_standing_orders()
+	return _standing_orders != null
+
+func get_standing_orders() -> RefCounted:
+	return _standing_orders
+
+## Anzeigenamen fuer die Texte der Dauerauftraege (vom Adapter, aus den vorhandenen Katalogen).
+func set_standing_orders_names(location_names: Dictionary, item_names: Dictionary) -> void:
+	if _standing_orders != null: _standing_orders.set_names(location_names, item_names)
+
+func advance_standing_clock(delta: float) -> void:
+	if _standing_orders != null: _standing_orders.advance_clock(delta)
+
+## Snapshot der Dauerauftraege; die Besitzpruefung zaehlt Basislager, Schiffe und Rucksaecke. Rechnet nur, wenn er abgefragt wird.
+func get_standing_orders_snapshot() -> Array:
+	if _standing_orders == null: return []
+	var owned: Dictionary = {}
+	for container_id: Variant in _inventory:
+		for item_id: Variant in Dictionary(Dictionary(_inventory[container_id]).get("items", {})):
+			owned[item_id] = int(owned.get(item_id, 0)) + int(_inventory[container_id].items[item_id])
+	return _standing_orders.get_snapshot(owned)
+
+func _load_standing_orders() -> RefCounted:
+	if not FileAccess.file_exists(STANDING_ORDERS_PATH): return null
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(STANDING_ORDERS_PATH))
+	var owner: RefCounted = STANDING_ORDERS.new()
+	if typeof(parsed) != TYPE_DICTIONARY or not owner.configure(parsed): return null
+	return owner
 
 func _export_state_base() -> Dictionary:
 	return {"schema_version":1,"definitions":_definitions.duplicate(true),"credits":_credits,"item_quantities":_item_quantities.duplicate(true),"fuel_by_craft_id":_fuel_by_craft_id.duplicate(true),"stock_by_offer_id":_stock_by_offer_id.duplicate(true),"requests":_requests.duplicate(true),"reward_receipts":_reward_receipts.duplicate(true),"revision":_revision,"inventory":_inventory_view(),"location_resources":_export_resources(),"research_receipts":_research_receipts.duplicate(true),"modular_capacity_baseline":_modular_capacity_baseline}
@@ -766,6 +803,10 @@ func restore_state(data: Dictionary) -> Dictionary:
 	for market_key: Variant in market_saved:
 		if market_full.has(market_key) and not _valid_integer(market_saved[market_key]):
 			return _reject("invalid_stock", "Marktbestand ungueltig")
+	# Dauerauftraege (H3): optionale Schluessel; fehlen sie, gilt Uhr 0 ohne Sperren. Eine Fehlform lehnt ab, auch wenn dieser Besitzer
+	# selbst keinen Dauerauftrags-Besitzer hat (Vorpruefung des Spielstands).
+	var standing_check: RefCounted = _standing_orders if _standing_orders != null else _load_standing_orders()
+	if standing_check != null and not standing_check.validate_state(data): return _reject("invalid_standing_orders", "Dauerauftraege ungueltig")
 	_reset_route_fuel_preparation()
 	_market = fresh._market.duplicate(true)
 	_market_stock = market_full.duplicate()
@@ -798,6 +839,7 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_open_tanker_cache_revision = -1
 	_revision = int(data.revision)
 	_ammo_start_granted = data.get("ammo_start_granted", false) == true
+	if _standing_orders != null: _standing_orders.restore_state(data)
 	_station_purchase_cache_revision = -1
 	# Stand von vor M2 tragen Fachgroesse 1: aus der Ruestung neu bestimmen, solange nichts verschoben werden muss. Den Ueberschuss
 	# ins Lager bucht erst `sync_compartments_after_load`, wenn der Loadout-Besitzer die Personen kennt (nie den Stand ablehnen).

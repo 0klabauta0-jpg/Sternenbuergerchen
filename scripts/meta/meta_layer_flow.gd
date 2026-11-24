@@ -470,6 +470,7 @@ func _process(_delta: float) -> void:
 	_poll_retired_terrain_workers()
 	_tick_personnel_recovery(_delta)
 	_tick_debt_interest(_delta)
+	if is_campaign_start() and is_instance_valid(_singleplayer_runtime): _singleplayer_runtime.call("advance_standing_clock", minf(_delta, PERSONNEL_RECOVERY_MAX_FRAME_SECONDS))  # Dauerauftraege (H3): durchgehende Uhr der Sperrzeiten
 	for craft_id in _space_approaches.keys():
 		if not _space_approaches.has(craft_id): continue
 		_space_approaches[craft_id].remaining=maxf(0.0,float(_space_approaches[craft_id].remaining)-_delta)
