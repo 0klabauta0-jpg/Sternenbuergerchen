@@ -735,7 +735,15 @@ func bind_mission_air_support(mission: Node) -> Dictionary:
 	if mission_root == null or _simulation == null: return {"ok":false, "reason":"runtime_unavailable"}
 	# M4e: nur in der Kampagne zaehlt der Magazinvorrat der Person auch im Einsatz (schmaler Verweis, kein Besitzerwechsel).
 	if (_campaign_mode or _skirmish_mode) and _supply != null and mission_root.has_method("bind_mission_magazine_supply"): mission_root.call("bind_mission_magazine_supply", _supply)
-	return mission_root.bind_air_support_source(_simulation, self, String(mission.get_meta("location_id", "")))
+	var bound: Dictionary = mission_root.bind_air_support_source(_simulation, self, String(mission.get_meta("location_id", "")))
+	# Luftrollen 4a: feindliche Flieger des Einsatzes (nur Kampagne; ohne Eintrag im Szenario aendert sich nichts).
+	if bound.get("ok", false) and _campaign_mode and mission_root.has_method("configure_enemy_aircraft"):
+		var setup: Node = mission.get_node_or_null("MissionSetup")
+		var scenario_path := String(setup.get("scenario_file_path")) if setup != null else ""
+		if not scenario_path.is_empty():
+			var scenario = load("res://scripts/mission/mission_scenario_data.gd").load_from_file(scenario_path)
+			if scenario != null: mission_root.call("configure_enemy_aircraft", scenario.get_enemy_aircraft_config())
+	return bound
 
 func get_campaign_entry_feedback() -> Dictionary:
 	return _encounter_entry_feedback.duplicate(true)

@@ -155,6 +155,18 @@
 			"warning_required_before_damage": true
 		},
 		"communication_intensity": "normal",
+		"enemy_aircraft": [
+			{
+				"aircraft_id": "pirate_buccaneer_1",
+				"delay_seconds": 20.0,
+				"faction_id": "pirates",
+				"model_id": "buccaneer",
+				"spawn_hex": {
+					"x": 40,
+					"y": 12
+				}
+			}
+		],
 		"fireteam_defaults": {
 			"advance_style": "bounding",
 			"security_mode": "360"

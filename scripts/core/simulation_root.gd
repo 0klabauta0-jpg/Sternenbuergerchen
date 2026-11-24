@@ -293,6 +293,7 @@ func _magazine_owner() -> RefCounted:
 
 func _exit_tree() -> void:
 	_mission_magazine_supply = null
+	_air_hostile_release_all()
 
 ## Fuehrt das Spiel fuer die Person einen Bestand? Kampagnen-Vorrat (eigener Behaelter) oder, seit M6a, Einsatz-Vorrat
 ## (Gegner, NPCs, Skirmish, Host); ohne beides (noch nie Bedarf gehabt) nein.
@@ -2101,7 +2102,7 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 		var flight: RefCounted = _space_combat_state.get_actor(craft_id)
 		var control: Dictionary = controls[craft_id]
 		if flight == null or flight.get_snapshot().motion_mode != "tactical":
-			if control.get("singleplayer_move", false) or control.get("air_support_move", false): _space_combat_state.clear_flight_control(craft_id)
+			if control.get("singleplayer_move", false) or control.get("air_support_move", false) or control.get("air_hostile_move", false): _space_combat_state.clear_flight_control(craft_id)
 			continue
 		# A synchronous area admission can publish at this same root tick just
 		# before the flight phase. Keep the command for the next newer tick.
@@ -2116,6 +2117,13 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 			if air_pose.position_plane.distance_to(control.goal.target_plane) < 0.02 and air_pose.velocity_plane.length() < 0.02:
 				_space_combat_state.clear_flight_control(craft_id)
 				_space_combat_state.set_flight_status(craft_id, {"ok":true, "reason":"arrived"})
+				continue
+		if control.get("air_hostile_move", false):
+			# Luftrollen 4a: feindlicher Flieger; die Lenkung gehoert dem Missionskern (Ziel wird dort laufend neu gesetzt, kein "arrived").
+			var hostile_mission: Node = control.mission_root.get_ref() if control.get("mission_root") is WeakRef else null
+			if not is_instance_valid(hostile_mission) or not hostile_mission._air_hostile_motion_context_valid(craft_id, self):
+				_space_combat_state.clear_flight_control(craft_id)
+				_space_combat_state.set_flight_status(craft_id, {"ok":false, "reason":"movement_context_changed"})
 				continue
 		if control.get("singleplayer_move", false):
 			var pose: Dictionary = flight.get_snapshot()
@@ -2143,7 +2151,7 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 				_space_combat_state.set_flight_status(craft_id, guidance)
 				continue
 			intent = guidance.intent
-			if control.get("air_support_move", false): intent["assist_mode"] = "coupled"
+			if control.get("air_support_move", false) or control.get("air_hostile_move", false): intent["assist_mode"] = "coupled"
 		var current_pose: Dictionary = flight.get_snapshot()
 		var environment := "atmosphere" if String(current_pose.get("space_area_id", "")).begins_with("atmosphere:") else "space"
 		var proposal: Dictionary = SPACE_FLIGHT_RESOLVER.step(current_pose, intent, control.hull, control.power, delta, environment)
@@ -2165,13 +2173,13 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 		var result: Dictionary = commit_space_fleet_motion(proposals, tick, group.world, {"runtime_authorized":true, "fixture":true, "internal_flight_tick":self})
 		if not result.get("ok", false):
 			for proposal in proposals:
-				if Dictionary(controls.get(proposal.craft_id, {})).get("singleplayer_move", false) or Dictionary(controls.get(proposal.craft_id, {})).get("air_support_move", false): _space_combat_state.clear_flight_control(proposal.craft_id)
+				if Dictionary(controls.get(proposal.craft_id, {})).get("singleplayer_move", false) or Dictionary(controls.get(proposal.craft_id, {})).get("air_support_move", false) or Dictionary(controls.get(proposal.craft_id, {})).get("air_hostile_move", false): _space_combat_state.clear_flight_control(proposal.craft_id)
 				_space_combat_state.set_flight_status(proposal.craft_id, result)
 			continue
 		for craft_id in result.accepted:
 			_space_combat_state.set_flight_status(craft_id, {"ok":true, "reason":""})
 		for craft_id in result.rejected:
-			if Dictionary(controls.get(craft_id, {})).get("singleplayer_move", false) or Dictionary(controls.get(craft_id, {})).get("air_support_move", false): _space_combat_state.clear_flight_control(craft_id)
+			if Dictionary(controls.get(craft_id, {})).get("singleplayer_move", false) or Dictionary(controls.get(craft_id, {})).get("air_support_move", false) or Dictionary(controls.get(craft_id, {})).get("air_hostile_move", false): _space_combat_state.clear_flight_control(craft_id)
 			_space_combat_state.set_flight_status(craft_id, {"ok":false, "reason":result.rejected[craft_id]})
 
 func enter_space_tactical(craft_id: String, tick: int, authority_context: Dictionary) -> Dictionary:
@@ -2265,7 +2273,7 @@ func commit_space_fleet_motion(proposals: Array[Dictionary], tick: int, world: D
 		if String(snapshot.space_area_id).begins_with("atmosphere:") and proposal.get("assist_mode", snapshot.assist_mode) != "coupled": return {"ok":false, "reason":"atmosphere_requires_coupled"}
 		if area.coordinate_frame == "local" and (authority_context.get("fixture") != true or not String(id).begins_with("space_fixture_")):
 			var own_control: Dictionary = _space_combat_state.get_flight_controls().get(id, {})
-			if authority_context.get("internal_flight_tick") != self or not (own_control.get("singleplayer_move", false) or own_control.get("air_support_move", false)): return {"ok":false, "reason":"local_area_not_ready"}
+			if authority_context.get("internal_flight_tick") != self or not (own_control.get("singleplayer_move", false) or own_control.get("air_support_move", false) or own_control.get("air_hostile_move", false)): return {"ok":false, "reason":"local_area_not_ready"}
 		if proposal.get("motion_mode", "tactical") != "tactical":
 			return {"ok": false, "reason": "invalid_motion_mode"}
 		var valid: Dictionary = flight.validate_motion(proposal, tick)
@@ -2298,7 +2306,7 @@ func commit_space_fleet_motion(proposals: Array[Dictionary], tick: int, world: D
 		if String(area.space_area_id).begins_with("atmosphere:"):
 			var control: Dictionary = _space_combat_state.get_flight_controls().get(id, {})
 			var mission: Node = control.mission_root.get_ref() if control.get("mission_root") is WeakRef else null
-			if not control.get("air_support_move", false) or not is_instance_valid(mission) or not mission._air_support_cells_on_map(swept_cells):
+			if not (control.get("air_support_move", false) or control.get("air_hostile_move", false)) or not is_instance_valid(mission) or not mission._air_support_cells_on_map(swept_cells):
 				clearance.rejected[id] = "map_edge"
 				accepted.erase(id)
 				continue
@@ -8251,7 +8259,7 @@ func get_air_support_radar_contacts(craft_id: String) -> Dictionary:
 		var pose: Dictionary = target.get_snapshot()
 		if pose.get("space_area_id") != result.space_area_id: continue
 		var axial: Vector2 = SPACE_GRID.HEX.plane_to_axial(pose.position_plane)
-		projections.append({"craft_id":contact_id, "position":origin + q * axial.x + r * axial.y})
+		projections.append({"craft_id":contact_id, "position":origin + q * axial.x + r * axial.y, "control_domain":String(binding.combat.get_metadata(contact_id).get("control_domain", ""))})
 	result["projections"] = projections
 	return result
 
@@ -8333,6 +8341,7 @@ func _begin_air_sortie(craft_id: String, arriving: bool, arrival_position: Vecto
 	var no_waypoints: Array[Vector2i] = []
 	_air_sortie_serial += 1
 	_air_support_sorties[craft_id] = {"flight":flight, "source":weakref(source), "previous_pose":old, "landing_position":position, "landing_grid":grid, "was_inactive":admission.was_inactive, "sortie_serial":_air_sortie_serial, "air_role":{}, "waypoints":no_waypoints, "waypoint_index":0, "role_target_id":"", "returning":"", "landing_blocked_reported":false, "fuel_seconds":0.0, "fuel_steps":0, "fuel_warned":false, "ring_blocked_seconds":0.0, "ring_blocked_reported":false}
+	_air_hostile_armed = true
 	if arriving and bool(_air_role_config("circle").get("arrival_starts_ring", false)): _air_start_arrival_ring(craft_id, grid)
 	return {"ok":true, "craft_id":craft_id}
 
@@ -8935,6 +8944,7 @@ func _air_reaim(craft_id: String, sortie: Dictionary, control: Dictionary) -> vo
 func _advance_air_roles(delta: float) -> void:
 	_advance_air_fuel(delta)
 	_advance_air_cas(delta)
+	_advance_air_hostile(delta)
 	_air_role_poll -= maxf(delta, 0.0)
 	_air_role_elapsed += maxf(delta, 0.0)
 	if _air_role_poll > 0.0: return
@@ -8997,6 +9007,210 @@ func _advance_air_roles(delta: float) -> void:
 			sortie["ring_blocked_seconds"] = 0.0
 			sortie["ring_blocked_reported"] = false
 		if not stepped_now and has_control and pilot_ok: _air_reaim(craft_id, sortie, controls[craft_id])
+
+## ---------------------------------------------------------------- Luftrollen 4a: feindlicher Flieger (Missionskern)
+## Eintraege aus tactical_authoring.enemy_aircraft (get_enemy_aircraft_config). Die Uhr laeuft erst nach dem ersten eigenen Start dieses
+## Einsatzes (_air_hostile_armed) und nur, solange ein eigenes Schiff fliegt; ohne Eintrag und ohne Gegner kehrt der Takt sofort zurueck.
+var _air_hostile_pending: Array = []
+var _air_hostile_ids: Array[String] = []
+var _air_hostile_state: Dictionary = {}
+var _air_hostile_configured := false
+var _air_hostile_armed := false
+var _air_hostile_clock := 0.0
+var _air_hostile_poll := 0.0
+var _air_hostile_retry := 0.0
+var _air_hostile_shot_serial := 0
+
+func configure_enemy_aircraft(entries: Array) -> Dictionary:
+	if _air_hostile_configured: return {"ok":true, "already_configured":true, "count":_air_hostile_pending.size() + _air_hostile_ids.size()}
+	var kept: Array = []
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY: continue
+		var entry: Dictionary = entry_variant
+		if String(entry.get("aircraft_id", "")).strip_edges().is_empty() or String(entry.get("model_id", "")).is_empty() or typeof(entry.get("spawn_hex")) != TYPE_VECTOR2I: continue
+		kept.append({"aircraft_id":String(entry.aircraft_id), "model_id":String(entry.model_id), "faction_id":String(entry.get("faction_id", "pirates")), "spawn_hex":entry.spawn_hex, "delay_seconds":maxf(float(entry.get("delay_seconds", 20.0)), 0.0)})
+	if kept.is_empty(): return {"ok":true, "count":0}
+	_air_hostile_configured = true
+	_air_hostile_pending = kept
+	return {"ok":true, "count":kept.size()}
+
+func _air_hostile_motion_context_valid(craft_id: String, source: Node) -> bool:
+	return _air_support_source != null and _air_support_source.get_ref() == source and _air_hostile_ids.has(craft_id)
+
+func _air_hostile_release_all() -> void:
+	if _air_hostile_ids.is_empty(): return
+	var source: Node = _air_support_source.get_ref() if _air_support_source != null else null
+	if is_instance_valid(source):
+		for id in _air_hostile_ids: source.call("remove_air_hostile", id)
+	_air_hostile_ids.clear()
+	_air_hostile_state.clear()
+	_air_hostile_pending.clear()
+
+## Eigene Schiffe in der Luft mit Rumpf > 0, sortiert.
+func _air_hostile_own_ships(combat: RefCounted) -> Array:
+	var own: Array = []
+	var ids: Array = _air_support_sorties.keys()
+	ids.sort()
+	for craft_id in ids:
+		if not is_air_support_craft_airborne(craft_id): continue
+		var systems: Dictionary = combat.get_ship_systems(craft_id)
+		if systems.is_empty() or float(systems.state.hull) <= 0.0: continue
+		own.append(craft_id)
+	return own
+
+func _air_hostile_nearest(combat: RefCounted, own: Array, from: Vector2) -> Dictionary:
+	var best := ""
+	var best_distance := INF
+	for craft_id in own:
+		var distance: float = from.distance_to(combat.get_actor(craft_id).get_snapshot().position_plane)
+		if distance < best_distance - 0.0001:
+			best = craft_id
+			best_distance = distance
+	return {"id":best, "distance":best_distance}
+
+func _air_hostile_spawn(source: Node, combat: RefCounted, entry: Dictionary) -> bool:
+	var equipment: RefCounted = source.get("_ship_equipment_owner")
+	if equipment == null: return false
+	var profile: Dictionary = equipment.get_model_flight_profile(String(entry.model_id))
+	if not profile.get("ok", false): return false
+	var spawn: Vector2i = entry.spawn_hex
+	var candidates: Array[Vector2i] = [spawn]
+	for radius in range(1, 4):
+		for q in range(-radius, radius + 1):
+			for r in range(-radius, radius + 1):
+				if SPACE_GRID.HEX.distance(Vector2i.ZERO, Vector2i(q, r)) == radius: candidates.append(spawn + Vector2i(q, r))
+	var heading := 0.0
+	var nearest: Dictionary = _air_hostile_nearest(combat, _air_hostile_own_ships(combat), SPACE_GRID.HEX.axial_to_plane(Vector2(spawn)))
+	if not String(nearest.id).is_empty(): heading = (combat.get_actor(nearest.id).get_snapshot().position_plane - SPACE_GRID.HEX.axial_to_plane(Vector2(spawn))).angle()
+	var spec := {"aircraft_id":entry.aircraft_id, "model_id":entry.model_id, "faction_id":entry.faction_id, "heading_rad":heading}
+	for cell in candidates:
+		var cells: Array = []
+		for offset: Vector2i in profile.footprint_hexes: cells.append(cell + offset)
+		if not _air_support_cells_on_map(cells): continue
+		if bool(source.call("admit_air_hostile", spec, "atmosphere:" + _air_support_location_id, cell, {"runtime_authorized":true}).get("ok", false)): return true
+	return false
+
+func _air_hostile_model_name(id: String) -> String:
+	return String(Dictionary(_air_hostile_state.get(id, {})).get("model_id", "")).capitalize()
+
+func _air_hostile_down(source: Node, combat: RefCounted, id: String) -> void:
+	var own: Array = _air_hostile_own_ships(combat)
+	_air_emit_role_event(String(own[0]) if not own.is_empty() else id, "hostile_down", "Piraten-%s abgeschossen." % _air_hostile_model_name(id))
+	source.call("remove_air_hostile", id)
+	_air_hostile_ids.erase(id)
+	_air_hostile_state.erase(id)
+
+## Erstes Erscheinen auf dem Radar eines eigenen Schiffs (einmal je Gegner).
+func _air_hostile_check_spotted(source: Node, id: String, own: Array) -> void:
+	if bool(Dictionary(_air_hostile_state.get(id, {})).get("spotted", false)): return
+	for craft_id in own:
+		var radar: Dictionary = source.call("get_space_radar_contacts", craft_id)
+		if radar.get("ok", false) and Array(radar.get("contacts", [])).has(id):
+			_air_hostile_state[id]["spotted"] = true
+			_air_emit_role_event(String(craft_id), "hostile_spotted", "Feindlicher Flieger gesichtet: %s." % _air_hostile_model_name(id))
+			return
+
+## Treffer auf ein eigenes Sortie-Schiff: Luftrumpf (AirAssetStatus) sinkt um den Rumpfschaden in Prozent; bei 0 der Abschuss wie beim Bodenbeschuss.
+func _air_hostile_hull_hit(craft_id: String, hull_damage: float, hull_capacity: float) -> void:
+	var points := maxi(ceili(hull_damage * 100.0 / maxf(hull_capacity, 1.0) - 0.000001), 1)
+	var label: String = _air_craft_label(craft_id)
+	var base_status: Dictionary = get_air_asset_status_snapshot(craft_id)
+	if base_status.is_empty(): base_status = {"asset_type":"dropship", "state":"intact", "integrity":100, "max_integrity":100}
+	base_status["asset_id"] = craft_id
+	if String(base_status.get("display_name", "")).is_empty(): base_status["display_name"] = label
+	var status = AIR_CRASH_STATUS.from_dict(base_status)
+	status.apply_damage(points, {"terminal_state":AIR_CRASH_STATUS.STATE_CRASHED})
+	var snapshot: Dictionary = status.to_snapshot()
+	var controller: Node = get_parent().get_node_or_null("TacticalController") if get_parent() != null else null
+	var texts: Array = []
+	if int(status.integrity) <= 0:
+		var skill := 0.0
+		for target: Dictionary in get_air_support_threat_targets():
+			if String(target.get("craft_id", "")) == craft_id and bool(target.get("pilot_known", false)): skill = float(target.get("pilot_skill", 0.0))
+		var down: Dictionary = resolve_air_shootdown(craft_id, skill, label, snapshot)
+		if down.get("ok", false):
+			snapshot = Dictionary(down.get("status", snapshot))
+			texts.append_array(Array(down.get("messages", [])))
+		else:
+			_apply_air_asset_status_update_effect({"effect_type":"air_asset_status_update", "status_snapshot":snapshot, "event_id":"air-hostile-hit:%s:%d" % [craft_id, tick_counter]})
+	else:
+		_apply_air_asset_status_update_effect({"effect_type":"air_asset_status_update", "status_snapshot":snapshot, "event_id":"air-hostile-hit:%s:%d" % [craft_id, tick_counter]})
+		texts.append("%s wird von einem feindlichen Flieger getroffen. Rumpf %d %%." % [label, int(status.integrity)])
+	if controller != null and controller.has_method("report_ground_fire_vs_air"): controller.call("report_ground_fire_vs_air", craft_id, snapshot, texts)
+
+## Ein Schuss einer Waffe des Gegners auf ein eigenes Schiff (Schiffsschuss im Kampagnenkern) samt Wirkung auf den Luftrumpf.
+func _air_hostile_shoot_slot(source: Node, hostile_id: String, target_id: String, slot: String) -> Dictionary:
+	_air_hostile_shot_serial += 1
+	var shot: Dictionary = source.call("resolve_local_ship_shot", hostile_id, target_id, slot, "air-hostile:%d:%s:%d:%s" % [get_instance_id(), hostile_id, _air_hostile_shot_serial, slot])
+	if not shot.get("ok", false): return shot
+	var hit_id := String(shot.event.get("hit_craft_id", ""))
+	var hull_damage := float(shot.impact.get("hull_damage", 0.0))
+	if hull_damage > 0.0 and _air_support_sorties.has(hit_id):
+		var systems: Dictionary = Dictionary(source.get("_space_combat_state").get_ship_systems(hit_id))
+		_air_hostile_hull_hit(hit_id, hull_damage, float(Dictionary(systems.get("state", {})).get("hull_capacity", 100.0)))
+	return shot
+
+func _air_hostile_step(source: Node, combat: RefCounted, id: String, config: Dictionary) -> void:
+	var flight: RefCounted = combat.get_actor(id)
+	var systems: Dictionary = combat.get_ship_systems(id)
+	if flight == null or systems.is_empty():
+		_air_hostile_ids.erase(id)
+		_air_hostile_state.erase(id)
+		return
+	if float(systems.state.hull) <= 0.0:
+		_air_hostile_down(source, combat, id)
+		return
+	var pose: Dictionary = flight.get_snapshot()
+	var own: Array = _air_hostile_own_ships(combat)
+	_air_hostile_check_spotted(source, id, own)
+	var nearest: Dictionary = _air_hostile_nearest(combat, own, pose.position_plane)
+	var control: Dictionary = Dictionary(combat.get_flight_controls().get(id, {}))
+	if String(nearest.id).is_empty() or float(nearest.distance) > float(config.get("sensor_range", 12.0)):
+		# Kein Ziel: Lage halten (bremsen, dann nichts mehr setzen).
+		if not control.is_empty() or pose.velocity_plane.length() > 0.05: source.call("set_air_hostile_control", id, {"target_plane":pose.position_plane}, self)
+		return
+	var target_id := String(nearest.id)
+	var target_plane: Vector2 = combat.get_actor(target_id).get_snapshot().position_plane
+	var away: Vector2 = pose.position_plane - target_plane
+	var point: Vector2 = target_plane + (away.normalized() if away.length() > 0.001 else Vector2.RIGHT) * float(config.get("standoff_hex", 6.0))
+	var old_goal: Dictionary = Dictionary(control.get("goal", {}))
+	if control.is_empty() or Vector2(old_goal.get("target_plane", Vector2.INF)).distance_to(point) > 0.25 or Vector2(old_goal.get("face_plane", Vector2.INF)).distance_to(target_plane) > 0.25:
+		source.call("set_air_hostile_control", id, {"target_plane":point, "face_plane":target_plane}, self)
+	var distance := float(nearest.distance)
+	for weapon: Dictionary in systems.stats.weapons:
+		var slot := String(weapon.slot_id)
+		if float(systems.cooldowns.get(slot, 0.0)) > 0.0 or distance > AIR_FLIGHT_ENV.weapon_range(float(weapon.range), String(pose.space_area_id)): continue
+		if absf(wrapf((target_plane - pose.position_plane).angle() - float(pose.heading_rad), -PI, PI)) > deg_to_rad(float(weapon.arc_degrees) * 0.5): continue
+		_air_hostile_shoot_slot(source, id, target_id, slot)
+
+## Takt im Physik-Tick (nur mit Sortie): Auftauchen nach Uhr, danach alle 0,2 s Verhalten (Anflug, Schuss, Abschuss, Sichtung).
+func _advance_air_hostile(delta: float) -> void:
+	if _air_hostile_pending.is_empty() and _air_hostile_ids.is_empty(): return
+	var source: Node = _air_support_source.get_ref() if _air_support_source != null else null
+	if not is_instance_valid(source): return
+	var combat: RefCounted = source.get("_space_combat_state")
+	if combat == null: return
+	var step := maxf(delta, 0.0)
+	if _air_hostile_armed and not _air_hostile_pending.is_empty():
+		_air_hostile_clock += step
+		_air_hostile_retry = maxf(_air_hostile_retry - step, 0.0)
+		for entry: Dictionary in _air_hostile_pending.duplicate():
+			if _air_hostile_clock < float(entry.delay_seconds) - 0.000001: continue
+			if _air_hostile_retry > 0.0: break
+			if _air_hostile_spawn(source, combat, entry):
+				_air_hostile_pending.erase(entry)
+				_air_hostile_ids.append(String(entry.aircraft_id))
+				_air_hostile_state[String(entry.aircraft_id)] = {"spotted":false, "model_id":String(entry.model_id)}
+				_air_hostile_poll = maxf(float(_air_role_config("hostile_aircraft").get("fire_poll_seconds", 0.2)), 0.05)
+			else:
+				_air_hostile_retry = 0.5
+				break
+	if _air_hostile_ids.is_empty(): return
+	_air_hostile_poll -= step
+	if _air_hostile_poll > 0.0: return
+	var config: Dictionary = _air_role_config("hostile_aircraft")
+	_air_hostile_poll = maxf(float(config.get("fire_poll_seconds", 0.2)), 0.05)
+	for id in _air_hostile_ids.duplicate(): _air_hostile_step(source, combat, id, config)
 
 func _advance_air_support_orders(delta: float) -> void:
 	if _air_support_sorties.is_empty(): return
@@ -9367,6 +9581,118 @@ func resolve_air_shootdown(craft_id: String, pilot_skill: float, display_name: S
 	_apply_air_asset_status_update_effect({"effect_type":"air_asset_status_update", "status_snapshot":snapshot, "event_id":"shootdown:%s:%d" % [craft_id, tick_counter]})
 	result["status"] = snapshot
 	return result
+
+## ---------------------------------------------------------------- Luftrollen 4a: feindlicher Flieger (Kampagnenkern)
+## Der Missionskern entscheidet, WANN und WO (configure_enemy_aircraft, Takt); diese Funktionen nehmen den Flieger auf,
+## setzen seine Lenkung und rechnen den Schiff-gegen-Schiff-Schuss in der Atmosphaere. Nur Gebiete "atmosphere:".
+const AIR_FLIGHT_ENV = preload("res://scripts/tactical/flight_environment.gd")
+## Modell je aufgenommenem feindlichem Flieger (die Lenkung liest daraus die Flugwerte).
+var _air_hostile_models: Dictionary = {}
+
+func admit_air_hostile(spec: Dictionary, area_id: String, cell: Vector2i, authority_context: Dictionary) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
+	if authority_context.get("runtime_authorized") != true: return {"ok":false, "reason":"runtime_authority_required"}
+	var id := String(spec.get("aircraft_id", ""))
+	var model := String(spec.get("model_id", ""))
+	var faction := String(spec.get("faction_id", "pirates"))
+	if id.strip_edges().is_empty() or faction.strip_edges().is_empty() or not area_id.begins_with("atmosphere:") or _ship_equipment_owner == null: return {"ok":false, "reason":"invalid_hostile"}
+	if _air_hostile_models.has(id) or _space_combat_state.get_actor(id) != null or _space_combat_state.get_inactive_actor(id) != null or not _space_combat_state.get_ship_systems(id).is_empty(): return {"ok":false, "reason":"hostile_exists"}
+	var profile: Dictionary = _ship_equipment_owner.get_model_flight_profile(model)
+	var stats: Dictionary = SPACE_COMPONENTS.effective_stats(model, SPACE_COMPONENTS.default_loadout(model))
+	if not profile.get("ok", false) or not stats.get("ok", false) or not SPACE_COMPONENT_SYSTEMS.initial(stats, float(stats.get("hull_capacity", 0.0))).get("ok", false): return {"ok":false, "reason":"invalid_ship_components"}
+	var flight: RefCounted = SPACE_FLIGHT_STATE.new()
+	if not flight.configure(id, {"position_plane":Vector2.ZERO}).get("ok", false): return {"ok":false, "reason":"invalid_ship"}
+	var proposal := {"expected_revision":0, "coordinate_frame":"local", "space_area_id":area_id, "position_plane":SPACE_GRID.HEX.axial_to_plane(Vector2(cell)), "velocity_plane":Vector2.ZERO, "heading_rad":float(spec.get("heading_rad", 0.0)), "angular_velocity":0.0, "assist_mode":"coupled", "motion_mode":"tactical", "mass":profile.mass}
+	var transition: Dictionary = flight.validate_area_transition(proposal, tick_counter + 1)
+	var admission: Dictionary = _space_combat_state.validate_new_local_admission({"craft_id":id, "faction_id":faction, "control_domain":"enemy", "footprint_hexes":profile.footprint_hexes}, flight, proposal, tick_counter + 1)
+	if not transition.get("ok", false) or not admission.get("ok", false): return {"ok":false, "reason":"hostile_admission_failed"}
+	flight._publish_area_transition(transition)
+	_space_combat_state._publish_new_local_admission(admission)
+	var installed: Dictionary = _space_combat_state.bind_ship_systems(id, stats, float(stats.hull_capacity))
+	assert(installed.get("ok", false))
+	_air_hostile_models[id] = model
+	return {"ok":true, "craft_id":id, "hull_capacity":float(stats.hull_capacity)}
+
+func remove_air_hostile(hostile_id: String) -> bool:
+	if not _air_hostile_models.has(hostile_id): return false
+	_air_hostile_models.erase(hostile_id)
+	return _space_combat_state.remove_actor(hostile_id)
+
+func set_air_hostile_control(hostile_id: String, goal: Dictionary, mission_root: Node) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
+	var flight: RefCounted = _space_combat_state.get_actor(hostile_id)
+	if not _air_hostile_models.has(hostile_id) or flight == null or not is_instance_valid(mission_root) or typeof(goal.get("target_plane")) != TYPE_VECTOR2: return {"ok":false, "reason":"hostile_unavailable"}
+	var profile: Dictionary = _ship_equipment_owner.get_model_flight_profile(String(_air_hostile_models[hostile_id])) if _ship_equipment_owner != null else {}
+	if not profile.get("ok", false): return {"ok":false, "reason":"flight_profile_unavailable"}
+	var pose: Dictionary = flight.get_snapshot()
+	# Wie _air_set_goal_plane: Karte, fremde Belegung, fremder Navigationsanspruch, Lenkung, Anspruch auf das Zielfeld.
+	var cells: Array[Vector2i] = _space_combat_state.preview_actor_cells(hostile_id, {"position_plane":goal.target_plane})
+	if cells.is_empty() or not mission_root._air_support_cells_on_map(cells): return {"ok":false, "reason":"invalid_target"}
+	for occupant in _space_combat_state.query_cells(cells, pose.space_area_id):
+		if occupant != hostile_id: return {"ok":false, "reason":"occupied"}
+	for claimant in _space_combat_state.query_navigation_claims(cells, pose.space_area_id):
+		if claimant != hostile_id: return {"ok":false, "reason":"navigation_claimed"}
+	var guidance: Dictionary = SPACE_GUIDANCE_RESOLVER.resolve(pose, goal, profile.hull, profile.power)
+	if not guidance.get("ok", false): return guidance
+	var claim: Dictionary = _space_combat_state.record_navigation_claim(hostile_id, pose.space_area_id, cells)
+	if not claim.get("ok", false): return claim
+	_space_combat_state.set_flight_control(hostile_id, {"goal":goal, "hull":profile.hull, "power":profile.power, "air_hostile_move":true, "mission_root":weakref(mission_root), "area_id":pose.space_area_id})
+	return {"ok":true}
+
+## Kern von request_singleplayer_space_fire ohne Rottenbefehl und Personalpruefung, nur fuer Gebiete "atmosphere:" (Schuetze und Ziel
+## im selben Gebiet, Fraktionen verschieden). Reichweite mit dem Atmosphaere-Faktor, Genauigkeit und Sensor aus data/combat/air_roles.json.
+## _space_fire_rng rueckt nur bei einem echten Schuss vor.
+func resolve_local_ship_shot(shooter_id: String, target_id: String, weapon_slot: String, event_id: String) -> Dictionary:
+	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
+	if shooter_id.strip_edges().is_empty() or target_id.strip_edges().is_empty() or weapon_slot.strip_edges().is_empty() or event_id.strip_edges().is_empty() or shooter_id == target_id: return {"ok":false, "reason":"invalid_command"}
+	var shooter: RefCounted = _space_combat_state.get_actor(shooter_id)
+	var target: RefCounted = _space_combat_state.get_actor(target_id)
+	if shooter == null or target == null: return {"ok":false, "reason":"unknown_actor"}
+	var pose: Dictionary = shooter.get_snapshot()
+	var target_pose: Dictionary = target.get_snapshot()
+	var area_id := String(pose.get("space_area_id", ""))
+	if not area_id.begins_with("atmosphere:") or pose.get("motion_mode") != "tactical" or target_pose.get("motion_mode") != "tactical" or target_pose.get("space_area_id") != area_id: return {"ok":false, "reason":"different_area"}
+	var shooter_faction := String(_space_combat_state.get_metadata(shooter_id).get("faction_id", ""))
+	var target_faction := String(_space_combat_state.get_metadata(target_id).get("faction_id", ""))
+	if shooter_faction.is_empty() or target_faction.is_empty() or shooter_faction == target_faction: return {"ok":false, "reason":"not_hostile"}
+	var source_systems: Dictionary = _space_combat_state.get_ship_systems(shooter_id)
+	var target_systems: Dictionary = _space_combat_state.get_ship_systems(target_id)
+	if source_systems.is_empty() or target_systems.is_empty() or float(source_systems.state.hull) <= 0.0 or float(target_systems.state.hull) <= 0.0: return {"ok":false, "reason":"systems_unavailable"}
+	var weapon := {}
+	for candidate: Dictionary in source_systems.stats.weapons:
+		if candidate.get("slot_id") == weapon_slot: weapon = candidate.duplicate(true); break
+	if weapon.is_empty(): return {"ok":false, "reason":"unknown_weapon"}
+	var config: Dictionary = _air_role_config("hostile_aircraft")
+	weapon["range"] = AIR_FLIGHT_ENV.weapon_range(float(weapon.range), area_id)
+	weapon["accuracy"] = clampf(float(config.get("accuracy", 1.0)), 0.0, 1.0)
+	var ids: Array = _space_combat_state.get_area_actor_ids(area_id)
+	if ids.size() > 256: return {"ok":false, "reason":"contact_capacity"}
+	var actors := {}
+	for actor_id: String in ids:
+		var actor: RefCounted = _space_combat_state.get_actor(actor_id)
+		if actor == null: continue
+		var p: Dictionary = actor.get_snapshot()
+		actors[actor_id] = {"id":actor_id, "position":p.position_plane, "heading_rad":p.heading_rad, "faction_id":String(_space_combat_state.get_metadata(actor_id).get("faction_id", "")), "area_id":area_id, "sensor_range":float(config.get("sensor_range", 12.0))}
+	if not actors.has(shooter_id) or not actors.has(target_id): return {"ok":false, "reason":"unknown_actor"}
+	var world := {"actors":actors, "opaque_cells":[]}
+	var contacts: Dictionary = SPACE_TARGETING.collect_contacts(world, shooter_faction)
+	if not contacts.get("ok", false): return contacts
+	world["known_targets"] = contacts.contacts
+	world["hostile_factions"] = [target_faction]
+	var start := SPACE_GRID.HEX.round_axial(SPACE_GRID.HEX.plane_to_axial(pose.position_plane))
+	var end := SPACE_GRID.HEX.round_axial(SPACE_GRID.HEX.plane_to_axial(target_pose.position_plane))
+	var occupied := {}
+	for cell: Vector2i in SPACE_GRID.HEX.line(start, end):
+		if not SPACE_AREA_GRID.contains(cell, pose): return {"ok":false, "reason":"line_blocked"}
+		var query: Array[Vector2i] = [cell]
+		occupied[cell] = _space_combat_state.query_cells(query, area_id)
+	world["occupants_by_cell"] = occupied
+	var proposal: Dictionary = SPACE_WEAPON.resolve_shot(actors[shooter_id], actors[target_id], weapon, {"fire_rule":"free"}, world, event_id, _space_fire_rng)
+	if not proposal.get("ok", false): return proposal
+	var hit: Dictionary = _space_combat_state._commit_ship_impact(proposal.event)
+	if not hit.get("ok", false): return hit
+	_space_fire_rng = int(proposal.rng_state)
+	return {"ok":true, "event":proposal.event.duplicate(true), "impact":hit.duplicate(true)}
 
 func bind_campaign_space_combat(ids: Dictionary, authority_context: Dictionary) -> Dictionary:
 	# Admission is a separate transaction; bind only existing authoritative
