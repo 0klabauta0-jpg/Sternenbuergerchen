@@ -5,7 +5,11 @@ extends RefCounted
 const CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
 const RNG = preload("res://scripts/core/gameplay_rng_state.gd")
 const COOLDOWN_FIELDS := ["_discipline_break_cooldown", "_misidentification_cooldown", "_medic_support_cooldown", "_recent_incoming_fire_tick_by_fireteam"]
-const BLOCKING_DICTS := ["_queued_bleedout_by_unit_id", "_down_state_started_tick_by_unit_id", "_detection_progress", "_enemy_patrol_paths_by_unit_id", "_enemy_security_states_by_group_id", "_enemy_team_tactics_states_by_group_id", "_mission_interaction_runtime_states", "_mission_scenario_runtime_step_states", "_combat_outcome_by_fire_event_id"]
+# Verbluten in Stufen (24.11.2026): "_down_state_started_tick_by_unit_id" sperrt das Speichern nicht mehr; der Ausfall-Tick steht im
+# Ausfallstand (casualty_flags.down_started_ticks). "_queued_bleedout_by_unit_id" bleibt in der Liste: er ist gesetzt, solange das eingereihte
+# Verbluten noch nicht gewirkt hat, und bei Einheiten mit Rueckkehr per Respawn (Skirmish, Mehrspieler) bis zum Respawn. Eigene Leute in
+# der Kampagne geben ihn mit dem Verbluten frei: eine Verblutete sperrt das Speichern nicht (Zustand steht im Einheiten-Stand).
+const BLOCKING_DICTS := ["_queued_bleedout_by_unit_id", "_detection_progress", "_enemy_patrol_paths_by_unit_id", "_enemy_security_states_by_group_id", "_enemy_team_tactics_states_by_group_id", "_mission_interaction_runtime_states", "_mission_scenario_runtime_step_states", "_combat_outcome_by_fire_event_id"]
 class PreparedLifecycle extends RefCounted:
 	pass
 var _preparations: Dictionary = {}
@@ -118,6 +122,8 @@ func _publish_restore(handle: RefCounted) -> void:
 	RNG.publish(sim, record.rng_streams)
 	sim._latest_command_token_by_unit_id=record.data.latest_tokens
 	sim._committed_command_token_by_unit_id=record.data.committed_tokens
+	# Reihenfolge ist noetig: erst der Tick, dann (unten) die Uhren. restore_casualty_state begrenzt einen Ausfall-Tick aus der Zukunft
+	# auf den aktuellen Tick; mit dem alten (kleineren) Tick davor wuerden sonst alle Uhren auf diesen alten Tick zurueckdatiert und liefen zu lang.
 	driver._current_tick=record.tick
 	driver._combat_startup_grace_ticks=record.data.startup_grace
 	driver._has_seen_active_friendly_units=record.data.seen_friendly

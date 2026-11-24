@@ -28,9 +28,9 @@ const APPROACH_STYLES: PackedStringArray = ["vorsichtig", "normal", "aggressiv"]
 const DEFAULT_APPROACH_STYLE := STYLE_NORMAL
 const STYLE_LABELS := {"vorsichtig": "Vorsichtig", "normal": "Normal", "aggressiv": "Aggressiv"}
 const STYLE_TOOLTIPS := {
-	"vorsichtig": "Tiefflug unter dem Radar; Landung ungenauer (Streukreis x 1,5).",
+	"vorsichtig": "Tiefflug unter dem Radar; Landung genauer (Streukreis x 0,75).",
 	"normal": "Normale Flughöhe.",
-	"aggressiv": "Normale Flughöhe.",
+	"aggressiv": "Normale Flughöhe; Landung ungenauer (Streukreis x 1,5).",
 }
 ## Approach path per mission craft (task LA, 2026-11-22): the second axis next to the style.
 ## Numbers live in data/combat/air_defense_units.json "approach_paths"; a missing block
@@ -191,10 +191,11 @@ static func decision_for_style(approach_style: String) -> String:
 	return AD.DECISION_PRESS_ON
 
 
-## Landing scatter radius factor: the low profile's lz_radius_factor, 1.0 otherwise.
+## Landing scatter radius factor per style from data "lz_radius_factor_by_style"
+## (vorsichtig 0.75, normal 1.0, aggressiv 1.5); 1.0 for a missing entry or block.
 static func lz_radius_factor_for_style(approach_style: String) -> float:
-	var profiles: Dictionary = Dictionary(AD.definition().get("approach_profiles", {}))
-	return float(Dictionary(profiles.get(profile_for_style(approach_style), {})).get("lz_radius_factor", 1.0))
+	var factors: Dictionary = Dictionary(AD.definition().get("lz_radius_factor_by_style", {}))
+	return float(factors.get(sanitize_style(approach_style), 1.0))
 
 
 ## Known path or "" for an unknown value (commands reject "", stored state falls back).

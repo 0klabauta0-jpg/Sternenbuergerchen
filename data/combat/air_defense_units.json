@@ -90,8 +90,9 @@
   },
   "approach_profiles": {
     "normal": {"clearance_levels": 6},
-    "low": {"clearance_levels": 1, "lz_radius_factor": 1.5}
+    "low": {"clearance_levels": 1}
   },
+  "lz_radius_factor_by_style": {"vorsichtig": 0.75, "normal": 1.0, "aggressiv": 1.5},
   "approach_paths": {
     "status": "provisional_la_2026_11_22",
     "accident": {"hull_loss_min_percent": 20, "hull_loss_max_percent": 40, "hull_floor_percent": 1},

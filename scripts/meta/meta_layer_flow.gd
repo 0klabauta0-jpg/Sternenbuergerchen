@@ -5721,6 +5721,8 @@ func _build_campaign_casualty_context(mission_instance: Node) -> Dictionary:
 	var driver: Node = mission_instance.get_node_or_null("CombatLoopDriver")
 	if driver != null and driver.has_method("get_casualty_flags"):
 		context["flags"] = Dictionary(driver.call("get_casualty_flags"))
+		# Verbluten in Stufen, N2: die Liegezeit je Person kommt aus der Uhr des Treibers (Ausfall-Tick).
+		context["driver"] = driver
 	var rules: Dictionary = _get_campaign_casualty_rules()
 	if rules.is_empty():
 		return context
@@ -5746,13 +5748,20 @@ func _campaign_casualty_fields_for_unit(unit: Node, unit_id: String, context: Di
 	if bool(context.get("ship_ok", false)) and unit is Node2D:
 		var position: Vector2 = _campaign_result_unit_position(unit as Node2D, unit_id, context)
 		near_ship = position.is_finite() and position.distance_to(Vector2(context.get("ship_position", Vector2.ZERO))) <= float(context.get("radius", 0.0))
-	return {
+	var fields: Dictionary = {
 		"was_downed": bool(flag.get("was_downed", false)),
 		"near_ship": near_ship,
 		"aboard": bool(unit.get_meta("dropship_embarked", false)),
 		# LC2b/W1: beim Absturz eines Schiffs gestorben (Merkmal am Akteur); classify_unit wertet es zuerst.
 		"killed_in_crash": bool(unit.get_meta("killed_in_crash", false)),
 	}
+	# Verbluten in Stufen, N2: Wer noch liegt, bringt seine Liegezeit mit; ohne Uhr (nicht ausgefallen, alter Stand) fehlt der Schluessel.
+	var driver: Variant = context.get("driver", null)
+	if driver is Node and (driver as Node).has_method("get_unit_down_seconds"):
+		var lying_seconds: float = float((driver as Node).call("get_unit_down_seconds", unit_id))
+		if lying_seconds >= 0.0:
+			fields["down_seconds"] = lying_seconds
+	return fields
 
 
 ## Dieselbe Positionsquelle wie request_campaign_crew_boarding: auf Hex-Karten der Hex-Zustand, sonst global_position.
