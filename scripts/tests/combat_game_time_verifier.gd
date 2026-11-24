@@ -97,7 +97,7 @@ func _test_down_linger_default() -> void:
 	driver.set("_current_tick", START_TICK + 10799)
 	_check(not bool(driver.call("_has_down_state_linger_elapsed", "unit_1", unit)), "Liegen: 10799 Ticks (180 s - 1) noch keine Stufe")
 	driver.set("_current_tick", START_TICK + 10800)
-	_check(bool(driver.call("_has_down_state_linger_elapsed", "unit_1", unit)) == STAGES.stage_hits(stage_list, 0, 0, "unit_1"), "Liegen: bei 10800 Ticks (180 s) wird Stufe 1 ausgewertet, ohne Wanduhrzeit (Ergebnis = zustandsloser Wurf)")
+	_check(bool(driver.call("_has_down_state_linger_elapsed", "unit_1", unit)) == STAGES.stage_hits(stage_list, 0, 0, "unit_1", START_TICK), "Liegen: bei 10800 Ticks (180 s) wird Stufe 1 ausgewertet, ohne Wanduhrzeit (Ergebnis = zustandsloser Wurf)")
 	driver.set("_current_tick", START_TICK + 23400)
 	_check(bool(driver.call("_has_down_state_linger_elapsed", "unit_1", unit)), "Liegen: bei 23400 Ticks (390 s) verblutet jede Person sicher")
 	rig.scene.free()

@@ -250,4 +250,5 @@ func _probe_lying_unit(s: Dictionary) -> void:
 	await create_timer(0.5).timeout
 	var critical: Dictionary = capture.capture_components(_flow, _runtime)
 	print("I4_PROBE critical hp=", pilot.call("get_health"), " vital=", pilot.call("get_vital_state"), " queued=", driver.get("_queued_bleedout_by_unit_id"), " capture_ok=", critical.get("ok"), " reason=", critical.get("reason"))
-	_check(not bool(critical.get("ok", false)), "I4 Messung: auch eine Kritische macht den Einsatz nicht speicherbar [%s]" % [critical.get("reason", "")])
+	# Nachbesserung 1 (W2): Wer verblutet ist und nicht zurueckkehrt (Kampagne), sperrt das Speichern nicht mehr.
+	_check(bool(critical.get("ok", false)) and String(pilot.call("get_vital_state")) == "bleedout" and Dictionary(driver.get("_queued_bleedout_by_unit_id")).is_empty(), "I4 Messung: auch eine Verblutete macht den Einsatz speicherbar, Zustand bleibt verblutet, Merker geleert [%s]" % [critical.get("reason", "")])

@@ -53,7 +53,6 @@ const AIM_READINESS_BASELINE_PERCENT: float = 50.0
 const AIM_READINESS_MAX_DELAY_DELTA_TICKS: int = 4
 const RECENT_FIRE_EVENT_TTL_TICKS: int = 72
 const MAX_RECENT_FIRE_EVENTS: int = 24
-const DOWN_STATE_VISIBLE_MIN_SECONDS: float = 3.0
 const TACTICAL_COMBAT_VISUAL_REFRESH_INTERVAL_MSEC: int = 160
 const COMBAT_HOTPATH_AUDIT_BUCKET_CELL_SIZE: float = 256.0
 const DETECTION_EVENT_COLOR: Color = Color(0.85, 0.85, 0.55, 1.0)
@@ -1029,7 +1028,7 @@ func get_combat_hotpath_audit_snapshot() -> Dictionary:
 		"last_fire_candidate_pair_scan_count": _last_fire_candidate_pair_scan_count,
 		"spatial_bucket_status": "diagnostic_next_step_not_runtime_filter",
 		"spatial_bucket_cell_size": COMBAT_HOTPATH_AUDIT_BUCKET_CELL_SIZE,
-		"down_linger_min_seconds": DOWN_STATE_VISIBLE_MIN_SECONDS,
+		"down_linger_min_seconds": float(BLEEDOUT_STAGES_SCRIPT.stages()[0].get("at_seconds", BLEEDOUT_STAGES_SCRIPT.FALLBACK_AT_SECONDS)),
 		"tactical_visual_refresh_interval_msec": TACTICAL_COMBAT_VISUAL_REFRESH_INTERVAL_MSEC,
 		"tactical_visual_refresh_count": _tactical_combat_visual_refresh_count,
 		"tactical_visual_refresh_pending": _tactical_combat_visual_refresh_pending,
@@ -1981,8 +1980,14 @@ func _poll_friendly_casualty_state(units: Array) -> void:
 		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
 		if unit_id.is_empty():
 			continue
-		if String(unit.call("get_vital_state")) != "fit":
+		var polled_state: String = String(unit.call("get_vital_state"))
+		if polled_state != "fit":
 			_was_downed_unit_ids[unit_id] = true
+			# Wie im Zweig "bleedout" von _on_unit_vital_status_changed (Einheiten, die erst nach _ready() registriert wurden,
+			# sind nicht verbunden): Verblutet und ohne Rueckkehr -> Merker und Uhr frei, das Speichern bleibt moeglich.
+			if polled_state == "bleedout" and not _unit_returns_by_respawn(unit) and (_queued_bleedout_by_unit_id.has(unit_id) or _down_state_started_tick_by_unit_id.has(unit_id)):
+				_queued_bleedout_by_unit_id.erase(unit_id)
+				_clear_down_state_linger(unit_id)
 		elif _down_state_started_tick_by_unit_id.has(unit_id):
 			_clear_down_state_linger(unit_id)
 			_queued_bleedout_by_unit_id.erase(unit_id)
@@ -2054,11 +2059,16 @@ func _has_down_state_linger_elapsed(unit_id: String, unit = null) -> bool:
 	var stage_list: Array = BLEEDOUT_STAGES_SCRIPT.stages()
 	var done: int = int(_bleedout_stages_done_by_unit_id.get(normalized_unit_id, 0))
 	var elapsed: int = _current_tick - started_tick
-	var mission_seed: int = _bleedout_mission_seed()
 	var silent: bool = _bleedout_silent_catchup_ids.has(normalized_unit_id)
 	var verdict: bool = false
+	var mission_seed: int = 0
+	var seed_read: bool = false
 	while done < stage_list.size() and elapsed >= BLEEDOUT_STAGES_SCRIPT.stage_ticks(stage_list[done]):
-		var hit: bool = BLEEDOUT_STAGES_SCRIPT.stage_hits(stage_list, done, mission_seed, normalized_unit_id)
+		if not seed_read:
+			# Nur wenn eine Stufe faellig ist (nicht in jedem Tick); der Ausfall-Tick gehoert zum Wurf (Seed ist im Spiel konstant).
+			mission_seed = _bleedout_mission_seed()
+			seed_read = true
+		var hit: bool = BLEEDOUT_STAGES_SCRIPT.stage_hits(stage_list, done, mission_seed, normalized_unit_id, started_tick)
 		done += 1
 		_bleedout_stages_done_by_unit_id[normalized_unit_id] = done
 		if hit:
@@ -2132,6 +2142,11 @@ func export_casualty_state() -> Dictionary:
 	return state
 
 
+## Ausfall-Tick im Stand: ganzzahliger Wert 0..1e12 (Ganzzahl oder ganzzahlige Kommazahl, wie im Lifecycle-Checkpoint).
+func _is_whole_tick(value: Variant) -> bool:
+	return typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)) and floor(float(value)) == float(value) and float(value) >= 0.0 and float(value) <= 1000000000000.0
+
+
 ## Prueft einen gespeicherten Ausfallzustand, ohne etwas zu aendern. allowed_unit_ids: die Personen, die im Einsatz sind.
 func validate_casualty_state(state: Variant, allowed_unit_ids: Array) -> Dictionary:
 	var has_ticks: bool = state is Dictionary and state.has("down_started_ticks")
@@ -2143,7 +2158,7 @@ func validate_casualty_state(state: Variant, allowed_unit_ids: Array) -> Diction
 			return {"ok": false, "reason": "invalid_mission_casualty_flags"}
 		for tick_id in state["down_started_ticks"]:
 			var tick_value = state["down_started_ticks"][tick_id]
-			if typeof(tick_id) != TYPE_STRING or String(tick_id).is_empty() or typeof(tick_value) != TYPE_INT or int(tick_value) < 0 or int(tick_value) > 1000000000000:
+			if typeof(tick_id) != TYPE_STRING or String(tick_id).is_empty() or not _is_whole_tick(tick_value):
 				return {"ok": false, "reason": "invalid_mission_casualty_flags"}
 	var ids: Array = state["was_downed_unit_ids"]
 	if ids.size() > allowed_unit_ids.size():
@@ -2169,14 +2184,15 @@ func restore_casualty_state(state: Variant, allowed_unit_ids: Array = []) -> Dic
 	for id in state["was_downed_unit_ids"]:
 		_was_downed_unit_ids[String(id)] = true
 	# Die Uhren der Liegenden laufen mit demselben Ausfall-Tick weiter; schon vergangene Stufen werden still nachgerechnet
-	# (kein zweiter "haelt durch"-Funkspruch). Fehlt der Schluessel (alter Stand), bleiben die Uhren leer wie bisher.
+	# (kein zweiter "haelt durch"-Funkspruch). Fehlt der Schluessel, lag beim Speichern niemand (oder alter Stand): vorhandene
+	# Uhren werden geleert. Ein Ausfall-Tick aus der Zukunft wird auf den aktuellen Tick begrenzt.
+	_down_state_started_tick_by_unit_id.clear()
+	_bleedout_stages_done_by_unit_id.clear()
+	_bleedout_silent_catchup_ids.clear()
 	if state.has("down_started_ticks"):
-		_down_state_started_tick_by_unit_id.clear()
-		_bleedout_stages_done_by_unit_id.clear()
-		_bleedout_silent_catchup_ids.clear()
 		for tick_id in state["down_started_ticks"]:
 			if allowed.has(String(tick_id)):
-				_down_state_started_tick_by_unit_id[String(tick_id)] = int(state["down_started_ticks"][tick_id])
+				_down_state_started_tick_by_unit_id[String(tick_id)] = mini(int(state["down_started_ticks"][tick_id]), _current_tick)
 				_bleedout_silent_catchup_ids[String(tick_id)] = true
 	return {"ok": true}
 
@@ -2186,18 +2202,25 @@ func _request_respawn_for_unit(unit, unit_id: String) -> void:
 	if respawn_manager == null or not respawn_manager.has_method("request_respawn"):
 		return
 
-	var unit_team_id: String = ""
-	if unit.has_method("get_team_id"):
-		unit_team_id = String(unit.call("get_team_id"))
+	if not _unit_returns_by_respawn(unit):
+		return
 
+	respawn_manager.call("request_respawn", unit_id, String(unit.call("get_team_id")))
+
+
+## Kehrt die Einheit nach dem Verbluten per Respawn zurueck? Eigene Leute in der Kampagne und Gegner mit endlicher Gegnerliste: nein.
+## Eine einzige Entscheidung fuer den Respawn und fuer das Aufraeumen des Verbluten-Merkers.
+func _unit_returns_by_respawn(unit) -> bool:
+	if unit == null or not unit.has_method("get_team_id"):
+		return false
+	var unit_team_id: String = String(unit.call("get_team_id"))
 	if unit_team_id.is_empty():
-		return
+		return false
 	if campaign_casualty_rules_enabled and unit_team_id == friendly_team_id:
-		return
+		return false
 	if _finite_enemy_roster and unit_team_id != friendly_team_id:
-		return
-
-	respawn_manager.call("request_respawn", unit_id, unit_team_id)
+		return false
+	return true
 
 
 ## LC6: Bodentruppen mit Raketenwerfer oder Schienenkanone beschiessen eigene Schiffe in der Luft. Eigener Takt je
@@ -4971,6 +4994,12 @@ func _on_unit_vital_status_changed(vital_status, unit) -> void:
 				unit.call("show_event_text", "BLEEDOUT", BLEEDOUT_EVENT_COLOR, 1.6)
 			_broadcast_remote_event("%s BLEEDOUT" % unit_id, unit_id, BLEEDOUT_EVENT_COLOR, 1.6, "BLEEDOUT")
 			_request_respawn_for_unit(unit, unit_id)
+			# Ohne Rueckkehr (Kampagne, endliche Gegnerliste) hat der Merker nach dem Verbluten keine Aufgabe mehr und die
+			# Uhr ist erledigt: das Speichern ist nicht gesperrt, der Stand traegt die Verblutete ueber den Einheiten-Zustand.
+			# Wer per Respawn zurueckkehrt, behaelt den Merker bis zum Respawn (der Respawn-Manager steht nicht im Spielstand).
+			if not _unit_returns_by_respawn(unit):
+				_queued_bleedout_by_unit_id.erase(unit_id)
+				_clear_down_state_linger(unit_id)
 		"respawning":
 			_set_event_text("%s RESPAWNING" % unit_id)
 			if unit.has_method("show_event_text"):

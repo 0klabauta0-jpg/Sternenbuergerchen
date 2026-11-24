@@ -4,7 +4,7 @@ extends RefCounted
 ## ({"version":1,"stages":[{"at_seconds":..,"chance":..}, ..]}, Sekunden in Spielzeit, 60 Ticks je Sekunde).
 ## Reine statische Hilfen ohne Zustand und ohne Szene. Der Wurf ist zustandslos und wiederholbar: er kommt nicht
 ## aus dem Gefechts-Zufallsstrom (der Trefferwuerfe), sondern aus einem festen Text-Seed (Einsatz-Seed,
-## Einheitenkennung, Stufennummer) - nach dem Muster der Einmal-Generatoren in air_defense_engagement.gd.
+## Einheitenkennung, Ausfall-Tick, Stufennummer) - nach dem Muster der Einmal-Generatoren in air_defense_engagement.gd.
 const DATA_PATH := "res://data/combat/bleedout_stages.json"
 const TICKS_PER_SECOND := 60
 const FALLBACK_AT_SECONDS := 390.0
@@ -67,21 +67,23 @@ static func stage_ticks(stage: Dictionary) -> int:
 	return int(ceil(float(stage.get("at_seconds", FALLBACK_AT_SECONDS)) * float(TICKS_PER_SECOND) - 0.000001))
 
 
-## Zustandsloser Wurf 0..1 aus Einsatz-Seed, Einheitenkennung und Stufennummer (0 = erste Stufe).
-static func roll(mission_seed: int, unit_id: String, stage_index: int) -> float:
+## Zustandsloser Wurf 0..1 aus Einsatz-Seed, Einheitenkennung, Ausfall-Tick und Stufennummer (0 = erste Stufe).
+## Der Ausfall-Tick gehoert dazu, weil der Einsatz-Seed im Spiel konstant ist: so wuerfelt dieselbe Kennung in jedem
+## Einsatz und bei jedem erneuten Ausfall neu. Der Tick steht im Spielstand, der Wurf bleibt wiederholbar.
+static func roll(mission_seed: int, unit_id: String, started_tick: int, stage_index: int) -> float:
 	var rng := RandomNumberGenerator.new()
-	rng.seed = _seed_to_int("%d:%s:%d:bleedout_stage" % [mission_seed, unit_id, stage_index])
+	rng.seed = _seed_to_int("%d:%s:%d:%d:bleedout_stage" % [mission_seed, unit_id, started_tick, stage_index])
 	return rng.randf()
 
 
 ## Trifft die Stufe? Wurf < Chance; Chance 1.0 trifft immer.
-static func stage_hits(stage_list: Array, stage_index: int, mission_seed: int, unit_id: String) -> bool:
+static func stage_hits(stage_list: Array, stage_index: int, mission_seed: int, unit_id: String, started_tick: int) -> bool:
 	if stage_index < 0 or stage_index >= stage_list.size():
 		return true
 	var chance: float = float(Dictionary(stage_list[stage_index]).get("chance", 1.0))
 	if chance >= 1.0:
 		return true
-	return roll(mission_seed, unit_id, stage_index) < chance
+	return roll(mission_seed, unit_id, started_tick, stage_index) < chance
 
 
 static func _seed_to_int(value: String) -> int:

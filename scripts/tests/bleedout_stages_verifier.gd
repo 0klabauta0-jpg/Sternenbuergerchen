@@ -48,6 +48,11 @@ func _process(_delta: float) -> bool:
 	_case_save_and_load()
 	_case_checkpoint_blocking_list()
 	_case_downed_enemies_count_as_eliminated()
+	_case_roll_depends_on_fall_tick()
+	_case_restore_rules()
+	_case_diagnostic_field()
+	_case_bleedout_does_not_block_saving()
+	_case_respawn_return_follows_bleedout()
 	print("BLEEDOUT_STAGES passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
 	return true
@@ -130,7 +135,7 @@ func _find_seed(unit_id: String, survive_stages: int) -> int:
 	for candidate in range(1, 20000):
 		var ok := true
 		for stage_index in range(survive_stages):
-			if STAGES.stage_hits(stage_list, stage_index, candidate, unit_id):
+			if STAGES.stage_hits(stage_list, stage_index, candidate, unit_id, T0):
 				ok = false
 				break
 		if ok:
@@ -138,10 +143,10 @@ func _find_seed(unit_id: String, survive_stages: int) -> int:
 	return -1
 
 
-func _find_hit_seed(unit_id: String) -> int:
+func _find_hit_seed(unit_id: String, started_tick: int = T0) -> int:
 	var stage_list: Array = STAGES.stages()
 	for candidate in range(1, 20000):
-		if STAGES.stage_hits(stage_list, 0, candidate, unit_id):
+		if STAGES.stage_hits(stage_list, 0, candidate, unit_id, started_tick):
 			return candidate
 	return -1
 
@@ -204,21 +209,21 @@ func _case_malformed_files_fall_back() -> void:
 
 
 func _case_roll_is_stateless() -> void:
-	var first: float = STAGES.roll(5, "u1", 0)
-	_check(first >= 0.0 and first < 1.0 and first == STAGES.roll(5, "u1", 0), "Wurf: im Bereich [0,1) und bei gleichen Angaben gleich")
+	var first: float = STAGES.roll(5, "u1", 700, 0)
+	_check(first >= 0.0 and first < 1.0 and first == STAGES.roll(5, "u1", 700, 0), "Wurf: im Bereich [0,1) und bei gleichen Angaben gleich")
 	var varied := false
 	for stage_index in range(1, 6):
-		varied = varied or STAGES.roll(5, "u1", stage_index) != first
-	_check(varied and STAGES.roll(6, "u1", 0) != first and STAGES.roll(5, "u2", 0) != first, "Wurf: andere Stufe, anderer Seed oder andere Kennung geben andere Werte")
+		varied = varied or STAGES.roll(5, "u1", 700, stage_index) != first
+	_check(varied and STAGES.roll(6, "u1", 700, 0) != first and STAGES.roll(5, "u2", 700, 0) != first and STAGES.roll(5, "u1", 701, 0) != first, "Wurf: andere Stufe, anderer Seed, andere Kennung oder anderer Ausfall-Tick geben andere Werte")
 	var stage_list: Array = STAGES.stages()
-	_check(STAGES.stage_hits(stage_list, 3, 1, "x") and STAGES.stage_hits(stage_list, 3, 999, "y"), "Wurf: die letzte Stufe (100 %) trifft immer")
+	_check(STAGES.stage_hits(stage_list, 3, 1, "x", 5) and STAGES.stage_hits(stage_list, 3, 999, "y", 9), "Wurf: die letzte Stufe (100 %) trifft immer")
 
 
 func _case_stage_one_share() -> void:
 	var stage_list: Array = STAGES.stages()
 	var hits := 0
 	for index in range(200):
-		if STAGES.stage_hits(stage_list, 0, 3, "unit_%d" % index):
+		if STAGES.stage_hits(stage_list, 0, 3, "unit_%d" % index, T0):
 			hits += 1
 	_check(hits >= 2 and hits <= 24, "Verteilung: bei 200 Kennungen verbluten in Stufe 1 zwischen 1 %% und 12 %% (%d)" % hits)
 
@@ -302,7 +307,7 @@ func _case_same_seed_same_course() -> void:
 
 
 func _case_heal_ends_clock() -> void:
-	var seed_value: int = _find_hit_seed(FRIEND_ID)
+	var seed_value: int = _find_hit_seed(FRIEND_ID, _tick_at(100.0))
 	var env := _build(seed_value)
 	var friend = env.friend
 	friend.call("apply_damage", 1000, {})
@@ -377,7 +382,7 @@ func _case_save_and_load() -> void:
 func _case_checkpoint_blocking_list() -> void:
 	var blocking: Array = CHECKPOINT.BLOCKING_DICTS
 	_check(not blocking.has("_down_state_started_tick_by_unit_id"), "Sperrliste: das Liege-Dictionary sperrt das Speichern nicht mehr")
-	_check(blocking.has("_queued_bleedout_by_unit_id") and blocking.size() == 8, "Sperrliste: der einen Tick lange Verbluten-Merker sperrt weiter, die uebrigen sieben bleiben (%d)" % blocking.size())
+	_check(blocking.has("_queued_bleedout_by_unit_id") and blocking.size() == 8, "Sperrliste: der Verbluten-Merker steht weiter drin (er sperrt bis der Effekt wirkt und bei Rueckkehr per Respawn bis dahin), die uebrigen sieben bleiben (%d)" % blocking.size())
 
 
 ## Gefechtsende: nur kampffaehige (fit) Gegner zaehlen; liegende gelten als ausgeschaltet, das Ende wird sofort erkannt.
@@ -386,4 +391,128 @@ func _case_downed_enemies_count_as_eliminated() -> void:
 	_check(not bool(env.driver.call("_is_enemy_team_eliminated")), "Gefechtsende: ein einsatzfaehiger Gegner -> nicht ausgeschaltet")
 	env.enemy.call("apply_damage", 1000, {})
 	_check(env.enemy.call("get_vital_state") == "down" and bool(env.driver.call("_is_enemy_team_eliminated")), "Gefechtsende: der letzte Gegner liegt (down) -> sofort ausgeschaltet, ohne Verbluten abzuwarten")
+	env.fixture.free()
+
+
+# ---- Nachbesserung 1 (24.11.2026) ---------------------------------------------------------------------------------
+
+## Setzt die Uhr der eigenen Person auf einen Ausfall-Tick und fragt Stufe 1 (genau bei 180 s danach).
+func _verdict_for_fall_tick(env: Dictionary, started: int) -> bool:
+	env.driver.call("_clear_down_state_linger", FRIEND_ID)
+	env.driver.get("_down_state_started_tick_by_unit_id")[FRIEND_ID] = started
+	env.driver.set("_current_tick", started + 10800)
+	return bool(env.driver.call("_has_down_state_linger_elapsed", FRIEND_ID, env.friend))
+
+
+## W1: Der Einsatz-Seed ist im Spiel immer 1. Dieselbe Kennung muss je Ausfall-Tick verschieden verbluten (heute 0 % oder 100 %).
+func _case_roll_depends_on_fall_tick() -> void:
+	var env := _build(1, true)
+	var hits := 0
+	var hit_tick := -1
+	var miss_tick := -1
+	for index in range(200):
+		var started: int = T0 + index * 37
+		if _verdict_for_fall_tick(env, started):
+			hits += 1
+			hit_tick = started if hit_tick < 0 else hit_tick
+		else:
+			miss_tick = started if miss_tick < 0 else miss_tick
+	_check(hits >= 2 and hits <= 24, "Ausfall-Tick: dieselbe Kennung, 200 Ausfall-Ticks, Stufe 1 -> zwischen 1 %% und 12 %% verbluten (%d)" % hits)
+	_check(hit_tick >= 0 and miss_tick >= 0 and _verdict_for_fall_tick(env, hit_tick) and not _verdict_for_fall_tick(env, miss_tick), "Ausfall-Tick: zwei verschiedene Ausfall-Ticks, zwei verschiedene Ergebnisse")
+	_check(_verdict_for_fall_tick(env, hit_tick) == _verdict_for_fall_tick(env, hit_tick) and _verdict_for_fall_tick(env, miss_tick) == _verdict_for_fall_tick(env, miss_tick), "Ausfall-Tick: gleicher Tick, gleiches Ergebnis")
+	var allowed: Array = [FRIEND_ID, ENEMY_ID]
+	var hit_env := _build(1, true)
+	hit_env.driver.set("_current_tick", hit_tick + 10800)
+	hit_env.driver.call("restore_casualty_state", {"was_downed_unit_ids": [], "down_started_ticks": {FRIEND_ID: hit_tick}}, allowed)
+	var miss_env := _build(1, true)
+	miss_env.driver.set("_current_tick", miss_tick + 10800)
+	miss_env.driver.call("restore_casualty_state", {"was_downed_unit_ids": [], "down_started_ticks": {FRIEND_ID: miss_tick}}, allowed)
+	_check(bool(hit_env.driver.call("_has_down_state_linger_elapsed", FRIEND_ID, hit_env.friend)) and not bool(miss_env.driver.call("_has_down_state_linger_elapsed", FRIEND_ID, miss_env.friend)), "Ausfall-Tick: Speichern/Laden aendert das Ergebnis nicht")
+	for each_env in [env, hit_env, miss_env]:
+		each_env.fixture.free()
+
+
+## K1/K2/K4: Laden raeumt alte Uhren, begrenzt einen Ausfall-Tick aus der Zukunft, nimmt ganzzahlige Kommazahlen wie der Checkpoint.
+func _case_restore_rules() -> void:
+	var allowed: Array = [FRIEND_ID, ENEMY_ID]
+	var env := _build(1, true)
+	env.driver.get("_down_state_started_tick_by_unit_id")[FRIEND_ID] = T0
+	env.driver.get("_bleedout_stages_done_by_unit_id")[FRIEND_ID] = 2
+	env.driver.get("_bleedout_silent_catchup_ids")[FRIEND_ID] = true
+	_check(bool(env.driver.call("restore_casualty_state", {"was_downed_unit_ids": []}, allowed).get("ok", false)), "K1: ein Stand ohne Uhren laedt")
+	_check(Dictionary(env.driver.get("_down_state_started_tick_by_unit_id")).is_empty() and Dictionary(env.driver.get("_bleedout_stages_done_by_unit_id")).is_empty() and Dictionary(env.driver.get("_bleedout_silent_catchup_ids")).is_empty(), "K1: fehlt der Schluessel, werden vorhandene Uhren, Stufenzaehler und Still-Merker geleert")
+	env.driver.set("_current_tick", T0 + 500)
+	env.driver.call("restore_casualty_state", {"was_downed_unit_ids": [], "down_started_ticks": {FRIEND_ID: T0 + 99999}}, allowed)
+	_check(Dictionary(env.driver.get("_down_state_started_tick_by_unit_id")).get(FRIEND_ID, -1) == T0 + 500, "K2: ein Ausfall-Tick in der Zukunft wird beim Laden auf den aktuellen Tick begrenzt (%s)" % str(env.driver.get("_down_state_started_tick_by_unit_id")))
+	env.driver.call("restore_casualty_state", {"was_downed_unit_ids": [], "down_started_ticks": {FRIEND_ID: T0 + 100}}, allowed)
+	_check(Dictionary(env.driver.get("_down_state_started_tick_by_unit_id")).get(FRIEND_ID, -1) == T0 + 100, "K2: ein Ausfall-Tick aus der Vergangenheit bleibt unveraendert")
+	var float_state := {"was_downed_unit_ids": [], "down_started_ticks": {FRIEND_ID: 12.0}}
+	_check(bool(env.driver.call("validate_casualty_state", float_state, allowed).get("ok", false)), "K4: ein ganzzahliger Wert 12.0 besteht die Pruefung (wie im Checkpoint)")
+	env.driver.set("_current_tick", T0 + 500)
+	env.driver.call("restore_casualty_state", float_state, allowed)
+	var stored = Dictionary(env.driver.get("_down_state_started_tick_by_unit_id")).get(FRIEND_ID, null)
+	_check(typeof(stored) == TYPE_INT and stored == 12, "K4: der Wert wird als Ganzzahl uebernommen (%s)" % str(stored))
+	_check(not bool(env.driver.call("validate_casualty_state", {"was_downed_unit_ids": [], "down_started_ticks": {FRIEND_ID: 1.0e13}}, allowed).get("ok", true)), "K4: zu grosse Kommazahl wird weiter abgelehnt")
+	env.fixture.free()
+
+
+## K5: Das Diagnosefeld meldet die Sekunden der ersten Stufe (nicht mehr 3 s).
+func _case_diagnostic_field() -> void:
+	var env := _build(1)
+	var audit: Dictionary = env.driver.call("get_combat_hotpath_audit_snapshot")
+	_check(audit.has("down_linger_min_seconds") and is_equal_approx(float(audit.get("down_linger_min_seconds", -1.0)), float(STAGES.stages()[0].at_seconds)), "K5: down_linger_min_seconds = Sekunden der ersten Stufe (%s)" % str(audit.get("down_linger_min_seconds", "fehlt")))
+	env.fixture.free()
+
+
+## W2: Wer verblutet ist, sperrt das Speichern nicht mehr (Kampagne, keine Rueckkehr); der Stand traegt die Verblutete weiter,
+## sie wird nicht neu gewuerfelt und nicht wieder zur Liegenden. Skirmish (Rueckkehr per Respawn): der Merker bleibt bis zum Respawn.
+func _case_bleedout_does_not_block_saving() -> void:
+	var seed_value: int = _find_hit_seed(FRIEND_ID)
+	var env := _build(seed_value, true)
+	env.friend.call("apply_damage", 1000, {})
+	env.driver.set("_current_tick", _tick_at(180.0))
+	env.driver.call("_queue_bleedout_for_downed_friendly", env.sim)
+	_check(_bleedout_effects(env) == 1 and Dictionary(env.driver.get("_queued_bleedout_by_unit_id")).has(FRIEND_ID), "Speichern nach Verbluten: Verbluten eingereiht, Merker gesetzt (sperrt bis der Effekt wirkt)")
+	env.friend.call("advance_bleedout")
+	_check(env.friend.call("get_vital_state") == "bleedout", "Speichern nach Verbluten: die Person ist verblutet")
+	_check(Dictionary(env.driver.get("_queued_bleedout_by_unit_id")).is_empty(), "Speichern nach Verbluten: Kampagne, keine Rueckkehr -> der Merker ist geleert, nichts sperrt mehr")
+	var state: Dictionary = env.driver.call("export_casualty_state")
+	_check(state == {"was_downed_unit_ids": [FRIEND_ID]}, "Speichern nach Verbluten: der Stand traegt nur den Ausfall-Merker, keine Uhr mehr (%s)" % str(state))
+	env.driver.set("_current_tick", _tick_at(400.0))
+	env.driver.call("_queue_bleedout_for_downed_friendly", env.sim)
+	_check(_bleedout_effects(env) == 1, "Speichern nach Verbluten: nicht doppelt gewuerfelt (weiterhin ein Verbluten)")
+	var env2 := _build(seed_value, true)
+	env2.friend.call("apply_damage", 1000, {})
+	env2.friend.call("advance_bleedout")
+	var resumed: Dictionary = env2.driver.call("restore_casualty_state", state, [FRIEND_ID, ENEMY_ID])
+	_check(bool(resumed.get("ok", false)) and Dictionary(env2.driver.get("_down_state_started_tick_by_unit_id")).is_empty(), "Speichern nach Verbluten: nach dem Laden keine Uhr, nicht wieder liegend")
+	_check(Dictionary(env2.driver.get_casualty_flags()).get(FRIEND_ID, {}).get("was_downed", false) == true, "Speichern nach Verbluten: der Ausfall-Merker bleibt fuer das Einsatzergebnis")
+	env2.driver.set("_current_tick", _tick_at(500.0))
+	env2.driver.call("_queue_bleedout_for_downed_friendly", env2.sim)
+	_check(_bleedout_effects(env2) == 0, "Speichern nach Verbluten: nach dem Laden wird nichts erneut eingereiht")
+	env.fixture.free()
+	env2.fixture.free()
+	var skirmish := _build(seed_value, false)
+	skirmish.friend.call("apply_damage", 1000, {})
+	skirmish.driver.set("_current_tick", _tick_at(180.0))
+	skirmish.driver.call("_queue_bleedout_for_downed_friendly", skirmish.sim)
+	skirmish.friend.call("advance_bleedout")
+	_check(Dictionary(skirmish.driver.get("_queued_bleedout_by_unit_id")).has(FRIEND_ID), "Skirmish: wer per Respawn zurueckkehrt, behaelt den Merker bis zum Respawn (unveraendert)")
+	skirmish.driver.call("_on_unit_respawn_completed", FRIEND_ID)
+	_check(Dictionary(skirmish.driver.get("_queued_bleedout_by_unit_id")).is_empty(), "Skirmish: nach dem Respawn ist der Merker geleert")
+	skirmish.fixture.free()
+
+
+## Wunsch des Besitzers (24.11. 09:10): Auch im Skirmish und Mehrspieler gilt die Stufenregel. Wer per Respawn zurueckkehrt,
+## ist 63 s nach dem Ausfall NOCH NICHT zurueck, sondern liegt; die Rueckkehr beginnt erst nach dem Verbluten plus Rueckkehrzeit.
+func _case_respawn_return_follows_bleedout() -> void:
+	var env := _build(_find_hit_seed(FRIEND_ID), false)
+	env.friend.call("apply_damage", 1000, {})
+	env.driver.set("_current_tick", _tick_at(63.0))
+	env.driver.call("_queue_bleedout_for_downed_friendly", env.sim)
+	_check(env.friend.call("get_vital_state") == "down" and _bleedout_effects(env) == 0, "Rueckkehr: 63 s nach dem Ausfall liegt die Person noch (down), kein Verbluten, keine Rueckkehr")
+	var return_seconds: float = float(preload("res://scripts/core/respawn_manager.gd").RESPAWN_TIME_ROVER)
+	env.driver.set("_current_tick", _tick_at(180.0))
+	env.driver.call("_queue_bleedout_for_downed_friendly", env.sim)
+	_check(_bleedout_effects(env) == 1 and return_seconds == 60.0, "Rueckkehr: das Verbluten kommt mit der ersten Stufe (180 s); die Rueckkehr beginnt erst danach und dauert %d s -> fruehestens bei 240 s" % int(return_seconds))
 	env.fixture.free()
