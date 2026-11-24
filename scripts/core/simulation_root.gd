@@ -2114,7 +2114,7 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 				_space_combat_state.set_flight_status(craft_id, {"ok":false, "reason":"movement_context_changed"})
 				continue
 			var air_pose: Dictionary = flight.get_snapshot()
-			if air_pose.position_plane.distance_to(control.goal.target_plane) < 0.02 and air_pose.velocity_plane.length() < 0.02:
+			if air_pose.position_plane.distance_to(control.goal.target_plane) < 0.02 and air_pose.velocity_plane.length() < 0.02 and not _air_goal_still_turning(air_pose, control.goal):
 				_space_combat_state.clear_flight_control(craft_id)
 				_space_combat_state.set_flight_status(craft_id, {"ok":true, "reason":"arrived"})
 				continue
@@ -2179,8 +2179,25 @@ func _advance_space_flights(delta: float, tick: int) -> void:
 		for craft_id in result.accepted:
 			_space_combat_state.set_flight_status(craft_id, {"ok":true, "reason":""})
 		for craft_id in result.rejected:
+			if result.rejected[craft_id] == "map_edge" and Dictionary(controls.get(craft_id, {})).get("air_support_move", false): _air_emergency_stop(craft_id, tick)
 			if Dictionary(controls.get(craft_id, {})).get("singleplayer_move", false) or Dictionary(controls.get(craft_id, {})).get("air_support_move", false) or Dictionary(controls.get(craft_id, {})).get("air_hostile_move", false): _space_combat_state.clear_flight_control(craft_id)
 			_space_combat_state.set_flight_status(craft_id, {"ok":false, "reason":result.rejected[craft_id]})
+
+## Luftrollen 3, Nachbesserung 2 (K1): ein Ziel mit face_plane auf der eigenen Stelle (Zielen im Schweben) gilt erst als angekommen, wenn die Nase steht (3 Grad).
+func _air_goal_still_turning(pose: Dictionary, goal: Dictionary) -> bool:
+	var face: Variant = goal.get("face_plane")
+	if typeof(face) != TYPE_VECTOR2 or not face.is_finite(): return false
+	var aim: Vector2 = face - Vector2(pose.position_plane)
+	return aim.length_squared() > 0.000001 and absf(wrapf(aim.angle() - float(pose.heading_rad), -PI, PI)) > deg_to_rad(3.0)
+
+## Luftrollen 3, Nachbesserung 2 (A): ein am Kartenrand abgelehnter Flugschritt eines Luftrollen-Schiffs laesst Lage, Tempo und Drall sonst unveraendert und der
+## naechste Schritt ragt wieder ueber den Rand. Notbremse: die jetzige (schon angenommene) Lage gilt mit Tempo 0 und Drall 0.
+func _air_emergency_stop(craft_id: String, tick: int) -> void:
+	var flight: RefCounted = _space_combat_state.get_actor(craft_id)
+	if flight == null: return
+	var pose: Dictionary = flight.get_snapshot()
+	if pose.get("motion_mode") != "tactical" or int(pose.get("tick", -1)) >= tick: return
+	flight.commit_motion({"expected_revision":pose.revision, "velocity_plane":Vector2.ZERO, "angular_velocity":0.0}, tick)
 
 func enter_space_tactical(craft_id: String, tick: int, authority_context: Dictionary) -> Dictionary:
 	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}
@@ -8469,6 +8486,13 @@ func _air_turned_cells(binding: Dictionary, id: String, pose: Dictionary, target
 	if aim.length_squared() <= 0.000001: return none
 	var turned: Array[Vector2i] = binding.combat.preview_actor_cells(id, {"position_plane":target_plane, "heading_rad":aim.angle()})
 	if turned.is_empty() or not _air_support_cells_on_map(turned): return none
+	# Nachbesserung 2 (A): der Flugschritt prueft die Huelle samt Rand (_sweep), nicht nur den Fussabdruck; dieselbe Pruefung am Zielplatz, sonst gilt er nicht als frei.
+	var profile: Dictionary = binding.equipment.get_space_flight_profile(id)
+	if profile.get("ok", false):
+		var at_goal: Dictionary = pose.duplicate()
+		at_goal.merge({"position_plane":target_plane, "heading_rad":aim.angle(), "footprint_hexes":profile.footprint_hexes}, true)
+		var swept: Dictionary = SPACE_NAVIGATION.preview_swept_cells(at_goal, at_goal)
+		if not swept.get("ok", false) or not _air_support_cells_on_map(swept.cells): return none
 	for occupant in binding.combat.query_cells(turned, pose.space_area_id):
 		if occupant != id: return none
 	for claimant in binding.combat.query_navigation_claims(turned, pose.space_area_id):
@@ -8712,7 +8736,7 @@ func request_air_support_circle(command: Dictionary) -> Dictionary:
 	var result := {"ok":true, "replayed":false, "craft_id":id, "role":role, "center_hex":center, "waypoint_index":int(ring.waypoint_index), "took_off":took_off, "message":message}
 	_air_role_receipts[request_id] = {"signature":signature, "result":result.duplicate(true)}
 	# Rolle neu gesetzt: ein Feuerhalt des Spielers (cas_hold) endet.
-	for key in ["cas_hold", "cas_hold_reported", "break_off_blocked_reported"]: Dictionary(_air_support_sorties.get(id, {})).erase(key)
+	for key in ["cas_hold", "cas_hold_reported", "break_off_blocked_reported", "break_off_stopped"]: Dictionary(_air_support_sorties.get(id, {})).erase(key)
 	_air_emit_role_event(id, "role_started", message)
 	return result
 
@@ -8756,9 +8780,9 @@ func _air_brake_offset(binding: Dictionary, craft_id: String, pose: Dictionary) 
 
 func get_air_support_role_snapshot(craft_id: String) -> Dictionary:
 	var sortie: Dictionary = _air_support_sorties.get(craft_id, {})
-	if sortie.is_empty(): return {"ok":false, "airborne":false, "role":"", "center_hex":null, "waypoint_index":0, "target_id":"", "returning":"", "fuel":_air_fuel_rest(craft_id), "fuel_warned":false}
+	if sortie.is_empty(): return {"ok":false, "airborne":false, "role":"", "center_hex":null, "waypoint_index":0, "target_id":"", "returning":"", "fuel":_air_fuel_rest(craft_id), "fuel_warned":false, "cas_hold":false}
 	var role: Dictionary = sortie.get("air_role", {})
-	return {"ok":true, "airborne":is_air_support_craft_airborne(craft_id), "role":String(role.get("role", "")), "center_hex":role.get("center_hex"), "waypoint_index":int(sortie.get("waypoint_index", 0)), "target_id":String(sortie.get("role_target_id", "")), "returning":String(sortie.get("returning", "")), "fuel":_air_fuel_rest(craft_id), "fuel_warned":bool(sortie.get("fuel_warned", false))}
+	return {"ok":true, "airborne":is_air_support_craft_airborne(craft_id), "role":String(role.get("role", "")), "center_hex":role.get("center_hex"), "waypoint_index":int(sortie.get("waypoint_index", 0)), "target_id":String(sortie.get("role_target_id", "")), "returning":String(sortie.get("returning", "")), "fuel":_air_fuel_rest(craft_id), "fuel_warned":bool(sortie.get("fuel_warned", false)), "cas_hold":bool(sortie.get("cas_hold", false))}
 
 ## Rolle weg, Rueckflug zur Landezone (reason: "player", spaeter "fuel" / "break_off"); das Landen selbst macht _advance_air_roles.
 func _air_begin_return(craft_id: String, reason: String) -> Dictionary:
@@ -8967,7 +8991,9 @@ func _advance_air_cas(delta: float) -> void:
 		sortie["role_target_id"] = current
 		if not current.is_empty():
 			var grid: Variant = _air_ground_unit_grid(current)
-			if _air_cas_target_alive(current, visible) and typeof(grid) == TYPE_VECTOR2I and float(SPACE_GRID.HEX.distance(grid, role.center_hex)) <= float(role.get("protect_radius", 8.0)) + float(role.get("pursuit_limit", 4.0)): continue
+			# Nachbesserung 2 (N2): die Sperre fuer eigene Leute gilt auch fuers Halten eines selbst gewaehlten Ziels.
+			var safety_hold := int(_air_role_config("cas").get("friendly_safety_hex", 0))
+			if _air_cas_target_alive(current, visible) and typeof(grid) == TYPE_VECTOR2I and float(SPACE_GRID.HEX.distance(grid, role.center_hex)) <= float(role.get("protect_radius", 8.0)) + float(role.get("pursuit_limit", 4.0)) and not (safety_hold > 0 and _air_friendly_near(grid, safety_hold, team)): continue
 			request_air_support_cease_fire(craft_id, "air-role-cas-lost:%s:%d:%s" % [craft_id, tick_counter, current])
 			sortie["role_target_id"] = ""
 		var picked := _air_pick_ground_target(craft_id, sortie, visible)
@@ -8988,7 +9014,10 @@ func _air_cas_target_alive(unit_id: String, visible: Array) -> bool:
 ## W1: Abbruch nach Stil. Erst Angriffsbefehl loeschen und Zielwahl beenden, dann den Rueckflug versuchen. "break_off_return" nur, wenn er wirklich begann;
 ## sonst faellt die Rolle auf reines Kreisen zurueck (role "none"), das Schiff schiesst nicht mehr und meldet role_blocked (einmal, Grund des Rueckflugs im Ereignis).
 func _air_cas_break_off(craft_id: String, sortie: Dictionary) -> void:
-	request_air_support_cease_fire(craft_id, "air-break-off:%s:%d" % [craft_id, tick_counter])
+	# Nachbesserung 2 (N1): der Feuerstopp kommt genau einmal; danach gilt wieder der Spieler (sein "Feuer" laesst das Schiff schiessen).
+	if not bool(sortie.get("break_off_stopped", false)):
+		sortie["break_off_stopped"] = true
+		request_air_support_cease_fire(craft_id, "air-break-off:%s:%d" % [craft_id, tick_counter])
 	sortie["role_target_id"] = ""
 	var back: Dictionary = _air_begin_return(craft_id, "break_off")
 	if back.get("ok", false):
@@ -9018,7 +9047,7 @@ func _air_reaim(craft_id: String, sortie: Dictionary, control: Dictionary) -> vo
 		_air_goto_waypoint(craft_id, sortie, int(sortie.get("waypoint_index", 0)))
 
 ## Luftrollen 3, Nachbesserung 1 (Luecke B): ein schwebendes Schiff ohne Rundbahn dreht die Nase aufs Ziel eines Angriffsbefehls (auch Handfeuer), wenn der gedrehte
-## Platz frei ist. Ein Ziel auf der eigenen Stelle wuerde sofort als "angekommen" geloescht und nie drehen; darum ein Punkt 0,3 Felder in Zielrichtung.
+## Platz frei ist. Das Ziel liegt auf der eigenen Stelle (nur drehen, nicht rutschen); "angekommen" gilt erst, wenn die Nase steht (_air_goal_still_turning).
 func _air_hover_aim(craft_id: String, sortie: Dictionary, combat: RefCounted, fleet: RefCounted) -> void:
 	var desired: Variant = _air_attack_target_plane(craft_id)
 	if desired == null or not is_air_support_craft_airborne(craft_id) or combat.get_flight_controls().has(craft_id): return
@@ -9028,7 +9057,25 @@ func _air_hover_aim(craft_id: String, sortie: Dictionary, combat: RefCounted, fl
 	if pose.get("motion_mode") != "tactical" or pose.get("space_area_id") != "atmosphere:" + _air_support_location_id or not bool(combat.get_flight_status(craft_id).get("ok", true)): return
 	var to_target: Vector2 = Vector2(desired) - Vector2(pose.position_plane)
 	if to_target.length() < 1.0 or absf(wrapf(to_target.angle() - float(pose.get("heading_rad", 0.0)), -PI, PI)) <= deg_to_rad(8.0): return
-	_air_set_goal_plane(craft_id, Vector2(pose.position_plane) + to_target.normalized() * 0.3, desired)
+	_air_set_goal_plane(craft_id, Vector2(pose.position_plane), desired)
+
+## Nachbesserung 2 (B): true, solange ein Angriffsbefehl aktiv ist, die Nase ausserhalb des halben Schussbogens (kleinster Bogen der Waffen) liegt und die 3 s Haltezeit
+## dieses Wegpunkts nicht um sind. Dann wird der Wegpunkt nicht gewechselt: der Vortrieb geht gegen 0, das Steuerbudget bleibt fuers Drehen.
+func _air_nose_hold(craft_id: String, sortie: Dictionary, pose: Dictionary, elapsed: float) -> bool:
+	var desired: Variant = _air_attack_target_plane(craft_id)
+	var binding: Dictionary = _resolve_air_support_craft(craft_id) if desired != null else {}
+	if desired == null or not binding.get("ok", false):
+		sortie["nose_hold_seconds"] = 0.0
+		return false
+	var half := INF
+	for weapon in Array(Dictionary(Dictionary(binding.combat.get_ship_systems(craft_id)).get("stats", {})).get("weapons", [])): half = minf(half, float(Dictionary(weapon).get("arc_degrees", 360.0)) * 0.5)
+	var error: float = absf(wrapf((Vector2(desired) - Vector2(pose.position_plane)).angle() - float(pose.get("heading_rad", 0.0)), -PI, PI))
+	var held: float = float(sortie.get("nose_hold_seconds", 0.0)) + elapsed
+	if half == INF or error <= deg_to_rad(half) or held > 3.0:
+		sortie["nose_hold_seconds"] = 0.0
+		return false
+	sortie["nose_hold_seconds"] = held
+	return true
 
 ## Takt 0,2 s (kehrt sofort zurueck, wenn keine Sortie fliegt): naechster Wegpunkt der Rundbahn bzw. Landung am Ende des Rueckflugs.
 func _advance_air_roles(delta: float) -> void:
@@ -9084,12 +9131,14 @@ func _advance_air_roles(delta: float) -> void:
 		var arrived: bool = pose.position_plane.distance_to(SPACE_GRID.HEX.axial_to_plane(Vector2(waypoints[index]))) <= switch_distance
 		var ring_blocked := false
 		var stepped_now := false
+		# Nachbesserung 2 (B): bei aktivem Angriffsbefehl bleibt das Schiff am Wegpunkt, bis die Nase im halben Schussbogen steht (hoechstens 3 s).
+		var nose_hold: bool = arrived and pilot_ok and _air_nose_hold(craft_id, sortie, pose, elapsed)
 		if (arrived or not has_control) and pilot_ok:
 			stepped_now = true
 			# Hat die Bewegung den letzten Schritt abgelehnt (z. B. Fussabdruck beim Drehen ueber dem Rand), gibt es fuer dieses Ziel kein Drehen.
-			var stepped: Dictionary = _air_goto_waypoint(craft_id, sortie, (index + 1) if arrived else index, bool(combat.get_flight_status(craft_id).get("ok", true)))
+			var stepped: Dictionary = _air_goto_waypoint(craft_id, sortie, (index + 1) if (arrived and not nose_hold) else index, bool(combat.get_flight_status(craft_id).get("ok", true)))
 			# Blockiert: kein Wegpunkt frei, oder am Wegpunkt angekommen und kein anderer ausser dem eigenen frei (kein Fortschritt).
-			ring_blocked = not stepped.get("ok", false) or (arrived and int(stepped.get("waypoint_index", index)) == index)
+			ring_blocked = not stepped.get("ok", false) or (arrived and not nose_hold and int(stepped.get("waypoint_index", index)) == index)
 		if ring_blocked:
 			sortie["ring_blocked_seconds"] = float(sortie.get("ring_blocked_seconds", 0.0)) + elapsed
 			if float(sortie.ring_blocked_seconds) >= AIR_RING_BLOCKED_REPORT_SECONDS and not bool(sortie.get("ring_blocked_reported", false)):
@@ -9372,8 +9421,10 @@ func _air_note_attack_order(craft_id: String, request_id: String) -> void:
 		for key in ["cas_hold", "cas_hold_reported"]: sortie.erase(key)
 
 ## Kennungen, die das Spiel selbst vergibt (Rolle, Rueckflug, Abbruch, Abschuss); alles andere ist ein Befehl des Spielers.
+## Nachbesserung 2 (K3): genaue Liste statt "alles mit air-"; Spielerbefehle des Adapters ("air-support-...") und der Knoepfe ("ui-air-...") zaehlen als Spieler.
+const AIR_SYSTEM_REQUEST_PREFIXES := ["air-return:", "air-role-", "air-break-off:", "ground-fire-", "shootdown-"]
 func _air_system_request(request_id: String) -> bool:
-	for prefix in ["air-", "ground-fire-", "shootdown-"]:
+	for prefix in AIR_SYSTEM_REQUEST_PREFIXES:
 		if request_id.begins_with(prefix): return true
 	return false
 
