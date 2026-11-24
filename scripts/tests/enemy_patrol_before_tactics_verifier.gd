@@ -12,6 +12,11 @@ const WALK_STEP := 1.5  # Welt-Einheiten je Tick, mit denen die Attrappe einem l
 class PatrolDriver extends QuietDriver:
 	var commands: Array = []
 	var live: Dictionary = {}
+	## Wenn gesetzt, ersetzt es die Lage aus der Bewegungs-Laufzeit (die Attrappen dieses Aufbaus koennen nicht laufen).
+	var fake_hex: Dictionary = {}
+
+	func _patrol_hex_state(simulation_root: Node, unit_id: String) -> Dictionary:
+		return fake_hex.duplicate() if not fake_hex.is_empty() else super(simulation_root, unit_id)
 
 	func _enqueue_enemy_behavior_command(simulation_root: Node, command: Dictionary) -> bool:
 		commands.append(command.duplicate(true))
@@ -29,6 +34,9 @@ func _run() -> void:
 	_test_contact_uses_group_tactics()
 	_test_locked_path_uses_group_tactics()
 	_test_without_path_uses_group_tactics()
+	_test_hit_patroller_stops_patrolling()
+	_test_fallen_mate_in_sight_stops_patrolling()
+	_test_redirected_waypoint_counts_as_reached()
 	await process_frame
 	print("ENEMY_PATROL_BEFORE_TACTICS passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
@@ -116,6 +124,99 @@ func _test_locked_path_uses_group_tactics() -> void:
 	_run_decisions(f, 30)
 	_check(not f.driver.commands.is_empty() and not _sources(f).has("enemy_patrol"), "3: kontaktgesperrter Weg: wieder die Gruppentaktik (Quellen %s)" % str(_sources(f)))
 	f.scope.free()
+
+
+## Quellen der Befehle EINER Einheit.
+func _sources_of(f: Dictionary, unit_id: String) -> Array:
+	var kinds := {}
+	for command in f.driver.commands:
+		if String(command.get("unit_id", "")) == unit_id:
+			kinds[String(command.get("source_command_type", ""))] = true
+	var result: Array = kinds.keys()
+	result.sort()
+	return result
+
+
+## Kontakt-Sperre (1f, Aufgabe 4a): Wer Schaden genommen hat, patrouilliert nicht weiter, auch ohne Sichtlinie zum Feind.
+func _test_hit_patroller_stops_patrolling() -> void:
+	var f := _patrol_rig(false, true)
+	_run_decisions(f, 3)
+	_check(_sources_of(f, "enemy").has("enemy_patrol"), "5: Vorbedingung: vor dem Treffer patrouilliert er")
+	f.units["enemy"].apply_damage(5)
+	_check(not _hold(f), "5: Vorbedingung: weiter kein Feind in Sicht und Reichweite")
+	f.driver.commands.clear()
+	_run_decisions(f, 30)
+	_check(not f.driver.commands.is_empty() and not _sources_of(f, "enemy").has("enemy_patrol"), "5: nach einem Treffer keine Patrouille mehr (Quellen %s)" % str(_sources_of(f, "enemy")))
+	_check(bool(f.driver._enemy_patrol_contact_locked.get("enemy", false)), "5: der Weg gilt als kontaktgesperrt")
+	f.scope.free()
+
+
+## Kontakt-Sperre (1f, Aufgabe 4a): Ein niedergestreckter Kamerad der Gruppe in Sichtweite sperrt den Patrouillenweg.
+func _test_fallen_mate_in_sight_stops_patrolling() -> void:
+	var far_own := Vector2i(CENTER.x - 7, CENTER.y - 7)
+	var far_enemy := Vector2i(CENTER.x + 7, CENTER.y + 7)
+	var specs := _line(far_own, far_enemy, "pistol", "pistol")
+	specs.append({"id": "mate", "team": "red", "grid": far_enemy + HEX.DIRECTIONS[1], "facing": 3, "weapon": "pistol", "hp": 10})
+	var f := _rig(specs)
+	for unit_id in ["enemy", "mate"]:
+		f.units[unit_id].set_meta("enemy_tactics_config", {"group_id": "wreck_probe", "advance_style": "probe"})
+	var terrain = f.scope.get_node("TerrainRegistry")
+	var waypoints: Array = [Vector2(terrain.grid_to_world(Vector2i(CENTER.x + 7, CENTER.y + 1))), Vector2(terrain.grid_to_world(Vector2i(CENTER.x + 7, CENTER.y - 4)))]
+	f.driver._enemy_patrol_paths_by_unit_id["enemy"] = waypoints.duplicate(true)
+	f.driver._enemy_patrol_waypoint_index_by_unit_id["enemy"] = 0
+	f.driver._enemy_patrol_contact_locked["enemy"] = false
+	f.units["mate"].apply_damage(50)
+	_check(String(f.units["mate"].get_vital_state()) != "fit", "6: Vorbedingung: der Kamerad ist niedergestreckt")
+	_check(not _hold(f), "6: Vorbedingung: kein Feind in Sicht und Reichweite")
+	_run_decisions(f, 30)
+	_check(not _sources_of(f, "enemy").is_empty() and not _sources_of(f, "enemy").has("enemy_patrol"), "6: mit niedergestrecktem Kameraden in Sicht keine Patrouille (Quellen %s)" % str(_sources_of(f, "enemy")))
+	_check(bool(f.driver._enemy_patrol_contact_locked.get("enemy", false)), "6: der Weg gilt als kontaktgesperrt")
+	f.scope.free()
+
+
+## Wegpunkt nach Umlenkung (1f, Aufgabe 4b): Hat die Bewegungs-Laufzeit das Ziel eines Patrouillenpunkts auf eine Nachbarzelle umgelenkt
+## (Niedergestreckter auf dem Punkt) und ist der Gegner dort "arrived", gilt der Punkt als erreicht und der Weg geht weiter.
+## Die Attrappen dieses Aufbaus laufen nicht; die Lage der Bewegung wird deshalb vorgegeben (`fake_hex`). Der echte Auftrag mit
+## umgelenktem Ziel steht in hex_goal_unfit_occupant_verifier, die ganze Kette im Wrack-Einsatz.
+func _redirect_case(hex_state: Dictionary) -> Dictionary:
+	var far_own := Vector2i(CENTER.x - 7, CENTER.y - 7)
+	var far_enemy := Vector2i(CENTER.x + 7, CENTER.y + 7)
+	var first_cell := Vector2i(CENTER.x + 7, CENTER.y + 1)
+	var f := _rig(_line(far_own, far_enemy, "pistol", "pistol"))
+	f.units["enemy"].set_meta("enemy_tactics_config", {"group_id": "wreck_probe", "advance_style": "probe"})
+	var terrain = f.scope.get_node("TerrainRegistry")
+	var waypoints: Array = [Vector2(terrain.grid_to_world(first_cell)), Vector2(terrain.grid_to_world(Vector2i(CENTER.x + 7, CENTER.y - 4)))]
+	f["waypoints"] = waypoints
+	f["first_cell"] = first_cell
+	f.driver._enemy_patrol_paths_by_unit_id["enemy"] = waypoints.duplicate(true)
+	f.driver._enemy_patrol_waypoint_index_by_unit_id["enemy"] = 0
+	f.driver._enemy_patrol_contact_locked["enemy"] = false
+	f.driver.fake_hex = hex_state
+	return f
+
+
+func _test_redirected_waypoint_counts_as_reached() -> void:
+	var first_cell := Vector2i(CENTER.x + 7, CENTER.y + 1)
+	var beside: Vector2i = first_cell + HEX.DIRECTIONS[0]
+	var f := _redirect_case({"status": "arrived", "goal_grid": beside, "grid": beside})
+	_run_decisions(f, 3)
+	_check(int(f.driver._enemy_patrol_waypoint_index_by_unit_id.get("enemy", 0)) == 1, "7: umgelenkt und angekommen: der Wegpunkt gilt als erreicht, der Index rueckt weiter (Index %s)" % str(f.driver._enemy_patrol_waypoint_index_by_unit_id.get("enemy", 0)))
+	var command: Dictionary = f.driver.live.get("enemy", {})
+	_check(Vector2(command.get("target_position", Vector2.ZERO)).is_equal_approx(f.waypoints[1]) and String(command.get("source_command_type", "")) == "enemy_patrol", "7: der naechste Patrouillenbefehl geht zum zweiten Wegpunkt")
+	f.scope.free()
+	# Gegenproben: nichts davon darf den Index weiterschieben.
+	var controls: Array = [
+		["noch unterwegs (active)", {"status": "active", "goal_grid": beside, "grid": beside}],
+		["Auftrag auf dem Wegpunkt selbst, aber 6 Felder entfernt", {"status": "arrived", "goal_grid": first_cell, "grid": first_cell}],
+		["Ausweichzelle weiter als 2 Felder vom Wegpunkt", {"status": "arrived", "goal_grid": first_cell + HEX.DIRECTIONS[0] * 4, "grid": first_cell + HEX.DIRECTIONS[0] * 4}],
+		["Ziel erreicht, aber nicht dort stehend", {"status": "arrived", "goal_grid": beside, "grid": beside + HEX.DIRECTIONS[0]}],
+		["wartet auf besetztes Ziel", {"status": "waiting_reservation", "goal_grid": first_cell, "grid": beside}],
+	]
+	for control in controls:
+		var g := _redirect_case(control[1])
+		_run_decisions(g, 3)
+		_check(int(g.driver._enemy_patrol_waypoint_index_by_unit_id.get("enemy", 0)) == 0, "7 Gegenprobe %s: der Index bleibt bei 0" % control[0])
+		g.scope.free()
 
 
 func _test_without_path_uses_group_tactics() -> void:
