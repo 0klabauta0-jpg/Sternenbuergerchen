@@ -15094,7 +15094,7 @@ func _confirm_campaign_retreat_press(craft_id: String) -> bool:
 	var now: int = Time.get_ticks_msec()
 	var armed_until: int = int(_retreat_armed_until.get(craft_id, 0))
 	if armed_until <= now:
-		var text: String = "Rückzug? Auftrag gilt als abgebrochen. Offen: %s" % ", ".join(PackedStringArray(summary.get("open_names", [])))
+		var text: String = "Rückzug? Auftrag gilt als abgebrochen. Offen: %s. Noch einmal drücken = Rückzug." % ", ".join(PackedStringArray(summary.get("open_names", [])))
 		_retreat_armed_until[craft_id] = now + RETREAT_ARM_MSEC
 		_retreat_armed_text[craft_id] = text
 		_last_command_text = text

@@ -91,6 +91,23 @@ func _watch(seconds: float, label: String, stop: Callable) -> bool:
 		await physics_frame
 	return false
 
+## Der echte Rueckflug-Knopf der Schiffskarte (A5-Kartenpanel), so wie der Spieler ihn sieht.
+func _return_button(mission: Node) -> Button:
+	var panel: Node = mission.find_child("MissionDropshipPanel", true, false) if is_instance_valid(mission) else null
+	return panel.get_node_or_null("CompactCard/Contents/Actions/return") as Button if panel != null else null
+
+func _return_feedback(mission: Node) -> Label:
+	var panel: Node = mission.find_child("MissionDropshipPanel", true, false) if is_instance_valid(mission) else null
+	return panel.get_node_or_null("CompactCard/Contents/MissionDropshipCardFeedbackLabel") as Label if panel != null else null
+
+func _press_return_button(mission: Node) -> bool:
+	var button: Button = _return_button(mission)
+	if button == null or not button.visible or button.disabled:
+		print("PROBE_RETURN_BUTTON nicht druckbar: ", "kein Knopf" if button == null else "visible=%s disabled=%s" % [str(button.visible), str(button.disabled)])
+		return false
+	button.pressed.emit()
+	return true
+
 func _departed() -> bool:
 	return _flow.get("_active_mission") == null or String(_space().get("phase", "")) != "surface"
 
@@ -250,22 +267,48 @@ func _run() -> void:
 		controller = mission.get_node("TacticalController")
 		var card: Dictionary = Dictionary(controller.call("_find_mission_dropship_card_entry", _craft_id))
 		print("PROBE_RETURN_CARD can_request=", controller.call("_can_request_mission_dropship_return", card), " guard=", var_to_str(controller.call("get_campaign_pilot_flight_guard", _craft_id)).replace("\n", " "))
-		controller.call("_on_mission_dropship_return_pressed", _craft_id)
+		# Der echte Knopf der Schiffskarte ist gesperrt, solange der Pilot nicht an Bord ist (Truppbewegung allein genuegt nicht).
+		# Der Spieler steigt dann ein (Rechtsklick auf das Schiff = request_campaign_extraction); danach ist der Knopf frei,
+		# oder das Schiff hebt schon vom Einsteigen ab (nur noch der Rueckkehr-Schritt offen).
+		var button_at_ship: Button = _return_button(mission)
+		print("PROBE_RETURN_BUTTON_AT_SHIP exists=", button_at_ship != null, " disabled=", button_at_ship.disabled if button_at_ship != null else "-", " text=", button_at_ship.text if button_at_ship != null else "-")
+		if button_at_ship != null and button_at_ship.disabled:
+			var boarded: Dictionary = controller.call("request_campaign_extraction", _craft_id)
+			print("PROBE_BOARD_BEFORE_BUTTON ", var_to_str(boarded).replace("\n", " "))
+			await _watch(90.0, "einsteigen_vor_dem_Knopf", func():
+				var b: Button = _return_button(mission)
+				return _departed() or (b != null and not b.disabled and b.visible))
+		if not _departed():
+			if _variant == "C":
+				var pre_button: Button = _return_button(mission)
+				_check(pre_button != null and pre_button.text == "Abheben", "Vor dem Druck steht am echten Kartenknopf 'Abheben' (Text: %s)" % ("kein Knopf" if pre_button == null else pre_button.text))
+			# Der Spieler drueckt den ECHTEN Knopf der Schiffskarte (pressed), nicht die Methode des Controllers.
+			_check(_press_return_button(mission), "Der echte Knopf der Schiffskarte ist da und wird gedrueckt")
+			for i in 3: await physics_frame
 		print("PROBE_RETURN_PRESSED last_cmd=", controller.get("_last_command_text"))
 		if _variant == "C":
 			# Rueckzug nur nach Rueckfrage: der erste Klick fragt nur nach, hebt nicht ab und sagt, was offen ist.
 			var first_text: String = String(controller.get("_last_command_text"))
 			_check(first_text.begins_with("Rückzug?") and first_text.contains("abgebrochen"), "Erster Klick fragt nach: Rückzug? Auftrag gilt als abgebrochen (Meldung: %s)" % first_text)
 			_check(first_text.contains("Satellitendaten sichern"), "Die Rueckfrage nennt den offenen Schritt")
+			_check(first_text.contains("Noch einmal drücken = Rückzug."), "Die Rueckfrage sagt, was der zweite Druck bedeutet (Meldung: %s)" % first_text)
+			# W1: Beschriftung und Meldung am sichtbaren Knopf der Schiffskarte.
+			var armed_button: Button = _return_button(mission)
+			_check(armed_button != null and armed_button.text == "Rückzug?", "W1: nach dem ersten Druck traegt der echte Kartenknopf 'Rückzug?' (Text: %s)" % ("kein Knopf" if armed_button == null else armed_button.text))
+			var armed_feedback: Label = _return_feedback(mission)
+			_check(armed_feedback != null and armed_feedback.visible and armed_feedback.text.contains("Offen:") and armed_feedback.text.contains("Noch einmal drücken = Rückzug."), "W1: die Kartenmeldung nennt offene Schritte und den zweiten Druck (Text: %s)" % ("keine Meldung" if armed_feedback == null else armed_feedback.text))
+			_check(armed_feedback != null and armed_feedback.autowrap_mode != TextServer.AUTOWRAP_OFF and armed_feedback.max_lines_visible != 1, "W1: die Kartenmeldung ist mehrzeilig lesbar, nicht auf eine Zeile gekuerzt")
 			var lifted_early: bool = await _watch(5.0, "nach_erstem_Klick", func(): return _departed())
 			_check(not lifted_early, "Der erste Klick hebt nicht ab")
+			var expired_button: Button = _return_button(mission)
+			_check(expired_button != null and expired_button.text == "Abheben", "W1: nach Ablauf der Frist traegt der Kartenknopf wieder 'Abheben' (Text: %s)" % ("kein Knopf" if expired_button == null else expired_button.text))
 			# Zweiter Klick kommt nach 5 s: die 4-Sekunden-Frist ist abgelaufen, also fragt er neu nach und fliegt noch nicht.
-			controller.call("_on_mission_dropship_return_pressed", _craft_id)
-			controller.call("_on_mission_dropship_return_pressed", _craft_id)
+			_press_return_button(mission)
+			_press_return_button(mission)
 			var lifted_fast: bool = await _watch(0.2, "zu_schneller_Klick", func(): return _departed())
 			_check(not lifted_fast, "Ein Klick unter 0,4 s nach der Rueckfrage fliegt nicht ab")
 			await create_timer(0.6, true, false, true).timeout
-			controller.call("_on_mission_dropship_return_pressed", _craft_id)
+			_press_return_button(mission)
 			print("PROBE_RETURN_CONFIRMED last_cmd=", controller.get("_last_command_text"))
 		var gone: bool = await _watch(60.0, "nach_Rueckflug_Knopf", func(): return _departed())
 		_obs("nach_Rueckflug_Knopf")
