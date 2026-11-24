@@ -10,6 +10,8 @@ const COMMANDS: GDScript = preload("res://scripts/mission/singleplayer_campaign_
 const RETREAT_WIN_CONDITIONS: Array = ["evacuation", "departure"]
 ## Handel H1: Ort -> Szenario des friedlichen Besuchs nach abgeschlossenem Story-Auftrag.
 const OPEN_OUTPOSTS_PATH := "res://data/singleplayer/open_outposts.json"
+## Kapitel 2: nur diese Auftragskennungen duerfen in einem aelteren Spielstand fehlen; sie gelten dann als neu (offered).
+const ADDITIVE_JOB_IDS: Array = ["wreck_crater_salvage", "stranded_refuel", "flak_silence", "cutlass_boarding", "hillside_bunker", "prospector_escort"]
 
 var _locations: Dictionary = {}
 var _jobs: Dictionary = {}
@@ -124,7 +126,8 @@ func _acceptance_gate(job_id: String) -> Dictionary:
 		return _reject("unknown_job", "Auftrag unbekannt")
 	var prior := String(_jobs[job_id].get("prerequisite_job_id", ""))
 	if _enforce_sequence and not prior.is_empty() and String(Dictionary(_jobs.get(prior, {})).get("status", "")) != "completed":
-		return _reject("previous_job_required", "Zuerst den vorherigen Kampagnenauftrag abschließen")
+		var hint := String(_jobs[job_id].get("locked_hint", ""))
+		return _reject("previous_job_required", hint if not hint.is_empty() else "Zuerst den vorherigen Kampagnenauftrag abschließen")
 	if _enforce_sequence and job_id == "benit_delivery" and not (bool(_progress.recruited_outpost) and bool(_progress.crate_loaded)):
 		return _reject("outpost_preparation_required", "Zuerst die Person am Handelsposten aufnehmen und die Kiste bergen")
 	if String(_jobs[job_id].status) not in ["offered", "accepted", "active"]:
@@ -145,6 +148,10 @@ func get_job_availability(retry_allowed: bool = false) -> Dictionary:
 		# Anfliegbar macht ihn das nicht: validate_location_visit ueberspringt gesperrt gelistete Auftraege.
 		# Nicht zu verwechseln mit jobs[id].locked im Schnappschuss (dort: Vorgaenger noch offen).
 		var shown_as_locked := status == "offered" and String(gate.get("reason", "")) == "outpost_preparation_required"
+		# Kapitel 2: ein neuer Auftrag mit locked_hint wird gesperrt gelistet, sobald sein Vorgaenger angenommen ist (oder gescheitert).
+		if status == "offered" and String(gate.get("reason", "")) == "previous_job_required" and not String(_jobs[id].get("locked_hint", "")).is_empty():
+			var prior_status := String(Dictionary(_jobs.get(String(_jobs[id].get("prerequisite_job_id", "")), {})).get("status", ""))
+			shown_as_locked = shown_as_locked or prior_status in ["accepted", "active", "pending_upload", "failed"]
 		result[id] = {"visible":status in ["accepted", "active", "completed", "pending_upload"] or bool(gate.ok) or shown_as_locked, "can_accept":status in ["offered", "failed"] and bool(gate.ok), "shown_as_locked":shown_as_locked, "reason":String(gate.get("reason", "")), "message":String(gate.get("message", ""))}
 	return result
 
@@ -394,6 +401,8 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_enforce_sequence = fresh._enforce_sequence
 	_jobs = fresh._jobs.duplicate(true)
 	for job_id in _jobs:
+		if not data.jobs.has(job_id):
+			continue # additiver neuer Auftrag: bleibt offered aus fresh.configure
 		_jobs[job_id].status = String(data.jobs[job_id].status)
 		if data.jobs[job_id].has("craft_id"):
 			_jobs[job_id]["craft_id"] = String(data.jobs[job_id].craft_id)
@@ -429,9 +438,18 @@ func _validate_saved_state(data: Dictionary) -> Dictionary:
 		if bool(data.progress.get(pair[0],false)) and String(Dictionary(data.jobs.get(pair[1],{})).get("status","")) not in allowed: return _reject("invalid_progress","Fortschritt ohne Missionsabschluss")
 	if bool(data.progress.second_pad_built) and not bool(data.progress.recruited_pilot): return _reject("invalid_progress","Pad ohne geretteten Piloten")
 	var location_verdict: Dictionary = _compare_locations(data.locations)
-	if not location_verdict.ok or data.jobs.size() != _jobs.size() or not _locations.has(data.get("selected_location_id", "")):
+	if not location_verdict.ok or not _locations.has(data.get("selected_location_id", "")):
 		return _reject("stale_campaign_definitions", "Ortsdaten geaendert")
+	# Auftragsmenge: jede gespeicherte Kennung muss es noch geben; fehlen darf nur eine additive neue Kennung.
+	for saved_id in data.jobs:
+		if not _jobs.has(saved_id):
+			return _reject("stale_campaign_definitions", "Auftragsdaten geaendert")
+	for current_id in _jobs:
+		if not data.jobs.has(current_id) and not ADDITIVE_JOB_IDS.has(String(current_id)):
+			return _reject("stale_campaign_definitions", "Auftragsdaten geaendert")
 	for job_id in _jobs:
+		if not data.jobs.has(job_id):
+			continue # additiver neuer Auftrag: gilt als offered
 		if typeof(data.jobs.get(job_id)) != TYPE_DICTIONARY:
 			return _reject("invalid_job_state", "Auftrag fehlt")
 		var saved: Dictionary = data.jobs[job_id].duplicate(true)
@@ -470,10 +488,10 @@ func _validate_saved_state(data: Dictionary) -> Dictionary:
 		if not Array(_locations[departure.origin_location_id].landing_pad_ids).has(departure.get("landing_pad_id", "")) or departure.origin_location_id == departure.destination_location_id:
 			return _reject("invalid_saved_departure", "Abflugpad ungueltig")
 		var departure_job := String(departure.get("job_id", ""))
-		if not departure_job.is_empty() and (not _jobs.has(departure_job) or String(data.jobs[departure_job].location_id) != String(departure.destination_location_id)):
+		if not departure_job.is_empty() and (not _jobs.has(departure_job) or not data.jobs.has(departure_job) or String(data.jobs[departure_job].location_id) != String(departure.destination_location_id)):
 			return _reject("invalid_saved_departure", "Abflugstand ungueltig")
 	var selected := String(data.get("selected_job_id", ""))
-	if not selected.is_empty() and (not _jobs.has(selected) or String(data.jobs[selected].status) not in ["accepted", "active"] or String(data.jobs[selected].location_id) != String(data.selected_location_id)):
+	if not selected.is_empty() and (not _jobs.has(selected) or not data.jobs.has(selected) or String(data.jobs[selected].status) not in ["accepted", "active"] or String(data.jobs[selected].location_id) != String(data.selected_location_id)):
 		return _reject("invalid_selected_job", "Auftragsauswahl ungueltig")
 	for request_id in data.requests:
 		var request: Variant = data.requests[request_id]
