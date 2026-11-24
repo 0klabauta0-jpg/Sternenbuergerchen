@@ -227,6 +227,14 @@ func has_arrived(id:String,command_id:String)->bool:
 	var state:Dictionary=_ground.read_unit(id)
 	return not state.is_empty() and state.grid==order.goal_grid and not state.route_state.has_commitments and not state.movement_state.moving
 
+## Wurde das Ziel dieses Auftrags umgelenkt (Besetzer nicht fit), gilt die Ausweichzelle fuer jede Frage "angekommen?", die noch
+## die befohlene Zelle nennt (Speicherpruefung, Einzelsteuerung). Sonst bleibt die Zelle, wie sie ist.
+func effective_goal_for(id:String,command_id:String,grid:Vector2i)->Vector2i:
+	if not _orders.has(id):return grid
+	var order:Dictionary=_orders[id]
+	if order.has("redirected_from") and order.redirected_from==grid and command_id in [order.command_id,order.source_command_id]:return order.goal_grid
+	return grid
+
 func get_audit()->Dictionary:
 	return _audit.duplicate(true)
 
@@ -438,6 +446,8 @@ func _redirect_goal_held_by_unfit(id:String,order:Dictionary,state:Dictionary,ow
 				if own_blockers.has(neighbor):continue
 				if best==null or _redirect_candidate_better(neighbor,best,state.grid):best=neighbor
 		if best!=null:
+			# Die Ausweichzelle ist ab hier das wirksame Ziel; die befohlene Zelle merken (effective_goal_for).
+			if not order.has("redirected_from"):order["redirected_from"]=order.goal_grid
 			order.goal_grid=best
 			# Save validation requires the stored target to name the goal cell.
 			order.command.target_position=_registry.call("grid_to_world",best)

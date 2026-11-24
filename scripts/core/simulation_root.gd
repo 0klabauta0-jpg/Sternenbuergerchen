@@ -2753,6 +2753,7 @@ func has_hex_position_arrived(unit_id:String,target_position:Vector2,command_id:
 	var state:Dictionary=get_hex_unit_state(unit_id)
 	if state.is_empty() or state.movement_state.moving or state.route_state.has_commitments:return false
 	var target_grid:Vector2i=_hex_ground_registry.call("world_to_grid",target_position)
+	target_grid=_hex_movement_runtime.effective_goal_for(unit_id,command_id,target_grid)
 	if state.grid!=target_grid:return false
 	var order:Dictionary=get_hex_movement_readout(unit_id)
 	if not order.is_empty() and order.goal_grid==target_grid and has_hex_destination_arrived(unit_id,command_id):return true

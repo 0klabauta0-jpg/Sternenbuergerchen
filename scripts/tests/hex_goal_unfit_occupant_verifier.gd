@@ -10,6 +10,10 @@ const TILE=preload("res://scripts/terrain/terrain_tile_data.gd")
 const HEX=preload("res://scripts/terrain/hex_grid.gd")
 var passed:=0
 var failed:=0
+class CMD extends RefCounted:
+	var command_type:="move_to_position"
+	var target_position:Vector2
+	var command_token:=""
 class Actor extends Node2D:
 	var unit_id:String
 	var current_command:RefCounted
@@ -99,6 +103,16 @@ func _test_unfit_goal_redirected()->void:
 	var grid:Vector2i=sim.get_hex_unit_state("a").grid
 	_check(grid!=Vector2i(3,0) and HEX.distance(grid,Vector2i(3,0))==1,"unit stops directly next to the fallen unit")
 	_check(sim.get_hex_unit_state("d").grid==Vector2i(3,0),"the fallen unit keeps its own cell")
+	# W1: die Ausweichzelle ist das wirksame Ziel. Die Fragen "angekommen?" (Speicherpruefung, Einzelsteuerung) nennen die
+	# BEFOHLENE Zelle und muessen trotzdem mit "ja" antworten.
+	var original_target:Vector2=rig.terrain.grid_to_world(Vector2i(3,0))
+	_check(sim.has_hex_position_arrived("a",original_target,"move_a"),"W1: arrival at the redirect cell counts as arrived for the commanded target")
+	var command=CMD.new()
+	command.target_position=original_target
+	command.command_token="move_a"
+	var checkpoint=load("res://scripts/mission/stable_mission_lifecycle_checkpoint.gd").new()
+	_check(checkpoint._command_is_stable(sim,rig.actors.a,command),"W1: the save check sees the redirected move as finished (no mission_movement_pending)")
+	_check(not sim.has_hex_position_arrived("a",rig.terrain.grid_to_world(Vector2i(5,1)),"move_a"),"W1: an unrelated target is still not arrived")
 	var movement=sim.get("_hex_movement_runtime")
 	var saved:Dictionary=movement.export_state()
 	var prepared:Dictionary=movement.prepare_restore_state(JSON.parse_string(JSON.stringify(saved)))
