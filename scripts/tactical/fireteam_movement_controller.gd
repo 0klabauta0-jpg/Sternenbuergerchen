@@ -1113,11 +1113,32 @@ func _resolve_occupied_hex_formation_targets(simulation_root,member_records:Arra
 			# The occupant already blocks the desired anchor; duplicating it as
 			# an external exclusion would reject the whole neighbor search.
 			if other!=id and other_grid!=grid:excluded.append(other_grid)
-		var anchor:Vector2=result[id]
 		if hull.has(grid):
+			# Slot under a landed hull: try every walkable neighbor outside the mask as anchor (ring 1, then ring 2; at most 6+12 tries).
+			var ring1:Array=[]
 			for next in terrain_registry.get_legal_hex_neighbors(grid):
-				if not hull.has(next) and not excluded.has(next):anchor=terrain_registry.grid_to_world(next);break
-		var plan:Dictionary=simulation_root.plan_hex_ground_actor_approach(PackedStringArray([id]),anchor,128.0,excluded)
+				if not ring1.has(next):ring1.append(next)
+			var anchors:Array=[]
+			var seen_anchor:Dictionary={grid:true}
+			for next in ring1:seen_anchor[next]=true
+			for next in ring1:anchors.append(next)
+			for ring_cell in ring1:
+				for next in terrain_registry.get_legal_hex_neighbors(ring_cell):
+					if not seen_anchor.has(next):seen_anchor[next]=true;anchors.append(next)
+			var tries:=0
+			for candidate in anchors:
+				if tries>=18:break
+				if hull.has(candidate) or excluded.has(candidate) or not terrain_registry.is_walkable(candidate):continue
+				tries+=1
+				var hull_plan:Dictionary=simulation_root.plan_hex_ground_actor_approach(PackedStringArray([id]),terrain_registry.grid_to_world(candidate),128.0,excluded)
+				if not hull_plan.get("ok",false):continue
+				var placed:Vector2i=terrain_registry.world_to_grid(hull_plan.targets[id])
+				if hull.has(placed) or excluded.has(placed) or not terrain_registry.is_walkable(placed):continue
+				result[id]=hull_plan.targets[id]
+				changed=true
+				break
+			continue
+		var plan:Dictionary=simulation_root.plan_hex_ground_actor_approach(PackedStringArray([id]),result[id],128.0,excluded)
 		if plan.get("ok",false):
 			result[id]=plan.targets[id]
 			changed=true
