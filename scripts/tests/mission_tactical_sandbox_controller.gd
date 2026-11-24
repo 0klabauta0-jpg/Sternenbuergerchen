@@ -2376,6 +2376,9 @@ func _connect_fire_rule_authority_signals() -> void:
 	var air_fire_callable := Callable(self, "_on_air_support_ground_fired")
 	if simulation_root.has_signal("air_support_ground_fired") and not simulation_root.is_connected("air_support_ground_fired", air_fire_callable):
 		simulation_root.connect("air_support_ground_fired", air_fire_callable)
+	var air_role_callable := Callable(self, "_on_air_role_event")
+	if simulation_root.has_signal("air_role_event") and not simulation_root.is_connected("air_role_event", air_role_callable):
+		simulation_root.connect("air_role_event", air_role_callable)
 	var committed_callable := Callable(self, "_on_authoritative_fire_rule_committed")
 	if simulation_root.has_signal("fire_rule_committed") and not simulation_root.is_connected("fire_rule_committed", committed_callable):
 		simulation_root.connect("fire_rule_committed", committed_callable)
@@ -2496,6 +2499,10 @@ func _on_air_support_ground_fired(event: Dictionary) -> void:
 	var view: Node = _get_primary_3d_view()
 	if is_instance_valid(view) and view.has_method("show_air_support_laser"):
 		view.call("show_air_support_laser", event)
+
+
+func _on_air_role_event(event: Dictionary) -> void:
+	_set_mission_dropship_card_feedback(String(event.get("craft_id", "")), String(event.get("text", "")))
 
 
 func _on_authoritative_fire_rule_committed(state: Dictionary) -> void:
@@ -13802,6 +13809,11 @@ func _on_mission_dropship_card_arrival_mode_pressed(craft_id: String, mode_name:
 
 func _append_air_support_card_row(host: VBoxContainer, card: Dictionary) -> void:
 	var simulation: Node = get_node_or_null("../SimulationRoot")
+	if host != null and host.get_node_or_null("AirSupportCardRow") != null:
+		var shown: Label = host.get_node_or_null("AirSupportFuelLabel") as Label
+		if shown != null:
+			shown.text = _air_support_fuel_line(String(card.get("craft_id", "")))
+			shown.visible = not shown.text.is_empty()
 	if host == null or host.get_node_or_null("AirSupportCardRow") != null or not _is_air_support_offered(): return
 	var craft_id := String(card.get("craft_id", ""))
 	if craft_id.is_empty(): return
@@ -13809,8 +13821,23 @@ func _append_air_support_card_row(host: VBoxContainer, card: Dictionary) -> void
 	row.name = "AirSupportCardRow"
 	row.columns = 3
 	host.add_child(row)
-	for item in [["Pilot einsteigen", "pilot_board"], ["Start", "start"], ["Fliegen", "move"], ["Landen", "land"], ["Feuer", "fire"], ["Feuerstopp", "cease"], ["Luftradar", "radar"]]:
+	for item in [["Pilot einsteigen", "pilot_board"], ["Start", "start"], ["Fliegen", "move"], ["Landen", "land"], ["Feuer", "fire"], ["Feuerstopp", "cease"], ["Luftradar", "radar"], ["Kreisen", "circle"], ["CAS", "role_cas"], ["Luftschutz", "role_air_defense"], ["Kreisen aus", "role_clear"]]:
 		row.add_child(_build_mission_dropship_card_command_button(item[0], "Schiffbefehl; Fliegen und Feuer nutzen das markierte Hexfeld.", false, Callable(self, "_on_air_support_card_action").bind(craft_id, item[1]), craft_id, "air_" + item[1]))
+	var fuel_label := Label.new()
+	fuel_label.name = "AirSupportFuelLabel"
+	fuel_label.text = _air_support_fuel_line(craft_id)
+	fuel_label.visible = not fuel_label.text.is_empty()
+	host.add_child(fuel_label)
+
+
+## Luftrollen 2: Zeile "Treibstoff: N" (nur mit Treibstoffkonto), bei Warnung mit Zusatz.
+func _air_support_fuel_line(craft_id: String) -> String:
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	if simulation == null or craft_id.is_empty(): return ""
+	var snapshot: Dictionary = simulation.get_air_support_role_snapshot(craft_id)
+	var fuel := float(snapshot.get("fuel", -1.0))
+	if fuel < 0.0: return ""
+	return "Treibstoff: %d%s" % [int(round(fuel)), " – Heimflug knapp" if bool(snapshot.get("fuel_warned", false)) else ""]
 
 
 ## Nottankdienst (T3): Knopf, Angebot und Zustand an der Schiffskarte des Ortes. Die Karte liest nur die Auskunft des Adapters
@@ -13847,6 +13874,10 @@ func _on_air_support_card_action(craft_id: String, action: String) -> void:
 		"move":
 			if _has_selected_tile: result = simulation.request_air_support_move({"craft_id":craft_id, "target_hex":_selected_tile_grid_position, "request_id":"ui-air-move:%d" % Time.get_ticks_usec()})
 			else: result = {"ok":false, "reason":"Zuerst ein Hexfeld markieren"}
+		"circle", "role_cas", "role_air_defense":
+			if _has_selected_tile: result = simulation.request_air_support_circle({"craft_id":craft_id, "center_hex":_selected_tile_grid_position, "role":{"circle":"none", "role_cas":"cas", "role_air_defense":"air_defense"}[action], "request_id":"ui-air-circle:%d" % Time.get_ticks_usec()})
+			else: result = {"ok":false, "reason":"Zuerst ein Hexfeld markieren"}
+		"role_clear": result = simulation.request_air_support_role_clear(craft_id, "ui-air-role-clear:%d" % Time.get_ticks_usec())
 		"fire":
 			var target: String = simulation.get_air_support_ground_target(_selected_tile_grid_position) if _has_selected_tile else ""
 			if target.is_empty(): result = {"ok":false, "reason":"Sichtbaren Gegner markieren"}

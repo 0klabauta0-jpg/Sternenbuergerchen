@@ -39,16 +39,22 @@ func ensure_ship_systems(craft_id: String, stats: Dictionary) -> Dictionary:
 	existing.erase("equipment_revision"); incoming.erase("equipment_revision")
 	return {"ok":true} if existing == incoming else {"ok":false, "reason":"systems_refit_required"}
 
-func _commit_ship_impact(event: Dictionary) -> Dictionary:
+## Luft-Luft-Schuesse (transient) fuehren ihre Belege in einem eigenen, nie gespeicherten und begrenzten Speicher (die letzten 64 Kennungen).
+const TRANSIENT_RECEIPT_LIMIT := 64
+var _transient_impact_receipts: Dictionary = {}
+
+func _commit_ship_impact(event: Dictionary, transient: bool = false, keep_hull: bool = false) -> Dictionary:
 	# Private owner tail for a Root-resolved shot; never pass a client event here.
+	# keep_hull: der Treffer senkt nur den Schild; der Rumpf des Ziels wird anderswo gefuehrt (Luftrumpf eigener Schiffe in der Atmosphaere).
 	var id: Variant = event.get("id")
 	if typeof(id) != TYPE_STRING or String(id).strip_edges().is_empty(): return {"ok":false, "reason":"invalid_event"}
 	var signature := var_to_str(event)
-	if _ship_impact_receipts.has(id):
-		var receipt: Dictionary = _ship_impact_receipts[id]
+	var receipts: Dictionary = _transient_impact_receipts if transient else _ship_impact_receipts
+	if receipts.has(id):
+		var receipt: Dictionary = receipts[id]
 		if receipt.signature != signature: return {"ok":false, "reason":"event_id_conflict"}
 		var replay: Dictionary = receipt.result.duplicate(true); replay["replayed"] = true; return replay
-	if _ship_impact_receipts.size() >= 4096: return {"ok":false, "reason":"receipt_capacity"}
+	if not transient and receipts.size() >= 4096: return {"ok":false, "reason":"receipt_capacity"}
 	var shooter: Variant = event.get("shooter_id")
 	var target: Variant = event.get("hit_craft_id")
 	var slot: Variant = event.get("weapon_slot")
@@ -73,6 +79,9 @@ func _commit_ship_impact(event: Dictionary) -> Dictionary:
 		if not hit.ok: return hit
 		hit_state = hit.state
 		result.shield_damage = hit.shield_damage; result.hull_damage = hit.hull_damage
+		if keep_hull:
+			hit_state["hull"] = current.state.hull
+			result.hull_damage = maxf(float(event.damage) - float(hit.shield_damage), 0.0)
 	elif float(event.damage) != 0.0:
 		return {"ok":false, "reason":"invalid_event"}
 	# Both proposals are complete before publishing either side. A self-hit is
@@ -81,7 +90,8 @@ func _commit_ship_impact(event: Dictionary) -> Dictionary:
 	source.state = consumed.state
 	source.cooldowns[slot] = 1.0 / float(weapon.shots_per_second)
 	if not String(target).is_empty(): _ship_systems[target].state = hit_state
-	_ship_impact_receipts[id] = {"signature":signature, "result":result.duplicate(true)}
+	receipts[id] = {"signature":signature, "result":result.duplicate(true)}
+	if transient and receipts.size() > TRANSIENT_RECEIPT_LIMIT: receipts.erase(receipts.keys()[0])
 	return result
 
 func advance_ship_systems(delta: float) -> Dictionary:

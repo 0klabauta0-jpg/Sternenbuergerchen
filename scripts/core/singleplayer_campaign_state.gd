@@ -167,7 +167,7 @@ func validate_location_visit(location_id: String, retry_allowed: bool = false) -
 		if not _enforce_sequence: return {"ok":true}
 		if _jobs.has(String(small.get("unlock_after_job_id", ""))) and String(_jobs[String(small.unlock_after_job_id)].status) == "completed": return {"ok":true}
 		return _reject("outpost_locked", "Gesperrt: " + String(small.get("locked_hint", "")))
-	if location_id == "homebase" or bool(_locations[location_id].get("free_visit", false)) or not _enforce_sequence: return {"ok":true}
+	if location_id == "homebase" or bool(_locations[location_id].get("free_visit", false)) or (not _enforce_sequence and not ADDITIVE_LOCATION_IDS.has(location_id)): return {"ok":true}  # additive Orte ohne Auftrag auch im freien Spiel nicht (kein spielbares Szenario im Gefecht)
 	var availability := get_job_availability(retry_allowed)
 	for id: String in _jobs:
 		# Ein gesperrt gelisteter Auftrag oeffnet seinen Ort nicht.
@@ -430,6 +430,9 @@ func restore_state(data: Dictionary) -> Dictionary:
 		if data.jobs[job_id].has("reopen_at_home"):
 			_jobs[job_id]["reopen_at_home"] = bool(data.jobs[job_id].reopen_at_home)
 	_selected_location_id = String(data.selected_location_id)
+	# Ein Stand, der einen additiven Ort anwaehlt, den sein eigener Ortsblock nicht kennt, ist nicht stimmig: Auswahl auf den Ausgangsort zuruecksetzen statt ablehnen.
+	if ADDITIVE_LOCATION_IDS.has(_selected_location_id) and not data.locations.has(_selected_location_id):
+		_selected_location_id = "homebase"
 	_selected_job_id = String(data.selected_job_id)
 	_departures_by_craft_id = data.departures_by_craft_id.duplicate(true)
 	_completion_receipts = data.completion_receipts.duplicate(true)

@@ -1,5 +1,6 @@
 extends RefCounted
 ## Pure planar thrust proposal; all strengths are fixture/catalog inputs.
+const FLIGHT_ENV = preload("res://scripts/tactical/flight_environment.gd")
 
 ## environment comes from the authoritative caller, never a client command.
 ## Existing five-argument callers remain in space until ground integration.
@@ -44,6 +45,8 @@ static func step(flight: Dictionary, intent: Dictionary, hull: Dictionary, power
 	if controls.length() > 1.0: controls = controls.normalized()
 	var thrust: Vector2 = axis * controls.x * (main if controls.x >= 0.0 else reverse) + axis_side * controls.y * side
 	thrust *= clampf(budget, 0.0, 1.0)
+	if environment == "atmosphere":
+		thrust *= float(FLIGHT_ENV.factors("atmosphere").acceleration_factor)
 	var angular_velocity: float = float(flight.get("angular_velocity", 0.0))
 	if not is_finite(angular_velocity):
 		return {"ok": false, "reason": "invalid_state"}
