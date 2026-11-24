@@ -175,7 +175,8 @@ func _case_1() -> void:
 	var switches := 0
 	var dmin := INF
 	var dmax := 0.0
-	var hdev := 0.0
+	var moving := 0
+	var aligned := 0
 	var vmax := 0.0
 	var center_plane := _plane(center)
 	for _i in range(1200):
@@ -189,12 +190,16 @@ func _case_1() -> void:
 			var d: float = p.position_plane.distance_to(center_plane)
 			dmin = minf(dmin, d)
 			dmax = maxf(dmax, d)
-		hdev = maxf(hdev, absf(wrapf(float(p.heading_rad) - heading0, -PI, PI)))
+		if p.velocity_plane.length() > 0.5:
+			moving += 1
+			if absf(wrapf(float(p.heading_rad) - p.velocity_plane.angle(), -PI, PI)) < deg_to_rad(30.0):
+				aligned += 1
 		vmax = maxf(vmax, p.velocity_plane.length())
 	_check(switches >= 3, tag + "in 60 s mindestens 3 Wegpunktwechsel: %d" % switches)
 	_check(dmin >= 3.0 and dmax <= 5.0, tag + "Abstand zur Mitte ab dem ersten Wechsel zwischen 3,0 und 5,0 (Ring-Radius 4): %.2f bis %.2f" % [dmin, dmax])
 	_check(vmax > 0.5, tag + "das Schiff fliegt wirklich (Hoechsttempo %.2f)" % vmax)
-	_check(hdev < deg_to_rad(1.0), tag + "Ausrichtung bleibt unveraendert (groesste Abweichung %.3f Grad)" % rad_to_deg(hdev))
+	_check(moving > 100 and float(aligned) >= 0.6 * float(moving), tag + "Luftrollen 3: die Nase folgt der Flugrichtung (Abweichung < 30 Grad in %d von %d Proben mit Tempo > 0,5)" % [aligned, moving])
+	_check(absf(heading0) < 1.0, tag + "Startausrichtung bekannt (%.3f)" % heading0)
 	_check(mission_root.is_air_support_craft_airborne("ship") and _count(env, "ship", "role_ended") == 0, tag + "weiter in der Luft, Rolle nicht beendet")
 	env.flow.free()
 
@@ -658,6 +663,49 @@ func _case_17() -> void:
 	env3.flow.free()
 
 
+## Fall 18 (Luftrollen 3): Drehen nur auf freien Platz. Das Ziel liegt am Ort des Schiffs; der gedrehte Fussabdruck traefe ein fremd beanspruchtes Feld.
+func _case_18() -> void:
+	var tag := "[18 Drehen nur auf freien Platz] "
+	var env: Dictionary = _blocked_env(true)
+	var mission_root: Node = env.mission_root
+	env.transport.parked["ship"] = true
+	_check(bool(mission_root.request_air_support_takeoff("ship").get("ok", false)), tag + "Aufbau: Start von Hand")
+	env.transport.parked["ship"] = false
+	_tick(env, 2.0)
+	var heading0: float = float(_pose(env, "ship").heading_rad)
+	var pos: Vector2 = _plane(Vector2i(10, 12))
+	var face: Vector2 = pos + Vector2(0.0, 5.0)
+	var cells_now: Array[Vector2i] = env.combat.preview_actor_cells("ship", {"position_plane":pos})
+	var cells_turned: Array[Vector2i] = env.combat.preview_actor_cells("ship", {"position_plane":pos, "heading_rad":PI / 2.0})
+	var extra: Array[Vector2i] = []
+	for cell in cells_turned:
+		if not cells_now.has(cell) and cell.y > 12: extra.append(cell)
+	_check(not extra.is_empty(), tag + "Aufbau: der gedrehte Fussabdruck belegt ein anderes Feld als der jetzige")
+	_check(bool(env.combat.record_navigation_claim("blocker", "atmosphere:moon_site", extra).get("ok", false)), tag + "Aufbau: Anspruch des Blockers auf das Drehfeld")
+	var blocked: Dictionary = mission_root._air_set_goal_plane("ship", pos, face)
+	var goal_blocked: Dictionary = Dictionary(env.combat.get_flight_controls().get("ship", {})).get("goal", {})
+	_check(bool(blocked.get("ok", false)) and not goal_blocked.has("face_plane"), tag + "kein Fehler, aber das Ziel traegt kein face_plane: " + str(blocked))
+	var bad := 0
+	for _i in range(500):
+		_tick(env, DT)
+		var reason := String(env.combat.get_flight_status("ship").get("reason", ""))
+		if reason == "occupied" or reason == "navigation_claimed": bad += 1
+	_check(_pose(env, "ship").position_plane.distance_to(pos) < 0.5, tag + "das Schiff ist am Zielfeld angekommen (%.2f)" % _pose(env, "ship").position_plane.distance_to(pos))
+	var turned_blocked: float = absf(wrapf(float(_pose(env, "ship").heading_rad) - heading0, -PI, PI))
+	_check(turned_blocked < deg_to_rad(5.0) and bad == 0, tag + "10 s: das Schiff dreht nicht (%.2f Grad), kein occupied/navigation_claimed (%d)" % [rad_to_deg(turned_blocked), bad])
+	_check(env.combat.query_navigation_claims(extra, "atmosphere:moon_site").has("blocker") and not env.combat.query_navigation_claims(extra, "atmosphere:moon_site").has("ship"), tag + "der Anspruch des Schiffs deckt das Drehfeld nicht")
+	env.combat.release_navigation_claim("blocker")
+	_check(bool(mission_root._air_set_goal_plane("ship", _plane(Vector2i(10, 10))).get("ok", false)), tag + "Aufbau: zurueck zum Start")
+	_tick(env, 25.0)
+	var free_turn: Dictionary = mission_root._air_set_goal_plane("ship", pos, face)
+	var goal_free: Dictionary = Dictionary(env.combat.get_flight_controls().get("ship", {})).get("goal", {})
+	_check(bool(free_turn.get("ok", false)) and goal_free.has("face_plane") and env.combat.query_navigation_claims(extra, "atmosphere:moon_site").has("ship"), tag + "Platz frei: face_plane gesetzt und das Drehfeld beansprucht")
+	_tick(env, 25.0)
+	var turned_free: float = absf(wrapf(float(_pose(env, "ship").heading_rad) - PI / 2.0, -PI, PI))
+	_check(turned_free < deg_to_rad(10.0), tag + "Platz frei: das Schiff dreht auf 90 Grad (Abweichung %.2f Grad)" % rad_to_deg(turned_free))
+	env.flow.free()
+
+
 ## Fall 12: ohne gebundene Luftunterstuetzung (Skirmish).
 func _case_12() -> void:
 	var tag := "[12 ohne Bindung] "
@@ -686,5 +734,6 @@ func _initialize() -> void:
 	_case_15()
 	_case_16()
 	_case_17()
+	_case_18()
 	print("AIR_ROLE_CIRCLE passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)

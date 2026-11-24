@@ -8405,7 +8405,7 @@ func request_air_support_move(command: Dictionary) -> Dictionary:
 	return {"ok":true, "replayed":false}
 
 ## Luftrollen 1b: bisheriges Endstueck von request_air_support_move (Karte, Belegung, Navigationsanspruch, Masse, Lenkung,
-## Flugsteuerung). face_plane (Nase auf ein Ziel) wird nur gesetzt, wenn angegeben; die Rundbahn setzt es nicht.
+## Flugsteuerung). face_plane (Nase auf ein Ziel) wird nur gesetzt, wenn angegeben und der gedrehte Platz frei ist (Luftrollen 3: Rundbahn und CAS).
 func _air_set_goal(craft_id: String, target_hex: Vector2i, face_plane: Variant = null) -> Dictionary:
 	return _air_set_goal_plane(craft_id, SPACE_GRID.HEX.axial_to_plane(Vector2(target_hex)), face_plane)
 
@@ -8414,21 +8414,52 @@ func _air_set_goal_plane(id: String, target_plane: Vector2, face_plane: Variant 
 	if not binding.get("ok", false): return binding
 	var pose: Dictionary = binding.flight.get_snapshot()
 	var cells: Array[Vector2i] = binding.combat.preview_actor_cells(id, {"position_plane":target_plane})
-	if cells.is_empty() or not _air_support_cells_on_map(cells): return {"ok":false, "reason":"invalid_target"}
-	for occupant in binding.combat.query_cells(cells, pose.space_area_id):
-		if occupant != id: return {"ok":false, "reason":"occupied"}
-	for claimant in binding.combat.query_navigation_claims(cells, pose.space_area_id):
-		if claimant != id: return {"ok":false, "reason":"navigation_claimed"}
+	var refusal := ""
+	if cells.is_empty() or not _air_support_cells_on_map(cells): refusal = "invalid_target"
+	if refusal.is_empty():
+		for occupant in binding.combat.query_cells(cells, pose.space_area_id):
+			if occupant != id: refusal = "occupied"
+	if refusal.is_empty():
+		for claimant in binding.combat.query_navigation_claims(cells, pose.space_area_id):
+			if claimant != id: refusal = "navigation_claimed"
+	# Mit face_plane zaehlt der gedrehte Platz (Luftrollen 3): ist der Platz in der jetzigen Ausrichtung nicht frei, der gedrehte aber schon, gilt das Ziel.
+	var turned: Array[Vector2i] = []
+	if face_plane != null: turned = _air_turned_cells(binding, id, pose, target_plane, face_plane)
+	if not refusal.is_empty():
+		if turned.is_empty(): return {"ok":false, "reason":refusal}
+		cells.clear()
 	var profile: Dictionary = binding.equipment.get_space_flight_profile(id)
 	if not profile.get("ok", false) or not is_equal_approx(float(profile.mass), float(pose.mass)): return {"ok":false, "reason":"flight_profile_changed"}
 	var goal := {"target_plane":target_plane}
-	if face_plane != null: goal["face_plane"] = face_plane
+	if face_plane != null:
+		# Luftrollen 3: Drehen nur auf freien Platz. Der Fussabdruck haengt an der Ausrichtung: vor dem Drehen wird der gedrehte Platz am Zielfeld
+		# wie oben geprueft (Karte, fremde Belegung, fremder Anspruch) und mitbeansprucht; ist er nicht frei, bleibt das Ziel ohne face_plane.
+		if not turned.is_empty():
+			goal["face_plane"] = face_plane
+			for cell in turned:
+				if not cells.has(cell): cells.append(cell)
 	var guidance: Dictionary = SPACE_GUIDANCE_RESOLVER.resolve(pose, goal, profile.hull, profile.power)
 	if not guidance.get("ok", false): return guidance
 	var claim: Dictionary = binding.combat.record_navigation_claim(id, pose.space_area_id, cells)
 	if not claim.get("ok", false): return claim
 	binding.combat.set_flight_control(id, {"goal":goal, "hull":profile.hull, "power":profile.power, "air_support_move":true, "mission_root":weakref(self), "equipment_snapshot":binding.equipment.get_snapshot(id), "area_id":pose.space_area_id})
 	return {"ok":true}
+
+## Fussabdruck am Zielfeld fuer die Ausrichtung, die face_plane dem Schiff dort gibt: Blick vom Zielfeld zum Zielpunkt, liegt dieser auf dem Zielfeld
+## (Rundbahn: face_plane = Wegpunkt), die Flugrichtung dorthin. Leer = nicht frei (Karte, fremde Belegung, fremder Anspruch) oder keine Drehung moeglich.
+func _air_turned_cells(binding: Dictionary, id: String, pose: Dictionary, target_plane: Vector2, face_plane: Variant) -> Array[Vector2i]:
+	var none: Array[Vector2i] = []
+	if typeof(face_plane) != TYPE_VECTOR2 or not face_plane.is_finite(): return none
+	var aim: Vector2 = face_plane - target_plane
+	if aim.length_squared() <= 0.000001: aim = target_plane - Vector2(pose.position_plane)
+	if aim.length_squared() <= 0.000001: return none
+	var turned: Array[Vector2i] = binding.combat.preview_actor_cells(id, {"position_plane":target_plane, "heading_rad":aim.angle()})
+	if turned.is_empty() or not _air_support_cells_on_map(turned): return none
+	for occupant in binding.combat.query_cells(turned, pose.space_area_id):
+		if occupant != id: return none
+	for claimant in binding.combat.query_navigation_claims(turned, pose.space_area_id):
+		if claimant != id: return none
+	return turned
 
 func _air_support_cells_on_map(cells: Array) -> bool:
 	var terrain: Node = _air_ground_registry()
@@ -8464,10 +8495,24 @@ func _air_ring_waypoints(binding: Dictionary, craft_id: String, center: Vector2i
 	if not profile.get("ok", false): return kept
 	var heading := float(binding.flight.get_snapshot().get("heading_rad", 0.0)) if is_air_support_craft_airborne(craft_id) else 0.0
 	var area := "atmosphere:" + _air_support_location_id
-	for cell in _air_ring_cells(center, int(_air_role_config("circle").get("radius_hex", 4))):
-		var cells: Array[Vector2i] = binding.combat.preview_footprint({"position_plane":SPACE_GRID.HEX.axial_to_plane(Vector2(cell)), "heading_rad":heading, "coordinate_frame":"local", "space_area_id":area}, profile.footprint_hexes)
-		if _air_support_cells_on_map(cells): kept.append(cell)
+	var ring: Array[Vector2i] = _air_ring_cells(center, int(_air_role_config("circle").get("radius_hex", 4)))
+	for i in ring.size():
+		var cell: Vector2i = ring[i]
+		var plane: Vector2 = SPACE_GRID.HEX.axial_to_plane(Vector2(cell))
+		var cells: Array[Vector2i] = binding.combat.preview_footprint({"position_plane":plane, "heading_rad":heading, "coordinate_frame":"local", "space_area_id":area}, profile.footprint_hexes)
+		# Luftrollen 3: die Nase folgt der Bahn - am Wegpunkt zeigt das Schiff in Richtung der Strecke vom vorigen Wegpunkt; auch dieser Platz muss auf die Karte passen.
+		var follow: float = (plane - SPACE_GRID.HEX.axial_to_plane(Vector2(ring[(i + ring.size() - 1) % ring.size()]))).angle()
+		var followed: Array[Vector2i] = binding.combat.preview_footprint({"position_plane":plane, "heading_rad":follow, "coordinate_frame":"local", "space_area_id":area}, profile.footprint_hexes)
+		if _air_support_cells_on_map(cells) and _air_support_cells_on_map(followed): kept.append(cell)
 	return kept
+
+## Ausrichtung der Rundbahn: ohne Angriffsziel zeigt die Nase auf den angeflogenen Wegpunkt (Flugrichtung); nahe am Wegpunkt kein Drehen (die Nase bliebe nicht ruhig).
+func _air_ring_face(craft_id: String, goal_plane: Vector2, previous_plane: Vector2) -> Variant:
+	var binding: Dictionary = _resolve_air_support_craft(craft_id)
+	if not binding.get("ok", false): return null
+	if Vector2(binding.flight.get_snapshot().position_plane).distance_to(goal_plane) <= 0.5 or goal_plane.distance_to(previous_plane) <= 0.001: return null
+	# Die Nase zeigt am Wegpunkt in Richtung der Strecke vom vorigen Wegpunkt (wie der Ring-Filter es prueft).
+	return goal_plane + (goal_plane - previous_plane).normalized() * 3.0
 
 ## Rolle im Vokabular des Raumkampf-Vertrags; wird als order_issue geprueft, aber nicht in die Rotte geschrieben.
 func _air_role_entry(binding: Dictionary, craft_id: String, role: String, center: Vector2i, waypoints: Array[Vector2i], request_id: String) -> Dictionary:
@@ -8500,12 +8545,14 @@ func _air_start_index(craft_id: String, center: Vector2i, waypoints: Array[Vecto
 	return best
 
 ## Fliegt den Wegpunkt start_index an; belegte oder beanspruchte Wegpunkte werden uebersprungen. Aendert nur waypoint_index.
-func _air_goto_waypoint(craft_id: String, sortie: Dictionary, start_index: int) -> Dictionary:
+func _air_goto_waypoint(craft_id: String, sortie: Dictionary, start_index: int, allow_turn: bool = true) -> Dictionary:
 	var waypoints: Array = sortie.get("waypoints", [])
 	var last := {"ok":false, "reason":"circle_blocked"}
 	for k in waypoints.size():
 		var index: int = (start_index + k) % waypoints.size()
-		var result: Dictionary = _air_set_goal(craft_id, waypoints[index])
+		var face: Variant = null
+		if allow_turn: face = _air_ring_face(craft_id, SPACE_GRID.HEX.axial_to_plane(Vector2(waypoints[index])), SPACE_GRID.HEX.axial_to_plane(Vector2(waypoints[(index + waypoints.size() - 1) % waypoints.size()])))
+		var result: Dictionary = _air_set_goal(craft_id, waypoints[index], face)
 		if result.get("ok", false):
 			sortie["waypoint_index"] = index
 			return {"ok":true, "waypoint_index":index}
@@ -8655,7 +8702,11 @@ func request_air_support_role_clear(craft_id: String, request_id: String) -> Dic
 	if sortie.is_empty() or (Dictionary(sortie.get("air_role", {})).is_empty() and Array(sortie.get("waypoints", [])).is_empty() and String(sortie.get("returning", "")).is_empty()): return {"ok":true, "already_clear":true}
 	var binding: Dictionary = _resolve_air_support_craft(craft_id)
 	if not binding.get("ok", false): return binding
-	var hold: Dictionary = _air_set_goal_plane(craft_id, binding.flight.get_snapshot().position_plane)
+	# Luftrollen 3: die Nase zeigt jetzt in Flugrichtung, gebremst wird nur noch mit dem schwachen Rueckwaertsschub. Haltepunkt daher ein Stueck voraus
+	# (Auslauf), sonst pendelt das Schiff mehrere Sekunden um den Punkt; ist er nicht frei, gilt wie bisher die jetzige Lage.
+	var hold_pose: Dictionary = binding.flight.get_snapshot()
+	var hold: Dictionary = _air_set_goal_plane(craft_id, Vector2(hold_pose.position_plane) + Vector2(hold_pose.velocity_plane) * 0.7)
+	if not hold.get("ok", false): hold = _air_set_goal_plane(craft_id, hold_pose.position_plane)
 	if not hold.get("ok", false): return hold
 	var text := "Kreisen beendet; das Schiff hält die Position."
 	_air_end_role(craft_id, text)
@@ -8810,7 +8861,8 @@ func _advance_air_roles(delta: float) -> void:
 		var arrived: bool = pose.position_plane.distance_to(SPACE_GRID.HEX.axial_to_plane(Vector2(waypoints[index]))) <= switch_distance
 		var ring_blocked := false
 		if (arrived or not has_control) and _resolve_air_support_pilot(craft_id).get("ok", false):
-			var stepped: Dictionary = _air_goto_waypoint(craft_id, sortie, (index + 1) if arrived else index)
+			# Hat die Bewegung den letzten Schritt abgelehnt (z. B. Fussabdruck beim Drehen ueber dem Rand), gibt es fuer dieses Ziel kein Drehen.
+			var stepped: Dictionary = _air_goto_waypoint(craft_id, sortie, (index + 1) if arrived else index, bool(combat.get_flight_status(craft_id).get("ok", true)))
 			# Blockiert: kein Wegpunkt frei, oder am Wegpunkt angekommen und kein anderer ausser dem eigenen frei (kein Fortschritt).
 			ring_blocked = not stepped.get("ok", false) or (arrived and int(stepped.get("waypoint_index", index)) == index)
 		if ring_blocked:
