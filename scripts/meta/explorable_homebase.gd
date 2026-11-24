@@ -551,7 +551,6 @@ var _refuel_service_available: bool = false
 var _map_bounds: Rect2
 var _map_data
 var _hint: Label
-var _interact: Button
 var _nearby_terminal: String = ""
 var _keys: Dictionary = {}
 var _keyboard_move: bool = false
@@ -618,7 +617,6 @@ func set_pad_preview(active: bool, craft_id: String = "", pad_id: String = "") -
 	_host.focus_mode = Control.FOCUS_NONE
 	_host.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	get_node("ExplorationHelp").visible = false
-	get_node("ExitExploration").visible = false
 	if _drone_helper != null:
 		_drone_helper.call("set_operating_visual", false)
 	set_process(true)
@@ -791,7 +789,6 @@ func set_active(active: bool) -> void:
 	_host.focus_mode = Control.FOCUS_ALL
 	_host.mouse_filter = Control.MOUSE_FILTER_STOP
 	get_node("ExplorationHelp").visible = true
-	get_node("ExitExploration").visible = true
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS if active else SubViewport.UPDATE_DISABLED
 	if _drone_helper != null:
 		_drone_helper.call("set_operating_visual", active)
@@ -1314,19 +1311,15 @@ func _terminal_distance(terminal: Dictionary) -> float:
 
 func _update_nearby_terminal() -> void:
 	var nearest: String = ""
-	var title: String = ""
 	var distance_value: float = INTERACTION_RADIUS
 	for terminal in _terminals:
 		var distance_candidate: float = _terminal_distance(terminal)
 		if bool(terminal.get("enabled", true)) and distance_candidate <= distance_value:
 			distance_value = distance_candidate
 			nearest = String(terminal["id"])
-			title = String(terminal["title"])
 	if nearest == _nearby_terminal:
 		return
 	_nearby_terminal = nearest
-	_interact.disabled = nearest.is_empty()
-	_interact.text = "E · " + title if not nearest.is_empty() else "Konsole aufsuchen"
 	for id in _terminal_labels:
 		(_terminal_labels[id] as Label3D).modulate = Color("ffe08b") if String(id) == nearest else Color("eaf2df")
 
@@ -1385,13 +1378,8 @@ func _build_overlay() -> void:
 	panel.offset_top = -118.0
 	panel.offset_right = -24.0
 	panel.offset_bottom = -22.0
-	_interact = Button.new()
-	_interact.name = "InteractTerminal"
-	_interact.text = "Konsole aufsuchen"
-	_interact.disabled = true
-	_interact.custom_minimum_size.y = 40.0
-	_interact.pressed.connect(func(): request_terminal(_nearby_terminal))
-	panel.add_child(_interact)
+	# Wunsch 24.11.: Die schwebenden Knoepfe "E · Personal" (Konsole) und "Übersicht · Esc" sind entfernt.
+	# Die Tasten E (Konsole) und Esc (zurueck zur Uebersicht) wirken unveraendert ueber _unhandled_key_input.
 	_hint = Label.new()
 	_hint.text = "?"
 	_hint.tooltip_text = "WASD gehen · Rechtsklick Ziel · E Konsole"
@@ -1399,16 +1387,6 @@ func _build_overlay() -> void:
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	panel.add_child(_hint)
 	_layout_exploration_help()
-	var exit := Button.new()
-	exit.name = "ExitExploration"
-	exit.text = "Übersicht  ·  Esc"
-	exit.pressed.connect(func(): exploration_exit_requested.emit())
-	add_child(exit)
-	exit.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	exit.offset_left = -196.0
-	exit.offset_top = 20.0
-	exit.offset_right = -24.0
-	exit.offset_bottom = 64.0
 
 
 func get_exploration_snapshot() -> Dictionary:
