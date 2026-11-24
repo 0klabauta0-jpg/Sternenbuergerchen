@@ -1113,8 +1113,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if not _active or not _initialized or not event is InputEventKey:
 		return
 	var key: Key = event.physical_keycode
-	# Gehen mit WASD nur, wenn das Basisbild den Fokus hat; E (Konsole) und Esc (zurueck) wirken unabhaengig vom Fokus,
-	# damit sie auch nach einem Klick auf einen Leistenknopf (Bauen, Lager, ...) so wirken wie die frueheren zwei Knoepfe.
+	# Gehen mit WASD nur, wenn das Basisbild den Fokus hat; E (Konsole) wirkt unabhaengig vom Fokus,
+	# damit es auch nach einem Klick auf einen Leistenknopf (Bauen, Lager, ...) wirkt. Esc gehoert dem Spielmenue (siehe _input).
 	if key in [KEY_W, KEY_A, KEY_S, KEY_D]:
 		if not _host.has_focus():
 			return
@@ -1122,9 +1122,6 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event.pressed and not event.echo and key == KEY_E:
 		request_terminal(_nearby_terminal)
-		get_viewport().set_input_as_handled()
-	elif event.pressed and not event.echo and key == KEY_ESCAPE:
-		_exit_or_cancel_move()
 		get_viewport().set_input_as_handled()
 
 
@@ -1134,15 +1131,6 @@ func _escape_belongs_to_base() -> bool:
 		return false
 	var focus_owner: Control = get_viewport().gui_get_focus_owner()
 	return not (focus_owner is LineEdit or focus_owner is TextEdit)
-
-
-## Esc in der Basisansicht: zuerst eine angefangene Bewegungsauswahl abbrechen, sonst zurueck zur Uebersicht.
-func _exit_or_cancel_move() -> void:
-	if _move_armed:
-		_move_armed = false
-		_person_feedback.text = "Bewegungsauswahl abgebrochen."
-	else:
-		exploration_exit_requested.emit()
 
 
 func _physics_process(delta: float) -> void:
@@ -1569,16 +1557,14 @@ func cancel_modal_input() -> void:
 func _input(event: InputEvent) -> void:
 	if not _active or _pad_preview or not is_visible_in_tree(): _camera_dragging=false; return
 	# Esc: Der Autoload GlobalEscapeMenu nimmt Esc in seinem _input an (vor jedem _unhandled_key_input) und oeffnet das Spielmenue.
-	# Auf dem Basisbild kommt Esc darum zuerst hier an (Szenenknoten bekommen _input vor Autoloads) und fuehrt zurueck zur Uebersicht;
-	# ist das Spielmenue schon offen oder tippt man in ein Textfeld, bleibt Esc bei diesen.
-	# Ist ein Seitenfenster offen, gehoert das erste Esc dem Fenster (wie sein "x"); erst danach gilt das Verhalten des Basisbilds.
+	# Szenenknoten bekommen _input vor Autoloads: Ist ein Seitenfenster offen, gehoert das erste Esc dem Fenster (wie sein "x").
+	# Sonst nimmt das Basisbild Esc NICHT an; es geht an den Autoload und oeffnet das Spielmenue. Tippt man in ein Textfeld
+	# oder ist das Spielmenue schon offen, bleibt Esc bei diesen.
 	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_ESCAPE and _initialized and _escape_belongs_to_base():
 		if side_window_open_probe.is_valid() and bool(side_window_open_probe.call()):
 			side_window_close_requested.emit()
-		else:
-			_exit_or_cancel_move()
-		get_viewport().set_input_as_handled()
-		return
+			get_viewport().set_input_as_handled()
+			return
 	if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_MIDDLE and not event.pressed:
 		_camera_dragging=false
 	elif event is InputEventMouseMotion and _camera_dragging:

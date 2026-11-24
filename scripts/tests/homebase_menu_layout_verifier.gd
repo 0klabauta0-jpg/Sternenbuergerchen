@@ -173,7 +173,7 @@ func _run() -> void:
 	for focus_case: String in ["Basisbild", "Bauen", "Lager"]:
 		if menu != null and bool(menu.call("is_overlay_open")):
 			menu.call("close_menu")
-		# Jeder Fall beginnt frisch auf dem Basisbild (Esc fuehrt aus der Basisansicht heraus).
+		# Jeder Fall beginnt frisch auf dem Basisbild ohne Seitenfenster (Esc oeffnet dort das Spielmenue).
 		screen.call("request_operation", "navigate", {"mode": "base"})
 		for i in 12:
 			await process_frame
@@ -187,8 +187,11 @@ func _run() -> void:
 		_check(e_handled, "E mit Fokus auf %s: erreicht die Basisansicht (Konsole aufsuchen)" % focus_case)
 		var before: int = exits[0]
 		await _key(KEY_ESCAPE)
+		for i in 4:
+			await process_frame
 		var menu_opened: bool = menu != null and bool(menu.call("is_overlay_open"))
-		_check(exits[0] == before + 1 and not menu_opened, "Esc mit Fokus auf %s: zurueck aus der Basisansicht, Spielmenue bleibt zu (Zaehler %d, Menue offen %s)" % [focus_case, exits[0] - before, str(menu_opened)])
+		_check(menu_opened, "Esc mit Fokus auf %s (leeres Basisbild): Spielmenue ist offen" % focus_case)
+		_check(String(presenter.get("_mode")) == "base" and exits[0] == before, "Esc mit Fokus auf %s: Modus weiter 'base', Trupp-Seite NICHT offen (Modus '%s', Wechsel %d)" % [focus_case, String(presenter.get("_mode")), exits[0] - before])
 		if menu_opened:
 			menu.call("close_menu")
 	# N1: Esc bei offenem Seitenfenster (Smart Mobile, Bauen, Lager) schliesst NUR das Fenster, wie das "x"; erst das zweite Esc wirkt wie ohne Fenster.
@@ -214,8 +217,10 @@ func _run() -> void:
 		_check(not win_menu, "Esc bei offenem %s: Spielmenue ist NICHT offen" % window_case)
 		_check(exits[0] == exits_win, "Esc bei offenem %s: Trupp-Seite ist NICHT offen (Wechsel %d)" % [window_case, exits[0] - exits_win])
 		await _key(KEY_ESCAPE)
+		for i in 4:
+			await process_frame
 		win_menu = menu != null and bool(menu.call("is_overlay_open"))
-		_check(exits[0] == exits_win + 1 and not win_menu, "Zweites Esc nach %s: wie ohne Fenster, zurueck aus der Basisansicht (Wechsel %d, Menue offen %s)" % [window_case, exits[0] - exits_win, str(win_menu)])
+		_check(win_menu and exits[0] == exits_win and String(presenter.get("_mode")) == "base", "Zweites Esc nach %s: oeffnet das Spielmenue, Trupp-Seite bleibt zu (Wechsel %d, Menue offen %s)" % [window_case, exits[0] - exits_win, str(win_menu)])
 		if win_menu:
 			menu.call("close_menu")
 	# Ausserhalb der Basisansicht (Uebersicht Trupp) bleibt Esc beim Spielmenue wie bisher.
