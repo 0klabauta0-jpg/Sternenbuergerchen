@@ -27,6 +27,10 @@ func _run() -> void:
 	if only.is_empty() or only in ["k2e", "trio"]: await _trio_case("near")
 	if only.is_empty() or only in ["k2f", "trio"]: await _trio_case("pair")
 	if only.is_empty() or only in ["l3", "trio"]: await _trio_case("victory")
+	# LC2m M3: vor jedem Abflug frisch gemessen: k2g laeuft nach dem letzten Auffrischen weg (EVAC), k2h liegt abseits (Schiffskarte), k2i steht am Schiff.
+	if only.is_empty() or only in ["k2g", "trio"]: await _trio_case("late")
+	if only.is_empty() or only in ["k2h", "trio"]: await _trio_case("card")
+	if only.is_empty() or only in ["k2i", "trio"]: await _trio_case("quick")
 	if only.is_empty(): await _i2_background_end_releases_instance()
 	print("CAMPAIGN_CRAFT_LOSS_CREW passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
@@ -219,7 +223,9 @@ func _begin_trio_sortie(credits: int, tag: String) -> Dictionary:
 	return sortie
 
 func _trio_case(variant: String) -> void:
-	var tag := {"left": "K2d", "near": "K2e", "pair": "K2f", "victory": "L3"}[variant] as String
+	var tag := {"left": "K2d", "near": "K2e", "pair": "K2f", "victory": "L3", "late": "K2g", "card": "K2h", "quick": "K2i"}[variant] as String
+	# Steht die dritte Person beim Messen am Einsatzschiff? (K2g laeuft erst danach weg.)
+	var at_ship: bool = variant in ["near", "late", "quick"]
 	var s: Dictionary = await _begin_trio_sortie(500, tag)
 	if s.is_empty():
 		_trio = false
@@ -236,7 +242,7 @@ func _trio_case(variant: String) -> void:
 	if variant == "pair": _k2_prepare(s, second)
 	_site(s, second)
 	var site: Dictionary = Dictionary(Array(s.simulation.get("_air_crash_sites")).back())
-	s.controller.call("apply_air_crash", second, site, {RECRUIT: {"state": "unhurt"}}, [RECRUIT])
+	s.controller.call("apply_air_crash", second, site, {RECRUIT: {"state": "severe" if variant == "card" else "unhurt"}}, [RECRUIT])
 	var occupants: Array = _flow.call("_lost_craft_occupant_ids", [{"craft_id": second}])
 	occupants.sort()
 	var expected_occupants: Array = second_crew.duplicate()
@@ -259,23 +265,45 @@ func _trio_case(variant: String) -> void:
 		if at >= 0: crew_ids.remove_at(at)
 	Dictionary(visits[_craft_id])["unit_ids"] = crew_ids
 	# Die dritte Person steht in K2e am Zugang des Einsatzschiffs, sonst drei Felder (270) davon entfernt; der Truppfuehrer steht am Zugang (_seat_crew).
-	if not _place_at(s.simulation, s.access, RECRUIT, Vector2.ZERO if variant == "near" else Vector2(270.0, 0.0)):
+	if not _place_at(s.simulation, s.access, RECRUIT, Vector2.ZERO if at_ship else Vector2(270.0, 0.0)):
 		_trio = false
 		return
 	var measured: Dictionary = {}
 	for raw in Array(Dictionary(_flow.call("_build_mission_result", s.mission, {})).get("team_states", [])): measured[String(Dictionary(raw).get("unit_id", ""))] = raw
-	_check(bool(Dictionary(measured.get(RECRUIT, {})).get("near_ship", variant != "near")) == (variant == "near") and not bool(Dictionary(measured.get(RECRUIT, {})).get("aboard", true)), tag + ": Aufbau: die dritte Person ist %s und nicht an Bord (%s)" % ["am Einsatzschiff" if variant == "near" else "abseits", str(measured.get(RECRUIT, {}))])
+	_check(bool(Dictionary(measured.get(RECRUIT, {})).get("near_ship", not at_ship)) == at_ship and not bool(Dictionary(measured.get(RECRUIT, {})).get("aboard", true)), tag + ": Aufbau: die dritte Person ist %s und nicht an Bord (%s)" % ["am Einsatzschiff" if at_ship else "abseits", str(measured.get(RECRUIT, {}))])
 	if variant == "pair": _check(bool(Dictionary(measured.get(LEADER, {})).get("near_ship", false)) and not bool(Dictionary(measured.get(LEADER, {})).get("aboard", true)), tag + ": Aufbau: der Truppfuehrer steht am Einsatzschiff, nicht an Bord")
-	if variant != "victory":
-		# LC2m W1: die Ansage vor dem Abheben, gebaut von der Funktion, die den EVAC-Knopf beschriftet.
+	var sentence := "1 Person des abgeschossenen Schiffs ist nicht am Schiff. Notrettung: 400 Credits."
+	var button: Button = s.controller.call("_ensure_mission_evacuation_button")
+	if variant not in ["victory", "card"]:
+		# LC2m W1: die Ansage vor dem Abheben, gebaut von der Funktion, die den EVAC-Knopf beschriftet (LC2m M3: angehaengt an den bisherigen Hinweis).
 		s.controller.call("_refresh_mission_evacuation_button")
-		var button: Button = s.controller.call("_ensure_mission_evacuation_button")
-		var away: bool = variant != "near"
+		var away: bool = not at_ship
 		var expected_text: String = "EVAC · Notrettung 400 Cr" if away else "EVAC"
 		_check(button != null and button.text == expected_text, tag + ": Knopf vor dem Abheben: \"%s\" (%s)" % [expected_text, button.text if button != null else "kein Knopf"])
-		if away: _check(button != null and button.tooltip_text == "1 Person des abgeschossenen Schiffs ist nicht am Schiff. Notrettung: 400 Credits.", tag + ": Tooltip nennt 1 Person und 400 Credits (%s)" % (button.tooltip_text if button != null else "-"))
+		if away: _check(button != null and button.tooltip_text.ends_with(sentence) and button.tooltip_text.length() > sentence.length(), tag + ": Tooltip nennt 1 Person und 400 Credits, hinter dem bisherigen Hinweis (%s)" % (button.tooltip_text if button != null else "-"))
 		else: _check(button != null and not button.tooltip_text.contains("Notrettung") and not button.text.contains("Notrettung"), tag + ": niemand abseits: kein Hinweis auf die Notrettung (%s)" % (button.tooltip_text if button != null else "-"))
 	if variant == "victory": s.driver.call("_resolve_combat", "victory", String(s.driver.get("friendly_team_id")))
+	elif variant in ["late", "quick"]:
+		# EVAC-Druck ueber den echten Weg (request_selected_fireteam_evacuation); GESTELLT ist nur die Landezone auf dem Truppfuehrer (wie H2 im feedback-Pruefer).
+		if variant == "late" and not _place_at(s.simulation, s.access, RECRUIT, Vector2(270.0, 0.0)):
+			_trio = false
+			return
+		s.controller.set("_has_lz_position", true)
+		s.controller.set("_lz_position", s.leader.global_position)
+		var first: Dictionary = s.controller.call("request_selected_fireteam_evacuation")
+		if variant == "late":
+			_check(not bool(first.get("accepted", true)) and _flow.get("_active_mission") == s.mission, tag + ": erster Druck: kein Abflug, der Stand war nicht angesagt (%s)" % str(first.get("reason")))
+			_check(button != null and button.text == "EVAC · Notrettung 400 Cr" and button.tooltip_text.ends_with(sentence), tag + ": jetzt nennt der Knopf den Betrag (%s / %s)" % [button.text if button != null else "-", button.tooltip_text if button != null else "-"])
+			var second_press: Dictionary = s.controller.call("request_selected_fireteam_evacuation")
+			_check(bool(second_press.get("accepted", false)), tag + ": zweiter Druck mit unveraendertem Stand: Abflug (%s)" % str(second_press.get("reason")))
+		else:
+			_check(bool(first.get("accepted", false)), tag + ": niemand abseits: der erste Druck fliegt ab (%s)" % str(first.get("reason")))
+	elif variant == "card":
+		# Abheben ueber die Schiffskarte (wie _press_return im Abflug-Pruefer); die Liegende ist abseits, alle Fitten steigen ein.
+		s.controller.call("_on_mission_dropship_return_pressed", _craft_id)
+		var card_text: String = String(s.controller.call("_get_mission_dropship_card_feedback_text", s.controller.call("_find_mission_dropship_card_entry", _craft_id)))
+		_check(_flow.get("_active_mission") == s.mission and card_text.contains(sentence), tag + ": erster Versuch: kein Abflug, die Schiffskarte nennt den Satz (%s)" % card_text)
+		s.controller.call("_on_mission_dropship_return_pressed", _craft_id)
 	else: s.driver.call("_resolve_combat", "aborted", "", "evacuation")
 	if not await _wait_released(tag + ": Einsatz wird freigegeben"):
 		_trio = false
@@ -284,7 +312,7 @@ func _trio_case(variant: String) -> void:
 	var others: Array = Array(result.get("other_craft_losses", []))
 	var fee: int = int(Dictionary(others[0]).get("rescue_fee", 0)) if not others.is_empty() else -1
 	_check(not bool(result.get("casualty_total_loss", false)) and not result.has("craft_loss") and others.size() == 1, tag + ": Einsatzschiff heil, nur das zweite Schiff verloren, kein Totalverlust")
-	var charged: bool = variant in ["left", "pair"]
+	var charged: bool = variant in ["left", "pair", "late", "card"]
 	_check((fee == 400 and _credits() == 100 and _loss_lines(result) == 1) if charged else (fee == 0 and _credits() == 500 and _loss_lines(result) == 0), tag + (": Gebuehr genau einmal 400, 500 -> 100, Zeile \"Notrettung: −400 Credits\" in der Nachbesprechung (%d / %d / Zeilen %d)" if charged else ": keine Gebuehr, 500 Credits, keine Notrettungszeile (%d / %d / Zeilen %d)") % [fee, _credits(), _loss_lines(result)])
 	_check(DEBRIEF_SCRIPT.build_craft_loss_text(result).contains("Schiff verloren: Zweitschiff"), tag + ": das zweite Schiff steht in der Verlustzeile der Nachbesprechung")
 	_check(not _unit_is_dead(RECRUIT) and not PackedStringArray(result.get("fatality_unit_ids", PackedStringArray())).has(RECRUIT), tag + ": die dritte Person lebt (%s)" % _unit_fate(RECRUIT))

@@ -1926,6 +1926,13 @@ func request_selected_fireteam_evacuation() -> Dictionary:
 		_last_command_text = "EVAC BLOCKED: %s" % blocked_reason.to_upper()
 		_update_ui()
 		return {"accepted": false, "reason": blocked_reason, "mission_result": {}}
+	# LC2m M3: Vor dem Abflug frisch gemessen; ein noch nicht angesagter Stand der Notrettung wird erst gezeigt, der naechste Druck fliegt ab.
+	var stranded_quote: Dictionary = _craft_loss_stranded_quote()
+	if int(stranded_quote.get("stranded_fee", 0)) > 0 and String(get_parent().get_meta("campaign_stranded_rescue_announced", "")) != String(stranded_quote.get("stranded_key", "")):
+		_refresh_mission_evacuation_button()
+		_last_command_text = String(stranded_quote.get("stranded_text", ""))
+		_update_ui()
+		return {"accepted": false, "reason": "rescue_fee_announced", "mission_result": {}}
 	var combat_driver = _get_combat_loop_driver()
 	if combat_driver == null or not combat_driver.has_method("request_mission_evacuation"):
 		_last_command_text = "EVAC BLOCKED: COMBAT AUTHORITY"
@@ -14819,20 +14826,24 @@ func _refresh_mission_evacuation_button() -> void:
 			button.disabled = not button_enabled
 	else:
 		# LC2m W1: Einsatzschiff heil, aber Insassen eines abgeschossenen zweiten Schiffs stehen weder an Bord noch am Schiff: die Gebuehr vor dem Abheben nennen.
-		var stranded_quote: Dictionary = {}
-		var crash_simulation: Node = get_node_or_null("../SimulationRoot")
-		if crash_simulation != null and crash_simulation.has_method("get_air_crash_sites"):
-			for site in Array(crash_simulation.call("get_air_crash_sites")):
-				var site_quote: Dictionary = _craft_loss_quote(String(Dictionary(site).get("craft_id", "")))
-				if int(site_quote.get("stranded_count", 0)) > 0:
-					stranded_quote = site_quote
-					break
-		var stranded_count: int = int(stranded_quote.get("stranded_count", 0))
-		if stranded_count > 0:
-			var stranded_fee: int = int(stranded_quote.get("stranded_fee", 0))
-			button.text = "EVAC · Notrettung %d Cr" % stranded_fee
-			button.tooltip_text = ("1 Person des abgeschossenen Schiffs ist nicht am Schiff. Notrettung: %d Credits." % stranded_fee) if stranded_count == 1 else ("%d Personen des abgeschossenen Schiffs sind nicht am Schiff. Notrettung: %d Credits." % [stranded_count, stranded_fee])
+		# LC2m M3: Der Satz haengt am bisherigen Hinweis; was der Knopf zeigt, gilt als angesagt (Schluessel am Einsatz, liest auch der Abflug).
+		var stranded_quote: Dictionary = _craft_loss_stranded_quote()
+		if int(stranded_quote.get("stranded_count", 0)) > 0:
+			button.text = "EVAC · Notrettung %d Cr" % int(stranded_quote.get("stranded_fee", 0))
+			button.tooltip_text += "\n" + String(stranded_quote.get("stranded_text", ""))
+			get_parent().set_meta("campaign_stranded_rescue_announced", String(stranded_quote.get("stranded_key", "")))
 	META_UI_SKIN_SCRIPT.style_tactical_button(button, button_enabled)
+
+
+## LC2m W1/M3: Frische Auskunft der Kampagne ueber Insassen abgeschossener zweiter Schiffe, die weder an Bord noch am Einsatzschiff sind
+## ({stranded_count, stranded_fee, stranded_text, stranded_key} oder {}); {} auch, wenn das Einsatzschiff selbst verloren ist.
+func _craft_loss_stranded_quote() -> Dictionary:
+	var crash_simulation: Node = get_node_or_null("../SimulationRoot")
+	if crash_simulation == null or not crash_simulation.has_method("get_air_crash_sites") or not _craft_loss_mission_craft_quote().is_empty(): return {}
+	for site in Array(crash_simulation.call("get_air_crash_sites")):
+		var site_quote: Dictionary = _craft_loss_quote(String(Dictionary(site).get("craft_id", "")))
+		if int(site_quote.get("stranded_count", 0)) > 0: return site_quote
+	return {}
 
 
 func _on_mission_evacuation_pressed() -> void:

@@ -4818,7 +4818,10 @@ func _stranded_rescue_quote() -> Dictionary:
 	var team_states: Array = Array(_build_mission_result(_active_mission, {}).get("team_states", []))
 	var stranded: Array = _stranded_lost_craft_occupants(team_states, _lost_craft_occupant_ids(others))
 	if stranded.is_empty(): return quote
-	return {"stranded_count": stranded.size(), "stranded_fee": _craft_loss_rescue_fee(team_states, rules)}
+	var fee: int = _craft_loss_rescue_fee(team_states, rules)
+	# LC2m M3: der Satz der Ansage (EVAC-Tooltip und Schiffskarte) und der Schluessel des Stands ("Anzahl|Gebuehr") fuer "schon angesagt".
+	var text: String = ("1 Person des abgeschossenen Schiffs ist nicht am Schiff. Notrettung: %d Credits." % fee) if stranded.size() == 1 else ("%d Personen des abgeschossenen Schiffs sind nicht am Schiff. Notrettung: %d Credits." % [stranded.size(), fee])
+	return {"stranded_count": stranded.size(), "stranded_fee": fee, "stranded_text": text, "stranded_key": "%d|%d" % [stranded.size(), fee]}
 
 
 ## LC2i I1: Ist die Flotte leer, wenn genau die Schiffe der Liste (craft_id-Texte oder Verlustbelege) verloren sind? Eine Flotte ohne Schiffe
@@ -10015,6 +10018,12 @@ func _campaign_departure_gate_casualties(craft_id: String) -> Dictionary:
 		var return_check: Dictionary = _departure_return_preflight(craft_id)
 		if not bool(return_check.get("ok", false)):
 			return {"handled": true, "ok": false, "reason": String(return_check.get("reason", "return_unavailable")), "message": _departure_fuel_message(String(return_check.get("reason", ""))) if String(return_check.get("reason", "")) in DEPARTURE_FUEL_REASONS else String(return_check.get("message", "Rückflug gerade nicht möglich"))}
+		# LC2m M3: Vor dem Abflug frisch gemessen. Steht ein Insasse eines verlorenen zweiten Schiffs abseits und ist genau dieser Stand (Anzahl, Gebuehr)
+		# noch nicht angesagt (EVAC-Knopf oder hier), fliegt das Schiff dieses eine Mal nicht ab; die Schiffskarte nennt den Satz. Der naechste Versuch fliegt.
+		var stranded: Dictionary = _stranded_rescue_quote()
+		if int(stranded.get("stranded_fee", 0)) > 0 and String(visit.get_meta("campaign_stranded_rescue_announced", "")) != String(stranded.get("stranded_key", "")):
+			visit.set_meta("campaign_stranded_rescue_announced", String(stranded.get("stranded_key", "")))
+			return {"handled": true, "ok": false, "reason": "rescue_fee_announced", "message": String(stranded.get("stranded_text", ""))}
 	# Orte laufen ueber _run_location_callback; ist der Flow gerade in einem Ortsrueckruf, wuerde er die Aufloesung still verwerfen.
 	if not String(visit.get_meta("location_id", "")).is_empty() and _location_callback_active:
 		return {"handled": true, "ok": false, "reason": "flow_busy", "message": "Abflug gerade nicht möglich, bitte erneut versuchen"}
