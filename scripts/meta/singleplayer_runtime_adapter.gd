@@ -287,6 +287,14 @@ func configure(flow: Node, screen: Control) -> void:
 	# Handel-Nachbesserung W3: friedlicher Besuch des Handelsaussenpostens in der Kampagne ohne Zeitlimit (0 = keins); das Skirmish-Szenario trade_outpost_visit bleibt.
 	if _campaign_mode:
 		catalog.append({"mission_id": "trade_outpost_open_visit", "mission_name": "Handelsaußenposten besuchen", "map_file_path": "res://maps/trade_outpost.json", "scenario_file_path": "res://data/mission_scenarios/trade_outpost_open_visit.json", "slot_count": 4, "time_limit_seconds": 0.0, "win_condition": "objective_capture"})
+	# Windbruch-Garnison: das freie Rebellenlager (open_garrisons.json), ohne Zeitlimit; ohne Eintrag kann der Anflug es nicht waehlen.
+	if _campaign_mode:
+		var garrisons: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/open_garrisons.json"))
+		for place_id: String in (Dictionary(garrisons) if typeof(garrisons) == TYPE_DICTIONARY else {}):
+			var garrison_id: String = String(Dictionary(garrisons)[place_id])
+			var garrison_place: Dictionary = Dictionary(_campaign.get_campaign_snapshot().locations).get(place_id, {})
+			if garrison_place.is_empty(): continue
+			catalog.append({"mission_id": garrison_id, "mission_name": String(garrison_place.name) + " – Rebellenlager", "map_file_path": garrison_place.map_file_path, "scenario_file_path": "res://data/mission_scenarios/" + garrison_id + ".json", "slot_count": 4, "time_limit_seconds": 0.0, "win_condition": "objective_capture"})
 	# Handel 2a: friedliche Besuchsszenarien der kleinen Aussenposten (small_outposts.json); ohne Eintrag im Katalog kann der Anflug sie nicht waehlen.
 	for place_id: String in Dictionary(_campaign.get_campaign_snapshot().locations):
 		if _campaign.small_outpost_entry(place_id).is_empty(): continue
@@ -2345,6 +2353,8 @@ func _destination_scenario_id(selected: Dictionary, location_id: String, selecte
 	if _campaign_mode and _campaign != null:
 		var visit: String = String(_campaign.open_visit_scenario_id(location_id))
 		if not visit.is_empty(): return visit
+		var garrison: String = String(_campaign.open_garrison_scenario_id(location_id))
+		if not garrison.is_empty(): return garrison
 	return String(Dictionary(selected.locations[location_id]).scenario_file_path).get_file().get_basename()
 
 ## Handel H2: Ankaufspreise der Station Polisa fuer die Stationsanzeige: die Preise der Warenboerse (Benit) ueber den Handelsdaten (Erz, Bergungsgut).
