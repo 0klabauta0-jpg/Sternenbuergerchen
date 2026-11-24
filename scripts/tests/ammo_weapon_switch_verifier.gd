@@ -8,6 +8,7 @@ extends "res://scripts/tests/ammo_combat_verifier.gd"
 
 const RIFLE_MAG := 40  # wirksam: 20 (Waffendaten) x magazine_scale 2
 const SWITCH_TICKS := 180  # Pistole: reload_ticks 30 x reload_scale 6
+const TEST_UNIT = preload("res://scripts/npc/test_unit.gd")
 
 
 ## Treiber, der die Befehle an Gegner mitschreibt (Tick, Befehl), bevor er sie wie gewohnt einreiht.
@@ -46,6 +47,9 @@ func _run() -> void:
 	print("AMMO_WEAPON_SWITCH passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
 
+	_test_p1_default_second_weapon_is_no_weapon()
+	_test_p2_given_second_weapon_switches_on_real_unit()
+	_test_p3_enemy_spawn_path_has_no_second_weapon()
 
 # ---- Hilfen ------------------------------------------------------------------------------------------------------
 
@@ -321,3 +325,99 @@ func _test_g2_own_squad_without_ammo_gets_no_order() -> void:
 	_check(own_orders == 0, "G2: kein automatischer Befehl fuer den eigenen Trupp (%d)" % own_orders)
 	_check(f.ctl.events.size() == 1 and String(f.ctl.events[0].text) == "Anna: Keine Munition mehr.", "G2: aber die einmalige Meldung ist da (%s)" % str(f.ctl.events))
 	f.scope.free()
+# ---- W2: Zweitwaffe nur, wenn sie wirklich gegeben wurde (echte Einheit TestUnit) ---------------------------------
+
+## Echte TestUnit ohne Szene (wie die Spielwege sie ausruesten: apply_identity_config). Die Kennung gehoert zu keiner Attrappe des Aufbaus.
+func _real_unit(unit_id: String, team: String, config: Dictionary):
+	var unit = TEST_UNIT.new()
+	var full := {"unit_id": unit_id, "team_id": team}
+	full.merge(config, true)
+	unit.apply_identity_config(full, false)
+	return unit
+
+
+## Aufbau mit einer eigenen Attrappe "real" (Versorgung der Kennung) und dem Gegner; die echte Einheit benutzt dieselbe Kennung.
+func _real_rig() -> Dictionary:
+	var specs := _duel("rifle", "none", {"weapon_1": "rifle", "name": "Anna"})
+	specs.append({"id": "real", "team": "blue", "grid": CENTER + HEX.DIRECTIONS[2], "facing": 0, "weapon": "pistol"})
+	var f := _ammo_rig(specs, {})
+	_add_controller(f)
+	return f
+
+
+## Wie _drain, aber mit einer frei gegebenen Einheit (nicht aus dem Aufbau). Gibt die Zahl der Schuesse zurueck, bis ganz leer.
+func _drain_unit(f: Dictionary, unit_id: String, unit, limit: int = 5000) -> int:
+	var shots := 0
+	for i in range(limit):
+		_tick(f)
+		if f.driver._ammo_unit_can_fire(unit_id, unit):
+			f.driver._ammo_note_shot(unit)
+			shots += 1
+		if f.driver._ammo_fully_empty_ids.has(unit_id):
+			return shots
+	return -1
+
+
+func _event_texts(f: Dictionary) -> Array:
+	var texts: Array = []
+	for e in f.ctl.events:
+		texts.append(String(e.text))
+	return texts
+
+
+## P1 (W2): Die Vorgabe weapon_2_id = "rifle" ist KEINE Zweitwaffe. Eine Einheit, deren Zweitwaffe nie gesetzt wurde, wechselt mit leerer
+## Pistole NICHT auf ein Phantom-Gewehr, sondern ist ganz leer. get_active_weapon_id bleibt fuer sie wie vorher (Rueckfall auf die Vorgabe).
+func _test_p1_default_second_weapon_is_no_weapon() -> void:
+	var f := _real_rig()
+	var unit = _real_unit("real", "blue", {"weapon_1_id": "pistol"})
+	_check(unit.get_weapon_2_id() == "rifle" and not unit.is_weapon_2_explicit(), "P1: Vorbedingung: Zweitwaffe nur die Vorgabe 'rifle', nicht gesetzt")
+	var shots := _drain_unit(f, "real", unit)
+	_check(shots == PISTOL_MAG and unit.get_combat_weapon_slot() == 1 and unit.get_active_weapon_id() == "pistol", "P1: 24 Pistolenschuesse, dann ganz leer, kein Wechsel auf das Vorgabe-Gewehr (%d Schuesse, Platz %d)" % [shots, unit.get_combat_weapon_slot()])
+	_check(int(f.driver._ammo_tracker().shots_fired("real", "rifle")) == 0 and _event_texts(f) == ["Test Unit: Keine Munition mehr."], "P1: nur die Meldung 'Keine Munition mehr.' (%s)" % str(_event_texts(f)))
+	unit.free()
+	# Bitgleich: ohne ausdruecklich gesetzte Zweitwaffe liefert get_active_weapon_id weiter die Vorgabe, wenn Waffe 1 keine Angriffswaffe ist.
+	var no_main = _real_unit("real_b", "blue", {"weapon_1_id": "none"})
+	_check(no_main.get_active_weapon_id() == "rifle" and not no_main.is_weapon_2_explicit(), "P1: Rueckfall 'Waffe 1 keine Angriffswaffe -> Waffe 2' unveraendert (%s)" % no_main.get_active_weapon_id())
+	no_main.free()
+	var fresh = TEST_UNIT.new()
+	_check(not fresh.is_weapon_2_explicit() and fresh.get_active_weapon_id() == "rifle", "P1: eine frische Einheit ohne jede Ausruestung: Zweitwaffe nicht gesetzt")
+	fresh.free()
+	f.scope.free()
+
+
+## P2 (W2): Ausdruecklich gesetzte Zweitwaffe (Ausruestung ueber apply_identity_config) wechselt wie bisher, auch ein ausdruecklich
+## gegebenes Gewehr als Zweitwaffe; das Waffenbild und die aktive Waffe der echten Einheit folgen.
+func _test_p2_given_second_weapon_switches_on_real_unit() -> void:
+	var f := _real_rig()
+	var unit = _real_unit("real", "blue", {"weapon_1_id": "rifle", "weapon_2_id": "pistol"})
+	_check(unit.is_weapon_2_explicit(), "P2: Vorbedingung: Zweitwaffe ausdruecklich gesetzt")
+	var shots := _drain_unit(f, "real", unit)
+	_check(shots == RIFLE_MAG + PISTOL_MAG and unit.get_combat_weapon_slot() == 2 and unit.get_active_weapon_id() == "pistol", "P2: Gewehr 40 + Pistole 24, aktive Waffe der echten Einheit Pistole auf Platz 2 (%d, Platz %d, %s)" % [shots, unit.get_combat_weapon_slot(), unit.get_active_weapon_id()])
+	_check(_event_texts(f) == ["Test Unit: Hauptwaffe leer – wechselt auf Pistole.", "Test Unit: Keine Munition mehr."], "P2: Wechselzeile und danach 'Keine Munition mehr.' (%s)" % str(_event_texts(f)))
+	unit.free()
+	f.scope.free()
+	var g := _real_rig()
+	var rifle_side = _real_unit("real", "blue", {"weapon_1_id": "pistol", "weapon_2_id": "rifle"})
+	var gs := _drain_unit(g, "real", rifle_side)
+	_check(gs == PISTOL_MAG + RIFLE_MAG and rifle_side.get_combat_weapon_slot() == 2 and rifle_side.get_active_weapon_id() == "rifle", "P2: ein ausdruecklich gegebenes Gewehr als Zweitwaffe wird benutzt (%d Schuesse)" % gs)
+	rifle_side.free()
+	g.scope.free()
+
+
+## P3 (W2): Gegner ueber den Weg der Szenario-Ausruestung (mission_test_setup._apply_authored_enemy_loadout setzt weapon_1_id + weapon_2_id "none";
+## ohne Eintrag bleibt es bei der Vorgabe): kein Wechsel, ganz leer, keine Spielermeldung.
+func _test_p3_enemy_spawn_path_has_no_second_weapon() -> void:
+	var authored := _real_rig()
+	var guard = _real_unit("real", "red", {"weapon_1_id": "pistol", "weapon_2_id": "none"})
+	var s1 := _drain_unit(authored, "real", guard)
+	_check(s1 == PISTOL_MAG and guard.get_combat_weapon_slot() == 1 and authored.ctl.events.is_empty(), "P3: Gegner mit Szenario-Waffe und Zweitwaffe 'none': 24 Schuesse, ganz leer, kein Wechsel (%d)" % s1)
+	guard.free()
+	authored.scope.free()
+	var plain := _real_rig()
+	var unauthored = _real_unit("real", "red", {"weapon_1_id": "pistol", "armor_id": "medium"})
+	var s2 := _drain_unit(plain, "real", unauthored)
+	_check(s2 == PISTOL_MAG and unauthored.get_combat_weapon_slot() == 1 and int(plain.driver._ammo_tracker().shots_fired("real", "rifle")) == 0 and plain.ctl.events.is_empty(), "P3: Gegner ohne Eintrag fuer die Zweitwaffe (nur Vorgabe 'rifle'): kein Phantom-Gewehr (%d)" % s2)
+	unauthored.free()
+	plain.scope.free()
+
+

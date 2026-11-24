@@ -45,6 +45,9 @@ class NPC extends Node2D:
 	var _main_active_weapon_id := ""
 	var display_name := ""
 	func get_weapon_2_id() -> String: return weapon_2_id
+	## M6c W2: wurde die Zweitwaffe ausdruecklich gesetzt (Spec-Schluessel weapon_2 vorhanden) oder ist sie nur die Vorgabe?
+	var weapon_2_explicit := false
+	func is_weapon_2_explicit() -> bool: return weapon_2_explicit
 	func get_display_name() -> String: return display_name
 	func get_combat_weapon_slot() -> int: return combat_weapon_slot
 	func set_combat_weapon_slot(slot: int) -> void:
@@ -303,6 +306,7 @@ func _rig(specs: Array, seed_value: int = 7) -> Dictionary:
 		npc.active_weapon_id = String(spec.get("weapon", "pistol"))
 		npc.weapon_1_id = String(spec.get("weapon_1", ""))
 		npc.weapon_2_id = String(spec.get("weapon_2", ""))
+		npc.weapon_2_explicit = bool(spec.get("weapon_2_given", spec.has("weapon_2")))
 		npc.display_name = String(spec.get("name", ""))
 		npc.hp = int(spec.get("hp", 100000))
 		npc.initiative = float(spec.get("initiative", -1.0))

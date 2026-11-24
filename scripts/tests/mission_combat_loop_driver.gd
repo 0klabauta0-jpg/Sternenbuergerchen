@@ -2342,8 +2342,11 @@ func _ammo_review_empty_weapon(unit_id: String, unit) -> void:
 		return
 	var slot: int = _ammo_unit_slot(unit)
 	var other_slot: int = 2 if slot == 1 else 1
-	var other_id: String = String(unit.call("get_weapon_2_id" if other_slot == 2 else "get_weapon_1_id"))
-	if other_id != weapon_id and WEAPON_DATA_SCRIPT.is_attack_weapon_id(other_id):
+	# K1: Kennungen wie die Einheit bereinigen (TU _resolve_active_combat_weapon_id), damit nie zwischen "gleichen" Waffen gewechselt wird.
+	var other_id: String = WEAPON_DATA_SCRIPT.sanitize_weapon_id(String(unit.call("get_weapon_2_id" if other_slot == 2 else "get_weapon_1_id")))
+	# W2: Auf Platz 2 wird nur gewechselt, wenn die Zweitwaffe der Einheit WIRKLICH gegeben wurde (Ausruestung / Spawn-Daten), nie auf die bloesse Vorgabe "rifle".
+	var other_given: bool = other_slot == 1 or (unit.has_method("is_weapon_2_explicit") and bool(unit.call("is_weapon_2_explicit")))
+	if other_given and other_id != weapon_id and WEAPON_DATA_SCRIPT.is_attack_weapon_id(other_id):
 		var other_state: Dictionary = tracker.status(unit_id, other_id, _current_tick, false)
 		if String(other_state.get("state", "")) == "ready" and int(other_state.get("rounds", 0)) > 0:
 			_ammo_switch_weapon_slot(unit_id, unit, other_slot, weapon_id, other_id)
