@@ -9492,6 +9492,10 @@ func _complete_space_surface_departure(craft_id: String, instance: Node, record:
 		_active_mission=null
 		_reset_active_mission_timer()
 		_show_star_map()
+	# Kopfgeld (Dauerauftrag "Rebellen hetzen"): Abflug von einem freien Ort ohne Auftrag rechnet die Ausgeschalteten ab; mit Auftrag
+	# macht das record_mission_result unten (mehrfaches Abrechnen bucht nichts doppelt).
+	if instance != null and String(identity.get("job_id", "")).is_empty() and _singleplayer_runtime != null and _singleplayer_runtime.has_method("settle_bounty_instance"):
+		_singleplayer_runtime.call("settle_bounty_instance", instance)
 	# Publish the completed Flow projection before observers can admit a new visit.
 	if String(identity.get("craft_id", "")) == craft_id and not String(identity.get("job_id", "")).is_empty():
 		_singleplayer_runtime.call("record_mission_result", _campaign_departure_booking({"result":"aborted","reason":"craft_left_without_objective_completion"}, instance), identity)
@@ -10139,6 +10143,8 @@ func _finish_singleplayer_visit_if_returned() -> void:
 		return
 	if not String(_active_singleplayer_identity.get("job_id", "")).is_empty():
 		_singleplayer_runtime.call("record_mission_result", _campaign_departure_booking({"result": "aborted", "reason": "craft_returned_without_objective_completion"}, _active_mission), _active_singleplayer_identity.duplicate(true))
+	elif _singleplayer_runtime != null and _singleplayer_runtime.has_method("settle_bounty_instance"):
+		_singleplayer_runtime.call("settle_bounty_instance", _active_mission)  # Kopfgeld auch beim Heimflug von einem freien Ort
 	_release_active_mission()
 	_active_singleplayer_identity.clear()
 	_mission_planning_state = DEFAULT_MISSION_PLANNING_STATE.duplicate(true)

@@ -125,7 +125,7 @@ func _run() -> void:
 	for child: Node in standing_box.get_children():
 		if child is Button:
 			standing_cards.append(child)
-	_check(standing_cards.size() == 5, "jeder der fuenf Dauerauftraege ist ein eigenes Feld (Knopf) (beobachtet %d)" % standing_cards.size())
+	_check(standing_cards.size() == 6, "jeder der sechs Dauerauftraege ist ein eigenes Feld (Knopf) (beobachtet %d)" % standing_cards.size())
 	var heading_ok := false
 	for child: Node in standing_box.get_children():
 		if child is Label and String(child.name) == "StandingOrdersHeading" and (child as Label).text == "Daueraufträge":

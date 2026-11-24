@@ -168,11 +168,11 @@ func configure(screen: Control) -> void:
 	item_rect_changed.connect(_align_footer_later)
 	_accept = _button("AcceptJob", "Auftrag annehmen")
 	SKIN.primary(_accept)
-	_accept.pressed.connect(func(): _request("accept_job", {"job_id": _job_id}))
+	_accept.pressed.connect(func(): _request("standing_accept", {"order_id": _standing_id}) if not _standing_id.is_empty() else _request("accept_job", {"job_id": _job_id}))
 	_show_map = _button("ShowOnMap", "Auf Karte zeigen")
 	_show_map.pressed.connect(_show_selected_on_map)
 	_abandon = _button("AbandonJob", "Auftrag abbrechen")
-	_abandon.pressed.connect(func(): _request("abandon_job", {"job_id": _job_id}))
+	_abandon.pressed.connect(func(): _request("standing_abandon", {"order_id": _standing_id}) if not _standing_id.is_empty() else _request("abandon_job", {"job_id": _job_id}))
 	resized.connect(_layout_device)
 	_layout_device()
 
@@ -342,8 +342,21 @@ func refresh() -> void:
 		_summary.visible = true
 		_details.text = _standing_facts(standing_entry)
 		_objectives.text = ""
-	_detail_card.visible=_details_expanded;_objectives.visible=_details_expanded and not standing_open;_actions.visible=_details_expanded and not standing_open
-	_footer.visible = _details_expanded and not standing_open
+	# Kopfgeld-Dauerauftrag: im Smart Mobile annehmen und abgeben (Fracht-Dauerauftraege bleiben beim Haendler, ohne Knoepfe).
+	var bounty_open: bool = standing_open and String(standing_entry.get("kind", "")) == "bounty"
+	_show_map.visible = not standing_open
+	if bounty_open:
+		var bounty_active: bool = String(standing_entry.get("status", "")) == "active"
+		_accept.text = "Auftrag annehmen"
+		_accept.disabled = bounty_active
+		_accept.tooltip_text = "Rebellen hetzen annehmen: 50 Cr je ausgeschaltetem Gegner"
+		_abandon.text = "Auftrag abgeben"
+		_abandon.disabled = not bounty_active
+		_abandon.tooltip_text = _abandon.text
+	else:
+		_abandon.text = "Auftrag abbrechen"
+	_detail_card.visible=_details_expanded;_objectives.visible=_details_expanded and not standing_open;_actions.visible=_details_expanded and (not standing_open or bounty_open)
+	_footer.visible = _details_expanded and (not standing_open or bounty_open)
 	_layout_device()
 
 ## Dauerauftraege (H3) unter den normalen Auftraegen: Titel, darunter der Satz des Besitzers; gesperrt und nicht verfuegbar mit "Gesperrt: ".

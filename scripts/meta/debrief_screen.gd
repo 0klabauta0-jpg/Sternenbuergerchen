@@ -886,6 +886,9 @@ func _apply_player_readout_texts() -> void:
 	var loot_text := build_loot_text(_mission_result)
 	if not loot_text.is_empty():
 		_native_review_confirmation.text += "\n" + loot_text
+	var bounty_text := build_bounty_text(_mission_result)
+	if not bounty_text.is_empty():
+		_native_review_confirmation.text += "\n" + bounty_text
 	var craft_loss_text := build_craft_loss_text(_mission_result)
 	if not craft_loss_text.is_empty():
 		_native_review_confirmation.text += "\n" + craft_loss_text
@@ -918,6 +921,13 @@ static func build_craft_loss_text(mission_result: Dictionary) -> String:
 			else:
 				lines.append("Auftragsfracht verloren: %s. Sie steht am Ladeort wieder bereit." % String(cargo))
 	return "\n".join(lines)
+
+
+## Kopfgeld (Dauerauftrag "Rebellen hetzen"): eigene Zeile, getrennt von der Auftragsbelohnung (Feld bounty des Ergebnisses); sonst leer.
+static func build_bounty_text(mission_result: Dictionary) -> String:
+	if typeof(mission_result.get("bounty")) != TYPE_DICTIONARY:
+		return ""
+	return String(Dictionary(mission_result.get("bounty")).get("line", ""))
 
 
 ## Beute aus optionalen Ausruestungskisten (Feld loot_items des Abschlussergebnisses, vom Adapter gebucht); ohne Beute leer.

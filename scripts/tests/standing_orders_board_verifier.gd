@@ -68,7 +68,7 @@ func _run() -> void:
 	board.refresh()
 	var texts: Dictionary = _texts(board)
 	_check(texts.has("StandingOrdersHeading") and String(texts.get("StandingOrdersHeading", "")) == "Daueraufträge", "mit Daten: Ueberschrift steht (Gegenprobe zum leeren Fall)")
-	_check(texts.size() == 6, "Ueberschrift und fuenf Zeilen (beobachtet %d)" % texts.size())
+	_check(texts.size() == 7, "Ueberschrift und sechs Zeilen (beobachtet %d)" % texts.size())
 	_check(String(texts.get("StandingOrder_freight_trade_outpost_c_benit", "")) == "Fracht: 4 Kisten C-Benit nach Aschental · 30 Cr\nAnnahme beim Händler in Kestrel.", "Fracht offen: Titel und Satz (beobachtet \"%s\")" % texts.get("StandingOrder_freight_trade_outpost_c_benit", "-"))
 	_check(String(texts.get("StandingOrder_mining_satellite_crash_a_benit", "")) == "Mining: A-Benit (Aschental) · 8 Cr je Stück\nGesperrt: Braucht: Hand-Mining-Tool. Ein Mining-Schiff gibt es noch nicht.", "Mining: Gesperrt mit Grund (beobachtet \"%s\")" % texts.get("StandingOrder_mining_satellite_crash_a_benit", "-"))
 	_check(String(texts.get("StandingOrder_salvage_satellite_crash_salvage", "")) == "Bergung: Bergungsgut (Aschental) · 8 Cr je Stück\nGesperrt: Braucht: Bergungswerkzeug.", "Bergung: Gesperrt mit Grund (beobachtet \"%s\")" % texts.get("StandingOrder_salvage_satellite_crash_salvage", "-"))

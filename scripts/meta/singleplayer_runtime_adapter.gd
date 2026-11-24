@@ -967,6 +967,10 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 			if operation == "station_buy_ship" and String(data.get("delivery_mode", "homebase")) == "local" and not bool(result.get("replayed", false)): _flow.call("finalize_polisa_local_ship_purchase", String(result.get("craft_id", "")))
 			_flow.call("_refresh_homebase_screen")
 		return result
+	if operation in ["standing_accept", "standing_abandon"] and String(payload.get("order_id", "")).begins_with("bounty:"):
+		# Smart Mobile: der Kopfgeld-Dauerauftrag wird ohne Handelsort angenommen/abgegeben; Fracht bleibt beim Haendler (weiter unten).
+		if not _campaign_mode: return _reject("not_campaign", "Daueraufträge gibt es nur in der Kampagne")
+		return _commit("singleplayer_supply", operation, {"order_id": String(payload.get("order_id", ""))}, _request_id("standing", payload))
 	if operation in ["inventory_transfer","inventory_equip"]:
 		var unit_id := String(data.get("unit_id",""))
 		var context := _inventory_context(unit_id,String(data.get("craft_id","")))
@@ -1363,7 +1367,34 @@ func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
 func is_campaign_mission() -> bool:
 	return _campaign_mode or _space_route_requested or String(_flow.get("_selected_mission_id")) in ["satellite_recovery", "trade_outpost_visit"]
 
+## Kopfgeld: letzte Abrechnung ({} = keine); die Zeile fuer Anzeigen ohne Einsatzergebnis (Abflug von einem freien Ort).
+var last_bounty: Dictionary = {}
+
+## Kopfgeld (Dauerauftrag "Rebellen hetzen"): rechnet die seit der letzten Abrechnung ausgeschalteten Gegner dieses Einsatzes ab.
+## Gilt fuer JEDEN Einsatz (Auftrag oder freier Besuch), auch bei Fehlschlag/Rueckzug, getrennt von der Auftragsbelohnung.
+## Gebucht wird NUR ueber den Befehl bounty_payout des Versorgungsstands, und der lehnt ohne angenommenen Dauerauftrag ab (kein Credit).
+## Mehrfacher Aufruf bucht nichts doppelt: der Einsatztreiber merkt sich, wie viele schon abgerechnet sind.
+func settle_bounty_instance(mission: Node) -> Dictionary:
+	if not _campaign_mode or _simulation == null or not is_instance_valid(mission): return {}
+	var driver: Node = mission.get_node_or_null("CombatLoopDriver")
+	if driver == null or not driver.has_method("get_enemies_out_of_action_count"): return {}
+	var total: int = int(driver.call("get_enemies_out_of_action_count"))
+	var open_count: int = total - int(driver.call("get_bounty_settled_count"))
+	if open_count <= 0: return {}
+	var paid: Dictionary = _commit("singleplayer_supply", "bounty_payout", {"kills": open_count}, "bounty:%s:%d:%d" % [_request_session, driver.get_instance_id(), total])
+	# Auch ohne angenommenen Auftrag gelten diese Gegner als abgerechnet: spaeteres Annehmen zahlt nichts rueckwirkend.
+	driver.call("mark_bounty_settled", total)
+	if not bool(paid.get("ok", false)): return {}
+	last_bounty = {"kills": int(paid.kills), "pay": int(paid.credits_added), "line": String(paid.line)}
+	return last_bounty.duplicate(true)
+
+func settle_bounty(craft_id: String) -> Dictionary:
+	if craft_id.is_empty() or _flow == null or not _flow.has_method("get_mission_for_craft"): return {}
+	return settle_bounty_instance(_flow.call("get_mission_for_craft", craft_id))
+
 func record_mission_result(result: Dictionary, authoritative_mission_identity: Dictionary = {}) -> void:
+	var bounty: Dictionary = settle_bounty(String(authoritative_mission_identity.get("craft_id", "")))
+	if not bounty.is_empty(): result["bounty"] = bounty
 	_recover_secured_campaign_chips()
 	var selected: Dictionary = _campaign.get_campaign_snapshot()
 	var craft_id: String = String(authoritative_mission_identity.get("craft_id", ""))
