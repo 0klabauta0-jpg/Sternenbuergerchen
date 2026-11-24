@@ -8507,7 +8507,7 @@ func preview_air_support_ground_fire(command: Dictionary) -> Dictionary:
 		if entry.get("slot_id") == command.weapon_slot: weapon = entry; break
 	if weapon.is_empty() or float(systems.cooldowns.get(command.weapon_slot, 0.0)) > 0.0 or not SPACE_COMPONENT_SYSTEMS.consume_weapon(systems.stats, systems.state, 1.0).get("ok", false): return {"ok":false, "reason":"weapon_unavailable"}
 	var delta: Vector2 = SPACE_GRID.HEX.axial_to_plane(Vector2(target_grid)) - pose.position_plane
-	if delta.length_squared() <= 0.000001 or delta.length() > float(weapon.range): return {"ok":false, "reason":"out_of_range"}
+	if delta.length_squared() <= 0.000001 or delta.length() > preload("res://scripts/tactical/flight_environment.gd").weapon_range(float(weapon.range), String(pose.get("space_area_id", ""))): return {"ok":false, "reason":"out_of_range"}
 	if absf(wrapf(delta.angle() - float(pose.heading_rad), -PI, PI)) > deg_to_rad(float(weapon.arc_degrees) * 0.5): return {"ok":false, "reason":"outside_fire_arc"}
 	var skill_key := "dropship_piloting" if installed.get("model_id") == "cutlass" else ("fighter_piloting" if installed.get("model_id") == "buccaneer" else "")
 	var profile: Variant = pilot.call("get_character_profile_bundle")

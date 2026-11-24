@@ -1,5 +1,6 @@
 extends RefCounted
 ## Fixture guidance only: collision and formation are handled separately.
+const FLIGHT_ENV = preload("res://scripts/tactical/flight_environment.gd")
 
 static func resolve(flight: Dictionary, goal: Dictionary, hull: Dictionary, power: Dictionary) -> Dictionary:
 	if typeof(flight.get("position_plane")) != TYPE_VECTOR2 or typeof(flight.get("velocity_plane")) != TYPE_VECTOR2 or typeof(goal.get("target_plane")) != TYPE_VECTOR2:
@@ -21,8 +22,15 @@ static func resolve(flight: Dictionary, goal: Dictionary, hull: Dictionary, powe
 	# using the weakest available translational brake, with margin for one tick
 	# and diagonal steering near blocked gates.
 	var braking_acceleration := minf(main, minf(reverse, side)) * fraction / mass
+	var speed_cap := 5.0
+	var atmosphere: bool = FLIGHT_ENV.environment_for_area(String(flight.get("space_area_id", ""))) == "atmosphere"
+	var env_factors: Dictionary = {}
+	if atmosphere:
+		env_factors = FLIGHT_ENV.factors("atmosphere")
+		braking_acceleration *= float(env_factors.acceleration_factor)
+		speed_cap = 5.0 * float(env_factors.speed_factor)
 	var safe_speed := sqrt(2.0 * braking_acceleration * displacement.length()) * 0.45
-	var desired_velocity: Vector2 = (displacement.limit_length(5.0) * 0.8).limit_length(safe_speed)
+	var desired_velocity: Vector2 = (displacement.limit_length(speed_cap) * 0.8).limit_length(safe_speed)
 	# Stronger velocity damping avoids overshooting a gate whose far edge is
 	# immediately blocked by the body, including asymmetric ship thrusters.
 	var desired_force: Vector2 = (desired_velocity - flight.velocity_plane) * (4.0 * mass)
@@ -31,4 +39,37 @@ static func resolve(flight: Dictionary, goal: Dictionary, hull: Dictionary, powe
 	var forward := along / ((main if along >= 0.0 else reverse) * fraction)
 	var lateral := desired_force.dot(axis.orthogonal()) / (side * fraction)
 	var controls := Vector2(forward, lateral).limit_length(1.0)
-	return {"ok":true, "intent":{"forward":controls.x, "lateral":controls.y, "turn":0.0, "assist_mode":"decoupled"}}
+	var turn := _turn_command(flight, goal, torque_of(hull), fraction, mass, atmosphere, env_factors)
+	# Atmosphere only flies coupled (step rejects decoupled there).
+	return {"ok":true, "intent":{"forward":controls.x, "lateral":controls.y, "turn":turn, "assist_mode":"coupled" if atmosphere else "decoupled"}}
+
+static func torque_of(hull: Dictionary) -> float:
+	var value: Variant = hull.get("turn_acceleration", 0.0)
+	return float(value) if typeof(value) in [TYPE_INT, TYPE_FLOAT] else 0.0
+
+## Turn command in -1..1. Space without goal.face_plane keeps turn 0.0 (nose never turns).
+## Atmosphere without face_plane aligns the nose with the velocity, or brakes the spin when slow.
+static func _turn_command(flight: Dictionary, goal: Dictionary, torque: float, fraction: float, mass: float, atmosphere: bool, env_factors: Dictionary) -> float:
+	var face: Variant = goal.get("face_plane")
+	var has_face: bool = typeof(face) == TYPE_VECTOR2 and face.is_finite()
+	if not has_face and not atmosphere:
+		return 0.0
+	if not is_finite(torque) or torque <= 0.0:
+		return 0.0
+	var heading := float(flight.get("heading_rad", 0.0))
+	var angular_velocity := float(flight.get("angular_velocity", 0.0))
+	if not is_finite(heading) or not is_finite(angular_velocity):
+		return 0.0
+	var alpha := torque * fraction / mass
+	if atmosphere:
+		alpha *= float(env_factors.acceleration_factor)
+	var aim := Vector2.ZERO
+	if has_face:
+		aim = face - flight.position_plane
+	elif flight.velocity_plane.length() > 0.2:
+		aim = flight.velocity_plane
+	var w_soll := 0.0
+	if aim.length_squared() > 0.000001:
+		var err := wrapf(aim.angle() - heading, -PI, PI)
+		w_soll = signf(err) * minf(sqrt(2.0 * alpha * absf(err)) * 0.45, 2.0)
+	return clampf((w_soll - angular_velocity) * 4.0 * mass / (torque * fraction), -1.0, 1.0)
