@@ -774,7 +774,8 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_sync_compartments(false)
 	return {"ok":true}
 
-func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: bool = false) -> void:
+## `bag_capacity` >= 0: Rucksackplaetze fuer neue Personen trotz Fach (Skirmish behaelt die 12); -1 = Kampagnenregel (0).
+func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: bool = false, bag_capacity: int = -1) -> void:
 	if not _inventory.has("station:trade_outpost:lift"):
 		_inventory["station:trade_outpost:lift"]={"capacity":256,"items":{}}
 	if not _inventory.has("station:polisa:lift"):
@@ -789,7 +790,7 @@ func configure_inventory(unit_ids: Array, craft_ids: Array, campaign_personnel: 
 	for id in unit_ids:
 		var key := "unit:"+String(id)+":backpack"
 		if not _inventory.has(key):
-			_inventory[key] = {"capacity": 0 if campaign_personnel else INVENTORY.BACKPACK_CAPACITY, "items": {}}
+			_inventory[key] = {"capacity": bag_capacity if bag_capacity >= 0 else (0 if campaign_personnel else INVENTORY.BACKPACK_CAPACITY), "items": {}}
 			if campaign_personnel:
 				_inventory[key].armor_chip_capacity = INVENTORY.ARMOR_CHIP_CAPACITY
 		elif campaign_personnel and not _inventory[key].has("armor_chip_capacity"):
@@ -904,6 +905,9 @@ func _inventory_transfer(payload: Dictionary, context: Dictionary) -> Dictionary
 	var destination: Dictionary = _inventory[target]
 	var fits := INVENTORY.has_space(destination, item, amount) if destination.has("armor_chip_capacity") else INVENTORY.used(to) + amount <= int(destination.capacity)
 	if not fits:
+		# M6b (B5): Magazin, Fach voll, kein Rucksack getragen -> der Hinweis nennt den Ausweg.
+		if destination.has("armor_chip_capacity") and int(destination.capacity) <= 0 and INVENTORY.AMMO_RULES.is_ammo_item(item, INVENTORY.ammo_rules()) and INVENTORY.compartment_used(destination) >= int(destination.armor_chip_capacity):
+			return _reject("container_full", "Fach voll – mit einem Rucksack passen mehr Magazine hinein.")
 		return _reject("container_full", "Kein freier Platz im Zielcontainer")
 	from[item]=int(from[item])-amount
 	if from[item]==0: from.erase(item)
@@ -1107,8 +1111,8 @@ func person_magazine_count(unit_id: String, ammo_class: String) -> int:
 func person_has_container(unit_id: String) -> bool:
 	return _inventory.has("unit:" + unit_id + ":backpack")
 
-## Kampagnenmodus der Munition (nicht gespeichert, vom Adapter je Lauf gesetzt): NUR dort zaehlt der Magazinvorrat der Person.
-## Ausserhalb (Skirmish, Mehrspieler, Testlagen ohne Kampagnenstand) gibt es weder Startausstattung noch Auffuellen, also
+## Magazinmodus der Munition (nicht gespeichert, vom Adapter je Lauf gesetzt): nur dort zaehlt der Magazinvorrat der Person.
+## Er gilt in Kampagne UND Skirmish (Startausstattung, Auffuellen von Hand). Ausserhalb (Mehrspieler, Testlagen ohne Kampagnenstand)
 ## haben alle Einheiten unbegrenzte Reserve wie die Gegner (nachladen muessen sie weiter, die Magazingroesse gilt weiter).
 var _campaign_magazine_mode: bool = false
 
@@ -1185,6 +1189,20 @@ func fill_person_compartments(unit_ids: Array, from_base: bool) -> Dictionary:
 	var short_text := ("Munition knapp: %d %s." % [short, "Fach blieb leer" if short == 1 else "Fächer blieben leer"]) if from_base and short > 0 else ""
 	if not short_text.is_empty(): parts.append(short_text)
 	return {"added": added, "short": short, "message": " ".join(parts), "short_message": short_text}
+
+## M6b (B1): Wie viele der Personen haben ein LEERES Fach (gar kein Magazin, gleich welcher Sorte, in Fach oder Rucksack)? Nur lesen, nichts bewegen.
+## Personen ohne Behaelter, ohne Fach oder ohne Waffe mit Munitionsbedarf zaehlen nicht.
+func count_empty_compartments(unit_ids: Array) -> int:
+	_sync_compartments()
+	var empty := 0
+	for id in unit_ids:
+		var key := "unit:" + String(id) + ":backpack"
+		if not _inventory.has(key) or not Dictionary(_inventory[key]).has("armor_chip_capacity"): continue
+		if int(Dictionary(_inventory[key]).armor_chip_capacity) <= 0: continue
+		var item := _ammo_class_of_person(String(id))
+		if item.is_empty(): continue
+		if INVENTORY.count_ammo(Dictionary(_inventory[key]).items) <= 0: empty += 1
+	return empty
 
 ## Einmal je Spielstand: 16 leichte und 8 Gewehr-Magazine ins Basislager (Zahlen: ammo_rules.json start_base_stock, soweit sie
 ## ins Lager passen) und volle Faecher fuer die Personen. Gibt true zurueck, wenn jetzt gewaehrt wurde; mit dem Merker nie wieder.
