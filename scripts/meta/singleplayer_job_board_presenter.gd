@@ -355,6 +355,8 @@ func refresh() -> void:
 		_abandon.tooltip_text = _abandon.text
 	else:
 		_abandon.text = "Auftrag abbrechen"
+		_abandon.tooltip_text = _abandon.text  # nach der Kopfgeld-Karte nicht den alten Tooltip behalten (Nachpruefung S3)
+		_accept.tooltip_text = _accept.text if accept_message.is_empty() else accept_message
 	_detail_card.visible=_details_expanded;_objectives.visible=_details_expanded and not standing_open;_actions.visible=_details_expanded and (not standing_open or bounty_open)
 	_footer.visible = _details_expanded and (not standing_open or bounty_open)
 	_layout_device()
