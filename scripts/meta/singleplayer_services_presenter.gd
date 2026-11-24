@@ -37,6 +37,12 @@ var _feedback: Label
 var _availability_feedback:=false
 
 var _sell: Button
+## Handel H2: Benit aus der Warenboerse. _market_buttons: Ware -> Kaufknopf; _sell_extra: weitere Verkaufsknoepfe (der erste Verkaufsknopf ist _sell).
+var _market_buttons: Dictionary = {}
+var _sell_extra: Array = []
+const MARKET_ITEMS: Array = ["a_benit", "b_benit", "c_benit"]
+const MARKET_SELL_ORDER: Array = ["b_benit", "c_benit", "a_benit"]
+const MARKET_NAMES: Dictionary = {"a_benit": "A-Benit", "b_benit": "B-Benit", "c_benit": "C-Benit"}
 var _campaign_buttons: Dictionary = {}
 var _section: String = "all"
 var _heading: Label
@@ -107,7 +113,17 @@ func _build() -> void:
 
 	_sell = _button("Rohstoff aus Schiffsfracht verkaufen", "SellBenit")
 	ship_content.add_child(_sell)
-	_sell.pressed.connect(_submit_sell)
+	_sell.pressed.connect(_submit_sell.bind(0))
+	for extra_index in range(MARKET_ITEMS.size() - 1):
+		var extra: Button = _button("Rohstoff verkaufen", "SellBenit%d" % (extra_index + 2))
+		ship_content.add_child(extra)
+		extra.pressed.connect(_submit_sell.bind(extra_index + 1))
+		_sell_extra.append(extra)
+	for market_item: String in MARKET_ITEMS:
+		var market_button: Button = _button("%s kaufen" % MARKET_NAMES[market_item], "BuyMarket_" + market_item)
+		ship_content.add_child(market_button)
+		market_button.pressed.connect(_submit_market.bind(market_item))
+		_market_buttons[market_item] = market_button
 	var fuel_row := HBoxContainer.new()
 	ship_content.add_child(fuel_row)
 	var amount_label: Label = _label("Tankmenge", 14)
@@ -268,6 +284,10 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		unavailable_reason = "Serviceschiff auswählen"
 	elif not _command_handler.is_valid():
 		unavailable_reason = "Versorgung noch nicht verbunden"
+	# Handel (Nachbesserung W2): An der Absturzstelle gilt der Handel nur, wenn das gelandete Schiff nah am Haendler steht; sonst sagt der Text, was zu tun ist.
+	var trade_reason: String = unavailable_reason
+	if location == "satellite_crash" and available and not Array(context.get("services", [])).has("trade"):
+		trade_reason = "Schiff in Sichtweite des Händlers landen, aber nicht direkt neben ihm – Handel erst dort"
 	var offer: Dictionary = Dictionary(Dictionary(supply.get("offers", {})).get(OFFER_ID, {}))
 	var price: int = int(offer.get("unit_price", 0))
 	var stock: int = int(Dictionary(supply.get("stock_by_offer_id", {})).get(OFFER_ID, 0))
@@ -295,14 +315,40 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		if id == "backpack_supply" and not button.disabled:
 			button.tooltip_text = "Wird im Frachtaufzug bereitgestellt; anschließend ins Schiff laden." if not lift.is_empty() else "Wird in die Schiffsfracht geliefert. An der Heimatbasis anlegen."
 
-	var purchased_item := "c_benit" if location == "satellite_crash" else "b_benit"
 	var cargo: Dictionary = Dictionary(Dictionary(supply.get("inventory",{})).get("craft:"+_selected_craft_id,{})).get("items",{}).duplicate()
 	var stored:Dictionary=Dictionary(Dictionary(supply.get("inventory",{})).get(lift,{})).get("items",{})
 	for item in stored:cargo[item]=int(cargo.get(item,0))+int(stored[item])
-	_sell.visible = location in ["satellite_crash","trade_outpost"]
-	_sell.text = "1 × %s verkaufen · 15 Cr" % ("C-Benit" if purchased_item == "c_benit" else "B-Benit")
-	_sell.disabled = not available or not local_service or not Array(context.get("services",[])).has("trade") or int(cargo.get(purchased_item,0)) < 1
-	_sell.tooltip_text = "Verkauf aus lokaler Schiffsfracht oder dem Frachtaufzug"
+	# Handel H2: Verkaufsknoepfe und Kaufknoepfe der Warenboerse kommen aus den Daten (supply.market), nichts steht fest im Text.
+	var market_here: Dictionary = Dictionary(Dictionary(supply.get("market", {})).get(location, {}))
+	var trade_ready: bool = available and local_service and Array(context.get("services",[])).has("trade")
+	var bought_items: Array = []
+	for sell_item: String in MARKET_SELL_ORDER:
+		if _market_buy_price(supply, location, sell_item) > 0: bought_items.append(sell_item)
+	var sell_buttons: Array = [_sell] + _sell_extra
+	for slot in range(sell_buttons.size()):
+		var sell_button: Button = sell_buttons[slot]
+		var slot_item: String = String(bought_items[slot]) if slot < bought_items.size() else ""
+		sell_button.set_meta("item", slot_item)
+		sell_button.visible = not slot_item.is_empty() and location in ["satellite_crash","trade_outpost"]
+		if slot_item.is_empty(): continue
+		var sell_price: int = _market_buy_price(supply, location, slot_item)
+		sell_button.text = "1 × %s verkaufen · %d Cr" % [MARKET_NAMES.get(slot_item, slot_item), sell_price]
+		sell_button.disabled = not trade_ready or int(cargo.get(slot_item,0)) < 1
+		sell_button.tooltip_text = "Verkauf aus lokaler Schiffsfracht oder dem Frachtaufzug" if not sell_button.disabled else ("Keine %s im Schiff oder Frachtaufzug" % MARKET_NAMES.get(slot_item, slot_item) if trade_ready else trade_reason)
+	for market_item: String in MARKET_ITEMS:
+		var market_button: Button = _market_buttons[market_item]
+		var market_entry: Dictionary = Dictionary(market_here.get(market_item, {}))
+		market_button.visible = market_entry.has("sell_price") and location in ["satellite_crash","trade_outpost"]
+		if not market_button.visible: continue
+		var market_price: int = int(market_entry.sell_price)
+		var market_stock: int = int(market_entry.get("stock", 0))
+		market_button.text = "%s · %d Cr · %d verfügbar" % [MARKET_NAMES.get(market_item, market_item), market_price, market_stock]
+		var market_reason: String = ""
+		if not trade_ready: market_reason = trade_reason
+		elif market_stock <= 0: market_reason = "Ausverkauft – füllt sich nach der Heimlandung wieder auf"
+		elif int(supply.get("credits", 0)) < market_price: market_reason = "Kredite reichen für den Kauf nicht"
+		market_button.disabled = not market_reason.is_empty() or _pending.has("buy")
+		market_button.tooltip_text = market_reason if not market_reason.is_empty() else ("Wird im Frachtaufzug bereitgestellt; anschließend ins Schiff laden." if not lift.is_empty() else "Wird in die Schiffsfracht geliefert.")
 	var amount: float = _amount.value
 	var cost: float = amount * float(supply.get("fuel_price_per_unit", 0.0))
 	_refuel.text = "+%s Treibstoff · %s Cr" % [str(amount), str(cost)]
@@ -359,6 +405,9 @@ func _apply_section() -> void:
 	_cargo_load.visible=ship and String(trade_context.get("location_id",""))=="trade_outpost"
 	_cargo_unload.visible=_cargo_load.visible
 	for control in [_buy,_sell]+_tool_buttons.values():control.visible=ship and trading
+	# Handel H2: die Knoepfe der Warenboerse zeigt refresh() je nach Daten; hier werden sie nur ausgeblendet, wenn kein Handelsort offen ist.
+	for control in _sell_extra+_market_buttons.values():
+		if not (ship and trading): control.visible = false
 	_tool_buttons["backpack_supply"].visible = ship and String(trade_context.get("location_id", "")) == "trade_outpost" and String(_snapshot.get("mode", "")) == "campaign"
 	_items.visible = ship and trading
 	_refuel.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
@@ -540,10 +589,35 @@ func _submit_campaign(key: String) -> void:
 	_feedback.text = String(result.get("message",result.get("reason","Aktion bestätigt")))
 	refresh()
 
-func _submit_sell() -> void:
-	if _sell.disabled or not _command_handler.is_valid(): return
+## Handel H2: Ankaufspreis des Haendlers am Ort aus den Daten (Warenboerse vor den Handelsdaten); 0 = kauft nicht. Gleiche Regel wie der Versorgungszustand.
+func _market_buy_price(supply: Dictionary, location: String, item: String) -> int:
+	var entry: Dictionary = Dictionary(Dictionary(Dictionary(supply.get("market", {})).get(location, {})).get(item, {}))
+	if entry.has("sell_price"): return 0
+	if entry.has("buy_price"): return int(entry.buy_price)
+	return int(Dictionary(Dictionary(supply.get("commodity_buy_orders", {})).get(location, {})).get(item, 0))
+
+## Handel H2: Kauf eines Stuecks aus der Warenboerse am aktuellen Ort (Befehl buy, Angebotskennung market:<Ort>:<Ware>).
+func _submit_market(item: String) -> void:
+	var button: Button = _market_buttons.get(item)
+	if button == null or not _command_handler.is_valid(): return
+	if button.disabled:
+		_feedback.text = button.tooltip_text
+		return
 	var context: Dictionary = Dictionary(_snapshot.get("service_contexts_by_craft_id",{})).get(_selected_craft_id,{})
-	var item := "c_benit" if String(context.get("location_id","")) == "satellite_crash" else "b_benit"
+	var location_id := String(context.get("location_id", ""))
+	_sequence += 1
+	var request_id: String = "services-market:%d:%d" % [get_instance_id(), _sequence]
+	var payload: Dictionary = {"craft_id": _selected_craft_id, "request_id": request_id, "service_location_id": location_id, "offer_id": "market:%s:%s" % [location_id, item], "quantity": 1}
+	var result: Dictionary = _command_handler.call("buy", payload)
+	_feedback.text = String(result.get("message", result.get("reason", "Kauf bestätigt")))
+	refresh()
+
+func _submit_sell(slot: int = 0) -> void:
+	var sell_button: Button = _sell if slot <= 0 else _sell_extra[slot - 1]
+	if sell_button.disabled or not _command_handler.is_valid(): return
+	var context: Dictionary = Dictionary(_snapshot.get("service_contexts_by_craft_id",{})).get(_selected_craft_id,{})
+	var item := String(sell_button.get_meta("item", ""))
+	if item.is_empty(): return
 	_sequence += 1
 	var cargo:Dictionary=Dictionary(Dictionary(_snapshot.get("supply",{})).get("inventory",{})).get("craft:"+_selected_craft_id,{}).get("items",{})
 	var source:="craft:"+_selected_craft_id if int(cargo.get(item,0))>0 else String(context.get("cargo_lift_container_id",""))

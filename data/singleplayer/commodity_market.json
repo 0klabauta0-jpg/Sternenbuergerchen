@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "note": "Warenboerse (Benit): feste Preise und Bestaende je Ort. sell_price + stock = der Haendler verkauft (Kauf des Spielers); buy_price = der Haendler kauft (Verkauf des Spielers). Der Bestand fuellt sich auf, sobald ein Schiff des Spielers an der Heimatbasis gelandet ist. Regel: ein Haendler verkauft, was es bei ihm gibt, und kauft, was es bei ihm nicht gibt. Alle Zahlen vorlaeufig.",
+  "locations": {
+    "trade_outpost": {
+      "a_benit": {"sell_price": 10, "stock": 8},
+      "c_benit": {"sell_price": 10, "stock": 8},
+      "b_benit": {"buy_price": 15}
+    },
+    "satellite_crash": {
+      "a_benit": {"sell_price": 10, "stock": 8},
+      "b_benit": {"sell_price": 10, "stock": 8},
+      "c_benit": {"buy_price": 15}
+    },
+    "polisa": {
+      "a_benit": {"buy_price": 15},
+      "b_benit": {"buy_price": 15},
+      "c_benit": {"buy_price": 15}
+    }
+  }
+}
