@@ -1,0 +1,28 @@
+{
+ "grundfarben": {
+  "munition": "rot",
+  "fracht": "blau",
+  "regel": "Jede weitere Kistenart bekommt eine eigene Grundfarbe am Korpus; Form, Verschlüsse (orange), Deckeleinsatz, Eckschützer und Zeichen (sand) bleiben gleich."
+ },
+ "ammo_box_01": {
+  "file": "ammo_box_01.glb",
+  "triangles": 1567,
+  "size_x": 0.3,
+  "size_z_depth": 0.1865,
+  "height": 0.1747
+ },
+ "cargo_crate_01": {
+  "file": "cargo_crate_01.glb",
+  "triangles": 1567,
+  "size_x": 0.3,
+  "size_z_depth": 0.1865,
+  "height": 0.1747
+ },
+ "magazine_01": {
+  "file": "magazine_01.glb",
+  "triangles": 1014,
+  "size_x": 0.0641,
+  "size_z_depth": 0.0308,
+  "height": 0.12
+ }
+}

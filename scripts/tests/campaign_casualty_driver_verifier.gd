@@ -160,17 +160,20 @@ func _case_lying_time_in_team_state() -> void:
 	var driver = env.driver
 	var friend = env.friend
 	var states: Array = driver.call("_build_team_states", driver.get("friendly_unit_paths"))
-	_check(states.size() == 1 and not Dictionary(states[0]).has("down_seconds"), "N2: wer kampffaehig ist, hat keine Liegezeit im Teamzustand")
+	var first: Dictionary = Dictionary(states[0]) if states.size() == 1 else {}
+	_check(states.size() == 1 and not first.has("down_seconds"), "N2: wer kampffaehig ist, hat keine Liegezeit im Teamzustand")
 	_check(is_equal_approx(float(driver.call("get_unit_down_seconds", FRIEND_ID)), -1.0), "N2: ohne Uhr gibt der Treiber -1 zurueck")
 	friend.call("apply_damage", 1000, {})
 	_age_down_state(driver, FRIEND_ID, 179.0)
 	states = driver.call("_build_team_states", driver.get("friendly_unit_paths"))
-	_check(states.size() == 1 and is_equal_approx(float(Dictionary(states[0]).get("down_seconds", -9.0)), 179.0), "N2: Liegezeit 179 s im Teamzustand (%s)" % str(Dictionary(states[0]).get("down_seconds", "fehlt")))
+	first = Dictionary(states[0]) if states.size() == 1 else {}
+	_check(states.size() == 1 and is_equal_approx(float(first.get("down_seconds", -9.0)), 179.0), "N2: Liegezeit 179 s im Teamzustand (%s)" % str(first.get("down_seconds", "fehlt")))
 	_age_down_state(driver, FRIEND_ID, 200.0)
 	states = driver.call("_build_team_states", driver.get("friendly_unit_paths"))
-	_check(states.size() == 1 and is_equal_approx(float(Dictionary(states[0]).get("down_seconds", -9.0)), 200.0), "N2: Liegezeit 200 s im Teamzustand")
+	first = Dictionary(states[0]) if states.size() == 1 else {}
+	_check(states.size() == 1 and is_equal_approx(float(first.get("down_seconds", -9.0)), 200.0), "N2: Liegezeit 200 s im Teamzustand")
 	var rules_script = load("res://scripts/core/campaign_casualty_rules.gd")
-	var long_result: Dictionary = rules_script.classify_unit(Dictionary(states[0]), "won")
+	var long_result: Dictionary = rules_script.classify_unit(first, "won")
 	_check(long_result.get("severity", "") == "severe", "N2: die Abrechnung wertet diese Person als schwer (%s)" % str(long_result))
 	env.fixture.free()
 	# Die Liegezeit gilt zum Gefechtsende: der Tick-Zaehler laeuft danach weiter, die Zeit der Person nicht.

@@ -2034,7 +2034,7 @@ func _enqueue_bleedout_effect(simulation_root: Node, unit_id: String) -> void:
 
 ## Verbluten in Stufen, G1: Der Spieler gibt EINE liegende Person seines Teams auf; sie verblutet sofort (ohne Wurf, ueber
 ## _enqueue_bleedout_effect), der Einsatz laeuft weiter. Gilt in allen Modi. Ablehnungen in fester Reihenfolge:
-## unknown_unit, not_own_unit (Team der Einheit ungleich requesting_team_id), not_down (nicht am Boden: kampffaehig, schon verblutet,
+## unknown_unit, not_own_unit (Team der Einheit ungleich requesting_team_id), combat_finished (Gefecht schon beendet), not_down (nicht am Boden: kampffaehig, schon verblutet,
 ## tot, oder schon eingereiht), not_authoritative (im Mehrspieler entscheidet nur der Server ueber das Verbluten).
 func request_unit_give_up(unit_id: String, requesting_team_id: String) -> Dictionary:
 	var key: String = unit_id.strip_edges()
@@ -2048,6 +2048,9 @@ func request_unit_give_up(unit_id: String, requesting_team_id: String) -> Dictio
 	var requesting: String = requesting_team_id.strip_edges()
 	if requesting.is_empty() or _get_unit_team_id_for_diagnostics(unit) != requesting:
 		return _give_up_rejection("not_own_unit", "Nur eigene Personen können aufgegeben werden.")
+	# Nach dem Gefechtsende ruht der Stufenwurf und die Liegezeit ist eingefroren: wer jetzt aufgibt, aenderte die Abrechnung.
+	if _combat_finished:
+		return _give_up_rejection("combat_finished", "Das Gefecht ist vorbei.")
 	if not unit.has_method("get_vital_state") or String(unit.call("get_vital_state")) != "down" or _queued_bleedout_by_unit_id.get(key, false):
 		return _give_up_rejection("not_down", "Die Person liegt nicht am Boden.")
 	var simulation_root: Node = get_node_or_null(simulation_root_path)
@@ -3445,6 +3448,7 @@ func _try_recover_premature_startup_resolution() -> bool:
 		return false
 
 	_combat_finished = false
+	_combat_end_tick = -1
 	_winning_team_id = ""
 	_mission_result_condition_override = ""
 	_mission_result.clear()
@@ -7022,7 +7026,7 @@ func _coerce_vector2(value: Variant, fallback: Vector2) -> Vector2:
 
 func reset_for_location_job(scenario_path: String) -> void:
 	# Reset only job execution, never the retained world, its units or Supply.
-	_combat_finished=false; _winning_team_id=""; _mission_result.clear()
+	_combat_finished=false; _combat_end_tick=-1; _winning_team_id=""; _mission_result.clear()
 	_mission_result_condition_override=""; _resolved_without_seen_friendly=false
 	_has_seen_active_friendly_units=false; _mission_started_at_msec=_game_now_msec(); _checkpoint_elapsed_offset_msec=0
 	reset_suppression()

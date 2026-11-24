@@ -56,6 +56,7 @@ func _process(_delta: float) -> bool:
 	_case_give_up_rejections()
 	_case_give_up_skirmish_returns()
 	_case_give_up_campaign()
+	_case_give_up_after_combat_end()
 	print("BLEEDOUT_STAGES passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed > 0 else 0)
 	return true
@@ -669,3 +670,22 @@ func _case_give_up_campaign() -> void:
 	var lost: Dictionary = rules_script.classify_unit(Dictionary(team_states[0]) if team_states.size() == 1 else {}, "aborted")
 	_check(lost.get("outcome", "") == "dead", "Aufgeben Kampagne: bleibt sie zurueck, ist sie tot wie jede Verblutete")
 	env.fixture.free()
+
+
+## Nachbesserung: nach dem Gefechtsende wird niemand mehr aufgegeben (die eingefrorene Liegezeit bleibt, kein Respawn).
+func _case_give_up_after_combat_end() -> void:
+	for campaign_on in [false, true]:
+		var env := _build_with_respawn(1, campaign_on)
+		env.friend.call("apply_damage", 1000, {})
+		env.driver.set("_current_tick", _tick_at(100.0))
+		var before_seconds: float = float(env.driver.call("get_unit_down_seconds", FRIEND_ID))
+		env.driver.call("_resolve_combat", "aborted", "")
+		env.driver.set("_current_tick", _tick_at(300.0))
+		var answer: Dictionary = env.driver.call("request_unit_give_up", FRIEND_ID, "team_alpha")
+		var tag: String = "Kampagne" if campaign_on else "Skirmish"
+		_check(answer.get("ok", true) == false and answer.get("reason", "") == "combat_finished" and answer.get("message", "") == "Das Gefecht ist vorbei.", "Aufgeben nach Gefechtsende (%s): abgelehnt mit combat_finished (%s)" % [tag, str(answer)])
+		_check(env.friend.call("get_vital_state") == "down" and _bleedout_effects(env) == 0 and not bool(env.respawn.call("has_pending_respawn", FRIEND_ID)) and _give_up_messages(env).is_empty(), "Aufgeben nach Gefechtsende (%s): die Person liegt weiter, nichts eingereiht, kein Respawn, keine Funkzeile" % tag)
+		_check(is_equal_approx(float(env.driver.call("get_unit_down_seconds", FRIEND_ID)), before_seconds), "Aufgeben nach Gefechtsende (%s): die Abrechnung liefert dieselbe Liegezeit wie ohne den Versuch" % tag)
+		var foreign: Dictionary = env.driver.call("request_unit_give_up", FRIEND_ID, "team_bravo")
+		_check(foreign.get("reason", "") == "not_own_unit", "Aufgeben nach Gefechtsende (%s): 'nicht eigen' kommt vor 'Gefecht vorbei'" % tag)
+		env.fixture.free()
