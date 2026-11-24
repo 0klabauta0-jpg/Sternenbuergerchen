@@ -249,7 +249,10 @@ func _scene_pb4_right_click() -> void:
 	_check(_in_set("_deployed_unit_ids", LEADER_ID) and not _in_set("_embarked_unit_ids", LEADER_ID) and _grid_of(LEADER_ID) == leader_grid, "PB4 Rechtsklick: der Liegende bleibt unbewegt am Boden")
 	_check_casualty_text(_player_text(), "PB4 Rechtsklick")
 	# Nach Ablauf der Versorgungsfrist heisst der Zustand "kritisch"; der Text folgt dem Zustand (nur wenn er im Test erreicht wird).
-	var critical: float = await _wait_scene(func(): return _critical(_leader), 100.0)
+	# Regel 24.11.2026 (data/combat/bleedout_stages.json, scripts/combat/bleedout_stages.gd): Verbluten in Stufen 180/300/360 s mit 5/25/50 %,
+	# die letzte Stufe bei 390 s trifft sicher. Der Liegende wird also erst nach hoechstens 390 s Liegezeit sicher kritisch (frueher nur mit Glueck);
+	# 100 s reichten nur unter der alten Regel. Gewartet wird bis zur sicheren letzten Stufe (390 s) plus Puffer; der Fall beweist weiter "kritisch".
+	var critical: float = await _wait_scene(func(): return _critical(_leader), 420.0)
 	print("PBINFO PB4 kritisch erreicht nach %.1f s, Zustand=%s" % [critical, String(_leader.call("get_vital_state"))])
 	# Fehlt eine Voraussetzung, ist das ein Fehlschlag und kein stilles Ueberspringen.
 	if not _check(critical >= 0.0, "PB4 kritisch: der Liegende erreicht den Zustand 'kritisch' (Zustand %s)" % String(_leader.call("get_vital_state"))):
