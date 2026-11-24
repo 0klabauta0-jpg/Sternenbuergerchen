@@ -15084,19 +15084,38 @@ var _retreat_armed_text: Dictionary = {}
 const RETREAT_ARM_MSEC: int = 4000
 const RETREAT_ARM_MIN_GAP_MSEC: int = 400
 const CAMPAIGN_RETURN_MARKER_ID: String = "ship_return"
+const CAMPAIGN_RETURN_PROMPT_SCRIPT: GDScript = preload("res://scripts/mission/campaign_return_prompt.gd")
+var _retreat_armed_signature: Dictionary = {}
+
+## Namensquellen des laufenden Einsatzszenarios (Wachen, Briefing, Schritte) fuer die lesbaren Schrittnamen der Rueckfrage.
+func _campaign_scenario_data_for_prompt() -> Dictionary:
+	var setup: Node = get_node_or_null("../MissionSetup")
+	var scenario: Variant = setup.get("_mission_scenario") if setup != null else null
+	if scenario == null:
+		return {}
+	return {"enemy_groups": scenario.get("enemy_groups"), "briefing": scenario.get("briefing"), "vertical_slice": scenario.get("vertical_slice")}
+
 
 func _confirm_campaign_retreat_press(craft_id: String) -> bool:
 	var summary: Dictionary = _campaign_open_step_summary()
-	if Array(summary.get("open_names", [])).is_empty() or not Dictionary(summary.get("return_binding", {})).is_empty():
+	# Ein anderes Schiff als das des Auftrags beruehrt den Auftrag nicht: keine Rueckfrage (W4).
+	var other_craft: bool = not CAMPAIGN_RETURN_PROMPT_SCRIPT.is_job_craft(Dictionary(get_parent().get_meta("singleplayer_mission_identity", {})), craft_id)
+	if other_craft or Array(summary.get("open_names", [])).is_empty() or not Dictionary(summary.get("return_binding", {})).is_empty():
 		_retreat_armed_until.erase(craft_id)
 		_retreat_armed_text.erase(craft_id)
+		_retreat_armed_signature.erase(craft_id)
 		return true
 	var now: int = Time.get_ticks_msec()
 	var armed_until: int = int(_retreat_armed_until.get(craft_id, 0))
+	var signature: String = CAMPAIGN_RETURN_PROMPT_SCRIPT.open_signature(Array(summary.get("open_step_ids", [])))
+	# K5: Haben sich die offenen Schritte seit der Rueckfrage geaendert, ist es eine neue Rueckfrage mit der neuen Liste.
+	if armed_until > now and String(_retreat_armed_signature.get(craft_id, signature)) != signature:
+		armed_until = 0
 	if armed_until <= now:
 		var text: String = "Rückzug? Auftrag gilt als abgebrochen. Offen: %s. Noch einmal drücken = Rückzug." % ", ".join(PackedStringArray(summary.get("open_names", [])))
 		_retreat_armed_until[craft_id] = now + RETREAT_ARM_MSEC
 		_retreat_armed_text[craft_id] = text
+		_retreat_armed_signature[craft_id] = signature
 		_last_command_text = text
 		_set_mission_dropship_card_feedback(craft_id, text)
 		_refresh_mission_dropship_panel()
@@ -15106,18 +15125,32 @@ func _confirm_campaign_retreat_press(craft_id: String) -> bool:
 		return false
 	_retreat_armed_until.erase(craft_id)
 	_retreat_armed_text.erase(craft_id)
+	_retreat_armed_signature.erase(craft_id)
 	return true
 
 
 func _on_retreat_arm_expired(craft_id: String) -> void:
 	if int(_retreat_armed_until.get(craft_id, 0)) > Time.get_ticks_msec():
 		return
-	var had_text: bool = _retreat_armed_text.has(craft_id)
+	var own_text: String = String(_retreat_armed_text.get(craft_id, ""))
 	_retreat_armed_until.erase(craft_id)
 	_retreat_armed_text.erase(craft_id)
-	if had_text:
+	_retreat_armed_signature.erase(craft_id)
+	if own_text.is_empty():
+		return
+	# K5: nur die EIGENE Rueckfrage-Meldung loeschen, keine neuere Meldung der Karte.
+	var card: Dictionary = _find_mission_dropship_card_entry(craft_id)
+	if not card.is_empty() and _get_mission_dropship_card_feedback_text(card) == own_text:
 		_set_mission_dropship_card_feedback(craft_id, "")
-		_refresh_mission_dropship_panel()
+	_refresh_mission_dropship_panel()
+
+
+## Rueckfrage fuer Bedienungen ausserhalb der Schiffskarte (Versorgungs-Knopf "Zur Heimatbasis"): dieselbe Regel, derselbe Zustand.
+## confirmed true: abfliegen (keine Rueckfrage noetig oder zweiter Druck); false: nur nachgefragt, message nennt die offenen Schritte.
+func request_player_retreat_confirmation(craft_id: String) -> Dictionary:
+	var normalized: String = craft_id.strip_edges()
+	var confirmed: bool = _confirm_campaign_retreat_press(normalized)
+	return {"confirmed": confirmed, "message": "" if confirmed else String(_retreat_armed_text.get(normalized, "Rückzug? Auftrag gilt als abgebrochen."))}
 
 
 func _is_retreat_armed(craft_id: String) -> bool:
@@ -15139,7 +15172,7 @@ func _dropship_return_button_tooltip(craft_id: String, default_text: String) -> 
 ## return_binding: die Bindung des Rueckkehr-Schritts (Ziel-Marker "ship_return"), aber nur wenn er der EINZIGE offene Schritt ist und
 ## mindestens ein anderer Schritt erledigt wurde. Ohne Kampagnenauftrag (kein job_id) oder ohne Schritte ist alles leer.
 func _campaign_open_step_summary() -> Dictionary:
-	var summary: Dictionary = {"open_names": [], "return_binding": {}}
+	var summary: Dictionary = {"open_names": [], "open_step_ids": [], "return_binding": {}}
 	var identity: Dictionary = Dictionary(get_parent().get_meta("singleplayer_mission_identity", {}))
 	var driver = _get_combat_loop_driver()
 	if String(identity.get("job_id", "")).is_empty() or driver == null or not driver.has_method("get_mission_scenario_runtime_gate_snapshot"):
@@ -15157,9 +15190,12 @@ func _campaign_open_step_summary() -> Dictionary:
 			done_count += 1
 		else:
 			open_gates.append(gate)
+	var scenario_data: Dictionary = _campaign_scenario_data_for_prompt()
 	for gate_variant in open_gates:
 		var step_id: String = String(Dictionary(gate_variant).get("step_id", ""))
-		summary["open_names"].append(String(Dictionary(bindings_by_step.get(step_id, {})).get("display_name", step_id)))
+		# Nie eine rohe Kennung (clear_outpost): Name der Benutzen-Stelle, sonst aus Szenario/Briefing, sonst deutscher Ersatztext.
+		summary["open_names"].append(CAMPAIGN_RETURN_PROMPT_SCRIPT.step_display_name(step_id, String(Dictionary(bindings_by_step.get(step_id, {})).get("display_name", "")), scenario_data))
+		summary["open_step_ids"].append(step_id)
 	if open_gates.size() == 1 and done_count > 0:
 		var last_gate: Dictionary = Dictionary(open_gates[0])
 		var last_binding: Dictionary = Dictionary(bindings_by_step.get(String(last_gate.get("step_id", "")), {}))
@@ -15174,7 +15210,11 @@ func _campaign_open_step_summary() -> Dictionary:
 ## Wer mit allen an Bord abfliegt (Rueckflug-Knopf, Einsteigen) und nur noch den Rueckkehr-Schritt offen hat, hat den Auftrag erfuellt:
 ## der Schritt wird wie an der Benutzen-Stelle gesetzt; der Driver loest im naechsten Takt als Sieg auf, und der Flow bucht und fliegt ab
 ## (_on_mission_combat_resolved, derselbe Weg wie nach der Benutzen-Stelle). true: Schritt wurde gesetzt (dann nicht selbst abheben).
-func _campaign_complete_return_step_on_departure() -> bool:
+func _campaign_complete_return_step_on_departure(craft_id: String = "") -> bool:
+	_return_step_refusal = ""
+	# Nur das Schiff des Auftrags setzt den Rueckkehr-Schritt; ein anderes Schiff hebt ab, ohne den Auftrag zu beruehren (W4).
+	if not CAMPAIGN_RETURN_PROMPT_SCRIPT.is_job_craft(Dictionary(get_parent().get_meta("singleplayer_mission_identity", {})), craft_id):
+		return false
 	var binding: Dictionary = Dictionary(_campaign_open_step_summary().get("return_binding", {}))
 	var driver = _get_combat_loop_driver()
 	if binding.is_empty() or driver == null or not driver.has_method("update_mission_interaction_runtime_progress"):
@@ -15196,7 +15236,35 @@ func _campaign_complete_return_step_on_departure() -> bool:
 		"command_type": "take",
 		"can_complete_zero_duration": duration_seconds <= 0.0,
 	}))
-	return bool(state.get("complete", false))
+	if not bool(state.get("complete", false)):
+		# K2: lehnt der Treiber das Setzen ab (z. B. Schiff nicht am Landeplatz des Auftrags), passiert nichts ausser einer Meldung mit dem Grund.
+		var reason: String = String(state.get("reason", "return_step_refused"))
+		_return_step_refusal = "Abflug nicht möglich: Das Schiff steht nicht auf dem Landeplatz des Auftrags." if reason == "return_craft_not_at_authored_pad" else "Abflug nicht möglich: Der Auftrag lässt den Abschluss gerade nicht zu (%s)." % reason
+		return false
+	return true
+
+
+var _return_step_refusal: String = ""
+var _campaign_departure_fuel_check: Callable
+
+func set_campaign_departure_fuel_check(check: Callable) -> void:
+	_campaign_departure_fuel_check = check
+
+
+## Meldung nach gesetztem Rueckkehr-Schritt: Rueckflug laeuft, oder (K1) SOFORT die Sperre, wenn der Treibstoff fuer den Abflug nicht reicht.
+func _campaign_return_step_done_text(craft_id: String, fuel_block: Dictionary) -> String:
+	if not bool(fuel_block.get("handled", false)):
+		return "Alle an Bord. Auftrag erfüllt, Rückflug läuft"
+	if String(fuel_block.get("reason", "")) == "tanker_order_open":
+		return "Auftrag erfüllt. Abflug gesperrt: Ein Tanker ist unterwegs - erst abwarten oder stornieren."
+	return "Auftrag erfüllt. Abflug gesperrt: zu wenig Treibstoff."
+
+
+func _campaign_departure_fuel_block_for(craft_id: String) -> Dictionary:
+	if not _campaign_departure_fuel_check.is_valid():
+		return {}
+	var block: Variant = _campaign_departure_fuel_check.call(craft_id)
+	return Dictionary(block) if typeof(block) == TYPE_DICTIONARY else {}
 
 
 func _apply_selected_mission_dropship_return(craft_id: String) -> bool:
@@ -15210,10 +15278,16 @@ func _apply_selected_mission_dropship_return(craft_id: String) -> bool:
 	if selected_card.is_empty() or not _can_request_mission_dropship_return(selected_card):
 		return false
 	# Alle an Bord und nur noch der Rueckkehr-Schritt offen: der Auftrag ist erfuellt. Der Driver loest als Sieg auf, der Flow bucht und fliegt ab.
-	if _campaign_complete_return_step_on_departure():
-		_last_command_text = "Alle an Bord. Auftrag erfüllt, Rückflug läuft"
+	var fuel_block: Dictionary = _campaign_departure_fuel_block_for(normalized_craft_id)
+	if _campaign_complete_return_step_on_departure(normalized_craft_id):
+		_last_command_text = _campaign_return_step_done_text(normalized_craft_id, fuel_block)
 		_set_mission_dropship_card_feedback(normalized_craft_id, _last_command_text)
 		return true
+	if not _return_step_refusal.is_empty():
+		# K2: der Treiber hat das Setzen abgelehnt: nur die Meldung mit dem Grund, kein stiller Rueckzug.
+		_last_command_text = _return_step_refusal
+		_set_mission_dropship_card_feedback(normalized_craft_id, _last_command_text)
+		return false
 	if _campaign_departure_gate.is_valid():
 		var gate_result: Variant = _campaign_departure_gate.call(normalized_craft_id)
 		if typeof(gate_result) == TYPE_DICTIONARY and bool(gate_result.get("handled", false)):
@@ -38825,8 +38899,11 @@ func _advance_campaign_extraction(delta: float) -> void:
 		var casualty_text := _campaign_casualty_aboard_text(craft_id, PackedStringArray(result.get("casualty_unit_ids", PackedStringArray())))
 		_set_mission_dropship_card_feedback(craft_id, casualty_text if not casualty_text.is_empty() else "Alle an Bord. Rueckflug ist bereit.")
 		# Alle an Bord und nur noch der Rueckkehr-Schritt offen: der Schritt gilt als erledigt, der normale Sieg-Weg fliegt ab.
-		if _campaign_complete_return_step_on_departure():
-			_set_mission_dropship_card_feedback(craft_id, "Alle an Bord. Auftrag erfüllt, Rückflug läuft")
+		var extraction_fuel_block: Dictionary = _campaign_departure_fuel_block_for(craft_id)
+		if _campaign_complete_return_step_on_departure(craft_id):
+			_set_mission_dropship_card_feedback(craft_id, _campaign_return_step_done_text(craft_id, extraction_fuel_block))
+		elif not _return_step_refusal.is_empty():
+			_set_mission_dropship_card_feedback(craft_id, _return_step_refusal)
 	elif reason not in ["pilot_not_at_ship", "crew_not_at_ship", "pilot_boarding_pending"] or _campaign_extraction_elapsed > 180.0:
 		_campaign_extraction_craft_id = ""
 		_set_mission_dropship_card_feedback(craft_id, String(result.get("message", "Rueckweg unterbrochen")))

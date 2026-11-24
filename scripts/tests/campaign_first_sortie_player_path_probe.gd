@@ -167,7 +167,10 @@ func _fly_home_and_report() -> void:
 		print("PROBE_LEGACY_CHIP ", var_to_str(legacy).replace("\n", " "), " chip_in=", str(_chip_containers()))
 		var chip_note: String = String(Dictionary(_runtime.call("_home_services_snapshot")).get("chip_note", ""))
 		print("PROBE_CHIP_NOTE ", chip_note)
-		_check(chip_note.contains("Datenchip") and chip_note.contains("abgebrochen"), "Datenchip vorhanden, Auftrag abgebrochen: das Datenterminal sagt, woran es liegt (Text: '%s')" % chip_note)
+		# K4: Der Auftrag steht nach dem Rueckzug wieder auf "accepted" (schon angenommen, noch offen): das Datenterminal sagt
+		# NICHT "erneut annehmen", sondern dass der Einsatz noch einmal geflogen und abgeschlossen werden muss.
+		_check(chip_note.contains("Datenchip") and chip_note.contains("noch offen") and chip_note.contains("Einsatz erneut fliegen und abschließen"), "Datenchip vorhanden, Auftrag noch offen: das Datenterminal sagt, was zu tun ist (Text: '%s')" % chip_note)
+		_check(not chip_note.contains("annehmen"), "Das Datenterminal verlangt bei einem schon angenommenen Auftrag kein erneutes Annehmen (Text: '%s')" % chip_note)
 		return
 	_check(int(job.get("retreat_count", 0)) == 0, "Der Abflug mit allen an Bord zaehlt nicht als Rueckzug (retreat_count=%d)" % int(job.get("retreat_count", 0)))
 	_check(not Array(services.get("upload_job_ids", [])).is_empty(), "Nach der Heimkehr ist das Datapad hochladbar (Knopf Hochladen ist anklickbar)")
@@ -292,6 +295,8 @@ func _run() -> void:
 			_check(first_text.begins_with("Rückzug?") and first_text.contains("abgebrochen"), "Erster Klick fragt nach: Rückzug? Auftrag gilt als abgebrochen (Meldung: %s)" % first_text)
 			_check(first_text.contains("Satellitendaten sichern"), "Die Rueckfrage nennt den offenen Schritt")
 			_check(first_text.contains("Noch einmal drücken = Rückzug."), "Die Rueckfrage sagt, was der zweite Druck bedeutet (Meldung: %s)" % first_text)
+			# W3: nie eine rohe Kennung (Unterstrich-Bezeichner) in der Rueckfrage.
+			_check(not first_text.contains("_"), "W3: kein Unterstrich-Bezeichner in der Rueckfrage (Meldung: %s)" % first_text)
 			# W1: Beschriftung und Meldung am sichtbaren Knopf der Schiffskarte.
 			var armed_button: Button = _return_button(mission)
 			_check(armed_button != null and armed_button.text == "Rückzug?", "W1: nach dem ersten Druck traegt der echte Kartenknopf 'Rückzug?' (Text: %s)" % ("kein Knopf" if armed_button == null else armed_button.text))
@@ -302,6 +307,17 @@ func _run() -> void:
 			_check(not lifted_early, "Der erste Klick hebt nicht ab")
 			var expired_button: Button = _return_button(mission)
 			_check(expired_button != null and expired_button.text == "Abheben", "W1: nach Ablauf der Frist traegt der Kartenknopf wieder 'Abheben' (Text: %s)" % ("kein Knopf" if expired_button == null else expired_button.text))
+			# W2: der Versorgungs-Knopf "Zur Heimatbasis" sendet return_homebase mit ask_retreat (wie die Bedienung): mit offenen Schritten
+			# fragt auch er nur nach, dieselbe Rueckfrage mit Text und Beschriftung; der Befehl ohne das Flag bleibt unveraendert (andere Pruefer).
+			var asked: Dictionary = Dictionary(_runtime.call("request_operation", "return_homebase", {"craft_id": _craft_id, "ask_retreat": true}))
+			print("PROBE_W2_ASKED ", var_to_str(asked).replace("\n", " "))
+			_check(not bool(asked.get("ok", true)) and String(asked.get("reason", "")) == "retreat_confirm_needed", "W2: 'Zur Heimatbasis' fragt bei offenen Schritten nach (Antwort: %s)" % String(asked.get("reason", asked.get("message", "ok"))))
+			_check(String(asked.get("message", "")).begins_with("Rückzug?") and String(asked.get("message", "")).contains("Offen:") and not String(asked.get("message", "")).contains("_"), "W2: die Rueckfrage nennt die offenen Schritte lesbar (Meldung: %s)" % String(asked.get("message", "")))
+			for i in 3: await physics_frame
+			var asked_button: Button = _return_button(mission)
+			_check(asked_button != null and asked_button.text == "Rückzug?", "W2: dieselbe Rueckfrage zeigt am Kartenknopf 'Rückzug?'")
+			var lifted_by_ask: bool = await _watch(5.0, "nach_Versorgungs_Rueckfrage", func(): return _departed())
+			_check(not lifted_by_ask, "W2: die Rueckfrage des Versorgungs-Knopfs hebt nicht ab")
 			# Zweiter Klick kommt nach 5 s: die 4-Sekunden-Frist ist abgelaufen, also fragt er neu nach und fliegt noch nicht.
 			_press_return_button(mission)
 			_press_return_button(mission)
@@ -316,6 +332,8 @@ func _run() -> void:
 	var job_now: String = String(Dictionary(Dictionary(_campaign().get("jobs", {})).get("satellite_recovery", {})).get("status", ""))
 	print("PROBE_JOB_AFTER_TAKEOFF status=", job_now, " chip_in=", str(_chip_containers()))
 	if _variant != "C":
-		_check(job_now in ["pending_upload", "completed"] or not _chip_containers().is_empty(), "Nach dem Abheben ist der Datenchip gesichert (Auftrag wartet auf Hochladen oder Chip an Bord)")
+		# K6: beides zugleich (nicht "oder"): der Auftrag wartet auf das Hochladen UND der Datenchip liegt beim Trupp.
+		_check(job_now == "pending_upload", "Nach dem Abheben wartet der Auftrag auf das Hochladen (Status: %s)" % job_now)
+		_check(not _chip_containers().is_empty(), "Nach dem Abheben liegt der Datenchip beim Trupp (Behaelter: %s)" % str(_chip_containers()))
 	await _fly_home_and_report()
 	await _finish()
