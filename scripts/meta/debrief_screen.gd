@@ -913,7 +913,10 @@ static func build_craft_loss_text(mission_result: Dictionary) -> String:
 	# LC2i I5: Auftragsfracht im verlorenen Schiff steht am Ladeort wieder bereit.
 	if typeof(mission_result.get("cargo_lost")) == TYPE_ARRAY:
 		for cargo in Array(mission_result.get("cargo_lost")):
-			lines.append("Auftragsfracht verloren: %s. Sie steht am Ladeort wieder bereit." % String(cargo))
+			if String(cargo).contains("Frachtkiste"):
+				lines.append("Fracht verloren: %s. Der Frachtauftrag läuft weiter; im Händlerfenster lässt er sich aufgeben." % String(cargo))
+			else:
+				lines.append("Auftragsfracht verloren: %s. Sie steht am Ladeort wieder bereit." % String(cargo))
 	return "\n".join(lines)
 
 

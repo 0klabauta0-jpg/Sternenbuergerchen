@@ -39,6 +39,12 @@ var _stock_by_offer_id: Dictionary = {}
 ## (alte Staende ohne ihn laden mit vollem Bestand).
 var _market: Dictionary = {}
 var _market_stock: Dictionary = {}
+## Dauerauftraege (Handel H3): eigener Besitzer, nur in der Kampagne angelegt (enable_standing_orders); null = es gibt ihn nicht (Skirmish).
+const STANDING_ORDERS = preload("res://scripts/core/standing_orders_state.gd")
+const STANDING_ORDERS_PATH := "res://data/singleplayer/standing_orders.json"
+## Gegenstand der Frachtauftraege: 1 Lagerplatz je Kiste, nicht verkaeuflich (kein Preis in der Warenboerse).
+const STANDING_CRATE := "cargo_crate"
+var _standing_orders: RefCounted = null
 var _requests: Dictionary = {}
 var _reward_receipts: Dictionary = {}
 var _research_receipts: Dictionary = {}
@@ -197,6 +203,9 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		"campaign_place_room_bed": result = _campaign_build_modular(payload, authority_context, true)
 		"campaign_set_room_door": result = _campaign_set_room_door(payload, authority_context)
 		"sell": result = _sell(payload, authority_context)
+		"standing_accept": result = _standing_accept(payload, authority_context)
+		"standing_deliver": result = _standing_deliver(payload, authority_context)
+		"standing_abandon": result = _standing_abandon(payload)
 		_: result = _reject("unknown_operation", "Aktion unbekannt")
 	if bool(result.get("ok", false)):
 		result["request_id"] = request_id
@@ -670,7 +679,153 @@ func export_state() -> Dictionary:
 	if _ammo_start_granted: exported["ammo_start_granted"] = true
 	# Handel H2: Marktbestaende (additiver Schluessel; fehlt er, laedt der Stand mit vollem Bestand).
 	if not _market_stock.is_empty(): exported["market_stock"] = _market_stock.duplicate()
+	# Dauerauftraege (H3): Uhr, Sperren, laufende Auftraege und Zaehler; nur in der Kampagne, alle Schluessel optional.
+	if _standing_orders != null: exported.merge(_standing_orders.export_state())
 	return exported
+
+## Legt den Besitzer der Dauerauftraege an (nur Kampagne). Gibt false zurueck, wenn die Datendatei fehlt oder fehlerhaft ist.
+func enable_standing_orders() -> bool:
+	_standing_orders = _load_standing_orders()
+	return _standing_orders != null
+
+func get_standing_orders() -> RefCounted:
+	return _standing_orders
+
+## Anzeigenamen fuer die Texte der Dauerauftraege (vom Adapter, aus den vorhandenen Katalogen).
+func set_standing_orders_names(location_names: Dictionary, item_names: Dictionary) -> void:
+	if _standing_orders != null: _standing_orders.set_names(location_names, item_names)
+
+func advance_standing_clock(delta: float) -> void:
+	if _standing_orders != null: _standing_orders.advance_clock(delta)
+
+## Snapshot der Dauerauftraege; die Besitzpruefung zaehlt Basislager, Schiffe und Rucksaecke. Rechnet nur, wenn er abgefragt wird.
+func get_standing_orders_snapshot() -> Array:
+	if _standing_orders == null: return []
+	return _standing_orders.get_snapshot(_standing_owned_items())
+
+## Nur die Gegenstaende zaehlen, die ein Dauerauftrag zur Annahme verlangt (requires_item), ueber Basislager, Schiffe und Rucksaecke.
+func _standing_owned_items() -> Dictionary:
+	var owned: Dictionary = {}
+	if _standing_orders == null: return owned
+	for item_id: Variant in _standing_orders.required_items():
+		var total := 0
+		for container_id: Variant in _inventory:
+			total += int(Dictionary(Dictionary(_inventory[container_id]).get("items", {})).get(item_id, 0))
+		owned[item_id] = total
+	return owned
+
+## Wird ein Dauerauftrag angenommen, geschieht das in dieser Reihenfolge (siehe Kopf von standing_orders_state.gd): standing_can_accept,
+## Kisten buchen, standing_accept_state. Zustand und _revision aendern sich zusammen; so sehen Snapshots und Zwischenspeicher die Aenderung.
+func standing_can_accept(id: String) -> Dictionary:
+	if _standing_orders == null: return _reject("standing_unavailable", "Daueraufträge sind nicht verfügbar")
+	return _standing_orders.can_accept(id, _standing_owned_items())
+
+## Nimmt den Auftrag an. Antwort: ok, reason, message und bei ok die vergebene Nummer (number).
+func standing_accept_state(id: String) -> Dictionary:
+	var check: Dictionary = standing_can_accept(id)
+	if not bool(check.get("ok", false)): return check
+	if not _standing_orders.accept(id, _standing_owned_items()): return _reject("standing_refused", "Auftrag nicht annehmbar")
+	_revision += 1
+	return {"ok": true, "reason": "", "message": "", "number": _standing_orders.get_counter()}
+
+## Beendet den laufenden Auftrag (Abgabe oder Aufgabe) und setzt die Sperre; false, wenn er nicht (mehr) laeuft (zweiter Aufruf).
+func standing_finish_state(id: String, delivered: bool) -> bool:
+	if _standing_orders == null or not _standing_orders.finish(id, delivered): return false
+	_revision += 1
+	return true
+
+## Fracht uebernehmen (Befehl standing_accept): beim Haendler am Startort, Schiff gelandet. Reihenfolge laut Kopf von standing_orders_state.gd:
+## alles Vorpruefbare pruefen, Kisten ins Schiff buchen, dann den Auftrag annehmen; scheitert das, kommen die Kisten wieder raus.
+## Die Revision hebt standing_accept_state (einmal je Befehl genuegt, zwischen Buchung und Annahme laeuft kein anderer Code).
+func _standing_accept(payload: Dictionary, context: Dictionary) -> Dictionary:
+	if _standing_orders == null: return _reject("standing_unavailable", "Daueraufträge sind nicht verfügbar")
+	var id: String = String(payload.get("order_id", ""))
+	var order: Dictionary = _standing_orders.get_order(id)
+	if order.is_empty(): return _reject("unknown_order", "Unbekannter Auftrag.")
+	if String(order.kind) != "freight" or not bool(order.get("playable", true)): return _reject("not_freight", "Das ist kein Frachtauftrag, den man beim Händler übernimmt.")
+	var location: String = String(context.get("location_id", ""))
+	if not _has_service(location, "trade") or bool(context.get("craft_busy", true)): return _reject("trade_unavailable", "Handel nicht erreichbar")
+	if location != String(order.origin): return _reject("wrong_location", "Diesen Auftrag übernimmst du beim Händler in %s." % _standing_orders.place_name(String(order.origin)))
+	var container: String = "craft:" + String(context.get("craft_id", ""))
+	if not _inventory.has(container): return _reject("inventory_access", "Schiffslager nicht verfügbar")
+	var verdict: Dictionary = standing_can_accept(id)
+	if not bool(verdict.get("ok", false)): return verdict
+	var crates: int = int(order.crates)
+	if not INVENTORY.fits(_inventory[container], STANDING_CRATE, crates): return _reject("container_full", "Schiffsfracht ist voll – für %s ist kein Platz." % _standing_crates_text(crates))
+	var items: Dictionary = _inventory[container].items
+	items[STANDING_CRATE] = int(items.get(STANDING_CRATE, 0)) + crates
+	var accepted: Dictionary = standing_accept_state(id)
+	if not bool(accepted.get("ok", false)):
+		_standing_remove_crates(items, crates)
+		return accepted
+	var number: int = int(accepted.number)
+	return {"ok": true, "message": "Fracht übernommen: %s." % _standing_crates_text(crates), "order_id": id, "number": number, "receipt_id": _standing_receipt_id(id, number),
+		"outcome": "accepted", "item_id": STANDING_CRATE, "quantity": crates, "container_id": container, "location_id": location}
+
+## Fracht abliefern (Befehl standing_deliver): beim Haendler am Zielort, alle Kisten nachweislich im gelandeten Schiff. finish ZUERST (zweiter Aufruf
+## lehnt ab), erst bei true werden Kisten entfernt und der Lohn gebucht: genau einmal, in einer Buchung.
+func _standing_deliver(payload: Dictionary, context: Dictionary) -> Dictionary:
+	if _standing_orders == null: return _reject("standing_unavailable", "Daueraufträge sind nicht verfügbar")
+	var id: String = String(payload.get("order_id", ""))
+	var order: Dictionary = _standing_orders.get_order(id)
+	if order.is_empty(): return _reject("unknown_order", "Unbekannter Auftrag.")
+	if String(order.kind) != "freight": return _reject("not_freight", "Das ist kein Frachtauftrag.")
+	var location: String = String(context.get("location_id", ""))
+	if not _has_service(location, "trade") or bool(context.get("craft_busy", true)): return _reject("trade_unavailable", "Handel nicht erreichbar")
+	var active: Dictionary = _standing_orders.get_active("freight")
+	if String(active.get("id", "")) != id: return _reject("not_active", "Dieser Auftrag läuft nicht.")
+	if location != String(order.destination): return _reject("wrong_location", "Abliefern geht nur beim Händler in %s." % _standing_orders.place_name(String(order.destination)))
+	var container: String = "craft:" + String(context.get("craft_id", ""))
+	if not _inventory.has(container): return _reject("inventory_access", "Schiffslager nicht verfügbar")
+	var items: Dictionary = _inventory[container].items
+	var crates: int = int(order.crates)
+	if int(items.get(STANDING_CRATE, 0)) < crates: return _reject("cargo_missing", "Fracht unvollständig – alle Kisten müssen im gelandeten Schiff liegen.")
+	var number: int = int(active.number)
+	if not standing_finish_state(id, true): return _reject("not_active", "Dieser Auftrag läuft nicht.")
+	_standing_remove_crates(items, crates)
+	var pay: int = int(order.pay)
+	_credits += pay
+	return {"ok": true, "message": "Fracht abgeliefert. Lohn: %d Cr." % pay, "order_id": id, "number": number, "receipt_id": _standing_receipt_id(id, number),
+		"outcome": "delivered", "pay": pay, "credits_added": pay, "crates_removed": crates, "container_id": container, "location_id": location}
+
+## Auftrag aufgeben (Befehl standing_abandon): beendet den laufenden Auftrag ohne Lohn, entfernt die uebrigen Kisten aus ALLEN Behaeltern, Sperrzeit beginnt.
+## Braucht keinen Handelsort: wer die Fracht nicht mehr abliefern kann, soll sie loswerden koennen.
+func _standing_abandon(payload: Dictionary) -> Dictionary:
+	if _standing_orders == null: return _reject("standing_unavailable", "Daueraufträge sind nicht verfügbar")
+	var id: String = String(payload.get("order_id", ""))
+	var order: Dictionary = _standing_orders.get_order(id)
+	if order.is_empty(): return _reject("unknown_order", "Unbekannter Auftrag.")
+	var active: Dictionary = _standing_orders.get_active(String(order.kind))
+	if String(active.get("id", "")) != id: return _reject("not_active", "Dieser Auftrag läuft nicht.")
+	var number: int = int(active.number)
+	if not standing_finish_state(id, false): return _reject("not_active", "Dieser Auftrag läuft nicht.")
+	var removed := 0
+	for container_id: Variant in _inventory:
+		var items: Dictionary = Dictionary(_inventory[container_id]).get("items", {})
+		removed += int(items.get(STANDING_CRATE, 0))
+		items.erase(STANDING_CRATE)
+	return {"ok": true, "message": "Auftrag aufgegeben. Kein Lohn.", "order_id": id, "number": number, "receipt_id": _standing_receipt_id(id, number),
+		"outcome": "abandoned", "pay": 0, "crates_removed": removed}
+
+func _standing_receipt_id(id: String, number: int) -> String:
+	return "standing:%s:%d" % [id, number]
+
+func _standing_crates_text(crates: int) -> String:
+	return "%d Kiste" % crates if crates == 1 else "%d Kisten" % crates
+
+func _standing_remove_crates(items: Dictionary, crates: int) -> void:
+	var left: int = int(items.get(STANDING_CRATE, 0)) - crates
+	if left > 0: items[STANDING_CRATE] = left
+	else: items.erase(STANDING_CRATE)
+
+func _load_standing_orders() -> RefCounted:
+	if not FileAccess.file_exists(STANDING_ORDERS_PATH): return null
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(STANDING_ORDERS_PATH))
+	var owner: RefCounted = STANDING_ORDERS.new()
+	if typeof(parsed) != TYPE_DICTIONARY or not owner.configure(parsed):
+		push_warning("standing_orders.json ist unbrauchbar; das Spiel läuft ohne Daueraufträge weiter.")
+		return null
+	return owner
 
 func _export_state_base() -> Dictionary:
 	return {"schema_version":1,"definitions":_definitions.duplicate(true),"credits":_credits,"item_quantities":_item_quantities.duplicate(true),"fuel_by_craft_id":_fuel_by_craft_id.duplicate(true),"stock_by_offer_id":_stock_by_offer_id.duplicate(true),"requests":_requests.duplicate(true),"reward_receipts":_reward_receipts.duplicate(true),"revision":_revision,"inventory":_inventory_view(),"location_resources":_export_resources(),"research_receipts":_research_receipts.duplicate(true),"modular_capacity_baseline":_modular_capacity_baseline}
@@ -766,6 +921,10 @@ func restore_state(data: Dictionary) -> Dictionary:
 	for market_key: Variant in market_saved:
 		if market_full.has(market_key) and not _valid_integer(market_saved[market_key]):
 			return _reject("invalid_stock", "Marktbestand ungueltig")
+	# Dauerauftraege (H3): optionale Schluessel; fehlen sie, gilt Uhr 0 ohne Sperren. Eine Fehlform lehnt ab, auch wenn dieser Besitzer
+	# selbst keinen Dauerauftrags-Besitzer hat (Vorpruefung des Spielstands).
+	var standing_check: RefCounted = _standing_orders if _standing_orders != null else _load_standing_orders()
+	if standing_check != null and not standing_check.validate_state(data): return _reject("invalid_standing_orders", "Dauerauftraege ungueltig")
 	_reset_route_fuel_preparation()
 	_market = fresh._market.duplicate(true)
 	_market_stock = market_full.duplicate()
@@ -798,6 +957,7 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_open_tanker_cache_revision = -1
 	_revision = int(data.revision)
 	_ammo_start_granted = data.get("ammo_start_granted", false) == true
+	if _standing_orders != null: _standing_orders.restore_state(data)
 	_station_purchase_cache_revision = -1
 	# Stand von vor M2 tragen Fachgroesse 1: aus der Ruestung neu bestimmen, solange nichts verschoben werden muss. Den Ueberschuss
 	# ins Lager bucht erst `sync_compartments_after_load`, wenn der Loadout-Besitzer die Personen kennt (nie den Stand ablehnen).

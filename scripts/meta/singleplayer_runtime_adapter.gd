@@ -179,6 +179,8 @@ func configure(flow: Node, screen: Control) -> void:
 	if not campaign_result.get("ok", false) or not supply_result.get("ok", false):
 		push_error("Singleplayer definitions could not be configured")
 		return
+	# Dauerauftraege (H3): nur in der Kampagne; Namen kommen aus den vorhandenen Anzeige-Katalogen (nur Darstellung).
+	_setup_standing_orders()
 	_simulation = SIM.new()
 	_simulation.name = "CampaignSimulationRoot"
 	add_child(_simulation)
@@ -613,6 +615,7 @@ func get_snapshot() -> Dictionary:
 	var campaign: Dictionary = _campaign.get_campaign_snapshot()
 	var retry_allowed := _campaign_mode and bool(_retry_failed_home_gate().ok)
 	campaign["job_availability"] = _campaign.get_job_availability(retry_allowed)
+	_attach_standing_orders(campaign)
 	var location_availability := {}
 	for location_id: String in campaign.locations:
 		location_availability[location_id] = _campaign.validate_location_visit(location_id, retry_allowed)
@@ -700,7 +703,7 @@ func retire_lost_craft(craft_id: String) -> Dictionary:
 	if _ship_equipment != null:
 		equipment_kept = not bool(_ship_equipment.unregister_unmodified_craft(craft_id).get("ok", false))
 	_supply.retire_lost_craft(craft_id, equipment_kept)
-	if _campaign_mode and not cargo_lost.is_empty():
+	if _campaign_mode and cargo_lost.has("C-Benit-Kiste"):
 		_commit("singleplayer_campaign", "unload_crate", {}, "unload:" + craft_id, {"runtime_authorized": true})
 	sync_crafts()
 	return {"ok": true, "equipment_kept": equipment_kept, "cargo_lost": cargo_lost}
@@ -713,6 +716,10 @@ func lost_craft_cargo_names(craft_id: String) -> Array:
 	var container: Dictionary = Dictionary(Dictionary(_supply.get_supply_snapshot().inventory).get("craft:" + craft_id, {}))
 	if bool(progress.get("crate_loaded", false)) and not bool(progress.get("crate_delivered", false)) and int(Dictionary(container.get("items", {})).get("c_benit_crate", 0)) >= 1:
 		names.append("C-Benit-Kiste")
+	# Dauerauftrag Fracht: die Frachtkisten gehen mit dem Schiff verloren, der Auftrag bleibt offen (Aufgeben im Haendlerfenster).
+	var freight: int = int(Dictionary(container.get("items", {})).get("cargo_crate", 0))
+	if freight >= 1:
+		names.append("1 Frachtkiste" if freight == 1 else "%d Frachtkisten" % freight)
 	return names
 
 func _home_pad_for(craft_id: String) -> String:
@@ -833,7 +840,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		return _request_space_wing_command(payload.command)
 	if operation == "select_location_view_craft":
 		return _flow.call("select_location_view_craft", String(payload.get("location_id", "")), String(payload.get("craft_id", "")))
-	if payload.has("service_location_id") and operation in ["buy", "sell", "refuel", "repair", "inventory_transfer", "inventory_equip", "return_homebase", "station_buy_ship", "station_build_home_pad", "station_install_ship_component", "station_deploy_crew", "station_handoff_crew", "station_board_crew"]:
+	if payload.has("service_location_id") and operation in ["buy", "sell", "standing_accept", "standing_deliver", "refuel", "repair", "inventory_transfer", "inventory_equip", "return_homebase", "station_buy_ship", "station_build_home_pad", "station_install_ship_component", "station_deploy_crew", "station_handoff_crew", "station_board_crew"]:
 		var live_context := _service_context(String(payload.get("craft_id", "")))
 		if String(payload.service_location_id).is_empty() or String(live_context.get("location_id", "")) != String(payload.service_location_id):
 			return _reject("service_location_changed", "Schiff ist nicht mehr am gewählten Versorgungsort")
@@ -947,6 +954,8 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		if not bool(context.get("ground_service_verified",false)) or not Array(context.get("services",[])).has("repair"):
 			return _reject("repair_service_required","Reparatur nur am lokalen freigegebenen Servicepad")
 		return _commit("singleplayer_supply","repair",data,request_id,context)
+	if operation in ["standing_accept", "standing_deliver", "standing_abandon"]:
+		return _request_standing(operation, data, request_id)
 	if operation in ["buy", "refuel", "sell"]:
 		if operation == "buy":
 			var offered: Dictionary = Dictionary(_supply.get_supply_snapshot().offers).get(String(data.get("offer_id", "")), {})
@@ -2165,6 +2174,36 @@ func charge_campaign_rescue_fee(amount: int) -> Dictionary:
 func advance_debt_interest(delta: float) -> Dictionary:
 	if _supply == null or not _campaign_mode: return {"ok": true, "charges": [], "credits": 0}
 	return _supply.advance_debt_clock(delta)
+
+## Dauerauftraege (H3, Fracht): Uebernehmen und Abliefern wie ein Verkauf beim Haendler (gelandetes Schiff, Handelsdienst am Ort);
+## Aufgeben braucht keinen Haendler. Nur Kampagne; Zustand, Kisten und Lohn buchen allein die Befehle im Versorgungsstand.
+func _request_standing(operation: String, data: Dictionary, request_id: String) -> Dictionary:
+	if not _campaign_mode or _supply == null or _supply.get_standing_orders() == null:
+		return _reject("standing_unavailable", "Daueraufträge gibt es nur in der Kampagne")
+	if operation == "standing_abandon":
+		return _commit("singleplayer_supply", operation, data, request_id)
+	var craft_id: String = String(data.get("craft_id", ""))
+	var context: Dictionary = _service_context(craft_id)
+	if context.is_empty():
+		return _reject("service_unavailable", "Schiff und Trupp müssen am Serviceort bereit sein")
+	context["craft_id"] = craft_id
+	if String(context.get("location_id", "")) in ["trade_outpost", "satellite_crash"] and not Array(context.get("services", [])).has("trade"):
+		return _reject("local_service_required", "Schiff muss am freigegebenen lokalen Handels- oder Servicepunkt stehen")
+	return _commit("singleplayer_supply", operation, data, request_id, context)
+
+## Dauerauftraege (H3): den Besitzer nur in der Kampagne anlegen; Namen aus den vorhandenen Anzeige-Katalogen (nur Darstellung).
+func _setup_standing_orders() -> void:
+	if not _campaign_mode or _supply == null: return
+	if _supply.enable_standing_orders():
+		_supply.set_standing_orders_names(load("res://scripts/mission/campaign_display_catalog.gd").LOCATION_NAMES, load("res://scripts/ui/components/personnel_inventory_panel.gd").LABELS)
+
+## Dauerauftraege (H3): der Schluessel steht nur im Kampagnen-Snapshot (Skirmish und alte Staende: kein Schluessel).
+func _attach_standing_orders(campaign: Dictionary) -> void:
+	if _campaign_mode and _supply != null: campaign["standing_orders"] = _supply.get_standing_orders_snapshot()
+
+## Dauerauftraege (H3): durchgehende Uhr der Sperrzeiten. Der Aufrufer (meta_layer_flow) deckelt das Delta je Frame.
+func advance_standing_clock(delta: float) -> void:
+	if _supply != null and _campaign_mode: _supply.advance_standing_clock(delta)
 
 ## Abschnitt P: Pleite-Pruefung (nur lesend; ausserhalb der Kampagne und ohne Versorgungsstand nie pleite). Antwort: bankrupt, reason (aus der
 ## reinen Regel campaign_bankruptcy_rules.gd), credits (Guthaben), reachable_credits (Guthaben plus Erloes aus allem, was am Ort verkauft

@@ -474,6 +474,7 @@ func _process(_delta: float) -> void:
 	_poll_retired_terrain_workers()
 	_tick_personnel_recovery(_delta)
 	_tick_debt_interest(_delta)
+	_tick_standing_orders(_delta)
 	for craft_id in _space_approaches.keys():
 		if not _space_approaches.has(craft_id): continue
 		_space_approaches[craft_id].remaining=maxf(0.0,float(_space_approaches[craft_id].remaining)-_delta)
@@ -5959,6 +5960,14 @@ func _tick_debt_interest(delta: float) -> void:
 		return
 	var last: Dictionary = Dictionary(charges[charges.size() - 1])
 	_show_save_feedback(CREDIT_TEXT_SCRIPT.interest_message(int(last.get("amount", 0)), int(last.get("credits", 0))))
+
+
+## Dauerauftraege (H3): durchgehende Uhr der Sperrzeiten (nur Kampagne), je Frame hoechstens PERSONNEL_RECOVERY_MAX_FRAME_SECONDS.
+## Die Uhr gehoert dem Besitzer im Versorgungsstand (ueber den Adapter); hier wird nur getaktet.
+func _tick_standing_orders(delta: float) -> void:
+	if not is_campaign_start() or not is_instance_valid(_singleplayer_runtime):
+		return
+	_singleplayer_runtime.call("advance_standing_clock", minf(delta, PERSONNEL_RECOVERY_MAX_FRAME_SECONDS))
 
 
 ## Abschnitt P: Pleite-Pruefung (im 0,25-s-Takt von _process, in der Kampagne). Nicht waehrend eines Einsatzes (aktiver Einsatz, offener
