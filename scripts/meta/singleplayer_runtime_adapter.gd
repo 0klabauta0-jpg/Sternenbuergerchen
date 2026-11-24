@@ -703,7 +703,7 @@ func retire_lost_craft(craft_id: String) -> Dictionary:
 	if _ship_equipment != null:
 		equipment_kept = not bool(_ship_equipment.unregister_unmodified_craft(craft_id).get("ok", false))
 	_supply.retire_lost_craft(craft_id, equipment_kept)
-	if _campaign_mode and not cargo_lost.is_empty():
+	if _campaign_mode and cargo_lost.has("C-Benit-Kiste"):
 		_commit("singleplayer_campaign", "unload_crate", {}, "unload:" + craft_id, {"runtime_authorized": true})
 	sync_crafts()
 	return {"ok": true, "equipment_kept": equipment_kept, "cargo_lost": cargo_lost}
@@ -716,6 +716,10 @@ func lost_craft_cargo_names(craft_id: String) -> Array:
 	var container: Dictionary = Dictionary(Dictionary(_supply.get_supply_snapshot().inventory).get("craft:" + craft_id, {}))
 	if bool(progress.get("crate_loaded", false)) and not bool(progress.get("crate_delivered", false)) and int(Dictionary(container.get("items", {})).get("c_benit_crate", 0)) >= 1:
 		names.append("C-Benit-Kiste")
+	# Dauerauftrag Fracht: die Frachtkisten gehen mit dem Schiff verloren, der Auftrag bleibt offen (Aufgeben im Haendlerfenster).
+	var freight: int = int(Dictionary(container.get("items", {})).get("cargo_crate", 0))
+	if freight >= 1:
+		names.append("1 Frachtkiste" if freight == 1 else "%d Frachtkisten" % freight)
 	return names
 
 func _home_pad_for(craft_id: String) -> String:
@@ -836,7 +840,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		return _request_space_wing_command(payload.command)
 	if operation == "select_location_view_craft":
 		return _flow.call("select_location_view_craft", String(payload.get("location_id", "")), String(payload.get("craft_id", "")))
-	if payload.has("service_location_id") and operation in ["buy", "sell", "standing_accept", "standing_deliver", "standing_abandon", "refuel", "repair", "inventory_transfer", "inventory_equip", "return_homebase", "station_buy_ship", "station_build_home_pad", "station_install_ship_component", "station_deploy_crew", "station_handoff_crew", "station_board_crew"]:
+	if payload.has("service_location_id") and operation in ["buy", "sell", "standing_accept", "standing_deliver", "refuel", "repair", "inventory_transfer", "inventory_equip", "return_homebase", "station_buy_ship", "station_build_home_pad", "station_install_ship_component", "station_deploy_crew", "station_handoff_crew", "station_board_crew"]:
 		var live_context := _service_context(String(payload.get("craft_id", "")))
 		if String(payload.service_location_id).is_empty() or String(live_context.get("location_id", "")) != String(payload.service_location_id):
 			return _reject("service_location_changed", "Schiff ist nicht mehr am gewählten Versorgungsort")
@@ -2181,7 +2185,7 @@ func _request_standing(operation: String, data: Dictionary, request_id: String) 
 	var craft_id: String = String(data.get("craft_id", ""))
 	var context: Dictionary = _service_context(craft_id)
 	if context.is_empty():
-		return _reject("service_unavailable", "Schiff und Trupp muessen am Serviceort bereit sein")
+		return _reject("service_unavailable", "Schiff und Trupp müssen am Serviceort bereit sein")
 	context["craft_id"] = craft_id
 	if String(context.get("location_id", "")) in ["trade_outpost", "satellite_crash"] and not Array(context.get("services", [])).has("trade"):
 		return _reject("local_service_required", "Schiff muss am freigegebenen lokalen Handels- oder Servicepunkt stehen")

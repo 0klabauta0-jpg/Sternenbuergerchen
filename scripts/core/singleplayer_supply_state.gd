@@ -779,7 +779,7 @@ func _standing_deliver(payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not _inventory.has(container): return _reject("inventory_access", "Schiffslager nicht verfügbar")
 	var items: Dictionary = _inventory[container].items
 	var crates: int = int(order.crates)
-	if int(items.get(STANDING_CRATE, 0)) < crates: return _reject("cargo_missing", "Fracht unvollständig – nur Aufgeben möglich.")
+	if int(items.get(STANDING_CRATE, 0)) < crates: return _reject("cargo_missing", "Fracht unvollständig – alle Kisten müssen im gelandeten Schiff liegen.")
 	var number: int = int(active.number)
 	if not standing_finish_state(id, true): return _reject("not_active", "Dieser Auftrag läuft nicht.")
 	_standing_remove_crates(items, crates)

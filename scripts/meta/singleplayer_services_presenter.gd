@@ -44,7 +44,7 @@ var _sell_extra: Array = []
 ## und der eine Knopf "Auftrag aufgeben (kein Lohn)". Die Zeilen kommen aus campaign.standing_orders; Zahlen und Namen stehen nicht im Code.
 const INVENTORY = preload("res://scripts/mission/inventory_transfer_contract.gd")
 const STANDING_CRATE := "cargo_crate"
-const STANDING_MISSING_TEXT := "Fracht unvollständig – nur Aufgeben möglich."
+const STANDING_MISSING_TEXT := "Fracht unvollständig – alle Kisten müssen im gelandeten Schiff liegen."
 var _standing_box: VBoxContainer
 var _standing_buttons: Dictionary = {}
 var _standing_abandon: Button

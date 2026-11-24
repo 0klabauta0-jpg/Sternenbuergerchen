@@ -42,6 +42,10 @@ func _run() -> void:
 	_number_part()
 	_skirmish_part()
 	_adapter_part()
+	_abandon_adapter_part()
+	_loss_part()
+	_second_craft_part()
+	_backpack_part()
 	await _ui_part()
 	print("STANDING_FREIGHT passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed else 0)
@@ -237,7 +241,7 @@ func _missing_part() -> void:
 	_load(s, "craft:ship", CRATE, -1)
 	var c0: int = s.get_credits()
 	var r: Dictionary = _deliver(s, A, "satellite_crash")
-	check(not bool(r.get("ok", true)) and String(r.get("reason", "")) == "cargo_missing" and String(r.get("message", "")) == "Fracht unvollständig – nur Aufgeben möglich.", "Kiste fehlt: keine Abgabe, Text 'Fracht unvollständig – nur Aufgeben möglich.' (%s)" % r.get("message", ""))
+	check(not bool(r.get("ok", true)) and String(r.get("reason", "")) == "cargo_missing" and String(r.get("message", "")) == "Fracht unvollständig – alle Kisten müssen im gelandeten Schiff liegen.", "Kiste fehlt: keine Abgabe, Text 'Fracht unvollständig – alle Kisten müssen im gelandeten Schiff liegen.' (%s)" % r.get("message", ""))
 	check(s.get_credits() == c0 and _ship_crates(s) == crates - 1 and String(_status(s, A).get("status", "")) == "active" and String(_status(s, A).get("status", "")) != "locked", "Kiste fehlt: kein Lohn, der Auftrag laeuft weiter, keine Sperre")
 	_load(s, "craft:ship", CRATE, 1)
 	check(bool(_deliver(s, A, "satellite_crash").get("ok", false)) and s.get_credits() == c0 + int(_order(A).pay), "Kiste fehlt: nach dem Zurueckladen klappt die Abgabe")
@@ -356,9 +360,139 @@ func _adapter_part() -> void:
 	adapter.free()
 	var source: String = FileAccess.get_file_as_string("res://scripts/meta/singleplayer_runtime_adapter.gd").replace("\r\n", "\n")
 	check(source.contains("operation in [\"standing_accept\", \"standing_deliver\", \"standing_abandon\"]:\n\t\treturn _request_standing(operation, data, request_id)"), "Adapter (Quelltext): request_operation leitet die drei Befehle an _request_standing")
-	check(source.contains("operation in [\"buy\", \"sell\", \"standing_accept\", \"standing_deliver\", \"standing_abandon\", \"refuel\""), "Adapter (Quelltext): die Pruefung des Versorgungsorts (service_location_id) gilt auch fuer die drei Befehle")
+	check(source.contains("operation in [\"buy\", \"sell\", \"standing_accept\", \"standing_deliver\", \"refuel\"") and not source.contains("\"standing_deliver\", \"standing_abandon\", \"refuel\""), "Adapter (Quelltext): die Pruefung des Versorgungsorts (service_location_id) gilt fuer Uebernehmen und Abliefern, NICHT fuer Aufgeben (ortsfrei)")
 	var request_source: String = source.substr(source.find("func _request_standing"), 900)
+	check(request_source.contains("Schiff und Trupp müssen am Serviceort bereit sein") and not request_source.contains("muessen"), "Adapter (Quelltext): der neue Text in _request_standing heisst 'Schiff und Trupp müssen am Serviceort bereit sein' (mit Umlaut)")
 	check(request_source.contains("_service_context(craft_id)") and request_source.contains("has(\"trade\")"), "Adapter (Quelltext): Uebernehmen und Abliefern brauchen Schiffskontext und Handelsdienst wie der Verkauf")
+
+# ---------- Nachbesserung 1: Aufgeben ueber den echten Adapter, verlorene Kisten, zweites Schiff, Rucksack ----------
+
+const FAKE_ADAPTER_SOURCE := "extends \"res://scripts/meta/singleplayer_runtime_adapter.gd\"\nvar fake_context: Dictionary = {}\nfunc _service_context(_craft_id: String) -> Dictionary:\n\treturn fake_context\n"
+const FAKE_SIM_SOURCE := "extends Node\nvar supply: RefCounted\nfunc request_singleplayer_command(command: Dictionary, context: Dictionary = {}) -> Dictionary:\n\treturn supply.apply_command(command, context)\n"
+
+## Der ECHTE Adapter (Kampagne, echter Versorgungsstand) ohne Szene: nur der Dienstkontext des Schiffs ist vorgegeben (leer = Schiff hat keinen
+## Dienstkontext) und die Simulation reicht den Befehl unveraendert an den Versorgungsstand.
+func _campaign_adapter(s: RefCounted, context: Dictionary) -> Node:
+	var adapter_script := GDScript.new()
+	adapter_script.source_code = FAKE_ADAPTER_SOURCE
+	var sim_script := GDScript.new()
+	sim_script.source_code = FAKE_SIM_SOURCE
+	if adapter_script.reload() != OK or sim_script.reload() != OK:
+		check(false, "Hilfe: Adapter und Simulation fuer die Pruefung lassen sich bauen")
+		return null
+	var adapter: Node = adapter_script.new()
+	var sim: Node = sim_script.new()
+	sim.set("supply", s)
+	adapter.set("_campaign_mode", true)
+	adapter.set("_supply", s)
+	adapter.set("_simulation", sim)
+	adapter.set("fake_context", context)
+	adapter.add_child(sim)
+	return adapter
+
+func _sup2() -> RefCounted:
+	var s: RefCounted = _sup()
+	s.register_craft("ship2", 5.0)
+	s.configure_inventory(["u1"], ["ship", "ship2"])
+	return s
+
+## W1: Aufgeben ist ortsfrei und braucht weder Haendler noch Schiff am Ort. Ueber request_operation des echten Adapters, ohne Dienstkontext.
+func _abandon_adapter_part() -> void:
+	var s: RefCounted = _sup()
+	var lock: int = int(_orders().lock_seconds)
+	_accept(s, A, "trade_outpost")
+	var adapter: Node = _campaign_adapter(s, {})
+	if adapter == null: return
+	var c0: int = s.get_credits()
+	var deliver: Dictionary = adapter.request_operation("standing_deliver", {"order_id": A, "craft_id": "ship", "service_location_id": "satellite_crash"})
+	check(not bool(deliver.get("ok", true)) and s.get_credits() == c0 and _ship_crates(s) == int(_order(A).crates), "W1: Abliefern ohne Dienstkontext bleibt abgelehnt (%s)" % str(deliver.get("reason", "")))
+	var r: Dictionary = adapter.request_operation("standing_abandon", {"order_id": A, "craft_id": "ship", "service_location_id": ""})
+	check(bool(r.get("ok", false)) and String(r.get("outcome", "")) == "abandoned" and int(r.get("pay", -1)) == 0, "W1: Aufgeben ohne Dienstkontext (leerer Ort) wird vom echten Adapter angenommen (%s)" % str(r.get("reason", r.get("message", ""))))
+	check(s.get_credits() == c0 and _crates(s) == 0 and s.get_standing_orders().get_active("freight").is_empty(), "W1: Auftrag beendet, kein Lohn, alle Kisten weg")
+	check(String(_status(s, A).get("status", "")) == "locked" and int(_status(s, A).get("lock_remaining_seconds", 0)) == lock, "W1: die Sperrzeit (%d s) laeuft" % lock)
+	var t: RefCounted = _sup()
+	_accept(t, A, "trade_outpost")
+	var adapter_t: Node = _campaign_adapter(t, {})
+	var d0: int = t.get_credits()
+	var r2: Dictionary = adapter_t.request_operation("standing_abandon", {"order_id": A, "craft_id": "", "service_location_id": "satellite_crash"})
+	check(bool(r2.get("ok", false)) and t.get_credits() == d0 and _crates(t) == 0 and String(_status(t, A).get("status", "")) == "locked", "W1: Aufgeben geht auch ohne gewaehltes Schiff und mit einem Ort ohne Kontext (%s)" % str(r2.get("reason", r2.get("message", ""))))
+	adapter.free()
+	adapter_t.free()
+
+## K-Abschuss: Kisten im verlorenen Schiff werden angesagt; der Auftrag bleibt offen, Abliefern geht nicht, Aufgeben geht.
+func _loss_part() -> void:
+	var crates: int = int(_order(A).crates)
+	var s: RefCounted = _sup()
+	var lock: int = int(_orders().lock_seconds)
+	check(_campaign_adapter(s, {}).lost_craft_cargo_names("ship").is_empty(), "Abschuss: ohne Kisten im Schiff nennt die Verlustmeldung nichts")
+	_accept(s, A, "trade_outpost")
+	var adapter: Node = _campaign_adapter(s, {})
+	if adapter == null: return
+	var names: Array = adapter.lost_craft_cargo_names("ship")
+	var want: String = "%d Frachtkisten" % crates
+	check(names.has(want) and names.size() == 1, "Abschuss: die Verlustmeldung nennt '%s' (%s)" % [want, str(names)])
+	check(adapter.lost_craft_cargo_names("ship2").is_empty(), "Abschuss: ein anderes Schiff nennt nichts")
+	var debrief: String = load("res://scripts/meta/debrief_screen.gd").build_craft_loss_text({"result": "victory", "craft_loss": {"craft_id": "ship", "ship_name": "Frachter", "rescue_fee": 0}, "cargo_lost": names})
+	check(debrief.contains(want) and debrief.contains("lässt er sich aufgeben") and not debrief.contains("Ladeort wieder bereit"), "Abschuss: die Nachbesprechung nennt '%s' und sagt nicht, die Kisten stuenden wieder bereit" % want)
+	_load(s, "craft:ship", CRATE, -(crates - 1))
+	check(Array(adapter.lost_craft_cargo_names("ship")) == ["1 Frachtkiste"], "Abschuss: bei einer Kiste steht '1 Frachtkiste' (%s)" % str(adapter.lost_craft_cargo_names("ship")))
+	_load(s, "craft:ship", CRATE, crates - 1)
+	s.retire_lost_craft("ship", false)
+	check(String(_status(s, A).get("status", "")) == "active" and _crates(s) == 0, "Abschuss: der Auftrag bleibt offen (Unterwegs), die Kisten sind mit dem Schiff weg")
+	var c0: int = s.get_credits()
+	var deliver: Dictionary = adapter.request_operation("standing_deliver", {"order_id": A, "craft_id": "ship", "service_location_id": "satellite_crash"})
+	check(not bool(deliver.get("ok", true)) and s.get_credits() == c0 and String(_status(s, A).get("status", "")) == "active", "Abschuss: Abliefern wird abgelehnt, kein Lohn (%s)" % str(deliver.get("reason", "")))
+	var r: Dictionary = adapter.request_operation("standing_abandon", {"order_id": A, "craft_id": "ship", "service_location_id": ""})
+	check(bool(r.get("ok", false)) and s.get_credits() == c0 and s.get_standing_orders().get_active("freight").is_empty(), "Abschuss: Aufgeben geht, kein Lohn (%s)" % str(r.get("reason", r.get("message", ""))))
+	check(String(_status(s, A).get("status", "")) == "locked" and int(_status(s, A).get("lock_remaining_seconds", 0)) == lock, "Abschuss: die Sperrzeit (%d s) laeuft" % lock)
+	# Schiff mit erhaltenem Lager (Umbauten): die Kisten bleiben im Behaelter des verlorenen Schiffs, Abliefern geht mangels Dienstkontext nicht, Aufgeben leert alles.
+	var t: RefCounted = _sup()
+	_accept(t, A, "trade_outpost")
+	var adapter_t: Node = _campaign_adapter(t, {})
+	t.retire_lost_craft("ship", true)
+	var d0: int = t.get_credits()
+	var deliver_t: Dictionary = adapter_t.request_operation("standing_deliver", {"order_id": A, "craft_id": "ship", "service_location_id": "satellite_crash"})
+	check(not bool(deliver_t.get("ok", true)) and t.get_credits() == d0 and _crates(t) == crates, "Abschuss (Lager erhalten): Abliefern wird abgelehnt, die Kisten bleiben")
+	var r_t: Dictionary = adapter_t.request_operation("standing_abandon", {"order_id": A, "craft_id": "ship", "service_location_id": ""})
+	check(bool(r_t.get("ok", false)) and t.get_credits() == d0 and _crates(t) == 0, "Abschuss (Lager erhalten): Aufgeben leert den Behaelter, kein Lohn")
+	adapter.free()
+	adapter_t.free()
+
+## Kisten im ZWEITEN Schiff am Zielort: Lohn nur gegen Kisten im gewaehlten, gelandeten Schiff.
+func _second_craft_part() -> void:
+	var s: RefCounted = _sup2()
+	var crates: int = int(_order(A).crates)
+	var pay: int = int(_order(A).pay)
+	_accept(s, A, "trade_outpost")
+	var moved: Array = [_load(s, "craft:ship", CRATE, -crates), _load(s, "craft:ship2", CRATE, crates)]
+	check(bool(moved[0].get("ok", false)) and bool(moved[1].get("ok", false)) and _ship_crates(s) == 0, "Zweites Schiff: Aufbau, alle Kisten liegen im zweiten Schiff (%s)" % str(moved))
+	var c0: int = s.get_credits()
+	var wrong: Dictionary = _deliver(s, A, "satellite_crash")
+	check(not bool(wrong.get("ok", true)) and String(wrong.get("reason", "")) == "cargo_missing" and s.get_credits() == c0 and _crates(s) == crates, "Zweites Schiff: Abliefern mit dem ersten Schiff (ohne Kisten) bringt keinen Lohn, die Kisten bleiben")
+	var right: Dictionary = s.apply_command(_cmd("standing_deliver", {"order_id": A, "craft_id": "ship2", "service_location_id": "satellite_crash"}), {"location_id": "satellite_crash", "craft_busy": false, "craft_id": "ship2"})
+	check(bool(right.get("ok", false)) and s.get_credits() == c0 + pay and _crates(s) == 0, "Zweites Schiff: Abliefern mit dem Schiff, in dem die Kisten liegen, zahlt %d Cr einmal (%s)" % [pay, str(right.get("reason", ""))])
+	var split: RefCounted = _sup2()
+	_accept(split, A, "trade_outpost")
+	_load(split, "craft:ship", CRATE, -1)
+	_load(split, "craft:ship2", CRATE, 1)
+	var c1: int = split.get_credits()
+	check(not bool(_deliver(split, A, "satellite_crash").get("ok", true)) and split.get_credits() == c1 and _crates(split) == crates, "Zweites Schiff: auf zwei Schiffe verteilte Kisten zaehlen nicht zusammen")
+
+## Aufgeben mit Kisten im Rucksack (und in allen anderen Behaeltern): nach dem Aufgeben ist keine Kiste mehr uebrig.
+func _backpack_part() -> void:
+	var s: RefCounted = _sup2()
+	var crates: int = int(_order(A).crates)
+	_accept(s, A, "trade_outpost")
+	var in_bag: Dictionary = _load(s, "unit:u1:backpack", CRATE, 1)
+	_load(s, "craft:ship", CRATE, -2)
+	_load(s, "craft:ship2", CRATE, 1)
+	check(bool(in_bag.get("ok", false)) and int(Dictionary(Dictionary(s.get_supply_snapshot().inventory)["unit:u1:backpack"].items).get(CRATE, 0)) == 1 and _crates(s) == crates, "Rucksack: Aufbau, eine Kiste im Rucksack, eine im zweiten Schiff, der Rest im ersten (%s)" % str(in_bag.get("reason", "")))
+	var c0: int = s.get_credits()
+	var r: Dictionary = _abandon(s, A, "trade_outpost")
+	check(bool(r.get("ok", false)) and int(r.get("crates_removed", -1)) == crates and s.get_credits() == c0 and _crates(s) == 0, "Rucksack: Aufgeben entfernt alle %d Kisten aus Rucksack und beiden Schiffen, kein Lohn (%s)" % [crates, str(r)])
+	check(String(_status(s, A).get("status", "")) == "locked", "Rucksack: nach dem Aufgeben laeuft die Sperre")
+	# W2: der Anzeigename der Kiste kommt aus LABELS (Inventar zeigt nicht die Rohkennung).
+	check(String(Dictionary(load("res://scripts/ui/components/personnel_inventory_panel.gd").LABELS).get(CRATE, "")) == "Frachtkiste", "W2: LABELS nennt cargo_crate 'Frachtkiste'")
 
 # ---------- Anzeige: Haendlerfenster ----------
 
@@ -429,7 +563,7 @@ func _ui_part() -> void:
 	_ui_far = false
 	_load(_ui_supply, "craft:ship", CRATE, -1)
 	_ui_refresh(panel)
-	var note: String = "Fracht unvollständig – nur Aufgeben möglich."
+	var note: String = "Fracht unvollständig – alle Kisten müssen im gelandeten Schiff liegen."
 	check(del_a.disabled and del_a.tooltip_text.contains(note) and not abandon.disabled, "Knoepfe: fehlt eine Kiste, ist Abliefern gesperrt, Text '%s'" % note)
 	var c0: int = _ui_supply.get_credits()
 	del_a.pressed.emit()
