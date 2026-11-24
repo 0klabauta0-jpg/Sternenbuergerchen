@@ -40,8 +40,10 @@ func _run() -> void:
 	_old_state_part()
 	_permit_part()
 	_grants_file_part()
+	_m3_state_part()
 	_overview_part()
 	await _ui_part()
+	await _ui_locked_part()
 	print("AMMO_SUPPLY passed=%d failed=%d" % [passed, failed])
 	quit(1 if failed else 0)
 
@@ -347,8 +349,30 @@ func _grants_file_part() -> void:
 	f.close()
 	SUPPLY.grants_path_override = bad_path
 	SUPPLY.grants_warned = false
+	SUPPLY.reset_grants_cache()
 	var s: RefCounted = _sup(1000, false)
 	check(Array(s.get_supply_snapshot().blueprints) == ["ammo_light", "ammo_rifle"] and SUPPLY.grants_warned == true, "Rueckfall: kaputte Datei loest die Warnung aus und die Liste ist nicht leer")
+	check(Array(s.get_supply_snapshot().blueprint_overview).is_empty() and Dictionary(SUPPLY.blueprint_grants().labels).is_empty() and Dictionary(SUPPLY.blueprint_grants().bundles).is_empty(), "Rueckfall: keine Paare, keine Namen im Code (Uebersicht leer)")
+	# Die Datei wird nur einmal gelesen: eine Aenderung der Datei wirkt erst nach dem Zuruecksetzen des Zwischenspeichers.
+	var cached: Dictionary = SUPPLY.blueprint_grants()
+	var f3: FileAccess = FileAccess.open(bad_path, FileAccess.WRITE)
+	f3.store_string('{"version":1,"start":["ammo_rail"],"bundles":{},"labels":{}}')
+	f3.close()
+	check(SUPPLY.blueprint_grants() == cached and Array(SUPPLY.blueprint_grants().start) == ["ammo_light", "ammo_rifle"], "Zwischenspeicher: geaenderte Datei wird ohne Zuruecksetzen nicht erneut gelesen")
+	SUPPLY.reset_grants_cache()
+	check(Array(SUPPLY.blueprint_grants().start) == ["ammo_rail"], "Zwischenspeicher: nach dem Zuruecksetzen wird neu gelesen")
+	SUPPLY.grants_warned = false
+	SUPPLY.grants_path_override = bad_path
+	var f4: FileAccess = FileAccess.open(bad_path, FileAccess.WRITE)
+	f4.store_string("{ kaputt")
+	f4.close()
+	SUPPLY.reset_grants_cache()
+	for i in 5: SUPPLY.blueprint_grants()
+	check(SUPPLY.grants_warned == true, "Zwischenspeicher: kaputte Datei wird bei fuenf Aufrufen nur einmal gemeldet")
+	SUPPLY.grants_warned = false
+	for i in 5: SUPPLY.blueprint_grants()
+	check(SUPPLY.grants_warned == false, "Zwischenspeicher: auch der Rueckfall wird gemerkt (kein erneutes Lesen, keine zweite Warnung)")
+	SUPPLY.reset_grants_cache()
 	_reward_bp(s, "rocket_launcher")
 	var bl: Array = Array(s.get_supply_snapshot().blueprints)
 	check(bl == ["ammo_light", "ammo_rifle", "rocket_launcher"], "Rueckfall: Start = leichte und Gewehrmunition, ohne Paare (%s)" % [bl])
@@ -356,12 +380,56 @@ func _grants_file_part() -> void:
 	var f2: FileAccess = FileAccess.open(bad_path, FileAccess.WRITE)
 	f2.store_string('{"version":1,"start":[],"bundles":{},"labels":{}}')
 	f2.close()
+	SUPPLY.reset_grants_cache()
 	check(Array(SUPPLY.blueprint_grants().start) == ["ammo_light", "ammo_rifle"], "Rueckfall: leere Start-Liste gilt als unbrauchbar, nie eine leere Liste")
 	SUPPLY.grants_path_override = "res://data/singleplayer/gibt_es_nicht.json"
 	check(Array(SUPPLY.blueprint_grants().start) == ["ammo_light", "ammo_rifle"], "Rueckfall: fehlende Datei ebenso")
 	SUPPLY.grants_path_override = ""
+	SUPPLY.reset_grants_cache()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(bad_path))
 	check(Array(SUPPLY.blueprint_grants().start) == ["ammo_light", "ammo_rifle"] and Dictionary(SUPPLY.blueprint_grants().bundles).size() == 2, "Rueckfall: Standardpfad wieder hergestellt, Paare sind da")
+
+## Stand der Zeit, als die Raketen-Herstellung noch frei war (M3): Die Erlaubnis wird fuer die Herstellung ueber eine eigene Datei
+## vorgetaeuscht (Start-Liste mit allen vier Sorten), danach wird der Stand wie damals exportiert (ohne required_blueprint an der Munition,
+## ohne die zwei Waffenangebote). Er muss mit den heutigen Daten laden - mit dem Raketen-Herstellbeleg und den Raketen im Bestand.
+func _m3_state_part() -> void:
+	var tmp: String = "user://erl_m3_grants.json"
+	var f: FileAccess = FileAccess.open(tmp, FileAccess.WRITE)
+	f.store_string('{"version":1,"start":["ammo_light","ammo_rifle","ammo_rail","ammo_rocket"],"bundles":{},"labels":{}}')
+	f.close()
+	SUPPLY.grants_path_override = tmp
+	SUPPLY.reset_grants_cache()
+	var s: RefCounted = _sup(-1, false)
+	_stock_all(s)
+	var made: Dictionary = _make(s, "ammo_rocket")
+	var bought: Dictionary = _buy(s, "polisa_ammo_rocket")
+	check(bool(made.get("ok", false)) and bool(bought.get("ok", false)) and int(_base(s).get("ammo_rocket", 0)) == 2 and int(_ship(s).get("ammo_rocket", 0)) == 1, "M3-Stand: Raketen hergestellt (2) und gekauft (1), wie zur Zeit der freien Rezepte (%s / %s)" % [made, bought])
+	var m3: Dictionary = _roundtrip(s)
+	SUPPLY.grants_path_override = ""
+	SUPPLY.reset_grants_cache()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(tmp))
+	var has_receipt: bool = false
+	for req: Variant in Dictionary(m3.requests).values():
+		if String(Dictionary(req).get("signature", "")).contains("ammo_rocket"): has_receipt = true
+	check(has_receipt, "M3-Stand: der Stand enthaelt den Herstellbeleg ammo_rocket")
+	for id: String in ["polisa_rocket_launcher", "polisa_rail_gun"]:
+		m3.definitions.offers.erase(id)
+		m3.stock_by_offer_id.erase(id)
+	for id: String in SUPPLY.AMMO_OFFER_IDS: m3.definitions.offers[id].erase("required_blueprint")
+	var loaded: RefCounted = SUPPLY.new()
+	loaded.configure([], _dat())
+	loaded.register_craft("ship", 5.0)
+	var r: Dictionary = loaded.restore_state(m3.duplicate(true))
+	check(bool(r.get("ok", false)) and String(r.get("reason", "")) != "stale_supply_definitions", "M3-Stand: Stand mit Raketen-Herstellbeleg laedt, kein stale_supply_definitions (%s)" % r)
+	check(int(_base(loaded).get("ammo_rocket", 0)) == 2 and int(_ship(loaded).get("ammo_rocket", 0)) == 1, "M3-Stand: Raketen im Bestand unveraendert (Basislager 2, Schiffslager 1)")
+	check(_locked(_make(loaded, "ammo_rocket")) and _locked(_buy_c(loaded, "polisa_ammo_rocket")), "M3-Stand: danach Raketen-Bau und -Kauf ohne Erlaubnis gesperrt")
+	var stock: Dictionary = Dictionary(loaded.get_supply_snapshot().stock_by_offer_id)
+	check(int(stock.get("polisa_rocket_launcher", -1)) == 2 and int(stock.get("polisa_rail_gun", -1)) == 2, "Alter Stand: die zwei neuen Waffenangebote haben nach dem Laden Bestand 2")
+	# Die Ausnahme ist eng: fehlendes required_blueprint UND anderer Preis an einem Munitionsangebot bleibt unladbar.
+	var priced: Dictionary = m3.duplicate(true)
+	priced.definitions.offers["polisa_ammo_rail"]["unit_price"] = 46
+	var rp: Dictionary = SUPPLY.new().restore_state(priced)
+	check(not bool(rp.get("ok", true)) and String(rp.get("reason", "")) == "stale_supply_definitions", "Ladeschutz eng: M3-Stand ohne required_blueprint, aber mit anderem Preis, bleibt unladbar (%s)" % rp)
 
 func _overview_part() -> void:
 	var s: RefCounted = _sup(-1, false)
@@ -400,6 +468,56 @@ func _ui_part() -> void:
 		check(details.contains("%d" % int(want[2])) and details.contains("%d × " % int(want[1])), "Anzeige Werkstatt: Detail %s nennt Kosten und Stueckzahl" % id)
 	panel.free()
 	_polisa_part()
+
+func _no_snapshot() -> Dictionary:
+	return {}
+
+func _no_command(_a: Variant = null, _b: Variant = null, _c: Variant = null) -> Dictionary:
+	return {"ok": false}
+
+## Anzeige OHNE Raketen-/Schienen-Erlaubnis (frische Kampagne): Werkstatt und Polisa mit den echten Ansichten.
+func _ui_locked_part() -> void:
+	var s: RefCounted = _sup(1000, false)
+	_stock_all(s)
+	var panel: Control = PRESENTER.new()
+	root.add_child(panel)
+	panel.call("_build")
+	panel.call("configure", Callable(self, "_no_snapshot"), Callable(self, "_no_command"))  # ohne Befehlsweg sind alle Knoepfe gesperrt
+	panel.call("set_section", "workshop")  # Der Zustandstext je Zeile entsteht beim Aufbau der Werkstatt-Seite; set_section holt sich selbst einen Abzug, daher VOR dem eigenen refresh.
+	panel.call("refresh", {"mode": "campaign", "campaign": {"jobs": {}, "progress": {}}, "supply": s.get_supply_snapshot(), "crafts": [{"craft_id": "ship", "location_id": "homebase", "busy": false}], "service_contexts_by_craft_id": {"ship": {"location_id": "homebase", "craft_busy": false}}, "home_services": {"workshop_available": true}})
+	panel.call("_apply_section")  # setzt Zustandstext und Kartensichtbarkeit aus dem eben uebergebenen Abzug
+	var actions: Dictionary = panel.get("_campaign_buttons")
+	for id: String in ["ammo_light", "ammo_rifle"]:
+		var entry: Dictionary = Dictionary(actions.get("campaign_fabricate" + id, {}))
+		check(not entry.is_empty() and entry.button.visible and not entry.button.disabled and String(entry.state_label.text) == "Erwerbserlaubnis freigeschaltet", "Anzeige ohne Fund, Werkstatt: %s zeigt 'Erwerbserlaubnis freigeschaltet' und ist bedienbar (ist '%s', sichtbar %s, gesperrt %s, Tipp '%s', Eintraege %d)" % [id, "" if entry.is_empty() else String(entry.state_label.text), "" if entry.is_empty() else str(entry.button.visible), "" if entry.is_empty() else str(entry.button.disabled), "" if entry.is_empty() else String(entry.button.tooltip_text), actions.size()])
+	for id: String in ["ammo_rail", "ammo_rocket"]:
+		var entry2: Dictionary = Dictionary(actions.get("campaign_fabricate" + id, {}))
+		# Ist-Stand (geprueft in der Werkstatt-Ansicht): gesperrte Rezepte bleiben in der Liste, als gesperrt gezeigt. (In der Ansicht "Alles" waeren sie ausgeblendet.)
+		check(not entry2.is_empty() and entry2.button.visible and entry2.card.visible and entry2.button.disabled and String(entry2.state_label.text) == "Gesperrt · Erwerbserlaubnis fehlt", "Anzeige ohne Fund, Werkstatt: %s steht gesperrt in der Liste mit 'Gesperrt · Erwerbserlaubnis fehlt' (ist: leer %s, Knopf sichtbar %s, Karte sichtbar %s, Text '%s')" % [id, entry2.is_empty(), "-" if entry2.is_empty() else str(entry2.button.visible), "-" if entry2.is_empty() else str(entry2.card.visible), "-" if entry2.is_empty() else String(entry2.state_label.text)])
+	panel.free()
+	var supply: Dictionary = s.get_supply_snapshot()
+	var offers: Dictionary = {}
+	for oid: String in supply.offers:
+		if Array(supply.offers[oid].get("location_ids", [])).has("polisa"): offers[oid] = supply.offers[oid]
+	var snapshot: Dictionary = {"service_ready": true, "craft_id": "ship", "craft_name": "ship", "credits": 1000, "offers": offers, "stock": supply.stock_by_offer_id, "inventory": supply.inventory, "people": [], "blueprints": supply.blueprints, "require_blueprints": true, "fuel": 5.0, "fuel_capacity": 10.0, "fuel_price_per_unit": 1.0, "revision": 1}
+	var screen: Control = load("res://scripts/ui/polisa_station_screen.gd").new()
+	root.add_child(screen)
+	screen.call("configure", Node.new())
+	screen.call("_select_page", "infantry")
+	screen.call("refresh", snapshot)
+	for oid: String in ["polisa_ammo_light", "polisa_ammo_rifle", "polisa_ammo_rail", "polisa_ammo_rocket", "polisa_rocket_launcher", "polisa_rail_gun"]:
+		var card: Node = screen.find_child("Product_" + oid, true, false)
+		var texts: Array = []
+		var enabled_buy: bool = false
+		var locked_button: bool = false
+		if card != null:
+			for n: Node in card.find_children("*", "Button", true, false):
+				texts.append(String((n as Button).text))
+				if String((n as Button).text) == "Kaufen" and not (n as Button).disabled: enabled_buy = true
+				if String((n as Button).text) == "Erwerbserlaubnis fehlt" and (n as Button).disabled: locked_button = true
+		var should_open: bool = oid in ["polisa_ammo_light", "polisa_ammo_rifle"]
+		check(card != null and enabled_buy == should_open and locked_button == (not should_open), "Anzeige ohne Fund, Polisa: %s %s (Knoepfe %s)" % [oid, "kaufbar" if should_open else "'Erwerbserlaubnis fehlt', gesperrt", texts])
+	screen.free()
 
 ## Haendlerzeilen auf Polisa: die echte Stationsansicht mit dem echten Versorgungs-Auszug (Angebote, Bestand, Schiffslager).
 func _polisa_part() -> void:

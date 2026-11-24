@@ -29,6 +29,8 @@ const AMMO_OFFER_IDS := ["polisa_ammo_light", "polisa_ammo_rifle", "polisa_ammo_
 ## Nur fuer Pruefer: anderer Pfad der Datei; leer = Standardpfad.
 static var grants_path_override: String = ""
 static var grants_warned: bool = false
+static var _grants_cache: Dictionary = {}
+static var _grants_cache_path: String = ""
 const CAMPAIGN_RECIPES:Dictionary={"light_armor":{"item":"armor_light","cost":20},"mining_tool":{"item":"mining_tool","cost":30},"assault_rifle":{"item":"rifle","cost":60}}
 
 static func get_campaign_recipe(blueprint_id:String)->Dictionary:
@@ -1476,15 +1478,24 @@ func discard_person_equipment(unit_id: String) -> Dictionary:
 
 ## Start-Erlaubnisse, Paare und Beschriftungen. Datei unbrauchbar: einmal push_warning, Rueckfall auf leichte und
 ## Gewehrmunition ohne Paare (nie eine leere Liste, sonst waere Munition unkaufbar).
+## Die Datei wird je Pfad nur einmal gelesen und gemerkt (`reset_grants_cache()` setzt zurueck; nur fuer Pruefer).
 static func blueprint_grants() -> Dictionary:
 	var path: String = grants_path_override if not grants_path_override.is_empty() else GRANTS_PATH
+	if not _grants_cache.is_empty() and _grants_cache_path == path: return _grants_cache
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
 	if parsed is Dictionary and _grants_valid(parsed):
-		return {"start": Array(parsed.start).duplicate(), "bundles": Dictionary(parsed.bundles).duplicate(true), "labels": Dictionary(parsed.labels).duplicate()}
-	if not grants_warned:
-		grants_warned = true
-		push_warning("blueprint_grants.json fehlt oder ist unbrauchbar; Rueckfall auf leichte und Gewehrmunition")
-	return {"start": ["ammo_light", "ammo_rifle"], "bundles": {}, "labels": {"ammo_light": "Leichte Munition", "ammo_rifle": "Gewehrmunition", "ammo_rail": "Schienenladung", "ammo_rocket": "Raketen", "rocket_launcher": "Raketenwerfer", "rail_gun": "Schienenkanone"}}
+		_grants_cache = {"start": Array(parsed.start).duplicate(), "bundles": Dictionary(parsed.bundles).duplicate(true), "labels": Dictionary(parsed.labels).duplicate()}
+	else:
+		if not grants_warned:
+			grants_warned = true
+			push_warning("blueprint_grants.json fehlt oder ist unbrauchbar; Rueckfall auf leichte und Gewehrmunition")
+		_grants_cache = {"start": ["ammo_light", "ammo_rifle"], "bundles": {}, "labels": {}}
+	_grants_cache_path = path
+	return _grants_cache
+
+static func reset_grants_cache() -> void:
+	_grants_cache = {}
+	_grants_cache_path = ""
 
 static func _grants_valid(data: Dictionary) -> bool:
 	if not (data.get("start") is Array and data.get("bundles") is Dictionary and data.get("labels") is Dictionary) or Array(data.start).is_empty():
