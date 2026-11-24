@@ -307,9 +307,16 @@ func _trio_case(variant: String) -> void:
 		_check(button != null and not button.visible, tag + ": Aufbau: der EVAC-Knopf ist beim Auffrischen unsichtbar (%s)" % ("kein Knopf" if button == null else str(button.visible)))
 		# Abheben ueber die Schiffskarte (wie _press_return im Abflug-Pruefer); die Liegende ist abseits, alle Fitten steigen ein.
 		s.controller.call("_on_mission_dropship_return_pressed", _craft_id)
+		# Rueckfrage vor dem Rueckzug: erster Klick fragt nur nach, der zweite (nach 0,4 s) bestaetigt.
+		if bool(s.controller.call("_is_retreat_armed", _craft_id)):
+			OS.delay_msec(450)
+			s.controller.call("_on_mission_dropship_return_pressed", _craft_id)
 		var card_text: String = String(s.controller.call("_get_mission_dropship_card_feedback_text", s.controller.call("_find_mission_dropship_card_entry", _craft_id)))
 		_check(_flow.get("_active_mission") == s.mission and card_text.contains(sentence), tag + ": erster Versuch: kein Abflug, die Schiffskarte nennt den Satz (%s)" % card_text)
 		s.controller.call("_on_mission_dropship_return_pressed", _craft_id)
+		if is_instance_valid(s.controller) and bool(s.controller.call("_is_retreat_armed", _craft_id)):
+			OS.delay_msec(450)
+			s.controller.call("_on_mission_dropship_return_pressed", _craft_id)
 	else: s.driver.call("_resolve_combat", "aborted", "", "evacuation")
 	if not await _wait_released(tag + ": Einsatz wird freigegeben"):
 		_trio = false
