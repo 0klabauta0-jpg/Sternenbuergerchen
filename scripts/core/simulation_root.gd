@@ -8133,6 +8133,14 @@ var _air_support_location_id := ""
 var _air_support_sorties: Dictionary = {}
 var _air_support_move_receipts: Dictionary = {}
 var _air_support_fire_poll := 0.0
+## Luftrollen 1b: Rundbahn, Rolle und Landen aus der Rundbahn (Werte aus data/combat/air_roles.json).
+signal air_role_event(event: Dictionary)
+const AIR_ROLES_PATH := "res://data/combat/air_roles.json"
+const AIR_ROLE_NAMES := ["none", "cas", "air_defense"]
+var _air_role_receipts: Dictionary = {}
+var _air_role_poll := 0.0
+var _air_sortie_serial := 0
+var _air_role_data_cache: Dictionary = {}
 const AIR_GROUND_DISPERSION = preload("res://scripts/mission/air_support_dispersion.gd")
 const AIR_GROUND_ADAPTER = preload("res://scripts/mission/air_support_ground_adapter.gd")
 const SPACE_COMPONENTS = preload("res://scripts/mission/space_component_catalog.gd")
@@ -8312,7 +8320,10 @@ func _begin_air_sortie(craft_id: String, arriving: bool, arrival_position: Vecto
 	binding.combat._publish_surface_air_admission(admission)
 	var systems: Dictionary = source._bind_owned_space_systems(craft_id)
 	assert(systems.get("ok", false))
-	_air_support_sorties[craft_id] = {"flight":flight, "source":weakref(source), "previous_pose":old, "landing_position":position, "landing_grid":grid, "was_inactive":admission.was_inactive}
+	var no_waypoints: Array[Vector2i] = []
+	_air_sortie_serial += 1
+	_air_support_sorties[craft_id] = {"flight":flight, "source":weakref(source), "previous_pose":old, "landing_position":position, "landing_grid":grid, "was_inactive":admission.was_inactive, "sortie_serial":_air_sortie_serial, "air_role":{}, "waypoints":no_waypoints, "waypoint_index":0, "role_target_id":"", "returning":"", "landing_blocked_reported":false, "fuel_seconds":0.0, "fuel_steps":0, "fuel_warned":false}
+	if arriving and bool(_air_role_config("circle").get("arrival_starts_ring", false)): _air_start_arrival_ring(craft_id, grid)
 	return {"ok":true, "craft_id":craft_id}
 
 func request_air_support_landing(craft_id: String) -> Dictionary:
@@ -8326,6 +8337,12 @@ func request_air_support_landing(craft_id: String) -> Dictionary:
 	var pilot: Dictionary = _resolve_air_support_pilot(craft_id)
 	if not pilot.get("ok", false): return pilot
 	var pose: Dictionary = binding.flight.get_snapshot()
+	if is_air_support_craft_airborne(craft_id) and (not Array(sortie.get("waypoints", [])).is_empty() or not String(sortie.get("returning", "")).is_empty()) and (pose.position_plane.distance_to(SPACE_GRID.HEX.axial_to_plane(Vector2(sortie.landing_grid))) > 0.15 or pose.velocity_plane.length() > 0.1):
+		# Luftrollen 1b: aus der Rundbahn (oder im Rueckflug) fliegt das Schiff selbst zur Landezone und landet dort. Von Hand weggeflogen: weiter not_at_landing_site.
+		if String(sortie.get("returning", "")).is_empty():
+			var begun: Dictionary = _air_begin_return(craft_id, "player")
+			if not begun.get("ok", false): return begun
+		return {"ok":true, "landing_pending":true, "message":"Fliegt zur Landezone und landet."}
 	if not is_air_support_craft_airborne(craft_id) or pose.position_plane.distance_to(SPACE_GRID.HEX.axial_to_plane(Vector2(sortie.landing_grid))) > 0.15 or pose.velocity_plane.length() > 0.1: return {"ok":false, "reason":"not_at_landing_site"}
 	if not is_hex_ground_runtime_active():
 		var occupied_cells: Array[Vector2i] = binding.combat.preview_actor_cells(craft_id, {})
@@ -8336,7 +8353,9 @@ func request_air_support_landing(craft_id: String) -> Dictionary:
 			if not String(ground.unit_id).is_empty(): return {"ok":false, "reason":"ground_landing_occupied"}
 	var controller: Node = get_parent().get_node_or_null("TacticalController")
 	if controller == null or not controller.has_method("_ground_ship_touchdown_ready") or not controller.call("_ground_ship_touchdown_ready", craft_id, sortie.landing_position, false): return {"ok":false, "reason":"ground_landing_occupied"}
-	return _end_air_sortie(craft_id, sortie, binding, source, pose)
+	var ended: Dictionary = _end_air_sortie(craft_id, sortie, binding, source, pose)
+	if ended.get("ok", false): _air_emit_role_event(craft_id, "landed", "Gelandet.")
+	return ended
 
 ## Shared tail of the landing: the craft leaves the air back to its pose before the sortie. LC2b: also used by the
 ## emergency landing and by the crash (the craft is then lost, see resolve_air_shootdown), which skip the position checks above.
@@ -8372,8 +8391,21 @@ func request_air_support_move(command: Dictionary) -> Dictionary:
 	if not pilot.get("ok", false): return pilot
 	var source: Node = _air_support_source.get_ref()
 	if not is_instance_valid(source) or source.get("is_processing_tick") or _air_support_sorties[id].source.get_ref() != source or binding.flight != _air_support_sorties[id].flight or not is_air_support_craft_airborne(id): return {"ok":false, "reason":"sortie_context_changed"}
+	var goal_result: Dictionary = _air_set_goal(id, command.target_hex)
+	if not goal_result.get("ok", false): return goal_result
+	_air_end_role(id, "Kreisen beendet.")
+	_air_support_move_receipts[command.request_id] = signature
+	return {"ok":true, "replayed":false}
+
+## Luftrollen 1b: bisheriges Endstueck von request_air_support_move (Karte, Belegung, Navigationsanspruch, Masse, Lenkung,
+## Flugsteuerung). face_plane (Nase auf ein Ziel) wird nur gesetzt, wenn angegeben; die Rundbahn setzt es nicht.
+func _air_set_goal(craft_id: String, target_hex: Vector2i, face_plane: Variant = null) -> Dictionary:
+	return _air_set_goal_plane(craft_id, SPACE_GRID.HEX.axial_to_plane(Vector2(target_hex)), face_plane)
+
+func _air_set_goal_plane(id: String, target_plane: Vector2, face_plane: Variant = null) -> Dictionary:
+	var binding: Dictionary = _resolve_air_support_craft(id)
+	if not binding.get("ok", false): return binding
 	var pose: Dictionary = binding.flight.get_snapshot()
-	var target_plane: Vector2 = SPACE_GRID.HEX.axial_to_plane(Vector2(command.target_hex))
 	var cells: Array[Vector2i] = binding.combat.preview_actor_cells(id, {"position_plane":target_plane})
 	if cells.is_empty() or not _air_support_cells_on_map(cells): return {"ok":false, "reason":"invalid_target"}
 	for occupant in binding.combat.query_cells(cells, pose.space_area_id):
@@ -8383,13 +8415,13 @@ func request_air_support_move(command: Dictionary) -> Dictionary:
 	var profile: Dictionary = binding.equipment.get_space_flight_profile(id)
 	if not profile.get("ok", false) or not is_equal_approx(float(profile.mass), float(pose.mass)): return {"ok":false, "reason":"flight_profile_changed"}
 	var goal := {"target_plane":target_plane}
+	if face_plane != null: goal["face_plane"] = face_plane
 	var guidance: Dictionary = SPACE_GUIDANCE_RESOLVER.resolve(pose, goal, profile.hull, profile.power)
 	if not guidance.get("ok", false): return guidance
 	var claim: Dictionary = binding.combat.record_navigation_claim(id, pose.space_area_id, cells)
 	if not claim.get("ok", false): return claim
 	binding.combat.set_flight_control(id, {"goal":goal, "hull":profile.hull, "power":profile.power, "air_support_move":true, "mission_root":weakref(self), "equipment_snapshot":binding.equipment.get_snapshot(id), "area_id":pose.space_area_id})
-	_air_support_move_receipts[command.request_id] = signature
-	return {"ok":true, "replayed":false}
+	return {"ok":true}
 
 func _air_support_cells_on_map(cells: Array) -> bool:
 	var terrain: Node = _air_ground_registry()
@@ -8403,8 +8435,245 @@ func _air_support_motion_context_valid(craft_id: String, source: Node, equipment
 	var binding: Dictionary = _resolve_air_support_craft(craft_id)
 	return binding.get("ok", false) and binding.flight == _air_support_sorties[craft_id].flight and binding.equipment.get_snapshot(craft_id) == equipment_snapshot and _resolve_air_support_pilot(craft_id).get("ok", false)
 
+## ---------------------------------------------------------------- Luftrollen 1b
+func _air_role_config(section: String) -> Dictionary:
+	if _air_role_data_cache.is_empty():
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(AIR_ROLES_PATH))
+		_air_role_data_cache = parsed if typeof(parsed) == TYPE_DICTIONARY else {"circle":{"radius_hex":4, "waypoint_switch_distance":1.0, "arrival_starts_ring":true}, "cas":{"protect_radius":8.0, "pursuit_limit":4.0}, "air_defense":{"protect_radius":8.0, "pursuit_limit":4.0}}
+	return Dictionary(_air_role_data_cache.get(section, {}))
+
+func _air_emit_role_event(craft_id: String, kind: String, text: String) -> void:
+	air_role_event.emit({"craft_id":craft_id, "kind":kind, "text":text})
+
+static func _air_ring_cells(center: Vector2i, radius: int) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	for direction in SPACE_GRID.HEX.DIRECTIONS: cells.append(center + radius * direction)
+	return cells
+
+## Ringzellen, deren Fussabdruck ganz auf der Karte liegt (Reihenfolge der Richtungen bleibt).
+func _air_ring_waypoints(binding: Dictionary, craft_id: String, center: Vector2i) -> Array[Vector2i]:
+	var kept: Array[Vector2i] = []
+	var profile: Dictionary = binding.equipment.get_space_flight_profile(craft_id)
+	if not profile.get("ok", false): return kept
+	var heading := float(binding.flight.get_snapshot().get("heading_rad", 0.0)) if is_air_support_craft_airborne(craft_id) else 0.0
+	var area := "atmosphere:" + _air_support_location_id
+	for cell in _air_ring_cells(center, int(_air_role_config("circle").get("radius_hex", 4))):
+		var cells: Array[Vector2i] = binding.combat.preview_footprint({"position_plane":SPACE_GRID.HEX.axial_to_plane(Vector2(cell)), "heading_rad":heading, "coordinate_frame":"local", "space_area_id":area}, profile.footprint_hexes)
+		if _air_support_cells_on_map(cells): kept.append(cell)
+	return kept
+
+## Rolle im Vokabular des Raumkampf-Vertrags; wird als order_issue geprueft, aber nicht in die Rotte geschrieben.
+func _air_role_entry(binding: Dictionary, craft_id: String, role: String, center: Vector2i, waypoints: Array[Vector2i], request_id: String) -> Dictionary:
+	var section: Dictionary = _air_role_config("air_defense" if role == "air_defense" else "cas")
+	var stance: String = {"vorsichtig":"cautious", "normal":"normal", "aggressiv":"aggressive"}.get(_air_attack_style(craft_id), "normal")
+	var spec: Array = {"none":["patrol", "observe", "hold"], "cas":["attack_area", "engage", "free"], "air_defense":["patrol", "engage", "free"]}[role]
+	var payload := {"wing_ids":[binding.wing_id], "verb":spec[0], "stance":stance, "contact_response":spec[1], "fire_rule":spec[2], "protect_radius":float(section.get("protect_radius", 8.0)), "pursuit_limit":float(section.get("pursuit_limit", 4.0))}
+	if spec[0] == "patrol": payload["waypoints"] = waypoints
+	else: payload["area_hexes"] = [center]
+	var revision: int = binding.wings.get_snapshot().revision
+	var context := {"authorized":true, "revision":revision, "phase":"tactical", "coordinate_frame":"local", "space_area_id":"atmosphere:" + _air_support_location_id, "owned_wings":[binding.wing_id], "receipts":{}}
+	var checked: Dictionary = SPACE_COMMAND_CONTRACT.validate({"contract_category":"space_combat", "operation":"order_issue", "request_id":"air-role:" + request_id, "expected_revision":revision, "payload":payload}, context)
+	if not checked.get("ok", false): return checked
+	return {"ok":true, "air_role":{"role":role, "verb":spec[0], "center_hex":center, "contact_response":spec[1], "fire_rule":spec[2], "stance":stance, "protect_radius":payload.protect_radius, "pursuit_limit":payload.pursuit_limit, "request_id":request_id}}
+
+## Startwegpunkt: dort, wo schon ein Schiff mit gleicher Mitte kreist, dessen Index + 3; sonst der naechste (Gleichstand: kleinerer Index).
+func _air_start_index(craft_id: String, center: Vector2i, waypoints: Array[Vector2i], position_plane: Vector2) -> int:
+	for other_id in _air_support_sorties.keys():
+		if other_id == craft_id: continue
+		var other: Dictionary = _air_support_sorties[other_id]
+		var other_role: Dictionary = other.get("air_role", {})
+		if not other_role.is_empty() and other_role.get("center_hex") == center and Array(other.get("waypoints", [])).size() == waypoints.size(): return (int(other.get("waypoint_index", 0)) + 3) % waypoints.size()
+	var best := 0
+	var best_distance := INF
+	for i in waypoints.size():
+		var distance: float = position_plane.distance_to(SPACE_GRID.HEX.axial_to_plane(Vector2(waypoints[i])))
+		if distance < best_distance - 0.0001:
+			best = i
+			best_distance = distance
+	return best
+
+## Fliegt den Wegpunkt start_index an; belegte oder beanspruchte Wegpunkte werden uebersprungen. Aendert nur waypoint_index.
+func _air_goto_waypoint(craft_id: String, sortie: Dictionary, start_index: int) -> Dictionary:
+	var waypoints: Array = sortie.get("waypoints", [])
+	var last := {"ok":false, "reason":"circle_blocked"}
+	for k in waypoints.size():
+		var index: int = (start_index + k) % waypoints.size()
+		var result: Dictionary = _air_set_goal(craft_id, waypoints[index])
+		if result.get("ok", false):
+			sortie["waypoint_index"] = index
+			return {"ok":true, "waypoint_index":index}
+		last = result
+		if String(result.get("reason", "")) not in ["occupied", "navigation_claimed", "invalid_target"]: return result
+	return last
+
+## Rundbahn mit Rolle in den Sortie-Eintrag schreiben und den Startwegpunkt anfliegen; bei Misserfolg bleibt der alte Stand.
+func _air_apply_ring(craft_id: String, sortie: Dictionary, entry: Dictionary, center: Vector2i, waypoints: Array[Vector2i], position_plane: Vector2) -> Dictionary:
+	var previous := {"air_role":sortie.get("air_role", {}), "waypoints":sortie.get("waypoints", []), "waypoint_index":sortie.get("waypoint_index", 0), "returning":sortie.get("returning", ""), "role_target_id":sortie.get("role_target_id", "")}
+	sortie["air_role"] = entry.air_role
+	sortie["waypoints"] = waypoints
+	sortie["returning"] = ""
+	sortie["role_target_id"] = ""
+	sortie["landing_blocked_reported"] = false
+	var started: Dictionary = _air_goto_waypoint(craft_id, sortie, _air_start_index(craft_id, center, waypoints, position_plane))
+	if not started.get("ok", false):
+		for key in previous: sortie[key] = previous[key]
+	return started
+
+## Ankunft im Modus Kreisen: Rolle none um die Landezone (gleiche Pruefungen, ohne Beleg). Misslingt der Ring, bleibt das Schiff wie bisher stehen.
+func _air_start_arrival_ring(craft_id: String, grid: Vector2i) -> void:
+	var binding: Dictionary = _resolve_air_support_craft(craft_id)
+	if not binding.get("ok", false): return
+	var sortie: Dictionary = _air_support_sorties[craft_id]
+	var waypoints: Array[Vector2i] = _air_ring_waypoints(binding, craft_id, grid)
+	if waypoints.size() < 3: return
+	var entry: Dictionary = _air_role_entry(binding, craft_id, "none", grid, waypoints, "arrival:%d" % int(sortie.sortie_serial))
+	if not entry.get("ok", false): return
+	if _air_apply_ring(craft_id, sortie, entry, grid, waypoints, binding.flight.get_snapshot().position_plane).get("ok", false):
+		_air_emit_role_event(craft_id, "role_started", "Kreist über der Landezone.")
+
+## Rolle, Wegpunkte und Rueckflug aus dem Sortie-Eintrag nehmen; "role_ended" nur, wenn es eine Rolle oder Rundbahn gab.
+func _air_end_role(craft_id: String, text: String) -> void:
+	var sortie: Dictionary = _air_support_sorties.get(craft_id, {})
+	if sortie.is_empty(): return
+	var had := not Dictionary(sortie.get("air_role", {})).is_empty() or not Array(sortie.get("waypoints", [])).is_empty()
+	var no_waypoints: Array[Vector2i] = []
+	sortie["air_role"] = {}
+	sortie["waypoints"] = no_waypoints
+	sortie["waypoint_index"] = 0
+	sortie["role_target_id"] = ""
+	sortie["returning"] = ""
+	sortie["landing_blocked_reported"] = false
+	if had: _air_emit_role_event(craft_id, "role_ended", text)
+
+func request_air_support_circle(command: Dictionary) -> Dictionary:
+	if _air_support_source == null or not is_instance_valid(_air_support_source.get_ref()): return {"ok":false, "reason":"air_source_unavailable"}
+	if _should_skip_local_tick_processing() or _air_ground_registry() == null: return {"ok":false, "reason":"ground_unavailable"}
+	if is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
+	if command.size() != 4 or typeof(command.get("craft_id")) != TYPE_STRING or typeof(command.get("center_hex")) != TYPE_VECTOR2I or typeof(command.get("role")) != TYPE_STRING or typeof(command.get("request_id")) != TYPE_STRING: return {"ok":false, "reason":"invalid_command"}
+	var id: String = command.craft_id
+	var request_id: String = command.request_id
+	var role: String = command.role
+	var center: Vector2i = command.center_hex
+	if id.strip_edges().is_empty() or request_id.strip_edges().is_empty() or request_id.length() > 128 or not AIR_ROLE_NAMES.has(role): return {"ok":false, "reason":"invalid_command"}
+	var signature := SPACE_COMMAND_CONTRACT.request_signature(command)
+	if _air_role_receipts.has(request_id):
+		var prior: Dictionary = _air_role_receipts[request_id]
+		if prior.signature != signature: return {"ok":false, "reason":"request_id_conflict"}
+		var replay: Dictionary = prior.result.duplicate(true)
+		replay["replayed"] = true
+		return replay
+	if _air_role_receipts.size() >= 4096: return {"ok":false, "reason":"receipt_capacity"}
+	var pilot: Dictionary = _resolve_air_support_pilot(id)
+	if not pilot.get("ok", false): return pilot
+	var binding: Dictionary = _resolve_air_support_craft(id)
+	if not binding.get("ok", false): return binding
+	if GROUND_FIRE_VS_AIR.is_broken_off(get_air_asset_status_snapshot(id), _air_attack_style(id)): return GROUND_FIRE_VS_AIR.refusal()
+	var terrain: Node = _air_ground_registry()
+	if terrain.call("get_tile_at_grid", center) == null: return {"ok":false, "reason":"role_point_off_map"}
+	var waypoints: Array[Vector2i] = _air_ring_waypoints(binding, id, center)
+	if waypoints.size() < 3: return {"ok":false, "reason":"circle_off_map"}
+	var entry: Dictionary = _air_role_entry(binding, id, role, center, waypoints, request_id)
+	if not entry.get("ok", false): return entry
+	var took_off := false
+	if not is_air_support_craft_airborne(id):
+		var started: Dictionary = _begin_air_sortie(id, false, Vector2.INF)
+		if not started.get("ok", false): return started
+		took_off = true
+		binding = _resolve_air_support_craft(id)
+		if not binding.get("ok", false): return binding
+	elif not _air_support_sorties.has(id): return {"ok":false, "reason":"sortie_unavailable"}
+	var ring: Dictionary = _air_apply_ring(id, _air_support_sorties[id], entry, center, waypoints, binding.flight.get_snapshot().position_plane)
+	if not ring.get("ok", false):
+		var failure: Dictionary = ring.duplicate()
+		failure["took_off"] = took_off
+		return failure
+	var message: String = {"none":"Kreist an Feld (%d, %d).", "cas":"Luftnahunterstützung an Feld (%d, %d).", "air_defense":"Luftschutz an Feld (%d, %d)."}[role] % [center.x, center.y]
+	var result := {"ok":true, "replayed":false, "craft_id":id, "role":role, "center_hex":center, "waypoint_index":int(ring.waypoint_index), "took_off":took_off, "message":message}
+	_air_role_receipts[request_id] = {"signature":signature, "result":result.duplicate(true)}
+	_air_emit_role_event(id, "role_started", message)
+	return result
+
+func request_air_support_role_clear(craft_id: String, request_id: String) -> Dictionary:
+	if _air_support_source == null or not is_instance_valid(_air_support_source.get_ref()): return {"ok":false, "reason":"air_source_unavailable"}
+	if _should_skip_local_tick_processing() or is_processing_tick: return {"ok":false, "reason":"simulation_busy"}
+	var sortie: Dictionary = _air_support_sorties.get(craft_id, {})
+	if sortie.is_empty() or (Dictionary(sortie.get("air_role", {})).is_empty() and Array(sortie.get("waypoints", [])).is_empty() and String(sortie.get("returning", "")).is_empty()): return {"ok":true, "already_clear":true}
+	var binding: Dictionary = _resolve_air_support_craft(craft_id)
+	if not binding.get("ok", false): return binding
+	var hold: Dictionary = _air_set_goal_plane(craft_id, binding.flight.get_snapshot().position_plane)
+	if not hold.get("ok", false): return hold
+	var text := "Kreisen beendet; das Schiff hält die Position."
+	_air_end_role(craft_id, text)
+	request_air_support_cease_fire(craft_id, request_id)
+	return {"ok":true, "already_clear":false, "message":text}
+
+func get_air_support_role_snapshot(craft_id: String) -> Dictionary:
+	var sortie: Dictionary = _air_support_sorties.get(craft_id, {})
+	if sortie.is_empty(): return {"ok":false, "airborne":false, "role":"", "center_hex":null, "waypoint_index":0, "target_id":"", "returning":""}
+	var role: Dictionary = sortie.get("air_role", {})
+	return {"ok":true, "airborne":is_air_support_craft_airborne(craft_id), "role":String(role.get("role", "")), "center_hex":role.get("center_hex"), "waypoint_index":int(sortie.get("waypoint_index", 0)), "target_id":String(sortie.get("role_target_id", "")), "returning":String(sortie.get("returning", ""))}
+
+## Rolle weg, Rueckflug zur Landezone (reason: "player", spaeter "fuel" / "break_off"); das Landen selbst macht _advance_air_roles.
+func _air_begin_return(craft_id: String, reason: String) -> Dictionary:
+	var sortie: Dictionary = _air_support_sorties.get(craft_id, {})
+	if sortie.is_empty(): return {"ok":false, "reason":"sortie_unavailable"}
+	var goal: Dictionary = _air_set_goal(craft_id, sortie.landing_grid)
+	if not goal.get("ok", false): return goal
+	var no_waypoints: Array[Vector2i] = []
+	sortie["air_role"] = {}
+	sortie["waypoints"] = no_waypoints
+	sortie["waypoint_index"] = 0
+	sortie["role_target_id"] = ""
+	sortie["returning"] = reason
+	sortie["landing_blocked_reported"] = false
+	request_air_support_cease_fire(craft_id, "air-return:%s:%d:%d" % [craft_id, int(sortie.sortie_serial), tick_counter])
+	_air_emit_role_event(craft_id, "landing_pending", "Fliegt zur Landezone und landet.")
+	return {"ok":true}
+
+## Takt 0,2 s (kehrt sofort zurueck, wenn keine Sortie fliegt): naechster Wegpunkt der Rundbahn bzw. Landung am Ende des Rueckflugs.
+func _advance_air_roles(delta: float) -> void:
+	_air_role_poll -= maxf(delta, 0.0)
+	if _air_role_poll > 0.0: return
+	_air_role_poll = 0.2
+	var source: Node = _air_support_source.get_ref() if _air_support_source != null else null
+	if not is_instance_valid(source): return
+	var combat: RefCounted = source.get("_space_combat_state")
+	var fleet: RefCounted = source.get("_singleplayer_space_travel_owner")
+	if combat == null or fleet == null: return
+	var switch_distance := float(_air_role_config("circle").get("waypoint_switch_distance", 1.0))
+	var controls: Dictionary = {}
+	var controls_read := false
+	for craft_id in _air_support_sorties.keys():
+		var sortie: Dictionary = _air_support_sorties[craft_id]
+		var returning := String(sortie.get("returning", ""))
+		var waypoints: Array = sortie.get("waypoints", [])
+		if waypoints.is_empty() and returning.is_empty(): continue
+		var flight: RefCounted = fleet.get_flight_state(craft_id)
+		if flight == null or flight != sortie.flight: continue
+		var pose: Dictionary = flight.get_snapshot()
+		if pose.get("motion_mode") != "tactical" or pose.get("space_area_id") != "atmosphere:" + _air_support_location_id: continue
+		if not controls_read:
+			controls = combat.get_flight_controls()
+			controls_read = true
+		var has_control: bool = controls.has(craft_id)
+		if not returning.is_empty():
+			var site: Vector2 = SPACE_GRID.HEX.axial_to_plane(Vector2(sortie.landing_grid))
+			if pose.position_plane.distance_to(site) <= 0.15 and pose.velocity_plane.length() <= 0.1:
+				var landed: Dictionary = request_air_support_landing(craft_id)
+				if not landed.get("ok", false) and String(landed.get("reason", "")) == "ground_landing_occupied" and not bool(sortie.get("landing_blocked_reported", false)):
+					sortie["landing_blocked_reported"] = true
+					_air_emit_role_event(craft_id, "landing_blocked", "Landezone belegt; das Schiff wartet über der Landezone.")
+			elif not has_control and _resolve_air_support_pilot(craft_id).get("ok", false):
+				_air_set_goal(craft_id, sortie.landing_grid)
+			continue
+		var index: int = int(sortie.get("waypoint_index", 0)) % waypoints.size()
+		var arrived: bool = pose.position_plane.distance_to(SPACE_GRID.HEX.axial_to_plane(Vector2(waypoints[index]))) <= switch_distance
+		if (arrived or not has_control) and _resolve_air_support_pilot(craft_id).get("ok", false):
+			_air_goto_waypoint(craft_id, sortie, (index + 1) if arrived else index)
+
 func _advance_air_support_orders(delta: float) -> void:
 	if _air_support_sorties.is_empty(): return
+	_advance_air_roles(delta)
 	_air_support_fire_poll -= maxf(delta, 0.0)
 	if _air_support_fire_poll > 0.0: return
 	_air_support_fire_poll = 0.2

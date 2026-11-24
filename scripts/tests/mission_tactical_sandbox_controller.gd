@@ -2376,6 +2376,9 @@ func _connect_fire_rule_authority_signals() -> void:
 	var air_fire_callable := Callable(self, "_on_air_support_ground_fired")
 	if simulation_root.has_signal("air_support_ground_fired") and not simulation_root.is_connected("air_support_ground_fired", air_fire_callable):
 		simulation_root.connect("air_support_ground_fired", air_fire_callable)
+	var air_role_callable := Callable(self, "_on_air_role_event")
+	if simulation_root.has_signal("air_role_event") and not simulation_root.is_connected("air_role_event", air_role_callable):
+		simulation_root.connect("air_role_event", air_role_callable)
 	var committed_callable := Callable(self, "_on_authoritative_fire_rule_committed")
 	if simulation_root.has_signal("fire_rule_committed") and not simulation_root.is_connected("fire_rule_committed", committed_callable):
 		simulation_root.connect("fire_rule_committed", committed_callable)
@@ -2496,6 +2499,10 @@ func _on_air_support_ground_fired(event: Dictionary) -> void:
 	var view: Node = _get_primary_3d_view()
 	if is_instance_valid(view) and view.has_method("show_air_support_laser"):
 		view.call("show_air_support_laser", event)
+
+
+func _on_air_role_event(event: Dictionary) -> void:
+	_set_mission_dropship_card_feedback(String(event.get("craft_id", "")), String(event.get("text", "")))
 
 
 func _on_authoritative_fire_rule_committed(state: Dictionary) -> void:
@@ -13752,7 +13759,7 @@ func _append_air_support_card_row(host: VBoxContainer, card: Dictionary) -> void
 	row.name = "AirSupportCardRow"
 	row.columns = 3
 	host.add_child(row)
-	for item in [["Pilot einsteigen", "pilot_board"], ["Start", "start"], ["Fliegen", "move"], ["Landen", "land"], ["Feuer", "fire"], ["Feuerstopp", "cease"], ["Luftradar", "radar"]]:
+	for item in [["Pilot einsteigen", "pilot_board"], ["Start", "start"], ["Fliegen", "move"], ["Landen", "land"], ["Feuer", "fire"], ["Feuerstopp", "cease"], ["Luftradar", "radar"], ["Kreisen", "circle"], ["CAS", "role_cas"], ["Luftschutz", "role_air_defense"], ["Kreisen aus", "role_clear"]]:
 		row.add_child(_build_mission_dropship_card_command_button(item[0], "Schiffbefehl; Fliegen und Feuer nutzen das markierte Hexfeld.", false, Callable(self, "_on_air_support_card_action").bind(craft_id, item[1]), craft_id, "air_" + item[1]))
 
 
@@ -13790,6 +13797,10 @@ func _on_air_support_card_action(craft_id: String, action: String) -> void:
 		"move":
 			if _has_selected_tile: result = simulation.request_air_support_move({"craft_id":craft_id, "target_hex":_selected_tile_grid_position, "request_id":"ui-air-move:%d" % Time.get_ticks_usec()})
 			else: result = {"ok":false, "reason":"Zuerst ein Hexfeld markieren"}
+		"circle", "role_cas", "role_air_defense":
+			if _has_selected_tile: result = simulation.request_air_support_circle({"craft_id":craft_id, "center_hex":_selected_tile_grid_position, "role":{"circle":"none", "role_cas":"cas", "role_air_defense":"air_defense"}[action], "request_id":"ui-air-circle:%d" % Time.get_ticks_usec()})
+			else: result = {"ok":false, "reason":"Zuerst ein Hexfeld markieren"}
+		"role_clear": result = simulation.request_air_support_role_clear(craft_id, "ui-air-role-clear:%d" % Time.get_ticks_usec())
 		"fire":
 			var target: String = simulation.get_air_support_ground_target(_selected_tile_grid_position) if _has_selected_tile else ""
 			if target.is_empty(): result = {"ok":false, "reason":"Sichtbaren Gegner markieren"}
