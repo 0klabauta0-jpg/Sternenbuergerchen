@@ -4,6 +4,7 @@ extends Node
 
 const SIM = preload("res://scripts/core/simulation_root.gd")
 const CAMPAIGN = preload("res://scripts/core/singleplayer_campaign_state.gd")
+const ORBIT_LOCATION_PRIORITY = preload("res://scripts/core/orbit_location_priority.gd")
 const SUPPLY = preload("res://scripts/core/singleplayer_supply_state.gd")
 const TRAVEL = preload("res://scripts/core/singleplayer_fleet_travel_state.gd")
 const ORBIT_SURFACES = preload("res://scripts/mission/orbit_surface_locations.gd")
@@ -371,19 +372,8 @@ func _fuel_reachability(craft_id: String, locations: Dictionary) -> Dictionary:
 	return result
 
 static func _location_for_orbit(location_orbits: Dictionary, orbit_id: String, preferred: String = "") -> String:
-	if orbit_id.is_empty(): return ""
-	if not preferred.is_empty() and String(location_orbits.get(preferred, "")) == orbit_id: return preferred
-	# Handel 2a-2, Nachbesserung 1: ohne Vorwahl zuerst ein Ort, der NICHT in ADDITIVE_LOCATION_IDS steht; erst danach alphabetisch.
-	var ids: Array = []
-	var additive: Array = []
-	for id in location_orbits:
-		if String(location_orbits[id]) != orbit_id: continue
-		if CAMPAIGN.ADDITIVE_LOCATION_IDS.has(String(id)): additive.append(String(id))
-		else: ids.append(String(id))
-	ids.sort()
-	additive.sort()
-	ids.append_array(additive)
-	return "" if ids.is_empty() else String(ids[0])
+	# Regel an EINER Stelle: orbit_location_priority.gd (gleiche Auswahl wie SimulationRoot._location_at_orbit).
+	return ORBIT_LOCATION_PRIORITY.location_at_orbit(location_orbits, orbit_id, preferred)
 
 ## Etappen, die einem Schiff bis zum Ziel noch bevorstehen: [{leg, origin, destination}].
 func _remaining_outbound_legs(travel: Dictionary, location_id: String) -> Array:
@@ -396,6 +386,9 @@ func _remaining_outbound_legs(travel: Dictionary, location_id: String) -> Array:
 	if phase == "surface":
 		var here := String(travel.get("location_id", ""))
 		if here.is_empty() or here == location_id: return []
+		# Handel 2a-2, Nachbesserung 2: derselbe Orbit (Farm <-> Handelsposten) ist kein Sprung: nur Ortsabflug und Anflug (3).
+		var here_orbit := String(location_orbits.get(here, ""))
+		if not here_orbit.is_empty() and here_orbit == String(location_orbits.get(location_id, "")): return [{"leg":"surface_exit", "origin":here, "destination":"homebase"}, approach]
 		return [{"leg":"surface_exit", "origin":here, "destination":"homebase"}, {"leg":"jump", "origin":here, "destination":location_id}, approach]
 	if phase == "approach": return []
 	if phase == "orbit":

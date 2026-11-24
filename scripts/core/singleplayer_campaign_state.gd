@@ -15,7 +15,8 @@ const SMALL_OUTPOSTS_PATH := "res://data/singleplayer/small_outposts.json"
 const ADDITIVE_JOB_IDS: Array = ["wreck_crater_salvage", "stranded_refuel", "flak_silence", "cutlass_boarding", "hillside_bunker", "prospector_escort"]
 ## Kapitel 2: nur diese Ortskennungen duerfen in einem aelteren Spielstand fehlen (ein Ort, den es heute gar nicht gibt, stoert nicht).
 ## Gleich singleplayer_supply_state.gd.
-const ADDITIVE_LOCATION_IDS: Array = ["relay_ridge", "asteroid_belt", "muellers_farm", "shady_lab", "templanon"]
+const ORBIT_LOCATION_PRIORITY: GDScript = preload("res://scripts/core/orbit_location_priority.gd")
+const ADDITIVE_LOCATION_IDS: Array = ORBIT_LOCATION_PRIORITY.ADDITIVE_LOCATION_IDS  # eine Quelle: orbit_location_priority.gd
 
 var _locations: Dictionary = {}
 var _jobs: Dictionary = {}
