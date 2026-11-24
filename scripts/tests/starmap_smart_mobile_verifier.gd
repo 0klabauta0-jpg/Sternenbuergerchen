@@ -325,6 +325,8 @@ func run() -> void:
 	check(owner.get_job_availability(true).benit_delivery.shown_as_locked and not owner.get_job_availability(true).benit_delivery.can_accept, "recruit alone does not unlock Benit")
 	check(command("load_crate",{},{"runtime_authorized":true}).ok and owner.get_job_availability(true).benit_delivery.can_accept, "actual cargo and recruit unlock Benit together")
 	finish_job("benit_delivery"); finish_job("outpost_chip_recovery"); finish_job("buccaneer_rescue")
+	# Additive Auftraege (ADDITIVE_JOB_IDS) haengen nicht an der Kette, sondern bleiben nach der Kette offen; ohne echten Abschluss waere "lesbar, keine zweite Auszahlung" fuer sie nur eine offene Annahme.
+	finish_job("wreck_crater_salvage")
 	for id: String in owner.get_campaign_snapshot().jobs:
 		check(owner.get_job_availability().get(id).visible and not owner.get_job_availability().get(id).can_accept and not command("accept_job",{"job_id":id}).ok, "completed job remains readable without repeat payout " + id)
 	var failed_owner := CAMPAIGN.new(); failed_owner.configure()
