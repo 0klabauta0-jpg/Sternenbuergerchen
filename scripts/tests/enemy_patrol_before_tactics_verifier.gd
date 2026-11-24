@@ -34,6 +34,7 @@ func _run() -> void:
 	_test_contact_uses_group_tactics()
 	_test_locked_path_uses_group_tactics()
 	_test_without_path_uses_group_tactics()
+	_test_non_patrol_styles_use_group_tactics()
 	_test_hit_patroller_stops_patrolling()
 	_test_fallen_mate_in_sight_stops_patrolling()
 	_test_redirected_waypoint_counts_as_reached()
@@ -44,13 +45,13 @@ func _run() -> void:
 
 ## Gegner "enemy" (Taktik probe) weit weg von "own" (kein Kontakt) oder, mit `contact`, zwei Felder neben ihm.
 ## `path`: zwei Wegpunkte (Spiegel der Karte: Querweg, nicht Richtung "own"); `locked`: Weg schon kontaktgesperrt.
-func _patrol_rig(contact: bool, with_path: bool, locked: bool = false) -> Dictionary:
+func _patrol_rig(contact: bool, with_path: bool, locked: bool = false, style: String = "probe") -> Dictionary:
 	var far_own := Vector2i(CENTER.x - 7, CENTER.y - 7)
 	var far_enemy := Vector2i(CENTER.x + 7, CENTER.y + 7)
 	var own_grid: Vector2i = far_enemy + HEX.DIRECTIONS[3] * 2 if contact else far_own
 	var specs := _line(own_grid, far_enemy, "pistol", "pistol")
 	var f := _rig(specs)
-	f.units["enemy"].set_meta("enemy_tactics_config", {"group_id": "wreck_probe", "advance_style": "probe"})
+	f.units["enemy"].set_meta("enemy_tactics_config", {"group_id": "wreck_probe", "advance_style": style})
 	var terrain = f.scope.get_node("TerrainRegistry")
 	var waypoints: Array = [Vector2(terrain.grid_to_world(Vector2i(CENTER.x + 7, CENTER.y + 1))), Vector2(terrain.grid_to_world(Vector2i(CENTER.x + 7, CENTER.y - 4)))]
 	f["waypoints"] = waypoints
@@ -109,6 +110,23 @@ func _test_patrol_before_tactics() -> void:
 	_check(after < start - 50.0, "1: der Abstand zum ersten Wegpunkt sinkt (%.0f -> %.0f)" % [start, after])
 	_check(not _sources(f).has("enemy_team_tactics"), "1: die Gruppentaktik bewegt die Einheit nicht (Quellen %s)" % str(_sources(f)))
 	f.scope.free()
+
+
+## W3 (1g): Die Patrouille geht der Gruppentaktik nur bei Streifen-Gruppen voraus ("patrol"/"probe"/"creep"). Wach-/Flak-Gruppen ("hold"/"defend")
+## und Angriffsgruppen ("rush"/"bound") verhalten sich mit Weg wie vorher: die Gruppentaktik zuerst, der Weg wird ohne Kontakt NICHT abgelaufen.
+func _test_non_patrol_styles_use_group_tactics() -> void:
+	for style in ["hold", "defend", "rush", "bound"]:
+		var f := _patrol_rig(false, true, false, style)
+		_check(not _hold(f), "8 (%s): Vorbedingung: kein Feindkontakt" % style)
+		_run_decisions(f, 45)
+		_check(not _sources_of(f, "enemy").has("enemy_patrol"), "8 (%s): mit Weg, ohne Kontakt keine Patrouille (Quellen %s)" % [style, str(_sources_of(f, "enemy"))])
+		_check(not bool(f.driver._enemy_patrol_contact_locked.get("enemy", false)), "8 (%s): der Weg bleibt ungesperrt (die Gruppentaktik hat ihn nur uebergangen)" % style)
+		f.scope.free()
+	for style in ["patrol", "creep"]:
+		var g := _patrol_rig(false, true, false, style)
+		_run_decisions(g, 3)
+		_check(_sources_of(g, "enemy").has("enemy_patrol"), "8 (%s): eine Streifen-Gruppe laeuft den Weg (Quellen %s)" % [style, str(_sources_of(g, "enemy"))])
+		g.scope.free()
 
 
 func _test_contact_uses_group_tactics() -> void:
