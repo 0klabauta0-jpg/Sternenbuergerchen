@@ -493,8 +493,11 @@ class PreparedSystemsCheckpoint extends RefCounted:
 	pass
 var _systems_checkpoint_preparations: Dictionary = {}
 
-func export_systems_checkpoint() -> Dictionary:
-	var encoded := CHECKPOINT_CODEC.encode_value({"systems":_ship_systems.duplicate(true), "receipts":_ship_impact_receipts.duplicate(true)})
+## skip_ids (Luftrollen 5a): Kennungen, die der Sortie-Block sichert (feindliche Flieger); sie fehlen hier. Ohne Liste unveraendert.
+func export_systems_checkpoint(skip_ids: Array = []) -> Dictionary:
+	var systems: Dictionary = _ship_systems.duplicate(true)
+	for skipped in skip_ids: systems.erase(String(skipped))
+	var encoded := CHECKPOINT_CODEC.encode_value({"systems":systems, "receipts":_ship_impact_receipts.duplicate(true)})
 	if not encoded.ok: return encoded
 	return {"schema":"space_systems_checkpoint.v1", "payload":encoded.value}
 
@@ -554,17 +557,28 @@ const NAVIGATION_CODEC = preload("res://scripts/mission/checkpoint_value_codec.g
 const NAVIGATION_GUIDANCE = preload("res://scripts/tactical/space_guidance_resolver.gd")
 const NAVIGATION_FLIGHT = preload("res://scripts/tactical/space_flight_resolver.gd")
 
-func export_navigation_checkpoint() -> Dictionary:
+## skip_ids (Luftrollen 5a): Kennungen, die der Sortie-Block sichert (feindliche Flieger); sie fehlen in Index, Lage, Steuerung, Anspruechen und Status.
+## Die Flaechen-Revisionen bleiben stehen (die Wiederherstellung verlangt nur "mindestens so viele wie Akteure"). Ohne Liste unveraendert.
+func export_navigation_checkpoint(skip_ids: Array = []) -> Dictionary:
 	var index: Dictionary = _registry.export_checkpoint_index()
 	if index.get("schema") != "space_registry_checkpoint.v1": return _navigation_bad()
+	var skip := {}
+	for skipped in skip_ids: skip[String(skipped)] = true
+	if not skip.is_empty():
+		var kept_actors: Array = []
+		for actor_entry in index.actors:
+			if not skip.has(String(actor_entry.get("craft_id", ""))): kept_actors.append(actor_entry)
+		index["actors"] = kept_actors
 	var poses := {}
 	for id in _metadata:
+		if skip.has(id): continue
 		var actor: RefCounted = _registry.get_actor(id)
 		if actor == null: actor = _inactive_actors.get(id)
 		if actor == null: return _navigation_bad()
 		poses[id] = actor.get_snapshot()
 		if not _inactive_actors.has(id) and (int(_indexed_revisions.get(id, -1)) != int(poses[id].revision) or not _registry.actor_cells_match(id, poses[id].space_area_id, preview_footprint(poses[id], _metadata[id].footprint_hexes))): return _navigation_bad()
 	var controls := _flight_controls.duplicate(true)
+	for skipped in skip: controls.erase(skipped)
 	for id in controls:
 		var control: Dictionary = controls[id]
 		if control.has("mission_root"):
@@ -575,13 +589,24 @@ func export_navigation_checkpoint() -> Dictionary:
 			control.erase("equipment_owner_id")
 	var claims := {}
 	for id in _navigation_claims:
+		if skip.has(id): continue
 		claims[id] = {"area_id":_navigation_claims[id].area_id, "cells":_navigation_claims[id].cells.keys()}
-	var inactive: Array = _inactive_actors.keys()
+	var inactive: Array = []
+	for id in _inactive_actors.keys():
+		if not skip.has(id): inactive.append(id)
 	inactive.sort()
-	var encoded := NAVIGATION_CODEC.encode_value({"metadata":_metadata, "indexed_revisions":_indexed_revisions, "flight_snapshots":poses, "controls":controls, "status":_flight_status, "claims":claims, "claim_revisions":_claim_revisions, "inactive":inactive})
+	var encoded := NAVIGATION_CODEC.encode_value({"metadata":_without_ids(_metadata, skip), "indexed_revisions":_without_ids(_indexed_revisions, skip), "flight_snapshots":poses, "controls":controls, "status":_without_ids(_flight_status, skip), "claims":claims, "claim_revisions":_claim_revisions, "inactive":inactive})
 	if not encoded.ok: return _navigation_bad()
 	return {"schema":"space_navigation_checkpoint.v1", "registry":index, "payload":encoded.value}
 
+
+## Dieselbe Tabelle ohne die uebersprungenen Kennungen (ohne Liste die Tabelle selbst).
+static func _without_ids(table: Dictionary, skip: Dictionary) -> Dictionary:
+	if skip.is_empty(): return table
+	var kept := {}
+	for id in table:
+		if not skip.has(id): kept[id] = table[id]
+	return kept
 
 static func prepare_navigation_checkpoint_candidate(state: Dictionary, flights: Dictionary, control_bindings: Dictionary = {}) -> Dictionary:
 	if state.size() != 3 or not state.has_all(["schema", "registry", "payload"]) or state.schema != "space_navigation_checkpoint.v1" or not state.registry is Dictionary or flights.size() > 4096: return _navigation_bad()
@@ -644,9 +669,27 @@ static func prepare_navigation_checkpoint_candidate(state: Dictionary, flights: 
 			if not profile.get("ok", false) or profile.hull != control.hull or profile.power != control.power or profile.footprint_hexes != data.metadata[id].footprint_hexes or not is_equal_approx(float(profile.mass), float(pose.mass)): return _navigation_bad()
 			if not data.claims.has(id): return _navigation_bad()
 			var target_cells: Array[Vector2i] = candidate.preview_footprint(pose.merged({"position_plane":control.goal.target_plane}, true), data.metadata[id].footprint_hexes)
-			if target_cells.is_empty() or target_cells.size() != data.claims[id].cells.size(): return _navigation_bad()
-			for cell in target_cells:
-				if not data.claims[id].cells.has(cell): return _navigation_bad()
+			if target_cells.is_empty(): return _navigation_bad()
+			var claim_sets: Array = [target_cells]
+			if control.get("air_support_move", false) and control.goal.get("face_plane") is Vector2:
+				# Luftrollen 5a: mit goal.face_plane (Nase aufs Ziel, Rundbahn und CAS) beansprucht die Lenkung zusaetzlich den gedrehten Platz am Zielfeld
+				# (oder, ist der jetzige Platz nicht frei, nur diesen). Die Ausrichtung folgt wie in der Lenkung aus Blick vom Zielfeld zum Zielpunkt.
+				var aim: Vector2 = control.goal.face_plane - control.goal.target_plane
+				if aim.length_squared() <= 0.000001: aim = control.goal.target_plane - pose.position_plane
+				if aim.length_squared() > 0.000001:
+					var turned_cells: Array[Vector2i] = candidate.preview_footprint(pose.merged({"position_plane":control.goal.target_plane, "heading_rad":aim.angle()}, true), data.metadata[id].footprint_hexes)
+					if not turned_cells.is_empty():
+						var both: Array[Vector2i] = target_cells.duplicate()
+						for cell in turned_cells:
+							if not both.has(cell): both.append(cell)
+						claim_sets = [target_cells, both, turned_cells]
+			var claim_matches := false
+			for expected: Array in claim_sets:
+				var same_cells: bool = expected.size() == data.claims[id].cells.size()
+				for cell in expected:
+					if not data.claims[id].cells.has(cell): same_cells = false
+				if same_cells: claim_matches = true
+			if not claim_matches: return _navigation_bad()
 			if control.get("singleplayer_move", false): control["equipment_owner_id"] = context.equipment_owner.get_instance_id()
 			else:
 				if not context.get("mission_root") is Node or not is_instance_valid(context.mission_root) or not context.mission_root.has_method("_air_support_motion_context_valid"): return _navigation_bad()

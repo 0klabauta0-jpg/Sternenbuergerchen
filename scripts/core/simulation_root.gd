@@ -9384,6 +9384,19 @@ func _air_hostile_spawn(source: Node, combat: RefCounted, entry: Dictionary) -> 
 	if not String(nearest.id).is_empty(): heading = (combat.get_actor(nearest.id).get_snapshot().position_plane - SPACE_GRID.HEX.axial_to_plane(Vector2(spawn))).angle()
 	var spec := {"aircraft_id":entry.aircraft_id, "model_id":entry.model_id, "faction_id":entry.faction_id, "heading_rad":heading}
 	if entry.has("hull"): spec["hull"] = float(entry.hull)
+	# Luftrollen 5a: ein nach dem Laden nicht aufgenommener Gegner (Zusatzfeld restore) kommt mit gesichertem Systemzustand und Abkuehlzeiten, zuerst genau an seiner
+	# gesicherten Lage, sonst am naechsten freien Feld des normalen Spawns.
+	var restore: Dictionary = Dictionary(entry.get("restore", {}))
+	if not restore.is_empty():
+		spec["systems_state"] = Dictionary(restore.systems_state).duplicate(true)
+		spec["cooldowns"] = Dictionary(restore.cooldowns).duplicate(true)
+		var exact: Dictionary = spec.duplicate(true)
+		exact["position_plane"] = restore.position_plane
+		exact["velocity_plane"] = restore.velocity_plane
+		exact["heading_rad"] = float(restore.heading_rad)
+		exact["angular_velocity"] = float(restore.angular_velocity)
+		var exact_cell: Vector2i = SPACE_GRID.HEX.round_axial(SPACE_GRID.HEX.plane_to_axial(restore.position_plane))
+		if bool(source.call("admit_air_hostile", exact, "atmosphere:" + _air_support_location_id, exact_cell, {"runtime_authorized":true}).get("ok", false)): return true
 	for cell in candidates:
 		var cells: Array = []
 		for offset: Vector2i in profile.footprint_hexes: cells.append(cell + offset)
@@ -9524,7 +9537,11 @@ func _advance_air_hostile(delta: float) -> void:
 			if _air_hostile_spawn(source, combat, entry):
 				_air_hostile_pending.erase(entry)
 				_air_hostile_ids.append(String(entry.aircraft_id))
-				_air_hostile_state[String(entry.aircraft_id)] = {"spotted":false, "returned":entry.has("base_delay"), "model_id":String(entry.model_id), "entry":entry.duplicate(true), "target":"", "holding":false, "shots":{}, "last_shot":{}}
+				var restore: Dictionary = Dictionary(entry.get("restore", {}))
+				var kept_entry: Dictionary = entry.duplicate(true)
+				kept_entry.erase("restore")
+				_air_hostile_state[String(entry.aircraft_id)] = {"spotted":bool(restore.get("spotted", false)), "returned":bool(restore.get("returned", entry.has("base_delay"))), "model_id":String(entry.model_id), "entry":kept_entry, "target":String(restore.get("target", "")), "holding":false,
+					"shots":Dictionary(restore.get("shots", {})).duplicate(true), "last_shot":Dictionary(restore.get("last_shot", {})).duplicate(true)}
 				_air_hostile_poll = maxf(float(_air_role_config("hostile_aircraft").get("fire_poll_seconds", 0.2)), 0.05)
 				_air_hostile_since_poll = 0.0
 				_air_hostile_alone = 0.0
@@ -9992,7 +10009,20 @@ func admit_air_hostile(spec: Dictionary, area_id: String, cell: Vector2i, author
 	if not profile.get("ok", false) or not stats.get("ok", false) or not SPACE_COMPONENT_SYSTEMS.initial(stats, float(stats.get("hull_capacity", 0.0))).get("ok", false): return {"ok":false, "reason":"invalid_ship_components"}
 	var flight: RefCounted = SPACE_FLIGHT_STATE.new()
 	if not flight.configure(id, {"position_plane":Vector2.ZERO}).get("ok", false): return {"ok":false, "reason":"invalid_ship"}
-	var proposal := {"expected_revision":0, "coordinate_frame":"local", "space_area_id":area_id, "position_plane":SPACE_GRID.HEX.axial_to_plane(Vector2(cell)), "velocity_plane":Vector2.ZERO, "heading_rad":float(spec.get("heading_rad", 0.0)), "angular_velocity":0.0, "assist_mode":"coupled", "motion_mode":"tactical", "mass":profile.mass}
+	# Luftrollen 5a: beim Laden bringt der Spielstand die genaue Lage (position_plane, velocity_plane, angular_velocity) und den Systemzustand mit;
+	# ohne diese Schluessel gilt wie bisher das Feld und der Stillstand.
+	var start_plane: Vector2 = SPACE_GRID.HEX.axial_to_plane(Vector2(cell))
+	var start_velocity := Vector2.ZERO
+	var start_turn := 0.0
+	if spec.has("position_plane"):
+		if typeof(spec.position_plane) != TYPE_VECTOR2 or typeof(spec.get("velocity_plane")) != TYPE_VECTOR2 or typeof(spec.get("angular_velocity")) not in [TYPE_INT, TYPE_FLOAT]: return {"ok":false, "reason":"invalid_hostile"}
+		start_plane = spec.position_plane
+		start_velocity = spec.velocity_plane
+		start_turn = float(spec.angular_velocity)
+	if spec.has("systems_state"):
+		var checked_state: Dictionary = Dictionary(spec.systems_state).duplicate(true) if typeof(spec.systems_state) == TYPE_DICTIONARY else {}
+		if checked_state.is_empty() or not SPACE_COMPONENT_SYSTEMS.advance(stats, checked_state, 0.0).get("ok", false) or typeof(spec.get("cooldowns")) != TYPE_DICTIONARY: return {"ok":false, "reason":"invalid_hostile"}
+	var proposal := {"expected_revision":0, "coordinate_frame":"local", "space_area_id":area_id, "position_plane":start_plane, "velocity_plane":start_velocity, "heading_rad":float(spec.get("heading_rad", 0.0)), "angular_velocity":start_turn, "assist_mode":"coupled", "motion_mode":"tactical", "mass":profile.mass}
 	var transition: Dictionary = flight.validate_area_transition(proposal, tick_counter + 1)
 	var admission: Dictionary = _space_combat_state.validate_new_local_admission({"craft_id":id, "faction_id":faction, "control_domain":"enemy", "footprint_hexes":profile.footprint_hexes}, flight, proposal, tick_counter + 1)
 	if not transition.get("ok", false) or not admission.get("ok", false): return {"ok":false, "reason":"hostile_admission_failed"}
@@ -10002,6 +10032,10 @@ func admit_air_hostile(spec: Dictionary, area_id: String, cell: Vector2i, author
 	assert(installed.get("ok", false))
 	# Rueckkehr nach dem Abdrehen: mit dem Rumpf von damals (Schild voll).
 	if spec.has("hull"): _space_combat_state._ship_systems[id].state["hull"] = clampf(float(spec.hull), 1.0, float(stats.hull_capacity))
+	# Luftrollen 5a: gesicherter Systemzustand (Rumpf, Schild, Energie) und Abkuehlzeiten der Waffen.
+	if spec.has("systems_state"):
+		_space_combat_state._ship_systems[id].state = Dictionary(spec.systems_state).duplicate(true)
+		_space_combat_state._ship_systems[id].cooldowns = Dictionary(spec.cooldowns).duplicate(true)
 	_air_hostile_models[id] = model
 	return {"ok":true, "craft_id":id, "hull_capacity":float(stats.hull_capacity)}
 
@@ -10013,6 +10047,299 @@ func remove_air_hostile(hostile_id: String) -> bool:
 	if not _air_hostile_models.has(hostile_id): return false
 	_air_hostile_models.erase(hostile_id)
 	return _space_combat_state.remove_actor(hostile_id)
+
+## Kennungen der aufgenommenen Gegner (Aufrufer uebergibt sie als skip_ids an export_navigation_checkpoint / export_systems_checkpoint).
+func get_air_hostile_ids() -> Array:
+	return _air_hostile_ids.duplicate()
+
+## ---------------------------------------------------------------- Luftrollen 5a: Sortie-Spielstand
+## Sichert den ganzen Luftzustand des Missionskerns: Sortie-Eintraege (Rundbahn, Rolle, Rueckflug, Treibstoffuhr, Meldemerker), den Zufallsstrom des
+## Luftfeuers und die feindlichen Flieger samt Verhalten. Nicht gesichert (wird nach dem Laden neu gewaehlt): role_target_id, air_pursuit, air_last_shot und der
+## Verhaltenstakt des Gegners. cas_order_id / air_order_id werden nicht gesichert, sondern beim Laden aus dem Rottenbefehl abgeleitet (Praefix der Kennung, siehe
+## publish_air_sortie_checkpoint). Die Zeitgeber cas_friendly_until (als Rest, cas_friendly_remaining) und nose_hold_seconds werden mitgesichert.
+## export gibt {} zurueck, solange es nichts zu sichern gibt (kein Luft-Einsatz bisher): dann fehlt der Block im Spielstand.
+## publish gibt {"ok":true} oder {"ok":false, "reason":..., "failed_hostile_ids":[...]} zurueck (reason: no_source, hostile_not_admitted).
+const AIR_AD_REQUEST_PREFIX := "air-role-ad:"
+const AIR_GROUND_ORDER_PREFIX := "air-ground-order:"
+const AIR_SORTIE_CHECKPOINT_SCHEMA := "air_sortie_checkpoint.v1"
+const AIR_SORTIE_CODEC = preload("res://scripts/mission/checkpoint_value_codec.gd")
+const AIR_SORTIE_DATA_KEYS := ["serial", "rng", "hostile_clock", "hostile_now", "hostile_alone", "hostile_last_own", "hostile_shot_serial", "hostile_configured", "hostile_armed", "hostile_pending", "hostiles", "sorties"]
+const AIR_SORTIE_ENTRY_KEYS := ["landing_position", "landing_grid", "previous_pose", "was_inactive", "sortie_serial", "air_role", "waypoints", "waypoint_index", "returning", "landing_blocked_reported", "fuel_seconds", "fuel_steps", "fuel_warned", "ring_blocked_seconds", "ring_blocked_reported", "fuel_return_reported", "cas_hold", "cas_hold_reported", "break_off_reported", "break_off_blocked_reported", "break_off_stopped", "cas_friendly_remaining", "nose_hold_seconds"]
+const AIR_SORTIE_FLAG_KEYS := ["fuel_return_reported", "cas_hold", "cas_hold_reported", "break_off_reported", "break_off_blocked_reported", "break_off_stopped"]
+const AIR_SORTIE_HOSTILE_KEYS := ["model_id", "faction_id", "position_plane", "velocity_plane", "heading_rad", "angular_velocity", "systems_state", "cooldowns", "spotted", "returned", "target", "shots", "last_shot", "entry"]
+const AIR_SORTIE_HOSTILE_MODELS := ["buccaneer", "cutlass"]
+const AIR_SORTIE_RETURNS := ["", "player", "fuel", "break_off"]
+const AIR_SORTIE_POSE_KEYS := ["position_plane", "velocity_plane", "heading_rad", "angular_velocity", "assist_mode", "motion_mode", "mass", "space_area_id", "coordinate_frame"]
+
+func export_air_sortie_checkpoint() -> Dictionary:
+	if _air_support_sorties.is_empty() and _air_hostile_ids.is_empty() and not _air_hostile_armed and _air_sortie_serial == 0 and _air_ground_rng_state == 1: return {}
+	var sorties := {}
+	var craft_ids: Array = _air_support_sorties.keys()
+	craft_ids.sort()
+	for craft_id in craft_ids:
+		var sortie: Dictionary = _air_support_sorties[craft_id]
+		var entry := {"landing_position":sortie.landing_position, "landing_grid":sortie.landing_grid, "previous_pose":Dictionary(sortie.previous_pose).duplicate(true), "was_inactive":bool(sortie.was_inactive), "sortie_serial":int(sortie.sortie_serial),
+			"air_role":Dictionary(sortie.get("air_role", {})).duplicate(true), "waypoints":Array(sortie.get("waypoints", [])).duplicate(), "waypoint_index":int(sortie.get("waypoint_index", 0)), "returning":String(sortie.get("returning", "")),
+			"landing_blocked_reported":bool(sortie.get("landing_blocked_reported", false)), "fuel_seconds":float(sortie.get("fuel_seconds", 0.0)), "fuel_steps":int(sortie.get("fuel_steps", 0)), "fuel_warned":bool(sortie.get("fuel_warned", false)),
+			"ring_blocked_seconds":float(sortie.get("ring_blocked_seconds", 0.0)), "ring_blocked_reported":bool(sortie.get("ring_blocked_reported", false)),
+			"cas_friendly_remaining":maxf(float(sortie.get("cas_friendly_until", 0.0)) - _air_cas_clock, 0.0), "nose_hold_seconds":float(sortie.get("nose_hold_seconds", 0.0))}
+		for key in AIR_SORTIE_FLAG_KEYS: entry[key] = bool(sortie.get(key, false))
+		sorties[String(craft_id)] = entry
+	var hostiles := {}
+	if not _air_hostile_ids.is_empty():
+		var source: Node = _air_support_source.get_ref() if _air_support_source != null else null
+		var combat: RefCounted = source.get("_space_combat_state") if is_instance_valid(source) else null
+		if combat == null: return {"ok":false, "reason":"air_sortie_export_failed"}
+		for id in _air_hostile_ids:
+			var actor: RefCounted = combat.get_actor(id)
+			var systems: Dictionary = combat.get_ship_systems(id)
+			if actor == null or systems.is_empty(): return {"ok":false, "reason":"air_sortie_export_failed"}
+			var pose: Dictionary = actor.get_snapshot()
+			var behaviour: Dictionary = Dictionary(_air_hostile_state.get(id, {}))
+			hostiles[id] = {"model_id":String(behaviour.get("model_id", "")), "faction_id":String(combat.get_metadata(id).get("faction_id", "")), "position_plane":pose.position_plane, "velocity_plane":pose.velocity_plane, "heading_rad":float(pose.heading_rad), "angular_velocity":float(pose.angular_velocity),
+				"systems_state":Dictionary(systems.state).duplicate(true), "cooldowns":Dictionary(systems.cooldowns).duplicate(true), "spotted":bool(behaviour.get("spotted", false)), "returned":bool(behaviour.get("returned", false)), "target":String(behaviour.get("target", "")),
+				"shots":Dictionary(behaviour.get("shots", {})).duplicate(true), "last_shot":Dictionary(behaviour.get("last_shot", {})).duplicate(true), "entry":Dictionary(behaviour.get("entry", {})).duplicate(true)}
+	var content := {"serial":_air_sortie_serial, "rng":_air_ground_rng_state, "hostile_clock":_air_hostile_clock, "hostile_now":_air_hostile_now, "hostile_alone":_air_hostile_alone, "hostile_last_own":_air_hostile_last_own, "hostile_shot_serial":_air_hostile_shot_serial,
+		"hostile_configured":_air_hostile_configured, "hostile_armed":_air_hostile_armed, "hostile_pending":_air_hostile_pending.duplicate(true), "hostiles":hostiles, "sorties":sorties}
+	var encoded: Dictionary = AIR_SORTIE_CODEC.encode_value(content)
+	if not encoded.get("ok", false): return {"ok":false, "reason":"air_sortie_export_failed"}
+	return {"schema":AIR_SORTIE_CHECKPOINT_SCHEMA, "payload":encoded.value}
+
+static func _air_sortie_bad() -> Dictionary:
+	return {"ok":false, "reason":"invalid_air_sortie_checkpoint"}
+
+static func _air_sortie_number(value: Variant, minimum: float = -INF, maximum: float = INF) -> bool:
+	return typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)) and float(value) >= minimum and float(value) <= maximum
+
+static func _air_sortie_whole(value: Variant, minimum: int = 0) -> bool:
+	return typeof(value) == TYPE_INT and int(value) >= minimum and int(value) <= 1000000000
+
+## Eintrag der Wartelisten und der Gegner-Konfiguration (configure_enemy_aircraft + Abdrehen: base_delay, hull).
+static func _air_sortie_pending_valid(entry: Variant) -> bool:
+	if not entry is Dictionary: return false
+	for key in entry:
+		if typeof(key) != TYPE_STRING or key not in ["aircraft_id", "model_id", "faction_id", "spawn_hex", "delay_seconds", "base_delay", "hull", "restore"]: return false
+	if not entry.has_all(["aircraft_id", "model_id", "faction_id", "spawn_hex", "delay_seconds"]): return false
+	if typeof(entry.aircraft_id) != TYPE_STRING or String(entry.aircraft_id).strip_edges().is_empty() or typeof(entry.faction_id) != TYPE_STRING or String(entry.faction_id).strip_edges().is_empty(): return false
+	if typeof(entry.model_id) != TYPE_STRING or entry.model_id not in AIR_SORTIE_HOSTILE_MODELS or typeof(entry.spawn_hex) != TYPE_VECTOR2I or not _air_sortie_number(entry.delay_seconds, 0.0): return false
+	if entry.has("base_delay") and not _air_sortie_number(entry.base_delay, 0.0): return false
+	if entry.has("restore") and not _air_sortie_restore_valid(entry.restore): return false
+	return not entry.has("hull") or _air_sortie_number(entry.hull, 0.000001)
+
+## Lage, Systemzustand und Merker eines Gegners, der nach dem Laden nicht aufgenommen werden konnte und in der Warteliste wartet (siehe publish). Die Tiefenpruefung
+## (Karte, Systemzustand gegen die Werte des Modells) macht die Aufnahme selbst (admit_air_hostile), bei Ablehnung faellt der Gegner auf das normale Spawnfeld zurueck.
+static func _air_sortie_restore_valid(restore: Variant) -> bool:
+	var keys := ["position_plane", "velocity_plane", "heading_rad", "angular_velocity", "systems_state", "cooldowns", "spotted", "returned", "target", "shots", "last_shot"]
+	if not restore is Dictionary or restore.size() != keys.size() or not restore.has_all(keys): return false
+	if typeof(restore.position_plane) != TYPE_VECTOR2 or typeof(restore.velocity_plane) != TYPE_VECTOR2 or not _air_sortie_number(restore.heading_rad) or not _air_sortie_number(restore.angular_velocity): return false
+	if not restore.systems_state is Dictionary or not restore.cooldowns is Dictionary or typeof(restore.spotted) != TYPE_BOOL or typeof(restore.returned) != TYPE_BOOL or typeof(restore.target) != TYPE_STRING: return false
+	if not restore.shots is Dictionary or not restore.last_shot is Dictionary: return false
+	for slot in restore.shots:
+		if typeof(slot) != TYPE_STRING or not _air_sortie_whole(restore.shots[slot]): return false
+	for slot in restore.last_shot:
+		if typeof(slot) != TYPE_STRING or not _air_sortie_number(restore.last_shot[slot]): return false
+	for slot in restore.cooldowns:
+		if typeof(slot) != TYPE_STRING or not _air_sortie_number(restore.cooldowns[slot], 0.0): return false
+	return restore.position_plane.is_finite() and restore.velocity_plane.is_finite()
+
+## Rolle wie _air_role_entry sie baut, aber mit den gesicherten Werten (auch der Haltung): Befehlswoerter ueber SPACE_COMMAND_CONTRACT geprueft.
+func _air_sortie_role_valid(craft_id: String, role: Dictionary, waypoints: Array, wings: Object) -> bool:
+	if role.is_empty(): return waypoints.is_empty()
+	var keys := ["role", "verb", "center_hex", "contact_response", "fire_rule", "stance", "protect_radius", "pursuit_limit", "request_id"]
+	if role.size() != keys.size() or not role.has_all(keys) or waypoints.size() < 3: return false
+	if typeof(role.role) != TYPE_STRING or not AIR_ROLE_NAMES.has(role.role) or typeof(role.center_hex) != TYPE_VECTOR2I or not _air_support_cells_on_map([role.center_hex]): return false
+	var table: Array = {"none":["patrol", "observe", "hold"], "cas":["attack_area", "engage", "free"], "air_defense":["patrol", "engage", "free"]}[role.role]
+	if role.verb != table[0] or role.contact_response != table[1] or role.fire_rule != table[2] or typeof(role.stance) != TYPE_STRING or role.stance not in ["cautious", "normal", "aggressive"]: return false
+	if not _air_sortie_number(role.protect_radius, 0.0) or not _air_sortie_number(role.pursuit_limit, 0.0) or typeof(role.request_id) != TYPE_STRING or String(role.request_id).is_empty() or String(role.request_id).length() > 128: return false
+	if wings == null or not wings.has_method("get_craft_wing") or not wings.has_method("get_snapshot"): return false
+	var wing_id: String = wings.get_craft_wing(craft_id, "singleplayer")
+	if wing_id.is_empty(): return false
+	var payload := {"wing_ids":[wing_id], "verb":role.verb, "stance":role.stance, "contact_response":role.contact_response, "fire_rule":role.fire_rule, "protect_radius":float(role.protect_radius), "pursuit_limit":float(role.pursuit_limit)}
+	if role.verb == "patrol":
+		var typed_waypoints: Array[Vector2i] = []
+		for cell in waypoints: typed_waypoints.append(cell)
+		payload["waypoints"] = typed_waypoints
+	else: payload["area_hexes"] = [role.center_hex]
+	var revision: int = wings.get_snapshot().revision
+	var context := {"authorized":true, "revision":revision, "phase":"tactical", "coordinate_frame":"local", "space_area_id":"atmosphere:" + _air_support_location_id, "owned_wings":[wing_id], "receipts":{}}
+	return bool(SPACE_COMMAND_CONTRACT.validate({"contract_category":"space_combat", "operation":"order_issue", "request_id":"air-role:" + String(role.request_id), "expected_revision":revision, "payload":payload}, context).get("ok", false))
+
+## Ein Sortie-Eintrag aus dem Spielstand; leer = ungueltig. Das Ergebnis hat die Form, die _begin_air_sortie schreibt.
+func _air_sortie_entry_valid(craft_id: String, entry: Variant, fleet: Object, wings: Object, source: Node, serial: int) -> Dictionary:
+	if craft_id.strip_edges().is_empty() or not entry is Dictionary or entry.size() != AIR_SORTIE_ENTRY_KEYS.size() or not entry.has_all(AIR_SORTIE_ENTRY_KEYS): return {}
+	var flight: Variant = fleet.get_flight_state(craft_id)
+	if flight == null: return {}
+	var pose: Dictionary = flight.get_snapshot()
+	if pose.get("coordinate_frame") != "local" or pose.get("motion_mode") != "tactical" or pose.get("space_area_id") != "atmosphere:" + _air_support_location_id or pose.get("assist_mode") != "coupled": return {}
+	if not _air_support_cells_on_map([SPACE_GRID.HEX.round_axial(SPACE_GRID.HEX.plane_to_axial(pose.position_plane))]): return {}
+	var terrain: Node = _air_ground_registry()
+	if typeof(entry.landing_position) != TYPE_VECTOR2 or typeof(entry.landing_grid) != TYPE_VECTOR2I or not _air_support_cells_on_map([entry.landing_grid]) or terrain.call("world_to_grid", entry.landing_position) != entry.landing_grid: return {}
+	var before: Variant = entry.previous_pose
+	if not before is Dictionary or not before.has_all(AIR_SORTIE_POSE_KEYS) or typeof(before.position_plane) != TYPE_VECTOR2 or typeof(before.velocity_plane) != TYPE_VECTOR2: return {}
+	if not _air_sortie_number(before.heading_rad) or not _air_sortie_number(before.angular_velocity) or not _air_sortie_number(before.mass, 0.000001) or typeof(before.assist_mode) != TYPE_STRING or typeof(before.motion_mode) != TYPE_STRING or typeof(before.coordinate_frame) != TYPE_STRING: return {}
+	if typeof(before.space_area_id) != TYPE_STRING or String(before.space_area_id).begins_with("atmosphere:"): return {}
+	for key in ["was_inactive", "landing_blocked_reported", "fuel_warned", "ring_blocked_reported"] + AIR_SORTIE_FLAG_KEYS:
+		if typeof(entry[key]) != TYPE_BOOL: return {}
+	if not _air_sortie_whole(entry.sortie_serial, 1) or int(entry.sortie_serial) > serial or not _air_sortie_whole(entry.fuel_steps) or not _air_sortie_number(entry.fuel_seconds, 0.0, 59.999999) or not _air_sortie_number(entry.ring_blocked_seconds, 0.0) or not _air_sortie_number(entry.cas_friendly_remaining, 0.0, 600.0) or not _air_sortie_number(entry.nose_hold_seconds, 0.0, 60.0): return {}
+	if typeof(entry.returning) != TYPE_STRING or entry.returning not in AIR_SORTIE_RETURNS or not entry.air_role is Dictionary or not entry.waypoints is Array or not _air_sortie_whole(entry.waypoint_index): return {}
+	var waypoints: Array[Vector2i] = []
+	for cell in entry.waypoints:
+		if typeof(cell) != TYPE_VECTOR2I or not _air_support_cells_on_map([cell]): return {}
+		waypoints.append(cell)
+	if waypoints.is_empty():
+		if int(entry.waypoint_index) != 0 or not entry.air_role.is_empty(): return {}
+	elif int(entry.waypoint_index) >= waypoints.size() or not String(entry.returning).is_empty(): return {}
+	if not _air_sortie_role_valid(craft_id, entry.air_role, waypoints, wings): return {}
+	var sortie := {"flight":flight, "source":weakref(source), "previous_pose":entry.previous_pose.duplicate(true), "landing_position":entry.landing_position, "landing_grid":entry.landing_grid, "was_inactive":entry.was_inactive, "sortie_serial":int(entry.sortie_serial),
+		"air_role":entry.air_role.duplicate(true), "waypoints":waypoints, "waypoint_index":int(entry.waypoint_index), "role_target_id":"", "returning":String(entry.returning), "landing_blocked_reported":entry.landing_blocked_reported,
+		"fuel_seconds":float(entry.fuel_seconds), "fuel_steps":int(entry.fuel_steps), "fuel_warned":entry.fuel_warned, "ring_blocked_seconds":float(entry.ring_blocked_seconds), "ring_blocked_reported":entry.ring_blocked_reported}
+	for key in AIR_SORTIE_FLAG_KEYS:
+		if entry[key]: sortie[key] = true
+	# Zeitgeber: publish setzt cas_friendly_until aus dem Rest und der Uhr des Kerns (die Uhr ist nicht gesichert) und entfernt den Hilfsschluessel wieder.
+	if float(entry.cas_friendly_remaining) > 0.0: sortie["cas_friendly_remaining"] = float(entry.cas_friendly_remaining)
+	if float(entry.nose_hold_seconds) > 0.0: sortie["nose_hold_seconds"] = float(entry.nose_hold_seconds)
+	return sortie
+
+## Ein gesicherter Gegner; leer = ungueltig. Das Ergebnis geht unveraendert in publish.
+func _air_sortie_hostile_valid(id: String, hostile: Variant, source: Node) -> Dictionary:
+	if id.strip_edges().is_empty() or not hostile is Dictionary or hostile.size() != AIR_SORTIE_HOSTILE_KEYS.size() or not hostile.has_all(AIR_SORTIE_HOSTILE_KEYS): return {}
+	var model: Variant = hostile.model_id
+	if typeof(model) != TYPE_STRING or model not in AIR_SORTIE_HOSTILE_MODELS or typeof(hostile.faction_id) != TYPE_STRING or String(hostile.faction_id).strip_edges().is_empty(): return {}
+	if typeof(hostile.position_plane) != TYPE_VECTOR2 or typeof(hostile.velocity_plane) != TYPE_VECTOR2 or not _air_sortie_number(hostile.heading_rad) or not _air_sortie_number(hostile.angular_velocity): return {}
+	if typeof(hostile.spotted) != TYPE_BOOL or typeof(hostile.returned) != TYPE_BOOL or typeof(hostile.target) != TYPE_STRING or not hostile.shots is Dictionary or not hostile.last_shot is Dictionary or not hostile.systems_state is Dictionary or not hostile.cooldowns is Dictionary: return {}
+	var equipment: RefCounted = source.get("_ship_equipment_owner")
+	var combat: RefCounted = source.get("_space_combat_state")
+	if equipment == null or combat == null: return {}
+	var profile: Dictionary = equipment.get_model_flight_profile(model)
+	var stats: Dictionary = SPACE_COMPONENTS.effective_stats(model, SPACE_COMPONENTS.default_loadout(model))
+	if not profile.get("ok", false) or not stats.get("ok", false): return {}
+	var cells: Array = combat.preview_footprint({"position_plane":hostile.position_plane, "heading_rad":float(hostile.heading_rad), "coordinate_frame":"local", "space_area_id":"atmosphere:" + _air_support_location_id}, profile.footprint_hexes)
+	if not _air_support_cells_on_map(cells): return {}
+	var probe: Dictionary = hostile.systems_state.duplicate(true)
+	if not SPACE_COMPONENT_SYSTEMS.advance(stats, probe, 0.0).get("ok", false) or not _air_sortie_number(probe.get("hull"), 0.000001) or not _air_sortie_number(probe.get("hull_capacity")) or not is_equal_approx(float(probe.hull_capacity), float(stats.hull_capacity)) or float(probe.hull) > float(probe.hull_capacity): return {}
+	var slots := {}
+	for weapon in stats.get("weapons", []):
+		if weapon is Dictionary and typeof(weapon.get("slot_id")) == TYPE_STRING: slots[weapon.slot_id] = true
+	for slot in hostile.cooldowns:
+		if typeof(slot) != TYPE_STRING or not slots.has(slot) or not _air_sortie_number(hostile.cooldowns[slot], 0.0): return {}
+	for slot in hostile.shots:
+		if typeof(slot) != TYPE_STRING or not _air_sortie_whole(hostile.shots[slot]): return {}
+	for slot in hostile.last_shot:
+		if typeof(slot) != TYPE_STRING or not _air_sortie_number(hostile.last_shot[slot]): return {}
+	if not _air_sortie_pending_valid(hostile.entry) or hostile.entry.aircraft_id != id or hostile.entry.model_id != model: return {}
+	return hostile.duplicate(true)
+
+func prepare_air_sortie_checkpoint(state: Dictionary, bindings: Dictionary) -> Dictionary:
+	if state.is_empty(): return {"ok":true, "empty":true}
+	if state.size() != 2 or not state.has_all(["schema", "payload"]) or state.schema != AIR_SORTIE_CHECKPOINT_SCHEMA: return _air_sortie_bad()
+	var decoded: Dictionary = AIR_SORTIE_CODEC.decode_value(state.payload)
+	if not decoded.get("ok", false) or not decoded.value is Dictionary: return _air_sortie_bad()
+	var data: Dictionary = decoded.value
+	if data.size() != AIR_SORTIE_DATA_KEYS.size() or not data.has_all(AIR_SORTIE_DATA_KEYS): return _air_sortie_bad()
+	var source: Node = _air_support_source.get_ref() if _air_support_source != null else null
+	var fleet: Variant = bindings.get("fleet")
+	if not is_instance_valid(source) or _air_ground_registry() == null or _air_support_location_id.is_empty() or not fleet is Object or not fleet.has_method("get_flight_state"): return _air_sortie_bad()
+	var wings: Variant = bindings.get("wings", source.get("_space_wing_state"))
+	# Zufallsstand: voller Bereich von draw_air_ground_roll (state & 0x7fffffff), nicht der enge Zaehlerbereich von _air_sortie_whole.
+	if not _air_sortie_whole(data.serial) or typeof(data.rng) != TYPE_INT or int(data.rng) < 0 or int(data.rng) > 0x7fffffff or not _air_sortie_number(data.hostile_clock, 0.0) or not _air_sortie_number(data.hostile_now, 0.0) or not _air_sortie_number(data.hostile_alone, 0.0): return _air_sortie_bad()
+	if typeof(data.hostile_last_own) != TYPE_STRING or not _air_sortie_whole(data.hostile_shot_serial) or typeof(data.hostile_configured) != TYPE_BOOL or typeof(data.hostile_armed) != TYPE_BOOL: return _air_sortie_bad()
+	if not data.hostile_pending is Array or not data.hostiles is Dictionary or not data.sorties is Dictionary or data.sorties.size() > 64 or data.hostiles.size() > 64 or data.hostile_pending.size() > 64: return _air_sortie_bad()
+	var taken := {}
+	var sorties := {}
+	for craft_id in data.sorties:
+		if typeof(craft_id) != TYPE_STRING: return _air_sortie_bad()
+		var sortie: Dictionary = _air_sortie_entry_valid(craft_id, data.sorties[craft_id], fleet, wings, source, int(data.serial))
+		if sortie.is_empty(): return _air_sortie_bad()
+		sorties[craft_id] = sortie
+		taken[craft_id] = true
+	var hostiles := {}
+	for id in data.hostiles:
+		if typeof(id) != TYPE_STRING or taken.has(id): return _air_sortie_bad()
+		var hostile: Dictionary = _air_sortie_hostile_valid(id, data.hostiles[id], source)
+		if hostile.is_empty(): return _air_sortie_bad()
+		hostiles[id] = hostile
+		taken[id] = true
+	var pending: Array = []
+	for entry in data.hostile_pending:
+		if not _air_sortie_pending_valid(entry) or taken.has(entry.aircraft_id): return _air_sortie_bad()
+		taken[entry.aircraft_id] = true
+		pending.append(entry.duplicate(true))
+	return {"ok":true, "candidate":{"serial":int(data.serial), "rng":int(data.rng), "hostile_clock":float(data.hostile_clock), "hostile_now":float(data.hostile_now), "hostile_alone":float(data.hostile_alone), "hostile_last_own":String(data.hostile_last_own),
+		"hostile_shot_serial":int(data.hostile_shot_serial), "hostile_configured":bool(data.hostile_configured), "hostile_armed":bool(data.hostile_armed), "hostile_pending":pending, "hostiles":hostiles, "sorties":sorties}}
+
+## Gibt {"ok":true} zurueck, oder {"ok":false, "reason":"no_source"|"hostile_not_admitted", "failed_hostile_ids":[...]}. Bei hostile_not_admitted ist der Rest geladen; die nicht
+## aufgenommenen Gegner warten in der Warteliste und behalten dort Lage, Systemzustand, Abkuehlzeiten und Merker (Eintrag "restore").
+func publish_air_sortie_checkpoint(candidate: Dictionary) -> Dictionary:
+	if candidate.is_empty() or not candidate.has("sorties"): return {"ok":true}
+	var source: Node = _air_support_source.get_ref() if _air_support_source != null else null
+	if not is_instance_valid(source): return {"ok":false, "reason":"no_source", "failed_hostile_ids":[]}
+	var failed: Array = []
+	_air_hostile_release_all()
+	_air_hostile_state.clear()
+	_air_support_sorties.clear()
+	var craft_ids: Array = candidate.sorties.keys()
+	craft_ids.sort()
+	for craft_id in craft_ids:
+		# Tiefe Kopie: der Kandidat teilt keine Dictionaries mit dem Spielstand (Flug und Quelle bleiben dieselben Objekte).
+		var sortie: Dictionary = Dictionary(candidate.sorties[craft_id]).duplicate(true)
+		var typed_waypoints: Array[Vector2i] = []
+		typed_waypoints.assign(candidate.sorties[craft_id].waypoints)
+		sortie["waypoints"] = typed_waypoints
+		# Zeitgeber der CAS-Sperre: Rest auf die Uhr des Kerns umgerechnet.
+		if sortie.has("cas_friendly_remaining"): sortie["cas_friendly_until"] = _air_cas_clock + float(sortie["cas_friendly_remaining"])
+		sortie.erase("cas_friendly_remaining")
+		_air_support_sorties[craft_id] = sortie
+	_air_sortie_serial = int(candidate.serial)
+	_air_ground_rng_state = int(candidate.rng)
+	_air_hostile_clock = float(candidate.hostile_clock)
+	_air_hostile_now = float(candidate.hostile_now)
+	_air_hostile_alone = float(candidate.hostile_alone)
+	_air_hostile_last_own = String(candidate.hostile_last_own)
+	_air_hostile_shot_serial = int(candidate.hostile_shot_serial)
+	_air_hostile_configured = bool(candidate.hostile_configured)
+	_air_hostile_armed = bool(candidate.hostile_armed)
+	_air_hostile_pending = candidate.hostile_pending.duplicate(true)
+	_air_hostile_poll = 0.0
+	_air_hostile_since_poll = 0.0
+	_air_hostile_retry = 0.0
+	var hostile_ids: Array = candidate.hostiles.keys()
+	hostile_ids.sort()
+	for id in hostile_ids:
+		var hostile: Dictionary = candidate.hostiles[id]
+		var spec := {"aircraft_id":id, "model_id":hostile.model_id, "faction_id":hostile.faction_id, "heading_rad":float(hostile.heading_rad), "position_plane":hostile.position_plane, "velocity_plane":hostile.velocity_plane, "angular_velocity":float(hostile.angular_velocity), "systems_state":hostile.systems_state.duplicate(true), "cooldowns":hostile.cooldowns.duplicate(true)}
+		var cell: Vector2i = SPACE_GRID.HEX.round_axial(SPACE_GRID.HEX.plane_to_axial(hostile.position_plane))
+		if bool(source.call("admit_air_hostile", spec, "atmosphere:" + _air_support_location_id, cell, {"runtime_authorized":true}).get("ok", false)):
+			_air_hostile_ids.append(String(id))
+			# Die Lenkung wird im Verhaltenstakt neu gesetzt (holding false); das Ziel wird dort gegen die eigenen Schiffe geprueft.
+			_air_hostile_state[id] = {"spotted":hostile.spotted, "returned":hostile.returned, "model_id":hostile.model_id, "entry":hostile.entry.duplicate(true), "target":hostile.target, "holding":false, "shots":hostile.shots.duplicate(true), "last_shot":hostile.last_shot.duplicate(true)}
+		else:
+			# Aufnahme nicht moeglich (Platz belegt): der Gegner wartet in der Warteliste (Eintrag wie nach dem Abdrehen) und behaelt Lage, Systemzustand, Abkuehlzeiten
+			# und Merker im Zusatzfeld "restore"; der Aufrufer erfaehrt es ueber den Rueckgabewert.
+			failed.append(String(id))
+			push_warning("Luftrollen 5a: Gegner %s konnte nicht aufgenommen werden, er wartet in der Warteliste" % String(id))
+			var again: Dictionary = hostile.entry.duplicate(true)
+			again["base_delay"] = float(again.get("base_delay", again.get("delay_seconds", 20.0)))
+			again["delay_seconds"] = _air_hostile_clock
+			again["hull"] = float(hostile.systems_state.hull)
+			again["restore"] = {"position_plane":hostile.position_plane, "velocity_plane":hostile.velocity_plane, "heading_rad":float(hostile.heading_rad), "angular_velocity":float(hostile.angular_velocity), "systems_state":hostile.systems_state.duplicate(true),
+				"cooldowns":hostile.cooldowns.duplicate(true), "spotted":bool(hostile.spotted), "returned":bool(hostile.returned), "target":String(hostile.target), "shots":hostile.shots.duplicate(true), "last_shot":hostile.last_shot.duplicate(true)}
+			_air_hostile_pending.append(again)
+	# Rollenbefehle: die Kennungen cas_order_id / air_order_id werden nicht gesichert, sondern aus dem Rottenbefehl abgeleitet (der Rottenstand sichert den Befehl mit,
+	# er muss vor dem Luft-Block geladen sein). Kennung "air-ground-order:air-role-cas:<Schiff>:" = Befehl der Rolle CAS, "air-role-ad:<Schiff>:" = Befehl des Luftschutzes;
+	# jede andere Kennung bleibt ein Spielerbefehl. Ohne Befehl bleiben beide leer, die Rolle waehlt neu.
+	for craft_id in craft_ids:
+		var order: Dictionary = _air_wing_order(String(craft_id))
+		if order.get("verb") != "attack_target": continue
+		var order_id := String(order.get("order_id", ""))
+		if order_id.begins_with(AIR_GROUND_ORDER_PREFIX + AIR_CAS_REQUEST_PREFIX + String(craft_id) + ":"): _air_support_sorties[craft_id]["cas_order_id"] = order_id
+		elif order_id.begins_with(AIR_AD_REQUEST_PREFIX + String(craft_id) + ":"): _air_support_sorties[craft_id]["air_order_id"] = order_id
+	# Lenkung: aktueller Wegpunkt der Rundbahn bzw. die Landezone im Rueckflug. Ein Fehlschlag ist nicht schlimm, der Takt setzt sie sonst von selbst.
+	for craft_id in craft_ids:
+		var sortie: Dictionary = _air_support_sorties[craft_id]
+		if not String(sortie.returning).is_empty(): _air_set_goal(craft_id, sortie.landing_grid)
+		elif not Array(sortie.waypoints).is_empty(): _air_goto_waypoint(craft_id, sortie, int(sortie.waypoint_index))
+	if failed.is_empty(): return {"ok":true}
+	return {"ok":false, "reason":"hostile_not_admitted", "failed_hostile_ids":failed}
 
 func set_air_hostile_control(hostile_id: String, goal: Dictionary, mission_root: Node) -> Dictionary:
 	if _should_skip_local_tick_processing(): return {"ok":false, "reason":"not_authority"}

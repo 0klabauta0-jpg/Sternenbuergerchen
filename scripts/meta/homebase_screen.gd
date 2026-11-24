@@ -9183,6 +9183,13 @@ func _operations_craft_busy(craft_id: String) -> bool:
 	return _is_craft_in_transit(craft_id) or _has_active_pilot_transfer_for_craft(craft_id) or _has_active_cargo_load_for_craft(craft_id) or _get_aircraft_location(craft_id) != "homebase"
 
 
+## Das Schiff hat die Basis wirklich verlassen (im Flug, im Orbit, im Einsatz, an einem anderen Ort). Beladen/Boarding am Pad zaehlt nicht.
+func _operations_craft_away(craft_id: String) -> bool:
+	if craft_id.is_empty():
+		return false
+	return _is_craft_in_transit(craft_id) or _get_aircraft_location(craft_id) != "homebase"
+
+
 func _can_join_boarded_team_as_pilot(unit_id: String, fireteam_id: String) -> bool:
 	if get_base_personnel_runtime() == null: return false
 	var craft_id := _operations_payload_craft_for_team(fireteam_id)
@@ -9234,6 +9241,7 @@ func _operations_unit_entry(unit_data: Dictionary) -> Dictionary:
 		"secondary_role":String(profile.secondary_specialty) if profile!=null else "",
 		"condition":String(profile.status_text) if profile!=null else "",
 		"fireteam_id": fireteam_id, "busy": busy, "in_transit": in_transit,
+		"away": in_transit or physical_status == "away" or (not payload_craft.is_empty() and _operations_craft_away(payload_craft)) or (not pilot_craft.is_empty() and _operations_craft_away(pilot_craft)),
 		"can_assign": not busy and not target_busy and fireteam_id != _focused_fireteam_id and focused_members.size() < 4 and capacity_available,
 		"can_remove": not busy and not fireteam_id.is_empty(),
 		"can_edit": (not busy and not fireteam_id.is_empty()) or outside_campaign, "loadout": _get_member_loadout(id)}
@@ -9324,7 +9332,7 @@ func get_operations_snapshot(include_runtime: bool = true) -> Dictionary:
 		var craft: Dictionary = {"id": id, "name": String(definition.get("display_name", "Dropship")),
 			"texture_path": String(definition.get("texture_path", "")), "pilot_id": pilot_id, "pilot_aboard": pilot_present and not pilot_id.is_empty(),
 			"pilot_name": _build_display_name(pilot_id) if not pilot_id.is_empty() else "", "pilot_options": pilots,
-			"busy": busy, "status": status, "progress": progress, "next_step": next_step,
+			"busy": busy, "away": _operations_craft_away(id), "status": status, "progress": progress, "next_step": next_step,
 			"has_payload": not payload_teams.is_empty(), "payload_fireteam_ids": Array(payload_teams),
 			"passenger_count": payload_ids.size(), "aboard_count":int(presence.aboard_count), "can_start": can_start,
 			"can_board": not busy and bool(gate.get("can_stage", false)) and not Array(focused_team.get("members", [])).is_empty() and (not bool(focused_team.get("busy", false)) or (payload_teams.has(_focused_fireteam_id) and not pilot_present)),

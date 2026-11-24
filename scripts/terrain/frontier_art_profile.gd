@@ -66,13 +66,47 @@ func apply_light(light: DirectionalLight3D) -> void:
 	light.rotation_degrees = Vector3(-52.0, -32.0, 0.0)
 	light.shadow_opacity = 0.72
 	light.shadow_blur = 1.8
-	light.shadow_normal_bias = 0.45
-	light.shadow_bias = 0.025
+	# One cascade: texel size is constant across the picture and there are no
+	# cascade seams that travel through the view while zooming.
+	light.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
+	light.directional_shadow_fade_start = 0.95
+	light.shadow_normal_bias = 0.25
+	light.shadow_bias = 0.04
 	if homebase_palette or quiet_tactical_surface:
 		# Flat rock crowns and wide ground showed striped self-shadowing.
-		light.shadow_normal_bias = 1.0
-		light.shadow_bias = 0.075
-	light.directional_shadow_max_distance = 45.0
+		# That was tuned against four cascades with a large bias (1.0 / 0.075),
+		# which detached shadows from building bases. With one cascade the
+		# texel size is the same everywhere, so the small bias above holds;
+		# flat ground caps cast no shadow anyway (hex_ground_batch.gd).
+		light.shadow_normal_bias = 0.25
+		light.shadow_bias = 0.04
+	# Start width; the map view re-sets it from the camera size (see below).
+	light.directional_shadow_max_distance = SHADOW_DISTANCE_STAGES[0][1]
+
+## Shadow reach in fixed stages tied to the orthogonal camera size S: the
+## camera sits about 1.32 * S from the focus and the top edge of the picture
+## about 2.03 * S, so every stage keeps width >= 2.1 * S up to its end size.
+## Inside a stage the width never changes (no moving cascade or texel grid).
+## `previous` is the width used so far (0 for none); stepping down needs a 10 %
+## margin, so wheel steps back and forth over a stage edge do not flip it.
+const SHADOW_DISTANCE_STAGES := [[26.0, 60.0], [50.0, 110.0], [115.0, 250.0]]
+const SHADOW_DISTANCE_REACH := 2.1
+const SHADOW_DISTANCE_ROUND := 50.0
+const SHADOW_DISTANCE_SHRINK_MARGIN := 0.9
+
+static func _shadow_distance_stage(size: float) -> float:
+	for stage in SHADOW_DISTANCE_STAGES:
+		if size <= float(stage[0]):
+			return float(stage[1])
+	return ceilf(SHADOW_DISTANCE_REACH * size / SHADOW_DISTANCE_ROUND) * SHADOW_DISTANCE_ROUND
+
+static func shadow_distance_for_size(size: float, previous: float) -> float:
+	var wanted := _shadow_distance_stage(size)
+	if previous <= wanted:
+		return wanted
+	# Smaller than before: only drop when the size is clearly inside the lower stage.
+	var lowered := _shadow_distance_stage(size / SHADOW_DISTANCE_SHRINK_MARGIN)
+	return minf(previous, lowered)
 
 func configure_surface_blend(tiles: Array, axis_q: Vector2, axis_r: Vector2) -> void:
 	_blend=load("res://scripts/terrain/terrain_surface_blend.gd").build(tiles)

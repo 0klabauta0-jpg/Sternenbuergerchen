@@ -382,7 +382,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	elif phase == "orbit" and String(preparation.get("status", "")) == "cancelled":
 		_error.text = ""
 	_close.visible = phase in ["grounded", "orbit", "quantum", "stopped"]
-	_close.text = "Abflug vorbereiten" if phase == "grounded" else "Trupp & Ausrüstung"
+	_close.text = "Abflug vorbereiten" if phase == "grounded" else "Trupp"
 	var campaign: Dictionary = _runtime.get("campaign", {})
 	_update_fuel_help()
 	var locations: Dictionary = campaign.get("locations", {})

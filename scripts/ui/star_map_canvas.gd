@@ -37,6 +37,9 @@ const MIN_ZOOM := 0.55
 const MAX_ZOOM := 32.0
 const MIN_ORBIT_RADIUS_PX := 10.0
 const MIN_LOCATION_DIAMETER_PX := 20.0
+const HOME_LABEL := "Heimatbasis"
+const HOME_FONT_SIZE := 12
+var _home_marker_draws := 0
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(maxf(custom_minimum_size.x, 350), 250)
@@ -452,10 +455,72 @@ func _draw() -> void:
 		if _camera_zoom >= 3.0:
 			var letter: String = {"satellite_crash": "A", "trade_outpost": "B", "fortified_outpost": "C"}.get(id, "")
 			draw_string(ThemeDB.fallback_font, _hex_center(hex) + Vector2(-4, 4), letter, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("ebfaff"))
+	_draw_home_marker()
 	if _selection_active and _selection_start.distance_to(_selection_end) >= 6.0:
 		var box := Rect2(_selection_start, _selection_end - _selection_start).abs()
 		draw_rect(box, Color(0.3, 0.85, 0.95, 0.18), true)
 		draw_rect(box, Color("77dce9"), false, 1.0)
+
+
+## Rechteck des Auftragsmarkers ("!" mit Strich ueber dem Ort), im Leinwandraum. Leer, wenn der Ort keinen angenommenen Auftrag hat.
+func get_job_marker_rect(id: String) -> Rect2:
+	if not bool(Dictionary(_locations.get(id, {})).get("accepted_job", false)):
+		return Rect2()
+	var body: Dictionary = _body_for_location(id)
+	if body.is_empty() or _world == null:
+		return Rect2()
+	var point := _hex_center(_location_marker_polygon(body))
+	return Rect2(point + Vector2(-7, -26), Vector2(14, 24))
+
+
+## Rechteck des Heimat-Markers (Haus + "Heimatbasis") im Leinwandraum. Er haengt nur am Himmelskoerper der Heimat (surface_location_id
+## "homebase"), nicht an Auswahl, Zoom oder Auftrag. Platz: links vom Koerper; trifft das den Auftragsmarker eines Ortes, rechts, dann unten.
+func get_home_marker_rect() -> Rect2:
+	var body: Dictionary = _body_for_location("homebase")
+	if body.is_empty() or _world == null:
+		return Rect2()
+	var polygon := _location_marker_polygon(body)
+	var center := _hex_center(polygon)
+	var radius := 0.0
+	for point in polygon:
+		radius = maxf(radius, point.distance_to(center))
+	var text_size := ThemeDB.fallback_font.get_string_size(HOME_LABEL, HORIZONTAL_ALIGNMENT_LEFT, -1, HOME_FONT_SIZE)
+	var plate := Vector2(26.0 + text_size.x + 8.0, 22.0)
+	var gap := radius + 8.0
+	var candidates: Array[Rect2] = [
+		Rect2(center + Vector2(-gap - plate.x, -plate.y * 0.5), plate),
+		Rect2(center + Vector2(gap, -plate.y * 0.5), plate),
+		Rect2(center + Vector2(-plate.x * 0.5, gap), plate),
+	]
+	var jobs: Array[Rect2] = []
+	for id in _locations:
+		var job_rect := get_job_marker_rect(String(id))
+		if job_rect.has_area():
+			jobs.append(job_rect)
+	for candidate in candidates:
+		var free := true
+		for job_rect in jobs:
+			if candidate.intersects(job_rect):
+				free = false
+		if free and Rect2(Vector2.ZERO, size).encloses(candidate):
+			return candidate
+	return candidates[0]
+
+
+func _draw_home_marker() -> void:
+	var rect := get_home_marker_rect()
+	if not rect.has_area():
+		return
+	_home_marker_draws += 1
+	var gold := Color("f2c47c")
+	draw_rect(rect, Color(0.024, 0.055, 0.094, 0.9), true)
+	draw_rect(rect, gold, false, 1.5)
+	var origin := rect.position + Vector2(5.0, 2.0)
+	# Haus: Dach (Dreieck), Wand, Tuer.
+	draw_colored_polygon(PackedVector2Array([origin + Vector2(9, 1), origin + Vector2(0, 9), origin + Vector2(18, 9)]), gold)
+	draw_rect(Rect2(origin + Vector2(3, 9), Vector2(12, 9)), Color("e8fff8"), true)
+	draw_rect(Rect2(origin + Vector2(7, 12), Vector2(4, 6)), Color("0d2935"), true)
+	draw_string(ThemeDB.fallback_font, rect.position + Vector2(26.0, 15.0), HOME_LABEL, HORIZONTAL_ALIGNMENT_LEFT, -1, HOME_FONT_SIZE, Color("f4f2e9"))
 
 
 func _draw_orbit_markers() -> void:

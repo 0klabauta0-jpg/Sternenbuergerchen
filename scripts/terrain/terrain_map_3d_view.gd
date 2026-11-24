@@ -1244,6 +1244,7 @@ var _runtime_terrain_registry: WeakRef
 var _fire_sector_los_cache: Dictionary = {}
 var _fire_sector_los_cache_signature: String = ""
 var _frontier_art_enabled: bool = false
+var _shadow_max_distance: float = 0.0
 var _frontier_art_override: int = -1 # -1 follows the map/CLI; 0/1 are explicit visual overrides.
 var _external_terrain_object_visuals: Dictionary = {}
 var _flat_ground_visual_owner: WeakRef
@@ -4123,6 +4124,7 @@ func _apply_editor_light_settings() -> void:
 	light.shadow_blur = EDITOR_LIGHT_SHADOW_BLUR
 	if _frontier_art_enabled:
 		_frontier_art_profile.apply_light(light)
+		_update_shadow_distance_for_camera()
 	if _is_mixed_ground_palette():
 		light.light_energy = 0.80
 		light.light_color = Color("f5e2c2")
@@ -4244,11 +4246,26 @@ func _read_terrain_visual_theme_id(terrain_map_data) -> String:
 	return String(terrain_map_data.call("get_terrain_visual_theme_id")).strip_edges().to_lower()
 
 
+func _update_shadow_distance_for_camera() -> void:
+	# Shadow reach follows the camera size in fixed stages with hysteresis, so
+	# cascade/texel grid stay still between stages (no brightness flicker while
+	# zooming) and the far picture edge still receives shadows.
+	if not _frontier_art_enabled or _world_root == null:
+		return
+	var light := _world_root.get_node_or_null(LIGHT_NAME) as DirectionalLight3D
+	if light == null:
+		return
+	_shadow_max_distance = FRONTIER_ART_PROFILE_SCRIPT.shadow_distance_for_size(_camera_size, _shadow_max_distance)
+	if not is_equal_approx(light.directional_shadow_max_distance, _shadow_max_distance):
+		light.directional_shadow_max_distance = _shadow_max_distance
+
+
 func _update_camera_transform() -> void:
 	_ensure_nodes()
 	if _camera == null:
 		return
 	_camera.size = _camera_size
+	_update_shadow_distance_for_camera()
 	var focus_3d: Vector3 = _grid_to_3d_position(_focus_grid_position, 0.0)
 	var yaw_rad: float = deg_to_rad(_camera_yaw_degrees)
 	var pitch_rad: float = deg_to_rad(_camera_pitch_degrees)
