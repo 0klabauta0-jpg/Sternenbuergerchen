@@ -64,6 +64,25 @@
 			"block_rects": [
 				[24.8, 4.69, 5.4, 2.74]
 			]
+		},
+		{
+			"id": "treibstofftank",
+			"mode": "replace",
+			"replaces": "utility_fuel_01",
+			"model": "res://art/tripo_models_20261124/basis_treibstofftank_01.glb",
+			"role": "Tankstation am Flugdeck (ersetzt die alte Zapfstelle utility_fuel_01)",
+			"raw_size_model": [0.9995, 0.5981, 0.8208],
+			"raw_tris": 4128,
+			"scale": 1.2367,
+			"real_height_range": [2.5, 4.0],
+			"scale_note": "Rohmass 1,00 x 0,60 x 0,82 (Blender-Einheiten). Gewaehlt 3,0 m Tankhoehe im Menschenmass (Figur 0,609 m = 1,8 m): 0,8208 * 3,655 m je Einheit = 3,0 m; Spielfaktor = 3,655 * 0,338 = 1,2367. Wirkt 3,65 x 2,19 x 3,0 m. Grund: ein Bodentank fuer Schiffsbetankung, gut mannshoch (>= 2,5 m), unter dem Dach eines Hangars (<= 4 m).",
+			"rotation_y_deg": 0.0,
+			"offset": [0.0, 0.0, -0.97],
+			"offset_note": "0,97 m nach Norden (z-) gegenueber der alten Zapfstelle, damit der Rahmen mindestens 1 m von beiden Landepads (Rand z 12,59) entfernt bleibt.",
+			"keep_free_terminals": ["refuel"],
+			"block_rects": [
+				[26.05, 10.75, 1.30, 0.80]
+			]
 		}
 	],
 	"terminal_note": "Lage der Terminals als Ueberlagerung beim Laden (statt in der 27-MB-Karte). plane = Benutzen-Stelle in Ebenenmetern (wird auf das naechste Feld gerundet). new=true legt den Eintrag an.",

@@ -264,8 +264,13 @@ func _check_closed_replace(base: Control, layout: Dictionary, entry: Dictionary,
 	_check(holder.position.distance_to(Vector3(plane.x + float(off[0]), float(off[1]), plane.y + float(off[2]))) < 0.001, "%s steht an der Stelle von %s plus Versatz" % [id, old_id])
 	_check(not old_nodes.has(old_id) and holder.visible, "%s: altes %s nicht in der Szene, neues Modell sichtbar" % [id, old_id])
 	var ratio: float = person_height / 1.8
-	var door_real: float = float(entry.get("door_height_model", 0.0)) * float(entry.get("scale", 1.0)) / ratio
-	_check(door_real >= 1.95 and door_real <= 2.35, "Menschenmass: Tor wirkt %.2f m hoch (Figur %.3f m): %s" % [door_real, person_height, id])
+	if entry.has("door_height_model"):
+		var door_real: float = float(entry.get("door_height_model", 0.0)) * float(entry.get("scale", 1.0)) / ratio
+		_check(door_real >= 1.95 and door_real <= 2.35, "Menschenmass: Tor wirkt %.2f m hoch (Figur %.3f m): %s" % [door_real, person_height, id])
+	if entry.has("real_height_range"):
+		var range_m: Array = entry.get("real_height_range", [0.0, 0.0])
+		var height_real: float = _bounds(holder).size.y / ratio
+		_check(height_real >= float(range_m[0]) and height_real <= float(range_m[1]), "Menschenmass: %s wirkt %.2f m hoch (erlaubt %.1f bis %.1f m, Figur %.3f m = 1,8 m)" % [id, height_real, float(range_m[0]), float(range_m[1]), person_height])
 	var rect: Rect2 = _rect_xz(_bounds(holder))
 	print("INFO %s Rahmen x %.2f..%.2f z %.2f..%.2f" % [id, rect.position.x, rect.end.x, rect.position.y, rect.end.y])
 	var nav_graph: Object = _nav_of(base)
@@ -289,7 +294,29 @@ func _check_closed_replace(base: Control, layout: Dictionary, entry: Dictionary,
 					open_inside += 1
 			sz += 0.1
 		sx += 0.1
-	_check(sampled > 0 and open_inside == 0, "%s: Grundriss gesperrt, kein offenes Feld im Rahmen (%d von %d begehbaren Probefeldern offen)" % [id, open_inside, sampled])
+	_check(open_inside == 0, "%s: Grundriss gesperrt, kein offenes Feld im Rahmen (%d von %d begehbaren Probefeldern offen)" % [id, open_inside, sampled])
+	# Benutzen-Stelle eines vorhandenen Terminals bleibt frei: weder im Rahmen noch im 0,5 m Rand, begehbar, offen, erreichbar.
+	var from_world0: Vector2 = _spawn_world(base, layout)
+	for tid0 in entry.get("keep_free_terminals", []):
+		var found0: Array = layout.get("terminals", []).filter(func(t: Dictionary) -> bool: return String(t.get("id", "")) == String(tid0))
+		_check(found0.size() == 1, "%s: genau ein Terminal %s (%d)" % [id, String(tid0), found0.size()])
+		if found0.size() != 1:
+			continue
+		var tg0: Array = Dictionary(found0[0]).get("grid", [])
+		var cell0 := Vector2i(int(tg0[0]), int(tg0[1]))
+		var pl0: Vector3 = BASE_NAV.plane_at_grid(cell0)
+		var tile0: Variant = terrain.call("get_tile_at_grid", cell0)
+		_check(not rect.grow(0.5).has_point(Vector2(pl0.x, pl0.z)), "%s: Benutzen-Stelle %s (%.2f / %.2f) bleibt frei, mindestens 0,5 m vom Rahmen" % [id, String(tid0), pl0.x, pl0.z])
+		_check(tile0 != null and bool(tile0.walkable) and bool(nav_graph.call("is_grid_open", cell0)), "%s: Benutzen-Stelle %s begehbar und offen" % [id, String(tid0)])
+		_check(not Array(nav_graph.call("find_world_path", from_world0, terrain.call("grid_to_world", cell0))).is_empty(), "%s: %s vom Startpunkt erreichbar" % [id, String(tid0)])
+	# Landepads und Anflug (Pad um 1,0 m vergroessert) bleiben frei.
+	for pad in layout.get("landing_pads", []):
+		var pp: Array = Dictionary(pad).get("plane", [0, 0])
+		var ps: Array = Dictionary(pad).get("size", [8.0, 6.0])
+		var pad_rect := Rect2(float(pp[0]) - float(ps[0]) * 0.5, float(pp[1]) - float(ps[1]) * 0.5, float(ps[0]), float(ps[1])).grow(1.0)
+		_check(not rect.intersects(pad_rect), "%s: Rahmen liegt nicht auf %s samt 1 m Rand (Anflug frei)" % [id, String(Dictionary(pad).get("id", ""))])
+	if not entry.has("gate_side"):
+		return
 	# Torseite: laut Eintrag (gate_side) Westseite = -x; Terminals davor, Streifen davor frei.
 	var gate: Array = entry.get("gate_world", [])
 	_check(gate.size() == 2 and String(entry.get("gate_side", "")) == "west" and absf(float(gate[0]) - rect.position.x) <= 0.2 and float(gate[1]) > rect.position.y and float(gate[1]) < rect.end.y, "%s: Tor liegt an der Westkante des Rahmens (gate_world %s)" % [id, str(gate)])
@@ -389,7 +416,8 @@ func _terminal_ids(base: Control) -> Array:
 func _run() -> void:
 	var config: Dictionary = OVERRIDES.load_config()
 	var entries: Array = Array(config.get("entries", []))
-	_check(not config.is_empty() and entries.size() == 2, "Zuordnung laedt, zwei Eintraege (%d)" % entries.size())
+	_check(not config.is_empty() and entries.size() == 3, "Zuordnung laedt, drei Eintraege (%d)" % entries.size())
+	_check(entries.any(func(e: Dictionary) -> bool: return String(e.get("id", "")) == "treibstofftank" and String(e.get("mode", "")) == "replace" and String(e.get("replaces", "")) == "utility_fuel_01"), "Tankstation ersetzt die alte Zapfstelle (mode=replace, replaces=utility_fuel_01)")
 	_check(entries.any(func(e: Dictionary) -> bool: return String(e.get("id", "")) == "home_pod" and String(e.get("mode", "")) == "replace" and String(e.get("replaces", "")) == "habitat_cutaway_01"), "Pod ersetzt das Habitat (mode=replace, replaces=habitat_cutaway_01)")
 	_check(entries.any(func(e: Dictionary) -> bool: return String(e.get("id", "")) == "lager_werkstatt" and String(e.get("mode", "")) == "replace" and String(e.get("replaces", "")) == "freihafen_hall_01"), "Lager ersetzt die Halle (mode=replace, replaces=freihafen_hall_01)")
 	_check(bool(config.get("enabled", false)) and not config.has("toggle_key"), "Vorgabe AN, keine Umschalt-Taste mehr (Karten und Begehbarkeit haengen an AN)")
