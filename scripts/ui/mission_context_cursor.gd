@@ -100,7 +100,7 @@ func update_objective_feedback() -> void:
 		selected_active=selected_active or bool(_controller.call("_is_fireteam_runtime_active",String(id)))
 	_objective_progress.value=progress*100
 	_objective_progress.visible=not complete
-	_objective_action.visible=not complete
+	_objective_action.visible=not complete and status!="in_progress"
 	_objective_action.disabled=_controller.get("_selected_fireteam_ids").is_empty() or bool(satellite.get("blocked",false)) or status=="in_progress" or not selected_active or not bool(_controller.call("_can_issue_local_commands"))
 	if complete:
 		_objective_text.text="✓ Daten gesichert\nZum Schiff zurück und einsteigen – es hebt dann ab. Dort: Basis → Datenterminal."
@@ -122,22 +122,55 @@ func update_objective_feedback() -> void:
 
 func _hide_objective_panel() -> void:
 	if _objective_panel!=null and _objective_panel.visible: _objective_panel.hide()
-var _swallow_left_release := false
+const MARKER_DRAG_THRESHOLD := 10.0
+var _marker_press_active := false
+var _marker_press_position := Vector2.ZERO
+## Einheit hat Vorrang; erledigte/gesperrte Marker und fehlende Auswahl verbrauchen keinen Linksklick.
+static func marker_consumes_left_click(has_selection: bool, unit_under_pointer: bool, target: Dictionary) -> bool:
+	if not has_selection or unit_under_pointer or target.is_empty(): return false
+	if String(target.get("kind",""))!="interaction": return false
+	return not bool(target.get("complete",false)) and not bool(target.get("blocked",false))
+func _left_press_hits_active_marker(position: Vector2) -> bool:
+	var has_selection:bool=not _controller.get("_selected_fireteam_ids").is_empty()
+	var unit_hit:bool=has_selection and _controller.call("_find_selectable_unit_at_screen_position",position)!=null
+	return marker_consumes_left_click(has_selection,unit_hit,refresh_at(position) if has_selection and not unit_hit else {})
+func _activate_left_click(position: Vector2) -> void:
+	var target:=refresh_at(position)
+	if target.is_empty() or String(target.get("kind",""))!="interaction": return
+	var entry:Dictionary=target.get("entry",{})
+	# Steht ein gewaehlter Trupp schon in Reichweite: sofort starten (wie Klick + GO), sonst nur vormerken.
+	if bool(entry.get("can_use_now",false)) and String(entry.get("runtime_use_status",""))=="usable":
+		var result:Dictionary=_controller.call("create_selected_mission_interaction_use_intent",String(target.id),true)
+		if result.get("accepted",false):
+			_controller.call("execute_selected_fireteam_orders")
+			update_objective_feedback()
+			return
+	activate_at(position)
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion and _marker_press_active:
+		var motion:=event as InputEventMouseMotion
+		if motion.position.distance_to(_marker_press_position)>=MARKER_DRAG_THRESHOLD:
+			# Auswahlrahmen beginnt auf dem Marker: an die normale Auswahl uebergeben.
+			_marker_press_active=false
+			_controller.call("_begin_selection_interaction",_marker_press_position,false)
+		return
 	if not (event is InputEventMouseButton): return
 	var button_event:=event as InputEventMouseButton
 	if button_event.button_index==MOUSE_BUTTON_LEFT and not button_event.pressed:
-		# Das Loslassen zu einem verbrauchten Linksklick nicht an die Auswahl weiterreichen.
-		if _swallow_left_release:
-			_swallow_left_release=false; get_viewport().set_input_as_handled()
+		if _marker_press_active:
+			_marker_press_active=false
+			if button_event.position.distance_to(_marker_press_position)>=MARKER_DRAG_THRESHOLD:
+				_controller.call("_begin_selection_interaction",_marker_press_position,false)
+				return
+			_activate_left_click(_marker_press_position)
+			get_viewport().set_input_as_handled()
 		return
 	if not button_event.pressed or button_event.shift_pressed: return
 	if button_event.button_index==MOUSE_BUTTON_LEFT:
-		# Auftragsmarker: Linksklick loest die Aktion aus und verbraucht den Klick (Auswahl bleibt).
-		var target:=refresh_at(button_event.position)
-		if target.is_empty() or String(target.get("kind",""))!="interaction": return
-		if activate_at(button_event.position).get("handled",false):
-			_swallow_left_release=true; get_viewport().set_input_as_handled()
+		# Aktiver Auftragsmarker: Linksklick (ohne Ziehen) loest die Aktion beim Loslassen aus.
+		if _left_press_hits_active_marker(button_event.position):
+			_marker_press_active=true; _marker_press_position=button_event.position
+			get_viewport().set_input_as_handled()
 	elif button_event.button_index==MOUSE_BUTTON_RIGHT:
 		# Nur das eigene Schiff (Einsteigen) bleibt am Rechtsklick; sonst gilt der normale Bewegungsbefehl.
 		var target:=refresh_at(button_event.position)

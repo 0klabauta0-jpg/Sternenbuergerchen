@@ -92,6 +92,8 @@ func _check_scene(size: Vector2i) -> void:
 	var close := popup.get_node("Contents/CloseButton") as Button
 	_check(popup.visible and not paused, prefix + "native transport details open without pausing")
 	_check(Rect2(Vector2.ZERO, Vector2(size)).encloses(Rect2(Vector2(popup.position), Vector2(popup.size))), prefix + "details popup fits the actual viewport")
+	var popup_rect := Rect2(Vector2(popup.position), Vector2(popup.size))
+	_check(popup_rect.position.x >= float(size.x) * 0.5 and not popup_rect.has_point(Vector2(size) * 0.5), prefix + "details popup sits in the right half and leaves the screen centre free")
 	_check(popup.get_node_or_null("Contents/Scroll/A5DropshipFullPanel") != null, prefix + "full existing transport controls have a native scroll owner")
 	for refresh in range(3):
 		controller.call("_refresh_mission_dropship_panel")

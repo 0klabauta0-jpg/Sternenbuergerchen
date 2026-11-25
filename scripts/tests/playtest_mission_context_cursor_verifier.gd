@@ -40,6 +40,38 @@ func _run() -> void:
 	var result:Dictionary=cursor.activate_at(pointer)
 	check(result.get("handled",false) and result.get("ok",false),"context rightclick queues existing actual Use intent")
 	check(driver.get_mission_scenario_runtime_gate_snapshot()==before,"queued Use still requires GO and real duration")
+	# (a) Klickregeln: Einheit hat Vorrang, erledigte/gesperrte Marker verbrauchen keinen Klick, ohne Auswahl auch nicht.
+	var active_marker:Dictionary={"kind":"interaction","complete":false,"blocked":false}
+	check(cursor.marker_consumes_left_click(true,false,active_marker),"aktiver Marker mit Auswahl verbraucht den Linksklick")
+	check(not cursor.marker_consumes_left_click(true,true,active_marker),"Linksklick auf eine eigene Einheit am Marker waehlt die Einheit")
+	check(not cursor.marker_consumes_left_click(true,false,{"kind":"interaction","complete":true,"blocked":false}),"erledigter Marker verbraucht keinen Klick")
+	check(not cursor.marker_consumes_left_click(true,false,{"kind":"interaction","complete":false,"blocked":true}),"gesperrter Marker verbraucht keinen Klick")
+	check(not cursor.marker_consumes_left_click(false,false,active_marker),"ohne Auswahl verbraucht der Marker keinen Klick")
+	# Einheit direkt am Marker: echter Linksklick waehlt, vormerken findet nicht statt.
+	var unit_pos:Vector2=(controller.call("_get_fireteam_units","ft1",true)[0] as Node2D).global_position
+	var unit_pointer:Vector2=view.world_to_screen_position(unit_pos)
+	check(controller.call("_find_selectable_unit_at_screen_position",unit_pointer)!=null,"Einheit am Marker ist anwaehlbar")
+	var intent_before:Variant=controller.get("_last_mission_interaction_use_intent_snapshot").duplicate(true)
+	var press_unit:=InputEventMouseButton.new();press_unit.button_index=MOUSE_BUTTON_LEFT;press_unit.pressed=true;press_unit.position=unit_pointer;cursor._unhandled_input(press_unit)
+	check(not bool(cursor.get("_marker_press_active")),"Klick auf Einheit am Marker startet keine Marker-Aktion")
+	# (b) In Reichweite, keine Einheit unter dem Zeiger: Linksklick startet sofort ohne GO.
+	var j:=0
+	for unit: Node2D in controller.call("_get_fireteam_units","ft1",true): unit.position=target+Vector2(45+j*3,0);j+=1
+	await process_frame
+	var entry_now:Dictionary={}
+	for e:Dictionary in controller.call("get_mission_interaction_runtime_use_state_snapshot").get("interactions",[]):
+		if String(e.get("interaction_id",""))=="satellite_data": entry_now=e
+	print("DIRECT_ENTRY can_use_now=",entry_now.get("can_use_now"), " status=",entry_now.get("runtime_use_status"))
+	check(bool(entry_now.get("can_use_now",false)),"Einheiten in Reichweite: Marker ist sofort benutzbar")
+	check(controller.call("_find_selectable_unit_at_screen_position",pointer)==null,"kein Truppmitglied unter dem Zeiger am Marker")
+	for pressed in [true,false]:
+		var direct:=InputEventMouseButton.new();direct.button_index=MOUSE_BUTTON_LEFT;direct.pressed=pressed;direct.position=pointer;root.push_input(direct,true)
+		await process_frame
+	var direct_use:Dictionary=controller.get("_last_mission_interaction_use_intent_snapshot")
+	var direct_wp:Variant=controller.call("_get_waypoint_from_ref",direct_use) if direct_use.get("accepted",false) else null
+	check(direct_use.get("accepted",false) and direct_wp!=null and String(direct_wp.status)=="active","Linksklick in Reichweite startet die Aktion ohne GO (Wegpunkt aktiv)")
+	cursor.update_objective_feedback()
+	check(not String(cursor.get("_objective_text").text).contains("GO drücken"),"kein Vormerk-Fenster mit GO bei direktem Start")
 	controller.call("set_tactical_ui_visible",false)
 	check(cursor.refresh_at(pointer).is_empty(),"hidden live mission clears hints and cannot accept contextual rightclick")
 	check(not cursor.activate_at(pointer).get("handled",false),"hidden mission cannot consume another view rightclick")
