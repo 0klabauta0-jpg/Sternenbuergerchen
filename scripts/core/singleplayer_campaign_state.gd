@@ -183,8 +183,8 @@ func validate_location_visit(location_id: String, retry_allowed: bool = false) -
 	return _reject("tutorial_locked", "Zuerst den vorherigen Kampagnenauftrag abschließen und Chips zuhause hochladen")
 
 ## Freigabe 25.11.2026: Szenario des freien Besuchs ohne Auftrag (open_outposts.json). Wie open_visit_scenario_id (nach abgeschlossenem Story-Auftrag),
-## zusaetzlich auch VOR dem Auftrag, solange dort kein Auftrag angenommen/aktiv/hochzuladen/gescheitert ist (dann gilt nur dessen Szenario bzw. die
-## Wiederholungsregel). "" = kein freier Besuch. Nur in der Kampagne; nur lesend, aendert keinen Zustand und keine Auftragskette.
+## zusaetzlich auch VOR dem Auftrag, solange dort kein Auftrag angenommen/aktiv/hochzuladen ist (dann gilt nur dessen Szenario). Auch nach einem gescheiterten Auftrag
+## bleibt der freie Besuch moeglich; nur die Wiederholung des Auftrags folgt der Heimat-Regel. "" = kein freier Besuch. Nur in der Kampagne; nur lesend, aendert keinen Zustand und keine Auftragskette.
 func free_visit_scenario_id(location_id: String) -> String:
 	var after_story := open_visit_scenario_id(location_id)
 	if not after_story.is_empty(): return after_story
@@ -192,7 +192,7 @@ func free_visit_scenario_id(location_id: String) -> String:
 	var visits: Variant = JSON.parse_string(FileAccess.get_file_as_string(OPEN_OUTPOSTS_PATH)) if FileAccess.file_exists(OPEN_OUTPOSTS_PATH) else {}
 	if typeof(visits) != TYPE_DICTIONARY or not Dictionary(visits).has(location_id): return ""
 	for id: String in _jobs:
-		if String(_jobs[id].location_id) == location_id and String(_jobs[id].status) in ["accepted", "active", "pending_upload", "failed"]: return ""
+		if String(_jobs[id].location_id) == location_id and String(_jobs[id].status) in ["accepted", "active", "pending_upload"]: return ""  # gescheitert sperrt den freien Besuch nicht (Wunsch 25.11.); nur die Wiederholung des Auftrags bleibt an die Heimat-Regel gebunden
 	return String(Dictionary(visits)[location_id])
 
 ## Handel-Marker eines Ortes fuer den Handelsdienst am gelandeten Schiff: kleine Posten (locations) immer; Orte mit Auftrag und freiem Besuch
