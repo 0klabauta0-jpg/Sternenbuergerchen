@@ -17,7 +17,11 @@
 			"max_offset": 14.0,
 			"footprint_m": [24.0, 22.15],
 			"door_height_m": 2.1,
-			"real_height_range": [5.0, 10.0]
+			"real_height_range": [5.0, 10.0],
+			"extras": [
+				{"id": "muellers_farm_lift", "kind": "model", "model": "res://art/tripo_models_20261124/basis_frachtaufzug_01.glb", "scale": 0.2181, "offset": [0.5, -4.2], "rotation_y_deg": 0.0, "footprint_m": [5.714, 8.0], "real_height_range": [1.2, 2.5], "max_distance": 6.0},
+				{"id": "muellers_farm_pad", "kind": "pad", "size": [3.4, 4.2], "offset": [-1.0, 5.2], "rotation_y_deg": 0.0, "designation": "PAD 01", "deck_top": 0.03}
+			]
 		},
 		{
 			"id": "shady_lab",
@@ -32,7 +36,11 @@
 			"max_offset": 14.0,
 			"footprint_m": [20.0, 20.0],
 			"door_height_m": 2.1,
-			"real_height_range": [8.0, 13.0]
+			"real_height_range": [8.0, 13.0],
+			"extras": [
+				{"id": "shady_lab_lift", "kind": "model", "model": "res://art/tripo_models_20261124/basis_frachtaufzug_01.glb", "scale": 0.2181, "offset": [0.5, -4.2], "rotation_y_deg": 0.0, "footprint_m": [5.714, 8.0], "real_height_range": [1.2, 2.5], "max_distance": 6.0},
+				{"id": "shady_lab_pad", "kind": "pad", "size": [3.4, 4.2], "offset": [-1.0, 5.2], "rotation_y_deg": 0.0, "designation": "PAD 01", "deck_top": 0.03}
+			]
 		},
 		{
 			"id": "templanon",
@@ -47,7 +55,11 @@
 			"max_offset": 14.0,
 			"footprint_m": [20.0, 17.32],
 			"door_height_m": 2.1,
-			"real_height_range": [10.0, 16.0]
+			"real_height_range": [10.0, 16.0],
+			"extras": [
+				{"id": "templanon_lift", "kind": "model", "model": "res://art/tripo_models_20261124/basis_frachtaufzug_01.glb", "scale": 0.2181, "offset": [0.5, -4.2], "rotation_y_deg": 0.0, "footprint_m": [5.714, 8.0], "real_height_range": [1.2, 2.5], "max_distance": 6.0},
+				{"id": "templanon_pad", "kind": "pad", "size": [3.4, 4.2], "offset": [-1.0, 5.2], "rotation_y_deg": 0.0, "designation": "PAD 01", "deck_top": 0.03}
+			]
 		}
 	]
 }
