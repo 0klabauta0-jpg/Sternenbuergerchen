@@ -9342,7 +9342,7 @@ func get_operations_snapshot(include_runtime: bool = true) -> Dictionary:
 			"busy": busy, "away": _operations_craft_away(id), "status": status, "progress": progress, "next_step": next_step,
 			"has_payload": not payload_teams.is_empty(), "payload_fireteam_ids": Array(payload_teams),
 			"passenger_count": payload_ids.size(), "aboard_count":int(presence.aboard_count), "can_start": can_start,
-			"crew_capacity": int(definition.get("crew_capacity", 0)), "payload_names": _operations_payload_names(payload_ids),
+			"crew_capacity": int(definition.get("crew_capacity", 0)), "model_id": String(definition.get("model_id", "")), "payload_names": _operations_payload_names(payload_ids),
 			"can_board": not busy and bool(gate.get("can_stage", false)) and not Array(focused_team.get("members", [])).is_empty() and (not bool(focused_team.get("busy", false)) or (payload_teams.has(_focused_fireteam_id) and not pilot_present)),
 			"can_unboard": not busy and payload_teams.has(_focused_fireteam_id)}
 		var preview: Texture2D = _get_aircraft_texture(definition)

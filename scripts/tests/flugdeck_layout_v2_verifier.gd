@@ -31,8 +31,9 @@ func _seats(screen: Node, presenter: Node) -> void:
 		var detail: Node = presenter.find_child("ShipDetail", true, false)
 		var seats := 0
 		for node in detail.find_children("TroopSlot_*", "", true, false): seats += 1
-		check(seats == maxi(int(craft.crew_capacity) - 1, 0), "Passagierplaetze %d == Kapazitaet %d - 1 (%s)" % [seats, int(craft.crew_capacity), craft.id])
-		check(detail.find_child("TurretSlot*", true, false) == null, "kein Turmschuetzenplatz, Daten nennen keinen (%s)" % craft.id)
+		var layout: Dictionary = load("res://scripts/ui/components/ship_detail_panel.gd").seat_layout(craft)
+		check(seats == int(layout.passengers) and int(layout.passengers) + int(layout.gunner) == maxi(int(craft.crew_capacity) - 1, 0), "Passagierplaetze %d + Turmschuetze %d == Kapazitaet %d - Pilot (%s)" % [seats, int(layout.gunner), int(craft.crew_capacity), craft.id])
+		check(detail.find_child("GunnerSlot", true, false).visible == (int(layout.gunner) > 0), "Turmschuetzenplatz nur bei Schiffen mit solchem Platz (%s)" % craft.id)
 		if int(craft.crew_capacity) <= 1 and small.is_empty(): small = String(craft.id)
 		if int(craft.crew_capacity) > 1 and big.is_empty(): big = String(craft.id)
 	if big.is_empty():
@@ -57,28 +58,58 @@ func _seats(screen: Node, presenter: Node) -> void:
 	# Baustein allein, Schiff mit 8 Sitzen (Cutlass-Kapazitaet): Plaetze, Ziehen, volles Schiff.
 	var solo: Node = load("res://scripts/ui/components/ship_detail_panel.gd").new()
 	root.add_child(solo)
-	var free_ok := [true]
-	solo.set("fireteam_validator", func(id: String) -> bool: return free_ok[0] and id == "ft_a")
+	var free := [6]
+	solo.set("fireteam_check", func(id: String) -> String: return "" if free[0] >= 4 else "Nicht genug Plätze: Trupp hat 4, frei sind %d." % free[0])
 	solo.set("pilot_validator", func(id: String) -> bool: return id == "u1")
 	var dropped: Array = []
+	var unboarded: Array = []
 	solo.connect("fireteam_dropped", func(id: String): dropped.append("team:" + id))
 	solo.connect("pilot_dropped", func(id: String): dropped.append("pilot:" + id))
-	solo.call("update_craft", {"name": "Cutlass", "crew_capacity": 8, "payload_names": ["Anna", "Ben"]}, {})
+	solo.connect("pilot_cleared", func(): dropped.append("pilot_cleared"))
+	solo.connect("unboard_requested", func(id: String): unboarded.append(id))
+	var cutlass := {"name": "Cutlass", "model_id": "cutlass", "crew_capacity": 8, "payload_names": ["Anna", "Ben"], "seat_team_ids": ["ft_a", "ft_a"], "pilot_name": ""}
+	solo.call("update_craft", cutlass, {})
 	var solo_seats := solo.find_children("TroopSlot_*", "", true, false)
-	check(solo_seats.size() == 7, "Baustein: 8 Sitze -> 7 Passagierplaetze")
-	check(solo.find_child("TurretSlot*", true, false) == null, "Baustein: kein Turmschuetzenplatz ohne Daten")
+	check(solo_seats.size() == 6, "Baustein Cutlass: 8 Sitze -> 6 Passagierplaetze")
+	var gunner: Control = solo.find_child("GunnerSlot", true, false)
+	check(gunner.visible and gunner.tooltip_text.contains("noch nicht besetzbar") and not gunner.call("_can_drop_data", Vector2.ZERO, {"type": "homebase_unit_card", "unit_id": "u1"}), "Baustein Cutlass: Turmschuetzenplatz sichtbar, gesperrt, nimmt nichts an")
+	var small_craft := cutlass.duplicate()
+	small_craft["model_id"] = "buccaneer"
+	small_craft["crew_capacity"] = 4
+	solo.call("update_craft", small_craft, {})
+	check(solo.find_children("TroopSlot_*", "", true, false).size() == 3 and not (solo.find_child("GunnerSlot", true, false) as Control).visible, "Baustein anderes Schiff: 3 Passagierplaetze, kein Turmschuetze")
+	solo.call("update_craft", cutlass, {})
 	var s0: Node = solo.find_child("TroopSlot_0", true, false)
-	check(s0.find_children("*", "Label", true, false)[0].text == "Anna", "Baustein: Platz 0 zeigt Namen Anna")
+	var s2: Node = solo.find_child("TroopSlot_2", true, false)
+	check(s0.find_child("SeatName", true, false).text == "Anna" and not s0.find_child("Hatch", true, false).visible, "Baustein: belegter Platz zeigt Namen, keine Schraffur")
+	check(s2.find_child("SeatName", true, false).text == "Passagier" and s2.find_child("Hatch", true, false).visible, "Baustein: leerer Platz grau schraffiert mit 'Passagier'")
 	var team_ok := {"type": "fob_fireteam_card", "fireteam_id": "ft_a"}
-	check(s0.call("_can_drop_data", Vector2.ZERO, team_ok), "Baustein: Trupp auf Passagierplatz erlaubt")
-	check(not s0.call("_can_drop_data", Vector2.ZERO, {"type": "fob_fireteam_card", "fireteam_id": "ft_b"}), "Baustein: unpassender Trupp abgelehnt")
-	s0.call("_drop_data", Vector2.ZERO, team_ok)
+	check(s2.call("_can_drop_data", Vector2.ZERO, team_ok), "Baustein: Trupp auf Passagierplatz erlaubt")
+	s2.call("_drop_data", Vector2.ZERO, team_ok)
+	check(dropped == ["team:ft_a"] and not (solo.find_child("SeatMessage", true, false) as Control).visible, "Baustein: passender Trupp sendet Befehl, keine Meldung " + str(dropped))
+	free[0] = 3
+	s2.call("_drop_data", Vector2.ZERO, team_ok)
+	var message: Label = solo.find_child("SeatMessage", true, false)
+	check(dropped == ["team:ft_a"] and message.visible and message.text == "Nicht genug Plätze: Trupp hat 4, frei sind 3.", "Baustein: zu grosser Trupp abgelehnt mit Meldung '" + message.text + "'")
+	var person_drop := {"type": "homebase_unit_card", "unit_id": "u1"}
+	check(s2.call("_can_drop_data", Vector2.ZERO, person_drop), "Baustein: Person lichtet den Platz auf (wird mit Hinweis verworfen)")
+	s2.call("_drop_data", Vector2.ZERO, person_drop)
+	check(dropped == ["team:ft_a"] and message.text == "Einzelpersonen bitte als Trupp einsteigen lassen.", "Baustein: Einzelperson auf Passagierplatz -> Hinweis, kein Befehl")
 	solo.call("_drop_fireteam", Vector2.ZERO, team_ok)
-	solo.find_child("PilotSlot", true, false).call("_drop_data", Vector2.ZERO, {"type": "homebase_unit_card", "unit_id": "u1"})
-	check(dropped == ["team:ft_a", "team:ft_a", "pilot:u1"], "Baustein: Ablegen sendet Trupp und Pilot " + str(dropped))
-	check(not solo.find_child("PilotSlot", true, false).call("_can_drop_data", Vector2.ZERO, {"type": "homebase_unit_card", "unit_id": "u2"}), "Baustein: Pilotplatz lehnt nicht erlaubte Person ab")
-	free_ok[0] = false
-	check(not s0.call("_can_drop_data", Vector2.ZERO, team_ok) and not solo.call("_can_drop_fireteam", Vector2.ZERO, team_ok), "Baustein: volles Schiff lehnt Trupp ab")
+	check(dropped == ["team:ft_a"] and message.text.begins_with("Nicht genug"), "Baustein: Ablegen auf das Schiffsdetail prueft ebenso")
+	var pilot_slot_solo: Node = solo.find_child("PilotSlot", true, false)
+	pilot_slot_solo.call("_drop_data", Vector2.ZERO, person_drop)
+	check(dropped == ["team:ft_a", "pilot:u1"], "Baustein: Person auf Pilotplatz sendet Pilot " + str(dropped))
+	check(not pilot_slot_solo.call("_can_drop_data", Vector2.ZERO, {"type": "homebase_unit_card", "unit_id": "u2"}), "Baustein: Pilotplatz lehnt nicht erlaubte Person ab")
+	check(solo.find_child("PilotName", true, false).text == "Pilot" and solo.find_child("PilotSlot", true, false).find_child("Hatch", true, false).visible and not (solo.find_child("PilotClear", true, false) as Control).visible, "Baustein: leerer Pilotplatz schraffiert, ohne Knopf")
+	var with_pilot := cutlass.duplicate()
+	with_pilot["pilot_name"] = "Kai"
+	solo.call("update_craft", with_pilot, {})
+	var clear: Button = solo.find_child("PilotClear", true, false)
+	check(solo.find_child("PilotName", true, false).text == "Kai" and clear.visible, "Baustein: belegter Pilotplatz zeigt Namen und Knopf")
+	clear.pressed.emit()
+	(solo.find_child("SeatClear_0", true, false) as Button).pressed.emit()
+	check(dropped.back() == "pilot_cleared" and unboarded == ["ft_a"], "Baustein: Knoepfe leeren Pilot und setzen Trupp ab")
 	solo.queue_free()
 	if presenter.find_child("TroopSlot_0", true, false) == null: return
 	# Trupp auf einen Passagierplatz.
@@ -99,7 +130,7 @@ func _seats(screen: Node, presenter: Node) -> void:
 	var team_payload := {"type": "fob_fireteam_card", "fireteam_id": team_id, "label": "t"}
 	var slot0: Node = presenter.find_child("TroopSlot_0", true, false)
 	check(slot0 != null and slot0.call("_can_drop_data", Vector2.ZERO, team_payload), "Passagierplatz nimmt Trupp an")
-	check(slot0 != null and not slot0.call("_can_drop_data", Vector2.ZERO, unit_payload), "Passagierplatz lehnt Einzelperson ab (kein Befehl dafuer)")
+
 	slot0.call("_drop_data", Vector2.ZERO, team_payload)
 	for i in 30: await process_frame
 	await _settle(presenter)
