@@ -10,6 +10,115 @@ func check(ok: bool, label: String) -> void:
 		printerr("FAIL: ", label)
 	else:
 		print("PASS: ", label)
+func _settle(presenter: Node) -> void:
+	presenter.refresh()
+	for i in 6: await process_frame
+
+func _snapshot_craft(screen: Node, id: String) -> Dictionary:
+	for craft in Array(screen.call("get_operations_snapshot").get("crafts", [])):
+		if String(Dictionary(craft).id) == id: return Dictionary(craft)
+	return {}
+
+## Sitzplaetze im Schiffsdetail: Passagierplaetze nach Kapazitaet, Ziehen auf Pilotplatz und Passagierplaetze.
+func _seats(screen: Node, presenter: Node) -> void:
+	var crafts: Array = Array(screen.call("get_operations_snapshot").get("crafts", []))
+	var small := ""
+	var big := ""
+	for craft_variant in crafts:
+		var craft: Dictionary = Dictionary(craft_variant)
+		screen.request_operation("craft", {"craft_id": String(craft.id)})
+		await _settle(presenter)
+		var detail: Node = presenter.find_child("ShipDetail", true, false)
+		var seats := 0
+		for node in detail.find_children("TroopSlot_*", "", true, false): seats += 1
+		check(seats == maxi(int(craft.crew_capacity) - 1, 0), "Passagierplaetze %d == Kapazitaet %d - 1 (%s)" % [seats, int(craft.crew_capacity), craft.id])
+		check(detail.find_child("TurretSlot*", true, false) == null, "kein Turmschuetzenplatz, Daten nennen keinen (%s)" % craft.id)
+		if int(craft.crew_capacity) <= 1 and small.is_empty(): small = String(craft.id)
+		if int(craft.crew_capacity) > 1 and big.is_empty(): big = String(craft.id)
+	if big.is_empty():
+		big = String(Dictionary(crafts[0]).id)  # Testwelt ohne Schiff mit Sitzen: Baustein wird unten allein geprueft
+	screen.request_operation("craft", {"craft_id": big})
+	await _settle(presenter)
+	var detail: Node = presenter.find_child("ShipDetail", true, false)
+	var pilot_slot: Node = detail.find_child("PilotSlot", true, false)
+	var snapshot: Dictionary = screen.call("get_operations_snapshot")
+	var selected: Dictionary = Dictionary(snapshot.selected_craft)
+	var person := ""
+	for option in Array(selected.pilot_options):
+		if not String(Dictionary(option).id).is_empty(): person = String(Dictionary(option).id)
+	check(not person.is_empty(), "Person fuer den Pilotplatz vorhanden")
+	var unit_payload := {"type": "homebase_unit_card", "unit_id": person, "label": "x"}
+	check(not pilot_slot.call("_can_drop_data", Vector2.ZERO, {"type": "homebase_unit_card", "unit_id": "nobody"}), "PilotSlot lehnt unbekannte Person ab")
+	check(not pilot_slot.call("_can_drop_data", Vector2.ZERO, {"type": "fob_fireteam_card", "fireteam_id": "ft1"}), "PilotSlot lehnt Trupp ab")
+	check(pilot_slot.call("_can_drop_data", Vector2.ZERO, unit_payload), "PilotSlot nimmt Person an")
+	pilot_slot.call("_drop_data", Vector2.ZERO, unit_payload)
+	await _settle(presenter)
+	check(String(_snapshot_craft(screen, String(selected.id)).get("pilot_id", "")) == person, "Person auf PilotSlot gezogen -> Pilot gesetzt")
+	# Baustein allein, Schiff mit 8 Sitzen (Cutlass-Kapazitaet): Plaetze, Ziehen, volles Schiff.
+	var solo: Node = load("res://scripts/ui/components/ship_detail_panel.gd").new()
+	root.add_child(solo)
+	var free_ok := [true]
+	solo.set("fireteam_validator", func(id: String) -> bool: return free_ok[0] and id == "ft_a")
+	solo.set("pilot_validator", func(id: String) -> bool: return id == "u1")
+	var dropped: Array = []
+	solo.connect("fireteam_dropped", func(id: String): dropped.append("team:" + id))
+	solo.connect("pilot_dropped", func(id: String): dropped.append("pilot:" + id))
+	solo.call("update_craft", {"name": "Cutlass", "crew_capacity": 8, "payload_names": ["Anna", "Ben"]}, {})
+	var solo_seats := solo.find_children("TroopSlot_*", "", true, false)
+	check(solo_seats.size() == 7, "Baustein: 8 Sitze -> 7 Passagierplaetze")
+	check(solo.find_child("TurretSlot*", true, false) == null, "Baustein: kein Turmschuetzenplatz ohne Daten")
+	var s0: Node = solo.find_child("TroopSlot_0", true, false)
+	check(s0.find_children("*", "Label", true, false)[0].text == "Anna", "Baustein: Platz 0 zeigt Namen Anna")
+	var team_ok := {"type": "fob_fireteam_card", "fireteam_id": "ft_a"}
+	check(s0.call("_can_drop_data", Vector2.ZERO, team_ok), "Baustein: Trupp auf Passagierplatz erlaubt")
+	check(not s0.call("_can_drop_data", Vector2.ZERO, {"type": "fob_fireteam_card", "fireteam_id": "ft_b"}), "Baustein: unpassender Trupp abgelehnt")
+	s0.call("_drop_data", Vector2.ZERO, team_ok)
+	solo.call("_drop_fireteam", Vector2.ZERO, team_ok)
+	solo.find_child("PilotSlot", true, false).call("_drop_data", Vector2.ZERO, {"type": "homebase_unit_card", "unit_id": "u1"})
+	check(dropped == ["team:ft_a", "team:ft_a", "pilot:u1"], "Baustein: Ablegen sendet Trupp und Pilot " + str(dropped))
+	check(not solo.find_child("PilotSlot", true, false).call("_can_drop_data", Vector2.ZERO, {"type": "homebase_unit_card", "unit_id": "u2"}), "Baustein: Pilotplatz lehnt nicht erlaubte Person ab")
+	free_ok[0] = false
+	check(not s0.call("_can_drop_data", Vector2.ZERO, team_ok) and not solo.call("_can_drop_fireteam", Vector2.ZERO, team_ok), "Baustein: volles Schiff lehnt Trupp ab")
+	solo.queue_free()
+	if presenter.find_child("TroopSlot_0", true, false) == null: return
+	# Trupp auf einen Passagierplatz.
+	snapshot = screen.call("get_operations_snapshot")
+	var team_id := ""
+	for team_variant in Array(snapshot.fireteams):
+		var team: Dictionary = Dictionary(team_variant)
+		if not Array(team.members).is_empty() and not bool(team.busy): team_id = String(team.id)
+	if team_id.is_empty():
+		var other := ""
+		for unit_variant in Array(snapshot.roster):
+			var unit: Dictionary = Dictionary(unit_variant)
+			if not bool(unit.busy) and String(unit.id) != person and other.is_empty(): other = String(unit.id)
+		team_id = String(Dictionary(Array(snapshot.fireteams)[0]).id)
+		var assigned: Dictionary = screen.request_operation("assign", {"unit_id": other, "fireteam_id": team_id})
+		print("ASSIGN ", assigned)
+		await _settle(presenter)
+	var team_payload := {"type": "fob_fireteam_card", "fireteam_id": team_id, "label": "t"}
+	var slot0: Node = presenter.find_child("TroopSlot_0", true, false)
+	check(slot0 != null and slot0.call("_can_drop_data", Vector2.ZERO, team_payload), "Passagierplatz nimmt Trupp an")
+	check(slot0 != null and not slot0.call("_can_drop_data", Vector2.ZERO, unit_payload), "Passagierplatz lehnt Einzelperson ab (kein Befehl dafuer)")
+	slot0.call("_drop_data", Vector2.ZERO, team_payload)
+	for i in 30: await process_frame
+	await _settle(presenter)
+	var after: Dictionary = _snapshot_craft(screen, String(selected.id))
+	print("BOARD ", after.get("payload_fireteam_ids"), " ", after.get("payload_names"), " aboard=", after.get("aboard_count"))
+	check(Array(after.get("payload_fireteam_ids", [])).has(team_id), "Trupp auf Passagierplatz gezogen -> an Bord")
+	var names: Array = Array(after.get("payload_names", []))
+	check(not names.is_empty(), "Truppmitglieder stehen als Namen im Schiff")
+	for index in names.size():
+		var slot: Node = presenter.find_child("TroopSlot_%d" % index, true, false)
+		check(slot != null and slot.find_children("*", "Label", true, false).any(func(l): return (l as Label).text == String(names[index])), "Platz %d zeigt %s" % [index, names[index]])
+	# Volles Schiff: ein Trupp, der nicht mehr passt, wird abgelehnt.
+	if not small.is_empty():
+		screen.request_operation("craft", {"craft_id": small})
+		await _settle(presenter)
+		var small_detail: Node = presenter.find_child("ShipDetail", true, false)
+		check(not small_detail.call("_can_drop_fireteam", Vector2.ZERO, team_payload), "Schiff ohne freien Platz lehnt Trupp ab")
+		check(not small_detail.call("_can_drop_fireteam", Vector2.ZERO, team_payload) and small_detail.find_children("TroopSlot_*", "", true, false).is_empty(), "Schiff mit einem Sitz hat keine Passagierplaetze")
+
 func _run() -> void:
 	root.size = Vector2i(1920, 1080)
 	load("res://scripts/meta/game_start_contract.gd").request_start(self, "campaign", "new")
@@ -99,7 +208,7 @@ func _run() -> void:
 		if detail != null:
 			check(detail.find_child("PilotSlot", true, false) != null, "ShipDetail has PilotSlot %s" % tag)
 			check(detail.find_child("Cargo", true, false) != null, "ShipDetail has Cargo %s" % tag)
-			var wanted := clampi(int(selected.get("crew_capacity", 0)) - 1, 0, 4)
+			var wanted := clampi(int(selected.get("crew_capacity", 0)) - 1, 0, 12)
 			var troop := 0
 			for node in detail.find_children("TroopSlot_*", "", true, false): troop += 1
 			check(troop == wanted, "TroopSlot count %d == %d %s" % [troop, wanted, tag])
@@ -112,6 +221,7 @@ func _run() -> void:
 		var roster_rows: Dictionary = presenter.get("_rows")
 		check(roster_rows.size() == Array(snapshot.get("roster", [])).size() and roster_rows.size() > 0, "Personal list holds the whole roster %s" % tag)
 		check(columns.roster.visible and presenter.find_child("ReturnPersonToRoster", true, false) != null, "Personal list reachable %s" % tag)
+	await _seats(screen, presenter)
 	flow.queue_free()
 	await process_frame
 	print("FLUGDECK_LAYOUT_V2 passed=%d failed=%d" % [checks - failures, failures])

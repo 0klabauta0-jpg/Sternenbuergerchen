@@ -6,6 +6,12 @@ const CYAN := Color("6fe3e8")
 const CREAM := Color("f2ead0")
 const MUTED := Color("93aab3")
 const GOLD := Color("f2c94c")
+const DRAG_SURFACE: GDScript = preload("res://scripts/meta/operations_drag_surface.gd")
+## Der Aufrufer sendet die Befehle (`pilot`, `board`) und prueft, ob ein Ablegen moeglich ist.
+signal pilot_dropped(unit_id: String)
+signal fireteam_dropped(fireteam_id: String)
+var pilot_validator: Callable = Callable()
+var fireteam_validator: Callable = Callable()
 var pilot_host: VBoxContainer
 var _preview: TextureRect
 var _name: Label
@@ -34,8 +40,12 @@ func _init() -> void:
 	_status.name = "CraftStatus"
 	add_child(_status)
 	add_child(_label("Pilotplatz", 14, MUTED))
-	var pilot_box := PanelContainer.new()
+	var pilot_box: PanelContainer = DRAG_SURFACE.new()
 	pilot_box.name = "PilotSlot"
+	pilot_box.set("accepted_type", "homebase_unit_card")
+	pilot_box.set("drop_validator", func(payload: Dictionary) -> bool: return pilot_validator.is_valid() and bool(pilot_validator.call(String(payload.get("unit_id", "")))))
+	pilot_box.connect("payload_dropped", func(payload: Dictionary): pilot_dropped.emit(String(payload.get("unit_id", ""))))
+	pilot_box.tooltip_text = "Person hierher ziehen: wird Pilot dieses Schiffs"
 	pilot_box.add_theme_stylebox_override("panel", _box(Color("163743"), CYAN))
 	add_child(pilot_box)
 	var pilot_inner := VBoxContainer.new()
@@ -47,7 +57,9 @@ func _init() -> void:
 	pilot_host = VBoxContainer.new()
 	pilot_host.name = "PilotHost"
 	pilot_inner.add_child(pilot_host)
-	add_child(_label("Truppplätze", 14, MUTED))
+	# Ein auf das Schiffsdetail gezogener Trupp geht wie bei der Schiffskarte an Bord.
+	set_drag_forwarding(Callable(), _can_drop_fireteam, _drop_fireteam)
+	add_child(_label("Passagierplätze", 14, MUTED))
 	_troops = VBoxContainer.new()
 	_troops.name = "TroopSlots"
 	_troops.add_theme_constant_override("separation", 4)
@@ -71,7 +83,8 @@ func update_craft(craft: Dictionary, cargo: Dictionary) -> void:
 	_status.text = String(craft.get("status", ""))
 	var pilot: String = String(craft.get("pilot_name", ""))
 	_pilot_slot.text = pilot if not pilot.is_empty() else "Nicht zugewiesen"
-	var slots: int = clampi(int(craft.get("crew_capacity", 0)) - 1, 0, 4)
+	# Ein Platz gehoert dem Piloten, alle uebrigen sind Passagierplaetze (Anzahl aus den Schiffsdaten).
+	var slots: int = clampi(int(craft.get("crew_capacity", 0)) - 1, 0, 12)
 	var names: Array = Array(craft.get("payload_names", []))
 	var signature: String = "%d|%s" % [slots, JSON.stringify(names)]
 	if signature != _signature:
@@ -80,12 +93,16 @@ func update_craft(craft: Dictionary, cargo: Dictionary) -> void:
 			_troops.remove_child(child)
 			child.queue_free()
 		if slots == 0:
-			var note := _label("Kein Platz für einen Trupp", 14, MUTED)
+			var note := _label("Keine Passagierplätze", 14, MUTED)
 			note.name = "TroopNote"
 			_troops.add_child(note)
 		for index in slots:
-			var slot := PanelContainer.new()
+			var slot: PanelContainer = DRAG_SURFACE.new()
 			slot.name = "TroopSlot_%d" % index
+			slot.set("accepted_type", "fob_fireteam_card")
+			slot.set("drop_validator", func(payload: Dictionary) -> bool: return _can_drop_fireteam(Vector2.ZERO, payload))
+			slot.connect("payload_dropped", func(payload: Dictionary): fireteam_dropped.emit(String(payload.get("fireteam_id", ""))))
+			slot.tooltip_text = ("Besetzt: " + String(names[index])) if index < names.size() else "Frei: ganzen Trupp hierher ziehen"
 			slot.add_theme_stylebox_override("panel", _box(Color("163743"), Color("28515e")))
 			var text := _label(String(names[index]) if index < names.size() else "Frei", 15, CREAM if index < names.size() else MUTED)
 			slot.add_child(text)
@@ -95,6 +112,16 @@ func update_craft(craft: Dictionary, cargo: Dictionary) -> void:
 	for item in items:
 		lines.append("%s × %d" % [String(_labels.get(item, String(item).replace("_", " "))), int(items[item])])
 	_cargo.text = "\n".join(lines) if not lines.is_empty() else "Leer"
+
+func _can_drop_fireteam(_at: Vector2, data: Variant) -> bool:
+	if typeof(data) != TYPE_DICTIONARY or String(Dictionary(data).get("type", "")) != "fob_fireteam_card":
+		return false
+	var id: String = String(Dictionary(data).get("fireteam_id", "")).strip_edges()
+	return not id.is_empty() and fireteam_validator.is_valid() and bool(fireteam_validator.call(id))
+
+func _drop_fireteam(at: Vector2, data: Variant) -> void:
+	if _can_drop_fireteam(at, data):
+		fireteam_dropped.emit(String(Dictionary(data).get("fireteam_id", "")))
 
 func _label(value: String, size: int, color: Color) -> Label:
 	var label := Label.new()
