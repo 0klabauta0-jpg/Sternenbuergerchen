@@ -581,6 +581,7 @@ func _build_equipment() -> void:
 	_build_equipment_palette(list)
 	_inventory_panel=load("res://scripts/ui/components/personnel_inventory_panel.gd").new()
 	_inventory_panel.name="PersonnelInventory"
+	_inventory_panel.set("bag_below_when_narrow", true)
 	list.add_child(_inventory_panel)
 	_inventory_panel.operation_requested.connect(_act)
 	_remove_member = _button("Aus Trupp entfernen", false)

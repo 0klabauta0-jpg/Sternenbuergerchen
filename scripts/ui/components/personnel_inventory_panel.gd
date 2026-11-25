@@ -54,6 +54,9 @@ var _bag_heading: Label
 var _personal_storage: Dictionary = {}
 var _accessible:Array=[]
 
+## Gesetzt von der Heimatbasis-Spalte: unter 820 Breite steht der Block für Rüstungsfach und Rucksack unter den Fächern statt rechts neben der Figur.
+var bag_below_when_narrow := false
+
 static func get_preferred_character_column_width(viewport_width: float) -> float:
 	if viewport_width >= 1500:
 		return 850
@@ -229,11 +232,12 @@ func _layout_body_slots() -> void:
 	_body_preview.custom_minimum_size = body_size
 	_body_preview.position = Vector2(left + (model_space - body_size.x) * 0.5, model_top)
 	_body_preview.size = body_size
-	_bag_preview.visible = show_bag
+	var bag_below := bag_below_when_narrow and not show_bag
+	_bag_preview.visible = show_bag or bag_below
 	_bag_preview.position = Vector2(width - 172, 148)
 	_bag_preview.size = Vector2(164, 300)
 	var bag_body:Node=_bodies.get("unit:"+_unit_id+":backpack")
-	if bag_body!=null:(bag_body.get_parent() as Control).visible=not show_bag
+	if bag_body!=null:(bag_body.get_parent() as Control).visible=not _bag_preview.visible
 	var slot_y := slots_top
 	for key:String in ["armor","weapon_1","weapon_2"]:
 		var slot:=_slots.get_node_or_null("InventorySlot_"+key) as Control
@@ -248,6 +252,11 @@ func _layout_body_slots() -> void:
 		slot.position = Vector2(12, slot_y)
 		slot_y += slot.size.y + 4
 	var height := maxf(model_top + MODEL_HEIGHT + 4, slot_y + 6)
+	if bag_below:
+		# Schmale Spalte: Rüstungs-/Munitionsfach und Rucksack unter dem Sekundär-Fach, volle Spaltenbreite.
+		_bag_preview.position = Vector2(12, height)
+		_bag_preview.size = Vector2(width - 24, 290)
+		height += 290 + 6
 	_slots.custom_minimum_size.y = height
 	_body_frame.size = Vector2(width, height)
 	_slots.queue_redraw()
