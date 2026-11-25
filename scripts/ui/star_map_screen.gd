@@ -28,6 +28,7 @@ var _mode_auto: Button
 var _mode_manual: Button
 var _course_start_ok := true
 var _open_orbit_on_arrival := false
+var _outbound_hint_key := ""
 var _arrival_saw_quantum := false
 var _arrival_attempts := 0
 var _arrival_target: Dictionary = {}
@@ -748,6 +749,17 @@ func _update_course(travel: Dictionary, phase: String) -> void:
 
 ## "Selbst fliegen": Kommt das Schiff an, oeffnet sich die Orbit-Ansicht von selbst (wenn der lokale Orbit schon bereitsteht).
 func _update_arrival(phase: String) -> void:
+	# Abflug vom Boden im Handflug: Das Schiff startet am oberen Planetenrand; einmal je Abflug sagen, wie es weitergeht.
+	var travel: Dictionary = _runtime.get("space_travel", {})
+	var transit: Dictionary = Dictionary(travel.get("orbit_transit", {}))
+	if phase == "orbit" and not bool(travel.get("orbit_transit_automatic", true)) and transit.get("direction") == "outbound" and transit.get("status") == "manual":
+		var hint_key := String(travel.get("craft_id", "")) + ":" + String(transit.get("location_id", ""))
+		if hint_key != _outbound_hint_key:
+			_outbound_hint_key = hint_key
+			_error.text = "Abgehoben. Fliege auf der Orbit-Karte nach unten ins Weltall, dann kannst du über die Sternkarte weiterfliegen – oder stelle oben auf „Automatisch“."
+			_error.add_theme_color_override("font_color", Color("c4d7de"))
+	elif phase != "orbit":
+		_outbound_hint_key = ""
 	if not _open_orbit_on_arrival: return
 	# War die Karte waehrend des Sprungs verdeckt, wurde "quantum" nie gesehen: dann zaehlt, dass das Schiff am Ziel steht.
 	var at_target := not _arrival_target.is_empty() and String(_runtime.get("space_travel", {}).get("orbit_id", "")) == String(_arrival_target.orbit_id) and String(_runtime.get("space_travel", {}).get("orbit_marker_id", "")) == String(_arrival_target.marker_id)
@@ -755,6 +767,10 @@ func _update_arrival(phase: String) -> void:
 		_arrival_saw_quantum = true
 	elif phase == "orbit" and (_arrival_saw_quantum or at_target):
 		_arrival_attempts += 1
+		if _arrival_attempts == 1:
+			# Einmal je Ankunft im Handflug: Der Spieler soll nicht ratlos im Orbit stehen.
+			_error.text = "Im Orbit angekommen. Öffne „Orbit ansehen“ und klicke auf den Planeten oben – oder stelle oben auf „Automatisch“."
+			_error.add_theme_color_override("font_color", Color("c4d7de"))
 		_show_orbit_view()
 		if _orbit_visible or _arrival_attempts > 40: _open_orbit_on_arrival = false
 	elif phase in ["grounded", "surface", "approach"]:
@@ -869,6 +885,7 @@ func _send(operation: String, payload: Dictionary = {}) -> void:
 	if not _commands.is_valid():
 		return
 	var result: Variant = _commands.call(operation, payload)
+	_error.remove_theme_color_override("font_color")
 	_error.text = String(Dictionary(result).get("message", "Aktion wurde abgelehnt.")) if result is Dictionary and not bool(result.get("ok", false)) else ""
 	if operation in ["space_move", "space_begin_station_dock"]:
 		_refresh_orbit_projection()

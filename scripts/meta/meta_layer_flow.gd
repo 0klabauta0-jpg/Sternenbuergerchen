@@ -295,7 +295,10 @@ func _ready() -> void:
 	_sync_wound_lock()
 	# Spieler-Oberflaeche: ohne gespeicherte Wahl fliegt der Spieler im Orbit von Hand (Automatik bleibt waehlbar).
 	_singleplayer_runtime.set("_surface_orbit_manual_default",true)
-	if OS.get_environment("CAMPAIGN_ACTIVE_TEST_ONLY") == "1" and OS.get_environment("CAMPAIGN_ACTIVE_TEST_ORBIT") == "1":
+	# Bewusste Abweichung zwischen Spiel und kopflosen Pruefern (Entscheidung des Auftraggebers, 25.11.2026):
+	# Im echten Spiel mit Bildschirm ist der Orbit-Durchflug immer an; kopflos nur ueber die Umgebungsvariablen,
+	# damit kein Ablaufpruefer auf einen Klick im Orbit wartet. Abgedeckt: campaign_active_mission_continue_verifier.
+	if DisplayServer.get_name() != "headless" or (OS.get_environment("CAMPAIGN_ACTIVE_TEST_ONLY") == "1" and OS.get_environment("CAMPAIGN_ACTIVE_TEST_ORBIT") == "1"):
 		_singleplayer_runtime.set("_surface_orbit_path_enabled",true)
 	var encounter_layer := CanvasLayer.new()
 	encounter_layer.layer=95

@@ -23,6 +23,7 @@ func _initialize() -> void:
 	adapter.free()
 	var flow_source := FileAccess.get_file_as_string("res://scripts/meta/meta_layer_flow.gd")
 	check(flow_source.contains("_surface_orbit_manual_default\",true"), "Die Spieler-Oberflaeche setzt die Vorgabe Handflug")
+	check(flow_source.contains("DisplayServer.get_name() != \"headless\" or (OS.get_environment(\"CAMPAIGN_ACTIVE_TEST_ONLY\")") and DisplayServer.get_name() == "headless", "Durchflug im Spiel an; kopflos bleibt er ohne Umgebungsvariable aus")
 	check(CANVAS.BACKGROUND_PLANET_EDGE == "top" and FileAccess.file_exists(CANVAS.BACKGROUND_PATH), "Hintergrunddatei vorhanden, Planet oben")
 	var image := Image.load_from_file(ProjectSettings.globalize_path(CANVAS.BACKGROUND_PATH))
 	check(image != null and image.get_width() <= 4096 and image.get_height() <= 4096, "Hintergrund hoechstens 4096 Pixel")
