@@ -1177,11 +1177,20 @@ func _update_team_rows(teams: Array) -> void:
 			row.name = "TeamRow_" + id.validate_node_name()
 			row.set("accepted_type", "homebase_unit_card")
 			row.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-			row.custom_minimum_size.y = 40
+			row.custom_minimum_size.y = 62
+			var card_box := VBoxContainer.new()
+			card_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			card_box.add_theme_constant_override("separation", 2)
+			row.add_child(card_box)
+			var card_title := _label("", 15, GOLD)
+			card_title.name = "TeamTitle"
+			card_title.autowrap_mode = TextServer.AUTOWRAP_OFF
+			card_title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			card_box.add_child(card_title)
 			var line := HBoxContainer.new()
 			line.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			line.add_theme_constant_override("separation", 6)
-			row.add_child(line)
+			card_box.add_child(line)
 			var star := _label("★", 13, GOLD)
 			star.name = "LeaderStar"
 			star.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -1226,6 +1235,7 @@ func _update_team_rows(teams: Array) -> void:
 		(item.find_child("LeaderStar", true, false) as Control).visible = not leader_unit.is_empty()
 		(item.find_child("LeaderName", true, false) as Label).text = String(leader_unit.get("name", String(team.get("label", id))))
 		(item.find_child("Members", true, false) as Label).text = ", ".join(others)
+		(item.find_child("TeamTitle", true, false) as Label).text = "%s · %d / 4 Mitglieder" % [String(team.get("label", id)), member_list.size()]
 		item.set("drag_payload", {"type": "fob_fireteam_card", "fireteam_id": id, "label": String(team.get("label", id))})
 		item.tooltip_text = "%s · Trupp wählen · auf ein Schiff ziehen zum Boarden" % String(team.get("label", id))
 		var selected: bool = id == _fireteam_id
@@ -1525,9 +1535,9 @@ func _layout_columns() -> void:
 		var right_x: float=roster_width+squad_width+gap*2
 		rects["equipment"] = Rect2(right_x,0,clampf(available.x*0.36,420.0,620.0),available.y)
 	elif _mode == "mission":
-		# Flugdeck v2, von links: Schiffsdetail, Schiffsleiste, Liste Personal, Liste Trupps, Rest = Vorschau (nur wenn >= 280).
+		# Flugdeck v2, von links: Schiffsdetail, Schiffsleiste, Liste Trupps, Liste Personal, Rest = Vorschau (nur wenn >= 280).
 		var large: bool = available.x >= 1500.0
-		var widths: Array = [400.0, 240.0, 250.0, 330.0] if large else [340.0, 200.0, 220.0, 280.0]
+		var widths: Array = [400.0, 240.0, 330.0, 250.0] if large else [340.0, 200.0, 280.0, 220.0]
 		var column_gap: float = 8.0
 		var total: float = 0.0
 		for width in widths:
@@ -1538,7 +1548,7 @@ func _layout_columns() -> void:
 				widths[index] = float(widths[index]) * room / total
 		var cursor: float = 0.0
 		for index in 4:
-			rects[["equipment", "flight", "roster", "squad"][index]] = Rect2(cursor, 0, float(widths[index]), available.y)
+			rects[["equipment", "flight", "squad", "roster"][index]] = Rect2(cursor, 0, float(widths[index]), available.y)
 			cursor += float(widths[index]) + column_gap
 		if large and available.x - cursor >= 280.0:
 			scene_rect = Rect2(cursor, 0, available.x - cursor, available.y)
@@ -1565,6 +1575,9 @@ func _layout_columns() -> void:
 	_ship_detail.get_parent().visible = flight_view
 	_slots_scroll.visible = not flight_view
 	_team_list_scroll.visible = flight_view
+	# Flugdeck: jeder Trupp ist eine Karte, Auswahlliste und Kopfzeile bleiben als Knoten, sind aber unsichtbar.
+	_team_selector.visible = not flight_view
+	_team_drag_source.visible = not flight_view
 	(_columns.equipment.get_meta("title_label") as Label).text = "Schiffsdetail" if flight_view else "Lager & Ausrüstung"
 	(_columns.squad.get_meta("title_label") as Label).text = "Trupps" if flight_view else "Trupp"
 	_compact_rows(flight_view)

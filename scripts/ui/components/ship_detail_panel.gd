@@ -156,6 +156,8 @@ func update_craft(craft: Dictionary, cargo: Dictionary) -> void:
 		if slots == 0:
 			var note := _label("Keine Passagierplätze", 14, MUTED)
 			note.name = "TroopNote"
+			note.autowrap_mode = TextServer.AUTOWRAP_OFF
+			note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			_troops.add_child(note)
 		for index in slots:
 			_troops.add_child(_passenger_slot(index, String(names[index]) if index < names.size() else "", String(teams[index]) if index < teams.size() else ""))
