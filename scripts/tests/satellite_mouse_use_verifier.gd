@@ -41,14 +41,25 @@ func _run() -> void:
 	check(hover.get("id","")=="satellite_data","actual projected satellite hover identifies correct target")
 	check(hover.get("label","")=="Daten sichern","actual cursor advertises the real data action")
 	check(driver.get_mission_scenario_runtime_gate_snapshot()==before,"hover never completes objective or submits gameplay")
+	check(String(cursor.get("_hint").text).contains("Linksklick") and not String(cursor.get("_hint").text).contains("Rechtsklick"),"hint names Linksklick for the marker")
 	var motion:=InputEventMouseMotion.new();motion.position=pointer;root.push_input(motion,true);await process_frame
+	# Rechtsklick auf den Marker ist kein Marker-Befehl mehr (bleibt dem normalen Bewegungsbefehl).
+	var right_click:=InputEventMouseButton.new();right_click.button_index=MOUSE_BUTTON_RIGHT;right_click.pressed=true;right_click.position=pointer;cursor._unhandled_input(right_click)
+	check(not bool(Dictionary(controller.get("_last_mission_interaction_use_intent_snapshot")).get("accepted",false)),"rightclick on marker does not queue the Use intent")
+	var selection_before:Variant=controller.get("_selected_fireteam_ids").duplicate()
+	var action_button:Node=cursor.get("_objective_action")
+	check(action_button.action_mode==BaseButton.ACTION_MODE_BUTTON_PRESS,"panel button fires on press")
+	for tick in 3:
+		cursor.update_objective_feedback()
+		check(cursor.get("_objective_action")==action_button and action_button.is_inside_tree(),"panel button stays the same node over updates")
 	for pressed in [true,false]:
-		var click:=InputEventMouseButton.new();click.button_index=MOUSE_BUTTON_RIGHT;click.pressed=pressed;click.position=pointer;root.push_input(click,true)
+		var click:=InputEventMouseButton.new();click.button_index=MOUSE_BUTTON_LEFT;click.pressed=pressed;click.position=pointer;root.push_input(click,true)
 		await process_frame
+	check(controller.get("_selected_fireteam_ids")==selection_before and not controller.get("_selected_fireteam_ids").is_empty(),"leftclick on marker keeps the selection")
 	var use:Dictionary=controller.get("_last_mission_interaction_use_intent_snapshot")
 	print("MOUSE_USE ",use)
 	var result:Dictionary={"handled":true,"ok":use.get("accepted",false)}
-	check(result.get("handled",false) and result.get("ok",false),"context rightclick queues existing actual Use intent")
+	check(result.get("handled",false) and result.get("ok",false),"context leftclick queues existing actual Use intent")
 	check(driver.get_mission_scenario_runtime_gate_snapshot()==before,"queued Use still requires GO and real duration")
 	cursor.update_objective_feedback()
 	check(cursor.get("_objective_text").text.contains("GO"),"visible panel confirms prepared data action")
