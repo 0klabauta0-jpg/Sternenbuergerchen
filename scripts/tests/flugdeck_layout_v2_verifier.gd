@@ -122,6 +122,7 @@ func _seats(screen: Node, presenter: Node) -> void:
 	clear.pressed.emit()
 	(solo.find_child("SeatClear_0", true, false) as Button).pressed.emit()
 	check(dropped.back() == "pilot_cleared" and unboarded == ["ft_a"], "Baustein: Knoepfe leeren Pilot und setzen Trupp ab")
+	await _seat_cards(solo, dropped, presenter)
 	solo.queue_free()
 	if presenter.find_child("TroopSlot_0", true, false) == null: return
 	# Trupp auf einen Passagierplatz.
@@ -159,6 +160,128 @@ func _seats(screen: Node, presenter: Node) -> void:
 		var small_detail: Node = presenter.find_child("ShipDetail", true, false)
 		check(not small_detail.call("_can_drop_fireteam", Vector2.ZERO, team_payload), "Schiff ohne freien Platz lehnt Trupp ab")
 		check(not small_detail.call("_can_drop_fireteam", Vector2.ZERO, team_payload) and small_detail.find_children("TroopSlot_*", "", true, false).is_empty(), "Schiff mit einem Sitz hat keine Passagierplaetze")
+
+## fs1 (20261125): Pilot nicht doppelt, Platzbedarf, Ablegen ohne Pilot, Ziehen vom Passagierplatz, Wartezustand, Karten, Trupp-Streifen.
+func _seat_cards(solo: Node, dropped: Array, presenter: Node) -> void:
+	var units := [
+		{"id": "u_kai", "name": "Kai", "role": "Pilot", "status": "Boarding"},
+		{"id": "u_anna", "name": "Anna", "role": "Sanität", "status": "An Bord"},
+		{"id": "u_ben", "name": "Ben", "role": "Schütze", "status": "Boarding"},
+		{"id": "u_cleo", "name": "Cleo", "role": "Technik", "status": "An Bord"}]
+	var rich := {"name": "Cutlass", "model_id": "cutlass", "crew_capacity": 8, "pilot_name": "Kai", "pilot_id": "u_kai", "pilot_aboard": false,
+		"pilot_unit": {"id": "u_kai", "name": "Kai", "role": "Pilot", "status": "Nicht an Bord · Pilot"},
+		"payload_names": ["Kai", "Anna", "Ben", "Cleo"], "payload_unit_ids": ["u_kai", "u_anna", "u_ben", "u_cleo"],
+		"seat_team_ids": ["ft_a", "ft_a", "ft_a", "ft_b"], "seat_units": units, "payload_aboard": [false, true, false, true]}
+	solo.call("update_craft", rich, {})
+	var seat_names: Array = []
+	for node in solo.find_children("SeatName", "Label", true, false): seat_names.append((node as Label).text)
+	check(solo.find_child("PilotName", true, false).text == "Kai" and not seat_names.has("Kai") and seat_names.has("Anna") and seat_names.has("Ben") and seat_names.has("Cleo"), "Pilot im Trupp steht nur im Pilotplatz, nicht zusaetzlich auf einem Passagierplatz " + str(seat_names))
+	var anna: Node = solo.find_child("TroopSlot_0", true, false)
+	var ben: Node = solo.find_child("TroopSlot_1", true, false)
+	var cleo: Node = solo.find_child("TroopSlot_2", true, false)
+	check(anna.find_child("SeatName", true, false).text == "Anna" and ben.find_child("SeatName", true, false).text == "Ben" and cleo.find_child("SeatName", true, false).text == "Cleo", "Passagierplaetze ruecken ohne den Piloten auf")
+	# Karte wie unter Personal: Portraet, Name, Statuszeile (Pilot: Portraet, Name, Rolle und Status).
+	check(anna.find_child("SeatPortrait", true, false) != null and anna.find_child("SeatName", true, false) != null and (anna.find_child("SeatStatus", true, false) as Label).text == "An Bord", "belegter Passagierplatz zeigt Portraet, Name und Statuszeile")
+	var pilot_card: Control = solo.find_child("PilotCard", true, false)
+	check(solo.find_child("PilotPortrait", true, false).visible and (solo.find_child("PilotInfo", true, false) as Label).text == "Pilot · Nicht an Bord · Pilot", "belegter Pilotplatz zeigt Portraet, Name, Rolle und Status")
+	# Wartezustand: zugewiesen, aber nicht an Bord = gedimmt und pulsierend; an Bord = Vollfarbe.
+	var anna_card: Control = anna.find_child("SeatCard", true, false)
+	var ben_card: Control = ben.find_child("SeatCard", true, false)
+	check(bool(pilot_card.get_meta("waiting", false)) and pilot_card.modulate.a < 0.71 and pilot_card.get("_tween") != null, "Pilot zugewiesen, nicht an Bord: Karte gedimmt und blinkend")
+	check(bool(ben_card.get_meta("waiting", false)) and ben_card.modulate.a < 0.71 and ben_card.get("_tween") != null, "Passagier unterwegs zum Schiff: Karte gedimmt und blinkend")
+	check(not bool(anna_card.get_meta("waiting", false)) and is_equal_approx(anna_card.modulate.a, 1.0) and anna_card.get("_tween") == null, "Passagier an Bord: Vollfarbe ohne Blinken")
+	await create_timer(0.35).timeout
+	check(ben_card.modulate.a >= 0.34 and ben_card.modulate.a <= 0.71, "Blinken bleibt im Bereich 0,35 bis 0,7 (%s)" % ben_card.modulate.a)
+	var arrived := rich.duplicate(true)
+	arrived["pilot_aboard"] = true
+	arrived["payload_aboard"] = [true, true, true, true]
+	solo.call("update_craft", arrived, {})
+	pilot_card = solo.find_child("PilotCard", true, false)
+	ben_card = solo.find_child("TroopSlot_1", true, false).find_child("SeatCard", true, false)
+	check(is_equal_approx(pilot_card.modulate.a, 1.0) and pilot_card.get("_tween") == null and is_equal_approx(ben_card.modulate.a, 1.0), "Pilot und Passagier an Bord: Vollfarbe")
+	solo.call("update_craft", rich, {})
+	# Trupp-Streifen: gleiche Farbe je Trupp, andere Farbe fuer anderen Trupp, leere Plaetze ohne Streifen.
+	anna = solo.find_child("TroopSlot_0", true, false)
+	ben = solo.find_child("TroopSlot_1", true, false)
+	cleo = solo.find_child("TroopSlot_2", true, false)
+	var stripes: Array = []
+	for slot in [anna, ben, cleo]: stripes.append(slot.find_child("TeamStripe", true, false))
+	check(not stripes.has(null) and (stripes[0] as ColorRect).color == (stripes[1] as ColorRect).color and (stripes[0] as ColorRect).color != (stripes[2] as ColorRect).color, "Plaetze desselben Trupps haben denselben Streifen, anderer Trupp eine andere Farbe")
+	check(solo.find_child("TroopSlot_3", true, false).find_child("TeamStripe", true, false) == null, "leerer Platz ohne Trupp-Streifen")
+	# Ziehen vom Passagierplatz auf den Pilotplatz.
+	var drag: Dictionary = Dictionary(anna.get("drag_payload"))
+	check(String(drag.get("type", "")) == "homebase_unit_card" and String(drag.get("unit_id", "")) == "u_anna", "belegter Passagierplatz ist ziehbar mit Personen-Zieh-Daten " + str(drag))
+	check(solo.find_child("TroopSlot_3", true, false).get("drag_payload").is_empty(), "leerer Platz ist nicht ziehbar")
+	var pilot_slot: Node = solo.find_child("PilotSlot", true, false)
+	var before: int = dropped.size()
+	solo.set("pilot_validator", func(id: String) -> bool: return id == "u_anna")
+	check(pilot_slot.call("_can_drop_data", Vector2.ZERO, drag), "Pilotplatz nimmt Person vom Passagierplatz an")
+	pilot_slot.call("_drop_data", Vector2.ZERO, drag)
+	check(dropped.size() == before + 1 and dropped.back() == "pilot:u_anna", "Ablegen auf dem Pilotplatz sendet pilot mit der richtigen Kennung " + str(dropped.back()))
+	solo.set("pilot_validator", func(id: String) -> bool: return false)
+	var ben_drag: Dictionary = Dictionary(ben.get("drag_payload"))
+	pilot_slot.call("_drop_data", Vector2.ZERO, ben_drag)
+	var message: Label = solo.find_child("SeatMessage", true, false)
+	check(dropped.size() == before + 1 and message.visible and message.text == "Ben kann nicht Pilot werden.", "nicht pilotfaehige Person: Meldung statt Befehl '" + message.text + "'")
+	solo.set("pilot_validator", func(id: String) -> bool: return id == "u1")
+	# Platzbedarf und Ablegen ohne Pilot (Presenter-Regel): Trupp mit N Mitgliedern braucht N-1 Plaetze, wenn der Pilot dazugehoert.
+	var saved_craft: Variant = presenter.get("_detail_craft")
+	var saved_teams: Variant = presenter.get("_detail_fireteams")
+	var seven: Array = []
+	for i in 7: seven.append({"id": "m%d" % i})
+	presenter.set("_detail_fireteams", [{"id": "big", "members": seven, "busy": false}, {"id": "duo", "members": [{"id": "m0"}, {"id": "m1"}], "busy": false}])
+	presenter.set("_detail_craft", {"model_id": "cutlass", "crew_capacity": 8, "pilot_id": "m0", "payload_unit_ids": [], "payload_names": [], "busy": false})
+	check(String(presenter.call("_fireteam_drop_message", "big")) == "", "Trupp mit 7 Mitgliedern inkl. Pilot braucht 6 Plaetze: passt auf Cutlass")
+	presenter.set("_detail_craft", {"model_id": "cutlass", "crew_capacity": 8, "pilot_id": "other", "payload_unit_ids": [], "payload_names": [], "busy": false})
+	check(String(presenter.call("_fireteam_drop_message", "big")).begins_with("Nicht genug Plätze: Trupp hat 7, frei sind 6"), "derselbe Trupp ohne Pilot im Trupp braucht 7 Plaetze: abgelehnt")
+	presenter.set("_detail_craft", {"model_id": "cutlass", "crew_capacity": 8, "pilot_id": "", "payload_unit_ids": [], "payload_names": [], "busy": false})
+	check(String(presenter.call("_fireteam_drop_message", "duo")) == "", "Ablegen eines Trupps ohne zugewiesenen Piloten wird nicht abgelehnt")
+	presenter.set("_detail_craft", {"model_id": "cutlass", "crew_capacity": 8, "pilot_id": "m0", "payload_unit_ids": ["m0", "x1", "x2", "x3", "x4"], "payload_names": ["a", "b", "c", "d", "e"], "busy": false})
+	check(String(presenter.call("_fireteam_drop_message", "duo")) == "" , "bereits eingestiegener Pilot zaehlt bei den belegten Plaetzen nicht mit (4 belegt, 2 frei)")
+	presenter.set("_detail_craft", saved_craft)
+	presenter.set("_detail_fireteams", saved_teams)
+
+## fs1 Punkt 7: Mitgliederzeile in der Trupp-Spalte ist ziehbar; Ablegen auf Personal loest "aus Trupp entfernen" aus.
+func _team_drag(screen: Node, presenter: Node) -> void:
+	var snapshot: Dictionary = screen.call("get_operations_snapshot")
+	var unit_id := ""
+	for team_variant in Array(snapshot.fireteams):
+		for member_variant in Array(Dictionary(team_variant).members):
+			# Bevorzugt ein Mitglied, das nicht die Kampagnenfuehrung ist; in der Testwelt gibt es oft nur diese.
+			if bool(Dictionary(member_variant).can_remove) and (unit_id.is_empty() or unit_id == "campaign_leader"):
+				unit_id = String(Dictionary(member_variant).id)
+	check(not unit_id.is_empty(), "Testwelt hat ein entfernbares Truppmitglied (%s)" % unit_id)
+	if unit_id.is_empty(): return
+	var member_row: Node = presenter.find_child("TeamMember_" + unit_id.validate_node_name(), true, false)
+	check(member_row != null and member_row.is_visible_in_tree(), "Trupp-Spalte zeigt eine Mitgliederzeile je Mitglied")
+	if member_row == null: return
+	var drag: Dictionary = Dictionary(member_row.get("drag_payload"))
+	check(String(drag.get("type", "")) == "homebase_unit_card" and String(drag.get("unit_id", "")) == unit_id, "Mitgliederzeile ist ziehbar mit Personen-Zieh-Daten " + str(drag))
+	check(presenter.find_child("RemoveFromTeam", true, false) != null or presenter.get("_remove_member") != null, "Knopf 'Aus Trupp entfernen' bleibt erhalten")
+	var roster_row: Node = Dictionary(presenter.get("_rows"))[unit_id].root
+	check(not roster_row.call("_can_drop_data", Vector2.ZERO, {"type": "homebase_unit_card", "unit_id": unit_id, "source_context": "operations"}), "Personal-Zeile lehnt Personen aus der Personal-Liste selbst ab")
+	check(roster_row.call("_can_drop_data", Vector2.ZERO, drag), "Personal-Spalte nimmt die gezogene Mitgliederzeile an")
+	var landed: Array = []
+	roster_row.connect("payload_dropped", func(payload: Dictionary): landed.append(String(payload.get("unit_id", ""))))
+	roster_row.call("_drop_data", Vector2.ZERO, drag)
+	await _settle(presenter)
+	var after_drop := _in_team(screen, unit_id)
+	check(landed == [unit_id], "Ablegen auf der Personal-Zeile meldet die gezogene Person " + str(landed))
+	print("REMOVE-RUECKMELDUNG nach Ablegen: ", String((presenter.get("_feedback") as Label).text) if presenter.get("_feedback") != null else "-", " | noch im Trupp: ", after_drop)
+	# Gleiche Aktion wie der Knopf: derselbe Befehl `remove` fuer dieselbe Person liefert denselben Zustand (nicht erneut im Trupp noetig).
+	if after_drop:
+		presenter.set("_focused_id", unit_id)
+		(presenter.get("_remove_member") as Button).pressed.emit()
+		await _settle(presenter)
+		check(_in_team(screen, unit_id) == after_drop, "Knopf 'Aus Trupp entfernen' liefert fuer dieselbe Person dasselbe Ergebnis wie das Ablegen (%s bleibt im Trupp)" % unit_id)
+	else:
+		check(presenter.find_child("TeamMember_" + unit_id.validate_node_name(), true, false) == null, "Ablegen auf Personal entfernt die Person aus dem Trupp; Mitgliederzeile verschwindet")
+
+func _in_team(screen: Node, unit_id: String) -> bool:
+	for team_variant in Array(screen.call("get_operations_snapshot").fireteams):
+		for member_variant in Array(Dictionary(team_variant).members):
+			if String(Dictionary(member_variant).id) == unit_id: return true
+	return false
 
 func _run() -> void:
 	root.size = Vector2i(1920, 1080)
@@ -269,6 +392,7 @@ func _run() -> void:
 		check(roster_rows.size() == Array(snapshot.get("roster", [])).size() and roster_rows.size() > 0, "Personal list holds the whole roster %s" % tag)
 		check(columns.roster.visible and presenter.find_child("ReturnPersonToRoster", true, false) != null, "Personal list reachable %s" % tag)
 	await _seats(screen, presenter)
+	await _team_drag(screen, presenter)
 	flow.queue_free()
 	await process_frame
 	print("FLUGDECK_LAYOUT_V2 passed=%d failed=%d" % [checks - failures, failures])

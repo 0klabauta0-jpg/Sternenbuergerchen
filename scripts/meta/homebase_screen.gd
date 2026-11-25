@@ -9269,6 +9269,16 @@ func _operations_payload_names(unit_ids: PackedStringArray) -> Array:
 	return names
 
 
+## Je Passagier: wirklich an Bord? Mit Basis-Laufzeit zaehlt der koerperliche Zustand `aboard` (Personen laufen erst zum Schiff);
+## ohne Laufzeit gilt der Trupp-Stand des Boardings.
+func _operations_payload_aboard(unit_ids: PackedStringArray, team_boarded: bool, aboard_unit_ids: Dictionary) -> Array:
+	var result: Array = []
+	var with_runtime: bool = get_base_personnel_runtime() != null
+	for unit_id in unit_ids:
+		result.append(bool(aboard_unit_ids.get(String(unit_id), false)) if with_runtime else team_boarded)
+	return result
+
+
 func get_operations_snapshot(include_runtime: bool = true) -> Dictionary:
 	# Read-only projection: never sanitize, seed, advance timers or change owners.
 	var roster: Array = []
@@ -9297,6 +9307,12 @@ func get_operations_snapshot(include_runtime: bool = true) -> Dictionary:
 			focused_team = team
 	var crafts: Array = []
 	var selected_craft: Dictionary = {}
+	var aboard_unit_ids: Dictionary = {}
+	var snapshot_runtime: Node = get_base_personnel_runtime()
+	if snapshot_runtime != null:
+		for person: Dictionary in snapshot_runtime.call("get_snapshot").get("units", []):
+			if String(person.get("status", "")) == "aboard":
+				aboard_unit_ids[String(person.get("unit_id", ""))] = true
 	for craft_variant in _aircraft_manager.get_aircraft_definitions():
 		var definition: Dictionary = Dictionary(craft_variant)
 		var id: String = String(definition.get("craft_id", ""))
@@ -9349,6 +9365,8 @@ func get_operations_snapshot(include_runtime: bool = true) -> Dictionary:
 			"has_payload": not payload_teams.is_empty(), "payload_fireteam_ids": Array(payload_teams),
 			"passenger_count": payload_ids.size(), "aboard_count":int(presence.aboard_count), "can_start": can_start,
 			"crew_capacity": seat_capacity, "model_id": seat_model_id, "payload_names": _operations_payload_names(payload_ids),
+			# Kennung und Anwesenheit je Passagier (gleiche Reihenfolge wie payload_names): fuer Ziehen vom Platz und Wartezustand.
+			"payload_unit_ids": Array(payload_ids), "payload_aboard": _operations_payload_aboard(payload_ids, boarded, aboard_unit_ids),
 			"can_board": not busy and bool(gate.get("can_stage", false)) and not Array(focused_team.get("members", [])).is_empty() and (not bool(focused_team.get("busy", false)) or (payload_teams.has(_focused_fireteam_id) and not pilot_present)),
 			"can_unboard": not busy and payload_teams.has(_focused_fireteam_id)}
 		var preview: Texture2D = _get_aircraft_texture(definition)
