@@ -1821,6 +1821,7 @@ func render_map(terrain_map_data = null, initial_focus: Variant = null, initial_
 		_cache_fow_overlay_render_tiles(render_tiles)
 		_rebuild_fog_of_war_visuals()
 	_rebuild_marker_visuals()
+	_sync_outpost_structure_models()
 	_rebuild_patrol_visuals()
 	_rebuild_network_drag_preview_visuals()
 	_rebuild_selection_visuals()
@@ -1835,6 +1836,20 @@ func render_map(terrain_map_data = null, initial_focus: Variant = null, initial_
 	_is_rendering_map = false
 	if _regional_overview_requested():
 		_queue_visual_streaming_refresh_if_needed()
+
+
+## Gebaeudemodelle der kleinen Aussenposten (data/visual/outpost_structure_models.json): in jedem Einsatz auf der Karte, nur Darstellung.
+var _outpost_structure_root: Node3D = null
+
+
+func _sync_outpost_structure_models() -> void:
+	if is_instance_valid(_outpost_structure_root):
+		_outpost_structure_root.get_parent().remove_child(_outpost_structure_root)
+		_outpost_structure_root.queue_free()
+	_outpost_structure_root = null
+	if _terrain_map_data == null or not is_instance_valid(_world_root):
+		return
+	_outpost_structure_root = load("res://scripts/terrain/outpost_structure_models.gd").build(self, _world_root, _terrain_map_data)
 
 
 func _build_terrain_visuals(tiles: Array, grid_tiles: Array) -> void:
