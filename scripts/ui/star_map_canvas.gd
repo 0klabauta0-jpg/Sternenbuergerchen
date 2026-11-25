@@ -466,10 +466,51 @@ func _grid_opacity() -> float:
 	return lerpf(0.035, 0.20, smoothstep(2.0, 12.0, cell_radius_px))
 
 
+## Hintergrundbild der Systemkarte: Die Bildmitte (Leuchten) liegt auf der Sonne und wandert und zoomt mit der Karte.
+const BACKGROUND_PATH := "res://art/orbit_backgrounds/sternkarte01.jpg"
+## Deckwert des Bildes (1 = unverdunkelt); der Rest wird von der dunklen Grundfarbe gedeckt.
+const BACKGROUND_OPACITY := 0.6
+## Kantenlaenge des Bildes in Kartenebenen-Einheiten: doppelte Diagonale der Karte, damit es bei kleinstem Zoom alles deckt.
+const BACKGROUND_SIDE_UNITS := 680.0
+var _background_texture: Texture2D
+var _background_tried := false
+
+
+func get_background_texture() -> Texture2D:
+	if _background_tried:
+		return _background_texture
+	_background_tried = true
+	if ResourceLoader.exists(BACKGROUND_PATH):
+		_background_texture = load(BACKGROUND_PATH) as Texture2D
+	elif FileAccess.file_exists(BACKGROUND_PATH):
+		var image := Image.load_from_file(ProjectSettings.globalize_path(BACKGROUND_PATH))
+		if image != null and not image.is_empty():
+			_background_texture = ImageTexture.create_from_image(image)
+	return _background_texture
+
+
+## Bildflaeche auf dem Bildschirm; Mitte = Bildschirmpunkt der Sonne (Kartenkoordinaten des Zentralsterns).
+func get_background_rect() -> Rect2:
+	if not _bodies.has("sun"):
+		return Rect2()
+	var half := Vector2.ONE * BACKGROUND_SIDE_UNITS * 0.5 * _pixels_per_unit()
+	return Rect2(map_to_screen(GRID.pair(_bodies.sun.position)) - half, half * 2.0)
+
+
+func _draw_background() -> void:
+	var texture := get_background_texture()
+	if texture == null:
+		return
+	var rect := get_background_rect()
+	if rect.size.x >= 1.0:
+		draw_texture_rect(texture, rect, false, Color(1, 1, 1, BACKGROUND_OPACITY))
+
+
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), Color("060e18"))
 	if _bodies.is_empty():
 		return
+	_draw_background()
 	if _grid_mesh != null:
 		var scale_2d := _screen_scale()
 		draw_mesh(_grid_mesh, null, Transform2D(Vector2(scale_2d.x, 0), Vector2(0, scale_2d.y), map_to_screen(Vector2.ZERO)), Color(0.25, 0.48, 0.58, _grid_opacity()))
