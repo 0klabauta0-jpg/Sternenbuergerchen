@@ -51,6 +51,8 @@ var _market_stock: Dictionary = {}
 ## Gueter-Dreieck: Ort -> {goods, text}. An diesen Orten wird nur mit den genannten Gueter gehandelt (Daten: commodity_market.json, post_goods).
 ## Bei Ankaufswaren mit buy_limit steht in _market_stock["Ort:Ware"] die noch freie Abnahme (Start = buy_limit), sonst der Bestand.
 var _post_goods: Dictionary = {}
+## Benit-Ring: Orte, an denen der Handelsdienst aus der Warenboerse kommt (commodity_market.json, trade_places), nicht aus service_locations.
+var _trade_places: Array = []
 ## Dauerauftraege (Handel H3): eigener Besitzer, nur in der Kampagne angelegt (enable_standing_orders); null = es gibt ihn nicht (Skirmish).
 const STANDING_ORDERS = preload("res://scripts/core/standing_orders_state.gd")
 const STANDING_ORDERS_PATH := "res://data/singleplayer/standing_orders.json"
@@ -142,6 +144,7 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 		_stock_by_offer_id[String(offer_id)] = int(data.offers[offer_id].stock)
 	_market = parsed_market.market
 	_post_goods = parsed_market.post_goods
+	_trade_places = parsed_market.trade_places
 	_market_stock = _full_market_stock()
 	for craft in crafts:
 		register_craft(String(craft.get("craft_id", craft.get("id", ""))) if typeof(craft) == TYPE_DICTIONARY else String(craft))
@@ -706,6 +709,7 @@ func _reward(payload: Dictionary, context: Dictionary) -> Dictionary:
 	return {"ok": true, "completion_id": completion_id, "credits_added": int(amount), "message": "Auftragsbelohnung gutgeschrieben"}
 
 func _has_service(location_id: String, service: String) -> bool:
+	if service == "trade" and _trade_places.has(location_id): return true
 	return Array(Dictionary(_definitions.get("service_locations", {})).get(location_id, [])).has(service)
 
 func _valid_nonnegative_number(value: Variant) -> bool:
@@ -1002,6 +1006,7 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_reset_route_fuel_preparation()
 	_market = fresh._market.duplicate(true)
 	_post_goods = fresh._post_goods.duplicate(true)
+	_trade_places = fresh._trade_places.duplicate()
 	_market_stock = market_full.duplicate()
 	for market_key: Variant in market_saved:
 		if market_full.has(market_key): _market_stock[market_key] = clampi(int(market_saved[market_key]), 0, int(market_full[market_key]))
@@ -2046,7 +2051,13 @@ func _parse_market(raw: Variant) -> Dictionary:
 			if typeof(good) != TYPE_STRING or String(good).is_empty(): return {"ok": false, "message": "Warenboerse: Postengut ungueltig"}
 			goods.append(String(good))
 		post_goods[String(place)] = {"goods": goods, "text": String(Dictionary(post).get("text", ""))}
-	return {"ok": true, "market": out, "post_goods": post_goods}
+	var trade_places: Array = []
+	var places: Variant = Dictionary(raw).get("trade_places", [])
+	if typeof(places) != TYPE_ARRAY: return {"ok": false, "message": "Warenboerse: Handelsorte ungueltig"}
+	for place: Variant in Array(places):
+		if typeof(place) != TYPE_STRING or String(place).is_empty(): return {"ok": false, "message": "Warenboerse: Handelsort ungueltig"}
+		trade_places.append(String(place))
+	return {"ok": true, "market": out, "post_goods": post_goods, "trade_places": trade_places}
 
 ## Gueter-Dreieck: an Orten mit Eintrag in post_goods gilt nur die dort genannte Warenliste; sonst ist alles erlaubt.
 func _post_allows(location: String, item: String) -> bool:
