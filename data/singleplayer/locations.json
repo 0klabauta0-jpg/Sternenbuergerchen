@@ -127,7 +127,7 @@
       0.86,
       0.86
     ],
-    "map_file_path": "res://maps/Ground_Mission01_32x32.json",
+    "map_file_path": "res://maps/trade_outpost.json",
     "scenario_file_path": "res://data/mission_scenarios/muellers_farm_visit.json",
     "landing_pad_ids": [
       "muellers_farm_pad_01"

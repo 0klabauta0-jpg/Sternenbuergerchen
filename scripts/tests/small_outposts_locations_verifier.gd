@@ -13,7 +13,7 @@ const REGISTRY = preload("res://scripts/terrain/terrain_registry.gd")
 const FIELD_LANDING = preload("res://scripts/mission/field_landing_contract.gd")
 const SURFACE = preload("res://scripts/mission/orbit_surface_locations.gd")
 const PLACES := {
-	"muellers_farm": {"name": "Müllers Farm", "map": "res://maps/Ground_Mission01_32x32.json", "marker": "spawn_bravo", "pad": "muellers_farm_pad_01", "orbit": "glut_1b_orbit", "body": "glut_1b", "home": 9.0, "trade": 6.0, "crash": 11.0},
+	"muellers_farm": {"name": "Müllers Farm", "map": "res://maps/trade_outpost.json", "marker": "spawn_bravo", "pad": "muellers_farm_pad_01", "orbit": "glut_1b_orbit", "body": "glut_1b", "home": 9.0, "trade": 6.0, "crash": 11.0},
 	"shady_lab": {"name": "Shady Research Lab", "map": "res://maps/Ground_Mission02_128x128.json", "marker": "spawn_bravo", "pad": "gm02_pad_bravo", "orbit": "planet_orbit", "body": "planet", "home": 10.0, "trade": 9.0, "crash": 11.0},
 	"templanon": {"name": "Templanon", "map": "res://maps/windbruch_outpost.json", "marker": "recon_altfeld", "pad": "windbruch_pad_03", "orbit": "planet_orbit", "body": "planet", "home": 10.0, "trade": 9.0, "crash": 11.0},
 }
