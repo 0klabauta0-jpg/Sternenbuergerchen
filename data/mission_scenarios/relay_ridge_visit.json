@@ -23,7 +23,7 @@
     "minimap_mode": "terrain_only",
     "objectives": [
       {
-        "target_id": "spawn_bravo",
+        "target_id": "spawn_enemy_patrol",
         "text": "Händler aufsuchen"
       },
       {
@@ -62,8 +62,8 @@
         "radius_world": 96.0,
         "required_team": "team_alpha",
         "display_name": "Händler: Relaisgrat",
-        "interaction_id": "spawn_bravo",
-        "marker_id": "spawn_bravo"
+        "interaction_id": "spawn_enemy_patrol",
+        "marker_id": "spawn_enemy_patrol"
       }
     ],
     "flow_steps": [
@@ -72,7 +72,7 @@
         "min_hold_seconds": 1.0,
         "objective_type": "interaction_use",
         "required_state": "service_visited",
-        "target_marker_id": "spawn_bravo"
+        "target_marker_id": "spawn_enemy_patrol"
       },
       {
         "objective_type": "location_return",

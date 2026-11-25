@@ -13,7 +13,7 @@ const REGISTRY = preload("res://scripts/terrain/terrain_registry.gd")
 const FIELD_LANDING = preload("res://scripts/mission/field_landing_contract.gd")
 const SURFACE = preload("res://scripts/mission/orbit_surface_locations.gd")
 const PLACES := {
-	"muellers_farm": {"name": "Müllers Farm", "map": "res://maps/Ground_Mission01_32x32.json", "marker": "spawn_bravo", "pad": "muellers_farm_pad_01", "orbit": "glut_1b_orbit", "body": "glut_1b", "home": 9.0, "trade": 6.0, "crash": 11.0},
+	"muellers_farm": {"name": "Müllers Farm", "map": "res://maps/trade_outpost.json", "marker": "spawn_bravo", "pad": "muellers_farm_pad_01", "orbit": "glut_1b_orbit", "body": "glut_1b", "home": 9.0, "trade": 6.0, "crash": 11.0},
 	"shady_lab": {"name": "Shady Research Lab", "map": "res://maps/Ground_Mission02_128x128.json", "marker": "spawn_bravo", "pad": "gm02_pad_bravo", "orbit": "planet_orbit", "body": "planet", "home": 10.0, "trade": 9.0, "crash": 11.0},
 	"templanon": {"name": "Templanon", "map": "res://maps/windbruch_outpost.json", "marker": "recon_altfeld", "pad": "windbruch_pad_03", "orbit": "planet_orbit", "body": "planet", "home": 10.0, "trade": 9.0, "crash": 11.0},
 }
@@ -174,12 +174,12 @@ func _case_unlock() -> void:
 	_finish_job("outpost_recovery")
 	for id: String in PLACES:
 		_check(bool(owner.validate_location_visit(id).get("ok", false)), "Freigabe %s: nach outpost_recovery weiter anfliegbar" % id)
-	# Freigabe 25.11.2026: der Relaisgrat hat jetzt einen freien Besuch (relay_ridge_visit) und ist ohne Auftrag anfliegbar; mit Handel am Marker spawn_bravo.
+	# Freigabe 25.11.2026: der Relaisgrat hat jetzt einen freien Besuch (relay_ridge_visit) und ist ohne Auftrag anfliegbar; mit Handel am Marker spawn_enemy_patrol.
 	var fresh: RefCounted = CAMPAIGN.new()
 	fresh.configure()
 	_check(bool(fresh.validate_location_visit("relay_ridge").get("ok", false)) and String(fresh.free_visit_scenario_id("relay_ridge")) == "relay_ridge_visit", "Freigabe: relay_ridge ist direkt nach Spielstart anfliegbar (freier Besuch relay_ridge_visit)")
 	var relay_trade: Dictionary = fresh.trade_marker_entry("relay_ridge")
-	_check(String(relay_trade.get("service_marker_id", "")) == "spawn_bravo" and is_equal_approx(float(relay_trade.get("service_radius_world", 0.0)), 256.0), "Freigabe: relay_ridge hat im freien Besuch den Haendler-Marker spawn_bravo (Radius 256) (%s)" % str(relay_trade))
+	_check(String(relay_trade.get("service_marker_id", "")) == "spawn_enemy_patrol" and is_equal_approx(float(relay_trade.get("service_radius_world", 0.0)), 256.0), "Freigabe: relay_ridge hat im freien Besuch den Haendler-Marker spawn_enemy_patrol (Radius 256) (%s)" % str(relay_trade))
 	_check(fresh.trade_marker_entry("satellite_crash").is_empty() and fresh.trade_marker_entry("distress_orbit").is_empty() and not fresh.trade_marker_entry("templanon").is_empty(), "Freigabe: Handels-Marker nur fuer die drei Posten und den Relaisgrat")
 	var chain: Array = []
 	var availability: Dictionary = fresh.get_job_availability(true)
