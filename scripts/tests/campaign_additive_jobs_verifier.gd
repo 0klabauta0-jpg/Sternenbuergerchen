@@ -225,7 +225,8 @@ func _case_gated_location() -> void:
 	var plain: RefCounted = _owner(old_jobs, 0)
 	_check(bool(_cmd(plain, "accept_job", {"job_id":"satellite_recovery"}).get("ok", false)), "Fixture: satellite_recovery angenommen (ohne Pruefeintrag)")
 	var without: Dictionary = plain.validate_location_visit("distress_orbit", true)
-	_check(not bool(without.get("ok", true)) and String(without.get("reason", "")) == "tutorial_locked", "Fall 7: ohne Pruefeintrag ist distress_orbit verschlossen (%s)" % str(without))
+	# Freigabe 25.11.2026: ohne gesperrt gelisteten Auftrag ist distress_orbit ohne Auftrag anfliegbar (keine Begegnung); der Auftrag wird dadurch nicht frueher annehmbar.
+	_check(bool(without.get("ok", false)), "Fall 7: ohne Pruefeintrag ist distress_orbit ohne Auftrag anfliegbar (%s)" % str(without))
 	var owner: RefCounted = _owner(gated_jobs, 0)
 	_check(bool(_cmd(owner, "accept_job", {"job_id":"satellite_recovery"}).get("ok", false)), "Fixture: satellite_recovery angenommen (mit Pruefeintrag)")
 	var entry: Dictionary = owner.get_job_availability(true)[GATE_ID]

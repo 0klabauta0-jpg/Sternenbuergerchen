@@ -2209,7 +2209,8 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 		if not station_dock and not station_landing: _simulation.publish_singleplayer_departure_events(self, String(_departure_token_by_craft.get(craft_id, "")))
 		if _campaign_mode and not station_dock and not station_landing and not departure.get("replayed", false): observe_campaign_progress()
 		if result.get("ok", false) and not bool(result.get("replayed", false)):
-			if location_id == "distress_orbit":
+			# Ohne angenommenen Auftrag ist der Notruf-Ort ein freier Orbit-Besuch: keine Weltraumbegegnung.
+			if location_id == "distress_orbit" and _campaign != null and _campaign.has_open_job_at(location_id):
 				_space_encounter.start_encounter(craft_id, true)
 				_encounter_entry_delay = 0.0
 				_encounter_entry_feedback.clear()

@@ -161,6 +161,12 @@ func get_job_availability(retry_allowed: bool = false) -> Dictionary:
 		result[id] = {"visible":status in ["accepted", "active", "completed", "pending_upload"] or bool(gate.ok) or shown_as_locked, "can_accept":status in ["offered", "failed"] and bool(gate.ok), "shown_as_locked":shown_as_locked, "reason":String(gate.get("reason", "")), "message":String(gate.get("message", ""))}
 	return result
 
+## true, wenn an diesem Ort ein Auftrag angenommen/aktiv/hochzuladen ist (dann gilt dessen Szenario bzw. die Begegnung).
+func has_open_job_at(location_id: String) -> bool:
+	for id: String in _jobs:
+		if String(_jobs[id].location_id) == location_id and String(_jobs[id].status) in ["accepted", "active", "pending_upload"]: return true
+	return false
+
 func validate_location_visit(location_id: String, retry_allowed: bool = false) -> Dictionary:
 	if not _locations.has(location_id): return _reject("unknown_location", "Zielort unbekannt")
 	# Handel 2a: kleine Aussenposten (small_outposts.json) sind frei, sobald ihr Freischalt-Auftrag abgeschlossen ist; im freien Spiel immer.
@@ -174,7 +180,14 @@ func validate_location_visit(location_id: String, retry_allowed: bool = false) -
 	if location_id == "homebase" or bool(_locations[location_id].get("free_visit", false)) or (not _enforce_sequence and not ADDITIVE_LOCATION_IDS.has(location_id)): return {"ok":true}  # additive Orte ohne Auftrag auch im freien Spiel nicht (kein spielbares Szenario im Gefecht)
 	# Windbruch-Garnison: der freie Kampf-Ort ist immer anfliegbar (ohne angenommenen Auftrag laeuft das Lager, mit Auftrag dessen Szenario).
 	if not open_garrison_scenario_id(location_id).is_empty(): return {"ok":true}
+	# Freigabe 25.11.2026: der Notruf-Ort (reiner Orbit) ist ohne angenommenen Auftrag frei anfliegbar (Umsehen auf der Orbit-Karte, keine Begegnung).
+	# Der Auftrag selbst wird dadurch nicht frueher annehmbar (get_job_availability bleibt unveraendert).
 	var availability := get_job_availability(retry_allowed)
+	if location_id == "distress_orbit":
+		var any_locked := false
+		for id: String in _jobs:
+			if String(_jobs[id].location_id) == location_id and bool(availability[id].shown_as_locked): any_locked = true
+		if not any_locked: return {"ok":true}
 	for id: String in _jobs:
 		# Ein gesperrt gelisteter Auftrag oeffnet seinen Ort nicht.
 		if String(_jobs[id].location_id) == location_id and bool(availability[id].visible) and not bool(availability[id].shown_as_locked): return {"ok":true}
