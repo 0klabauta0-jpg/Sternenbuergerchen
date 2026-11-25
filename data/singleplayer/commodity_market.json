@@ -42,12 +42,18 @@
       "heilkraeuter": {"buy_price": 34, "buy_limit": 12},
       "aufputschmittel": {"buy_price": 34, "buy_limit": 12}
     },
+    "relay_ridge": {
+      "b_benit": {"sell_price": 8, "stock": 12},
+      "a_benit": {"buy_price": 15}
+    },
     "polisa": {
       "a_benit": {"buy_price": 15},
       "b_benit": {"buy_price": 15},
       "c_benit": {"buy_price": 15}
     }
   },
+  "trade_places_note": "Benit-Ring (25.11.2026): Orte, an denen der Handelsdienst aus dieser Datei kommt, ohne dass service_locations in trade_offers.json (und damit der Spielstandvergleich) angefasst wird. B-Posten des Rings = relay_ridge: verkauft B-Benit (8 Cr), kauft A-Benit.",
+  "trade_places": ["relay_ridge"],
   "post_goods_note": "Gueter-Dreieck (24.11.2026): An den drei kleinen Aussenposten wird nur mit den hier genannten Gueter gehandelt (Heilkraeuter, Duenger, Aufputschmittel); die frueheren Handelsgueter dieser Orte (Nahrung usw.) bleiben in den Daten, werden dort aber nicht gehandelt. buy_limit = so viele Stuecke nimmt der Haendler je Heimlandung ab; Vorrat und Abnahme fuellen sich mit der Heimlandung wieder auf. Zeile des Ortes in post_goods loeschen = alle Gueter des Ortes wieder handelbar.",
   "post_goods": {
     "muellers_farm": {"goods": ["heilkraeuter", "duenger", "aufputschmittel"], "text": "Das Gewächshaus verkauft Heilkräuter und sucht Dünger und Aufputschmittel."},
