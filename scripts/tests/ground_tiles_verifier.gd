@@ -53,6 +53,8 @@ func _check_files_and_shader() -> void:
 	check(shader != null, "Boden-Shader laedt")
 	if shader == null:
 		return
+	# Heimatbasis nutzt den Normalboden (11 mit Flecken 09/06), keine eigene Basis-Textur 03.
+	check(shader.code.contains("const bool GROUND_BASE_OWN_TEXTURE = false;"), "Heimatbasis: Basis nutzt den Normalboden, keine eigene Textur 03")
 	var names := {}
 	for entry in shader.get_shader_uniform_list():
 		names[String(entry["name"])] = true

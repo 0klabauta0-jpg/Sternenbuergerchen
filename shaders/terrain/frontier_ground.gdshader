@@ -38,6 +38,7 @@ uniform sampler2D ground_tex_normal : source_color, filter_linear_mipmap, repeat
 uniform sampler2D ground_tex_gravel : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D ground_tex_clay : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D ground_tex_rock : source_color, filter_linear_mipmap, repeat_enable;
+const bool GROUND_BASE_OWN_TEXTURE = false;
 uniform sampler2D ground_tex_base : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D ground_tex_paving : source_color, filter_linear_mipmap, repeat_enable;
 // Edge length of one texture tile in metres (one field is about 1 m).
@@ -377,7 +378,8 @@ void fragment() {
 		vec2 tile_dx = dFdx(tile_uv);
 		vec2 tile_dy = dFdy(tile_uv);
 		vec3 tile_color;
-		if (homebase_palette) {
+		// Heimatbasis hat keine eigene Bodentextur mehr (Spielerwunsch 25.11.): Normalboden wie die Einsatzkarten.
+		if (GROUND_BASE_OWN_TEXTURE && homebase_palette) {
 			tile_color = textureGrad(ground_tex_base, tile_uv, tile_dx, tile_dy).rgb * ground_base_tile_gain;
 		} else {
 			tile_color = textureGrad(ground_tex_normal, tile_uv, tile_dx, tile_dy).rgb;
