@@ -60,6 +60,27 @@
 				{"id": "templanon_lift", "kind": "model", "model": "res://art/tripo_models_20261124/basis_frachtaufzug_01.glb", "scale": 0.2181, "offset": [0.5, -4.2], "rotation_y_deg": 0.0, "footprint_m": [5.714, 8.0], "real_height_range": [1.2, 2.5], "max_distance": 6.0},
 				{"id": "templanon_pad", "kind": "pad", "size": [3.4, 4.2], "offset": [-1.0, 5.2], "rotation_y_deg": 0.0, "designation": "PAD 01", "deck_top": 0.03}
 			]
+		},
+		{
+			"id": "relay_ridge",
+			"place_id": "relay_ridge",
+			"map_file_path": "res://maps/Ground_Mission02_128x128.json",
+			"map_name": "GM02_128",
+			"marker_id": "spawn_enemy_patrol",
+			"model": "res://art/tripo_models_20261124/basis_home_pod_4k_01.glb",
+			"scale": 3.872,
+			"scale_from_home_pod": {"home_scale": 4.5, "home_figure": 0.609},
+			"scale_note": "Der Wohn-Pod der Heimatbasis ist NICHT in Metern: Rohmasse etwa 1,000 x 0,876 x 0,447. Faktor = 4,5 (Heimatbasis) x Figur in der Einsatzansicht / Figur der Heimatbasis (0,609); Menschenmass dann etwa 13,3 x 11,6 x 5,9 m.",
+			"offset": [-3.2, 0.0],
+			"rotation_y_deg": 90.0,
+			"max_offset": 14.0,
+			"footprint_m": [1.0, 0.876],
+			"door_height_m": 2.2,
+			"real_height_range": [5.0, 7.0],
+			"extras": [
+				{"id": "relay_ridge_lift", "kind": "model", "model": "res://art/tripo_models_20261124/basis_frachtaufzug_01.glb", "scale": 0.2181, "offset": [3.5, -1.0], "rotation_y_deg": 0.0, "footprint_m": [5.714, 8.0], "real_height_range": [1.2, 2.5], "max_distance": 6.0},
+				{"id": "relay_ridge_pad", "kind": "pad", "size": [3.4, 4.2], "offset": [-1.0, 5.2], "rotation_y_deg": 0.0, "designation": "PAD 01", "deck_top": 0.03}
+			]
 		}
 	]
 }
