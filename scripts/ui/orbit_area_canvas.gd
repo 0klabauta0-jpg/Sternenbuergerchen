@@ -320,7 +320,7 @@ func _draw() -> void:
 		var drawn_sprite := false
 		var model_id := str(actor.get("model_id",""))
 		if _sprites != null and SPRITES.fields_for(model_id) > 0:
-			var sprite := _sprites.get_sprite(model_id)
+			var sprite: Texture2D = _sprites.get_sprite(model_id)
 			var length_px := _scale() * SPRITES.length_units(model_id) / SPRITES.HEX_LENGTH_UNITS
 			if sprite != null and length_px >= 12.0:
 				# Textur: Nase nach oben, ORTHO_SIZE Modelleinheiten auf TEXTURE_SIZE Pixel.
