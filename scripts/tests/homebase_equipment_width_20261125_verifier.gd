@@ -9,7 +9,10 @@ class SnapshotOwner extends Control:
 	func get_operations_snapshot() -> Dictionary:
 		return snapshot.duplicate(true)
 	var inventory: Dictionary = {}
+	var equips: Array = []
 	func request_operation(operation: String, payload: Dictionary) -> Dictionary:
+		if operation == "inventory_equip":
+			equips.append(payload.duplicate())
 		if operation == "inventory_transfer":
 			var from_items: Dictionary = inventory[String(payload.source_container_id)].items
 			var to_items: Dictionary = inventory[String(payload.destination_container_id)].items
@@ -96,6 +99,10 @@ func _check_bag(presenter: Control, owner: Control, column: Control, tag: String
 	_check(bag.is_visible_in_tree() and br.size.x > 0.0, tag + ": Fach-Block sichtbar")
 	_check(br.position.x >= rect.position.x - 0.5 and br.end.x <= rect.end.x + 0.5, tag + ": Fach-Block liegt waagerecht ganz in der Spalte")
 	_check(br.position.y >= secondary.get_global_rect().end.y - 0.5, tag + ": Fach-Block liegt unter dem Sekundaer-Fach")
+	_check(br.size.x <= secondary.get_global_rect().size.x + 2.0, tag + ": Fach-Block hoechstens so breit wie das Sekundaer-Fach (%.1f <= %.1f)" % [br.size.x, secondary.get_global_rect().size.x])
+	_check_visible_without_scrolling(presenter, column, tag)
+	_check_hatch(column, owner, bag, tag)
+	await _check_slot_drops(column, owner, tag)
 	var backpack := "unit:fixture_alpha:backpack"
 	for item in ["ammo_light", "bandage"]:
 		var payload := {"type": "inventory_item", "source_container_id": "base:homebase", "item_id": item, "label": item}
@@ -109,6 +116,72 @@ func _check_bag(presenter: Control, owner: Control, column: Control, tag: String
 		_check(bag != null and bag.is_visible_in_tree(), tag + ": Fach-Block nach dem Ablegen noch sichtbar")
 		if bag == null:
 			return
+
+
+## Figur, alle Faecher und der Anfang der Lagerliste liegen im sichtbaren Bereich des umgebenden Scrollbereichs (bei 1920x1080 ohne Scrollversatz).
+func _check_visible_without_scrolling(presenter: Control, column: Control, tag: String) -> void:
+	var scroll: ScrollContainer = null
+	var node: Node = column.get_parent()
+	while node != null:
+		if node is ScrollContainer:
+			scroll = node as ScrollContainer
+			break
+		node = node.get_parent()
+	var view: Rect2 = scroll.get_global_rect() if scroll != null else presenter.get_viewport().get_visible_rect()
+	var parts := {
+		"Figur": column.find_child("PersonnelBodyPreview", true, false),
+		"Rüstungsfach": column.find_child("InventorySlot_armor", true, false),
+		"Primaer": column.find_child("InventorySlot_weapon_1", true, false),
+		"Sekundaer": column.find_child("InventorySlot_weapon_2", true, false),
+		"Fach-Block": column.find_child("CarriedBackpack", true, false),
+		"Basislager": column.find_child("Inventory_base_homebase", true, false),
+	}
+	if parts["Figur"] == null:
+		for candidate in column.find_children("*", "Control", true, false):
+			if String((candidate as Control).get_script().resource_path if (candidate as Control).get_script() != null else "").ends_with("personnel_body_preview.gd"):
+				parts["Figur"] = candidate
+	print("SCROLL ", tag, " scroll=", scroll != null, " offset=", scroll.scroll_vertical if scroll != null else -1, " view=", view)
+	var strict := tag.begins_with("1920x1080")
+	if strict and scroll != null:
+		_check(scroll.scroll_vertical == 0, tag + ": kein Scrollversatz")
+	for part_name in parts:
+		var control := parts[part_name] as Control
+		_check(control != null and control.is_visible_in_tree(), tag + ": %s vorhanden und sichtbar" % part_name)
+		if control == null or not strict:
+			continue
+		var r := control.get_global_rect()
+		print("  ", part_name, " ", r)
+		_check(r.position.y >= view.position.y - 0.5 and r.end.y <= view.end.y + 0.5, tag + ": %s liegt ganz im sichtbaren Bereich" % part_name)
+
+
+## Leeres Faech: Schraffur (ohne Mausfang); belegtes Fach: keine.
+func _check_hatch(column: Control, owner: Control, bag: Control, tag: String) -> void:
+	var secondary := column.find_child("InventorySlot_weapon_2", true, false) as Control
+	var primary := column.find_child("InventorySlot_weapon_1", true, false) as Control
+	var sec_hatch := secondary.get_node_or_null("Hatch") as Control
+	_check(sec_hatch != null and sec_hatch.mouse_filter == Control.MOUSE_FILTER_IGNORE, tag + ": leeres Sekundaer-Fach hat Schraffur ohne Mausfang")
+	_check(primary.get_node_or_null("Hatch") == null, tag + ": belegtes Primaer-Fach hat keine Schraffur")
+	var items: Dictionary = owner.inventory["unit:fixture_alpha:backpack"].items
+	var bag_hatch := bag.get_node_or_null("Hatch")
+	_check((bag_hatch != null) == items.is_empty(), tag + ": Fach-Block hat Schraffur genau wenn leer")
+
+
+## Jedes Fach nimmt ein passendes Ablegen an; Rüstung und Waffe werden wirklich abgelegt (Equip-Anfrage mit richtigem Fach).
+func _check_slot_drops(column: Control, owner: Control, tag: String) -> void:
+	var cases := {"armor": "armor_light", "weapon_1": "rifle", "weapon_2": "pistol"}
+	for key in cases:
+		var slot := column.find_child("InventorySlot_" + String(key), true, false) as Control
+		_check(slot != null and slot.is_visible_in_tree(), tag + ": Fach %s sichtbar" % key)
+		if slot == null:
+			continue
+		var payload := {"type": "inventory_item", "source_container_id": "base:homebase", "item_id": cases[key], "label": cases[key]}
+		_check(bool(slot.call("_can_drop_data", Vector2(10, 10), payload)), tag + ": Fach %s nimmt %s an" % [key, cases[key]])
+		var before: int = (owner as SnapshotOwner).equips.size()
+		slot.call("_drop_data", Vector2(10, 10), payload)
+		for _i in range(2):
+			await process_frame
+		var equips: Array = (owner as SnapshotOwner).equips
+		_check(equips.size() == before + 1 and String(Dictionary(equips[equips.size() - 1]).get("slot", "")) == String(key) and String(Dictionary(equips[equips.size() - 1]).get("item_id", "")) == String(cases[key]), tag + ": Ablegen in %s loest Anlegen aus" % key)
 
 
 func _snapshot() -> Dictionary:

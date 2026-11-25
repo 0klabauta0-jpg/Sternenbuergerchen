@@ -8,6 +8,7 @@ const MENU_ICONS=preload("res://scripts/ui/menu_equipment_icons.gd")
 const BADGES=preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 const COPY=preload("res://scripts/meta/character_sheet_copy.gd")
 const PORTRAITS=preload("res://scripts/meta/portrait_identity_catalog.gd")
+const HATCH = preload("res://scripts/ui/components/hatched_slot_background.gd")
 const FAR_SHIP_HINT := "Schiffsfracht nur in der Nähe des Schiffs erreichbar."
 const PORTRAIT_SIZE := Vector2(112, 140)
 const MODEL_HEIGHT := 500.0
@@ -15,6 +16,7 @@ const MODEL_HEIGHT := 500.0
 const SLOT_HEIGHT := 60.0
 const SLOT_WIDTH_WIDE := 240.0
 const SLOT_WIDTH_NARROW := 216.0
+const BAG_MIN_HEIGHT := 200.0
 const SLOT_ICON := Vector2(48, 48)
 const STORAGE_TILE_SIZE := Vector2(110, 64)
 const STORAGE_TILE_ICON := 28
@@ -74,7 +76,7 @@ func _ready() -> void:
 	_bag_heading.name = "CarriedStorageHeading"
 	SKIN.label(_bag_heading, 15)
 	bag_body.add_child(_bag_heading)
-	var bag_scroll:=ScrollContainer.new();bag_scroll.custom_minimum_size.y=240;bag_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;bag_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;bag_body.add_child(bag_scroll)
+	var bag_scroll:=ScrollContainer.new();bag_scroll.custom_minimum_size.y=110;bag_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;bag_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;bag_body.add_child(bag_scroll)
 	_bag_grid=GridContainer.new();_bag_grid.columns=2;bag_scroll.add_child(_bag_grid)
 	_bag_preview.payload_dropped.connect(func(data:Dictionary):_drop_to(data,"unit:"+_unit_id+":backpack"))
 	_slots.draw.connect(_draw_equipment_guides)
@@ -166,6 +168,8 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 		var icon:=TextureRect.new(); icon.texture=_item_icon(item); icon.custom_minimum_size=SLOT_ICON; icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE; icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED; icon.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot_body.add_child(icon)
 		var label:=Label.new(); label.text=spec[1]+"\n"+String(LABELS.get(item,item));label.custom_minimum_size.x=130;label.add_theme_font_size_override("font_size",16);label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER;label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; label.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot_body.add_child(label)
 		slot.payload_dropped.connect(func(data:Dictionary): _wear(data,key))
+		if equipment_allowed and (item=="none" or (key=="armor" and item=="suit")):
+			_add_hatch(slot, label)
 	_layout_body_slots()
 	var personal_label := "Persönlicher Stauraum" if has_armor_slot else "Rucksack"
 	for spec in [["base:homebase","Basislager"],["craft:"+craft_id,"Schiffsfracht"],[personal_id, personal_label]]:
@@ -200,11 +204,19 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 				button.name="BackpackItem_"+String(item)+"_List";button.text="" if button.icon != null else String(LABELS.get(item,item));button.custom_minimum_size=Vector2(64,64);button.add_theme_constant_override("icon_max_width",52);button.tooltip_text="%s × %d"%[String(LABELS.get(item,item)),int(data.items[item])]
 			button.pressed.connect(func(): _selection={"source_container_id":id,"item_id":item}; _selected.text=String(LABELS.get(item,item))+" · "+String(spec[1]))
 		if Dictionary(data.get("items",{})).is_empty() and not far_ship:
+			if allowed and equipment_allowed: _add_hatch(box)
 			var empty:=Label.new(); empty.text="Leer · Gegenstand hierher ziehen"; empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; body.add_child(empty)
 	_transfer.disabled=accessible.is_empty(); _equip.disabled=accessible.is_empty() or not equipment_allowed
 	_remove_armor.visible = equipment_allowed and String(loadout.get("armor", "suit")) != "suit"
 	_remove_armor.disabled = accessible.is_empty()
 	_layout_body_slots()
+
+## Graue Schraffur (eigener Baustein, keine Mausereignisse) fuer ein leeres Fach, in das man etwas ziehen kann; Aufschrift ausgegraut.
+func _add_hatch(target: Control, label: Label = null) -> void:
+	var hatch: Control = HATCH.new()
+	target.add_child(hatch)
+	if label != null:
+		label.add_theme_color_override("font_color", HATCH.MUTED_TEXT)
 
 func _compact_tile(button: Button) -> void:
 	for state in ["normal", "hover", "pressed", "disabled"]:
@@ -253,10 +265,12 @@ func _layout_body_slots() -> void:
 		slot_y += slot.size.y + 4
 	var height := maxf(model_top + MODEL_HEIGHT + 4, slot_y + 6)
 	if bag_below:
-		# Schmale Spalte: Rüstungs-/Munitionsfach und Rucksack unter dem Sekundär-Fach, volle Spaltenbreite.
-		_bag_preview.position = Vector2(12, height)
-		_bag_preview.size = Vector2(width - 24, 290)
-		height += 290 + 6
+		# Schmale Spalte: Rüstungs-/Munitionsfach und Rucksack stehen in der Fächerspalte direkt unter dem Sekundär-Fach,
+		# so schmal wie die Fächer und neben der Figur; die Gesamthöhe wächst dadurch nicht.
+		var bag_height := maxf(BAG_MIN_HEIGHT, model_top + MODEL_HEIGHT - slot_y)
+		_bag_preview.position = Vector2(12, slot_y)
+		_bag_preview.size = Vector2(minf(left - 24, SLOT_WIDTH_WIDE if wide else SLOT_WIDTH_NARROW), bag_height)
+		height = maxf(height, slot_y + bag_height + 6)
 	_slots.custom_minimum_size.y = height
 	_body_frame.size = Vector2(width, height)
 	_slots.queue_redraw()
@@ -376,6 +390,10 @@ func _refresh_bag_preview()->void:
 	var id:String="unit:"+_unit_id+":backpack"
 	var allowed:bool=_accessible.has(id)
 	_bag_preview.accepted_type="inventory_item" if allowed else ""
+	var old_hatch:=_bag_preview.get_node_or_null("Hatch")
+	if old_hatch!=null:_bag_preview.remove_child(old_hatch);old_hatch.queue_free()
+	if allowed and carried_items.is_empty():_add_hatch(_bag_preview,_bag_heading)
+	else:_bag_heading.remove_theme_color_override("font_color")
 	for item:String in carried_items:
 		var source:PanelContainer=SURFACE.new();source.drag_payload={"type":"inventory_item","source_container_id":id,"item_id":item,"label":String(LABELS.get(item,item))} if allowed else {};_bag_grid.add_child(source)
 		var button:=Button.new();button.name="BackpackItem_"+item;button.icon=_item_icon(item);button.expand_icon=true;button.custom_minimum_size=Vector2(62,64);button.add_theme_constant_override("icon_max_width",52);button.tooltip_text="%s × %d"%[String(LABELS.get(item,item)),int(carried_items[item])];source.add_child(button)
