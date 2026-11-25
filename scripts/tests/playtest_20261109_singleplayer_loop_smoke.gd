@@ -201,6 +201,15 @@ func _verify_final_state(initial: Dictionary) -> void:
 ## (sonst gelten die Befehle des ersten Fluges als schon gebucht und der zweite Flug bewegt sich nicht).
 var _launch_tag := ""
 
+## Anflug aus dem Planetenorbit. Ist der Orbit-Durchflug eingeschaltet (nur mit den Umgebungsvariablen), gilt im Spiel Handflug als Vorgabe;
+## dieser Ablauf stellt dann AUSDRUECKLICH "Automatisch" ein (derselbe Befehl wie der Knopf der Sternkarte), damit der Durchflug von selbst laeuft.
+## Der Handflug-Fall steht in campaign_active_mission_continue_verifier (ueberschreibt diese Funktion).
+func _begin_orbit_approach(scenario_id: String, destination: String) -> Dictionary:
+	if bool(_runtime.get("_surface_orbit_path_enabled")):
+		var automatic: Dictionary = _runtime.call("request_operation", "space_set_orbit_automatic", {"craft_id": _craft_id, "enabled": true})
+		_check(bool(automatic.get("ok", false)) and bool(_space().get("orbit_transit_automatic", false)), scenario_id + " Automatisch ausdruecklich eingestellt (%s)" % str(automatic))
+	return _screen.call("request_operation", "space_begin_approach", {"craft_id": _craft_id, "location_id": destination, "request_id": "loop:approach:" + scenario_id + _launch_tag})
+
 func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 	_screen.call("request_operation", "craft", {"craft_id": _craft_id})
 	_screen.call("request_operation", "focus_fireteam", {"fireteam_id": _team_id})
@@ -265,7 +274,7 @@ func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 	# Regel 8 / Auftrag 21.11.: Abheben und der eine Sprung dieser Strecke sind bezahlt; Abbruch und Neustart aus "stopped" kosten nichts dazu.
 	var paid_so_far: float = float(_runtime.get("_supply").call("get_leg_fuel_cost", "homebase", "", "launch")) + float(_runtime.get("_supply").call("get_leg_fuel_cost", "homebase", destination, "jump"))
 	_check(is_equal_approx(float(Dictionary(_supply().get("fuel_by_craft_id", {})).get(_craft_id, -1.0)), float(before_launch_fuel.get(_craft_id, 0.0)) - paid_so_far), "Quantum, abort and restart debit exactly the takeoff and one jump leg (%s), no approach fuel" % str(paid_so_far))
-	var approach: Dictionary = _screen.call("request_operation", "space_begin_approach", {"craft_id": _craft_id, "location_id": destination, "request_id": "loop:approach:" + scenario_id + _launch_tag})
+	var approach: Dictionary = await _begin_orbit_approach(scenario_id, destination)
 	if not _check(bool(approach.get("ok", false)), scenario_id + " explicit approach accepts from planet orbit"):
 		print("APPROACH_RESULT:", approach)
 		_dump("approach")
