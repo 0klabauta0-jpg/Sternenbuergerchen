@@ -168,6 +168,8 @@ func configure(screen: Control) -> void:
 	item_rect_changed.connect(_align_footer_later)
 	_accept = _button("AcceptJob", "Auftrag annehmen")
 	SKIN.primary(_accept)
+	# Absicherung (Meldung 25.11.): der Knopf loest beim Druecken aus; ein leichtes Wegrutschen beim Loslassen kostet den Klick nicht.
+	_accept.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
 	_accept.pressed.connect(func(): _request("standing_accept", {"order_id": _standing_id}) if not _standing_id.is_empty() else _request("accept_job", {"job_id": _job_id}))
 	_show_map = _button("ShowOnMap", "Auf Karte zeigen")
 	_show_map.pressed.connect(_show_selected_on_map)
