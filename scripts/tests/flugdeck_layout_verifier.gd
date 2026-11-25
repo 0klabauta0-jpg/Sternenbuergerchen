@@ -31,7 +31,7 @@ func _run()->void:
 		var craft:Control=presenter.get("_craft_selector")
 		var pad:Control=presenter.get("_pad_selector")
 		check(pilot.size.x<=220,"pilot choice bounded and compact %s"%resolution)
-		check(absf(board.global_position.y-start.global_position.y)<2,"boarding and launch share a row %s"%resolution)
+		check(absf(board.global_position.x-start.global_position.x)<2 and board.global_position.y<start.global_position.y,"boarding above launch in one compact column %s"%resolution)
 		check(craft.global_position.x>pad.global_position.x,"ship dropdown to right of pad dropdown")
 		check(footer.get_global_rect().grow(1).encloses(start.get_global_rect()),"launch stays inside compact footer %s"%resolution)
 		check(footer.get_global_rect().grow(1).encloses(presenter.get("_launch_reason").get_global_rect()),"readiness reason stays inside footer %s"%resolution)

@@ -82,7 +82,18 @@ var _focused_details: Button
 var _remove_member: Button
 var _pad_selector: OptionButton
 var _selected_pad_id: String = ""
-var _flight_actions: HBoxContainer
+var _flight_actions: BoxContainer
+## Flugdeck-Aufbau v2: Schiffsdetail (Spalte equipment), Schiffsleiste (flight), Trupp-Zeilen (squad).
+const SHIP_DETAIL_SCRIPT: GDScript = preload("res://scripts/ui/components/ship_detail_panel.gd")
+var _ship_detail: VBoxContainer
+var _equipment_scroll: Control
+var _ship_strip: VBoxContainer
+var _ship_cards: Dictionary = {}
+var _slots_scroll: Control
+var _team_list_scroll: Control
+var _team_rows_host: VBoxContainer
+var _team_rows: Dictionary = {}
+var _squad_extras: Array[Control] = []
 var _craft_selector: OptionButton
 var _craft_image: TextureRect
 var _pilot_selector: OptionButton
@@ -424,6 +435,7 @@ func _column(key: String, heading: String) -> VBoxContainer:
 	var title: Label = _label(heading, 23, CREAM)
 	THEME.style_section_heading(title, 26)
 	content.add_child(title)
+	panel.set_meta("title_label", title)
 	return content
 
 
@@ -476,11 +488,17 @@ func _build_squad() -> void:
 	_team_drag_source.add_child(_team_title)
 	_team_drag_source.connect("payload_dropped", func(data: Dictionary): _act("assign", {"unit_id": String(data.unit_id), "fireteam_id": _fireteam_id}))
 	var list: VBoxContainer = _scroll(content)
+	_slots_scroll = list.get_parent()
 	for index in range(4):
 		var slot: Dictionary = _person_row(list, "slot_%d" % index, false)
 		_slots.append(slot)
 		var focus: Button = slot.focus
 		focus.pressed.connect(_slot_pressed.bind(index))
+	# Flugdeck-Ansicht: je Trupp eine Zeile (Fuehrer mit Stern, daneben die Mitglieder) statt der vier Plaetze.
+	_team_rows_host = _scroll(content)
+	_team_rows_host.name = "TeamRows"
+	_team_list_scroll = _team_rows_host.get_parent()
+	_team_list_scroll.visible = false
 	_team_note = _label("", 15, MUTED)
 	_team_note.tooltip_text = "Person auf einen Platz ziehen · Trupp ins Schiff ziehen."
 	content.add_child(_team_note)
@@ -501,7 +519,20 @@ func _build_squad() -> void:
 
 func _build_equipment() -> void:
 	var content: VBoxContainer = _column("equipment", "Lager & Ausrüstung")
+	_ship_detail = SHIP_DETAIL_SCRIPT.new()
+	_ship_detail.visible = false
+	var detail_scroll := ScrollContainer.new()
+	detail_scroll.name = "ShipDetailScroll"
+	detail_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	detail_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	detail_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	detail_scroll.visible = false
+	content.add_child(detail_scroll)
+	_ship_detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	detail_scroll.add_child(_ship_detail)
+	_ship_detail.visible = true
 	var list: VBoxContainer = _scroll(content)
+	_equipment_scroll = list.get_parent()
 	_identity_row = BoxContainer.new()
 	_identity_row.vertical = false
 	_identity_row.add_theme_constant_override("separation", 16)
@@ -651,21 +682,23 @@ func _build_flightdeck() -> void:
 	_craft_selector.item_selected.connect(func(index: int):
 		_pad_selector.set_meta("empty_pad_focus", false)
 		_act("craft", {"craft_id": String(_craft_selector.get_item_metadata(index))}))
-	var pilot_row := HBoxContainer.new()
-	pilot_row.name = "FlightdeckReadiness"
-	pilot_row.add_theme_constant_override("separation", 10)
-	content.add_child(pilot_row)
-	var pilot := VBoxContainer.new()
-	pilot.custom_minimum_size.x = 180
-	pilot_row.add_child(pilot)
+	# Schiffsleiste: je Schiff eine Karte mit Bild (Karten entstehen in _update_flight).
+	_ship_strip = VBoxContainer.new()
+	_ship_strip.name = "ShipStrip"
+	_ship_strip.add_theme_constant_override("separation", 6)
+	content.add_child(_ship_strip)
+	# Pilotplatz gehoert zum Schiffsdetail (linke Spalte); Befehl `pilot` und Knotennamen bleiben.
+	var pilot: VBoxContainer = _ship_detail.pilot_host
 	_pilot_selector = _option(pilot, "PilotSelector")
-	_pilot_selector.custom_minimum_size.x = 180
+	_pilot_selector.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_pilot_selector.custom_minimum_size.x = 200
 	_pilot_selector.item_selected.connect(func(index: int): _act("pilot", {"unit_id": String(_pilot_selector.get_item_metadata(index)), "craft_id": _craft_id}))
 	_pilot_status = _label("Nicht an Bord", 14, GOLD)
 	pilot.add_child(_pilot_status)
 	var status := VBoxContainer.new()
+	status.name = "FlightdeckReadiness"
 	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	pilot_row.add_child(status)
+	content.add_child(status)
 	_craft_status = _label("Kein Schiff verfügbar", 16, THEME.status_color("neutral"))
 	status.add_child(_craft_status)
 	_payload_label = _label("", 14, CREAM)
@@ -678,15 +711,16 @@ func _build_flightdeck() -> void:
 	content.add_child(_mission_name)
 	_mission_selector = _option(content, "MissionSelector")
 	_mission_selector.item_selected.connect(func(index: int): _act("mission", {"mission_id": String(_mission_selector.get_item_metadata(index))}))
-	_flight_actions = HBoxContainer.new()
+	_flight_actions = VBoxContainer.new()
 	_flight_actions.name = "FlightdeckActions"
-	_flight_actions.add_theme_constant_override("separation", 8)
+	_flight_actions.add_theme_constant_override("separation", 6)
 	content.add_child(_flight_actions)
 	_board = _button("Boarding starten", false)
 	_board.name = "BoardFireteam"
 	_flight_actions.add_child(_board)
 	_board.pressed.connect(func(): _act("board", {"fireteam_id": _fireteam_id, "craft_id": _craft_id}))
 	_unboard = _button("Trupp absetzen", false)
+	_unboard.name = "UnboardFireteam"
 	_flight_actions.add_child(_unboard)
 	_unboard.pressed.connect(func(): _act("unboard", {"fireteam_id": _fireteam_id, "craft_id": _craft_id}))
 	_start = _button("Abheben · Mondorbit", true)
@@ -694,9 +728,11 @@ func _build_flightdeck() -> void:
 	_flight_actions.add_child(_start)
 	_start.pressed.connect(func(): _act("start", {"craft_id": _craft_id}))
 	for button in [_board, _unboard, _start]:
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.custom_minimum_size = Vector2(0, DENSITY.button_primary_height if button == _start else DENSITY.button_height)
-		button.add_theme_font_size_override("font_size", DENSITY.button_font)
+		# Kleine Knoepfe in der Form der linken Leiste (kein Spaltenbreit-Knopf mehr).
+		button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		button.custom_minimum_size = Vector2(150, DENSITY.nav_button_height)
+		THEME.style_command_button(button, "go" if button == _start else "neutral")
+		button.add_theme_font_size_override("font_size", DENSITY.nav_font)
 		button.clip_text = true
 	_launch_reason = _label("Abflugbereitschaft wird geprüft …", 13, GOLD)
 	_launch_reason.name = "LaunchReadiness"
@@ -824,7 +860,7 @@ func _person_row(parent: Control, id: String, with_assign: bool) -> Dictionary:
 	if not with_assign:
 		panel.set("accepted_type", "homebase_unit_card")
 		panel.connect("payload_dropped", func(data: Dictionary): _act("assign", {"unit_id": String(data.unit_id), "fireteam_id": _fireteam_id}))
-	return {"root": panel, "portrait": portrait, "focus": focus, "role": role, "status": status, "badge": badge, "assign": action, "unit_id": ""}
+	return {"root": panel, "text": text, "portrait": portrait, "focus": focus, "role": role, "status": status, "badge": badge, "assign": action, "unit_id": ""}
 
 
 func _person_input(event: InputEvent, panel: PanelContainer, allow_single: bool = false) -> void:
@@ -1042,6 +1078,7 @@ func _update_roster(roster: Array) -> void:
 		if not live.has(key):
 			Dictionary(_rows[key]).root.queue_free()
 			_rows.erase(key)
+	_compact_rows(_mode == "mission")
 	_filter_rows()
 
 
@@ -1108,7 +1145,84 @@ func _update_team(team: Dictionary, teams: Array) -> void:
 	_team_note.text = "Trupp an Bord · zum Bearbeiten zurückholen" if bool(team.get("busy", false)) else ""
 	if members.size() > 4:
 		_team_note.text = "%d weitere Mitglieder in den Charakterdetails/Werkzeugen." % (members.size() - 4)
-	_team_note.visible = not _team_note.text.is_empty()
+	_team_note.visible = not _team_note.text.is_empty() and _mode != "mission"
+	_update_team_rows(teams)
+
+
+## Liste "Trupps": je Trupp eine Zeile `TeamRow_<id>`: Fuehrer klein mit Stern (`LeaderStar`), daneben die uebrigen Mitglieder.
+## Fuehrer = `lead_unit_id` aus dem Schnappschuss, sonst das erste Mitglied (kein neuer Speicher).
+func _update_team_rows(teams: Array) -> void:
+	var live: Dictionary = {}
+	for team_variant in teams:
+		var team: Dictionary = Dictionary(team_variant)
+		var id: String = String(team.get("id", ""))
+		if id.is_empty():
+			continue
+		live[id] = true
+		if not _team_rows.has(id):
+			var row: PanelContainer = DRAG_SURFACE.new()
+			row.name = "TeamRow_" + id.validate_node_name()
+			row.set("accepted_type", "homebase_unit_card")
+			row.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+			row.custom_minimum_size.y = 40
+			var line := HBoxContainer.new()
+			line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			line.add_theme_constant_override("separation", 6)
+			row.add_child(line)
+			var star := _label("★", 13, GOLD)
+			star.name = "LeaderStar"
+			star.autowrap_mode = TextServer.AUTOWRAP_OFF
+			star.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			line.add_child(star)
+			var leader := _label("", 13, CREAM)
+			leader.name = "LeaderName"
+			leader.autowrap_mode = TextServer.AUTOWRAP_OFF
+			leader.clip_text = true
+			leader.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			leader.custom_minimum_size.x = 0
+			leader.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			leader.size_flags_stretch_ratio = 0.8
+			leader.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			line.add_child(leader)
+			var members := _label("", 13, MUTED)
+			members.name = "Members"
+			members.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			members.custom_minimum_size.x = 0
+			members.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			members.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			line.add_child(members)
+			row.gui_input.connect(func(event: InputEvent):
+				if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+					_act("focus_fireteam", {"fireteam_id": id}))
+			row.connect("payload_dropped", func(data: Dictionary): _act("assign", {"unit_id": String(data.get("unit_id", "")), "fireteam_id": id}))
+			_team_rows_host.add_child(row)
+			_team_rows[id] = row
+		var item: PanelContainer = _team_rows[id]
+		var member_list: Array = Array(team.get("members", []))
+		var lead_id: String = String(team.get("lead_unit_id", ""))
+		var leader_unit: Dictionary = {}
+		for member_variant in member_list:
+			if String(Dictionary(member_variant).get("id", "")) == lead_id:
+				leader_unit = Dictionary(member_variant)
+		if leader_unit.is_empty() and not member_list.is_empty():
+			leader_unit = Dictionary(member_list[0])
+		var others: PackedStringArray = PackedStringArray()
+		for member_variant in member_list:
+			if String(Dictionary(member_variant).get("id", "")) != String(leader_unit.get("id", "")):
+				others.append(String(Dictionary(member_variant).get("name", "")))
+		(item.find_child("LeaderStar", true, false) as Control).visible = not leader_unit.is_empty()
+		(item.find_child("LeaderName", true, false) as Label).text = String(leader_unit.get("name", String(team.get("label", id))))
+		(item.find_child("Members", true, false) as Label).text = ", ".join(others)
+		item.set("drag_payload", {"type": "fob_fireteam_card", "fireteam_id": id, "label": String(team.get("label", id))})
+		item.tooltip_text = "%s · Trupp wählen · auf ein Schiff ziehen zum Boarden" % String(team.get("label", id))
+		var selected: bool = id == _fireteam_id
+		if not item.has_meta("selected") or bool(item.get_meta("selected")) != selected:
+			item.add_theme_stylebox_override("panel", _card_style(Color("173d49"), GOLD if selected else Color("28515e")))
+			item.set_meta("selected", selected)
+	for id in _team_rows.keys():
+		if not live.has(id):
+			(_team_rows[id] as Control).queue_free()
+			_team_rows.erase(id)
 
 
 func _update_equipment(unit: Dictionary, options: Dictionary) -> void:
@@ -1170,6 +1284,60 @@ func _update_flight(craft: Dictionary, snapshot: Dictionary) -> void:
 	_mission_selector.visible = not space_route
 	_mission_name.visible = not space_route
 	_mission_name.text = "Einsatz"
+	var inventory: Dictionary = Dictionary(Dictionary(Dictionary(snapshot.get("singleplayer", {})).get("supply", {})).get("inventory", {}))
+	_ship_detail.update_craft(craft, Dictionary(inventory.get("craft:" + _craft_id, {})))
+	_update_ship_strip(Array(snapshot.get("crafts", [])))
+
+
+## Schiffsleiste: je Schiff eine Karte `ShipCard_<id>` mit Bild und Name; die gewaehlte hat gelben Rahmen (Meta `selected`).
+## Klick waehlt das Schiff (Befehl `craft`), ein daraufgezogener Trupp geht an Bord (Befehl `board`).
+func _update_ship_strip(crafts: Array) -> void:
+	var live: Dictionary = {}
+	for craft_variant in crafts:
+		var craft: Dictionary = Dictionary(craft_variant)
+		var id: String = String(craft.get("id", ""))
+		if id.is_empty():
+			continue
+		live[id] = true
+		if not _ship_cards.has(id):
+			var card: PanelContainer = DRAG_SURFACE.new()
+			card.name = "ShipCard_" + id.validate_node_name()
+			card.set("accepted_type", "fob_fireteam_card")
+			card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+			var body := VBoxContainer.new()
+			body.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			body.add_theme_constant_override("separation", 2)
+			card.add_child(body)
+			var picture := _portrait(Vector2(0, 88))
+			picture.name = "Picture"
+			picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			body.add_child(picture)
+			var caption := _label("", 14, CREAM)
+			caption.name = "Caption"
+			caption.autowrap_mode = TextServer.AUTOWRAP_OFF
+			caption.clip_text = true
+			caption.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			body.add_child(caption)
+			card.gui_input.connect(func(event: InputEvent):
+				if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+					_pad_selector.set_meta("empty_pad_focus", false)
+					_act("craft", {"craft_id": id}))
+			card.connect("payload_dropped", func(data: Dictionary): _act("board", {"fireteam_id": String(data.get("fireteam_id", "")), "craft_id": id}))
+			_ship_strip.add_child(card)
+			_ship_cards[id] = card
+		var item: PanelContainer = _ship_cards[id]
+		_set_texture(item.find_child("Picture", true, false), String(craft.get("texture_path", "")))
+		(item.find_child("Caption", true, false) as Label).text = String(craft.get("name", id))
+		item.tooltip_text = "%s · %s" % [String(craft.get("name", id)), String(craft.get("status", ""))]
+		var selected: bool = id == _craft_id
+		if not item.has_meta("selected") or bool(item.get_meta("selected")) != selected:
+			item.add_theme_stylebox_override("panel", _card_style(Color("173d49"), GOLD if selected else Color("28515e")))
+			item.set_meta("selected", selected)
+	for id in _ship_cards.keys():
+		if not live.has(id):
+			(_ship_cards[id] as Control).queue_free()
+			_ship_cards.erase(id)
 
 
 func _update_pad_options(snapshot: Dictionary) -> void:
@@ -1304,6 +1472,24 @@ func _layout_columns() -> void:
 		rects["squad"] = Rect2(roster_width+gap,0,squad_width,available.y)
 		var right_x: float=roster_width+squad_width+gap*2
 		rects["equipment"] = Rect2(right_x,0,clampf(available.x*0.36,420.0,620.0),available.y)
+	elif _mode == "mission":
+		# Flugdeck v2, von links: Schiffsdetail, Schiffsleiste, Liste Personal, Liste Trupps, Rest = Vorschau (nur wenn >= 280).
+		var large: bool = available.x >= 1500.0
+		var widths: Array = [400.0, 240.0, 250.0, 330.0] if large else [340.0, 200.0, 220.0, 280.0]
+		var column_gap: float = 8.0
+		var total: float = 0.0
+		for width in widths:
+			total += float(width)
+		var room: float = maxf(available.x - column_gap * 3.0, 0.0)
+		if total > room:
+			for index in widths.size():
+				widths[index] = float(widths[index]) * room / total
+		var cursor: float = 0.0
+		for index in 4:
+			rects[["equipment", "flight", "roster", "squad"][index]] = Rect2(cursor, 0, float(widths[index]), available.y)
+			cursor += float(widths[index]) + column_gap
+		if large and available.x - cursor >= 280.0:
+			scene_rect = Rect2(cursor, 0, available.x - cursor, available.y)
 	else:
 		var start_x: float = 0.0
 		if _mode != "mission":
@@ -1322,7 +1508,14 @@ func _layout_columns() -> void:
 		rects["flight"] = Rect2(scene_rect.position.x, top_height + gap, scene_rect.size.x, footer_height)
 	for control in [_squad_craft_selector, _squad_craft_image, _squad_craft_caption]:
 		control.visible = _mode != "mission"
-	_pilot_selector.custom_minimum_size.x = 160.0 if narrow else 200.0
+	var flight_view: bool = _mode == "mission"
+	_equipment_scroll.visible = not flight_view
+	_ship_detail.get_parent().visible = flight_view
+	_slots_scroll.visible = not flight_view
+	_team_list_scroll.visible = flight_view
+	(_columns.equipment.get_meta("title_label") as Label).text = "Schiffsdetail" if flight_view else "Lager & Ausrüstung"
+	(_columns.squad.get_meta("title_label") as Label).text = "Trupps" if flight_view else "Trupp"
+	_compact_rows(flight_view)
 	for key in _columns:
 		var panel: Control = _columns[key]
 		panel.visible = rects.has(key)
@@ -1346,6 +1539,14 @@ func _layout_columns() -> void:
 		var identity_size: int = 30 if available.x > 2200.0 else (23 if narrow else 26)
 		if _focused_name.get_theme_font_size("font_size") != identity_size:
 			_focused_name.add_theme_font_size_override("font_size", identity_size)
+
+
+## Schmale Personalzeilen im Flugdeck (Spalte 220-250 breit): Textblock und Abzeichen duerfen schrumpfen.
+func _compact_rows(compact: bool) -> void:
+	for item_variant in _rows.values():
+		var item: Dictionary = item_variant
+		(item.text as Control).custom_minimum_size.x = 40.0 if compact else 100.0
+		(item.badge as Control).custom_minimum_size.x = 0.0 if compact else 20.0
 
 
 func _open_base_management(section: String) -> void:
@@ -1771,6 +1972,7 @@ func _option(parent: Control, node_name: String) -> OptionButton:
 	option.custom_minimum_size.y = DENSITY.option_height
 	option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	option.fit_to_longest_item = false
+	option.clip_text = true
 	option.add_theme_font_size_override("font_size", DENSITY.option_font)
 	parent.add_child(option)
 	return option
