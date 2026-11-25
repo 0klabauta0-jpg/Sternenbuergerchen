@@ -12,7 +12,6 @@ const PATHFINDER = preload("res://scripts/terrain/terrain_pathfinder.gd")
 const REGISTRY = preload("res://scripts/terrain/terrain_registry.gd")
 const FIELD_LANDING = preload("res://scripts/mission/field_landing_contract.gd")
 const SURFACE = preload("res://scripts/mission/orbit_surface_locations.gd")
-const LOCKED_TEXT := "Gesperrt: Erst nach dem Auftrag am Handelsaußenposten"
 const PLACES := {
 	"muellers_farm": {"name": "Müllers Farm", "map": "res://maps/Ground_Mission01_32x32.json", "marker": "spawn_bravo", "pad": "muellers_farm_pad_01", "orbit": "glut_1b_orbit", "body": "glut_1b", "home": 9.0, "trade": 6.0, "crash": 11.0},
 	"shady_lab": {"name": "Shady Research Lab", "map": "res://maps/Ground_Mission02_128x128.json", "marker": "spawn_bravo", "pad": "gm02_pad_bravo", "orbit": "planet_orbit", "body": "planet", "home": 10.0, "trade": 9.0, "crash": 11.0},
@@ -91,7 +90,7 @@ func _case_files() -> void:
 		_check(String(loc.get("scenario_file_path", "")) == "res://data/mission_scenarios/%s_visit.json" % id and not loc.has("free_visit"), "Ort %s: Besuchsszenario eingetragen, kein free_visit" % id)
 		_check(String(orbits.get(id, "")) == String(want.orbit), "Ort %s: Umlaufbahn %s" % [id, want.orbit])
 		var entry: Dictionary = Dictionary(small.get(id, {}))
-		_check(String(entry.get("service_marker_id", "")) == String(want.marker) and is_equal_approx(float(entry.get("service_radius_world", 0.0)), 256.0) and String(entry.get("unlock_after_job_id", "")) == "outpost_recovery" and String(entry.get("locked_hint", "")) == "Erst nach dem Auftrag am Handelsaußenposten", "Ort %s: small_outposts.json (Marker, Radius 256, Freischaltung, Sperrtext)" % id)
+		_check(String(entry.get("service_marker_id", "")) == String(want.marker) and is_equal_approx(float(entry.get("service_radius_world", 0.0)), 256.0) and not entry.has("unlock_after_job_id") and not entry.has("locked_hint"), "Ort %s: small_outposts.json (Marker, Radius 256, keine Freischaltung, kein Sperrtext - Freigabe 25.11.2026)" % id)
 		_check(Array(Dictionary(offers.get("service_locations", {})).get(id, [])) == ["trade"], "Ort %s: service_locations trade" % id)
 	var farm: Dictionary = Dictionary(locations.get("muellers_farm", {}))
 	_check(farm.get("region_position") == [0.86, 0.86] and Dictionary(locations.get("shady_lab", {})).get("region_position") == [0.66, 0.66] and Dictionary(locations.get("templanon", {})).get("region_position") == [0.40, 0.90], "Orte: Lage auf der Sternkarte wie im Plan")
@@ -152,7 +151,7 @@ func _command(operation: String, payload: Dictionary, context: Dictionary = {}) 
 
 func _finish_job(id: String) -> void:
 	var job: Dictionary = owner.get_campaign_snapshot().jobs[id]
-	var ok := bool(_command("accept_job", {"job_id": id}).get("ok", false))
+	var ok := String(job.status) == "accepted" or bool(_command("accept_job", {"job_id": id}).get("ok", false))
 	ok = ok and bool(_command("bind_departure", {"craft_id": "ship", "origin_location_id": "homebase", "destination_location_id": job.location_id, "landing_pad_id": "homebase_pad_01", "job_id": id}, {"departure_authorized": true}).get("ok", false))
 	ok = ok and bool(_command("activate_job", {"craft_id": "ship", "job_id": id}, {"departure_authorized": true}).get("ok", false))
 	ok = ok and bool(_command("complete_job", {"craft_id": "ship", "job_id": id}, {"runtime_evidence": {"scenario_id": job.scenario_id, "result": "victory", "mission_scenario_runtime_gates": {"all_gates_complete": true, "completed_step_ids": job.required_step_ids}}}).get("ok", false))
@@ -163,15 +162,33 @@ func _case_unlock() -> void:
 	owner = CAMPAIGN.new()
 	owner.configure()
 	for id: String in PLACES:
-		var locked: Dictionary = owner.validate_location_visit(id)
-		_check(not bool(locked.get("ok", true)) and String(locked.get("reason", "")) == "outpost_locked" and String(locked.get("message", "")) == LOCKED_TEXT, "Freischaltung %s: vor outpost_recovery gesperrt mit genauem Text (%s)" % [id, str(locked)])
+		var open_at_start: Dictionary = owner.validate_location_visit(id)
+		_check(bool(open_at_start.get("ok", false)), "Freigabe %s: direkt nach der Einfuehrung anfliegbar, vor outpost_recovery (%s)" % [id, str(open_at_start)])
 		_check(String(owner.open_visit_scenario_id(id)) == "" and String(Dictionary(Dictionary(owner.get_campaign_snapshot().locations).get(id, {})).get("scenario_file_path", "")).get_file().get_basename() == id + "_visit", "Ziel-Szenario %s: ohne Auftrag das Ortsszenario %s_visit" % [id, id])
 	_finish_job("satellite_recovery")
-	_check(not bool(owner.validate_location_visit("templanon").get("ok", true)), "Freischaltung: nach satellite_recovery allein ist templanon weiter gesperrt")
+	_check(bool(owner.validate_location_visit("templanon").get("ok", false)), "Freigabe: nach satellite_recovery allein ist templanon anfliegbar")
+	# Kampagnenauftrag angenommen (outpost_recovery, noch nicht erledigt): die drei Orte bleiben anfliegbar.
+	_check(bool(_command("accept_job", {"job_id": "outpost_recovery"}).get("ok", false)) and String(owner.get_campaign_snapshot().jobs.outpost_recovery.status) == "accepted", "Freigabe: outpost_recovery ist angenommen (Fixture)")
+	for id: String in PLACES:
+		_check(bool(owner.validate_location_visit(id).get("ok", false)), "Freigabe %s: auch mit angenommenem Kampagnenauftrag anfliegbar" % id)
 	_finish_job("outpost_recovery")
 	for id: String in PLACES:
-		_check(bool(owner.validate_location_visit(id).get("ok", false)), "Freischaltung %s: nach outpost_recovery anfliegbar" % id)
-	_check(String(owner.validate_location_visit("relay_ridge").get("reason", "")) == "tutorial_locked", "Freischaltung: relay_ridge bleibt tutorial_locked")
+		_check(bool(owner.validate_location_visit(id).get("ok", false)), "Freigabe %s: nach outpost_recovery weiter anfliegbar" % id)
+	# Freigabe 25.11.2026: der Relaisgrat hat jetzt einen freien Besuch (relay_ridge_visit) und ist ohne Auftrag anfliegbar; mit Handel am Marker spawn_bravo.
+	var fresh: RefCounted = CAMPAIGN.new()
+	fresh.configure()
+	_check(bool(fresh.validate_location_visit("relay_ridge").get("ok", false)) and String(fresh.free_visit_scenario_id("relay_ridge")) == "relay_ridge_visit", "Freigabe: relay_ridge ist direkt nach Spielstart anfliegbar (freier Besuch relay_ridge_visit)")
+	var relay_trade: Dictionary = fresh.trade_marker_entry("relay_ridge")
+	_check(String(relay_trade.get("service_marker_id", "")) == "spawn_bravo" and is_equal_approx(float(relay_trade.get("service_radius_world", 0.0)), 256.0), "Freigabe: relay_ridge hat im freien Besuch den Haendler-Marker spawn_bravo (Radius 256) (%s)" % str(relay_trade))
+	_check(fresh.trade_marker_entry("satellite_crash").is_empty() and fresh.trade_marker_entry("distress_orbit").is_empty() and not fresh.trade_marker_entry("templanon").is_empty(), "Freigabe: Handels-Marker nur fuer die drei Posten und den Relaisgrat")
+	var chain: Array = []
+	var availability: Dictionary = fresh.get_job_availability(true)
+	for job_id: String in availability:
+		if bool(Dictionary(availability[job_id]).get("can_accept", false)): chain.append(job_id)
+	_check(chain == ["satellite_recovery"], "Kette unveraendert: am Start ist nur satellite_recovery annehmbar (%s)" % str(chain))
+	_check(String(fresh.validate_location_visit("distress_orbit").get("reason", "")) == "tutorial_locked", "Freigabe: distress_orbit bleibt gesperrt (kein Besuchsszenario, Orbit-Ort ohne Bodenkarte)")
+	var relay_scenario := String(Dictionary(_json("res://data/singleplayer/locations.json").get("relay_ridge", {})).get("scenario_file_path", ""))
+	_check(relay_scenario.ends_with("flak_silence.json") and String(Dictionary(fresh.get_campaign_snapshot().jobs).get("flak_silence", {}).get("scenario_id", "flak_silence")) == "flak_silence", "Freigabe: das Auftragsszenario flak_silence des Relaisgrats bleibt unveraendert")
 	var free: RefCounted = CAMPAIGN.new()
 	free.configure({}, {}, false)
 	for id: String in PLACES:

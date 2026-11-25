@@ -28,8 +28,9 @@ func _run() -> void:
 	var craft: Dictionary = operations.get("selected_craft", {})
 	_check(not String(craft.get("pilot_id", "")).is_empty(), "Campaign has a real assigned pilot")
 	_check(Array(flow.get("_selected_unit_ids")).size() == 1, "Exactly one deployable leader selected")
-	var blocked: Dictionary = screen.call("request_operation", "select_destination", {"location_id": "trade_outpost"})
-	_check(not bool(blocked.get("ok", false)), "Trade is locked before satellite lesson")
+	var blocked: Dictionary = screen.call("request_operation", "select_destination", {"location_id": "distress_orbit"})
+	# Freigabe 25.11.2026: der Handelsaussenposten ist als freier Besuch frei (frueher hier gesperrt); gesperrt bleibt ein Ort ohne Besuchsszenario (Orbit-Ort).
+	_check(not bool(blocked.get("ok", false)), "Orbit location without free visit is locked before satellite lesson")
 	flow.call("_show_homebase")
 	_check(Array(flow.get("_all_team_units")).size() == 2, "Returning to base never repairs campaign to Skirmish roster")
 	var saved: Dictionary = flow.get("_campaign_start").call("save_home_checkpoint", flow, flow.get("_singleplayer_runtime"))
@@ -44,7 +45,7 @@ func _run() -> void:
 	for item: Dictionary in Array(flow.get("_mission_catalog")):
 		catalog_ids.append(String(item.get("mission_id", "")))
 	var campaign_jobs: Dictionary = Dictionary(flow.get("_singleplayer_runtime").get("_campaign").get_campaign_snapshot().get("jobs", {}))
-	var expected_ids: Array = ["satellite_recovery", "polisa_visit", "trade_outpost_visit", "satellite_crash_visit", "trade_outpost_open_visit"]
+	var expected_ids: Array = ["satellite_recovery", "polisa_visit", "trade_outpost_visit", "satellite_crash_visit", "trade_outpost_open_visit", "relay_ridge_visit"]
 	for job: Dictionary in campaign_jobs.values():
 		if not expected_ids.has(String(job.scenario_id)):
 			expected_ids.append(String(job.scenario_id))

@@ -362,7 +362,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		var sell_button: Button = sell_buttons[slot]
 		var slot_item: String = String(bought_items[slot]) if slot < bought_items.size() else ""
 		sell_button.set_meta("item", slot_item)
-		sell_button.visible = not slot_item.is_empty() and (location in ["satellite_crash","trade_outpost"] or location in POST_IDS)
+		sell_button.visible = not slot_item.is_empty() and (location in ["satellite_crash","trade_outpost","relay_ridge"] or location in POST_IDS)
 		if slot_item.is_empty(): continue
 		var sell_price: int = _market_buy_price(supply, location, slot_item)
 		sell_button.text = "1 × %s verkaufen · %d Cr" % [MARKET_NAMES.get(slot_item, slot_item), sell_price]
@@ -379,7 +379,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	for market_item: String in MARKET_ITEMS:
 		var market_button: Button = _market_buttons[market_item]
 		var market_entry: Dictionary = Dictionary(market_here.get(market_item, {}))
-		market_button.visible = market_entry.has("sell_price") and (location in ["satellite_crash","trade_outpost"] or location in POST_IDS) and _post_allows(supply, location, market_item)
+		market_button.visible = market_entry.has("sell_price") and (location in ["satellite_crash","trade_outpost","relay_ridge"] or location in POST_IDS) and _post_allows(supply, location, market_item)
 		if not market_button.visible: continue
 		var market_price: int = int(market_entry.sell_price)
 		var market_stock: int = int(market_entry.get("stock", 0))
@@ -452,7 +452,7 @@ func _apply_section() -> void:
 	for control in [_craft_selector,_fuel,_buy,_sell,_repair,_cargo_load,_cargo_unload,_amount.get_parent(),_refuel,_return]+_tool_buttons.values():
 		control.visible = ship
 	var trade_context:Dictionary=Dictionary(_snapshot.get("service_contexts_by_craft_id",{})).get(_selected_craft_id,{})
-	var trading:bool=String(trade_context.get("location_id","")) in ["trade_outpost","satellite_crash"]+POST_IDS
+	var trading:bool=String(trade_context.get("location_id","")) in ["trade_outpost","satellite_crash","relay_ridge"]+POST_IDS
 	_cargo_load.visible=ship and String(trade_context.get("location_id",""))=="trade_outpost"
 	_cargo_unload.visible=_cargo_load.visible
 	var at_post:bool=String(trade_context.get("location_id","")) in POST_IDS

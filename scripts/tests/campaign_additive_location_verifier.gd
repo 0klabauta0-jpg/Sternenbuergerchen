@@ -77,7 +77,8 @@ func _case_loaded_owner_campaign(state: Dictionary) -> void:
 	var snapshot: Dictionary = owner.get_campaign_snapshot()
 	_check(snapshot.locations.has(PLACE), "Fall 10: der geladene Besitzer kennt den Ort %s" % PLACE)
 	_check(not snapshot.locations.has("asteroid_belt"), "Fall 3d: Kennung der Liste ohne Daten stoert nicht, am geladenen Besitzer entsteht kein Ort")
-	_check(String(owner.validate_location_visit(PLACE).get("reason", "")) == "tutorial_locked", "Fall 10: geladener Besitzer kennt den Ort bei der Anflugpruefung (gesperrt, nicht unbekannt)")
+	# Freigabe 25.11.2026: der Relaisgrat ist als freier Besuch anfliegbar (frueher tutorial_locked); "unbekannt" waere unknown_location.
+	_check(bool(owner.validate_location_visit(PLACE).get("ok", false)) and String(owner.validate_location_visit(PLACE).get("reason", "")) != "unknown_location", "Fall 10: geladener Besitzer kennt den Ort bei der Anflugpruefung (anfliegbar als freier Besuch, nicht unbekannt)")
 	var saved_again: Dictionary = _json(owner.export_state())
 	_check(saved_again.locations.has(PLACE), "Fall 10: der daraus neu gespeicherte Stand enthaelt den Ort")
 	var reloaded: Dictionary = _campaign().restore_state(saved_again.duplicate(true))
@@ -155,7 +156,7 @@ func _case_data() -> void:
 	var snapshot: Dictionary = owner.get_campaign_snapshot()
 	_check(snapshot.locations.has(PLACE) and String(snapshot.locations[PLACE].map_file_path) == MAP, "Fall 6: Ort hat die Karte Ground Mission 02")
 	var visit: Dictionary = owner.validate_location_visit(PLACE)
-	_check(not bool(visit.get("ok", true)) and String(visit.get("reason", "")) == "tutorial_locked", "Fall 6: ohne freigegebenen Auftrag nicht anfliegbar (%s)" % str(visit))
+	_check(bool(visit.get("ok", false)), "Fall 6: ohne freigegebenen Auftrag als freier Besuch anfliegbar (Freigabe 25.11.2026, frueher tutorial_locked) (%s)" % str(visit))
 	# K-5: freies Spiel/Gefecht (Reihenfolge nicht erzwungen) bietet einen Ort ohne Auftrag und ohne spielbares Szenario nicht an.
 	var free_owner: RefCounted = CAMPAIGN.new()
 	free_owner.configure({}, {}, false)

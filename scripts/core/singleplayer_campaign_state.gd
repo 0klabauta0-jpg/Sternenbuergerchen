@@ -167,7 +167,9 @@ func validate_location_visit(location_id: String, retry_allowed: bool = false) -
 	var small := small_outpost_entry(location_id)
 	if not small.is_empty():
 		if not _enforce_sequence: return {"ok":true}
-		if _jobs.has(String(small.get("unlock_after_job_id", ""))) and String(_jobs[String(small.unlock_after_job_id)].status) == "completed": return {"ok":true}
+		# Freigabe 25.11.2026: die kleinen Posten sind von Spielbeginn an anfliegbar. Ein Eintrag MIT unlock_after_job_id sperrt weiter (fuer kuenftige Posten).
+		var unlock_id := String(small.get("unlock_after_job_id", ""))
+		if unlock_id.is_empty() or (_jobs.has(unlock_id) and String(_jobs[unlock_id].status) == "completed"): return {"ok":true}
 		return _reject("outpost_locked", "Gesperrt: " + String(small.get("locked_hint", "")))
 	if location_id == "homebase" or bool(_locations[location_id].get("free_visit", false)) or (not _enforce_sequence and not ADDITIVE_LOCATION_IDS.has(location_id)): return {"ok":true}  # additive Orte ohne Auftrag auch im freien Spiel nicht (kein spielbares Szenario im Gefecht)
 	# Windbruch-Garnison: der freie Kampf-Ort ist immer anfliegbar (ohne angenommenen Auftrag laeuft das Lager, mit Auftrag dessen Szenario).
@@ -176,7 +178,34 @@ func validate_location_visit(location_id: String, retry_allowed: bool = false) -
 	for id: String in _jobs:
 		# Ein gesperrt gelisteter Auftrag oeffnet seinen Ort nicht.
 		if String(_jobs[id].location_id) == location_id and bool(availability[id].visible) and not bool(availability[id].shown_as_locked): return {"ok":true}
+	# Freigabe 25.11.2026: Orte mit freiem Besuchsszenario (open_outposts.json) sind auch ohne Auftrag anfliegbar.
+	if not free_visit_scenario_id(location_id).is_empty(): return {"ok":true}
 	return _reject("tutorial_locked", "Zuerst den vorherigen Kampagnenauftrag abschließen und Chips zuhause hochladen")
+
+## Freigabe 25.11.2026: Szenario des freien Besuchs ohne Auftrag (open_outposts.json). Wie open_visit_scenario_id (nach abgeschlossenem Story-Auftrag),
+## zusaetzlich auch VOR dem Auftrag, solange dort kein Auftrag angenommen/aktiv/hochzuladen/gescheitert ist (dann gilt nur dessen Szenario bzw. die
+## Wiederholungsregel). "" = kein freier Besuch. Nur in der Kampagne; nur lesend, aendert keinen Zustand und keine Auftragskette.
+func free_visit_scenario_id(location_id: String) -> String:
+	var after_story := open_visit_scenario_id(location_id)
+	if not after_story.is_empty(): return after_story
+	if not _enforce_sequence or not _locations.has(location_id): return ""
+	var visits: Variant = JSON.parse_string(FileAccess.get_file_as_string(OPEN_OUTPOSTS_PATH)) if FileAccess.file_exists(OPEN_OUTPOSTS_PATH) else {}
+	if typeof(visits) != TYPE_DICTIONARY or not Dictionary(visits).has(location_id): return ""
+	for id: String in _jobs:
+		if String(_jobs[id].location_id) == location_id and String(_jobs[id].status) in ["accepted", "active", "pending_upload", "failed"]: return ""
+	return String(Dictionary(visits)[location_id])
+
+## Handel-Marker eines Ortes fuer den Handelsdienst am gelandeten Schiff: kleine Posten (locations) immer; Orte mit Auftrag und freiem Besuch
+## (visit_trade_markers) nur im freien Besuch. {} = kein solcher Ort. Nur lesend.
+func trade_marker_entry(location_id: String) -> Dictionary:
+	var small := small_outpost_entry(location_id)
+	if not small.is_empty(): return small
+	var file: Variant = JSON.parse_string(FileAccess.get_file_as_string(SMALL_OUTPOSTS_PATH)) if FileAccess.file_exists(SMALL_OUTPOSTS_PATH) else {}
+	if typeof(file) != TYPE_DICTIONARY: return {}
+	var markers: Variant = Dictionary(file).get("visit_trade_markers", {})
+	if typeof(markers) != TYPE_DICTIONARY or typeof(Dictionary(markers).get(location_id)) != TYPE_DICTIONARY: return {}
+	if free_visit_scenario_id(location_id).is_empty(): return {}
+	return Dictionary(Dictionary(markers)[location_id]).duplicate(true)
 
 ## Handel 2a: Eintrag eines kleinen Aussenpostens aus data/singleplayer/small_outposts.json; {} wenn der Ort keiner ist. Nur lesend.
 func small_outpost_entry(location_id: String) -> Dictionary:

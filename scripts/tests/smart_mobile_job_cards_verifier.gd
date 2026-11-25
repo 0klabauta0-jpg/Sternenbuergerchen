@@ -131,6 +131,15 @@ func _run() -> void:
 		if child is Label and String(child.name) == "StandingOrdersHeading" and (child as Label).text == "Daueraufträge":
 			heading_ok = true
 	_check(heading_ok, "Zwischenueberschrift 'Daueraufträge' bleibt")
+	# --- Reihenfolge (Wunsch 25.11.): Kampagnenauftraege ganz oben, darunter die Daueraufträge (Karten vor dem Dauerauftrag-Kasten in der Liste)
+	var selector_node: Node = (board.get("_job_cards") as Node).get_parent()
+	_check(standing_box.get_parent() == selector_node and (board.get("_job_cards") as Node).get_index() < standing_box.get_index(), "Reihenfolge: Kampagnenauftraege stehen vor den Dauerauftraegen (Index %d < %d)" % [(board.get("_job_cards") as Node).get_index(), standing_box.get_index()])
+	# Dauerauftraege sind neben einem angenommenen Kampagnenauftrag annehmbar (der Dauerauftrags-Besitzer kennt keinen Kampagnenstatus).
+	var bounty_ok := false
+	for entry: Dictionary in standing.get_snapshot({}):
+		if String(entry.get("kind", "")) == "bounty":
+			bounty_ok = bool(standing.can_accept(String(entry.id), {}).get("ok", false))
+	_check(bounty_ok, "Dauerauftrag Kopfgeld ist annehmbar; can_accept haengt nur an Besitz und Sperrzeit, nicht am Kampagnenstand")
 	# --- Felder ueber die ganze Breite der Liste und ohne Ueberlappung
 	var list_width: float = (board.get("_job_cards") as Control).size.x
 	var all_cards: Array = cards.values() + standing_cards

@@ -2,12 +2,11 @@ extends "res://scripts/tests/campaign_intro_loop_smoke.gd"
 ## Handel 2a, Aufgabe 2: echter Besuchsflug zu einem kleinen Aussenposten (Standard Muellers Farm; die Geschwister
 ## small_outposts_visit_shady_lab_verifier und small_outposts_visit_templanon_verifier ueberschreiben nur _place_id()).
 ## Der Treiber fliegt zuerst die Satellitenbergung (echt). Statt des zweiten Ausflugs wird dann der kleine Aussenposten besucht:
-##   1 vor outpost_recovery ist der Ort gesperrt (Text "Gesperrt: ..."), die Anflugwahl wird abgelehnt;
-##   2 Testvorbereitung (NICHT geflogen): outpost_recovery wird im Besitzer auf "completed" gesetzt (die Freischaltung ist die Pruefung, nicht der Auftrag);
+##   1 schon vor outpost_recovery ist der Ort anfliegbar (Freigabe 25.11.2026, die alte Sperre "outpost_locked" ist weg);
+##   2 die Anflugwahl gelingt ohne Auftrag und ohne jede Testvorbereitung am Auftragsstatus;
 ##   3 Anflug: Abheben, Sprung, Landung beim Haendler-Marker (Landefeld nahe dem Haendler), Besuchsszenario geladen, Gang zum Haendler;
-##   4 Rueckflug: Besatzung steigt ein, Abflug, Heimkehr; der Auftragsstatus wird davor auf den echten Wert zurueckgesetzt.
+##   4 Rueckflug: Besatzung steigt ein, Abflug, Heimkehr; der Ort bleibt danach anfliegbar, der Auftragsstatus ist unveraendert.
 ## Abschlusszeile: SMALL_OUTPOSTS_VISIT_FLIGHT place=<id> passed=%d failed=%d (danach die Zeile des Treibers SINGLEPLAYER_LOOP_RESULTS ...).
-const LOCKED_TEXT := "Gesperrt: Erst nach dem Auftrag am Handelsaußenposten"
 var _sv_flown := false
 var _sv_near_trader := false
 var _sv_marker := ""
@@ -66,15 +65,12 @@ func _visit_part() -> void:
 	_sv_map = String(definition.get("map_file_path", ""))
 	var scenario_id := place + "_visit"
 	var live: RefCounted = _runtime.get("_campaign")
-	var locked: Dictionary = live.validate_location_visit(place)
-	_check(String(locked.get("reason", "")) == "outpost_locked" and String(locked.get("message", "")) == LOCKED_TEXT, "C1: vor outpost_recovery ist %s gesperrt (%s)" % [place, str(locked)])
-	var refused: Dictionary = _screen.call("request_operation", "select_destination", {"location_id": place, "job_id": "", "request_id": "sv:locked"})
-	_check(not bool(refused.get("ok", true)), "C1: die Anflugwahl des gesperrten Ortes wird abgelehnt (%s)" % str(refused))
+	# Freigabe 25.11.2026: die drei kleinen Aussenposten sind immer anfliegbar, auch vor outpost_recovery (kein Eingriff in den Auftragsstatus).
 	var job: Dictionary = live.get("_jobs")["outpost_recovery"]
 	var original_status := String(job.status)
-	job.status = "completed"
-	print("SV_PREPARE outpost_recovery status %s -> completed (Testvorbereitung, nicht geflogen)" % original_status)
-	_check(bool(live.validate_location_visit(place).get("ok", false)), "C2: nach outpost_recovery ist %s anfliegbar" % place)
+	_check(original_status != "completed", "C1: Ausgangslage: outpost_recovery ist noch nicht erledigt (%s)" % original_status)
+	var open_now: Dictionary = live.validate_location_visit(place)
+	_check(bool(open_now.get("ok", false)), "C1: schon vor outpost_recovery ist %s anfliegbar (%s)" % [place, str(open_now)])
 	var selected: Dictionary = _screen.call("request_operation", "select_destination", {"location_id": place, "job_id": "", "request_id": "sv:open"})
 	_check(bool(selected.get("ok", false)), "C2: der Ort laesst sich ohne Auftrag als Ziel waehlen (%s)" % str(selected))
 	_check(String(_flow.get("_selected_mission_id")) == scenario_id, "C2: gewaehlt ist das Besuchsszenario %s (%s)" % [scenario_id, String(_flow.get("_selected_mission_id"))])
@@ -94,8 +90,6 @@ func _visit_part() -> void:
 	if not await _move_and_use(mission, _sv_marker, "service_visit", _sv_map):
 		return
 	_no_trade_part(place)
-	job.status = original_status
-	print("SV_PREPARE outpost_recovery status zurueck auf %s" % original_status)
 	if not await _prepare_visit_return(mission):
 		return
 	# Der Versorgungsknopf "Rueckflug" gehoert zum Haendlerdienst (Aufgabe 3) und erscheint hier nicht. Der Weg des Spielers an einem Ort ohne
@@ -116,7 +110,7 @@ func _visit_part() -> void:
 	_flow.call("_show_homebase")
 	_check(String(Dictionary(_campaign().jobs).get("outpost_recovery", {}).get("status", "")) == original_status, "C5: nach der Heimkehr hat der Besuch den Auftragsstatus nicht veraendert")
 	var again: Dictionary = _runtime.get("_campaign").validate_location_visit(place)
-	_check(String(again.get("reason", "")) == "outpost_locked", "C5: Gegenprobe: mit echtem Auftragsstatus ist der Ort wieder gesperrt")
+	_check(bool(again.get("ok", false)), "C5: Gegenprobe: auch nach der Heimkehr mit echtem Auftragsstatus bleibt der Ort anfliegbar (%s)" % str(again))
 
 ## Der Knopf "return" (Beschriftung "Abheben") der Schiffskarte des eigenen Schiffs; null, solange keine Karte sichtbar ist.
 func _ship_card_return_button() -> Button:
