@@ -395,6 +395,25 @@ static func restore_details_scroll(controller: Node) -> void:
 		scroll.remove_meta("native_a5_pending_scroll_position")
 
 
+## Detailfenster: rechts am Bildschirmrand direkt unter der Schiffskarte, waechst nach links und unten.
+## Hoehe endet vor dem Ereignisprotokoll (ebenfalls rechts), nichts verlaesst den Bildschirm.
+static func details_popup_rect(controller: Node, wanted_size: Vector2i) -> Rect2i:
+	var view := Vector2i(controller.get_viewport().get_visible_rect().size)
+	var layout: Dictionary = LAYOUT.get_mission_hud_layout(view)
+	var control: Rect2i = layout.mission_control
+	var top := control.end.y
+	var panel := controller.get_node_or_null(PANEL_PATH) as Control
+	if panel != null:
+		top = maxi(top, int(ceilf(panel.position.y + panel.size.y)))
+	top += 8
+	var log_rect: Rect2i = layout.event_log
+	var width := mini(wanted_size.x, view.x - 16)
+	var height := mini(wanted_size.y, maxi(120, log_rect.position.y - 12 - top))
+	height = mini(height, view.y - top - 8)
+	var x := clampi(control.end.x - width, 0, maxi(0, view.x - width))
+	return Rect2i(x, top, width, height)
+
+
 static func fit_details_popup(controller: Node) -> void:
 	var popup := controller.get_node_or_null("../TacticalUI/A5DropshipDetailsPopup") as PopupPanel
 	var full := controller.get_node_or_null(FULL_PATH) as Control
@@ -406,19 +425,18 @@ static func fit_details_popup(controller: Node) -> void:
 	var padding := THEME.get_theme().get_stylebox("panel", "PopupPanel").get_minimum_size()
 	var content_height := full.get_combined_minimum_size().y if full.visible else 0.0
 	var height := close.get_combined_minimum_size().y + contents.get_theme_constant("separation") + content_height + padding.y
-	var target_size := Vector2i(minf(440, available.x), minf(maxf(120, ceilf(height)), available.y))
+	var wanted := Vector2i(minf(440, available.x), minf(maxf(120, ceilf(height)), available.y))
+	var placed := details_popup_rect(controller, wanted)
+	var target_size := placed.size
 	var resized := popup.size != target_size
 	if resized:
 		popup.size = target_size
-	# Native minimum-size adjustment can invalidate popup_centered()'s initial
-	# origin before content layout. Center the final geometry, not that stale
-	# origin; positioning never reopens the window or steals action focus.
-	if popup.is_embedded():
-		var centered := Vector2i((controller.get_viewport().get_visible_rect().size - Vector2(popup.size)) * 0.5)
-		if popup.position != centered:
-			popup.position = centered
-	elif resized:
-		popup.move_to_center()
+	# Endgeometrie am rechten Rand unter der Schiffskarte setzen; kein erneutes Oeffnen, kein Fokusklau.
+	var origin := placed.position
+	if not popup.is_embedded():
+		origin += controller.get_window().position
+	if popup.position != origin:
+		popup.position = origin
 
 
 static func _set_readout_minimum_height(label: Label, available_width: float) -> void:

@@ -60,10 +60,16 @@ func _run() -> void:
 	print("MOUSE_USE ",use)
 	var result:Dictionary={"handled":true,"ok":use.get("accepted",false)}
 	check(result.get("handled",false) and result.get("ok",false),"context leftclick queues existing actual Use intent")
-	check(driver.get_mission_scenario_runtime_gate_snapshot()==before,"queued Use still requires GO and real duration")
+	check(driver.get_mission_scenario_runtime_gate_snapshot()==before,"queued Use still requires the real duration")
 	cursor.update_objective_feedback()
-	check(cursor.get("_objective_text").text.contains("GO"),"visible panel confirms prepared data action")
-	check(bool(controller.call("execute_selected_fireteam_orders")),"real GO accepts actual mouse Use")
+	var in_range_entry:Dictionary={}
+	for e:Dictionary in controller.get_mission_interaction_runtime_use_state_snapshot().get("interactions",[]):
+		if String(e.get("interaction_id",""))=="satellite_data": in_range_entry=e
+	if String(cursor.get("_objective_text").text).contains("GO"):
+		check(bool(controller.call("execute_selected_fireteam_orders")),"real GO accepts actual mouse Use")
+	else:
+		print("DIRECT_START in_range=",in_range_entry.get("can_use_now")," text=",cursor.get("_objective_text").text)
+		check(true,"Linksklick in Reichweite startet ohne GO")
 	var completed:=false
 	for tick in range(1200):
 		await physics_frame

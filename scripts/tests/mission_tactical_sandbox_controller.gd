@@ -13355,7 +13355,8 @@ func _open_native_dropship_details() -> void:
 	if popup == null or not _tactical_ui_visible:
 		return
 	var available := get_viewport().get_visible_rect().size - Vector2(48, 48)
-	popup.popup_centered(Vector2i(Vector2(440, 180).min(available)))
+	var details_rect: Rect2i = NATIVE_A5_DROPSHIP_SCRIPT.details_popup_rect(self, Vector2i(Vector2(440, 180).min(available)))
+	popup.popup(Rect2i(details_rect.position + (Vector2i.ZERO if popup.is_embedded() else get_window().position), details_rect.size))
 	_refresh_mission_dropship_panel()
 	var close := popup.get_node_or_null("Contents/CloseButton") as Button
 	if close != null:
