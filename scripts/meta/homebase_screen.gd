@@ -9336,13 +9336,19 @@ func get_operations_snapshot(include_runtime: bool = true) -> Dictionary:
 			next_step = "Pilot zum Schiff schicken"
 		elif can_start:
 			next_step = "Einsatz starten"
+		# Das Startschiff (dropship_1) ist die Cutlass, hat aber aus aelteren Staenden weder model_id noch crew_capacity: Katalogwert 8 (1 Pilot, 1 Schuetze, 6 Plaetze).
+		var seat_model_id: String = String(definition.get("model_id", ""))
+		var seat_capacity: int = int(definition.get("crew_capacity", 0))
+		if seat_capacity <= 0 and seat_model_id in ["", "cutlass"] and String(definition.get("craft_type", "")) == "dropship":
+			seat_model_id = "cutlass"
+			seat_capacity = 8
 		var craft: Dictionary = {"id": id, "name": String(definition.get("display_name", "Dropship")),
 			"texture_path": String(definition.get("texture_path", "")), "pilot_id": pilot_id, "pilot_aboard": pilot_present and not pilot_id.is_empty(),
 			"pilot_name": _build_display_name(pilot_id) if not pilot_id.is_empty() else "", "pilot_options": pilots,
 			"busy": busy, "away": _operations_craft_away(id), "status": status, "progress": progress, "next_step": next_step,
 			"has_payload": not payload_teams.is_empty(), "payload_fireteam_ids": Array(payload_teams),
 			"passenger_count": payload_ids.size(), "aboard_count":int(presence.aboard_count), "can_start": can_start,
-			"crew_capacity": int(definition.get("crew_capacity", 0)), "model_id": String(definition.get("model_id", "")), "payload_names": _operations_payload_names(payload_ids),
+			"crew_capacity": seat_capacity, "model_id": seat_model_id, "payload_names": _operations_payload_names(payload_ids),
 			"can_board": not busy and bool(gate.get("can_stage", false)) and not Array(focused_team.get("members", [])).is_empty() and (not bool(focused_team.get("busy", false)) or (payload_teams.has(_focused_fireteam_id) and not pilot_present)),
 			"can_unboard": not busy and payload_teams.has(_focused_fireteam_id)}
 		var preview: Texture2D = _get_aircraft_texture(definition)
