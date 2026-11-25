@@ -1292,7 +1292,7 @@ func _layout_columns() -> void:
 	var scene_rect := Rect2()
 	if _mode == "personnel":
 		var roster_width: float = clampf(available.x * 0.25, 280.0, 380.0)
-		var equipment_width: float = available.x - roster_width - gap
+		var equipment_width: float = clampf(available.x * 0.36, 420.0, 620.0)
 		rects["roster"] = Rect2(0, 0, roster_width, available.y)
 		rects["equipment"] = Rect2(roster_width + gap, 0, equipment_width, available.y)
 	elif _mode in ["base", "jobs", "map", "services"]:
@@ -1303,7 +1303,7 @@ func _layout_columns() -> void:
 		rects["roster"] = Rect2(0,0,roster_width,available.y)
 		rects["squad"] = Rect2(roster_width+gap,0,squad_width,available.y)
 		var right_x: float=roster_width+squad_width+gap*2
-		rects["equipment"] = Rect2(right_x,0,maxf(available.x-right_x,280.0),available.y)
+		rects["equipment"] = Rect2(right_x,0,clampf(available.x*0.36,420.0,620.0),available.y)
 	else:
 		var start_x: float = 0.0
 		if _mode != "mission":
