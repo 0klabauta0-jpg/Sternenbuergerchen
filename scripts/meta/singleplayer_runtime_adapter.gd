@@ -151,7 +151,10 @@ var _local_warp_arrival_enabled := false
 ## Enabled only after the local-flight checkpoint join supports safe resume.
 var _surface_orbit_path_enabled := false
 var _surface_orbit_intents: Dictionary = {}
+## Wert true = Automatik aus gewaehlt, false = Automatik ausdruecklich an gewaehlt.
 var _surface_orbit_auto_disabled: Dictionary = {}
+## Vorgabe ohne gespeicherte Wahl: true = Handflug (nur die Spieler-Oberflaeche setzt das).
+var _surface_orbit_manual_default := false
 var _warp_arrival_feedback: Dictionary = {}
 var _request_session := str(Time.get_unix_time_from_system()) + ":" + str(randi())
 var _sequence: int = 0
@@ -781,13 +784,18 @@ func sync_space_wings() -> Dictionary:
 			craft_ids.append(definition.craft_id)
 	return _simulation.reconcile_space_wings(craft_ids, pilots, {"runtime_authorized":true})
 
+func _orbit_auto_off(craft_id: String) -> bool:
+	if _surface_orbit_auto_disabled.has(craft_id): return _surface_orbit_auto_disabled[craft_id] != false
+	return _surface_orbit_manual_default
+
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
 	if operation == "space_set_orbit_automatic":
 		if not _surface_orbit_path_enabled: return _reject("orbit_transit_unavailable", "Orbitdurchflug ist noch nicht verfügbar")
 		if payload.size() != 2 or typeof(payload.get("craft_id")) != TYPE_STRING or typeof(payload.get("enabled")) != TYPE_BOOL or _travel == null or _travel.get_flight_state(String(payload.craft_id)) == null: return _reject("invalid_command", "Schiff oder Automatik fehlt")
 		var id := String(payload.craft_id)
 		if payload.enabled:
-			_surface_orbit_auto_disabled.erase(id)
+			if _surface_orbit_manual_default: _surface_orbit_auto_disabled[id] = false
+			else: _surface_orbit_auto_disabled.erase(id)
 			var current: Dictionary = _surface_orbit_intents.get(id, {})
 			if current.get("status") == "manual" and _simulation != null:
 				var restart: Dictionary = _simulation.start_singleplayer_orbit_transit(self, id, String(current.get("location_id", "")), String(current.get("direction", "inbound")), _request_id("orbit-transit", {"craft_id":id}))
@@ -1597,7 +1605,7 @@ func get_space_travel_snapshot(craft_id: String = "") -> Dictionary:
 	var snapshot: Dictionary = _travel.get_snapshot(craft_id)
 	var transit_id := String(snapshot.get("craft_id", ""))
 	snapshot["orbit_transit_available"] = _surface_orbit_path_enabled
-	snapshot["orbit_transit_automatic"] = not _surface_orbit_auto_disabled.has(transit_id)
+	snapshot["orbit_transit_automatic"] = not _orbit_auto_off(transit_id)
 	if _surface_orbit_intents.has(transit_id): snapshot["orbit_transit"] = Dictionary(_surface_orbit_intents[transit_id]).duplicate(true)
 	var service := _service_shuttle_snapshot()
 	if not service.is_empty(): snapshot["service_shuttle"] = service
@@ -1828,7 +1836,7 @@ func advance_space_travel(delta: float) -> void:
 						if not intent.is_empty():
 							intent["direction"] = "inbound"
 							intent["status"] = "manual"
-							if not _surface_orbit_auto_disabled.has(craft_id):
+							if not _orbit_auto_off(craft_id):
 								var automatic: Dictionary = _simulation.start_singleplayer_orbit_transit(self, craft_id, String(intent.location_id), "inbound", _request_id("orbit-transit", {"craft_id":craft_id}))
 								intent["status"] = "flying" if automatic.get("ok", false) else "manual"
 								intent["reason"] = String(automatic.get("reason", ""))
@@ -2081,7 +2089,7 @@ func _start_surface_orbit_outbound(craft_id: String, location_id: String) -> voi
 	if intent.get("location_id") != location_id or intent.get("direction") != "outbound" or intent.get("status") != "starting": return
 	intent["target_orbit_id"] = orbit_id
 	intent["status"] = "manual"
-	if _surface_orbit_auto_disabled.has(craft_id): intent.erase("pending_warp"); return
+	if _orbit_auto_off(craft_id): intent.erase("pending_warp"); return
 	var result: Dictionary = _simulation.start_singleplayer_orbit_transit(self, craft_id, location_id, "outbound", _request_id("orbit-transit", {"craft_id":craft_id}))
 	intent["status"] = "flying" if result.get("ok", false) else "manual"
 	intent["reason"] = String(result.get("reason", ""))
@@ -2142,7 +2150,7 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 		var flight: RefCounted = _travel.get_flight_state(craft_id)
 		if operation == "space_start_quantum" and flight != null and flight.get_snapshot().get("coordinate_frame") == "local":
 			var transit: Dictionary = _surface_orbit_intents.get(craft_id, {})
-			if transit.get("status") in ["starting", "flying"] and not _surface_orbit_auto_disabled.has(craft_id):
+			if transit.get("status") in ["starting", "flying"] and not _orbit_auto_off(craft_id):
 				if transit.has("pending_approach"): return _reject("approach_pending", "Vorgemerkten Anflug zuerst abschließen oder abbrechen")
 				if transit.get("direction") != "outbound": return _reject("orbit_direction_conflict", "Während des Einflugs ist kein Warp vorgemerkt")
 				var target := String(data.get("target_orbit_id", ""))
@@ -2183,7 +2191,7 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 		if String(Dictionary(snapshot.get("location_orbits",{})).get(location_id,"")) != String(snapshot.orbit_id):
 			return _reject("destination_orbit_mismatch","Zielort gehört nicht zum aktuellen Orbit; kein Treibstoff verbraucht")
 		var transit: Dictionary = _surface_orbit_intents.get(craft_id, {})
-		if not station_dock and not station_landing and transit.get("status") in ["starting", "flying"] and not _surface_orbit_auto_disabled.has(craft_id):
+		if not station_dock and not station_landing and transit.get("status") in ["starting", "flying"] and not _orbit_auto_off(craft_id):
 			if transit.has("pending_warp"): return _reject("warp_pending", "Vorgemerkten Warp zuerst abschließen oder abbrechen")
 			if transit.get("direction") != "inbound": return _reject("orbit_direction_conflict", "Während des Ausflugs ist kein Anflug vorgemerkt")
 			if transit.get("location_id") != location_id: return _reject("destination_mismatch", "Anflugziel passt nicht zum Orbitdurchflug")
@@ -2201,7 +2209,8 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 		if not station_dock and not station_landing: _simulation.publish_singleplayer_departure_events(self, String(_departure_token_by_craft.get(craft_id, "")))
 		if _campaign_mode and not station_dock and not station_landing and not departure.get("replayed", false): observe_campaign_progress()
 		if result.get("ok", false) and not bool(result.get("replayed", false)):
-			if location_id == "distress_orbit":
+			# Ohne angenommenen Auftrag ist der Notruf-Ort ein freier Orbit-Besuch: keine Weltraumbegegnung.
+			if location_id == "distress_orbit" and _campaign != null and _campaign.has_open_job_at(location_id):
 				_space_encounter.start_encounter(craft_id, true)
 				_encounter_entry_delay = 0.0
 				_encounter_entry_feedback.clear()

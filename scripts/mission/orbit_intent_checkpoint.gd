@@ -52,12 +52,12 @@ static func _check_data(data: Dictionary, bindings: Dictionary, requests: Varian
 	if routes.size() > 64: return _bad("orbit_checkpoint_capacity")
 	var controls: Dictionary = bindings.combat.get_flight_controls()
 	for craft in data.auto_disabled:
-		if not _id(craft) or typeof(data.auto_disabled[craft]) != TYPE_BOOL or data.auto_disabled[craft] != true or not routes.has(craft) or bindings.fleet.get_flight_state(craft) == null: return _bad("orbit_preference_invalid")
+		if not _id(craft) or typeof(data.auto_disabled[craft]) != TYPE_BOOL or not routes.has(craft) or bindings.fleet.get_flight_state(craft) == null: return _bad("orbit_preference_invalid")
 	for craft in controls:
 		var control: Variant = controls[craft]
 		if not control is Dictionary: return _bad("orbit_control_invalid")
 		if control.get("orbit_auto_braking",false): return _bad("orbit_braking_pending")
-		if control.get("orbit_auto_transit",false) and (not data.intents.has(craft) or data.auto_disabled.has(craft)): return _bad("orbit_control_unmatched")
+		if control.get("orbit_auto_transit",false) and (not data.intents.has(craft) or data.auto_disabled.get(craft,false)==true): return _bad("orbit_control_unmatched")
 	var pending_ids := {}
 	for craft in data.intents:
 		if not _id(craft) or not routes.has(craft): return _bad("orbit_craft_unknown")
@@ -93,7 +93,7 @@ static func _check_data(data: Dictionary, bindings: Dictionary, requests: Varian
 		if intent.get("direction") not in ["inbound","outbound"] or travel.get("phase") != "orbit" or travel.get("orbit_id") != intent.target_orbit_id or pose.get("coordinate_frame") != "local" or pose.get("motion_mode") != "tactical" or pose.get("space_area_id") != "orbit_approach:" + String(body.get("id","")).uri_encode() or actor != flight: return _bad("orbit_local_mismatch")
 		var status: Dictionary = bindings.combat.get_flight_status(craft)
 		if intent.status == "flying":
-			if data.auto_disabled.has(craft) or control.get("orbit_auto_transit") != true or control.get("orbit_auto_location_id") != intent.location_id or control.get("orbit_auto_direction") != intent.direction or typeof(status.get("ok")) != TYPE_BOOL or status.get("ok") != true or status.get("reason") not in ["transit", ""]: return _bad("orbit_automatic_mismatch")
+			if data.auto_disabled.get(craft,false)==true or control.get("orbit_auto_transit") != true or control.get("orbit_auto_location_id") != intent.location_id or control.get("orbit_auto_direction") != intent.direction or typeof(status.get("ok")) != TYPE_BOOL or status.get("ok") != true or status.get("reason") not in ["transit", ""]: return _bad("orbit_automatic_mismatch")
 		elif intent.status == "arrived":
 			if control.get("orbit_auto_transit",false) or status.get("ok") != true or status.get("reason") != "arrived": return _bad("orbit_arrival_unconfirmed")
 		elif control.get("orbit_auto_transit",false): return _bad("orbit_manual_mismatch")
@@ -103,7 +103,7 @@ static func _check_pending(craft: String, intent: Dictionary, travel: Dictionary
 	var approach: bool = intent.has("pending_approach")
 	var warp: bool = intent.has("pending_warp")
 	if not approach and not warp: return {"ok":true}
-	if approach and warp or intent.status != "flying" or disabled.has(craft) or not requests is Dictionary: return _bad("orbit_pending_unavailable")
+	if approach and warp or intent.status != "flying" or disabled.get(craft,false)==true or not requests is Dictionary: return _bad("orbit_pending_unavailable")
 	var pending: Dictionary = intent.pending_approach if approach else intent.pending_warp
 	if not _keys(pending,["request_id","signature"] if approach else ["request_id","signature","payload"]) or not _id(pending.request_id) or not _id(pending.signature) or pending_ids.has(pending.request_id) or requests.has(pending.request_id): return _bad("orbit_pending_request_conflict")
 	var payload := {"craft_id":craft,"location_id":intent.location_id}

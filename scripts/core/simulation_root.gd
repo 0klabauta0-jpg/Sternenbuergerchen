@@ -1729,6 +1729,9 @@ func get_space_area_snapshot(area_id: String, actor_id: String) -> Dictionary:
 		var entry := {"craft_id":craft_id, "wing_id":wing_id, "flight":pose, "metadata":_space_combat_state.get_metadata(craft_id), "footprint_cells":_space_combat_state.get_indexed_actor_cells(craft_id)}
 		var systems: Dictionary = _space_combat_state.get_ship_systems(craft_id)
 		if not systems.is_empty(): entry["systems"] = systems.state.duplicate(true)
+		if _ship_equipment_owner != null:
+			var model_profile: Dictionary = _ship_equipment_owner.get_space_flight_profile(craft_id)
+			if model_profile.get("ok", false) and typeof(model_profile.get("model_id")) == TYPE_STRING: entry["model_id"] = model_profile.model_id
 		actors.append(entry)
 	var observed := {}
 	for own: Dictionary in actors:

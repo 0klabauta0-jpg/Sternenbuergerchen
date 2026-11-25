@@ -28,9 +28,8 @@ func _run() -> void:
 	var craft: Dictionary = operations.get("selected_craft", {})
 	_check(not String(craft.get("pilot_id", "")).is_empty(), "Campaign has a real assigned pilot")
 	_check(Array(flow.get("_selected_unit_ids")).size() == 1, "Exactly one deployable leader selected")
-	var blocked: Dictionary = screen.call("request_operation", "select_destination", {"location_id": "distress_orbit"})
-	# Freigabe 25.11.2026: der Handelsaussenposten ist als freier Besuch frei (frueher hier gesperrt); gesperrt bleibt ein Ort ohne Besuchsszenario (Orbit-Ort).
-	_check(not bool(blocked.get("ok", false)), "Orbit location without free visit is locked before satellite lesson")
+	# Freigabe 25.11.2026: distress_orbit ist ohne Auftrag anfliegbar (keine Begegnung); gesperrt bleibt der Auftrag selbst, nicht der Ort.
+	_check(not bool(Dictionary(flow.get("_singleplayer_runtime").get("_campaign").get_job_availability().get("buccaneer_rescue", {})).get("can_accept", true)), "Rescue job cannot be accepted before its turn (orbit visit itself is free)")
 	flow.call("_show_homebase")
 	_check(Array(flow.get("_all_team_units")).size() == 2, "Returning to base never repairs campaign to Skirmish roster")
 	var saved: Dictionary = flow.get("_campaign_start").call("save_home_checkpoint", flow, flow.get("_singleplayer_runtime"))

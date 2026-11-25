@@ -186,7 +186,7 @@ func _case_unlock() -> void:
 	for job_id: String in availability:
 		if bool(Dictionary(availability[job_id]).get("can_accept", false)): chain.append(job_id)
 	_check(chain == ["satellite_recovery"], "Kette unveraendert: am Start ist nur satellite_recovery annehmbar (%s)" % str(chain))
-	_check(String(fresh.validate_location_visit("distress_orbit").get("reason", "")) == "tutorial_locked", "Freigabe: distress_orbit bleibt gesperrt (kein Besuchsszenario, Orbit-Ort ohne Bodenkarte)")
+	_check(bool(fresh.validate_location_visit("distress_orbit").get("ok", false)) and not bool(fresh.get_job_availability()["buccaneer_rescue"].can_accept), "Freigabe: distress_orbit ist ohne Auftrag anfliegbar (keine Begegnung, Orbit-Ort ohne Bodenkarte); der Auftrag ist dadurch nicht annehmbar")
 	var relay_scenario := String(Dictionary(_json("res://data/singleplayer/locations.json").get("relay_ridge", {})).get("scenario_file_path", ""))
 	_check(relay_scenario.ends_with("flak_silence.json") and String(Dictionary(fresh.get_campaign_snapshot().jobs).get("flak_silence", {}).get("scenario_id", "flak_silence")) == "flak_silence", "Freigabe: das Auftragsszenario flak_silence des Relaisgrats bleibt unveraendert")
 	var free: RefCounted = CAMPAIGN.new()
