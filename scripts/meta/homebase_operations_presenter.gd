@@ -86,6 +86,8 @@ var _flight_actions: BoxContainer
 ## Flugdeck-Aufbau v2: Schiffsdetail (Spalte equipment), Schiffsleiste (flight), Trupp-Zeilen (squad).
 const SHIP_DETAIL_SCRIPT: GDScript = preload("res://scripts/ui/components/ship_detail_panel.gd")
 var _ship_detail: VBoxContainer
+var _detail_craft: Dictionary = {}
+var _detail_fireteams: Array = []
 var _equipment_scroll: Control
 var _ship_strip: VBoxContainer
 var _ship_cards: Dictionary = {}
@@ -694,6 +696,16 @@ func _build_flightdeck() -> void:
 	_pilot_selector.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_pilot_selector.custom_minimum_size.x = 200
 	_pilot_selector.item_selected.connect(func(index: int): _act("pilot", {"unit_id": String(_pilot_selector.get_item_metadata(index)), "craft_id": _craft_id}))
+	# Ziehen: Person auf den Pilotplatz = derselbe Befehl `pilot` wie der Auswahlkasten; Trupp auf einen Platz = `board`.
+	_ship_detail.pilot_validator = _can_drop_pilot
+	_ship_detail.fireteam_check = _fireteam_drop_message
+	_ship_detail.pilot_cleared.connect(func(): _act("pilot", {"unit_id": "", "craft_id": _craft_id}))
+	_ship_detail.unboard_requested.connect(func(team_id: String): _act("unboard", {"fireteam_id": team_id, "craft_id": _craft_id}))
+	# Der Auswahlkasten bleibt als Knoten (Pruefer, erster Einsatz), ist fuer den Spieler aber ersetzt durch den Pilotplatz.
+	_pilot_selector.visible = false
+	_ship_detail.pilot_dropped.connect(func(unit_id: String): _act("pilot", {"unit_id": unit_id, "craft_id": _craft_id}))
+	_ship_detail.fireteam_dropped.connect(func(team_id: String): _act("board", {"fireteam_id": team_id, "craft_id": _craft_id}))
+	_ship_detail.find_child("PilotSlot", true, false).call("forward_drag_from", _pilot_selector)
 	_pilot_status = _label("Nicht an Bord", 14, GOLD)
 	pilot.add_child(_pilot_status)
 	var status := VBoxContainer.new()
@@ -1286,9 +1298,48 @@ func _update_flight(craft: Dictionary, snapshot: Dictionary) -> void:
 	_mission_name.visible = not space_route
 	_mission_name.text = "Einsatz"
 	var inventory: Dictionary = Dictionary(Dictionary(Dictionary(snapshot.get("singleplayer", {})).get("supply", {})).get("inventory", {}))
-	_ship_detail.update_craft(craft, Dictionary(inventory.get("craft:" + _craft_id, {})))
+	_detail_craft = craft
+	_detail_fireteams = Array(snapshot.get("fireteams", []))
+	# Trupp je belegtem Platz (Reihenfolge wie die Namen): fuer das Absetzen per Knopf am Platz.
+	var seat_craft: Dictionary = craft.duplicate()
+	var seat_teams: Array = []
+	for payload_team in Array(craft.get("payload_fireteam_ids", [])):
+		for team_variant in _detail_fireteams:
+			if String(Dictionary(team_variant).get("id", "")) == String(payload_team):
+				for member in Array(Dictionary(team_variant).get("members", [])):
+					seat_teams.append(String(payload_team))
+	seat_craft["seat_team_ids"] = seat_teams
+	_ship_detail.update_craft(seat_craft, Dictionary(inventory.get("craft:" + _craft_id, {})))
 	_update_ship_strip(Array(snapshot.get("crafts", [])))
 
+
+## Pilotplatz nimmt nur Personen an, die auch im Auswahlkasten stehen (gleiche Regeln wie Befehl `pilot`); belegtes oder unterwegs befindliches Schiff nimmt nichts an.
+func _can_drop_pilot(unit_id: String) -> bool:
+	if _detail_craft.is_empty() or bool(_detail_craft.get("busy", false)) or unit_id.is_empty():
+		return false
+	for option in Array(_detail_craft.get("pilot_options", [])):
+		if String(Dictionary(option).get("id", "")) == unit_id:
+			return true
+	return false
+
+## Trupp auf Passagierplatz/Schiffsdetail: leer = passt; sonst die kurze Meldung fuer das Schiffsdetail.
+## Passagierplaetze zaehlen ohne Pilot und Turmschuetze (Aufteilung im Schiffsdetail-Baustein).
+func _fireteam_drop_message(team_id: String) -> String:
+	if _detail_craft.is_empty() or bool(_detail_craft.get("busy", false)):
+		return "Das Schiff ist nicht an der Heimatbasis."
+	var free: int = int(SHIP_DETAIL_SCRIPT.seat_layout(_detail_craft).passengers) - Array(_detail_craft.get("payload_names", [])).size()
+	for team_variant in _detail_fireteams:
+		var team: Dictionary = Dictionary(team_variant)
+		if String(team.get("id", "")) == team_id:
+			var members: int = Array(team.get("members", [])).size()
+			if members == 0:
+				return "Der Trupp hat keine Mitglieder."
+			if bool(team.get("busy", false)):
+				return "Der Trupp ist schon an Bord."
+			if members > free:
+				return "Nicht genug Plätze: Trupp hat %d, frei sind %d." % [members, maxi(free, 0)]
+			return ""
+	return "Trupp nicht verfügbar."
 
 ## Schiffsleiste: je Schiff eine Karte `ShipCard_<id>` mit Bild und Name; die gewaehlte hat gelben Rahmen (Meta `selected`).
 ## Klick waehlt das Schiff (Befehl `craft`), ein daraufgezogener Trupp geht an Bord (Befehl `board`).

@@ -6,6 +6,9 @@ signal payload_dropped(payload: Dictionary)
 var drag_payload: Dictionary = {}
 var accepted_type: String = ""
 var equipment_key: String = ""
+var drop_validator: Callable = Callable()
+## true: der Pruefer entscheidet allein ueber Art und Inhalt (mehrere Zieh-Arten, z. B. Trupp oder Person).
+var accept_any: bool = false
 
 func get_drag_payload() -> Dictionary:
 	return drag_payload.duplicate(true)
@@ -24,7 +27,12 @@ func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 	if typeof(data) != TYPE_DICTIONARY or accepted_type.is_empty():
 		return false
 	var payload: Dictionary = Dictionary(data)
+	if accept_any and drop_validator.is_valid():
+		return bool(drop_validator.call(payload))
 	if String(payload.get("type", "")) != accepted_type:
+		return false
+	# Optionaler Besitzer-Pruefer: das Fach leuchtet nur auf, wenn das Ablegen moeglich ist.
+	if drop_validator.is_valid() and not bool(drop_validator.call(payload)):
 		return false
 	match accepted_type:
 		"homebase_unit_card":
