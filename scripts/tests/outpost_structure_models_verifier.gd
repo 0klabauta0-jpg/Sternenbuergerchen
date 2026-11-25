@@ -45,12 +45,15 @@ func _run() -> void:
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(CONFIG_PATH)) if FileAccess.file_exists(CONFIG_PATH) else null
 	var config: Dictionary = Dictionary(parsed) if parsed is Dictionary else {}
 	var entries: Array = Array(config.get("entries", []))
-	_check(entries.size() == 3, "Zuordnung hat drei Orte (%d)" % entries.size())
+	_check(entries.size() == 4, "Zuordnung hat vier Orte (%d)" % entries.size())
 	var figure := _figure_height()
 	var human_m: float = float(config.get("human_height_m", 1.8))
 	var ratio: float = figure / human_m
 	print("INFO Spielfigur in der Einsatzansicht %.3f Einheiten = %.1f m, Faktor je Meter %.4f" % [figure, human_m, ratio])
-	var outposts: Dictionary = Dictionary(JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/small_outposts.json"))).get("locations", {})
+	var outposts_file: Dictionary = Dictionary(JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/small_outposts.json")))
+	# die drei kleinen Posten stehen unter "locations", der Relaisgrat (Ort mit Auftrag und freiem Besuch) unter "visit_trade_markers"
+	var outposts: Dictionary = Dictionary(outposts_file.get("locations", {})).duplicate()
+	outposts.merge(Dictionary(outposts_file.get("visit_trade_markers", {})))
 	for entry_variant in entries:
 		var entry: Dictionary = entry_variant
 		var id := String(entry.get("id", ""))
@@ -64,8 +67,14 @@ func _run() -> void:
 		view.configure_from_map(map)
 		for i in range(3):
 			await process_frame
-		var holders: Array = view.find_children("*", "Node3D", true, false).filter(func(n: Node) -> bool: return n.has_meta("outpost_structure_id"))
-		_check(holders.size() == 1, "auf der Karte steht GENAU EIN Aussenposten-Modell (%d): %s" % [holders.size(), id])
+		var all_holders: Array = view.find_children("*", "Node3D", true, false).filter(func(n: Node) -> bool: return n.has_meta("outpost_structure_id"))
+		var same_map := 0
+		for other in entries:
+			if String(Dictionary(other).get("map_name", "")) == String(entry.get("map_name", "")):
+				same_map += 1
+		_check(all_holders.size() == same_map, "auf der Karte stehen so viele Aussenposten-Modelle wie Eintraege fuer sie (%d von %d): %s" % [all_holders.size(), same_map, id])
+		var holders: Array = all_holders.filter(func(n: Node) -> bool: return String(n.get_meta("outpost_structure_id")) == id)
+		_check(holders.size() == 1, "es steht GENAU EIN Aussenposten-Modell je Eintrag/Marke (%d): %s" % [holders.size(), id])
 		if holders.size() != 1:
 			view.queue_free()
 			continue
@@ -79,7 +88,12 @@ func _run() -> void:
 		var offset_len := center.distance_to(Vector2(marker_3d.x, marker_3d.z))
 		_check(offset_len <= float(entry.get("max_offset", 0.0)) + 0.001, "Gebaeude steht am Marker: Abstand %.2f <= %.2f: %s" % [offset_len, float(entry.get("max_offset", 0.0)), id])
 		# Menschenmass
-		_check(absf(holder.scale.x - ratio) <= 0.01 and absf(holder.scale.x - float(entry.get("scale", -1.0))) <= 0.0005, "Faktor %.4f = Figur/1,8 m (%.4f): %s" % [holder.scale.x, ratio, id])
+		var expected_scale: float = ratio
+		var home_ref: Dictionary = Dictionary(entry.get("scale_from_home_pod", {}))
+		if not home_ref.is_empty():
+			# Modell nicht in Metern (Wohn-Pod der Heimatbasis): Faktor der Heimatbasis x Figur hier / Figur dort
+			expected_scale = float(home_ref.get("home_scale", 0.0)) * figure / float(home_ref.get("home_figure", 1.0))
+		_check(absf(holder.scale.x - expected_scale) <= 0.01 and absf(holder.scale.x - float(entry.get("scale", -1.0))) <= 0.0005, "Faktor %.4f = erwartet %.4f (Figur/1,8 m = %.4f): %s" % [holder.scale.x, expected_scale, ratio, id])
 		var door_real := float(entry.get("door_height_m", 0.0))
 		_check(door_real >= 1.95 and door_real <= 2.35, "Tuerhoehe im Menschenmass %.2f m (aus den Daten, am Modell geschaetzt): %s" % [door_real, id])
 		var real_h: float = box.size.y / ratio
@@ -117,7 +131,8 @@ func _run() -> void:
 			bad += holder.find_children("*", cls, true, false).size()
 		_check(bad == 0, "nur Darstellung, keine Kollision/Sichtsperre/Navigation/Licht am Modell (%d): %s" % [bad, id])
 		# Frachtaufzug und Landepad
-		var all_extras: Array = view.find_children("*", "Node3D", true, false).filter(func(n: Node) -> bool: return n.has_meta("outpost_extra_id"))
+		var every_extra: Array = view.find_children("*", "Node3D", true, false).filter(func(n: Node) -> bool: return n.has_meta("outpost_extra_id"))
+		var all_extras: Array = every_extra.filter(func(n: Node) -> bool: return String(n.get_meta("outpost_extra_id")).begins_with(id + "_"))
 		var lifts: Array = all_extras.filter(func(n: Node) -> bool: return String(n.get_meta("outpost_extra_kind")) == "model")
 		var pads: Array = all_extras.filter(func(n: Node) -> bool: return String(n.get_meta("outpost_extra_kind")) == "pad")
 		_check(lifts.size() == 1 and pads.size() == 1 and all_extras.size() == 2, "genau EIN Frachtaufzug und EIN Landepad (%d/%d): %s" % [lifts.size(), pads.size(), id])
@@ -171,6 +186,17 @@ func _run() -> void:
 					covered += 1
 			_check(covered == 0, "Aufzug und Pad decken keinen Marker der Karte (%d): %s" % [covered, id])
 			_check(not rect.intersects(lrect) and not rect.intersects(prect) and not lrect.intersects(prect), "Gebaeude, Aufzug und Pad ueberlappen einander nicht: %s" % id)
+			# mehrere Gebaeude auf einer Karte: kein fremdes Gebaeude, kein fremder Aufzug/Pad ueberlappt dieses
+			var clash := 0
+			for other_node in all_holders + every_extra:
+				var on: Node3D = other_node
+				if on == holder or on == lift or on == pad:
+					continue
+				var ob: AABB = _bounds(on)
+				var orect := Rect2(ob.position.x, ob.position.z, ob.size.x, ob.size.z)
+				if orect.intersects(rect) or orect.intersects(lrect) or orect.intersects(prect):
+					clash += 1
+			_check(clash == 0, "Gebaeude, Aufzug und Pad ueberlappen kein anderes Aussenposten-Teil auf der Karte (%d): %s" % [clash, id])
 			var bad2 := 0
 			for cls in ["CollisionObject3D", "CollisionShape3D", "OccluderInstance3D", "NavigationRegion3D", "NavigationObstacle3D", "Light3D"]:
 				bad2 += lift.find_children("*", cls, true, false).size() + pad.find_children("*", cls, true, false).size()
