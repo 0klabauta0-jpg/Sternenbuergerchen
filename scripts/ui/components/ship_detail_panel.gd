@@ -8,6 +8,9 @@ const CYAN := Color("6fe3e8")
 const CREAM := Color("f2ead0")
 const MUTED := Color("93aab3")
 const GOLD := Color("f2c94c")
+const PORTRAITS: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
+## Feste Farbpalette fuer den Trupp-Streifen am rechten Rand der Passagierplaetze (je Trupp eine Farbe).
+const TEAM_COLORS: Array[Color] = [Color("e8a33d"), Color("5fb0e8"), Color("c07ee8"), Color("7ee89a"), Color("e86f6f"), Color("e8e06f")]
 ## Platzaufteilung je Schiffsmodell: Turmschuetzenplaetze. Alle anderen Modelle: keiner. Passagiere = Kapazitaet - Pilot - Turmschuetze.
 const GUNNER_SEATS := {"cutlass": 1}
 const MAX_PASSENGERS := 12
@@ -23,6 +26,9 @@ var _preview: TextureRect
 var _name: Label
 var _status: Label
 var _pilot_slot: Label
+var _pilot_card: Pulse
+var _pilot_portrait: TextureRect
+var _pilot_info: Label
 var _pilot_hatch: Control
 var _pilot_clear: Button
 var _pilot_box: PanelContainer
@@ -68,8 +74,8 @@ func _init() -> void:
 	_pilot_box.name = "PilotSlot"
 	_pilot_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_pilot_box.set("accepted_type", "homebase_unit_card")
-	_pilot_box.set("drop_validator", func(payload: Dictionary) -> bool: return pilot_validator.is_valid() and bool(pilot_validator.call(String(payload.get("unit_id", "")))))
-	_pilot_box.connect("payload_dropped", func(payload: Dictionary): pilot_dropped.emit(String(payload.get("unit_id", ""))))
+	_pilot_box.set("drop_validator", func(payload: Dictionary) -> bool: return _pilot_payload_ok(payload))
+	_pilot_box.connect("payload_dropped", func(payload: Dictionary): _handle_pilot_drop(payload))
 	_pilot_box.tooltip_text = "Person hierher ziehen: wird Pilot dieses Schiffs"
 	row.add_child(_pilot_box)
 	_pilot_hatch = Hatch.new()
@@ -79,10 +85,30 @@ func _init() -> void:
 	_pilot_box.add_child(pilot_inner)
 	var pilot_line := HBoxContainer.new()
 	pilot_inner.add_child(pilot_line)
+	# Pilotkarte wie die Minikarte unter Personal: Portraet, Name, Rolle/Status. Pulsiert, solange der Pilot nicht an Bord ist.
+	_pilot_card = Pulse.new()
+	_pilot_card.name = "PilotCard"
+	_pilot_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_pilot_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_pilot_card.add_theme_constant_override("separation", 8)
+	pilot_line.add_child(_pilot_card)
+	_pilot_portrait = _portrait(Vector2(40, 40))
+	_pilot_portrait.name = "PilotPortrait"
+	_pilot_portrait.visible = false
+	_pilot_card.add_child(_pilot_portrait)
+	var pilot_text := VBoxContainer.new()
+	pilot_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pilot_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pilot_text.add_theme_constant_override("separation", 0)
+	_pilot_card.add_child(pilot_text)
 	_pilot_slot = _label("Pilot", 15, MUTED)
 	_pilot_slot.name = "PilotName"
 	_pilot_slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	pilot_line.add_child(_pilot_slot)
+	pilot_text.add_child(_pilot_slot)
+	_pilot_info = _compact_label("", 12, CYAN)
+	_pilot_info.name = "PilotInfo"
+	_pilot_info.visible = false
+	pilot_text.add_child(_pilot_info)
 	_pilot_clear = _clear_button("PilotClear", "Pilot entfernen")
 	_pilot_clear.pressed.connect(func(): pilot_cleared.emit())
 	pilot_line.add_child(_pilot_clear)
@@ -141,13 +167,21 @@ func update_craft(craft: Dictionary, cargo: Dictionary) -> void:
 	_pilot_hatch.visible = pilot.is_empty()
 	_pilot_clear.visible = not pilot.is_empty() and not bool(craft.get("busy", false))
 	_pilot_box.add_theme_stylebox_override("panel", _box(Color("163743"), CYAN) if not pilot.is_empty() else _box(Color("0f2630"), Color("3e6972")))
+	var pilot_unit: Dictionary = Dictionary(craft.get("pilot_unit", {}))
+	_pilot_portrait.visible = not pilot.is_empty() and not pilot_unit.is_empty()
+	_set_portrait(_pilot_portrait, pilot_unit)
+	var pilot_info: String = _info_line(pilot_unit)
+	_pilot_info.text = pilot_info
+	_pilot_info.visible = not pilot.is_empty() and not pilot_info.is_empty()
+	# Zugewiesen, aber noch nicht an Bord: gedimmt und pulsierend; sonst Vollfarbe.
+	_pilot_card.waiting = not pilot.is_empty() and not bool(craft.get("pilot_aboard", true))
 	var layout: Dictionary = seat_layout(craft)
 	_gunner_box.visible = int(layout.gunner) > 0
 	var slots: int = int(layout.passengers)
 	_passenger_slots = slots
-	var names: Array = Array(craft.get("payload_names", []))
-	var teams: Array = Array(craft.get("seat_team_ids", []))
-	var signature: String = "%d|%s|%s" % [slots, JSON.stringify(names), JSON.stringify(teams)]
+	# Der Pilot steht nur im Pilotplatz, nie zusaetzlich auf einem Passagierplatz (auch wenn er zum Trupp an Bord gehoert).
+	var seats: Array = _seat_entries(craft, String(craft.get("pilot_id", "")))
+	var signature: String = "%d|%s" % [slots, JSON.stringify(seats)]
 	if signature != _signature:
 		_signature = signature
 		for child in _troops.get_children():
@@ -159,15 +193,40 @@ func update_craft(craft: Dictionary, cargo: Dictionary) -> void:
 			note.autowrap_mode = TextServer.AUTOWRAP_OFF
 			note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			_troops.add_child(note)
+		var team_order: Array = []
+		for seat in seats:
+			var seat_team: String = String(Dictionary(seat).team)
+			if not seat_team.is_empty() and not team_order.has(seat_team):
+				team_order.append(seat_team)
 		for index in slots:
-			_troops.add_child(_passenger_slot(index, String(names[index]) if index < names.size() else "", String(teams[index]) if index < teams.size() else ""))
+			var entry: Dictionary = Dictionary(seats[index]) if index < seats.size() else {}
+			var color_index: int = team_order.find(String(entry.get("team", ""))) if not entry.is_empty() else -1
+			_troops.add_child(_passenger_slot(index, entry, TEAM_COLORS[color_index % TEAM_COLORS.size()] if color_index >= 0 else Color(0, 0, 0, 0)))
 	var items: Dictionary = Dictionary(cargo.get("items", {}))
 	var lines: PackedStringArray = PackedStringArray()
 	for item in items:
 		lines.append("%s × %d" % [String(_labels.get(item, String(item).replace("_", " "))), int(items[item])])
 	_cargo.text = "\n".join(lines) if not lines.is_empty() else "Leer"
 
-func _passenger_slot(index: int, occupant: String, team_id: String) -> PanelContainer:
+## Parallele Listen des Schnappschusses zu Plaetzen zusammengefuehrt: {id, name, team, unit, aboard}.
+## Eintraege der Pilotperson entfallen (sie steht nur im Pilotplatz); ohne `payload_unit_ids` ist kein Abgleich moeglich.
+func _seat_entries(craft: Dictionary, pilot_id: String) -> Array:
+	var names: Array = Array(craft.get("payload_names", []))
+	var ids: Array = Array(craft.get("payload_unit_ids", []))
+	var teams: Array = Array(craft.get("seat_team_ids", []))
+	var units: Array = Array(craft.get("seat_units", []))
+	var aboard: Array = Array(craft.get("payload_aboard", []))
+	var entries: Array = []
+	for index in names.size():
+		var id: String = String(ids[index]) if index < ids.size() else ""
+		if not pilot_id.is_empty() and id == pilot_id:
+			continue
+		entries.append({"id": id, "name": String(names[index]), "team": String(teams[index]) if index < teams.size() else "",
+			"unit": Dictionary(units[index]) if index < units.size() and typeof(units[index]) == TYPE_DICTIONARY else {},
+			"aboard": bool(aboard[index]) if index < aboard.size() else true})
+	return entries
+
+func _passenger_slot(index: int, entry: Dictionary, team_color: Color) -> PanelContainer:
 	var slot: PanelContainer = DRAG_SURFACE.new()
 	slot.name = "TroopSlot_%d" % index
 	slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -175,24 +234,121 @@ func _passenger_slot(index: int, occupant: String, team_id: String) -> PanelCont
 	slot.set("accept_any", true)
 	slot.set("drop_validator", func(payload: Dictionary) -> bool: return _passenger_payload_ok(payload))
 	slot.connect("payload_dropped", func(payload: Dictionary): _handle_drop(payload))
+	var occupant: String = String(entry.get("name", ""))
+	var unit_id: String = String(entry.get("id", ""))
+	var team_id: String = String(entry.get("team", ""))
+	var unit: Dictionary = Dictionary(entry.get("unit", {}))
 	var filled: bool = not occupant.is_empty()
-	slot.tooltip_text = ("Besetzt: " + occupant) if filled else "Frei: Trupp (oder Person, dann mit Hinweis) hierher ziehen"
+	slot.tooltip_text = ("Besetzt: %s · auf den Pilotplatz ziehen, um Pilot zu werden" % occupant) if filled else "Frei: Trupp (oder Person, dann mit Hinweis) hierher ziehen"
 	slot.add_theme_stylebox_override("panel", _box(Color("163743"), CYAN) if filled else _box(Color("0f2630"), Color("3e6972")))
+	if filled and not unit_id.is_empty():
+		# Belegter Platz ist ziehbar wie eine Person in der Personal-Spalte (z. B. auf den Pilotplatz).
+		slot.set("drag_payload", {"type": "homebase_unit_card", "unit_id": unit_id, "label": occupant, "source_context": "seat"})
 	var hatch := Hatch.new()
 	hatch.visible = not filled
 	slot.add_child(hatch)
 	var line := HBoxContainer.new()
+	line.add_theme_constant_override("separation", 4)
 	slot.add_child(line)
-	var text := _label(occupant if filled else "Passagier", 15, CREAM if filled else MUTED)
+	var card := Pulse.new()
+	card.name = "SeatCard"
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_theme_constant_override("separation", 6)
+	line.add_child(card)
+	if filled and not unit.is_empty():
+		var portrait: TextureRect = _portrait(Vector2(32, 32))
+		portrait.name = "SeatPortrait"
+		_set_portrait(portrait, unit)
+		card.add_child(portrait)
+	var text_box := VBoxContainer.new()
+	text_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	text_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text_box.add_theme_constant_override("separation", 0)
+	text_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	card.add_child(text_box)
+	var text := _compact_label(occupant if filled else "Passagier", 14, CREAM if filled else MUTED)
 	text.name = "SeatName"
-	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	line.add_child(text)
+	text_box.add_child(text)
+	var status_text: String = String(unit.get("status", ""))
+	if filled and not unit.is_empty() and status_text.is_empty():
+		status_text = "An Bord" if bool(entry.aboard) else "Nicht an Bord"
+	if filled and not status_text.is_empty():
+		var status := _compact_label(status_text, 11, CYAN)
+		status.name = "SeatStatus"
+		text_box.add_child(status)
+	card.waiting = filled and not bool(entry.get("aboard", true))
 	if filled and not team_id.is_empty():
 		var clear := _clear_button("SeatClear_%d" % index, "Ganzen Trupp absetzen")
 		clear.visible = true
 		clear.pressed.connect(func(): unboard_requested.emit(team_id))
 		line.add_child(clear)
+	if filled and team_color.a > 0.0:
+		var stripe := ColorRect.new()
+		stripe.name = "TeamStripe"
+		stripe.color = team_color
+		stripe.custom_minimum_size = Vector2(5, 0)
+		stripe.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		stripe.tooltip_text = "Gleicher Streifen = gleicher Trupp"
+		slot.set_meta("team_id", team_id)
+		slot.set_meta("team_color", team_color)
+		line.add_child(stripe)
 	return slot
+
+## Pilotplatz: Personen aus dem Auswahlkasten (`pilot_validator`) oder von einem Passagierplatz (wird bei Nichteignung gemeldet statt still verworfen).
+func _pilot_payload_ok(payload: Dictionary) -> bool:
+	var id: String = String(payload.get("unit_id", "")).strip_edges()
+	if id.is_empty():
+		return false
+	if String(payload.get("source_context", "")) == "seat":
+		return true
+	return pilot_validator.is_valid() and bool(pilot_validator.call(id))
+
+func _handle_pilot_drop(payload: Dictionary) -> void:
+	var id: String = String(payload.get("unit_id", "")).strip_edges()
+	if id.is_empty():
+		return
+	if pilot_validator.is_valid() and bool(pilot_validator.call(id)):
+		show_message("")
+		pilot_dropped.emit(id)
+		return
+	var who: String = String(payload.get("label", "")).strip_edges()
+	show_message("%s kann nicht Pilot werden." % (who if not who.is_empty() else "Diese Person"))
+
+func _info_line(unit: Dictionary) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	for key in ["role", "status"]:
+		var value: String = String(unit.get(key, ""))
+		if not value.is_empty():
+			parts.append(value)
+	return " · ".join(parts)
+
+func _set_portrait(rect: TextureRect, unit: Dictionary) -> void:
+	var path: String = PORTRAITS.resolve_path(String(unit.get("portrait_id", "")), String(unit.get("portrait_path", ""))) if not unit.is_empty() else ""
+	if String(rect.get_meta("rendered_path", "__unset")) == path:
+		return
+	rect.texture = load(path) as Texture2D if not path.is_empty() and ResourceLoader.exists(path) else null
+	rect.set_meta("rendered_path", path)
+
+func _portrait(minimum: Vector2) -> TextureRect:
+	var portrait := TextureRect.new()
+	portrait.custom_minimum_size = minimum
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	portrait.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return portrait
+
+## Einzeilige, abgeschnittene Beschriftung (kein Umbruch, zwingt die Spalte nicht auf).
+func _compact_label(value: String, size: int, color: Color) -> Label:
+	var label := _label(value, size, color)
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.clip_text = true
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.custom_minimum_size.x = 0
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return label
 
 func _passenger_payload_ok(payload: Dictionary) -> bool:
 	match String(payload.get("type", "")):
@@ -249,6 +405,38 @@ func _box(background: Color, border: Color) -> StyleBoxFlat:
 	style.content_margin_top = 5
 	style.content_margin_bottom = 5
 	return style
+
+## Karteninhalt eines Platzes. `waiting` = zugewiesen, aber noch nicht an Bord: ausgegraut und sanft pulsierend
+## (Deckkraft WAIT_ALPHA_LOW <-> WAIT_ALPHA_HIGH, rund 1 s je Zyklus). Sonst Vollfarbe ohne Blinken.
+class Pulse extends HBoxContainer:
+	const LOW := 0.35
+	const HIGH := 0.7
+	var waiting: bool = false:
+		set(value):
+			var changed: bool = value != waiting
+			waiting = value
+			set_meta("waiting", value)
+			if changed or (value and _tween == null and is_inside_tree()):
+				_apply()
+	var _tween: Tween
+	func _enter_tree() -> void:
+		_apply()
+	func _exit_tree() -> void:
+		_stop()
+	func _stop() -> void:
+		if _tween != null:
+			_tween.kill()
+			_tween = null
+	func _apply() -> void:
+		_stop()
+		if not waiting:
+			modulate.a = 1.0
+			return
+		modulate.a = LOW
+		if is_inside_tree():
+			_tween = create_tween().set_loops()
+			_tween.tween_property(self, "modulate:a", HIGH, 0.5).set_trans(Tween.TRANS_SINE)
+			_tween.tween_property(self, "modulate:a", LOW, 0.5).set_trans(Tween.TRANS_SINE)
 
 ## Dezente graue Schraffur fuer leere Ablegefelder (diagonale Linien, keine Bilddatei).
 class Hatch extends Control:

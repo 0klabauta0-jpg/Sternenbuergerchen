@@ -473,6 +473,24 @@ func _build_roster() -> void:
 	_roster_return_target.add_child(_label("‹ Person zurück ins Personal", 14, CYAN))
 	_roster_return_target.connect("payload_dropped", func(data: Dictionary): _act("remove", {"unit_id": String(data.unit_id)}))
 	_roster_list = _scroll(content)
+	# Auch die freie Fläche der Liste nimmt ein Truppmitglied an (Zeilen selbst werden einzeln in _update_roster angebunden).
+	for area in [_roster_list, _roster_list.get_parent()]:
+		(area as Control).set_drag_forwarding(Callable(), _roster_area_can_drop, _roster_area_drop)
+
+
+func _roster_area_can_drop(_at: Vector2, data: Variant) -> bool:
+	return typeof(data) == TYPE_DICTIONARY and _is_team_member_drag(Dictionary(data))
+
+
+func _roster_area_drop(at: Vector2, data: Variant) -> void:
+	if _roster_area_can_drop(at, data):
+		_act("remove", {"unit_id": String(Dictionary(data).get("unit_id", ""))})
+
+
+## Zieh-Daten eines Truppmitglieds (Trupp-Spalte): Person mit Herkunft "team".
+func _is_team_member_drag(payload: Dictionary) -> bool:
+	return String(payload.get("type", "")) == "homebase_unit_card" and String(payload.get("source_context", "")) == "team" \
+		and not String(payload.get("unit_id", "")).strip_edges().is_empty()
 
 
 func _build_squad() -> void:
@@ -1074,6 +1092,11 @@ func _update_roster(roster: Array) -> void:
 		if not _rows.has(id):
 			var row: Dictionary = _person_row(_roster_list, id, true)
 			_rows[id] = row
+			# Die ganze Personal-Spalte nimmt ein aus dem Trupp gezogenes Mitglied an (wie der Streifen "Person zurück ins Personal").
+			var roster_row: Control = row.root
+			roster_row.set("accepted_type", "homebase_unit_card")
+			roster_row.set("drop_validator", func(payload: Dictionary) -> bool: return _is_team_member_drag(payload))
+			roster_row.connect("payload_dropped", func(data: Dictionary): _act("remove", {"unit_id": String(data.get("unit_id", ""))}))
 			_row_create_count += 1
 			var focus: Button = row.focus
 			focus.pressed.connect(func(): _act("focus_unit", {"unit_id": id}))
@@ -1132,7 +1155,7 @@ func _fill_person(row: Dictionary, unit: Dictionary) -> void:
 	status.tooltip_text = status.text
 	panel.tooltip_text = "%s · %s" % [String(unit.get("name", "Freier Platz")), status.text]
 	panel.custom_minimum_size.y = DENSITY.card_empty_min_height if unit.is_empty() else DENSITY.card_min_height
-	panel.set("drag_payload", {"type": "homebase_unit_card", "unit_id": String(unit.get("id", "")), "source_context": "operations", "label": String(unit.get("name", ""))} if not unit.is_empty() else {})
+	panel.set("drag_payload", {"type": "homebase_unit_card", "unit_id": String(unit.get("id", "")), "source_context": "operations" if row.assign != null else "team", "label": String(unit.get("name", ""))} if not unit.is_empty() else {})
 	var badges: Array = Array(unit.get("badges", []))
 	var badge: TextureRect = row.badge
 	badge.visible = not badges.is_empty()
@@ -1188,9 +1211,16 @@ func _update_team_rows(teams: Array) -> void:
 			card_title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			card_box.add_child(card_title)
 			var line := HBoxContainer.new()
+			line.name = "LeaderLine"
+			line.visible = false  # ersetzt durch die ziehbaren Mitgliederzeilen (Knoten bleiben fuer Pruefer)
 			line.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			line.add_theme_constant_override("separation", 6)
 			card_box.add_child(line)
+			var member_rows := VBoxContainer.new()
+			member_rows.name = "MemberRows"
+			member_rows.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			member_rows.add_theme_constant_override("separation", 3)
+			card_box.add_child(member_rows)
 			var star := _label("★", 13, GOLD)
 			star.name = "LeaderStar"
 			star.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -1236,6 +1266,7 @@ func _update_team_rows(teams: Array) -> void:
 		(item.find_child("LeaderName", true, false) as Label).text = String(leader_unit.get("name", String(team.get("label", id))))
 		(item.find_child("Members", true, false) as Label).text = ", ".join(others)
 		(item.find_child("TeamTitle", true, false) as Label).text = "%s · %d / 4 Mitglieder" % [String(team.get("label", id)), member_list.size()]
+		_sync_team_members(item.find_child("MemberRows", true, false) as VBoxContainer, member_list, String(leader_unit.get("id", "")), id)
 		item.set("drag_payload", {"type": "fob_fireteam_card", "fireteam_id": id, "label": String(team.get("label", id))})
 		item.tooltip_text = "%s · Trupp wählen · auf ein Schiff ziehen zum Boarden" % String(team.get("label", id))
 		var selected: bool = id == _fireteam_id
@@ -1246,6 +1277,64 @@ func _update_team_rows(teams: Array) -> void:
 		if not live.has(id):
 			(_team_rows[id] as Control).queue_free()
 			_team_rows.erase(id)
+
+
+## Mitgliederzeilen `TeamMember_<unit_id>` einer Trupp-Karte: je Mitglied ziehbar (Person-Zieh-Daten, Herkunft "team");
+## auf die Spalte Personal gezogen loest es dieselbe Aktion wie "Aus Trupp entfernen" aus. Neuaufbau nur bei geaenderten Daten.
+func _sync_team_members(host: VBoxContainer, members: Array, leader_id: String, team_id: String) -> void:
+	var rows: Array = []
+	for member_variant in members:
+		var member: Dictionary = Dictionary(member_variant)
+		rows.append([String(member.get("id", "")), String(member.get("name", "")), String(member.get("role", ""))])
+	var signature: String = JSON.stringify([rows, leader_id])
+	if String(host.get_meta("members_signature", "")) == signature:
+		return
+	host.set_meta("members_signature", signature)
+	for child in host.get_children():
+		host.remove_child(child)
+		child.queue_free()
+	for member_variant in members:
+		var member: Dictionary = Dictionary(member_variant)
+		var unit_id: String = String(member.get("id", ""))
+		if unit_id.is_empty():
+			continue
+		var panel: PanelContainer = DRAG_SURFACE.new()
+		panel.name = "TeamMember_" + unit_id.validate_node_name()
+		panel.set("accepted_type", "homebase_unit_card")
+		panel.set("drag_payload", {"type": "homebase_unit_card", "unit_id": unit_id, "source_context": "team", "label": String(member.get("name", ""))})
+		panel.mouse_default_cursor_shape = Control.CURSOR_DRAG
+		panel.tooltip_text = "%s · auf die Spalte Personal ziehen, um aus dem Trupp zu lösen" % String(member.get("name", ""))
+		panel.add_theme_stylebox_override("panel", _card_style(Color("1d4a58"), Color("28515e")))
+		var line := HBoxContainer.new()
+		line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		line.add_theme_constant_override("separation", 6)
+		panel.add_child(line)
+		if unit_id == leader_id:
+			var star := _label("★", 13, GOLD)
+			star.autowrap_mode = TextServer.AUTOWRAP_OFF
+			star.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			line.add_child(star)
+		var name_label := _label(String(member.get("name", "")), 14, CREAM)
+		name_label.name = "MemberName"
+		name_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		name_label.clip_text = true
+		name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		name_label.custom_minimum_size.x = 0
+		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		line.add_child(name_label)
+		var role_label := _label(String(member.get("role", "")), 12, MUTED)
+		role_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		role_label.clip_text = true
+		role_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		role_label.custom_minimum_size.x = 0
+		role_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		line.add_child(role_label)
+		panel.gui_input.connect(func(event: InputEvent):
+			if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+				_act("focus_fireteam", {"fireteam_id": team_id}))
+		panel.connect("payload_dropped", func(data: Dictionary): _act("assign", {"unit_id": String(data.get("unit_id", "")), "fireteam_id": team_id}))
+		host.add_child(panel)
 
 
 func _update_equipment(unit: Dictionary, options: Dictionary) -> void:
@@ -1310,15 +1399,25 @@ func _update_flight(craft: Dictionary, snapshot: Dictionary) -> void:
 	var inventory: Dictionary = Dictionary(Dictionary(Dictionary(snapshot.get("singleplayer", {})).get("supply", {})).get("inventory", {}))
 	_detail_craft = craft
 	_detail_fireteams = Array(snapshot.get("fireteams", []))
-	# Trupp je belegtem Platz (Reihenfolge wie die Namen): fuer das Absetzen per Knopf am Platz.
+	# Je belegtem Platz (Reihenfolge wie payload_unit_ids): Trupp (Absetzen/Streifen) und Kartendaten der Person.
 	var seat_craft: Dictionary = craft.duplicate()
-	var seat_teams: Array = []
+	var roster_by_id: Dictionary = {}
+	for roster_variant in Array(snapshot.get("roster", [])):
+		roster_by_id[String(Dictionary(roster_variant).get("id", ""))] = Dictionary(roster_variant)
+	var team_of_unit: Dictionary = {}
 	for payload_team in Array(craft.get("payload_fireteam_ids", [])):
 		for team_variant in _detail_fireteams:
 			if String(Dictionary(team_variant).get("id", "")) == String(payload_team):
 				for member in Array(Dictionary(team_variant).get("members", [])):
-					seat_teams.append(String(payload_team))
+					team_of_unit[String(Dictionary(member).get("id", ""))] = String(payload_team)
+	var seat_teams: Array = []
+	var seat_units: Array = []
+	for seat_unit_id in Array(craft.get("payload_unit_ids", [])):
+		seat_teams.append(String(team_of_unit.get(String(seat_unit_id), "")))
+		seat_units.append(Dictionary(roster_by_id.get(String(seat_unit_id), {})))
 	seat_craft["seat_team_ids"] = seat_teams
+	seat_craft["seat_units"] = seat_units
+	seat_craft["pilot_unit"] = Dictionary(roster_by_id.get(String(craft.get("pilot_id", "")), {}))
 	_ship_detail.update_craft(seat_craft, Dictionary(inventory.get("craft:" + _craft_id, {})))
 	_update_ship_strip(Array(snapshot.get("crafts", [])))
 
@@ -1337,12 +1436,25 @@ func _can_drop_pilot(unit_id: String) -> bool:
 func _fireteam_drop_message(team_id: String) -> String:
 	if _detail_craft.is_empty() or bool(_detail_craft.get("busy", false)):
 		return "Das Schiff ist nicht an der Heimatbasis."
-	var free: int = int(SHIP_DETAIL_SCRIPT.seat_layout(_detail_craft).passengers) - Array(_detail_craft.get("payload_names", [])).size()
+	# Der zugewiesene Pilot steht im Pilotplatz und belegt keinen Passagierplatz: weder die schon Eingestiegenen noch der neue Trupp zaehlen ihn.
+	var pilot_id: String = String(_detail_craft.get("pilot_id", ""))
+	var seated: int = 0
+	var seated_ids: Array = Array(_detail_craft.get("payload_unit_ids", []))
+	if seated_ids.is_empty():
+		seated = Array(_detail_craft.get("payload_names", [])).size()
+	else:
+		for seated_id in seated_ids:
+			if pilot_id.is_empty() or String(seated_id) != pilot_id:
+				seated += 1
+	var free: int = int(SHIP_DETAIL_SCRIPT.seat_layout(_detail_craft).passengers) - seated
 	for team_variant in _detail_fireteams:
 		var team: Dictionary = Dictionary(team_variant)
 		if String(team.get("id", "")) == team_id:
-			var members: int = Array(team.get("members", [])).size()
-			if members == 0:
+			var members: int = 0
+			for member in Array(team.get("members", [])):
+				if pilot_id.is_empty() or String(Dictionary(member).get("id", "")) != pilot_id:
+					members += 1
+			if Array(team.get("members", [])).is_empty():
 				return "Der Trupp hat keine Mitglieder."
 			if bool(team.get("busy", false)):
 				return "Der Trupp ist schon an Bord."
