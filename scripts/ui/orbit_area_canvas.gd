@@ -27,6 +27,40 @@ var _dock_visible := false
 var _course_target := Vector2i.ZERO
 var _course_active := false
 const COURSE_ARRIVAL_DISTANCE := 1.5
+## Hintergrundbild fuer alle Orbit-Karten. Die Datei ist so gedreht abgelegt, dass der Planet des Bildes
+## an der oberen Kante liegt, wie der Planetenbogen der Karte (orbit_approach_layout: Planet oben, Eintrittsband unten).
+const BACKGROUND_PATH := "res://art/orbit_backgrounds/orbit_map01.jpg"
+const BACKGROUND_PLANET_EDGE := "top"
+## Deckwert des Bildes (1 = unverdunkelt); der Rest wird von der dunklen Grundfarbe gedeckt.
+const BACKGROUND_OPACITY := 0.55
+const MAP_PLANE_SIZE := Vector2(512.0, 221.7025033689)
+var _background_texture: Texture2D
+var _background_tried := false
+
+func get_background_texture() -> Texture2D:
+	if _background_tried: return _background_texture
+	_background_tried = true
+	if ResourceLoader.exists(BACKGROUND_PATH):
+		_background_texture = load(BACKGROUND_PATH) as Texture2D
+	elif FileAccess.file_exists(BACKGROUND_PATH):
+		var image := Image.load_from_file(ProjectSettings.globalize_path(BACKGROUND_PATH))
+		if image != null and not image.is_empty(): _background_texture = ImageTexture.create_from_image(image)
+	return _background_texture
+
+## Bildfuellend ueber die Kartenflaeche, Seitenverhaeltnis gehalten (beschneiden, oben verankert, damit der Planet am Planetenrand bleibt).
+func _draw_background() -> void:
+	var texture := get_background_texture()
+	if texture == null or texture.get_width() <= 0: return
+	var top_left := plane_to_screen(Vector2.ZERO)
+	var bottom_right := plane_to_screen(MAP_PLANE_SIZE)
+	var target := Rect2(top_left, bottom_right - top_left)
+	if target.size.x < 1.0 or target.size.y < 1.0: return
+	var tex_size := Vector2(texture.get_width(), texture.get_height())
+	var source_size := tex_size
+	if target.size.x / target.size.y > tex_size.x / tex_size.y: source_size.y = tex_size.x * target.size.y / target.size.x
+	else: source_size.x = tex_size.y * target.size.x / target.size.y
+	var source := Rect2(Vector2((tex_size.x - source_size.x) * 0.5, 0.0), source_size)
+	_static_layer.draw_texture_rect_region(texture, target, source, Color(1, 1, 1, BACKGROUND_OPACITY))
 
 func _ready() -> void:
 	clip_contents = true
@@ -215,11 +249,13 @@ func _camera_changed() -> void:
 func _draw_static() -> void:
 	_static_layer.draw_rect(Rect2(Vector2.ZERO,size),Color("060e18"))
 	if _layout.is_empty(): return
+	_draw_background()
 	var body_color := Color("866349")
 	if _body_visual.get("color") is Color: body_color = _body_visual.color
 	var upper_center := hex_to_screen(GRID.from_offset(Vector2i(256, 0)))
 	var planet_radius := 90.0 * _scale()
-	_static_layer.draw_circle(upper_center - Vector2(0, planet_radius + 3.0), planet_radius, Color(body_color, 0.45))
+	var has_background := get_background_texture() != null
+	if not has_background: _static_layer.draw_circle(upper_center - Vector2(0, planet_radius + 3.0), planet_radius, Color(body_color, 0.45))
 	_static_layer.draw_string(ThemeDB.fallback_font, upper_center + Vector2(-30, -8), "Planet", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("c4d7de"))
 	var lower_left := hex_to_screen(GRID.from_offset(Vector2i(0, 255)))
 	var lower_right := hex_to_screen(GRID.from_offset(Vector2i(511, 255)))
@@ -234,7 +270,7 @@ func _draw_static() -> void:
 			else: _static_layer.draw_circle(hex_to_screen(cell),0.7,Color(0.25,0.48,0.58,0.3))
 	for cell: Vector2i in _body_mask:
 		var point := hex_to_screen(cell)
-		if Rect2(Vector2(-8,-8),size+Vector2(16,16)).has_point(point): _static_layer.draw_colored_polygon(_polygon(cell),body_color)
+		if Rect2(Vector2(-8,-8),size+Vector2(16,16)).has_point(point): _static_layer.draw_colored_polygon(_polygon(cell),Color(body_color, 0.3) if has_background else body_color)
 	for offset: Vector2i in _layout.gate_cells:
 		var cell := GRID.from_offset(offset)
 		if _scale() >= 5: _outline(_polygon(cell),Color(0.57,0.89,0.93,0.6),_static_layer)
