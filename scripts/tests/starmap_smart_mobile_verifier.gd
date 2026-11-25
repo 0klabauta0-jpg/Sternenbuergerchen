@@ -333,7 +333,8 @@ func run() -> void:
 	owner = failed_owner
 	check(command("accept_job",{"job_id":"satellite_recovery"}).ok and command("fail_job",{"job_id":"satellite_recovery"},{"mission_aborted":true}).ok, "real failed-job owner fixture")
 	check(not owner.get_job_availability(false).satellite_recovery.visible and owner.get_job_availability(true).satellite_recovery.can_accept, "failed retry is visible only with actual Home permission")
-	check(owner.validate_location_visit("satellite_crash",true).ok and not owner.validate_location_visit("satellite_crash",false).ok, "failed location and job share the same Home-versus-away permission")
+	# Freigabe 25.11.2026: der ORT bleibt nach einem gescheiterten Auftrag als freier Besuch anfliegbar (auch unterwegs); nur der AUFTRAG braucht die Heimat-Berechtigung (Zeile darueber).
+	check(owner.validate_location_visit("satellite_crash",true).ok and owner.validate_location_visit("satellite_crash",false).ok and not owner.get_job_availability(false).satellite_recovery.can_accept and owner.get_job_availability(true).satellite_recovery.can_accept, "failed location stays open as free visit; the failed job is acceptable only with Home permission")
 	var away_snapshot: Dictionary = snapshot()
 	away_snapshot.campaign.job_availability = owner.get_job_availability(false)
 	var away_host := Operations.new()
