@@ -5,6 +5,8 @@ const HEX = preload("res://scripts/terrain/hex_grid.gd")
 const AREA = preload("res://scripts/core/space_area_grid.gd")
 const LAYOUT = preload("res://scripts/mission/orbit_approach_layout.gd")
 const DOCK = preload("res://scripts/mission/polisa_station_dock_layout.gd")
+const SPRITES = preload("res://scripts/ui/orbit_ship_sprites.gd")
+var _sprites: Node
 const TILT := 0.72
 const MIN_ZOOM := 0.6
 const MAX_ZOOM := 48.0
@@ -67,6 +69,9 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	custom_minimum_size = Vector2(350,250)
 	set_process(false)
+	_sprites = SPRITES.new()
+	add_child(_sprites)
+	_sprites.sprite_ready.connect(func(_model_id: String) -> void: queue_redraw())
 	_static_layer = Control.new()
 	_static_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_static_layer.show_behind_parent = true
@@ -312,7 +317,20 @@ func _draw() -> void:
 		var forward := (Vector2.from_angle(heading)*Vector2(1,TILT)).normalized()
 		var side := forward.orthogonal()
 		var radius := clampf(_scale()*1.5,5.0,14.0)
-		draw_colored_polygon(PackedVector2Array([point+forward*radius,point-forward*radius*0.65+side*radius*0.65,point-forward*radius*0.3,point-forward*radius*0.65-side*radius*0.65]),color)
+		var drawn_sprite := false
+		var model_id := str(actor.get("model_id",""))
+		if _sprites != null and SPRITES.fields_for(model_id) > 0:
+			var sprite := _sprites.get_sprite(model_id)
+			var length_px := _scale() * SPRITES.length_units(model_id) / SPRITES.HEX_LENGTH_UNITS
+			if sprite != null and length_px >= 12.0:
+				# Textur: Nase nach oben, ORTHO_SIZE Modelleinheiten auf TEXTURE_SIZE Pixel.
+				var factor := length_px / SPRITES.length_units(model_id) * SPRITES.ORTHO_SIZE / SPRITES.TEXTURE_SIZE
+				draw_set_transform(point,forward.angle()+PI*0.5,Vector2(factor,factor))
+				draw_texture(sprite,-Vector2(sprite.get_width(),sprite.get_height())*0.5)
+				draw_set_transform(Vector2.ZERO,0.0,Vector2.ONE)
+				draw_arc(point,maxf(length_px*0.6,8.0),0.0,TAU,24,Color(color,0.8 if selected else 0.35),2.0 if selected else 1.0,true)
+				drawn_sprite = true
+		if not drawn_sprite: draw_colored_polygon(PackedVector2Array([point+forward*radius,point-forward*radius*0.65+side*radius*0.65,point-forward*radius*0.3,point-forward*radius*0.65-side*radius*0.65]),color)
 		draw_string(ThemeDB.fallback_font,point+Vector2(10,-10),id,HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("b0c8d5"))
 	var course := get_course_line()
 	if course.size() == 2:
