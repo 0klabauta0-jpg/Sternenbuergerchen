@@ -1,0 +1,53 @@
+{
+	"schema_version": 1,
+	"enabled": true,
+	"human_height_m": 1.8,
+	"note": "Gebaeudemodelle der drei kleinen Aussenposten, nur Darstellung (keine Kollision, keine Sperre). Zuordnung ueber den Kartennamen (map_name) und die Haendler-Marke: das Gebaeude steht in JEDEM Einsatz auf dieser Karte. scale = Spielfigur-Hoehe in Einheiten / 1,8 m, je echtem Meter des Modells (GLB-Masse sind echte Meter). offset = Versatz der Gebaeudemitte von der Marke in Einheiten (x, z der Einsatzansicht). rotation_y_deg dreht die Tuerseite (Modell +Z) zur Marke. footprint_m = Grundflaeche des Modells in Metern (zur Geländehoehen-Probe). Unterkante liegt auf der tiefsten Ecke der Grundflaeche. door_height_m ist am Vorschaubild geschaetzt, nicht gemessen.",
+	"entries": [
+		{
+			"id": "muellers_farm",
+			"place_id": "muellers_farm",
+			"map_file_path": "res://maps/Ground_Mission01_32x32.json",
+			"map_name": "GM01 Frontier Hex 96x98",
+			"marker_id": "spawn_bravo",
+			"model": "res://art/tripo_models_20261124/aussenposten_muellers_farm_01.glb",
+			"scale": 0.2908,
+			"offset": [5.5, 0.0],
+			"rotation_y_deg": -90.0,
+			"max_offset": 14.0,
+			"footprint_m": [24.0, 22.15],
+			"door_height_m": 2.1,
+			"real_height_range": [5.0, 10.0]
+		},
+		{
+			"id": "shady_lab",
+			"place_id": "shady_lab",
+			"map_file_path": "res://maps/Ground_Mission02_128x128.json",
+			"map_name": "GM02_128",
+			"marker_id": "spawn_bravo",
+			"model": "res://art/tripo_models_20261124/aussenposten_shady_lab_01.glb",
+			"scale": 0.2908,
+			"offset": [4.8, 0.0],
+			"rotation_y_deg": -90.0,
+			"max_offset": 14.0,
+			"footprint_m": [20.0, 20.0],
+			"door_height_m": 2.1,
+			"real_height_range": [8.0, 13.0]
+		},
+		{
+			"id": "templanon",
+			"place_id": "templanon",
+			"map_file_path": "res://maps/windbruch_outpost.json",
+			"map_name": "windbruch_outpost",
+			"marker_id": "recon_altfeld",
+			"model": "res://art/tripo_models_20261124/aussenposten_templer_posten_01.glb",
+			"scale": 0.2908,
+			"offset": [4.8, 0.0],
+			"rotation_y_deg": -90.0,
+			"max_offset": 14.0,
+			"footprint_m": [20.0, 17.32],
+			"door_height_m": 2.1,
+			"real_height_range": [10.0, 16.0]
+		}
+	]
+}
