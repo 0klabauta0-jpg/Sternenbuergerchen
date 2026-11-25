@@ -424,10 +424,29 @@ func _operations_action_rects() -> Array[Rect2]:
 	if screen == null:
 		return []
 	var operations: Control = screen.get("_operations_presenter")
+	var rects: Array[Rect2] = []
 	if operations != null and operations.has_method("get_launch_action_rects"):
-		return operations.call("get_launch_action_rects")
-	var none: Array[Rect2] = []
-	return none
+		rects.append_array(operations.call("get_launch_action_rects"))
+	# Meldung 25.11.: Hinweiskarte und Hilfefenster deckten Knoepfe im Inhalt ab (Personal-Sortierung, Namen, Schiffswahl) und
+	# fingen dort die Maus ab. Alle sichtbaren, freigegebenen Knoepfe der Heimatbasis gelten deshalb als geschuetzt.
+	_append_button_rects(screen, rects)
+	return rects
+
+
+func _append_button_rects(node: Node, rects: Array[Rect2]) -> void:
+	for child: Node in node.get_children():
+		if child is BaseButton:
+			var button: BaseButton = child
+			if button.is_visible_in_tree() and not button.disabled:
+				var rect: Rect2 = button.get_global_rect()
+				var parent: Node = button.get_parent()
+				while parent != null and rect.has_area():
+					if parent is Control and (parent as Control).clip_contents:
+						rect = rect.intersection((parent as Control).get_global_rect())
+					parent = parent.get_parent()
+				if rect.has_area():
+					rects.append(rect)
+		_append_button_rects(child, rects)
 
 
 func _fit_popup_content() -> void:
