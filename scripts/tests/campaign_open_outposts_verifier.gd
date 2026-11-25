@@ -26,8 +26,11 @@ func _state_part() -> void:
 	var visits: Dictionary = Dictionary(JSON.parse_string(FileAccess.get_file_as_string(VISITS_PATH)))
 	_check(visits.has("trade_outpost") and visits.has("satellite_crash"), "A: open_outposts.json nennt Handelsaussenposten und Absturzstelle")
 	_check(String(cs.open_visit_scenario_id("satellite_crash")) == "" and String(cs.open_visit_scenario_id("trade_outpost")) == "", "A: frischer Stand: kein Ort hat ein offenes Besuchsszenario")
-	_check(not bool(cs.validate_location_visit("trade_outpost").get("ok", true)), "A: der Handelsaussenposten ist vor seinem Auftrag nicht anfliegbar (tutorial_locked)")
+	# Freigabe 25.11.2026: auch vor dem Auftrag ist der Handelsaussenposten als freier Besuch anfliegbar (frueher tutorial_locked); der Auftrag bleibt in der Kette.
+	_check(bool(cs.validate_location_visit("trade_outpost").get("ok", false)) and String(cs.free_visit_scenario_id("trade_outpost")) == "trade_outpost_open_visit", "A: der Handelsaussenposten ist vor seinem Auftrag als freier Besuch anfliegbar")
+	_check(String(cs.free_visit_scenario_id("satellite_crash")) == "satellite_crash_visit" and not Dictionary(cs.get_job_availability(true).get("outpost_recovery", {})).get("can_accept", true), "A: freier Besuch der Absturzstelle moeglich, outpost_recovery bleibt (wie vorher) nicht annehmbar")
 	var accepted: Dictionary = cs.apply_command({"contract_category": "singleplayer_campaign", "operation": "accept_job", "payload": {"job_id": "satellite_recovery"}, "request_id": "oo:accept"})
+	_check(bool(accepted.get("ok", false)) and String(cs.free_visit_scenario_id("satellite_crash")) == "" and String(cs.get_campaign_snapshot().jobs.satellite_recovery.scenario_id) == "satellite_recovery", "A: nach dem freien Besuch ist der Auftrag normal annehmbar; danach gilt am Ort nur sein Szenario (frisch, unveraendert)")
 	_check(bool(accepted.get("ok", false)) and String(cs.open_visit_scenario_id("satellite_crash")) == "", "A: mit angenommenem, noch nicht abgeschlossenem Auftrag bleibt der Ort an den Auftrag gebunden")
 	var skirmish: RefCounted = CAMPAIGN_STATE.new()
 	skirmish.configure({}, {}, false)
@@ -60,7 +63,7 @@ func _files_part() -> void:
 		ids.append(String(Dictionary(Array(vs.get("team_slots", [{}]))[0]).get("spawn_marker_id", "")))
 		var all_markers := true
 		for marker: String in ids: all_markers = all_markers and markers.contains('"%s"' % marker)
-		_check(all_markers and ids.has("trade_service"), "B: %s nutzt nur Marker, die die Karte hat, und hat den Haendler (trade_service)" % sid)
+		_check(all_markers and (ids.has("trade_service") or (loc == "relay_ridge" and ids.has("spawn_bravo"))), "B: %s nutzt nur Marker, die die Karte hat, und hat den Haendler (trade_service)" % sid)
 		# Nachbesserung W3: Ein friedlicher Besuch in der Kampagne hat kein Zeitlimit (0 = keins) - weder im Szenario noch im Katalogeintrag.
 		_check(float(sc.get("time_limit_seconds", 1.0)) <= 0.0, "B: %s hat kein Zeitlimit (friedlicher Besuch darf nicht als Niederlage enden)" % sid)
 	# Das bestehende Besuchsszenario des Handelsaussenpostens gehoert dem Skirmish und bleibt unveraendert (Limit 1200); die Kampagne nutzt ein eigenes.

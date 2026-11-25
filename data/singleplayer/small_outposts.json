@@ -1,9 +1,12 @@
 {
   "version": 1,
-  "note": "Handel 2a: kleine Aussenposten ohne Auftrag. Nicht im Spielstand; nur Freischaltung und Haendler-Marker.",
+  "note": "Handel 2a: kleine Aussenposten ohne Auftrag. Nicht im Spielstand; nur Haendler-Marker. Seit 25.11.2026 ohne Freischaltung: die drei Posten sind von Spielbeginn an anfliegbar. visit_trade_markers: Orte MIT Auftrag und freiem Besuch (open_outposts.json), an denen im freien Besuch am Marker gehandelt wird.",
   "locations": {
-    "muellers_farm": {"service_marker_id": "spawn_bravo", "service_radius_world": 256.0, "unlock_after_job_id": "outpost_recovery", "locked_hint": "Erst nach dem Auftrag am Handelsaußenposten"},
-    "shady_lab": {"service_marker_id": "spawn_bravo", "service_radius_world": 256.0, "unlock_after_job_id": "outpost_recovery", "locked_hint": "Erst nach dem Auftrag am Handelsaußenposten"},
-    "templanon": {"service_marker_id": "recon_altfeld", "service_radius_world": 256.0, "unlock_after_job_id": "outpost_recovery", "locked_hint": "Erst nach dem Auftrag am Handelsaußenposten"}
+    "muellers_farm": {"service_marker_id": "spawn_bravo", "service_radius_world": 256.0},
+    "shady_lab": {"service_marker_id": "spawn_bravo", "service_radius_world": 256.0},
+    "templanon": {"service_marker_id": "recon_altfeld", "service_radius_world": 256.0}
+  },
+  "visit_trade_markers": {
+    "relay_ridge": {"service_marker_id": "spawn_bravo", "service_radius_world": 256.0}
   }
 }

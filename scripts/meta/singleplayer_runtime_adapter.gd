@@ -287,6 +287,8 @@ func configure(flow: Node, screen: Control) -> void:
 	# Handel-Nachbesserung W3: friedlicher Besuch des Handelsaussenpostens in der Kampagne ohne Zeitlimit (0 = keins); das Skirmish-Szenario trade_outpost_visit bleibt.
 	if _campaign_mode:
 		catalog.append({"mission_id": "trade_outpost_open_visit", "mission_name": "Handelsaußenposten besuchen", "map_file_path": "res://maps/trade_outpost.json", "scenario_file_path": "res://data/mission_scenarios/trade_outpost_open_visit.json", "slot_count": 4, "time_limit_seconds": 0.0, "win_condition": "objective_capture"})
+		# Freier Besuch des Relaisgrats (25.11.2026, open_outposts.json): friedlich, ohne Zeitlimit.
+		catalog.append({"mission_id": "relay_ridge_visit", "mission_name": "Relaisgrat besuchen", "map_file_path": "res://maps/Ground_Mission02_128x128.json", "scenario_file_path": "res://data/mission_scenarios/relay_ridge_visit.json", "slot_count": 4, "time_limit_seconds": 0.0, "win_condition": "objective_capture"})
 	# Windbruch-Garnison: das freie Rebellenlager (open_garrisons.json), ohne Zeitlimit; ohne Eintrag kann der Anflug es nicht waehlen.
 	if _campaign_mode:
 		var garrisons: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/open_garrisons.json"))
@@ -1207,8 +1209,8 @@ func _service_context(craft_id: String) -> Dictionary:
 			return local
 	# Gueter-Dreieck (24.11.2026): an den drei kleinen Aussenposten (small_outposts.json) gilt der Handelsdienst, sobald das Schiff gelandet und
 	# nah genug am Haendler-Marker steht (service_marker_id, service_radius_world). Nur Handel: kein Tanken, keine Reparatur, kein Frachtaufzug.
-	if location == "mission" and _campaign != null and not _campaign.small_outpost_entry(place_id).is_empty():
-		var post: Dictionary = _campaign.small_outpost_entry(place_id)
+	if location == "mission" and _campaign != null and not _campaign.trade_marker_entry(place_id).is_empty():
+		var post: Dictionary = _campaign.trade_marker_entry(place_id)
 		var post_mission: Node = _flow.call("get_mission_for_craft", craft_id)
 		var post_controller: Node = post_mission.get_node_or_null("TacticalController") if post_mission != null else null
 		if post_controller == null or not bool(post_controller.call("_is_parked_campaign_dropship", craft_id)): return {}
@@ -2434,6 +2436,9 @@ func _destination_scenario_id(selected: Dictionary, location_id: String, selecte
 		if not visit.is_empty(): return visit
 		var garrison: String = String(_campaign.open_garrison_scenario_id(location_id))
 		if not garrison.is_empty(): return garrison
+		# Freigabe 25.11.2026: ohne Auftrag an einem Ort mit freiem Besuchsszenario (open_outposts.json) gilt auch vor dem Story-Auftrag das friedliche Besuchsszenario.
+		var free_visit: String = String(_campaign.free_visit_scenario_id(location_id))
+		if not free_visit.is_empty(): return free_visit
 	return String(Dictionary(selected.locations[location_id]).scenario_file_path).get_file().get_basename()
 
 ## Handel H2: Ankaufspreise der Station Polisa fuer die Stationsanzeige: die Preise der Warenboerse (Benit) ueber den Handelsdaten (Erz, Bergungsgut).
@@ -3190,7 +3195,13 @@ func _built_home_pad_ids() -> Array:
 
 func _selected_destination_is_free_visit() -> bool:
 	var campaign: Dictionary = _campaign.get_campaign_snapshot()
-	return bool(Dictionary(campaign.locations.get(String(campaign.selected_location_id), {})).get("free_visit", false))
+	var destination := String(campaign.selected_location_id)
+	if bool(Dictionary(campaign.locations.get(destination, {})).get("free_visit", false)): return true
+	# Freigabe 25.11.2026: auch die Einfuehrungsstufe 0 haelt keinen freien Besuch auf (kleine Posten, Orte mit Besuchsszenario, Windbruch), solange der
+	# gewaehlte Auftrag nicht an diesem Ort liegt (dann bleibt der gefuehrte erste Auftrag mit Annehmen und Boarding).
+	var selected_job: Dictionary = Dictionary(campaign.jobs).get(String(campaign.get("selected_job_id", "")), {})
+	if not selected_job.is_empty() and String(selected_job.get("location_id", "")) == destination: return false
+	return not _campaign.small_outpost_entry(destination).is_empty() or not String(_campaign.free_visit_scenario_id(destination)).is_empty() or not String(_campaign.open_garrison_scenario_id(destination)).is_empty()
 
 
 func _craft_grounded_at_home(craft_id: String) -> bool:

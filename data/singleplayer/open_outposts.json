@@ -1,4 +1,5 @@
 {
   "trade_outpost": "trade_outpost_open_visit",
-  "satellite_crash": "satellite_crash_visit"
+  "satellite_crash": "satellite_crash_visit",
+  "relay_ridge": "relay_ridge_visit"
 }
