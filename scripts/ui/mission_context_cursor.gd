@@ -25,7 +25,7 @@ func _ready() -> void:
 	var column:=VBoxContainer.new();_objective_panel.add_child(column)
 	_objective_text=Label.new();_objective_text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;_objective_text.custom_minimum_size.x=330;_objective_text.add_theme_font_size_override("font_size",18);column.add_child(_objective_text)
 	_objective_progress=ProgressBar.new();_objective_progress.custom_minimum_size.y=12;_objective_progress.show_percentage=false;column.add_child(_objective_progress)
-	_objective_action=Button.new();_objective_action.text="Daten sichern vorbereiten";_objective_action.custom_minimum_size.y=34;column.add_child(_objective_action)
+	_objective_action=Button.new();_objective_action.text="Daten sichern vorbereiten";_objective_action.custom_minimum_size.y=34;_objective_action.action_mode=BaseButton.ACTION_MODE_BUTTON_PRESS;column.add_child(_objective_action)
 	_objective_action.pressed.connect(func(): queue_interaction("satellite_data"))
 	_objective_panel.hide()
 func _process(delta: float) -> void:
@@ -53,10 +53,10 @@ func refresh_at(pointer: Vector2) -> Dictionary:
 	_target=ACTIONS.choose(pointer,candidates)
 	if _target.is_empty(): _clear(); return {}
 	var blocked:=bool(_target.get("blocked",false))
-	_hint.text=String(_target.label)+(" · gesperrt" if blocked else " · Rechtsklick")
+	_hint.text=String(_target.label)+(" · gesperrt" if blocked else (" · Rechtsklick" if _target.kind=="ship" else " · Linksklick"))
 	if bool(_target.get("complete",false)): _hint.text="Daten gesichert · zur Basis zurückbringen" if String(_target.id)=="satellite_data" else "Aktion abgeschlossen"
 	elif blocked: _hint.text+="\nAktion derzeit nicht verfügbar"
-	elif _target.kind=="interaction" and not bool(_target.entry.get("can_use_now",false)): _hint.text+=" → Annäherung & Sichern, dann GO"
+	elif _target.kind=="interaction" and not bool(_target.entry.get("can_use_now",false)): _hint.text=String(_target.label)+": annähern, dann Linksklick → dann GO"
 	elif _target.kind=="interaction": _hint.text+=" → dann GO"
 	_hint.position=pointer+Vector2(18,22); _hint.show()
 	Input.set_default_cursor_shape(Input.CURSOR_FORBIDDEN if blocked else Input.CURSOR_POINTING_HAND); _owns_cursor=true
@@ -81,13 +81,15 @@ func queue_interaction(id: String) -> Dictionary:
 
 func update_objective_feedback() -> void:
 	if _objective_panel==null:return
-	_objective_panel.hide()
-	if not bool(_controller.get("_tactical_ui_visible")) or bool(_controller.get("_character_overlay_open")):return
+	# Nicht bei jeder Aktualisierung hide()/show(): das Verstecken bricht einen gedrueckten Knopf ab.
+	if not bool(_controller.get("_tactical_ui_visible")) or bool(_controller.get("_character_overlay_open")):
+		_hide_objective_panel();return
 	var satellite:Dictionary={}
 	for entry:Dictionary in _controller.call("get_mission_interaction_runtime_use_state_snapshot").get("interactions",[]):
 		if String(entry.get("interaction_id",""))=="satellite_data":satellite=entry;break
-	if satellite.is_empty():return
-	_objective_panel.show()
+	if satellite.is_empty():
+		_hide_objective_panel();return
+	if not _objective_panel.visible: _objective_panel.show()
 	_objective_panel.position=Vector2(maxf((get_viewport().get_visible_rect().size.x-350)*.5,8),128)
 	_objective_panel.size.x=350
 	var complete:bool=bool(satellite.get("complete",false)) or String(satellite.get("runtime_use_status",""))=="complete"
@@ -116,13 +118,33 @@ func update_objective_feedback() -> void:
 		if waypoint!=null and String(intent.get("interaction_id",""))=="satellite_data" and String(waypoint.status) in ["pending","active"]:
 			_objective_text.text="Datenaufnahme vorbereitet · GO drücken." if String(waypoint.status)=="pending" else "Trupp nähert sich / Datenaufnahme läuft."
 		else:
-			_objective_text.text="Satellitendaten bergen\nVom begehbaren Nachbarfeld bedienen. Nicht auf das Wrack laufen."
+			_objective_text.text="Daten sichern: annähern, dann Linksklick auf den Marker.\nVom begehbaren Nachbarfeld bedienen. Nicht auf das Wrack laufen."
 
+func _hide_objective_panel() -> void:
+	if _objective_panel!=null and _objective_panel.visible: _objective_panel.hide()
+var _swallow_left_release := false
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_RIGHT and event.pressed and not event.shift_pressed:
-		if activate_at(event.position).get("handled",false): get_viewport().set_input_as_handled()
+	if not (event is InputEventMouseButton): return
+	var button_event:=event as InputEventMouseButton
+	if button_event.button_index==MOUSE_BUTTON_LEFT and not button_event.pressed:
+		# Das Loslassen zu einem verbrauchten Linksklick nicht an die Auswahl weiterreichen.
+		if _swallow_left_release:
+			_swallow_left_release=false; get_viewport().set_input_as_handled()
+		return
+	if not button_event.pressed or button_event.shift_pressed: return
+	if button_event.button_index==MOUSE_BUTTON_LEFT:
+		# Auftragsmarker: Linksklick loest die Aktion aus und verbraucht den Klick (Auswahl bleibt).
+		var target:=refresh_at(button_event.position)
+		if target.is_empty() or String(target.get("kind",""))!="interaction": return
+		if activate_at(button_event.position).get("handled",false):
+			_swallow_left_release=true; get_viewport().set_input_as_handled()
+	elif button_event.button_index==MOUSE_BUTTON_RIGHT:
+		# Nur das eigene Schiff (Einsteigen) bleibt am Rechtsklick; sonst gilt der normale Bewegungsbefehl.
+		var target:=refresh_at(button_event.position)
+		if target.is_empty() or String(target.get("kind",""))!="ship": return
+		if activate_at(button_event.position).get("handled",false): get_viewport().set_input_as_handled()
 func _clear() -> void:
-	if _objective_panel!=null and not bool(_controller.get("_tactical_ui_visible")):_objective_panel.hide()
+	if _objective_panel!=null and not bool(_controller.get("_tactical_ui_visible")):_hide_objective_panel()
 	if _hint!=null: _hint.hide()
 	if _owns_cursor: Input.set_default_cursor_shape(Input.CURSOR_ARROW); _owns_cursor=false
 func _exit_tree() -> void: _clear()
