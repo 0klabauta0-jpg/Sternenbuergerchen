@@ -63,7 +63,7 @@ func _files_part() -> void:
 		ids.append(String(Dictionary(Array(vs.get("team_slots", [{}]))[0]).get("spawn_marker_id", "")))
 		var all_markers := true
 		for marker: String in ids: all_markers = all_markers and markers.contains('"%s"' % marker)
-		_check(all_markers and (ids.has("trade_service") or (loc == "relay_ridge" and ids.has("spawn_bravo"))), "B: %s nutzt nur Marker, die die Karte hat, und hat den Haendler (trade_service)" % sid)
+		_check(all_markers and (ids.has("trade_service") or (loc == "relay_ridge" and ids.has("spawn_enemy_patrol"))), "B: %s nutzt nur Marker, die die Karte hat, und hat den Haendler (trade_service)" % sid)
 		# Nachbesserung W3: Ein friedlicher Besuch in der Kampagne hat kein Zeitlimit (0 = keins) - weder im Szenario noch im Katalogeintrag.
 		_check(float(sc.get("time_limit_seconds", 1.0)) <= 0.0, "B: %s hat kein Zeitlimit (friedlicher Besuch darf nicht als Niederlage enden)" % sid)
 	# Das bestehende Besuchsszenario des Handelsaussenpostens gehoert dem Skirmish und bleibt unveraendert (Limit 1200); die Kampagne nutzt ein eigenes.

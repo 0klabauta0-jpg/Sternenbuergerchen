@@ -174,12 +174,12 @@ func _case_unlock() -> void:
 	_finish_job("outpost_recovery")
 	for id: String in PLACES:
 		_check(bool(owner.validate_location_visit(id).get("ok", false)), "Freigabe %s: nach outpost_recovery weiter anfliegbar" % id)
-	# Freigabe 25.11.2026: der Relaisgrat hat jetzt einen freien Besuch (relay_ridge_visit) und ist ohne Auftrag anfliegbar; mit Handel am Marker spawn_bravo.
+	# Freigabe 25.11.2026: der Relaisgrat hat jetzt einen freien Besuch (relay_ridge_visit) und ist ohne Auftrag anfliegbar; mit Handel am Marker spawn_enemy_patrol.
 	var fresh: RefCounted = CAMPAIGN.new()
 	fresh.configure()
 	_check(bool(fresh.validate_location_visit("relay_ridge").get("ok", false)) and String(fresh.free_visit_scenario_id("relay_ridge")) == "relay_ridge_visit", "Freigabe: relay_ridge ist direkt nach Spielstart anfliegbar (freier Besuch relay_ridge_visit)")
 	var relay_trade: Dictionary = fresh.trade_marker_entry("relay_ridge")
-	_check(String(relay_trade.get("service_marker_id", "")) == "spawn_bravo" and is_equal_approx(float(relay_trade.get("service_radius_world", 0.0)), 256.0), "Freigabe: relay_ridge hat im freien Besuch den Haendler-Marker spawn_bravo (Radius 256) (%s)" % str(relay_trade))
+	_check(String(relay_trade.get("service_marker_id", "")) == "spawn_enemy_patrol" and is_equal_approx(float(relay_trade.get("service_radius_world", 0.0)), 256.0), "Freigabe: relay_ridge hat im freien Besuch den Haendler-Marker spawn_enemy_patrol (Radius 256) (%s)" % str(relay_trade))
 	_check(fresh.trade_marker_entry("satellite_crash").is_empty() and fresh.trade_marker_entry("distress_orbit").is_empty() and not fresh.trade_marker_entry("templanon").is_empty(), "Freigabe: Handels-Marker nur fuer die drei Posten und den Relaisgrat")
 	var chain: Array = []
 	var availability: Dictionary = fresh.get_job_availability(true)

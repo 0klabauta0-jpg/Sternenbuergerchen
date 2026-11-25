@@ -7,6 +7,6 @@
     "templanon": {"service_marker_id": "recon_altfeld", "service_radius_world": 256.0}
   },
   "visit_trade_markers": {
-    "relay_ridge": {"service_marker_id": "spawn_bravo", "service_radius_world": 256.0}
+    "relay_ridge": {"service_marker_id": "spawn_enemy_patrol", "service_radius_world": 256.0}
   }
 }
