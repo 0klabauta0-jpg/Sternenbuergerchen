@@ -327,6 +327,64 @@ func set_selected_ship(craft_id: String) -> void:
 	_selected_ship_id = craft_id
 	queue_redraw()
 
+var _ship_names: Dictionary = {}
+var _ship_hidden: Array = []
+
+## Anzeigenamen der Spielerschiffe (craft_id -> Name); "hidden" sind Schiffe ohne Marke (z. B. der Stationsshuttle).
+func set_ship_names(names: Dictionary, hidden: Array = []) -> void:
+	if names == _ship_names and hidden == _ship_hidden: return
+	_ship_names = names.duplicate()
+	_ship_hidden = hidden.duplicate()
+	queue_redraw()
+
+## Schiffsmarken im Leinwandraum: [{craft_id, name, point, rect, at_site}]. Unterwegs sitzt die Marke an der Schiffsposition,
+## an einem Ort (gelandet/am Zielort) leicht versetzt neben dem Ortssymbol, damit dieses klickbar bleibt.
+func get_ship_marks() -> Array:
+	var marks: Array = []
+	if _world == null: return marks
+	var routes: Dictionary = _travel.get("routes", {String(_travel.get("craft_id", "")): _travel})
+	var ids: Array = routes.keys()
+	ids.sort()
+	var slots := {}
+	for id in ids:
+		var key := String(id)
+		if key.is_empty() or key in _ship_hidden: continue
+		var route: Dictionary = routes[id]
+		var phase := String(route.get("phase", "grounded"))
+		var point := Vector2.ZERO
+		var offset := Vector2(10.0, -10.0)
+		var at_site := phase in ["grounded", "surface"]
+		var slot_key := "space"
+		if at_site:
+			slot_key = String(route.get("location_id", ""))
+			if slot_key.is_empty(): slot_key = "homebase"
+			if _body_for_location(slot_key).is_empty() and not _location_buttons.has(slot_key): continue
+			point = _location_anchor(slot_key)
+			offset = Vector2(MIN_LOCATION_DIAMETER_PX * 0.5 + 2.0, MIN_LOCATION_DIAMETER_PX * 0.5 + 4.0)
+		else:
+			var position: Variant = route.get("position", [])
+			if not position is Array or position.size() != 2: continue
+			point = map_to_screen(GRID.pair(position))
+		var slot := int(slots.get(slot_key, 0))
+		slots[slot_key] = slot + 1
+		var center := point + offset + Vector2(0.0, 16.0 * slot)
+		var text := String(_ship_names.get(key, key))
+		var text_size := ThemeDB.fallback_font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_FONT_SIZE)
+		marks.append({"craft_id": key, "name": text, "point": center, "at_site": at_site,
+			"rect": Rect2(center + Vector2(8.0, -9.0), Vector2(text_size.x + 10.0, 18.0))})
+	return marks
+
+func _draw_ship_marks() -> void:
+	for mark: Dictionary in get_ship_marks():
+		var center: Vector2 = mark.point
+		var color := Color("f2c47c") if String(mark.craft_id) == _selected_ship_id else Color("8fe8f2")
+		draw_colored_polygon(PackedVector2Array([center + Vector2(0, -6), center + Vector2(6, 0), center + Vector2(0, 6), center + Vector2(-6, 0)]), color)
+		draw_polyline(PackedVector2Array([center + Vector2(0, -6), center + Vector2(6, 0), center + Vector2(0, 6), center + Vector2(-6, 0), center + Vector2(0, -6)]), Color("060e18"), 1.0)
+		var rect: Rect2 = mark.rect
+		draw_rect(rect, Color(0.024, 0.055, 0.094, 0.85), true)
+		draw_rect(rect, color, false, 1.0)
+		draw_string(ThemeDB.fallback_font, rect.position + Vector2(5.0, 13.0), String(mark.name), HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_FONT_SIZE, Color("ebfaff"))
+
 
 func orbit_marker_at(point: Vector2) -> Dictionary:
 	var cell := screen_to_hex(point)
@@ -565,6 +623,7 @@ func _draw() -> void:
 			draw_string(ThemeDB.fallback_font, point + Vector2(-5, -22), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("f2c47c"))
 	_draw_location_labels()
 	_draw_home_marker()
+	_draw_ship_marks()
 	if _selection_active and _selection_start.distance_to(_selection_end) >= 6.0:
 		var box := Rect2(_selection_start, _selection_end - _selection_start).abs()
 		draw_rect(box, Color(0.3, 0.85, 0.95, 0.18), true)

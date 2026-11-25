@@ -9,9 +9,16 @@ const WING_PANEL = preload("res://scripts/ui/space_wing_panel.gd")
 const GRID = preload("res://scripts/core/strategic_hex_grid.gd")
 const SERVICE_ROUTE_PROJECTION = preload("res://scripts/ui/polisa_service_route_projection.gd")
 const TANKER_PANEL = preload("res://scripts/ui/emergency_tanker_panel.gd")
+const MODE_BUTTON_WIDTH := 92.0
+const MODE_BUTTON_HEIGHT := 26.0
 ## Klick auf einen Orbitmarker merkt das Ziel nur vor (orbit_previewed); erst "Start" fliegt los und sendet orbit_requested.
 signal orbit_previewed(orbit_id: String, marker_id: String)
 signal orbit_requested(orbit_id: String, marker_id: String)
+## Selbst fliegen: Die Ansicht ist nach dem Start von selbst auf die Orbit-Karte gewechselt.
+signal orbit_view_opened(craft_id: String)
+var _flight_status: Label
+var _arrival_note := ""
+var _orbit_view_wanted := 0
 var _provider: Callable
 var _commands: Callable
 var _area_provider: Callable
@@ -188,6 +195,10 @@ func _build() -> void:
 	system_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	system_column.add_theme_constant_override("separation", 6)
 	body.add_child(system_column)
+	_flight_status = _label("", 16, Color("f2ca86"))
+	_flight_status.name = "FlightStatus"
+	_flight_status.hide()
+	system_column.add_child(_flight_status)
 	var map_views := HBoxContainer.new()
 	map_views.name = "SpaceMapViews"
 	system_column.add_child(map_views)
@@ -410,6 +421,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	_status.text = _phase_text(travel, preparation)
 	var service_status: String = SERVICE_ROUTE_PROJECTION.describe(Dictionary(travel.get("service_shuttle", {})), Dictionary(travel.get("service_shuttle_home", {})), Dictionary(travel.get("service_shuttle_dispatch", {})))
 	if not service_status.is_empty(): _status.text += "\n" + service_status
+	_update_flight_status(travel, phase)
 	_abort.visible = phase == "quantum" or (phase == "approach" and bool(preparation.get("cancel_available", false)))
 	_abort.text = "Anflug abbrechen" if phase == "approach" else "Sprung abbrechen"
 	var preparing := phase == "approach" and String(preparation.get("status", "")) in ["preparing_resources", "ready"]
@@ -470,6 +482,67 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	_land.visible = phase == "orbit" and orbit == "moon_orbit"
 	_boundary.visible = _approach.visible or phase == "approach"
 	_error.visible = not _error.text.is_empty()
+	_try_orbit_view()
+
+## Namen der Spielerschiffe (craft_id -> Name) und Schiffe ohne Marke (nur Stationsshuttle).
+func _ship_names() -> Array:
+	var names := {}
+	var hidden: Array = []
+	for craft: Variant in Array(_runtime.get("crafts", [])):
+		if not craft is Dictionary: continue
+		var id := String(craft.get("craft_id", ""))
+		if id.is_empty(): continue
+		if bool(craft.get("service_only", false)): hidden.append(id)
+		else: names[id] = String(craft.get("display_name", id))
+	return [names, hidden]
+
+func _place_name(location_id: String) -> String:
+	if location_id.is_empty(): return "Ziel"
+	return DISPLAY.location_name(location_id, Dictionary(Dictionary(_runtime.get("campaign", {})).get("locations", {})).get(location_id, {}))
+
+func _marker_short(route: Dictionary, target: bool) -> String:
+	var orbit_id := String(route.get("target_orbit_id" if target else "orbit_id", ""))
+	if orbit_id.is_empty(): return "Weltraum"
+	var marker_id := String(route.get("target_orbit_marker_id" if target else "orbit_marker_id", GRID.ORBIT_MARKER_IDS[0]))
+	return "%s OM-%s" % [_orbit_name(orbit_id), marker_id.get_slice("_", 1)]
+
+## Statuszeile ueber der Karte: welches Schiff fliegt gerade wohin (Automatik und Handflug); danach der Ankunftshinweis.
+func _update_flight_status(travel: Dictionary, phase: String) -> void:
+	if _flight_status == null: return
+	var named := _ship_names()
+	var names: Dictionary = named[0]
+	var hidden: Array = named[1]
+	_canvas.call("set_ship_names", names, hidden)
+	var routes: Dictionary = travel.get("routes", {})
+	if routes.is_empty(): routes = {String(travel.get("craft_id", "")): travel}
+	var active := String(travel.get("craft_id", ""))
+	var transit: Dictionary = Dictionary(travel.get("orbit_transit", {}))
+	var by_hand := not bool(travel.get("orbit_transit_automatic", true))
+	var lines := PackedStringArray()
+	var ids: Array = routes.keys()
+	ids.sort()
+	for id: Variant in ids:
+		var key := String(id)
+		if key.is_empty() or key in hidden: continue
+		var route: Dictionary = routes[id]
+		var name := String(names.get(key, key))
+		match String(route.get("phase", "grounded")):
+			"quantum":
+				lines.append("%s fliegt: %s → %s" % [name, _marker_short(route, false), _marker_short(route, true)])
+			"approach":
+				var place := String(route.get("location_id", ""))
+				if place.is_empty(): place = String(Dictionary(_runtime.get("campaign", {})).get("selected_location_id", ""))
+				lines.append("%s fliegt: %s → %s" % [name, _marker_short(route, false), _place_name(place)])
+			"orbit":
+				if key == active and String(transit.get("status", "")) in ["flying", "starting", "manual"]:
+					var how := " (von Hand)" if by_hand else ""
+					var place := _place_name(String(transit.get("location_id", "")))
+					if transit.get("direction") == "outbound": lines.append("%s fliegt%s: %s → Weltraum" % [name, how, place])
+					else: lines.append("%s fliegt%s: %s → %s" % [name, how, _marker_short(route, false), place])
+	if phase in ["quantum", "approach", "grounded", "surface"]: _arrival_note = ""
+	if phase == "orbit" and not _arrival_note.is_empty(): lines.append(_arrival_note)
+	_flight_status.text = "\n".join(lines)
+	_flight_status.visible = not lines.is_empty()
 
 func _update_fuel_help() -> void:
 	if _fuel_help == null: return
@@ -597,7 +670,9 @@ func _build_course_box(parent: VBoxContainer) -> void:
 	_mode_row.name = "OrbitModeRow"
 	_mode_row.add_theme_constant_override("separation", 4)
 	_course_box.add_child(_mode_row)
-	var caption := _label("Durchflug:", 14, APP_THEME.MUTED)
+	var caption := _label("Flug:", 12, APP_THEME.MUTED)
+	caption.autowrap_mode = TextServer.AUTOWRAP_OFF
+	caption.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_mode_row.add_child(caption)
 	var group := ButtonGroup.new()
 	_mode_auto = _button("OrbitModeAutomatic", "Automatik", func(): _set_orbit_mode(true))
@@ -607,9 +682,11 @@ func _build_course_box(parent: VBoxContainer) -> void:
 	for button: Button in [_mode_auto, _mode_manual]:
 		button.toggle_mode = true
 		button.button_group = group
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.size_flags_stretch_ratio = 1.0
-		button.custom_minimum_size.x = 0
+		# Schmal: eine Zeile, kleine Schrift, nur so breit wie der Text (beide gleich breit), so niedrig wie noetig.
+		button.add_theme_font_size_override("font_size", 12)
+		button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		button.custom_minimum_size = Vector2(MODE_BUTTON_WIDTH, MODE_BUTTON_HEIGHT)
 		_mode_row.add_child(button)
 	_mode_auto.button_pressed = true
 	_course_start = _button("StartCourse", "Start", _start_pending)
@@ -758,6 +835,9 @@ func _update_arrival(phase: String) -> void:
 			_outbound_hint_key = hint_key
 			_error.text = "Abgehoben. Fliege auf der Orbit-Karte nach unten ins Weltall, dann kannst du über die Sternkarte weiterfliegen – oder stelle oben auf „Automatisch“."
 			_error.add_theme_color_override("font_color", Color("c4d7de"))
+			_arrival_note = _error.text
+			# Abflug im Handflug: gleich auf die Orbit-Karte, dort wird nach unten ins Weltall geflogen.
+			_request_orbit_view()
 	elif phase != "orbit":
 		_outbound_hint_key = ""
 	if not _open_orbit_on_arrival: return
@@ -771,6 +851,7 @@ func _update_arrival(phase: String) -> void:
 			# Einmal je Ankunft im Handflug: Der Spieler soll nicht ratlos im Orbit stehen.
 			_error.text = "Im Orbit angekommen. Öffne „Orbit ansehen“ und klicke auf den Planeten oben – oder stelle oben auf „Automatisch“."
 			_error.add_theme_color_override("font_color", Color("c4d7de"))
+			_arrival_note = _error.text
 		_show_orbit_view()
 		if _orbit_visible or _arrival_attempts > 40: _open_orbit_on_arrival = false
 	elif phase in ["grounded", "surface", "approach"]:
@@ -878,8 +959,27 @@ func _begin_approach() -> void:
 	var runtime: Dictionary = _provider.call() if _provider.is_valid() else _runtime
 	_send("space_begin_approach", {"craft_id": _craft_id(), "location_id": String(Dictionary(runtime.get("campaign", {})).get("selected_location_id", ""))})
 	# Selbst fliegen: nach "Anflug starten" gleich die Orbit-Ansicht zeigen, statt ueber den Durchflug zu warten.
-	if _error.text.is_empty() and not bool(Dictionary(_runtime.get("space_travel", {})).get("orbit_transit_automatic", true)) and not _orbit_craft_id.is_empty():
-		_show_orbit_view()
+	if _error.text.is_empty(): _request_orbit_view()
+
+## Selbst fliegen: nach erfolgreichem Start (Anflug oder Abflug) von selbst auf die Orbit-Karte wechseln. Das Schiff, das fliegt,
+## wird dort gewaehlt (auch wenn der Spieler vorher keins gewaehlt hat); steht der Orbitbereich noch nicht bereit, versucht es
+## die Karte in den naechsten Takten erneut. Bei "Automatik" bleibt die Ansicht, wo sie ist.
+func _request_orbit_view() -> void:
+	var travel: Dictionary = _runtime.get("space_travel", {})
+	var craft_id := String(travel.get("craft_id", ""))
+	if bool(travel.get("orbit_transit_automatic", true)) or craft_id.is_empty(): return
+	_orbit_craft_id = craft_id
+	_orbit_availability_signature = ""
+	_orbit_view_wanted = 100
+	_try_orbit_view()
+
+func _try_orbit_view() -> void:
+	if _orbit_view_wanted <= 0: return
+	_orbit_view_wanted -= 1
+	if not _orbit_visible: _show_orbit_view()
+	if _orbit_visible:
+		_orbit_view_wanted = 0
+		orbit_view_opened.emit(_orbit_craft_id)
 
 func _send(operation: String, payload: Dictionary = {}) -> void:
 	if not _commands.is_valid():
