@@ -269,3 +269,30 @@ func _json_issue(value: Variant,path: String,depth: int = 0) -> String:
     if not issue.is_empty(): return issue
    return ""
  return path + ":" + type_string(typeof(value))
+
+
+## Fall b) Handflug (Vorgabe im Spiel, ohne Wahl): das Schiff steht nach dem Sprung im Eintrittsband unten, der Anflug wird abgelehnt (not_at_approach_gate);
+## dann fliegt der Pruefer es mit dem Bewegungsbefehl der Orbit-Karte (space_move) zu einer Torzelle am Planetenrand und nimmt den Anflug erst bei der Ankunft an.
+## Fall a) Automatisch steht im Elternablauf (ausdruecklich eingestellt); mit ORBIT_TEST_AUTOMATIC=1 faehrt auch dieser Pruefer so.
+func _begin_orbit_approach(scenario_id: String, destination: String) -> Dictionary:
+ if not bool(_runtime.get("_surface_orbit_path_enabled")) or OS.get_environment("ORBIT_TEST_AUTOMATIC") == "1":
+  return await super._begin_orbit_approach(scenario_id, destination)
+ _check(not bool(_space().get("orbit_transit_automatic", true)), scenario_id + " Handflug ist ohne Wahl die Vorgabe")
+ var early: Dictionary = _screen.call("request_operation", "space_begin_approach", {"craft_id": _craft_id, "location_id": destination, "request_id": "hand:early:" + scenario_id + _launch_tag})
+ _check(not bool(early.get("ok", false)) and String(early.get("reason", "")) == "not_at_approach_gate", scenario_id + " Handflug: Anflug im Eintrittsband unten wird abgelehnt (%s)" % str(early))
+ var orbit_id := String(_space().get("orbit_id", ""))
+ var body_id := String(Dictionary(Dictionary(_space().get("orbits", {})).get(orbit_id, {})).get("body_id", ""))
+ var gates: Array = preload("res://scripts/mission/orbit_approach_layout.gd").gate_cells(body_id)
+ if gates.is_empty(): _check(false, scenario_id + " Handflug: Torzellen vorhanden"); return {"ok": false, "reason": "no_gate_cells"}
+ var target: Vector2i = preload("res://scripts/core/strategic_hex_grid.gd").from_offset(gates[gates.size() / 2])
+ var move: Dictionary = _runtime.call("request_operation", "space_move", {"craft_id": _craft_id, "target_hex": target, "request_id": "hand:move:" + scenario_id + _launch_tag})
+ _check(bool(move.get("ok", false)), scenario_id + " Handflug: Bewegung zur Torzelle angenommen (%s)" % str(move))
+ var state := {"frames": 0, "result": {}}
+ var predicate := func() -> bool:
+  state.frames += 1
+  if state.frames % 30 != 0: return false
+  var attempt: Dictionary = _screen.call("request_operation", "space_begin_approach", {"craft_id": _craft_id, "location_id": destination, "request_id": "hand:try:%d:%s%s" % [state.frames, scenario_id, _launch_tag]})
+  state.result = attempt
+  return bool(attempt.get("ok", false))
+ var arrived: bool = await _wait(predicate, 120000, scenario_id + " Handflug: Schiff erreicht die Torzelle, danach wird der Anflug angenommen")
+ return state.result if arrived else {"ok": false, "reason": "gate_not_reached", "last": state.result}
