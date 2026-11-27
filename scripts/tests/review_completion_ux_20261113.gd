@@ -149,8 +149,7 @@ func _run() -> void:
 	root.add_child(main_menu)
 	await process_frame
 	main_menu._on_campaign_pressed()
-	check(not main_menu.get("_campaign_continue_button").disabled and String(main_menu.get("_campaign_dialog").dialog_text).contains("Basisstand"), "actual main menu uses same saved-state projection")
-	main_menu.get("_campaign_dialog").hide()
+	check(not main_menu.get("_campaign_continue_button").disabled and String(main_menu.get_main_menu_snapshot().continue_info).contains("Heimatbasis"), "actual main menu uses same saved-state projection")
 	var corrupt := FileAccess.open(ACTIVE.DEFAULT_PATH, FileAccess.WRITE)
 	corrupt.store_string("{broken UX fixture")
 	corrupt.close()
@@ -158,7 +157,6 @@ func _run() -> void:
 	check(main_menu.get("_campaign_continue_button").disabled and not main_menu.get("_campaign_home_button").disabled, "real corrupt active disables Continue while preserving explicit home recovery")
 	main_menu._on_campaign_continue_pressed()
 	check(main_menu.routed.is_empty() and FileAccess.get_file_as_string(ACTIVE.DEFAULT_PATH) == "{broken UX fixture", "revalidation neither routes nor changes corrupted artifact")
-	main_menu.get("_campaign_dialog").hide()
 	main_menu.free()
 	menu.close_menu()
 	current_scene = null

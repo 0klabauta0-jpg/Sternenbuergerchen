@@ -160,7 +160,7 @@ func _test_real_new_roster_button_preserves_failure_state() -> void:
 	await process_frame
 	await process_frame
 	menu.ensure_start_roster_exists(original_seed, 20)
-	var button := menu.get_node("MenuRail/MenuMargin/MenuVBox/MenuButtons/NewRosterButton") as Button
+	var button := menu.get_node("TeamsScreen/TeamsMargin/TeamsVBox/TeamsActionRow/NewRosterButton") as Button
 	var status_label := menu.get_node("MenuRail/MenuMargin/MenuVBox/StatusLabel") as Label
 	var archive_blocker: String = "%s/archive" % path.get_base_dir()
 	if not _write_text(archive_blocker, "review46 owned button archive blocker"):
@@ -183,7 +183,7 @@ func _test_real_new_roster_button_preserves_failure_state() -> void:
 	_check(String(failed_snapshot.get("seed", "")) == original_seed, "Failed actual button reset retains the original displayed roster")
 	_check(FileAccess.get_file_as_bytes(path) == before_bytes, "Failed actual button reset preserves every original save byte")
 	_check(failed_editor == before_editor, "Failed actual button reset leaves the complete existing editor snapshot unchanged")
-	_check(status_label.text == "Roster save failed", "Actual button caller keeps the reset failure visible in the normal status label")
+	_check(status_label.text == "Team konnte nicht gespeichert werden.", "Actual button caller keeps the reset failure visible in the normal status label")
 	_check(bool(failed_snapshot.get("reset_confirmation_pending", false)), "Actual button caller keeps the failed confirmation available for retry")
 	var remove_error: Error = DirAccess.remove_absolute(ProjectSettings.globalize_path(archive_blocker))
 	_check(remove_error == OK, "Only the actual-button fixture's owned blocker is removed for retry")

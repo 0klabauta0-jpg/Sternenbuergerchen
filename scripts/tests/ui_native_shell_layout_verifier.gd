@@ -6,7 +6,7 @@ const ROSTER: GDScript = preload("res://scripts/meta/start_roster_generator.gd")
 const STORE: GDScript = preload("res://scripts/meta/player_roster_store.gd")
 const THEME: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 const FIXTURE_PROFILE_ID := "ui_native_shell_fixture"
-const LIBRARY_PATH := "MenuRail/MenuMargin/MenuVBox/MenuButtons/TeamLibraryPanel"
+const LIBRARY_PATH := "TeamsScreen/TeamsMargin/TeamsVBox/TeamLibraryPanel"
 const SHEET_PATH := "CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/CharacterDetailsColumns/PopupScroll/GeneratedSheetContent"
 
 var _passed := 0
@@ -56,6 +56,8 @@ func _test_shell(viewport_size: Vector2i) -> void:
 	menu.call("set_start_roster_store_path_for_tests", fixture_path, FIXTURE_PROFILE_ID, false)
 	viewport.add_child(menu)
 	await _wait_frames(4)
+	menu.call("open_teams_screen")
+	await _wait_frames(2)
 	var bounds := Rect2(Vector2.ZERO, Vector2(viewport_size))
 	var library := menu.get_node(LIBRARY_PATH) as Control
 	var rail := menu.get_node("MenuRail") as Control

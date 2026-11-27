@@ -5,7 +5,7 @@ const MENU := preload("res://scenes/ui/main_menu.tscn")
 const ROSTER := preload("res://scripts/meta/start_roster_generator.gd")
 const STORE := preload("res://scripts/meta/player_roster_store.gd")
 const SETTINGS := preload("res://scripts/ui/game_settings_contract.gd")
-const LIBRARY := "MenuRail/MenuMargin/MenuVBox/MenuButtons/TeamLibraryPanel"
+const LIBRARY := "TeamsScreen/TeamsMargin/TeamsVBox/TeamLibraryPanel"
 
 var _passed := 0
 var _failed := 0
@@ -90,6 +90,8 @@ func _test_shell() -> void:
 	viewport.add_child(menu)
 	menu.call("set_settings_path_for_tests", settings_path)
 	await _wait(4)
+	menu.call("open_teams_screen")
+	await _wait(2)
 	var library := menu.get_node(LIBRARY)
 	var rows := library.find_children("TeamLibraryEntryButton", "Button", true, false)
 	_check(not rows.is_empty(), "Library presents a real saved record")
