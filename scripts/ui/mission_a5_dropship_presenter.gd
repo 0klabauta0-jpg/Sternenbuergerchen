@@ -64,6 +64,17 @@ static func ensure(controller: Node) -> Control:
 			else:
 				THEME.style_label(label, false, spec[1])
 			_set_readout_minimum_height(label, 1.0)
+		# Belegungszeile (nur bei gelandetem Kampagnenschiff sichtbar): eine Zeile unter dem Kopf, nimmt den Knoepfen keinen Platz.
+		var occupancy := Label.new()
+		occupancy.name = "A5TransportOccupancy"
+		occupancy.clip_text = true
+		occupancy.autowrap_mode = TextServer.AUTOWRAP_OFF
+		occupancy.max_lines_visible = 1
+		occupancy.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		occupancy.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		occupancy.visible = false
+		box.add_child(occupancy)
+		THEME.style_label(occupancy, false, 13)
 		var actions := HBoxContainer.new()
 		actions.name = "Actions"
 		actions.add_theme_constant_override("separation", 4)
@@ -208,9 +219,23 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 			status.text = authoritative_status.replace("Damage ", "Schaden ")
 		elif authoritative_status.begins_with("Threat lock "):
 			status.text = authoritative_status.replace("Threat lock ", "Bedroht ")
+	# Gelandetes Kampagnenschiff: die Statuszeile folgt der echten Belegung (An Bord / Abgesetzt / Gemischt), nicht dem Ablaufzustand "complete".
+	var occupancy: Dictionary = {}
+	if not selected_card.is_empty() and controller.has_method("get_campaign_craft_occupancy"):
+		occupancy = Dictionary(controller.call("get_campaign_craft_occupancy", craft_id))
+	var occupancy_known: bool = bool(occupancy.get("known", false))
+	if occupancy_known and status.text in ["Abgesetzt", "Gelandet"]:
+		status.text = String(occupancy.get("status", status.text))
 	var status_visual: Dictionary = _status_visual(selected_card, pending, status.text)
 	status.text = String(status_visual.symbol) + "  " + status.text
-	status.tooltip_text = ("Anfrage wird geprüft\n" if pending else "") + status.text
+	status.tooltip_text = ("Anfrage wird geprüft\n" if pending else "") + status.text + ("\n" + String(occupancy.get("line", "")) if occupancy_known else "")
+	var occupancy_label := panel.get_node_or_null("CompactCard/Contents/A5TransportOccupancy") as Label
+	if occupancy_label != null:
+		occupancy_label.text = String(occupancy.get("line", "")) if occupancy_known else ""
+		occupancy_label.visible = occupancy_known
+		occupancy_label.tooltip_text = "An Bord: %d von %d Besatzungsmitgliedern, %d abgesetzt" % [int(occupancy.get("aboard", 0)), int(occupancy.get("total", 0)), int(occupancy.get("outside", 0))] if occupancy_known else ""
+		occupancy_label.mouse_filter = Control.MOUSE_FILTER_PASS if occupancy_known else Control.MOUSE_FILTER_IGNORE
+		_set_readout_minimum_height(occupancy_label, 100000.0)
 	status.add_theme_color_override("font_color", status_visual.color)
 	status.set_meta("native_a5_status_shape", status_visual.symbol)
 	ship.texture = controller.call("_get_mission_dropship_card_texture", selected_card) as Texture2D if not selected_card.is_empty() else null
@@ -273,7 +298,8 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 	_style_primary_action(card, int(hud_layout.body_font_size))
 	var feedback := card.get_node("Contents/MissionDropshipCardFeedbackLabel") as Label
 	feedback.text = "" if selected_card.is_empty() else String(controller.call("_get_mission_dropship_card_feedback_text", selected_card))
-	if feedback.text == "Trupp ab": feedback.text = "Trupp abgesetzt"
+	# "Trupp ab" ist nur wahr, solange jemand draussen steht; sind alle wieder an Bord, entfaellt die Meldung.
+	if feedback.text == "Trupp ab": feedback.text = "" if occupancy_known and int(occupancy.get("outside", 0)) == 0 else "Trupp abgesetzt"
 	# Die Rueckfrage vor dem Rueckzug ist lang: sie bekommt mehrere Zeilen, sonst bliebe nur der Anfang lesbar.
 	feedback.max_lines_visible = 4 if (not selected_card.is_empty() and bool(controller.call("_is_retreat_armed", craft_id))) else 1
 	feedback.tooltip_text = feedback.text
@@ -289,7 +315,7 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 
 static func _apply_readable_geometry(panel: VBoxContainer, rect: Rect2i, metrics: Dictionary) -> void:
 	var font_size: int = int(metrics.body_font_size)
-	var signature: String = "%d:%d:p7" % [rect.size.x, font_size]
+	var signature: String = "%d:%d:p8" % [rect.size.x, font_size]
 	if String(panel.get_meta("native_a5_readable_metrics", "")) == signature:
 		return
 	panel.set_meta("native_a5_readable_metrics", signature)
@@ -306,6 +332,9 @@ static func _apply_readable_geometry(panel: VBoxContainer, rect: Rect2i, metrics
 	THEME.style_label(status, false, maxi(14, font_size - 1))
 	var feedback := card.get_node("Contents/MissionDropshipCardFeedbackLabel") as Label
 	THEME.style_label(feedback, false, maxi(13, font_size - 2))
+	var occupancy := card.get_node_or_null("Contents/A5TransportOccupancy") as Label
+	if occupancy != null:
+		THEME.style_label(occupancy, false, maxi(13, font_size - 2))
 	var approach_heading := card.get_node("Contents/ApproachRow").get_child(0) as Label
 	approach_heading.add_theme_font_size_override("font_size", font_size - 1)
 	var actions := card.get_node("Contents/Actions") as HBoxContainer

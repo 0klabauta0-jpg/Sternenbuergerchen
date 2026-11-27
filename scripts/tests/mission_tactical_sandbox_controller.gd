@@ -5390,6 +5390,59 @@ func _is_unit_embarked_without_deployment(unit) -> bool:
 	return _mission_fireteam_runtime_state.is_unit_embarked_without_deployment(unit, _build_hud_embarked_unit_state(), _deployed_unit_ids)
 
 
+## Truppkarte links: Steht ein Kampagnenschiff gelandet am Boden, bleibt der Trupp auf der Karte, auch wenn Mitglieder (oder alle) aufgesessen sind.
+## Sonst (Anflug, Absetzen, keine Kampagne) gilt wie bisher nur, wer am Boden ist.
+func _get_fireteam_mini_card_units(fireteam_id: String) -> Array:
+	var ground_units: Array = _filter_ground_fireteam_card_units(_get_fireteam_units(fireteam_id, not _use_visible_units_for_fireteam_ui()))
+	if not _is_any_campaign_dropship_parked():
+		return ground_units
+	# Aufgesessene Einheiten sind ausgeblendet ("hidden"): die Gesamtliste des Trupps immer mit versteckten holen.
+	var all_units: Array = _get_fireteam_units(fireteam_id, true)
+	return ground_units if all_units.size() <= ground_units.size() else all_units
+
+
+func _is_any_campaign_dropship_parked() -> bool:
+	if not _should_keep_campaign_dropship_landed():
+		return false
+	if _is_parked_campaign_dropship(_mission_drop_craft_id):
+		return true
+	for card_variant in _mission_drop_cards:
+		if typeof(card_variant) == TYPE_DICTIONARY and _is_parked_campaign_dropship(String(Dictionary(card_variant).get("craft_id", "")).strip_edges()):
+			return true
+	return false
+
+
+## Belegung eines gelandeten Kampagnenschiffs fuer die kleine Schiffskarte (nur Lesen, kein Speicherformat):
+## Pilot und Passagiere an Bord, abgesetzte Personen draussen. "known" ist nur bei geparktem Schiff mit bekannter Besatzung wahr.
+func get_campaign_craft_occupancy(craft_id: String) -> Dictionary:
+	var result: Dictionary = {"known": false, "pilot_aboard": 0, "passengers_aboard": 0, "outside": 0, "aboard": 0, "total": 0, "status": "", "line": ""}
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty() or not _is_parked_campaign_dropship(normalized_craft_id):
+		return result
+	var pilot_id: String = String(_find_raw_mission_dropship_card_entry(normalized_craft_id).get("pilot_unit_id", "")).strip_edges()
+	var seen: Dictionary = {}
+	for id_variant in _campaign_craft_crew_ids(normalized_craft_id):
+		var unit_id: String = String(id_variant).strip_edges()
+		if unit_id.is_empty() or seen.has(unit_id):
+			continue
+		seen[unit_id] = true
+		if _deployed_unit_ids.has(unit_id):
+			result.outside = int(result.outside) + 1
+		elif _embarked_unit_ids.has(unit_id):
+			if unit_id == pilot_id:
+				result.pilot_aboard = int(result.pilot_aboard) + 1
+			else:
+				result.passengers_aboard = int(result.passengers_aboard) + 1
+	result.aboard = int(result.pilot_aboard) + int(result.passengers_aboard)
+	result.total = int(result.aboard) + int(result.outside)
+	if int(result.total) <= 0:
+		return result
+	result.known = true
+	result.status = "An Bord" if int(result.outside) == 0 else ("Abgesetzt" if int(result.aboard) == 0 else "Gemischt")
+	result.line = "Pilot %d · Passagiere %d" % [int(result.pilot_aboard), int(result.passengers_aboard)]
+	return result
+
+
 func _selected_fireteams_have_embarked_payload() -> bool:
 	for fireteam_id_variant in _selected_fireteam_ids:
 		if _fireteam_has_embarked_payload(String(fireteam_id_variant)):
@@ -5462,7 +5515,7 @@ func _refresh_fireteam_mini_cards() -> void:
 	var primary_focus_fireteam_id: String = _get_left_tactical_stack_primary_focus_fireteam_id(available_fireteam_ids)
 	for fireteam_id in available_fireteam_ids:
 		var normalized_fireteam_id: String = String(fireteam_id).strip_edges().to_lower()
-		var units: Array = _filter_ground_fireteam_card_units(_get_fireteam_units(normalized_fireteam_id, not _use_visible_units_for_fireteam_ui()))
+		var units: Array = _get_fireteam_mini_card_units(normalized_fireteam_id)
 		if units.is_empty():
 			continue
 		active_fireteam_ids[normalized_fireteam_id] = true
@@ -5512,7 +5565,7 @@ func _refresh_fireteam_mini_cards() -> void:
 		_increment_mission_fireteam_card_delta_rendering_count("runtime_status_apply")
 		_apply_fireteam_mini_card_leader_portrait(card, lead)
 		_apply_native_a5_fireteam_card(card, normalized_fireteam_id, units, selected_fireteam, runtime_inactive)
-		card.modulate = Color(1.0, 1.0, 1.0, 0.58) if runtime_inactive else Color.WHITE
+		card.modulate = Color(1.0, 1.0, 1.0, 0.58) if runtime_inactive and int(card.get_meta("mission_fireteam_aboard_count", 0)) < units.size() else Color.WHITE
 		if is_new_card:
 			var input_callable := Callable(self, "_on_fireteam_mini_card_gui_input").bind(normalized_fireteam_id)
 			if not card.gui_input.is_connected(input_callable):
@@ -5591,7 +5644,17 @@ func _apply_native_a5_fireteam_card(card: Control, fireteam_id: String, units: A
 	TACTICAL_UI_THEME_SCRIPT._override_font_size(selected_marker, "font_size", int(metrics.body_font_size))
 	var snapshot: Dictionary = card.get_meta("mission_fireteam_status_card_snapshot", {})
 	var status := card.get_node("Margin/VBox/StageLabel") as Label
-	status.text = _native_a5_team_status(snapshot, inactive)
+	var aboard_count: int = 0
+	for member in units:
+		if _is_unit_embarked_without_deployment(member):
+			aboard_count += 1
+	if aboard_count > 0 and aboard_count == units.size():
+		status.text = "An Bord"
+	elif aboard_count > 0:
+		status.text = "%s · %d an Bord" % [_native_a5_team_status(snapshot, inactive), aboard_count]
+	else:
+		status.text = _native_a5_team_status(snapshot, inactive)
+	card.set_meta("mission_fireteam_aboard_count", aboard_count)
 	status.visible = true
 	status.max_lines_visible = 1
 	status.clip_text = true
@@ -5776,7 +5839,7 @@ func _build_fireteam_mini_cards_runtime_signature() -> String:
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
 		if fireteam_id.is_empty():
 			continue
-		var units: Array = _filter_ground_fireteam_card_units(_get_fireteam_units(fireteam_id, not _use_visible_units_for_fireteam_ui()))
+		var units: Array = _get_fireteam_mini_card_units(fireteam_id)
 		var suppression_state: Dictionary = Dictionary(_suppression_state_by_fireteam.get(fireteam_id, {}))
 		var movement_state: Dictionary = get_fireteam_movement_state(fireteam_id)
 		var contact_context: Dictionary = _build_fireteam_contact_badge_context(fireteam_id)
@@ -6669,8 +6732,15 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		if portrait_path.is_empty() and unit.has_method("get_portrait_path"):
 			portrait_path = String(unit.call("get_portrait_path")).strip_edges()
 		portrait_rect.texture = _load_portrait_identity_texture(portrait_id, portrait_path)
+		var member_aboard: bool = _is_unit_embarked_without_deployment(unit)
 		portrait_rect.modulate = Color.WHITE if portrait_rect.texture != null else Color(0.42, 0.46, 0.50, 1.0)
+		if member_aboard:
+			# An Bord: Portrait bleibt, gedaempft und mit Hinweis im Tooltip.
+			portrait_rect.modulate = portrait_rect.modulate * Color(0.62, 0.72, 0.84, 1.0)
 		portrait_rect.tooltip_text = String(unit.call("get_display_name")) if unit.has_method("get_display_name") else unit.name
+		if member_aboard:
+			portrait_rect.tooltip_text += " (an Bord)"
+		portrait_rect.set_meta("mission_fireteam_member_aboard", member_aboard)
 		portrait_rect.set_meta("mission_fireteam_member_portrait", true)
 		var unit_id := String(unit.call("get_unit_id")) if unit.has_method("get_unit_id") else String(unit.name)
 		portrait_rect.set_meta("mission_member_unit_id", unit_id)
@@ -6699,7 +6769,7 @@ func _build_fireteam_mini_member_portrait_signature(units: Array) -> String:
 		var portrait_path: String = String(profile.get("portrait_path", "")).strip_edges()
 		if portrait_path.is_empty() and unit.has_method("get_portrait_path"):
 			portrait_path = String(unit.call("get_portrait_path")).strip_edges()
-		tokens.append("%s|%s|%s" % [unit_id, portrait_id, portrait_path])
+		tokens.append("%s|%s|%s|%s" % [unit_id, portrait_id, portrait_path, str(_is_unit_embarked_without_deployment(unit))])
 	return ";".join(tokens)
 
 
@@ -22205,12 +22275,23 @@ func _get_available_fireteam_ids() -> PackedStringArray:
 func _get_displayable_fireteam_ids() -> PackedStringArray:
 	var use_visible_units_for_ui: bool = _use_visible_units_for_fireteam_ui()
 	var candidate_units: Array = _get_all_friendly_units(not use_visible_units_for_ui)
-	return _mission_fireteam_runtime_state.build_displayable_fireteam_ids(
+	var ground_ids: PackedStringArray = _mission_fireteam_runtime_state.build_displayable_fireteam_ids(
 		_get_available_fireteam_ids(),
 		candidate_units,
 		_embarked_unit_ids,
 		_deployed_unit_ids
 	)
+	if not _is_any_campaign_dropship_parked():
+		return ground_ids
+	# Gelandetes Kampagnenschiff: auch ein ganz aufgesessener Trupp bleibt in der Liste (Truppkarte links).
+	var result: PackedStringArray = []
+	for fireteam_id_variant in _get_available_fireteam_ids():
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty() or result.has(fireteam_id):
+			continue
+		if ground_ids.has(fireteam_id) or not _get_fireteam_mini_card_units(fireteam_id).is_empty():
+			result.append(fireteam_id)
+	return result
 
 
 func _use_visible_units_for_fireteam_ui() -> bool:

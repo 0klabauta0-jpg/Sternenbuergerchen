@@ -45,6 +45,31 @@ func _launch_and_land(scenario_id:String,map_path:String)->bool:
 	_check(button.disabled and panel.get_node("A5BoardStatus").text=="Trupp an Bord","combined card confirms actual completed boarding")
 	var ship_board:Button=mission.get_node("TacticalUI/MissionDropshipPanel/CompactCard/Contents/Actions/board")
 	_check(not ship_board.is_visible_in_tree(),"boarding action is no longer duplicated at ship")
+	# Einsatzanzeige nach dem Aufsitzen (Paket A, 27.11.): Truppkarte bleibt, Schiffskarte sagt "An Bord", Belegungszeile steht.
+	for i in 3:
+		await process_frame
+		controller.call("_update_ui")
+	var occupancy:Dictionary=controller.call("get_campaign_craft_occupancy",_craft_id)
+	_check(bool(occupancy.get("known",false)) and int(occupancy.get("outside",1))==0 and int(occupancy.get("aboard",0))>0 and String(occupancy.get("status",""))=="An Bord","A(2): Belegung bekannt, alle an Bord ("+str(occupancy)+")")
+	var ship_card:Node=mission.get_node("TacticalUI/MissionDropshipPanel/CompactCard")
+	var ship_state:Label=ship_card.get_node_or_null("Contents/Header/Identity/A5TransportState") as Label
+	_check(ship_state!=null and ship_state.text.contains("An Bord") and not ship_state.text.contains("Abgesetzt"),"A(2): Statuszeile der Schiffskarte sagt An Bord, nicht abgesetzt ("+("fehlt" if ship_state==null else ship_state.text)+")")
+	var occupancy_label:Label=ship_card.get_node_or_null("Contents/A5TransportOccupancy") as Label
+	_check(occupancy_label!=null and occupancy_label.is_visible_in_tree() and occupancy_label.text==String(occupancy.get("line","")) and occupancy_label.text.begins_with("Pilot ") and occupancy_label.text.contains("Passagiere"),"A(3): Belegungszeile auf der Schiffskarte ("+("fehlt" if occupancy_label==null else occupancy_label.text)+")")
+	var ship_feedback:Label=ship_card.get_node_or_null("Contents/MissionDropshipCardFeedbackLabel") as Label
+	_check(ship_feedback==null or not ship_feedback.visible or not ship_feedback.text.contains("abgesetzt"),"A(2): keine Meldung 'Trupp abgesetzt', wenn alle an Bord sind")
+	var mini_team:Node=mission.get_node_or_null("TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox/FireteamMiniCard_"+_team_id.to_lower().capitalize())
+	var strip:Node=mini_team.get_node_or_null("Margin/VBox/FireteamMemberPortraitStrip") if mini_team!=null else null
+	var aboard_portraits:=0
+	var all_portraits:=0
+	if strip!=null:
+		for portrait in strip.get_children():
+			all_portraits+=1
+			if bool(portrait.get_meta("mission_fireteam_member_aboard",false)):aboard_portraits+=1
+	_check(mini_team!=null and all_portraits>0 and aboard_portraits==all_portraits,"A(1): Truppkarte links bleibt mit allen Mitgliedern, alle als an Bord gekennzeichnet (%d von %d)"%[aboard_portraits,all_portraits])
+	var mini_status:Label=mini_team.get_node_or_null("Margin/VBox/StageLabel") as Label if mini_team!=null else null
+	_check(mini_status!=null and mini_status.text=="An Bord","A(1): Statuszeile der Truppkarte sagt An Bord ("+("fehlt" if mini_status==null else mini_status.text)+")")
+	_check(panel.get_node("A5TeamPortraits").get_child_count()==all_portraits and all_portraits>0,"A(1): die verbundene Truppkarte zeigt die Portraits weiter (%d)"%panel.get_node("A5TeamPortraits").get_child_count())
 	var deploy:Dictionary=controller.request_campaign_crew_deployment(_craft_id)
 	if not _check(deploy.get("ok",false),"existing Trupp absetzen remains available"):return false
 	# GO is deliberately held ("WAIT FOR INSERTION", mission_tactical_sandbox_controller.gd:1590) until the team is runtime-active again; empty pending lists alone are true before the drop starts.

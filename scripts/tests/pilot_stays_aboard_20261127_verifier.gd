@@ -70,6 +70,34 @@ func _run() -> void:
 	_check(outside == _crew_ids.size() - 1 and outside > 0, "Pilot an Bord: der ganze Trupp ausser dem Piloten ist abgesetzt (%d)" % outside)
 	_check(String(controller.get("_drop_sequence_phase")) == "complete" and bool(controller.call("_is_parked_campaign_dropship", _craft_id)), "Pilot an Bord: die Abfolge ist fertig, das Schiff steht geparkt (%s)" % str(controller.get("_drop_sequence_phase")))
 	_check(bool(controller.call("get_campaign_pilot_flight_guard", _craft_id, false).get("ok", false)), "Pilot an Bord: der Flugwaechter sieht den Piloten an Bord")
+	# 1b) Einsatzanzeige (Paket A): Trupp draussen, Pilot an Bord = "gemischt"; Belegungszeile; Truppkarte bleibt mit dem Piloten als "an Bord"
+	for i in 3:
+		await process_frame
+		controller.call("_update_ui")
+	var occ: Dictionary = controller.call("get_campaign_craft_occupancy", _craft_id)
+	_check(bool(occ.get("known", false)) and int(occ.get("pilot_aboard", -1)) == 1 and int(occ.get("passengers_aboard", -1)) == 0 and int(occ.get("outside", 0)) > 0 and String(occ.get("status", "")) == "Gemischt" and String(occ.get("line", "")) == "Pilot 1 · Passagiere 0", "A(2)(3): Belegung Pilot 1, Passagiere 0, Rest draussen, gemischt (%s)" % str(occ))
+	var ship_card: Node = mission.get_node_or_null("TacticalUI/MissionDropshipPanel/CompactCard")
+	var ship_state: Label = ship_card.get_node_or_null("Contents/Header/Identity/A5TransportState") as Label if ship_card != null else null
+	_check(ship_state != null and ship_state.text.contains("Gemischt") and not ship_state.text.contains("Abgesetzt"), "A(2): Statuszeile der Schiffskarte sagt gemischt (%s)" % ("fehlt" if ship_state == null else ship_state.text))
+	var occ_label: Label = ship_card.get_node_or_null("Contents/A5TransportOccupancy") as Label if ship_card != null else null
+	_check(occ_label != null and occ_label.is_visible_in_tree() and occ_label.text == "Pilot 1 · Passagiere 0", "A(3): Belegungszeile auf der Schiffskarte (%s)" % ("fehlt" if occ_label == null else occ_label.text))
+	var ship_panel: Control = mission.get_node_or_null("TacticalUI/MissionDropshipPanel") as Control
+	_check(occ_label != null and ship_panel != null and ship_panel.get_global_rect().grow(1.0).encloses(occ_label.get_global_rect()), "A(3): Belegungszeile liegt innerhalb der Schiffskarte (%s)" % ("fehlt" if ship_panel == null else str(ship_panel.size)))
+	for command in ["set_lz", "drop", "return", "pilot"]:
+		var command_button: Button = ship_card.get_node_or_null(("Contents/PilotRow/" if command == "pilot" else "Contents/Actions/") + command) as Button if ship_card != null else null
+		if command_button != null and command_button.is_visible_in_tree():
+			_check(command_button.get_global_rect().size.x >= 40.0 and command_button.get_global_rect().size.y >= 24.0 and ship_panel.get_global_rect().grow(1.0).encloses(command_button.get_global_rect()), "A(3): Knopf %s bleibt benutzbar und in der Karte (%s)" % [command, str(command_button.get_global_rect().size)])
+	var mini_team: Node = mission.get_node_or_null("TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox/FireteamMiniCard_" + _team_id.to_lower().capitalize())
+	var strip: Node = mini_team.get_node_or_null("Margin/VBox/FireteamMemberPortraitStrip") if mini_team != null else null
+	var aboard_portraits := 0
+	var all_portraits := 0
+	if strip != null:
+		for portrait in strip.get_children():
+			all_portraits += 1
+			if bool(portrait.get_meta("mission_fireteam_member_aboard", false)) and String(portrait.get_meta("mission_member_unit_id", "")) == _pilot_id: aboard_portraits += 1
+	_check(mini_team != null and all_portraits == _crew_ids.size() and aboard_portraits == 1, "A(1): Truppkarte links zeigt den ganzen Trupp, der Pilot ist als an Bord gekennzeichnet (%d von %d, an Bord %d)" % [all_portraits, _crew_ids.size(), aboard_portraits])
+	var mini_status: Label = mini_team.get_node_or_null("Margin/VBox/StageLabel") as Label if mini_team != null else null
+	_check(mini_status != null and mini_status.text.contains("1 an Bord"), "A(1): Statuszeile der Truppkarte nennt 1 an Bord (%s)" % ("fehlt" if mini_status == null else mini_status.text))
 	# 2) nur der Pilot an Bord: Absetzen wird mit eigenem Grund abgelehnt
 	var only_pilot: Dictionary = controller.call("request_campaign_crew_deployment", _craft_id)
 	_check(not bool(only_pilot.get("ok", true)) and String(only_pilot.get("reason", "")) == "only_pilot_aboard", "Nur der Pilot an Bord: Absetzen abgelehnt mit only_pilot_aboard (%s)" % str(only_pilot))
