@@ -103,6 +103,31 @@ const CONTINUOUS_REDRAW_AFTER_CAMERA_MSEC: int = 220
 const CONTINUOUS_REDRAW_AFTER_BOOTSTRAP_MSEC: int = 1200
 const UNIT_PROXY_SMOOTH_SPEED: float = 18.0
 const UNIT_PROXY_SNAP_DISTANCE: float = 2.4
+# Figuren-Darstellung (nur Optik, die Simulation bleibt die Wahrheit):
+# Ueberblendzeit zwischen zwei Clips in Sekunden.
+const UNIT_ANIM_BLEND_SECONDS: float = 0.15
+# Drehtempo der Figur in Grad/Sekunde: schwer im Normalfall, schneller beim Feuern (Zielen).
+const UNIT_TURN_SPEED_DEGREES: float = 200.0
+const UNIT_TURN_SPEED_FIRING_DEGREES: float = 360.0
+# Nachlauf-Zeitkonstante der Figur auf dem Hexweg (kritisch gedaempft) und maximaler Rueckstand (horizontal).
+const UNIT_MOTION_FOLLOW_SECONDS: float = 0.15
+const UNIT_MOTION_MAX_LAG: float = 0.35
+# Ab dieser Weltgeschwindigkeit (Pixel/s) zaehlt die Bewegungsrichtung zum Drehen; Filterzeit der Richtung.
+const UNIT_MOTION_DIRECTION_MIN_WORLD_SPEED: float = 8.0
+const UNIT_MOTION_DIRECTION_FILTER_SECONDS: float = 0.15
+# Bezugsgeschwindigkeit je Laufclip (3D-Einheiten/s). GESCHAETZT, bei Bedarf nachmessen und anpassen.
+const UNIT_ANIM_REFERENCE_SPEED: Dictionary = {
+	"walk": 1.5, "walkShoot": 1.5,
+	"run": 3.4, "runShoot": 3.4,
+	"crouchWalk": 0.9, "crouchWalkShoot": 0.9, "crouchRunShoot": 0.9,
+}
+const UNIT_ANIM_SPEED_FACTOR_MIN: float = 0.7
+const UNIT_ANIM_SPEED_FACTOR_MAX: float = 1.4
+const UNIT_ANIM_SPEED_FOLLOW_SECONDS: float = 0.2
+# Je Figur +-5 % Grundtempo und eine feste Startphase, aus der unit_id abgeleitet (reproduzierbar).
+const UNIT_ANIM_BASE_SPEED_SPREAD: float = 0.05
+# Einmalig gespielter Tod-Clip; ersetzt das Umkippen per Modelldrehung, wenn vorhanden.
+const UNIT_DEATH_ANIMATION_NAME: String = "death"
 const MOVEMENT_STEP_SFX_RATE_LIMIT_MSEC: int = 420
 const DEFAULT_HALF_TILE_WIDTH: float = 64.0
 const DEFAULT_HALF_TILE_HEIGHT: float = 32.0
@@ -13375,14 +13400,24 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 			_maybe_emit_unit_step_sfx(unit_id, unit_world_position, unit_is_moving, next_visible)
 			if proxy_distance > 0.0001:
 				changed = true
-			if not hex_motion.is_empty() or force_rebuild or delta <= 0.0 or proxy_distance >= UNIT_PROXY_SNAP_DISTANCE:
+			var motion_fresh: bool = not proxy.has_meta("unit_motion_initialized")
+			var motion_snap: bool = motion_fresh or force_rebuild or delta <= 0.0 or proxy_distance >= UNIT_PROXY_SNAP_DISTANCE
+			var previous_proxy_position: Vector3 = proxy.position
+			if not hex_motion.is_empty():
+				proxy.position = _follow_unit_proxy_hex_position(proxy, next_position, delta, motion_snap)
+			elif motion_snap:
 				proxy.position = next_position
 			else:
 				proxy.position = proxy.position.lerp(next_position, clampf(delta * UNIT_PROXY_SMOOTH_SPEED, 0.0, 1.0))
+			_update_unit_proxy_motion_speed(proxy, previous_proxy_position, delta, motion_snap)
 			var next_rotation_y: float = _get_unit_proxy_rotation_y(proxy, unit, unit_world_position, active_fire_event, visible_contact_direction,hex_motion)
-			if absf(wrapf(proxy.rotation_degrees.y - next_rotation_y, -180.0, 180.0)) > 0.01:
+			var use_motion_heading: bool = not hex_motion.is_empty() and bool(hex_motion.moving) and active_fire_event.is_empty()
+			next_rotation_y = _blend_unit_motion_direction_yaw(proxy, unit_world_position, delta, next_rotation_y, use_motion_heading, motion_snap)
+			var turned_rotation_y: float = _step_unit_proxy_yaw(proxy.rotation_degrees.y, next_rotation_y, delta, not active_fire_event.is_empty(), motion_snap)
+			if absf(wrapf(proxy.rotation_degrees.y - turned_rotation_y, -180.0, 180.0)) > 0.01 or absf(wrapf(turned_rotation_y - next_rotation_y, -180.0, 180.0)) > 0.01:
 				changed = true
-			proxy.rotation_degrees.y = next_rotation_y
+			proxy.rotation_degrees.y = turned_rotation_y
+			proxy.set_meta("unit_motion_initialized", true)
 			proxy.set_meta("last_world_position", unit_world_position)
 		else:
 			var next_rotation_y: float = proxy.rotation_degrees.y
@@ -13392,7 +13427,7 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 				changed = true
 			proxy.rotation_degrees.y = next_rotation_y
 		proxy.set_meta("last_rotation_y", proxy.rotation_degrees.y)
-		if _update_unit_visual_animation(proxy, unit_is_moving, not active_fire_event.is_empty(), delta, displayed_weapon_posture, displayed_movement_posture, proxy_runtime.get("animation_player", null) as AnimationPlayer):
+		if _update_unit_visual_animation(proxy, unit_is_moving, not active_fire_event.is_empty(), delta, displayed_weapon_posture, displayed_movement_posture, proxy_runtime.get("animation_player", null) as AnimationPlayer, float(proxy.get_meta("unit_motion_speed", -1.0))):
 			changed = true
 		var visual_payload_signature: String = _build_unit_proxy_visual_payload_signature(unit, active_fire_event, displayed_weapon_posture, displayed_movement_posture, weapon_pose_direction, proxy.rotation_degrees.y)
 		var visual_payload_changed: bool = String(proxy.get_meta("unit_proxy_visual_payload_signature", "")) != visual_payload_signature
@@ -13722,14 +13757,18 @@ func _update_unit_vital_visual(proxy: Node3D, unit: Node, cached_model_root: Nod
 	var base_position: Vector3 = _get_vector3_meta(model_root, "unit_vital_visual_base_position", model_root.position)
 	var desired_rotation: Vector3 = base_rotation
 	var desired_position: Vector3 = base_position
-	if vital_state == "down":
+	# Mit Tod-Clip faellt die Figur per Animation; das Umkippen per Modelldrehung entfaellt (sonst doppelt).
+	var death_clip_drives_pose: bool = down_pose_active and bool(proxy.get_meta("unit_death_clip_available", false))
+	if death_clip_drives_pose:
+		pass
+	elif vital_state == "down":
 		desired_rotation = base_rotation + UNIT_DOWN_POSE_ROTATION_DEGREES
 	elif vital_state == "bleedout" or vital_state == "respawning":
 		desired_rotation = base_rotation + UNIT_BLEEDOUT_POSE_ROTATION_DEGREES
 	if model_root.rotation_degrees.distance_squared_to(desired_rotation) > 0.0001:
 		model_root.rotation_degrees = desired_rotation
 		changed = true
-	if down_pose_active:
+	if down_pose_active and not death_clip_drives_pose:
 		desired_position = _get_grounded_unit_pose_position(model_root, base_position)
 	if model_root.position.distance_squared_to(desired_position) > 0.000001:
 		model_root.position = desired_position
@@ -14200,6 +14239,7 @@ func _setup_unit_visual_animation(proxy_root: Node3D, model_root: Node3D, model_
 	proxy_root.set_meta("unit_animation_combat_case_imported_count", 0)
 	proxy_root.set_meta("unit_animation_combat_case_expected_count", 0)
 	proxy_root.set_meta("unit_animation_shoot_pose_track_override_count", 0)
+	proxy_root.set_meta("unit_death_clip_available", false)
 	if animation_paths.is_empty():
 		return true
 	var animation_player := AnimationPlayer.new()
@@ -14221,7 +14261,10 @@ func _setup_unit_visual_animation(proxy_root: Node3D, model_root: Node3D, model_
 		var duplicated := animation.duplicate(true) as Animation
 		if duplicated == null:
 			continue
-		duplicated.loop_mode = Animation.LOOP_LINEAR
+		# Der Tod-Clip laeuft einmal und bleibt am Ende stehen; alle anderen Clips sind Schleifen.
+		duplicated.loop_mode = Animation.LOOP_NONE if animation_name == UNIT_DEATH_ANIMATION_NAME else Animation.LOOP_LINEAR
+		if animation_name == UNIT_DEATH_ANIMATION_NAME:
+			proxy_root.set_meta("unit_death_clip_available", true)
 		heading_sanitized_track_count += _sanitize_unit_locomotion_heading_tracks(duplicated, animation_name)
 		duplicated.set_meta("unit_animation_catalog_name", animation_name)
 		animation_player.set_meta("source_animation_%s" % animation_name, String(duplicated.get_meta("source_animation_name", "")))
@@ -14451,25 +14494,140 @@ func _is_unit_locomotion_heading_control_track(track_path: String) -> bool:
 	return false
 
 
-func _update_unit_visual_animation(proxy: Node3D, is_moving: bool, is_firing: bool = false, delta: float = -1.0, weapon_posture: String = "", movement_posture: String = "", cached_animation_player: AnimationPlayer = null) -> bool:
+func _follow_unit_proxy_hex_position(proxy: Node3D, target: Vector3, delta: float, snap: bool) -> Vector3:
+	# Kritisch gedaempfter Nachlauf (SmoothDamp) nur in der Bodenebene: rundet Ecken, weiches Anfahren/Anhalten.
+	# Hoehe (y) wird direkt uebernommen, damit niemand im Boden steckt.
+	if snap or delta <= 0.0:
+		if proxy.has_meta("unit_motion_velocity"):
+			proxy.set_meta("unit_motion_velocity", Vector2.ZERO)
+		return target
+	var velocity: Vector2 = proxy.get_meta("unit_motion_velocity", Vector2.ZERO)
+	var target_flat: Vector2 = Vector2(target.x, target.z)
+	var change: Vector2 = Vector2(proxy.position.x, proxy.position.z) - target_flat
+	var omega: float = 2.0 / UNIT_MOTION_FOLLOW_SECONDS
+	var x: float = omega * delta
+	var damping: float = 1.0 / (1.0 + x + 0.48 * x * x + 0.235 * x * x * x)
+	var temp: Vector2 = (velocity + change * omega) * delta
+	velocity = (velocity - temp * omega) * damping
+	var lag: Vector2 = (change + temp) * damping
+	if change.dot(lag) < 0.0:
+		lag = Vector2.ZERO
+		velocity = Vector2.ZERO
+	var lag_length: float = lag.length()
+	if lag_length > UNIT_MOTION_MAX_LAG:
+		lag = lag * (UNIT_MOTION_MAX_LAG / lag_length)
+	elif lag_length < 0.001 and velocity.length_squared() < 0.0001:
+		lag = Vector2.ZERO
+		velocity = Vector2.ZERO
+	proxy.set_meta("unit_motion_velocity", velocity)
+	return Vector3(target_flat.x + lag.x, target.y, target_flat.y + lag.y)
+
+
+func _update_unit_proxy_motion_speed(proxy: Node3D, previous_position: Vector3, delta: float, snap: bool) -> void:
+	# Tatsaechliche horizontale Proxy-Geschwindigkeit (weich nachgefuehrt) fuer das Clip-Tempo.
+	if delta <= 0.0:
+		return
+	var measured: float = 0.0
+	if not snap:
+		measured = Vector2(proxy.position.x - previous_position.x, proxy.position.z - previous_position.z).length() / delta
+	var previous_speed: float = float(proxy.get_meta("unit_motion_speed", measured))
+	proxy.set_meta("unit_motion_speed", lerpf(previous_speed, measured, clampf(delta / UNIT_ANIM_SPEED_FOLLOW_SECONDS, 0.0, 1.0)))
+
+
+func _blend_unit_motion_direction_yaw(proxy: Node3D, world_position: Vector2, delta: float, fallback_yaw: float, active: bool, snap: bool) -> float:
+	# Beim Laufen (ohne Feuer-Ereignis) zur weich gefilterten Bewegungsrichtung drehen statt zu den harten 60-Grad-Sprüngen.
+	if not active:
+		if proxy.has_meta("unit_motion_direction") and Vector2(proxy.get_meta("unit_motion_direction")) != Vector2.ZERO:
+			proxy.set_meta("unit_motion_direction", Vector2.ZERO)
+		return fallback_yaw
+	if delta <= 0.0:
+		return fallback_yaw
+	var direction: Vector2 = proxy.get_meta("unit_motion_direction", Vector2.ZERO)
+	var previous_variant: Variant = proxy.get_meta("last_world_position", world_position)
+	var previous_world_position: Vector2 = Vector2(previous_variant) if typeof(previous_variant) == TYPE_VECTOR2 else world_position
+	var step: Vector2 = world_position - previous_world_position
+	if not snap and step.length() / delta >= UNIT_MOTION_DIRECTION_MIN_WORLD_SPEED:
+		var step_direction: Vector2 = step.normalized()
+		direction = step_direction if direction.length_squared() < 0.0001 else direction.lerp(step_direction, clampf(delta / UNIT_MOTION_DIRECTION_FILTER_SECONDS, 0.0, 1.0))
+		proxy.set_meta("unit_motion_direction", direction)
+	if direction.length_squared() < 0.0001:
+		return fallback_yaw
+	return _get_unit_world_direction_yaw(Vector2.ZERO, direction.normalized(), fallback_yaw)
+
+
+func _step_unit_proxy_yaw(current_yaw: float, target_yaw: float, delta: float, firing: bool, snap: bool) -> float:
+	# Schwere, begrenzte Drehung auf kuerzestem Weg; beim Feuern schneller, damit das Zielen nachkommt.
+	if snap or delta <= 0.0:
+		return target_yaw
+	var difference: float = wrapf(target_yaw - current_yaw, -180.0, 180.0)
+	var max_step: float = (UNIT_TURN_SPEED_FIRING_DEGREES if firing else UNIT_TURN_SPEED_DEGREES) * delta
+	if absf(difference) <= max_step:
+		return target_yaw
+	return current_yaw + signf(difference) * max_step
+
+
+func _is_unit_proxy_down_state(proxy: Node3D) -> bool:
+	var vital_state: String = String(proxy.get_meta("vital_state", ""))
+	return vital_state == "down" or vital_state == "bleedout" or vital_state == "respawning"
+
+
+func _unit_id_hash_fraction(unit_id: String, high_half: bool) -> float:
+	# Deterministisch (kein randf): gleiche unit_id ergibt immer denselben Wert in 0..1.
+	var hashed: int = unit_id.hash()
+	return float((hashed >> 16) & 0xFFFF if high_half else hashed & 0xFFFF) / 65535.0
+
+
+func _apply_unit_animation_start_phase(proxy: Node3D, animation_player: AnimationPlayer) -> void:
+	# Einmalig je Figur: Startphase des ersten Clips aus der unit_id, damit nicht alle im Gleichschritt laufen.
+	if proxy.has_meta("unit_anim_phase_applied"):
+		return
+	proxy.set_meta("unit_anim_phase_applied", true)
+	var unit_id: String = String(proxy.get_meta("unit_id", ""))
+	if unit_id.is_empty() or String(animation_player.current_animation) == UNIT_DEATH_ANIMATION_NAME:
+		return
+	var clip_length: float = animation_player.current_animation_length
+	if clip_length > 0.0:
+		animation_player.seek(_unit_id_hash_fraction(unit_id, true) * clip_length, true)
+
+
+func _get_unit_animation_speed_factor(proxy: Node3D, animation_name: String, move_speed: float, _delta: float) -> float:
+	# Faktor fuer advance(): Laufclips folgen der echten Proxy-Geschwindigkeit, dazu +-5 % Grundtempo je Figur.
+	var base_speed: float = float(proxy.get_meta("unit_anim_base_speed", 0.0))
+	if base_speed <= 0.0:
+		var unit_id: String = String(proxy.get_meta("unit_id", ""))
+		base_speed = 1.0 if unit_id.is_empty() else 1.0 + (_unit_id_hash_fraction(unit_id, false) * 2.0 - 1.0) * UNIT_ANIM_BASE_SPEED_SPREAD
+		proxy.set_meta("unit_anim_base_speed", base_speed)
+	var reference_speed: float = float(UNIT_ANIM_REFERENCE_SPEED.get(animation_name, 0.0))
+	var factor: float = 1.0
+	if reference_speed > 0.0 and move_speed >= 0.0:
+		factor = clampf(move_speed / reference_speed, UNIT_ANIM_SPEED_FACTOR_MIN, UNIT_ANIM_SPEED_FACTOR_MAX)
+	return factor * base_speed
+
+
+func _update_unit_visual_animation(proxy: Node3D, is_moving: bool, is_firing: bool = false, delta: float = -1.0, weapon_posture: String = "", movement_posture: String = "", cached_animation_player: AnimationPlayer = null, move_speed: float = -1.0) -> bool:
 	var animation_player: AnimationPlayer = cached_animation_player if cached_animation_player != null and is_instance_valid(cached_animation_player) else _find_unit_visual_animation_player(proxy)
 	if animation_player == null:
 		return false
 	var normalized_weapon_posture: String = _normalize_unit_weapon_posture(weapon_posture)
 	var normalized_movement_posture: String = _normalize_unit_movement_posture(movement_posture)
-	var desired_animation: String = _resolve_unit_visual_animation_name(animation_player, is_moving, is_firing, normalized_weapon_posture, normalized_movement_posture)
+	var is_down: bool = _is_unit_proxy_down_state(proxy)
+	var desired_animation: String = _resolve_unit_visual_animation_name(animation_player, is_moving, is_firing, normalized_weapon_posture, normalized_movement_posture, is_down)
 	if not animation_player.has_animation(desired_animation):
 		proxy.set_meta("unit_visual_animation_name", "")
 		return false
 	var changed: bool = false
-	if animation_player.current_animation != desired_animation or not animation_player.is_playing():
-		animation_player.play(desired_animation)
+	var is_death_clip: bool = desired_animation == UNIT_DEATH_ANIMATION_NAME
+	# Der Tod-Clip laeuft einmal und bleibt am Ende stehen (is_playing() ist dann false): nicht neu starten.
+	var death_already_played: bool = is_death_clip and String(proxy.get_meta("unit_visual_animation_name", "")) == desired_animation
+	if not death_already_played and (animation_player.current_animation != desired_animation or not animation_player.is_playing()):
+		animation_player.play(desired_animation, UNIT_ANIM_BLEND_SECONDS)
 		changed = true
 	if String(proxy.get_meta("unit_visual_animation_name", "")) != desired_animation:
 		proxy.set_meta("unit_visual_animation_name", desired_animation)
 		changed = true
+	_apply_unit_animation_start_phase(proxy, animation_player)
 	var previous_animation_position: float = animation_player.current_animation_position
-	animation_player.advance(maxf(delta, 0.0))
+	animation_player.advance(maxf(delta, 0.0) * _get_unit_animation_speed_factor(proxy, desired_animation, move_speed, delta))
 	# UPDATE_ONCE also needs a new frame when a stable clip advances its pose.
 	# Frozen/zero-delta or hidden animations must not cause recurring redraws.
 	if proxy.is_visible_in_tree() and not is_equal_approx(previous_animation_position, animation_player.current_animation_position):
@@ -14477,9 +14635,11 @@ func _update_unit_visual_animation(proxy: Node3D, is_moving: bool, is_firing: bo
 	return changed
 
 
-func _resolve_unit_visual_animation_name(animation_player: AnimationPlayer, is_moving: bool, is_firing: bool, weapon_posture: String, movement_posture: String) -> String:
+func _resolve_unit_visual_animation_name(animation_player: AnimationPlayer, is_moving: bool, is_firing: bool, weapon_posture: String, movement_posture: String, is_down: bool = false) -> String:
 	if animation_player == null:
 		return ""
+	if is_down and animation_player.has_animation(UNIT_DEATH_ANIMATION_NAME):
+		return UNIT_DEATH_ANIMATION_NAME
 	var normalized_weapon_posture: String = _normalize_unit_weapon_posture(weapon_posture)
 	var normalized_movement_posture: String = _normalize_unit_movement_posture(movement_posture)
 	var should_hold_aim: bool = is_firing or normalized_weapon_posture == "aimed"
