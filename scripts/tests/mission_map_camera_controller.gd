@@ -54,7 +54,7 @@ func _process(delta: float) -> void:
 		if Input.is_action_pressed(ACTION_PAN_RIGHT):
 			primary_direction.x += 1.0
 		if primary_direction != Vector2.ZERO:
-			primary_3d_view.call("pan_camera", primary_direction.normalized(), delta)
+			primary_3d_view.call("pan_camera_keyboard", primary_direction.normalized(), delta)
 		if Input.is_action_pressed(ACTION_ROTATE_LEFT):
 			primary_3d_view.call("rotate_camera", -80.0 * delta)
 		if Input.is_action_pressed(ACTION_ROTATE_RIGHT):
@@ -123,7 +123,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if is_zero_approx(zoom_steps):
 		return
 	if primary_3d_view != null:
-		primary_3d_view.call("zoom_camera_at_screen_position", zoom_steps, mouse_event.position)
+		primary_3d_view.call("zoom_camera_wheel_at_screen_position", zoom_steps, mouse_event.position)
 	else:
 		var before: Vector2 = get_canvas_transform().affine_inverse() * mouse_event.position
 		_adjust_camera_zoom(zoom_steps * CAMERA_ZOOM_STEP)
