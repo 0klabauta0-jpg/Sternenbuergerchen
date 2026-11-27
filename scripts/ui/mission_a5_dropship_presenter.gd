@@ -80,14 +80,19 @@ static func ensure(controller: Node) -> Control:
 		dial.direction_selected.connect(func(direction: String): controller.call("_on_mission_dropship_card_approach_pressed", String(controller.get("_mission_drop_craft_id")), direction))
 		direction_row.add_child(dial)
 		box.add_child(direction_row)
-		for action in ["set_lz", "drop", "board", "return"]:
+		# Der Pilot-Knopf liegt in einer eigenen Zeile unter den vier Aktionen: bei 1280x720 ist die Karte nur 304 bis 320 Pixel breit.
+		var pilot_row := HBoxContainer.new()
+		pilot_row.name = "PilotRow"
+		box.add_child(pilot_row)
+		box.move_child(pilot_row, actions.get_index() + 1)
+		for action in ["set_lz", "drop", "board", "return", "pilot"]:
 			var button := Button.new()
 			button.name = action
 			button.custom_minimum_size = Vector2(0, 30)
 			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			button.set_meta("mission_dropship_card_command_button", true)
 			button.set_meta("mission_dropship_card_command", action)
-			actions.add_child(button)
+			(pilot_row if action == "pilot" else actions).add_child(button)
 			THEME.style_command_button(button)
 		var feedback := Label.new()
 		feedback.name = "MissionDropshipCardFeedbackLabel"
@@ -227,9 +232,9 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 	_set_readout_minimum_height(status, 100000.0)
 	title.tooltip_text = title.text
 	var landed: bool = not selected_card.is_empty() and bool(controller.call("_is_parked_campaign_dropship", craft_id))
-	for action in ["set_lz", "drop", "board", "return"]:
-		var button := card.get_node("Contents/Actions/" + action) as Button
-		var method: String = {"set_lz":"_on_mission_dropship_card_set_lz_pressed", "drop":"_on_mission_dropship_card_drop_pressed", "board":"_on_campaign_extraction_pressed", "return":"_on_mission_dropship_return_pressed"}[action]
+	for action in ["set_lz", "drop", "board", "return", "pilot"]:
+		var button := card.get_node(("Contents/PilotRow/" if action == "pilot" else "Contents/Actions/") + action) as Button
+		var method: String = {"set_lz":"_on_mission_dropship_card_set_lz_pressed", "drop":"_on_mission_dropship_card_drop_pressed", "board":"_on_campaign_extraction_pressed", "return":"_on_mission_dropship_return_pressed", "pilot":"_on_mission_dropship_pilot_disembark_pressed"}[action]
 		var allowed := false
 		if not selected_card.is_empty():
 			match action:
@@ -237,8 +242,9 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 				"drop": allowed = bool(controller.call("_can_request_mission_dropship_card_drop", selected_card))
 				"board": allowed = landed
 				"return": allowed = bool(controller.call("_can_request_mission_dropship_return", selected_card)) and (not landed or bool(controller.call("get_campaign_pilot_flight_guard", craft_id).get("ok", false)))
+				"pilot": allowed = not String(selected_card.get("pilot_unit_id", "")).strip_edges().is_empty()
 		button.disabled = pending or not allowed
-		button.text = {"set_lz":"Landezone waehlen", "drop":"Trupp absetzen" if landed else "Landen", "board":"Einsteigen", "return":"Abheben"}[action]
+		button.text = {"set_lz":"Landezone waehlen", "drop":"Trupp absetzen" if landed else "Landen", "board":"Einsteigen", "return":"Abheben", "pilot":"Pilot: bleibt an Bord"}[action]
 		if action == "set_lz": button.text = "Landezone waehlen"
 		button.tooltip_text = "Alle Bodenpersonen muessen zum Schiff. Einsteigen wird nach Ankunft bestaetigt." if action == "board" else ("Pilot und Besatzung muessen an Bord sein." if action == "return" else "Landezone und Anflug des ausgewaehlten Schiffs")
 		if action == "return" and not selected_card.is_empty():
@@ -256,6 +262,11 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 			"drop": button.visible = landed or (bool(selected_card.get("has_lz_position", false)) and bool(selected_card.get("has_embarked_payload", false)))
 			"board": button.visible = false # Aufsitzen belongs to the selected troop card.
 			"return": button.visible = allowed or landed
+			"pilot":
+				button.visible = allowed
+				(button.get_parent() as Control).visible = allowed
+				button.text = "Pilot: steigt aus" if bool(controller.call("_is_pilot_disembark_selected", craft_id)) else "Pilot: bleibt an Bord"
+				button.tooltip_text = "Vorgabe: Der Pilot steigt mit aus. Bleibt er an Bord, ist Speichern im Einsatz gesperrt."
 	var approach_row := card.get_node("Contents/ApproachRow") as Control
 	approach_row.visible = not landed and not selected_card.is_empty()
 	approach_row.get_node("ApproachDial").call("set_direction", String(selected_card.get("approach_angle", "NW")))
@@ -299,8 +310,8 @@ static func _apply_readable_geometry(panel: VBoxContainer, rect: Rect2i, metrics
 	approach_heading.add_theme_font_size_override("font_size", font_size - 1)
 	var actions := card.get_node("Contents/Actions") as HBoxContainer
 	actions.add_theme_constant_override("separation", 4)
-	for action in ["set_lz", "drop", "board", "return"]:
-		var button := actions.get_node(NodePath(action)) as Button
+	for action in ["set_lz", "drop", "board", "return", "pilot"]:
+		var button := (card.get_node("Contents/PilotRow/pilot") if action == "pilot" else actions.get_node(NodePath(action))) as Button
 		button.custom_minimum_size = Vector2(0, _action_height(font_size))
 		button.add_theme_font_size_override("font_size", maxi(13, font_size - 2))
 	var selector := panel.get_node("CraftSelector") as OptionButton

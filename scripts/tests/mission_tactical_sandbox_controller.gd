@@ -680,6 +680,8 @@ var _drop_sequence_lz_position: Vector2 = Vector2.ZERO
 var _drop_sequence_approach_angle: String = "NW"
 var _drop_sequence_embarked_unit_ids: Dictionary = {}
 var _parallel_drop_sequences_by_craft: Dictionary = {}
+# Laufzeit-only (kein Speicherformat): craft_id -> true, wenn der Pilot beim Absetzen an Bord bleibt. Vorgabe fehlt = Pilot steigt aus (Speichern im Einsatz braucht alle Einheiten draussen).
+var _pilot_stays_aboard_by_craft: Dictionary = {}
 var _embarked_unit_ids: Dictionary = {}
 var _deployed_unit_ids: Dictionary = {}
 var _deployed_unit_positions: Dictionary = {}
@@ -14593,6 +14595,42 @@ func _can_deploy_parked_campaign_crew(craft_id: String) -> bool:
 	return false
 
 
+func _is_pilot_kept_aboard(craft_id: String, unit_id: String) -> bool:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty() or not bool(_pilot_stays_aboard_by_craft.get(craft_id, false)):
+		return false
+	return normalized_unit_id == String(_find_mission_dropship_card_entry(craft_id).get("pilot_unit_id", "")).strip_edges()
+
+
+# Der Pilot steigt mit ein (Flugwaechter sieht ihn an Bord), kommt aber beim Absetzen nicht in die Aussteigerliste.
+func _drop_units_without_kept_pilot(units: Array) -> Array:
+	var result: Array = []
+	for unit in units:
+		if unit != null and unit.has_method("get_unit_id") and _is_pilot_kept_aboard(_mission_drop_craft_id, String(unit.call("get_unit_id"))):
+			continue
+		result.append(unit)
+	return result
+
+
+func request_campaign_pilot_disembark_toggle(craft_id: String) -> Dictionary:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty() or _find_mission_dropship_card_entry(normalized_craft_id).is_empty():
+		return {"ok":false,"reason":"craft_unavailable","message":"Schiff nicht gefunden"}
+	var stays_aboard: bool = not bool(_pilot_stays_aboard_by_craft.get(normalized_craft_id, false))
+	_pilot_stays_aboard_by_craft[normalized_craft_id] = stays_aboard
+	_emit_planning_state_changed()
+	return {"ok":true,"pilot_disembarks":not stays_aboard}
+
+
+func _is_pilot_disembark_selected(craft_id: String) -> bool:
+	return not bool(_pilot_stays_aboard_by_craft.get(craft_id.strip_edges(), false))
+
+
+func _on_mission_dropship_pilot_disembark_pressed(craft_id: String) -> void:
+	request_campaign_pilot_disembark_toggle(craft_id)
+	_update_ui()
+
+
 func request_campaign_crew_deployment(craft_id: String) -> Dictionary:
 	if not _can_deploy_parked_campaign_crew(craft_id):
 		return {"ok":false,"reason":"deployment_unavailable","message":"Absetzen braucht ein gelandetes Schiff mit Kräften an Bord"}
@@ -14600,7 +14638,9 @@ func request_campaign_crew_deployment(craft_id: String) -> Dictionary:
 	var embarked:Dictionary={}
 	for unit in _campaign_craft_crew(craft_id):
 		if unit == null or not _embarked_unit_ids.has(String(unit.call("get_unit_id"))) or int(unit.call("get_health")) <= 0: continue
+		if _is_pilot_kept_aboard(craft_id, String(unit.call("get_unit_id"))): continue
 		crew.append(unit); embarked[String(unit.call("get_unit_id"))]=true
+	if crew.is_empty(): return {"ok":false,"reason":"only_pilot_aboard","message":"Kein Trupp zum Absetzen, nur der Pilot ist an Bord"}
 	var card:=_find_mission_dropship_card_entry(craft_id)
 	var sequence:Dictionary={"units":crew,"unit_index":0,"embarked_unit_ids":embarked,"lz_position":_campaign_landed_craft_position(craft_id),"approach_angle":String(card.get("approach_angle","NW"))}
 	if _requires_hex_deployment_owner():
@@ -37264,8 +37304,8 @@ func _try_start_drop_sequence(ignore_global_cooldown: bool = false) -> bool:
 		if not pending_landing.is_empty():_field_landing_by_craft[_mission_drop_craft_id]=pending_landing
 		_prepare_drop_sequence_context()
 		_embark_units_for_drop(pending_units)
-		_drop_sequence_units = pending_units
-		_drop_sequence_fireteam_name = _get_drop_fireteam_name_for_units(_drop_sequence_units)
+		_drop_sequence_units = _drop_units_without_kept_pilot(pending_units)
+		_drop_sequence_fireteam_name = _get_drop_fireteam_name_for_units(pending_units)
 		_drop_sequence_unit_index = 0
 		_drop_sequence_timer = 0.0
 		_drop_sequence_phase = DROP_SEQUENCE_INBOUND
@@ -37292,8 +37332,8 @@ func _try_start_drop_sequence(ignore_global_cooldown: bool = false) -> bool:
 	if landing.has("resolved_lz_position"):_field_landing_by_craft[_mission_drop_craft_id]=landing
 	_prepare_drop_sequence_context()
 	_embark_units_for_drop(pending_units)
-	_drop_sequence_units = pending_units
-	_drop_sequence_fireteam_name = _get_drop_fireteam_name_for_units(_drop_sequence_units)
+	_drop_sequence_units = _drop_units_without_kept_pilot(pending_units)
+	_drop_sequence_fireteam_name = _get_drop_fireteam_name_for_units(pending_units)
 	_drop_sequence_unit_index = 0
 	_drop_sequence_timer = 0.0
 	_drop_sequence_phase = DROP_SEQUENCE_INBOUND
