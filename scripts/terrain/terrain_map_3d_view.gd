@@ -92,6 +92,12 @@ const REGIONAL_OVERVIEW_MIN_SIZE: float = 84.0
 const REGIONAL_OVERVIEW_MAX_SIZE: float = 520.0
 const CAMERA_ZOOM_STEP: float = 2.2
 const CAMERA_PAN_UNITS_PER_SECOND: float = 9.0
+# Einsatz-Mausrad: multiplikativer Zoom je Raste. 1.2 -> von 5,5 bis 120 in ~17 Rasten, bis 520 in ~25.
+const CAMERA_WHEEL_ZOOM_FACTOR: float = 1.2
+# Einsatz-WASD: Einheiten/s = Kameragroesse * Faktor (Standardgroesse 34 -> ~18/s, frueher fest 9/s).
+const CAMERA_KEY_PAN_SIZE_FACTOR: float = 0.53
+# Untergrenze, damit WASD ganz nah nicht kriecht.
+const CAMERA_KEY_PAN_MIN_UNITS_PER_SECOND: float = 6.0
 const CAMERA_DRAG_PAN_FACTOR: float = 0.065
 const CONTINUOUS_REDRAW_AFTER_CAMERA_MSEC: int = 220
 const CONTINUOUS_REDRAW_AFTER_BOOTSTRAP_MSEC: int = 1200
@@ -2582,6 +2588,30 @@ func zoom_camera_at_screen_position(delta_steps: float, screen_position: Vector2
 	var after: Variant = screen_to_world_plane_position(screen_position, plane_height)
 	if before is Vector2 and after is Vector2:
 		_translate_camera_world_delta(Vector2(before) - Vector2(after))
+
+
+func zoom_camera_by_factor_steps(delta_steps: float) -> void:
+	# Positive Schritte zoomen hinein (kleinere Groesse), negative heraus.
+	var limit := get_camera_zoom_limit()
+	_camera_size = clampf(_camera_size / pow(CAMERA_WHEEL_ZOOM_FACTOR, delta_steps), CAMERA_MIN_SIZE, limit)
+	_update_camera_transform()
+	_request_viewport_redraw(true)
+
+
+func zoom_camera_wheel_at_screen_position(delta_steps: float, screen_position: Vector2, plane_height: float = 0.0) -> void:
+	var before: Variant = screen_to_world_plane_position(screen_position, plane_height)
+	zoom_camera_by_factor_steps(delta_steps)
+	var after: Variant = screen_to_world_plane_position(screen_position, plane_height)
+	if before is Vector2 and after is Vector2:
+		_translate_camera_world_delta(Vector2(before) - Vector2(after))
+
+
+func get_keyboard_pan_units_per_second() -> float:
+	return maxf(_camera_size * CAMERA_KEY_PAN_SIZE_FACTOR, CAMERA_KEY_PAN_MIN_UNITS_PER_SECOND)
+
+
+func pan_camera_keyboard(input_direction: Vector2, delta_seconds: float) -> void:
+	pan_camera(input_direction * (get_keyboard_pan_units_per_second() / CAMERA_PAN_UNITS_PER_SECOND), delta_seconds)
 
 
 func pan_camera_between_screen_positions(previous_position: Vector2, current_position: Vector2, plane_height: float = 0.0) -> void:
