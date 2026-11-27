@@ -275,7 +275,8 @@ func _run() -> void:
 	arrows.call("configure", [hint_a])
 	presenter.call("refresh")
 	var rects: Variant = presenter.call("_operations_action_rects")
-	_check(rects is Array and (rects as Array).is_empty(), "Ohne Operations-Besitzer: leere Liste")
+	# Seit 25.11. gelten alle sichtbaren Knoepfe der Heimatbasis (hier TargetButton) als geschuetzt, nicht nur die des Besitzers.
+	_check(rects is Array and not (rects as Array).is_empty(), "Ohne Operations-Besitzer: nur Knoepfe der Heimatbasis geschuetzt")
 	# Das Pfeilrechteck zaehlt fuer die Karte als geschuetzter Bereich (P3, Regel 8).
 	var protected_rects: Array = presenter.call("_launch_action_rects")
 	_check(protected_rects.has(Rect2(arrow.call("get_arrow_rect"))), "Gezeigter Pfeil ist ein geschuetzter Bereich der Karte")
