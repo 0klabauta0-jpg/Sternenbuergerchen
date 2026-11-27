@@ -1539,7 +1539,7 @@ func commit_singleplayer_local_return(adapter: Node, craft_id: String) -> Dictio
 	var wing_revision: int = _space_wing_state.get_snapshot().revision
 	var chosen := {}
 	var context := {"runtime_authorized":true, "actor_id":"singleplayer"}
-	# At most 256 gates, checked only on a return request, in stable order.
+	# Return request only, stable order: the 256 limb gates first, then the rest of the full-width approach zone (at most 2048 cells).
 	var gate_offsets: Array = [SPACE_AREA_GRID.station_dock_layout().get("dock_gate")] if station_dock else ([SPACE_GRID.to_offset(SPACE_GRID.HEX.round_axial(SPACE_GRID.HEX.plane_to_axial(pose.position_plane)))] if station_landing else layout.gate_cells)
 	for offset in gate_offsets:
 		if typeof(offset) != TYPE_VECTOR2I: return {"ok":false, "reason":"station_layout_changed"}

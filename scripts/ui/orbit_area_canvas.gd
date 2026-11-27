@@ -12,6 +12,16 @@ const MIN_ZOOM := 0.6
 const MAX_ZOOM := 48.0
 const MAP_CENTER := Vector2(256.0, 110.8512516844)
 signal move_requested(craft_id: String, target_hex: Vector2i)
+## Klick auf ein Schiff bzw. Rahmen um Schiffe (wie auf der Systemkarte). Nur Auswahl, kein Befehl.
+signal craft_selected(craft_id: String)
+signal crafts_box_selected(craft_ids: Array, additive: bool)
+## Ab so vielen Pixeln Bewegung bei gedrueckter linker Maustaste gilt es als Rahmen, darunter als Klick.
+const BOX_THRESHOLD := 6.0
+var _press_active := false
+var _box_active := false
+var _press_position := Vector2.ZERO
+var _box_end := Vector2.ZERO
+var _press_additive := false
 var _snapshot: Dictionary = {}
 var _actors: Dictionary = {}
 var _selected := ""
@@ -276,10 +286,20 @@ func _draw_static() -> void:
 	for cell: Vector2i in _body_mask:
 		var point := hex_to_screen(cell)
 		if Rect2(Vector2(-8,-8),size+Vector2(16,16)).has_point(point): _static_layer.draw_colored_polygon(_polygon(cell),Color(body_color, 0.3) if has_background else body_color)
+	# Anflugzone am Planetenrand: ueber die ganze Kartenbreite, ZONE_DEPTH Felder tief (nur sichtbare Zellen werden gezeichnet).
+	var screen_box := Rect2(Vector2(-12,-12),size+Vector2(24,24))
+	var zone_fill := Color(0.57,0.89,0.93,0.08)
 	for offset: Vector2i in _layout.gate_cells:
 		var cell := GRID.from_offset(offset)
-		if _scale() >= 5: _outline(_polygon(cell),Color(0.57,0.89,0.93,0.6),_static_layer)
-		else: _static_layer.draw_circle(hex_to_screen(cell),0.8,Color("91e4ee"))
+		var center := hex_to_screen(cell)
+		if not screen_box.has_point(center): continue
+		if _scale() >= 5:
+			var corners := _polygon(cell)
+			_static_layer.draw_colored_polygon(corners,zone_fill)
+			_outline(corners,Color(0.57,0.89,0.93,0.35),_static_layer)
+		else: _static_layer.draw_circle(center,0.8,Color(0.57,0.89,0.93,0.55))
+	var zone_label := hex_to_screen(GRID.from_offset(Vector2i(24, LAYOUT.ZONE_DEPTH + 2)))
+	_static_layer.draw_string(ThemeDB.fallback_font, zone_label, "Anflugzone", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("8ed7f1"))
 
 	_draw_station_target()
 
@@ -338,8 +358,41 @@ func _draw() -> void:
 		draw_arc(course[1],9.0,0.0,TAU,24,Color("f2c47c"),2.0,true)
 	elif _course_active and not _actors.has(_selected):
 		_course_active = false
+	if _box_active:
+		var frame := Rect2(_press_position,_box_end - _press_position).abs()
+		draw_rect(frame,Color(0.3,0.85,0.95,0.18),true)
+		draw_rect(frame,Color("77dce9"),false,1.0)
 	var name: String = str(_body_visual.get("name",_layout.body_id))
-	draw_string(ThemeDB.fallback_font,Vector2(16,22),name+" Ã‚Â· Orbit",HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("b0c8d5"))
+	draw_string(ThemeDB.fallback_font,Vector2(16,22),name+" Orbit",HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("b0c8d5"))
+
+## Schiffe, deren Mittelpunkt im Bildschirmrechteck liegt (Rahmenauswahl). Nur Schiffe dieses Orbitbereichs.
+func crafts_in_rect(box: Rect2) -> Array:
+	var result: Array = []
+	for id: String in _actors:
+		if box.has_point(plane_to_screen(_actors[id].flight.position_plane)): result.append(id)
+	result.sort()
+	return result
+
+## Schiff unter dem Mauszeiger (Bildschirmpunkt) oder "".
+func craft_at(point: Vector2) -> String:
+	var reach := clampf(_scale() * 1.5, 8.0, 18.0)
+	var best := ""
+	var best_distance := reach
+	for id: String in _actors:
+		var distance := point.distance_to(plane_to_screen(_actors[id].flight.position_plane))
+		if distance <= best_distance:
+			best_distance = distance
+			best = id
+	return best
+
+func is_box_selecting() -> bool:
+	return _box_active
+
+func cancel_modal_input() -> void:
+	_press_active = false
+	_box_active = false
+	_dragging = false
+	queue_redraw()
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -349,14 +402,47 @@ func _gui_input(event: InputEvent) -> void:
 		elif event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP,MOUSE_BUTTON_WHEEL_DOWN]:
 			zoom_at(event.position,_zoom*(1.15 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0/1.15))
 			accept_event()
-		elif event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-			if request_move_at(event.position): accept_event()
-	elif event is InputEventMouseMotion and _dragging:
-		if not event.button_mask & MOUSE_BUTTON_MASK_MIDDLE:
-			_dragging = false
-			return
-		pan_by(event.relative)
-		accept_event()
+		elif event.button_index == MOUSE_BUTTON_LEFT:
+			# Druck merkt sich nur den Punkt. Erst beim Loslassen entscheidet sich: kleine Bewegung = Klick (Kurs setzen bzw. Schiff waehlen),
+			# ab BOX_THRESHOLD Pixeln Bewegung = Rahmenauswahl. So verschluckt der Rahmen den einfachen Klick nicht.
+			if event.pressed:
+				_press_active = true
+				_box_active = false
+				_press_position = event.position
+				_box_end = event.position
+				_press_additive = event.ctrl_pressed
+				accept_event()
+			elif _press_active:
+				_press_active = false
+				var was_box := _box_active
+				_box_active = false
+				queue_redraw()
+				if was_box:
+					crafts_box_selected.emit(crafts_in_rect(Rect2(_press_position,event.position - _press_position).abs()),_press_additive)
+				else:
+					var hit := craft_at(event.position)
+					if not hit.is_empty():
+						if _press_additive: crafts_box_selected.emit([hit],true)
+						else: craft_selected.emit(hit)
+					else: request_move_at(event.position)
+				accept_event()
+	elif event is InputEventMouseMotion:
+		if _press_active:
+			if not event.button_mask & MOUSE_BUTTON_MASK_LEFT:
+				_press_active = false
+				_box_active = false
+				queue_redraw()
+			else:
+				_box_end = event.position
+				if not _box_active and _press_position.distance_to(_box_end) >= BOX_THRESHOLD: _box_active = true
+				if _box_active: queue_redraw()
+				accept_event()
+		elif _dragging:
+			if not event.button_mask & MOUSE_BUTTON_MASK_MIDDLE:
+				_dragging = false
+				return
+			pan_by(event.relative)
+			accept_event()
 
 static func _finite_vector(value: Variant) -> bool:
 	return value is Vector2 and is_finite(value.x) and is_finite(value.y)

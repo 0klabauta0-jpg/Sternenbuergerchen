@@ -30,7 +30,9 @@ static func plan(area_id: String, start: Vector2i, direction: String, footprint:
 		for x in range(layout.entry_band.position.x, layout.entry_band.end.x): candidates.append(Vector2i(x, layout.entry_band.end.y - 2))
 	candidates.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
 		var da := absi(a.x - start_offset.x); var db := absi(b.x - start_offset.x)
-		return a.x < b.x if da == db else da < db)
+		if da != db: return da < db
+		# Gleiche Spalte (die Anflugzone ist mehrere Felder tief): das flachste Feld zuerst, wie die bisherige Torzelle.
+		return a.x < b.x if a.x != b.x else a.y < b.y)
 	for offset in candidates:
 		var target: Vector2i = GRID.from_offset(offset)
 		var clear := true

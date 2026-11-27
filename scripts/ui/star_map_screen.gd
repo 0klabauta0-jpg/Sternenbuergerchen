@@ -69,6 +69,11 @@ var _view_homebase: Button
 var _destination_ids: PackedStringArray = []
 var _fleet_selector: OptionButton
 var _wing_panel
+## OM-Karte (Orbit-Ansicht): Titel mit dem Namen des Orbits statt der Systemzeile, links die Schiffs-/Gruppenliste statt des Systembaums.
+var _system_caption: Label
+var _orbit_left: PanelContainer
+var _orbit_left_box: VBoxContainer
+var _details_information: VBoxContainer
 var _visit_list: VBoxContainer
 var _visit_buttons: Dictionary={}
 var _details: PanelContainer
@@ -177,6 +182,7 @@ func _build() -> void:
 	system_caption.name = "SystemCaption"
 	system_caption.tooltip_text = "Baum: Orte ansehen oder Ziel wählen. Kartenmarker: Kurs ansehen, dann Start. Doppelklick zoomt auf Körper oder Ort."
 	column.add_child(system_caption)
+	_system_caption = system_caption
 	var body := HBoxContainer.new()
 	body.name = "SystemAndDetails"
 	body.add_theme_constant_override("separation", 8)
@@ -190,6 +196,27 @@ func _build() -> void:
 	_navigation.location_inspection_requested.connect(func(id: String): _send("inspect_location", {"location_id":id}))
 	_navigation.orbit_inspection_requested.connect(func(body_id: String, orbit_id: String): _send("inspect_orbit", {"body_id":body_id, "orbit_id":orbit_id}))
 	body.add_child(_navigation)
+	# Nur in der Orbit-Ansicht sichtbar: nimmt dort die Schiffsliste auf (siehe _place_wing_panel).
+	_orbit_left = PanelContainer.new()
+	_orbit_left.name = "OrbitShipColumn"
+	_orbit_left.custom_minimum_size = Vector2(250, 300)
+	_orbit_left.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	var left_style := StyleBoxFlat.new()
+	left_style.bg_color = Color("0c1721")
+	left_style.border_color = Color("284754")
+	left_style.set_border_width_all(1)
+	left_style.set_content_margin_all(8)
+	_orbit_left.add_theme_stylebox_override("panel", left_style)
+	var left_scroll := ScrollContainer.new()
+	left_scroll.name = "OrbitShipScroll"
+	left_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_orbit_left.add_child(left_scroll)
+	_orbit_left_box = VBoxContainer.new()
+	_orbit_left_box.name = "OrbitShipList"
+	_orbit_left_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left_scroll.add_child(_orbit_left_box)
+	_orbit_left.hide()
+	body.add_child(_orbit_left)
 	var system_column := VBoxContainer.new()
 	_map_column = system_column
 	system_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -239,6 +266,9 @@ func _build() -> void:
 	_orbit_canvas.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_orbit_canvas.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_orbit_canvas.move_requested.connect(_on_orbit_move_requested)
+	# OM-Karte: Klick auf ein Schiff bzw. Rahmen waehlt Schiffe/Gruppen wie auf der Systemkarte (nur Auswahl).
+	_orbit_canvas.craft_selected.connect(_on_map_craft_selected)
+	_orbit_canvas.crafts_box_selected.connect(func(ids: Array, additive: bool): _wing_panel.select_for_crafts(ids, additive))
 	system_column.add_child(_orbit_canvas)
 	_orbit_canvas.hide()
 	_details = PanelContainer.new()
@@ -261,6 +291,7 @@ func _build() -> void:
 	detail_scroll.add_child(inset)
 	var information := VBoxContainer.new()
 	information.name = "DestinationInformation"
+	_details_information = information
 	information.add_theme_constant_override("separation", 6)
 	inset.add_child(information)
 	_fleet_selector=OptionButton.new()
@@ -344,9 +375,33 @@ func _layout_details() -> void:
 	if _navigation != null:
 		_navigation.custom_minimum_size.x = clampf(size.x * 0.18, 210, 276)
 		var narrow := size.x < 1000
-		_navigation_toggle.visible = narrow
-		_navigation.visible = not narrow or _navigation_toggle.button_pressed
-		_map_column.visible = not narrow or not _navigation_toggle.button_pressed
+		# OM-Karte: keine Systemliste (und kein Umschalter dafuer); die Karte bleibt immer sichtbar.
+		_navigation_toggle.visible = narrow and not _orbit_visible
+		_navigation.visible = not _orbit_visible and (not narrow or _navigation_toggle.button_pressed)
+		_map_column.visible = _orbit_visible or not narrow or not _navigation_toggle.button_pressed
+	_place_wing_panel()
+
+## OM-Karte, breite Ansicht: Die Liste der Schiffe/Schiffsgruppen steht links (statt der Systemliste). Sonst, und in der schmalen
+## Ansicht, bleibt sie wie bisher im Zielfeld rechts. Es ist dasselbe Bedienelement, es wird nur umgehaengt.
+func _place_wing_panel() -> void:
+	if _wing_panel == null or _orbit_left == null or _details_information == null: return
+	var left: bool = _orbit_visible and size.x >= 1000.0
+	var target: Control = _orbit_left_box if left else _details_information
+	if _wing_panel.get_parent() != target: _wing_panel.reparent(target, false)
+	_orbit_left.visible = left
+
+## Titel der OM-Karte: Name des Orbits (z. B. "Vespa Orbit"); ausserhalb der Orbit-Ansicht die gewohnte Systemzeile.
+func _update_orbit_caption() -> void:
+	if _system_caption == null: return
+	var text := "SYSTEM: " + DISPLAY.SYSTEM_NAME
+	if _orbit_visible:
+		var visual: Dictionary = _orbit_body_visual(_orbit_canvas.call("get_projection"))
+		var body_name := String(visual.get("name", ""))
+		text = (body_name + " Orbit") if not body_name.is_empty() else "Orbit"
+	if _system_caption.text == text: return
+	_system_caption.text = text
+	_system_caption.add_theme_font_size_override("font_size", 24 if _orbit_visible else 16)
+	_system_caption.add_theme_color_override("font_color", Color("f2ca86") if _orbit_visible else APP_THEME.MUTED)
 
 func _label(text: String, font_size: int, color: Color = Color("e1ecf0")) -> Label:
 	var label := Label.new()
@@ -609,6 +664,7 @@ func _refresh_orbit_projection() -> void:
 	_orbit_button.disabled = not available
 	_orbit_button.tooltip_text = "Lokalen Orbit ansehen" if available else "Schiff explizit auswählen; benötigt einen aktiven lokalen Orbitbereich."
 	if _orbit_visible and not available: _show_system_view()
+	_update_orbit_caption()
 	_refresh_station_dock_button()
 
 func _refresh_station_dock_button() -> void:
@@ -641,6 +697,8 @@ func _show_orbit_view() -> void:
 	_canvas.hide()
 	_orbit_canvas.show()
 	_orbit_center.show()
+	_update_orbit_caption()
+	_layout_details()
 	_refresh_station_dock_button()
 	_elapsed = 0.0
 
@@ -649,6 +707,8 @@ func _show_system_view() -> void:
 	_canvas.show()
 	_orbit_canvas.hide()
 	_orbit_center.hide()
+	_update_orbit_caption()
+	_layout_details()
 	_refresh_station_dock_button()
 	_elapsed = 0.0
 
