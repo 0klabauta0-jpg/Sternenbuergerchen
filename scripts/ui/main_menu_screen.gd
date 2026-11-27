@@ -222,6 +222,7 @@ func _ready() -> void:
 	_layout_native_shell_windows()
 	_refresh_save_state_entries()
 	_focus_primary_entry()
+	_fit_menu_to_viewport()
 	_status_label.text = _ready_status_text()
 	if get_tree().root.has_meta("campaign_start_error"):
 		var start_error: String = String(get_tree().root.get_meta("campaign_start_error"))
@@ -1050,6 +1051,7 @@ func _configure_native_settings_window(action_row: HBoxContainer) -> void:
 
 
 func _layout_native_shell_windows() -> void:
+	_fit_menu_to_viewport()
 	var viewport_size := get_viewport_rect().size
 	if _settings_panel != null:
 		var settings_size := Vector2(minf(680.0, viewport_size.x - 64.0), maxf(280.0, minf(900.0, viewport_size.y - 96.0)))
@@ -3831,7 +3833,7 @@ func _ensure_campaign_entry() -> void:
 	_continue_info_label.add_theme_font_size_override("font_size", 13)
 	_continue_info_label.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT_MUTED)
 	_continue_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_continue_info_label.custom_minimum_size = Vector2(MAIN_BUTTON_SIZE.x, 0.0)
+	_continue_info_label.custom_minimum_size = Vector2(400.0, 0.0)
 	menu_buttons.add_child(_continue_info_label)
 	_campaign_button = _make_button("CampaignButton", "Kampagne")
 	_campaign_button.tooltip_text = "Einführung mit zwei NPCs und eigenem Kampagnenstand. Klappt auf: Neue Kampagne, Basisstand laden."
@@ -4138,6 +4140,51 @@ func _set_section_open(section: String) -> void:
 		_refresh_save_state_entries()
 	if _status_label != null:
 		_status_label.text = String(SECTION_HINTS.get(section, _ready_status_text()))
+	_fit_menu_to_viewport()
+
+
+# Alle Hauptknoepfe muessen auch in kleinen Fenstern (z. B. 1280x720) erreichbar bleiben:
+# Hoehen und Abstaende werden stufenweise verkleinert, bis der Bereich ins Bild passt.
+const MENU_FIT_LEVELS: Array = [
+	[52.0, 40.0, 10, 6, 40, 32],
+	[46.0, 34.0, 6, 4, 24, 16],
+	[40.0, 30.0, 4, 3, 16, 10],
+	[36.0, 26.0, 3, 2, 10, 6],
+]
+
+
+func _fit_menu_to_viewport() -> void:
+	if _main_menu_buttons == null or not is_inside_tree():
+		return
+	var margin := get_node_or_null("MenuRail/MenuMargin") as MarginContainer
+	if margin == null:
+		return
+	var limit: float = get_viewport_rect().size.y
+	for level_variant in MENU_FIT_LEVELS:
+		var level: Array = level_variant
+		_apply_menu_fit_level(margin, level)
+		if margin.get_combined_minimum_size().y <= limit:
+			break
+
+
+func _apply_menu_fit_level(margin: MarginContainer, level: Array) -> void:
+	_main_menu_buttons.add_theme_constant_override("separation", int(level[2]))
+	margin.add_theme_constant_override("margin_top", int(level[4]))
+	margin.add_theme_constant_override("margin_bottom", int(level[5]))
+	for node in _main_menu_buttons.get_children():
+		if node is Button:
+			(node as Button).custom_minimum_size.y = float(level[0])
+		elif node is VBoxContainer:
+			(node as VBoxContainer).add_theme_constant_override("separation", int(level[3]))
+			_set_sub_button_height(node, float(level[1]))
+
+
+func _set_sub_button_height(node: Node, height: float) -> void:
+	for child in node.get_children():
+		if child is Button:
+			(child as Button).custom_minimum_size.y = height
+		else:
+			_set_sub_button_height(child, height)
 
 
 func get_main_menu_snapshot() -> Dictionary:
@@ -4241,6 +4288,8 @@ func _ensure_main_menu_structure() -> void:
 	if _main_menu_buttons == null:
 		return
 	_main_menu_buttons.add_theme_constant_override("separation", 10)
+	_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_status_label.custom_minimum_size = Vector2(400.0, 0.0)
 	var title := get_node_or_null("MenuRail/MenuMargin/MenuVBox/TitleLabel") as Label
 	if title != null:
 		title.text = "STERNENBÜRGERCHEN"
@@ -4346,7 +4395,7 @@ func _apply_release_first_play_polish() -> void:
 	_style_sub_button(_team_editor_toggle_button, "")
 	for team_button in [_new_roster_button, _team_editor_toggle_button]:
 		if team_button != null:
-			team_button.custom_minimum_size = Vector2(320.0, 48.0)
+			team_button.custom_minimum_size = Vector2(200.0, 44.0)
 			team_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 
@@ -4364,7 +4413,7 @@ func _ensure_teams_screen() -> void:
 	_teams_screen = Panel.new()
 	_teams_screen.name = "TeamsScreen"
 	_teams_screen.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_teams_screen.offset_left = 56.0
+	_teams_screen.offset_left = 544.0
 	_teams_screen.offset_top = 56.0
 	_teams_screen.offset_right = -56.0
 	_teams_screen.offset_bottom = -56.0
