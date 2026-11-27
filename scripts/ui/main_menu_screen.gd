@@ -1052,6 +1052,16 @@ func _configure_native_settings_window(action_row: HBoxContainer) -> void:
 
 func _layout_native_shell_windows() -> void:
 	_fit_menu_to_viewport()
+	if _teams_screen != null:
+		# An das Fenster binden (nicht an die 1920x1080-Mindestgroesse des Menues), rechts neben der Leiste.
+		var teams_vp := get_viewport_rect().size
+		_teams_screen.set_as_top_level(true)
+		_teams_screen.anchor_left = 0.0
+		_teams_screen.anchor_top = 0.0
+		_teams_screen.anchor_right = 0.0
+		_teams_screen.anchor_bottom = 0.0
+		_teams_screen.position = Vector2(544.0, 56.0)
+		_teams_screen.size = Vector2(maxf(480.0, teams_vp.x - 544.0 - 32.0), maxf(360.0, teams_vp.y - 112.0))
 	var viewport_size := get_viewport_rect().size
 	if _settings_panel != null:
 		var settings_size := Vector2(minf(680.0, viewport_size.x - 64.0), maxf(280.0, minf(900.0, viewport_size.y - 96.0)))
@@ -4479,6 +4489,7 @@ func open_teams_screen() -> void:
 	if _teams_screen == null or _launching:
 		return
 	_teams_screen.visible = true
+	_layout_native_shell_windows()
 	_refresh_team_library()
 	_status_label.text = "Teams: Name, neues Team, Team-Editor und Bibliothek."
 	if _teams_back_button != null:
