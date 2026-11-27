@@ -8303,6 +8303,31 @@ func _resolve_air_support_pilot(craft_id: String) -> Dictionary:
 func request_air_support_takeoff(craft_id: String) -> Dictionary:
 	return _begin_air_sortie(craft_id, false, Vector2.INF)
 
+## Luftrollen F(b): gemeinsame Vorpruefung fuer Start und Ankunft im Kreisen, ohne Seiteneffekt. Gilt fuer jedes Kampagnenschiff mit Pilot an Bord
+## (keine Sperre nach Schiffsart). Bei Erfolg {"ok":true, "binding":...}, sonst {"ok":false, "reason":...} wie bisher.
+func _air_start_gate(craft_id: String, arriving: bool) -> Dictionary:
+	if _air_support_sorties.has(craft_id): return {"ok":false, "reason":"already_airborne"}
+	var binding: Dictionary = _resolve_air_support_craft(craft_id)
+	if not binding.get("ok", false): return binding
+	var pilot: Dictionary = _resolve_air_support_pilot(craft_id)
+	if not pilot.get("ok", false): return pilot
+	# Luftrollen 2: mit Treibstoffkonto und Rest <= Ortsabflug + 1 kein Lufteinsatz (gilt auch fuer die Ankunft im Kreisen).
+	var fuel_supply: RefCounted = _air_fuel_supply()
+	if fuel_supply != null and fuel_supply.has_fuel_account(craft_id) and float(fuel_supply.get_fuel(craft_id)) <= float(_air_fuel_costs(fuel_supply).land_at) + 0.00001:
+		return {"ok":false, "reason":"air_fuel_low", "message":"Treibstoff reicht nur noch für den Abflug vom Ort – kein Lufteinsatz."}
+	if not arriving:
+		var controller: Node = get_parent().get_node_or_null("TacticalController")
+		if controller == null or not controller.has_method("_is_parked_campaign_dropship") or not controller.call("_is_parked_campaign_dropship", craft_id): return {"ok":false, "reason":"craft_not_landed"}
+	return {"ok":true, "binding":binding}
+
+## Luftrollen F(b): Auskunft fuer die Schiffskarte, ob ein Start jetzt moeglich waere (aendert nichts). Gleiche Gruende wie request_air_support_takeoff.
+func get_air_support_start_refusal(craft_id: String) -> Dictionary:
+	if _should_skip_local_tick_processing() or _air_ground_registry() == null: return {"ok":false, "reason":"ground_unavailable"}
+	if _air_support_location_id == "polisa": return {"ok":false, "reason":"no_planetary_atmosphere"}
+	if craft_id.strip_edges().is_empty(): return {"ok":false, "reason":"invalid_context"}
+	var gate: Dictionary = _air_start_gate(craft_id, false)
+	return {"ok":true} if gate.get("ok", false) else gate
+
 ## Task LB: the ship arrives in the air over its resolved landing zone instead of touching down first.
 ## Same body as the takeoff, without the "parked and landed" demand; the landing position is the given one.
 func request_air_support_arrival(craft_id: String, landing_position: Vector2) -> Dictionary:
@@ -8313,19 +8338,12 @@ func _begin_air_sortie(craft_id: String, arriving: bool, arrival_position: Vecto
 	if _should_skip_local_tick_processing() or terrain == null: return {"ok":false, "reason":"ground_unavailable"}
 	if _air_support_location_id == "polisa": return {"ok":false, "reason":"no_planetary_atmosphere"}
 	if is_processing_tick or craft_id.strip_edges().is_empty(): return {"ok":false, "reason":"invalid_context"}
-	if _air_support_sorties.has(craft_id): return {"ok":false, "reason":"already_airborne"}
-	var binding: Dictionary = _resolve_air_support_craft(craft_id)
-	if not binding.get("ok", false): return binding
-	var pilot: Dictionary = _resolve_air_support_pilot(craft_id)
-	if not pilot.get("ok", false): return pilot
-	# Luftrollen 2: mit Treibstoffkonto und Rest <= Ortsabflug + 1 kein Lufteinsatz (gilt auch fuer die Ankunft im Kreisen).
-	var fuel_supply: RefCounted = _air_fuel_supply()
-	if fuel_supply != null and fuel_supply.has_fuel_account(craft_id) and float(fuel_supply.get_fuel(craft_id)) <= float(_air_fuel_costs(fuel_supply).land_at) + 0.00001:
-		return {"ok":false, "reason":"air_fuel_low", "message":"Treibstoff reicht nur noch für den Abflug vom Ort – kein Lufteinsatz."}
+	var gate: Dictionary = _air_start_gate(craft_id, arriving)
+	if not gate.get("ok", false): return gate
+	var binding: Dictionary = gate.binding
 	var position: Variant = arrival_position
 	if not arriving:
 		var controller: Node = get_parent().get_node_or_null("TacticalController")
-		if controller == null or not controller.has_method("_is_parked_campaign_dropship") or not controller.call("_is_parked_campaign_dropship", craft_id): return {"ok":false, "reason":"craft_not_landed"}
 		position = controller.call("_campaign_landed_craft_position", craft_id)
 	if typeof(position) != TYPE_VECTOR2 or not position.is_finite(): return {"ok":false, "reason":"landing_position_unavailable"}
 	var grid: Vector2i = terrain.call("world_to_grid", position)

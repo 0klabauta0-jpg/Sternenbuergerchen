@@ -496,6 +496,19 @@ func _part_real() -> void:
 	await process_frame
 	var pilot_button: Button = _air_button(mission, "air_pilot_board")
 	if not _check(pilot_button != null and not pilot_button.disabled, "(h) Knopf Pilot einsteigen vorhanden"): return
+	# Luftrollen F(b): ohne Pilot an Bord liest der Spieler den Grund in Klartext (Hinweis am Knopf und Rueckmeldung), nicht einen Code.
+	var gate_start: Button = _air_button(mission, "air_start")
+	var gate_circle: Button = _air_button(mission, "air_circle")
+	if _check(gate_start != null and gate_circle != null, "(F) Knoepfe Start und Kreisen vorhanden"):
+		gate_start.mouse_entered.emit()
+		gate_circle.mouse_entered.emit()
+		_check(gate_start.tooltip_text.contains("Gerade nicht möglich: ") and gate_start.tooltip_text.contains("Pilot") and not gate_start.tooltip_text.contains("pilot_"), "(F) Hinweis am Knopf Start nennt den Pilotengrund: " + gate_start.tooltip_text)
+		_check(gate_circle.tooltip_text.contains("Gerade nicht möglich: ") and not gate_circle.tooltip_text.contains("pilot_"), "(F) Hinweis am Knopf Kreisen ohne Rohcode: " + gate_circle.tooltip_text)
+		gate_start.pressed.emit()
+		var refusal_line: String = String(controller.get("_last_command_text"))
+		_check(refusal_line.contains("Pilot") and not refusal_line.contains("_") and not root_owner.call("is_air_support_craft_airborne", _craft_id), "(F) Start ohne Pilot: Rueckmeldung in Klartext, Schiff bleibt am Boden: " + refusal_line)
+		gate_circle.pressed.emit()
+		_check(not root_owner.call("is_air_support_craft_airborne", _craft_id), "(F) Kreisen ohne Pilot startet nichts")
 	var board_deadline := Time.get_ticks_msec() + 90000
 	while Time.get_ticks_msec() < board_deadline and not bool(controller.call("get_campaign_air_support_pilot_guard", _craft_id).get("ok", false)):
 		pilot_button.pressed.emit()

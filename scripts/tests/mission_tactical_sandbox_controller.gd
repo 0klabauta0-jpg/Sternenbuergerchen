@@ -13895,12 +13895,127 @@ func _append_air_support_card_row(host: VBoxContainer, card: Dictionary) -> void
 	row.columns = 3
 	host.add_child(row)
 	for item in [["Pilot einsteigen", "pilot_board"], ["Start", "start"], ["Fliegen", "move"], ["Landen", "land"], ["Feuer", "fire"], ["Feuerstopp", "cease"], ["Luftradar", "radar"], ["Kreisen", "circle"], ["CAS", "role_cas"], ["Luftschutz", "role_air_defense"], ["Kreisen aus", "role_clear"]]:
-		row.add_child(_build_mission_dropship_card_command_button(item[0], "Schiffbefehl; Fliegen und Feuer nutzen das markierte Hexfeld.", false, Callable(self, "_on_air_support_card_action").bind(craft_id, item[1]), craft_id, "air_" + item[1]))
+		var air_button: Button = _build_mission_dropship_card_command_button(item[0], "Schiffbefehl; Fliegen und Feuer nutzen das markierte Hexfeld.", false, Callable(self, "_on_air_support_card_action").bind(craft_id, item[1]), craft_id, "air_" + item[1])
+		# Luftrollen F(b): der Knopf bleibt benutzbar; beim Darueberfahren nennt der Hinweis in Klartext, was gerade fehlt.
+		air_button.mouse_entered.connect(_apply_air_support_button_tooltip.bind(air_button, craft_id, String(item[1])))
+		row.add_child(air_button)
 	var fuel_label := Label.new()
 	fuel_label.name = "AirSupportFuelLabel"
 	fuel_label.text = _air_support_fuel_line(craft_id)
 	fuel_label.visible = not fuel_label.text.is_empty()
 	host.add_child(fuel_label)
+
+
+## Luftrollen F(b): Klartext (Deutsch) fuer die Ablehnungsgruende der Luftbefehle; nie ein roher Code auf dem Schirm.
+const AIR_SUPPORT_REASON_TEXTS := {
+	"craft_not_landed": "Erst landen und absetzen",
+	"pilot_presence_unknown": "Kein Pilot an Bord",
+	"pilot_not_aboard": "Kein Pilot an Bord – Pilot muss einsteigen",
+	"pilot_unavailable": "Der Pilot ist nicht flugfähig",
+	"pilot_boarding_pending": "Der Pilot steigt gerade ein oder aus",
+	"pilot_assignment_changed": "Pilot wurde gewechselt – Pilot neu einsteigen lassen",
+	"pilot_not_assigned_to_craft": "Der Pilot gehört nicht zu diesem Schiff",
+	"pilot_owned_by_other_visit": "Der Pilot gehört zu einem anderen Schiff",
+	"boarding_owner_unavailable": "Kein Pilot an Bord",
+	"crew_unavailable": "Die Besatzung ist nicht einsatzfähig",
+	"crew_not_aboard": "Die Besatzung ist nicht an Bord",
+	"crew_deployment_pending": "Die Besatzung steigt noch ein oder aus",
+	"air_fuel_low": "Zu wenig Treibstoff",
+	"already_airborne": "Das Schiff ist schon in der Luft",
+	"sortie_unavailable": "Das Schiff ist nicht in der Luft",
+	"not_at_landing_site": "Erst zur Landezone zurückfliegen",
+	"ground_landing_occupied": "Die Landezone ist belegt",
+	"stale_aircraft_index": "Die Landezone ist belegt",
+	"no_planetary_atmosphere": "Hier gibt es keine Atmosphäre zum Fliegen",
+	"role_point_off_map": "Der Punkt liegt außerhalb der Karte",
+	"circle_off_map": "Die Rundbahn passt hier nicht auf die Karte",
+	"circle_near_map_edge": "Zu nah am Kartenrand – Mittelpunkt weiter innen wählen",
+	"invalid_landing_site": "Die Zelle über der Landezone ist belegt",
+	"landing_position_unavailable": "Die Landezone ist nicht bekannt",
+	"systems_unavailable": "Die Schiffssysteme sind ausgefallen",
+	"equipment_unavailable": "Für dieses Schiff gibt es keine Flugdaten",
+	"craft_not_ready": "Dieses Schiff ist noch nicht flugbereit",
+	"craft_not_at_location": "Das Schiff ist nicht an diesem Ort",
+	"air_source_unavailable": "Die Luftunterstützung ist hier nicht bereit",
+	"air_source_changed": "Die Luftunterstützung ist hier nicht bereit",
+	"mission_context_changed": "Die Luftunterstützung ist hier nicht bereit",
+	"air_owner_unavailable": "Die Luftunterstützung ist hier nicht bereit",
+	"ground_unavailable": "Die Luftunterstützung ist hier nicht bereit",
+	"simulation_busy": "Einen Augenblick – das Spiel rechnet gerade",
+	"circle_blocked": "Die Rundbahn ist belegt",
+	"invalid_action": "Unbekannter Schiffsbefehl",
+}
+## Bei diesen Gruenden ist der Satz der Simulation genauer als die Tabelle.
+const AIR_SUPPORT_REASON_PREFER_MESSAGE := ["air_fuel_low", "circle_near_map_edge"]
+const AIR_SUPPORT_BUTTON_TOOLTIPS := {
+	"pilot_board": "Schiffsbefehl: der zugewiesene Pilot steigt ein.",
+	"start": "Schiffsbefehl: das Schiff hebt ab.",
+	"move": "Schiffsbefehl: fliegt zum markierten Hexfeld.",
+	"land": "Schiffsbefehl: fliegt zur Landezone und landet.",
+	"fire": "Schiffsbefehl: greift den markierten Gegner an.",
+	"cease": "Schiffsbefehl: Feuer einstellen.",
+	"radar": "Schiffsbefehl: Luftradar abfragen.",
+	"circle": "Schiffsbefehl: kreist um das markierte Hexfeld.",
+	"role_cas": "Schiffsbefehl: Luftnahunterstützung um das markierte Hexfeld.",
+	"role_air_defense": "Schiffsbefehl: Luftschutz um das markierte Hexfeld.",
+	"role_clear": "Schiffsbefehl: Kreisen beenden, Schiff hält die Position.",
+}
+
+
+## Satz fuer das Ergebnis eines Luftbefehls: Tabelle, sonst Satz der Simulation, sonst Klartext des Aufrufers (enthaelt Leerzeichen).
+func _air_support_reason_text(result: Dictionary) -> String:
+	var reason: String = String(result.get("reason", "")).strip_edges()
+	var message: String = String(result.get("message", "")).strip_edges()
+	if reason in AIR_SUPPORT_REASON_PREFER_MESSAGE and not message.is_empty():
+		return message
+	if AIR_SUPPORT_REASON_TEXTS.has(reason):
+		return String(AIR_SUPPORT_REASON_TEXTS[reason])
+	if not message.is_empty():
+		return message
+	if reason.is_empty():
+		return "Schiffbefehl nicht möglich"
+	if reason.contains(" "):
+		return reason
+	print("air support command refused, unlisted reason: ", reason)
+	return "Schiffbefehl nicht möglich"
+
+
+## Was dem Knopf gerade fehlt (leer = nichts). Liest nur; aendert nichts.
+func _air_support_button_refusal(craft_id: String, action: String) -> String:
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	if simulation == null or action in ["pilot_board", "radar", "cease", "role_clear"]:
+		return ""
+	var airborne: bool = bool(simulation.call("is_air_support_craft_airborne", craft_id))
+	var needs_tile := false
+	match action:
+		"start":
+			if not simulation.has_method("get_air_support_start_refusal"): return ""
+			var gate: Dictionary = simulation.call("get_air_support_start_refusal", craft_id)
+			return "" if bool(gate.get("ok", false)) else _air_support_reason_text(gate)
+		"circle", "role_cas", "role_air_defense":
+			needs_tile = true
+			if not airborne:
+				var start_gate: Dictionary = simulation.call("get_air_support_start_refusal", craft_id) if simulation.has_method("get_air_support_start_refusal") else {"ok": true}
+				if not bool(start_gate.get("ok", false)):
+					return _air_support_reason_text(start_gate)
+		"move", "fire":
+			needs_tile = true
+			if not airborne:
+				return "Erst starten – das Schiff ist am Boden"
+		"land":
+			if not airborne:
+				return "Das Schiff ist nicht in der Luft"
+	if needs_tile and not _has_selected_tile:
+		return "Zuerst ein Hexfeld markieren"
+	return ""
+
+
+func _apply_air_support_button_tooltip(button: Button, craft_id: String, action: String) -> void:
+	if not is_instance_valid(button):
+		return
+	var base: String = String(AIR_SUPPORT_BUTTON_TOOLTIPS.get(action, "Schiffsbefehl"))
+	var refusal: String = _air_support_button_refusal(craft_id, action)
+	button.tooltip_text = base if refusal.is_empty() else "%s\nGerade nicht möglich: %s" % [base, refusal]
 
 
 ## Luftrollen 2: Zeile "Treibstoff: N" (nur mit Treibstoffkonto), bei Warnung mit Zusatz.
@@ -13957,7 +14072,7 @@ func _on_air_support_card_action(craft_id: String, action: String) -> void:
 			else:
 				var token := "ui-air-fire:%d" % Time.get_ticks_usec()
 				result = simulation.request_air_support_attack_order({"craft_id":craft_id, "target_unit_id":target, "request_id":token + ":order"})
-	_last_command_text = String(result.get("message", "Schiffbefehl ausgeführt")) if result.get("ok", false) else String(result.get("message", result.get("reason", "Schiffbefehl nicht möglich")))
+	_last_command_text = String(result.get("message", "Schiffbefehl ausgeführt")) if result.get("ok", false) else _air_support_reason_text(result)
 	_set_mission_dropship_card_feedback(craft_id, _last_command_text)
 	_refresh_mission_dropship_panel()
 
