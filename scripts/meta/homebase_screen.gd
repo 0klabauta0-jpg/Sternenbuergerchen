@@ -4,6 +4,7 @@ extends Control
 const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 const FRONTIER_SHIP_VISUALS_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
 const OPERATIONS_PRESENTER_SCRIPT: GDScript = preload("res://scripts/meta/homebase_operations_presenter.gd")
+const SHIP_SEATS_SCRIPT: GDScript = preload("res://scripts/ui/components/ship_detail_panel.gd")
 const PORTRAIT_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 const OPERATIONS_BADGES: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 
@@ -110,6 +111,9 @@ var _homebase_dropship_staged_fireteam_ids: PackedStringArray = []
 var _homebase_dropship_payload_craft_id: String = ""
 var _homebase_dropship_staged_fireteam_ids_by_craft: Dictionary = {}
 var _homebase_dispatch_target_by_craft: Dictionary = {}
+## Turmschuetzenplatz je Schiff (craft_id -> unit_id). Nur Anzeige und Belegung dieser Sitzung, bewusst NICHT im Speicherstand.
+## Zaehlt als an Bord, weil die Person im Trupp-Payload des Schiffs bleibt; Schusslogik gibt es dazu (noch) nicht.
+var _gunner_by_craft: Dictionary = {}
 var _homebase_direct_boarding_state_by_fireteam_id: Dictionary = {}
 var _homebase_direct_boarding_refresh_seconds: float = 0.0
 var _homebase_direct_boarding_force_refresh: bool = false
@@ -6385,6 +6389,11 @@ func _remove_homebase_direct_payload_fireteam(fireteam_id: String, craft_id: Str
 			next_by_craft[current_craft_id] = next_fireteam_ids
 	_homebase_dropship_staged_fireteam_ids_by_craft = next_by_craft
 	_homebase_direct_boarding_state_by_fireteam_id.erase(normalized_fireteam_id)
+	# Wer den Trupp-Payload verlaesst, verliert auch den Turmschuetzenplatz.
+	var leaving_members: PackedStringArray = _get_member_unit_ids_for_fireteam(normalized_fireteam_id)
+	for gunner_craft in _gunner_by_craft.keys():
+		if leaving_members.has(String(_gunner_by_craft[gunner_craft])):
+			_gunner_by_craft.erase(gunner_craft)
 	_sync_homebase_direct_legacy_payload_list()
 	if _homebase_dropship_staged_fireteam_ids.is_empty():
 		_homebase_dropship_payload_craft_id = ""
@@ -9343,7 +9352,7 @@ func get_operations_snapshot(include_runtime: bool = true) -> Dictionary:
 			next_step = "Rückkehr abwarten"
 		elif pilot_id.is_empty():
 			status = "Pilot fehlt"
-			next_step = "Pilot auswählen"
+			next_step = "Pilot zuweisen"
 		elif not payload_teams.is_empty() and not boarded:
 			status = "Boarding läuft"
 			next_step = "Boarding abwarten"
@@ -9367,6 +9376,7 @@ func get_operations_snapshot(include_runtime: bool = true) -> Dictionary:
 			"crew_capacity": seat_capacity, "model_id": seat_model_id, "payload_names": _operations_payload_names(payload_ids),
 			# Kennung und Anwesenheit je Passagier (gleiche Reihenfolge wie payload_names): fuer Ziehen vom Platz und Wartezustand.
 			"payload_unit_ids": Array(payload_ids), "payload_aboard": _operations_payload_aboard(payload_ids, boarded, aboard_unit_ids),
+			"gunner_id": _gunner_id_for_craft(id, payload_ids),
 			"can_board": not busy and bool(gate.get("can_stage", false)) and not Array(focused_team.get("members", [])).is_empty() and (not bool(focused_team.get("busy", false)) or (payload_teams.has(_focused_fireteam_id) and not pilot_present)),
 			"can_unboard": not busy and payload_teams.has(_focused_fireteam_id)}
 		var preview: Texture2D = _get_aircraft_texture(definition)
@@ -9395,6 +9405,11 @@ func get_operations_snapshot(include_runtime: bool = true) -> Dictionary:
 
 
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
+	if operation == "board_person":
+		var seated: Dictionary = _board_person(payload)
+		if _operations_presenter != null:
+			_operations_presenter.call("refresh")
+		return seated
 	if operation.begins_with("space_") or operation.begins_with("skirmish_"):
 		if not _singleplayer_command_handler.is_valid():
 			return _operations_rejected("singleplayer_unavailable", "Diese Funktion ist noch nicht verfügbar")
@@ -9410,6 +9425,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 			return _operations_rejected("base_unavailable", "Basis noch nicht bereit")
 		var data: Dictionary = payload.duplicate(true)
 		if operation in ["board", "unboard"]:
+			# Ganzer Trupp bleibt der Normalfall; eine Einzelperson geht ueber "board_person" (Passagier- oder Turmschuetzenplatz).
 			data["whole_fireteam"] = true
 		if not data.has("unit_id"):
 			data["unit_id"] = _focused_unit_id
@@ -9536,7 +9552,7 @@ func _request_operation_from_base(operation: String, payload: Dictionary = {}) -
 					_on_aircraft_pilot_drop_panel_unit_dropped(unit_id, craft_id)
 			elif operation == "board":
 				if _get_fireteam_definition(team_id).is_empty() or _get_member_unit_ids_for_fireteam(team_id).is_empty() or not _operations_payload_craft_for_team(team_id).is_empty() or not bool(_build_homebase_direct_staging_craft_gate_for_craft(craft_id).get("can_stage", false)):
-					return _operations_rejected("boarding_blocked", "Trupp und Pilot für Boarding vorbereiten")
+					return _operations_rejected("boarding_blocked", "Trupp für Boarding vorbereiten (Trupp leer oder schon an Bord, Schiff nicht bereit)")
 				_on_shipcard_dispatch_target_toggled(true, craft_id)
 				_on_homebase_shipcard_fireteam_dropped(team_id, craft_id)
 			elif operation == "unboard":
@@ -9544,7 +9560,9 @@ func _request_operation_from_base(operation: String, payload: Dictionary = {}) -
 					return _operations_rejected("not_embarked", "Dieser Trupp ist nicht im Schiff")
 				_on_homebase_dropship_fireteam_remove_pressed(team_id, craft_id)
 			else:
-				if _get_assigned_pilot_id(craft_id).is_empty() or not _has_homebase_direct_launch_payload_for_craft(craft_id) or not _can_send_craft(_get_aircraft_definition_by_id(craft_id), craft_id):
+				if _get_assigned_pilot_id(craft_id).is_empty():
+					return _operations_rejected("pilot_missing", "Pilot zuweisen")
+				if not _has_homebase_direct_launch_payload_for_craft(craft_id) or not _can_send_craft(_get_aircraft_definition_by_id(craft_id), craft_id):
 					return _operations_rejected("launch_blocked", "Pilot, Trupp und Boarding prüfen")
 				if _singleplayer_command_handler.is_valid():
 					var departure: Dictionary = _singleplayer_command_handler.call("prepare_departure", {"craft_id": craft_id})
@@ -9573,6 +9591,134 @@ func _request_operation_from_base(operation: String, payload: Dictionary = {}) -
 
 func _operations_rejected(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
+
+
+## Turmschuetze des Schiffs, solange die Person noch im Trupp-Payload dieses Schiffs steht (sonst leer). Nur lesen.
+func _gunner_id_for_craft(craft_id: String, payload_ids: PackedStringArray) -> String:
+	var gunner_id: String = String(_gunner_by_craft.get(craft_id, ""))
+	if gunner_id.is_empty() or not payload_ids.has(gunner_id) or gunner_id == _get_assigned_pilot_id(craft_id):
+		return ""
+	return gunner_id
+
+
+func _snapshot_craft_entry(craft_id: String) -> Dictionary:
+	for craft_variant in Array(get_operations_snapshot(false).get("crafts", [])):
+		if String(Dictionary(craft_variant).get("id", "")) == craft_id:
+			return Dictionary(craft_variant)
+	return {}
+
+
+## Freie Passagierplaetze eines Schiffs (Schnappschuss-Eintrag): Plaetze ohne Pilot und Turmschuetzen minus Belegte ohne Pilot und Turmschuetze.
+func _free_passenger_seats(craft: Dictionary) -> int:
+	var pilot_id: String = String(craft.get("pilot_id", ""))
+	var gunner_id: String = String(craft.get("gunner_id", ""))
+	var seated: int = 0
+	for seated_variant in Array(craft.get("payload_unit_ids", [])):
+		var seated_id: String = String(seated_variant)
+		if seated_id != pilot_id and seated_id != gunner_id:
+			seated += 1
+	return int(SHIP_SEATS_SCRIPT.seat_layout(craft).passengers) - seated
+
+
+## Trupp, in den eine Einzelperson zum Einsteigen kommt: ein schon im Schiff stehender Trupp mit Platz, sonst ihr eigener
+## Ein-Mann-Trupp, sonst ein leerer Trupp. Leer = es gibt keinen (der Aufrufer legt einen an).
+func _boarding_team_for_person(craft_id: String, unit_id: String) -> String:
+	for team_variant in _get_homebase_direct_payload_fireteam_ids_for_craft_raw(craft_id):
+		if _get_member_unit_ids_for_fireteam(String(team_variant)).size() < 4:
+			return String(team_variant)
+	var own_team: String = _get_fireteam_id_for_unit(unit_id)
+	if not own_team.is_empty() and _get_member_unit_ids_for_fireteam(own_team).size() == 1 and _operations_payload_craft_for_team(own_team).is_empty():
+		return own_team
+	for definition_variant in _fireteam_definitions:
+		var team_id: String = _normalize_fireteam_id(String(Dictionary(definition_variant).get("id", "")))
+		if not team_id.is_empty() and _get_member_unit_ids_for_fireteam(team_id).is_empty() and _operations_payload_craft_for_team(team_id).is_empty():
+			return team_id
+	return ""
+
+
+## Einzelperson (aus Personal-Liste, Trupp oder anderem Platz) auf einen Platz des Schiffs: seat "passenger" oder "gunner".
+## Die Person wird in einen Trupp gelegt (siehe _boarding_team_for_person) und geht ueber das gewohnte Einsteigen an Bord;
+## beim Turmschuetzen merkt sich der Schirm nur die Belegung (Sitzung, kein Speicherstand). Rueckgabe wie request_operation.
+func _board_person(payload: Dictionary) -> Dictionary:
+	var unit_id: String = String(payload.get("unit_id", "")).strip_edges()
+	var craft_id: String = String(payload.get("craft_id", _get_selected_aircraft_id())).strip_edges()
+	var seat: String = String(payload.get("seat", "passenger"))
+	if seat not in ["passenger", "gunner"]:
+		return _operations_rejected("invalid_seat", "Platz nicht verfügbar")
+	if unit_id.is_empty() or not _profiles_by_id.has(unit_id):
+		return _operations_rejected("unknown_unit", "Person nicht verfügbar")
+	if craft_id.is_empty() or _get_aircraft_definition_by_id(craft_id).is_empty() or _operations_craft_busy(craft_id):
+		return _operations_rejected("craft_busy", "Das Schiff ist nicht an der Heimatbasis.")
+	var gate: Dictionary = _build_homebase_direct_staging_craft_gate_for_craft(craft_id)
+	if not bool(gate.get("can_stage", false)):
+		return _operations_rejected("boarding_blocked", String(gate.get("block_text", "Dieses Schiff kann niemanden aufnehmen.")))
+	var craft: Dictionary = _snapshot_craft_entry(craft_id)
+	if seat == "gunner" and int(SHIP_SEATS_SCRIPT.seat_layout(craft).gunner) <= 0:
+		return _operations_rejected("no_gunner_seat", "Dieses Schiff hat keinen Turmschützenplatz.")
+	if unit_id == String(craft.get("pilot_id", "")):
+		return _operations_rejected("pilot_seat", "Der Pilot sitzt im Pilotplatz.")
+	var payload_ids: Array = Array(craft.get("payload_unit_ids", []))
+	var gunner_id: String = String(craft.get("gunner_id", ""))
+	# Eine Person, die nicht mehr im Schiff steht, behaelt keinen alten Turmschuetzenplatz.
+	if gunner_id.is_empty() and _gunner_by_craft.has(craft_id):
+		_gunner_by_craft.erase(craft_id)
+	if payload_ids.has(unit_id):
+		# Schon an Bord (oder auf dem Weg): nur der Platz wechselt.
+		if seat == "gunner":
+			if not gunner_id.is_empty() and gunner_id != unit_id:
+				return _operations_rejected("gunner_taken", "Der Turmschützenplatz ist besetzt.")
+			_gunner_by_craft[craft_id] = unit_id
+		elif unit_id == gunner_id:
+			if _free_passenger_seats(craft) < 1:
+				return _operations_rejected("seats_full", "Kein freier Passagierplatz.")
+			_gunner_by_craft.erase(craft_id)
+		return {"ok": true, "operation": "board_person", "message": "", "unchanged": seat == "passenger" and unit_id != gunner_id}
+	if seat == "gunner" and not gunner_id.is_empty():
+		return _operations_rejected("gunner_taken", "Der Turmschützenplatz ist besetzt.")
+	if seat == "passenger" and _free_passenger_seats(craft) < 1:
+		return _operations_rejected("seats_full", "Nicht genug Plätze: frei sind 0.")
+	var current_team: String = _get_fireteam_id_for_unit(unit_id)
+	if not _operations_payload_craft_for_team(current_team).is_empty():
+		return _operations_rejected("team_aboard_other_craft", "Die Person ist schon mit ihrem Trupp in einem Schiff.")
+	var unit: Dictionary = _operations_unit_entry(_get_available_unit_data(unit_id))
+	if bool(unit.get("busy", true)):
+		return _operations_rejected("unit_busy", "Person ist an Bord, zugewiesen oder unterwegs.")
+	if String(_profiles_by_id[unit_id].availability_status) in ["wounded", "respawning", "awaiting_pickup", "in_transit"]:
+		return _operations_rejected("unit_busy", "Person ist verwundet, wartet auf Abholung oder ist unterwegs.")
+	var runtime: Node = get_base_personnel_runtime()
+	if runtime != null and runtime.has_method("is_boarding_in_progress") and bool(runtime.call("is_boarding_in_progress", craft_id)):
+		return _operations_rejected("boarding_in_progress", "Das Schiff nimmt gerade noch jemanden auf. Gleich noch einmal versuchen.")
+	var target_team: String = _boarding_team_for_person(craft_id, unit_id)
+	if target_team.is_empty():
+		_on_homebase_add_fireteam_pressed()
+		target_team = _focused_fireteam_id
+	var was_selected: bool = _selected_unit_ids.has(unit_id)
+	if not was_selected and not _add_unit_to_team(unit_id):
+		return _operations_rejected("no_free_slot", "Alle Einsatzplätze sind belegt.")
+	_assign_unit_to_fireteam(unit_id, target_team)
+	_focused_unit_id = unit_id
+	_emit_homebase_fireteam_context_changed()
+	var team_staged_here: bool = _operations_payload_craft_for_team(target_team) == craft_id
+	var result: Dictionary = {"ok": true}
+	# Mit Basis-Laufzeit laeuft jede Person zum Schiff (auch zu einem schon stehenden Trupp); ohne sie genuegt das Eintragen.
+	if runtime != null or not team_staged_here:
+		result = request_operation("board", {"craft_id": craft_id, "fireteam_id": target_team, "unit_id": unit_id})
+	if not bool(result.get("ok", false)):
+		if was_selected:
+			_assign_unit_to_fireteam(unit_id, current_team)
+		else:
+			_assign_unit_to_fireteam(unit_id, "")
+			_remove_unit_from_team(unit_id)
+		_emit_homebase_fireteam_context_changed()
+		if String(result.get("message", "")).is_empty():
+			result["message"] = "Einsteigen gerade nicht möglich."
+		return result
+	if seat == "gunner":
+		_gunner_by_craft[craft_id] = unit_id
+	if runtime != null:
+		runtime.call("claim_manual_control", unit_id)
+	_rebuild_ui()
+	return {"ok": true, "operation": "board_person", "message": ""}
 
 
 func _get_team_drop_panel():

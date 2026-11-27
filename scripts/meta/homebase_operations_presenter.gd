@@ -209,6 +209,20 @@ func _act(operation: String, payload: Dictionary = {}) -> void:
 	refresh()
 
 
+## Einzelperson auf einen Passagier- oder Turmschuetzenplatz des gewaehlten Schiffs (Befehl `board_person`); Ablehnungen stehen im Schiffsdetail.
+func _board_person(unit_id: String, seat: String) -> void:
+	var screen: Control = _owner_screen()
+	if screen == null:
+		return
+	var result: Dictionary = screen.call("request_operation", "board_person", {"unit_id": unit_id, "seat": seat, "craft_id": _craft_id})
+	var message: String = String(result.get("message", ""))
+	if _feedback != null:
+		_feedback.text = message
+	if not bool(result.get("ok", false)) and not message.is_empty() and _ship_detail != null:
+		_ship_detail.call("show_message", message)
+	refresh()
+
+
 func _build() -> void:
 	var backdrop := ColorRect.new()
 	backdrop.color = INK
@@ -723,6 +737,7 @@ func _build_flightdeck() -> void:
 	_pilot_selector.visible = false
 	_ship_detail.pilot_dropped.connect(func(unit_id: String): _act("pilot", {"unit_id": unit_id, "craft_id": _craft_id}))
 	_ship_detail.fireteam_dropped.connect(func(team_id: String): _act("board", {"fireteam_id": team_id, "craft_id": _craft_id}))
+	_ship_detail.person_dropped.connect(_board_person)
 	_ship_detail.find_child("PilotSlot", true, false).call("forward_drag_from", _pilot_selector)
 	_pilot_status = _label("Nicht an Bord", 14, GOLD)
 	pilot.add_child(_pilot_status)
@@ -1438,13 +1453,15 @@ func _fireteam_drop_message(team_id: String) -> String:
 		return "Das Schiff ist nicht an der Heimatbasis."
 	# Der zugewiesene Pilot steht im Pilotplatz und belegt keinen Passagierplatz: weder die schon Eingestiegenen noch der neue Trupp zaehlen ihn.
 	var pilot_id: String = String(_detail_craft.get("pilot_id", ""))
+	var gunner_id: String = String(_detail_craft.get("gunner_id", ""))
 	var seated: int = 0
 	var seated_ids: Array = Array(_detail_craft.get("payload_unit_ids", []))
 	if seated_ids.is_empty():
 		seated = Array(_detail_craft.get("payload_names", [])).size()
 	else:
 		for seated_id in seated_ids:
-			if pilot_id.is_empty() or String(seated_id) != pilot_id:
+			# Der Turmschuetze sitzt auf seinem eigenen Platz, nicht auf einem Passagierplatz.
+			if (pilot_id.is_empty() or String(seated_id) != pilot_id) and (gunner_id.is_empty() or String(seated_id) != gunner_id):
 				seated += 1
 	var free: int = int(SHIP_DETAIL_SCRIPT.seat_layout(_detail_craft).passengers) - seated
 	for team_variant in _detail_fireteams:

@@ -18,6 +18,8 @@ signal pilot_dropped(unit_id: String)
 signal fireteam_dropped(fireteam_id: String)
 signal pilot_cleared
 signal unboard_requested(fireteam_id: String)
+## Einzelperson auf einen Platz gezogen: seat = "passenger" oder "gunner". Der Aufrufer entscheidet und meldet Ablehnungen ueber show_message.
+signal person_dropped(unit_id: String, seat: String)
 var pilot_validator: Callable = Callable()
 ## Callable(fireteam_id) -> String: leer = Trupp passt, sonst die Ablehnungsmeldung.
 var fireteam_check: Callable = Callable()
@@ -34,6 +36,8 @@ var _pilot_clear: Button
 var _pilot_box: PanelContainer
 var _troops: GridContainer
 var _gunner_box: PanelContainer
+var _gunner_label: Label
+var _gunner_hatch: Control
 var _message: Label
 var _cargo_title: Label
 var _cargo: Label
@@ -118,12 +122,18 @@ func _init() -> void:
 	_gunner_box = DRAG_SURFACE.new()
 	_gunner_box.name = "GunnerSlot"
 	_gunner_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_gunner_box.tooltip_text = "Turmschütze – noch nicht besetzbar"
-	_gunner_box.add_theme_stylebox_override("panel", _box(Color("0b1a21"), Color("28404a")))
-	_gunner_box.add_child(Hatch.new())
-	var gunner_label := _label("Turmschütze", 15, Color("5f7680"))
-	gunner_label.name = "GunnerName"
-	_gunner_box.add_child(gunner_label)
+	# Turmschuetzenplatz: belegbar (Person sitzt dort und zaehlt als an Bord); eine Schusslogik gibt es dazu noch nicht.
+	_gunner_box.set("accepted_type", "homebase_unit_card")
+	_gunner_box.set("drop_validator", func(payload: Dictionary) -> bool: return _person_payload_ok(payload))
+	_gunner_box.connect("payload_dropped", func(payload: Dictionary): _handle_person_drop(payload, "gunner"))
+	_gunner_box.tooltip_text = "Person hierher ziehen: sitzt als Turmschütze (noch ohne Schusslogik)"
+	_gunner_box.add_theme_stylebox_override("panel", _box(Color("0f2630"), Color("3e6972")))
+	_gunner_hatch = Hatch.new()
+	_gunner_box.add_child(_gunner_hatch)
+	_gunner_label = _label("Turmschütze", 15, MUTED)
+	_gunner_label.name = "GunnerName"
+	_gunner_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_gunner_box.add_child(_gunner_label)
 	row.add_child(_gunner_box)
 	add_child(_label("Passagierplätze", 14, MUTED))
 	_troops = GridContainer.new()
@@ -177,10 +187,11 @@ func update_craft(craft: Dictionary, cargo: Dictionary) -> void:
 	_pilot_card.waiting = not pilot.is_empty() and not bool(craft.get("pilot_aboard", true))
 	var layout: Dictionary = seat_layout(craft)
 	_gunner_box.visible = int(layout.gunner) > 0
+	_update_gunner(craft)
 	var slots: int = int(layout.passengers)
 	_passenger_slots = slots
-	# Der Pilot steht nur im Pilotplatz, nie zusaetzlich auf einem Passagierplatz (auch wenn er zum Trupp an Bord gehoert).
-	var seats: Array = _seat_entries(craft, String(craft.get("pilot_id", "")))
+	# Pilot und Turmschuetze stehen nur auf ihrem eigenen Platz, nie zusaetzlich auf einem Passagierplatz (auch wenn sie zum Trupp an Bord gehoeren).
+	var seats: Array = _seat_entries(craft, String(craft.get("pilot_id", "")), String(craft.get("gunner_id", "")))
 	var signature: String = "%d|%s" % [slots, JSON.stringify(seats)]
 	if signature != _signature:
 		_signature = signature
@@ -210,7 +221,7 @@ func update_craft(craft: Dictionary, cargo: Dictionary) -> void:
 
 ## Parallele Listen des Schnappschusses zu Plaetzen zusammengefuehrt: {id, name, team, unit, aboard}.
 ## Eintraege der Pilotperson entfallen (sie steht nur im Pilotplatz); ohne `payload_unit_ids` ist kein Abgleich moeglich.
-func _seat_entries(craft: Dictionary, pilot_id: String) -> Array:
+func _seat_entries(craft: Dictionary, pilot_id: String, gunner_id: String = "") -> Array:
 	var names: Array = Array(craft.get("payload_names", []))
 	var ids: Array = Array(craft.get("payload_unit_ids", []))
 	var teams: Array = Array(craft.get("seat_team_ids", []))
@@ -219,7 +230,7 @@ func _seat_entries(craft: Dictionary, pilot_id: String) -> Array:
 	var entries: Array = []
 	for index in names.size():
 		var id: String = String(ids[index]) if index < ids.size() else ""
-		if not pilot_id.is_empty() and id == pilot_id:
+		if (not pilot_id.is_empty() and id == pilot_id) or (not gunner_id.is_empty() and id == gunner_id):
 			continue
 		entries.append({"id": id, "name": String(names[index]), "team": String(teams[index]) if index < teams.size() else "",
 			"unit": Dictionary(units[index]) if index < units.size() and typeof(units[index]) == TYPE_DICTIONARY else {},
@@ -239,7 +250,7 @@ func _passenger_slot(index: int, entry: Dictionary, team_color: Color) -> PanelC
 	var team_id: String = String(entry.get("team", ""))
 	var unit: Dictionary = Dictionary(entry.get("unit", {}))
 	var filled: bool = not occupant.is_empty()
-	slot.tooltip_text = ("Besetzt: %s · auf den Pilotplatz ziehen, um Pilot zu werden" % occupant) if filled else "Frei: Trupp (oder Person, dann mit Hinweis) hierher ziehen"
+	slot.tooltip_text = ("Besetzt: %s · auf den Pilotplatz ziehen, um Pilot zu werden" % occupant) if filled else "Frei: ganzen Trupp oder eine einzelne Person hierher ziehen"
 	slot.add_theme_stylebox_override("panel", _box(Color("163743"), CYAN) if filled else _box(Color("0f2630"), Color("3e6972")))
 	if filled and not unit_id.is_empty():
 		# Belegter Platz ist ziehbar wie eine Person in der Personal-Spalte (z. B. auf den Pilotplatz).
@@ -359,7 +370,7 @@ func _passenger_payload_ok(payload: Dictionary) -> bool:
 ## Angenommenes Ablegen: passt es nicht, wird es mit sichtbarer Meldung verworfen; sonst geht der Befehl hinaus.
 func _handle_drop(payload: Dictionary) -> void:
 	if String(payload.get("type", "")) == "homebase_unit_card":
-		show_message("Einzelpersonen bitte als Trupp einsteigen lassen.")
+		_handle_person_drop(payload, "passenger")
 		return
 	var id: String = String(payload.get("fireteam_id", "")).strip_edges()
 	var problem: String = String(fireteam_check.call(id)) if fireteam_check.is_valid() else "Boarding gerade nicht verfügbar."
@@ -368,6 +379,35 @@ func _handle_drop(payload: Dictionary) -> void:
 		return
 	show_message("")
 	fireteam_dropped.emit(id)
+
+func _person_payload_ok(payload: Dictionary) -> bool:
+	return not String(payload.get("unit_id", "")).strip_edges().is_empty()
+
+## Einzelperson auf Passagier- oder Turmschuetzenplatz: der Befehl geht an den Aufrufer, der Ablehnungen ueber show_message meldet.
+func _handle_person_drop(payload: Dictionary, seat: String) -> void:
+	var id: String = String(payload.get("unit_id", "")).strip_edges()
+	if id.is_empty():
+		return
+	show_message("")
+	person_dropped.emit(id, seat)
+
+## Turmschuetzenplatz: Name der besetzenden Person (Schnappschuss `gunner_id` in `payload_unit_ids`), sonst grau schraffiert.
+func _update_gunner(craft: Dictionary) -> void:
+	var gunner_id: String = String(craft.get("gunner_id", ""))
+	var ids: Array = Array(craft.get("payload_unit_ids", []))
+	var names: Array = Array(craft.get("payload_names", []))
+	var index: int = ids.find(gunner_id) if not gunner_id.is_empty() else -1
+	var occupant: String = String(names[index]) if index >= 0 and index < names.size() else ""
+	var filled: bool = not occupant.is_empty()
+	_gunner_label.text = occupant if filled else "Turmschütze"
+	_gunner_label.add_theme_color_override("font_color", CREAM if filled else MUTED)
+	_gunner_hatch.visible = not filled
+	_gunner_box.add_theme_stylebox_override("panel", _box(Color("163743"), CYAN) if filled else _box(Color("0f2630"), Color("3e6972")))
+	var aboard: Array = Array(craft.get("payload_aboard", []))
+	var is_aboard: bool = bool(aboard[index]) if index >= 0 and index < aboard.size() else true
+	_gunner_box.tooltip_text = ("Turmschütze: %s · %s · auf einen Passagierplatz ziehen, um ihn dorthin zu setzen (noch ohne Schusslogik)" % [occupant, "an Bord" if is_aboard else "geht gerade an Bord"]) if filled else "Person hierher ziehen: sitzt als Turmschütze (noch ohne Schusslogik)"
+	# Belegter Platz ist ziehbar wie ein Passagierplatz (z. B. auf den Pilotplatz).
+	_gunner_box.set("drag_payload", {"type": "homebase_unit_card", "unit_id": gunner_id, "label": occupant, "source_context": "seat"} if filled else {})
 
 func _can_drop_fireteam(_at: Vector2, data: Variant) -> bool:
 	return _passenger_slots > 0 and typeof(data) == TYPE_DICTIONARY and _passenger_payload_ok(Dictionary(data))
