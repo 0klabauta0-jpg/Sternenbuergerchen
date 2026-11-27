@@ -762,6 +762,27 @@ func _case_12() -> void:
 	lone.free()
 
 
+## Luftrollen F(b): die Vorpruefung nennt jeden Grund einzeln und sperrt keine Schiffsart (Entermesser wie Buccaneer).
+func _case_19() -> void:
+	for model in ["cutlass", "buccaneer"]:
+		var tag := "[19 Vorpruefung %s] " % model
+		var env: Dictionary = _build(model, ["ship"])
+		var mission_root: Node = env.mission_root
+		var ground: Dictionary = mission_root.get_air_support_start_refusal("ship")
+		_check(not bool(ground.get("ok", true)) and String(ground.get("reason", "")) == "craft_not_landed", tag + "nicht gelandet: craft_not_landed: " + str(ground))
+		env.transport.parked["ship"] = true
+		env.transport.boarded = false
+		var nopilot: Dictionary = mission_root.get_air_support_start_refusal("ship")
+		_check(not bool(nopilot.get("ok", true)) and String(nopilot.get("reason", "")) == "pilot_boarding_pending", tag + "ohne Pilot: Grund des Pilotenwaechters: " + str(nopilot))
+		env.transport.boarded = true
+		_check(bool(mission_root.get_air_support_start_refusal("ship").get("ok", false)), tag + "gelandet und Pilot an Bord: kein Hindernis")
+		_check(not mission_root.is_air_support_craft_airborne("ship"), tag + "die Auskunft startet nichts")
+		_check(bool(mission_root.request_air_support_takeoff("ship").get("ok", false)), tag + "Start geht wie gemeldet")
+		var airborne: Dictionary = mission_root.get_air_support_start_refusal("ship")
+		_check(not bool(airborne.get("ok", true)) and String(airborne.get("reason", "")) == "already_airborne", tag + "in der Luft: already_airborne: " + str(airborne))
+		env.flow.free()
+
+
 func _initialize() -> void:
 	_case_1()
 	_case_2()
@@ -783,5 +804,6 @@ func _initialize() -> void:
 	_case_16()
 	_case_17()
 	_case_18()
+	_case_19()
 	print("AIR_ROLE_CIRCLE passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
