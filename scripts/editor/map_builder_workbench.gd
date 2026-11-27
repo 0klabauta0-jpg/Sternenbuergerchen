@@ -171,7 +171,7 @@ func _should_launch_runtime_map_editor() -> bool:
 func _launch_runtime_map_editor() -> void:
 	if get_tree() == null or not FileAccess.file_exists(RUNTIME_MAP_EDITOR_SCENE_PATH):
 		return
-	get_tree().change_scene_to_file(RUNTIME_MAP_EDITOR_SCENE_PATH)
+	_change_scene_via_service(get_tree(), RUNTIME_MAP_EDITOR_SCENE_PATH, "editor")
 
 
 func _show_runtime_hint() -> void:
@@ -440,3 +440,11 @@ func _make_node_name(type_id: String) -> String:
 	for part in parts:
 		result += part.capitalize()
 	return result
+
+
+## Szenenwechsel ueber den zentralen Ladedienst (Paket Z); ohne Dienst der alte Weg.
+func _change_scene_via_service(tree: SceneTree, scene_path: String, tip_context: String = "") -> Error:
+	var service: Node = tree.root.get_node_or_null("SceneLoadingService") if tree != null and tree.root != null else null
+	if service != null and service.has_method("change_scene"):
+		return int(service.call("change_scene", scene_path, {"tip_context": tip_context})) as Error
+	return tree.change_scene_to_file(scene_path)
