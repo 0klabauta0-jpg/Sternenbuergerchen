@@ -88,7 +88,7 @@ func _test_workbench_f6_runtime_entry() -> void:
 	var snapshot: Dictionary = Dictionary(workbench.call("get_workbench_snapshot"))
 	_assert(String(snapshot.get("runtime_map_editor_scene_path", "")) == "res://scenes/editor/map_editor.tscn", "Workbench points F6 to map_editor.tscn")
 	var script := _read_text(WORKBENCH_SCRIPT_PATH)
-	_assert(script.contains("change_scene_to_file(RUNTIME_MAP_EDITOR_SCENE_PATH)"), "Workbench changes scene to runtime map editor")
+	_assert((script.contains("change_scene_to_file(RUNTIME_MAP_EDITOR_SCENE_PATH)") or script.contains("_change_scene_via_service(get_tree(), RUNTIME_MAP_EDITOR_SCENE_PATH")), "Workbench changes scene to runtime map editor")
 	_assert(script.contains("DisplayServer.get_name() == \"headless\""), "Workbench keeps headless tests on the compile path")
 	workbench.queue_free()
 

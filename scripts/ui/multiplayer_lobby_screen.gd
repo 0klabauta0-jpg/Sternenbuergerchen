@@ -685,7 +685,7 @@ func return_to_main_menu() -> void:
 	disconnect_game()
 	back_requested.emit()
 	if get_tree() != null and ResourceLoader.exists(MAIN_MENU_SCENE_PATH):
-		get_tree().change_scene_to_file(MAIN_MENU_SCENE_PATH)
+		_change_scene_via_service(get_tree(), MAIN_MENU_SCENE_PATH, "main_menu")
 
 
 func set_settings_path_for_tests(config_path: String) -> void:
@@ -1890,3 +1890,11 @@ func _make_team_badge_style(color_hex: String) -> StyleBoxFlat:
 	style.content_margin_top = 5.0
 	style.content_margin_bottom = 5.0
 	return style
+
+
+## Szenenwechsel ueber den zentralen Ladedienst (Paket Z); ohne Dienst der alte Weg.
+func _change_scene_via_service(tree: SceneTree, scene_path: String, tip_context: String = "") -> Error:
+	var service: Node = tree.root.get_node_or_null("SceneLoadingService") if tree != null and tree.root != null else null
+	if service != null and service.has_method("change_scene"):
+		return int(service.call("change_scene", scene_path, {"tip_context": tip_context})) as Error
+	return tree.change_scene_to_file(scene_path)

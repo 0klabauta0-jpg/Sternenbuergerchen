@@ -1,6 +1,7 @@
 extends Node
 
-const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
+const MISSION_TEST_SCENE_PATH: String = "res://scenes/tests/mission_reactivity_test.tscn" # nicht mehr per preload (Paket Z): Hintergrundladen, siehe _get_mission_test_scene
+const MISSION_TEST_SCENE_PRELOAD_FRAMES: int = 4
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
@@ -262,6 +263,7 @@ var _release_first_exchange_exported_status_trace_samples: Array = []
 
 
 func _ready() -> void:
+	_ladezeit("Basis _ready Beginn")
 	set_process(true)
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
@@ -413,7 +415,9 @@ func _ready() -> void:
 	if (is_campaign_start() or has_meta("skirmish_preset_id")) and _singleplayer_runtime != null and _singleplayer_runtime.has_method("grant_ammo_start_if_missing"):  # M6b: auch im Skirmish
 		_singleplayer_runtime.call("grant_ammo_start_if_missing")
 	if is_campaign_start() and String(_game_start_request.get("action","new")) == "new":
+		var startstand_save_usec: int = Time.get_ticks_usec()
 		set_meta("campaign_checkpoint_result", _campaign_start.save_home_checkpoint(self,_singleplayer_runtime,true))
+		_ladezeit("Startstand gespeichert, Dauer %.1f ms" % (float(Time.get_ticks_usec() - startstand_save_usec) / 1000.0))
 	_homecoming_forget_all() # new campaign / loaded state
 	if is_campaign_start(): _reset_completion_save_baseline()
 	# Task 5b: der Malus wird sofort mit dem Basisstand gespeichert (ersetzt auch den ausstehenden Eintrag).
@@ -430,6 +434,65 @@ func _ready() -> void:
 	call_deferred("_apply_release_first_go_firefight_deeplink")
 	if is_campaign_start() and _campaign_start != null and bool(_campaign_start.get("active_restore_in_progress")):
 		call_deferred("_restore_active_campaign")
+	_ladezeit("Basis _ready Ende")
+	_ladezeit_after_next_draw("erstes gezeichnetes Bild nach Basis _ready")
+	call_deferred("_preload_mission_scene_after_base_ready")
+
+
+## Paket Z: Die Einsatz-Szene wird nicht mehr beim Basisstart mitgeladen, sondern erst ein paar Bilder nach dem Aufbau der Basis
+## im Hintergrund. Kopflos bleibt es beim alten Verhalten (Laden erst bei Bedarf), damit Pruefer gleich bleiben.
+var _mission_test_scene_cache: PackedScene = null
+var _mission_test_scene_preload_requested: bool = false
+
+
+func _preload_mission_scene_after_base_ready() -> void:
+	if DisplayServer.get_name() == "headless" or _mission_test_scene_cache != null or _mission_test_scene_preload_requested:
+		return
+	for i in range(MISSION_TEST_SCENE_PRELOAD_FRAMES):
+		if not is_inside_tree():
+			return
+		await get_tree().process_frame
+	if not is_inside_tree() or _mission_test_scene_cache != null:
+		return
+	if ResourceLoader.load_threaded_request(MISSION_TEST_SCENE_PATH, "PackedScene", true) == OK:
+		_mission_test_scene_preload_requested = true
+		_ladezeit("Einsatz-Szene Hintergrundladen angefordert")
+
+
+## Liefert die Einsatz-Szene: Ergebnis des Hintergrundladens (wartet, falls es noch laeuft), sonst normales Laden.
+func _get_mission_test_scene() -> PackedScene:
+	if _mission_test_scene_cache != null:
+		return _mission_test_scene_cache
+	if _mission_test_scene_preload_requested:
+		_mission_test_scene_preload_requested = false
+		var status: int = ResourceLoader.load_threaded_get_status(MISSION_TEST_SCENE_PATH)
+		if status == ResourceLoader.THREAD_LOAD_LOADED or status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			_mission_test_scene_cache = ResourceLoader.load_threaded_get(MISSION_TEST_SCENE_PATH) as PackedScene
+	if _mission_test_scene_cache == null:
+		_mission_test_scene_cache = load(MISSION_TEST_SCENE_PATH) as PackedScene
+	return _mission_test_scene_cache
+
+
+## Szenenwechsel ueber den zentralen Ladedienst (Hintergrundladen mit Balken); ohne Dienst der alte Weg.
+func _change_scene_via_service(tree: SceneTree, scene_path: String, tip_context: String = "") -> Error:
+	if tree == null:
+		return ERR_UNCONFIGURED
+	var service: Node = tree.root.get_node_or_null("SceneLoadingService") if tree.root != null else null
+	if service != null and service.has_method("change_scene"):
+		return int(service.call("change_scene", scene_path, {"tip_context": tip_context})) as Error
+	return tree.change_scene_to_file(scene_path)
+
+
+func _ladezeit(label: String) -> void:
+	var service: Node = get_node_or_null("/root/SceneLoadingService") if is_inside_tree() else null
+	if service != null:
+		service.call("ladezeit", label)
+
+
+func _ladezeit_after_next_draw(label: String) -> void:
+	var service: Node = get_node_or_null("/root/SceneLoadingService") if is_inside_tree() else null
+	if service != null:
+		service.call("ladezeit_after_next_draw", label)
 
 
 # Reconstruct into a hidden scene and publish only after every owner validates.
@@ -4311,7 +4374,7 @@ func _continue_campaign_after_failed_extraction() -> bool:
 		return false
 	# This is an explicit rollback, never a physical arrival or a fresh save.
 	load("res://scripts/meta/game_start_contract.gd").request_start(get_tree(), "campaign", "continue_home")
-	get_tree().change_scene_to_file("res://scenes/meta/meta_layer_test.tscn")
+	_change_scene_via_service(get_tree(), "res://scenes/meta/meta_layer_test.tscn", "campaign")
 	return true
 
 
@@ -4366,7 +4429,7 @@ func _start_mission(prepared_map = null, prepared_cache: RefCounted = null) -> v
 		else: _remember_location(_active_mission)
 		_active_mission = null
 
-	var mission_instance = MISSION_TEST_SCENE.instantiate()
+	var mission_instance = _get_mission_test_scene().instantiate()
 	_configure_mission_instance(mission_instance, _selected_unit_ids, _selected_fireteam_ids, false, prepared_map, prepared_cache)
 	mission_host.add_child(mission_instance)
 	_active_mission = mission_instance
@@ -6093,7 +6156,7 @@ func _on_bankruptcy_action(action: String) -> void:
 		return
 	if is_instance_valid(_bankruptcy_screen) and _bankruptcy_screen.has_method("set_buttons_disabled"):
 		_bankruptcy_screen.call("set_buttons_disabled", true) # k1: kein zweiter Druck waehrend des Wechsels
-	var error: Error = tree.change_scene_to_file(scene)
+	var error: Error = _change_scene_via_service(tree, scene, "campaign")
 	if error != OK:
 		# k1: Wechsel gescheitert: der Bildschirm bleibt bedienbar, die Zeit steht wieder.
 		tree.paused = true
@@ -8713,7 +8776,7 @@ func _ensure_preview_mission() -> void:
 	if _preview_mission != null and _preview_mission_signature == desired_signature:
 		return
 	_release_preview_mission()
-	var preview_instance = MISSION_TEST_SCENE.instantiate()
+	var preview_instance = _get_mission_test_scene().instantiate()
 	_configure_mission_instance(preview_instance, _selected_unit_ids, _selected_fireteam_ids, true)
 	mission_host.add_child(preview_instance)
 	_preview_mission = preview_instance
@@ -9880,7 +9943,7 @@ func _campaign_load_failed() -> void:
 	push_warning("Kampagnenstand ungueltig; kein neuer Stand wird angelegt.")
 	var detail := String(_campaign_start.get("error_message")) if _campaign_start != null else ""
 	get_tree().root.set_meta("campaign_start_error", detail if not detail.is_empty() else "Kampagnenstand konnte nicht geladen werden. Vorhandener Stand bleibt erhalten. Im Kampagnenmenü ist der letzte Basisstand separat erreichbar.")
-	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
+	_change_scene_via_service(get_tree(), "res://scenes/ui/main_menu.tscn", "main_menu")
 
 
 func is_context_overlay_obscured() -> bool:

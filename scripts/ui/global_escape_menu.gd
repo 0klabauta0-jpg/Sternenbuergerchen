@@ -314,7 +314,7 @@ func load_mission_slot(change_scene: bool = true) -> Dictionary:
 	if change_scene and not _test_mode:
 		var tree := get_tree()
 		if tree != null:
-			var error: Error = tree.change_scene_to_file(scene_path)
+			var error: Error = _change_scene_via_service(tree, scene_path, "campaign")
 			if error != OK:
 				return _load_result(false, "change_scene_failed", scene_path, error)
 			_end_modal_input(false)
@@ -329,7 +329,7 @@ func return_to_main_menu(change_scene: bool = true, confirmed: bool = false) -> 
 	if change_scene and not _test_mode:
 		var tree := get_tree()
 		if tree != null:
-			var error: Error = tree.change_scene_to_file(MAIN_MENU_SCENE_PATH)
+			var error: Error = _change_scene_via_service(tree, MAIN_MENU_SCENE_PATH, "main_menu")
 			if error != OK:
 				return {"ok": false, "reason": "change_scene_failed", "error": error}
 			_end_modal_input(false)
@@ -1046,3 +1046,11 @@ func _set_status(text: String) -> void:
 
 func _has_button(button_name: String) -> bool:
 	return _overlay_root != null and _overlay_root.find_child(button_name, true, false) != null
+
+
+## Szenenwechsel ueber den zentralen Ladedienst (Paket Z); ohne Dienst der alte Weg.
+func _change_scene_via_service(tree: SceneTree, scene_path: String, tip_context: String = "") -> Error:
+	var service: Node = tree.root.get_node_or_null("SceneLoadingService") if tree != null and tree.root != null else null
+	if service != null and service.has_method("change_scene"):
+		return int(service.call("change_scene", scene_path, {"tip_context": tip_context})) as Error
+	return tree.change_scene_to_file(scene_path)
