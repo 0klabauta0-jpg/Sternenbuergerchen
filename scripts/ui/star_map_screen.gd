@@ -229,6 +229,7 @@ func _build() -> void:
 	_canvas.orbit_previewed.connect(_preview_jump)
 	_canvas.preview_cleared.connect(_discard_preview)
 	_canvas.location_selected.connect(_select)
+	_canvas.location_activated.connect(_on_location_activated)
 	_canvas.body_selected.connect(func(id: String): _navigation.focus_body(id))
 	_canvas.craft_selected.connect(_on_map_craft_selected)
 	_canvas.crafts_box_selected.connect(func(ids: Array, additive: bool): _wing_panel.select_for_crafts(ids, additive))
@@ -464,7 +465,9 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		var required_orbit := String(location_orbits.get(id, "planet_orbit" if location_orbits.is_empty() else ""))
 		var at_site_orbit: bool = phase == "orbit" and not required_orbit.is_empty() and orbit == required_orbit
 		var selectable: bool = (phase == "grounded" or at_site_orbit) and reason.is_empty()
-		if reason.is_empty(): marker_locations[id]={"name":DISPLAY.location_name(id, location),"available":selectable,"selected":selected==id,"accepted_job":accepted_locations.has(id),"reason":reason,"region_position":location.get("region_position",[])}
+		# Ferner Ort: freigeschaltet, aber das Schiff steht im Orbit woanders. Einfachklick bleibt wirkungslos, Doppelklick merkt den Kurs vor.
+		var course_target: bool = not selectable and reason.is_empty() and phase in ["orbit", "stopped"] and not required_orbit.is_empty() and required_orbit != orbit
+		if reason.is_empty(): marker_locations[id]={"name":DISPLAY.location_name(id, location),"available":selectable,"selected":selected==id,"accepted_job":accepted_locations.has(id),"reason":reason,"region_position":location.get("region_position",[]),"course_target":course_target}
 	_canvas.call("set_location_snapshot",marker_locations)
 	var selected_location: Dictionary = locations.get(selected, {})
 	_destination_heading.text = DISPLAY.location_name(selected, selected_location)
@@ -946,6 +949,32 @@ func _select(location_id: String) -> void:
 				job_id = String(id)
 				break
 	_send("select_destination", {"location_id": location_id, "job_id": job_id})
+
+## Doppelklick auf einen Ort (die Karte zoomt schon auf ihn): Kurs dorthin vormerken. Der Flug startet NICHT; "Start" (Quantensprung)
+## bzw. "Anflug starten" bleibt der Knopf. Ein Ort wird nur gewaehlt, wenn der Befehlsweg das erlaubt (am Boden oder im Orbit des
+## Ortes); ein ferner Ort (Schiff im Orbit woanders) bekommt nur den Kurs zu seinem Orbit. Kein Wechsel der Ansicht, darum geht der
+## vorgemerkte Kurs nicht verloren. Steht das Schiff schon im Orbit des Ortes, zeigt "Anflug starten" samt Ladehinweis den naechsten Schritt.
+func _on_location_activated(location_id: String) -> void:
+	var travel: Dictionary = _runtime.get("space_travel", {})
+	var phase := String(travel.get("phase", "grounded"))
+	var orbit_id := String(Dictionary(travel.get("location_orbits", {})).get(location_id, "planet_orbit" if Dictionary(travel.get("location_orbits", {})).is_empty() else ""))
+	var at_site_orbit := phase == "orbit" and not orbit_id.is_empty() and orbit_id == String(travel.get("orbit_id", ""))
+	if (phase == "grounded" or at_site_orbit) and String(Dictionary(_runtime.get("campaign", {})).get("selected_location_id", "")) != location_id:
+		_select(location_id)
+	if orbit_id.is_empty() or at_site_orbit: return
+	var markers: Array = Dictionary(Dictionary(travel.get("orbits", {})).get(orbit_id, {})).get("markers", [])
+	var origin := GRID.pair(travel.get("position", []))
+	var best_id := ""
+	var best_distance := INF
+	for marker: Variant in markers:
+		if not marker is Dictionary: continue
+		var marker_id := String(marker.get("id", ""))
+		if marker_id.is_empty() or not GRID.can_jump_to_marker(travel, orbit_id, marker_id): continue
+		var distance := origin.distance_squared_to(GRID.normalized(GRID.cell_from_record(marker)))
+		if distance < best_distance:
+			best_distance = distance
+			best_id = marker_id
+	if not best_id.is_empty(): _preview_jump(orbit_id, best_id)
 
 func _cancel_current_travel() -> void:
 	var phase := String(Dictionary(_runtime.get("space_travel", {})).get("phase", ""))
