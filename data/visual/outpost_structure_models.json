@@ -2,7 +2,7 @@
 	"schema_version": 1,
 	"enabled": true,
 	"human_height_m": 1.8,
-	"note": "Gebaeudemodelle der drei kleinen Aussenposten, nur Darstellung (keine Kollision, keine Sperre). Zuordnung ueber den Kartennamen (map_name) und die Haendler-Marke: das Gebaeude steht in JEDEM Einsatz auf dieser Karte. scale = Spielfigur-Hoehe in Einheiten / 1,8 m, je echtem Meter des Modells (GLB-Masse sind echte Meter). offset = Versatz der Gebaeudemitte von der Marke in Einheiten (x, z der Einsatzansicht). rotation_y_deg dreht die Tuerseite (Modell +Z) zur Marke. footprint_m = Grundflaeche des Modells in Metern (zur Geländehoehen-Probe). Unterkante liegt auf der tiefsten Ecke der Grundflaeche. door_height_m ist am Vorschaubild geschaetzt, nicht gemessen.",
+	"note": "Gebaeudemodelle der drei kleinen Aussenposten, nur Darstellung (keine Kollision, keine Sperre). Zuordnung ueber den Kartennamen (map_name) und die Haendler-Marke: das Gebaeude steht in JEDEM Einsatz auf dieser Karte. scale = Spielfigur-Hoehe in Einheiten / 1,8 m, je echtem Meter des Modells (GLB-Masse sind echte Meter). offset = Versatz der Gebaeudemitte von der Marke in Einheiten (x, z der Einsatzansicht). rotation_y_deg dreht die Tuerseite (Modell +Z) zur Marke. footprint_m = Grundflaeche des Modells in Metern (zur Geländehoehen-Probe). Unterkante liegt auf der tiefsten Ecke der Grundflaeche. door_height_m ist am Vorschaubild geschaetzt, nicht gemessen. scale_y_factor (Vorgabe 1,0) staucht nur die Hoehe des Modells (Y-Skala) um diesen Faktor; Grundflaeche und Versatz bleiben.",
 	"entries": [
 		{
 			"id": "muellers_farm",
@@ -55,7 +55,7 @@
 			"max_offset": 14.0,
 			"footprint_m": [20.0, 17.32],
 			"door_height_m": 2.1,
-			"real_height_range": [10.0, 16.0],
+			"scale_y_factor": 0.82, "real_height_range": [9.0, 12.0],
 			"extras": [
 				{"id": "templanon_lift", "kind": "model", "model": "res://art/tripo_models_20261124/basis_frachtaufzug_01.glb", "scale": 0.2181, "offset": [0.5, -4.2], "rotation_y_deg": 0.0, "footprint_m": [5.714, 8.0], "real_height_range": [1.2, 2.5], "max_distance": 6.0},
 				{"id": "templanon_pad", "kind": "pad", "size": [3.4, 4.2], "offset": [-1.0, 5.2], "rotation_y_deg": 0.0, "designation": "PAD 01", "deck_top": 0.03}

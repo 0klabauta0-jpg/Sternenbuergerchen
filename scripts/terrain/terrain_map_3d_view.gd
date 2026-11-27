@@ -1256,6 +1256,13 @@ var _runtime_terrain_registry: WeakRef
 var _fire_sector_los_cache: Dictionary = {}
 var _fire_sector_los_cache_signature: String = ""
 var _frontier_art_enabled: bool = false
+## Grafik 1: Einsatz-Stimmung (Licht, Himmel, Staubnebel, Glow, dezentes Gitter, Bodenrauschen).
+## Angefordert vom Einsatz (set_mission_atmosphere_enabled); wirksam nur mit Frontier-Art,
+## ohne Heimatbasis, Raumstation und Mischpalette. Editor und Heimatbasis fragen nie an.
+var _mission_atmosphere_requested: bool = false
+var _mission_atmosphere_applied: bool = false
+var _mission_ssao_on: bool = true
+var _mission_grid_alpha: float = -1.0
 var _shadow_max_distance: float = 0.0
 var _frontier_art_override: int = -1 # -1 follows the map/CLI; 0/1 are explicit visual overrides.
 var _external_terrain_object_visuals: Dictionary = {}
@@ -1455,8 +1462,65 @@ func set_homebase_visuals_enabled(enabled: bool) -> void:
 	_homebase_visuals_enabled = enabled
 	_frontier_art_profile.homebase_palette = enabled
 	_material_cache.clear()
+	_sync_mission_atmosphere()
 	if _terrain_map_data != null:
 		render_map()
+
+
+## Grafik 1: Einsatz-Stimmung an/aus. Reine Darstellung; aendert keine Karten- oder Spielregeln.
+func set_mission_atmosphere_enabled(enabled: bool) -> void:
+	if _mission_atmosphere_requested == enabled:
+		return
+	_mission_atmosphere_requested = enabled
+	if not _sync_mission_atmosphere():
+		return
+	if _terrain_map_data != null:
+		render_map()
+	elif _world_root != null:
+		_ensure_nodes()
+	_request_viewport_redraw(true)
+
+
+func is_mission_atmosphere_active() -> bool:
+	return _mission_atmosphere_applied
+
+
+func _compute_mission_atmosphere_active() -> bool:
+	return _mission_atmosphere_requested and _frontier_art_enabled and not _homebase_visuals_enabled \
+		and not _orbital_station_view and not _is_mixed_ground_palette()
+
+
+## Gleicht den wirksamen Zustand mit den Voraussetzungen ab; true, wenn er sich geaendert hat.
+func _sync_mission_atmosphere() -> bool:
+	var active: bool = _compute_mission_atmosphere_active()
+	if active == _mission_atmosphere_applied:
+		return false
+	_mission_atmosphere_applied = active
+	_mission_grid_alpha = -1.0
+	_frontier_art_profile.set_mission_atmosphere(active)
+	return true
+
+
+## Zoomabhaengiges: SSAO nur ab Standard-Zoom, Gitter-Deckkraft sinkt beim Herauszoomen.
+## Wird nur bei Aenderung wirksam (Stufen mit Hysterese bzw. Hundertstel-Rundung).
+func _update_mission_atmosphere_for_camera() -> void:
+	if not _mission_atmosphere_applied:
+		return
+	var ssao_wanted: bool = FRONTIER_ART_PROFILE_SCRIPT.mission_ssao_wanted(_camera_size, _mission_ssao_on)
+	if ssao_wanted != _mission_ssao_on:
+		_mission_ssao_on = ssao_wanted
+		if _environment != null and _environment.environment != null:
+			_environment.environment.ssao_enabled = ssao_wanted
+	var grid_alpha: float = FRONTIER_ART_PROFILE_SCRIPT.mission_grid_alpha(_camera_size)
+	if not is_equal_approx(grid_alpha, _mission_grid_alpha):
+		_mission_grid_alpha = grid_alpha
+		for key in _material_cache.keys():
+			if String(key).ends_with("_mission"):
+				var grid_material := _material_cache[key] as ShaderMaterial
+				if grid_material != null:
+					var line_color: Color = grid_material.get_shader_parameter("line_color")
+					line_color.a = grid_alpha
+					grid_material.set_shader_parameter("line_color", line_color)
 
 
 func clear_frontier_art_override() -> void:
@@ -1473,6 +1537,7 @@ func _update_frontier_art_profile() -> bool:
 		return false
 	_frontier_art_enabled = enabled
 	_ground_batch_source_cache.clear()
+	_sync_mission_atmosphere()
 	return true
 
 
@@ -3125,6 +3190,7 @@ func get_render_snapshot() -> Dictionary:
 		"authored_ground_vertex_count": ground_snapshot.get("vertex_count", 0),
 		"frontier_art_enabled": _frontier_art_enabled,
 		"frontier_art_override": _frontier_art_override,
+		"mission_atmosphere_active": _mission_atmosphere_applied,
 		"grid_topology": _active_grid_topology,
 		"frontier_art_profile_id": FRONTIER_ART_PROFILE_SCRIPT.PROFILE_ID if _frontier_art_enabled else "",
 		"read_only": true,
@@ -3896,6 +3962,11 @@ func _build_editor_light_snapshot() -> Dictionary:
 		"adjustment_brightness": float(environment.adjustment_brightness) if environment != null else EDITOR_ADJUSTMENT_BRIGHTNESS,
 		"adjustment_contrast": float(environment.adjustment_contrast) if environment != null else EDITOR_ADJUSTMENT_CONTRAST,
 		"adjustment_saturation": float(environment.adjustment_saturation) if environment != null else EDITOR_ADJUSTMENT_SATURATION,
+		"fog_enabled": environment != null and environment.fog_enabled,
+		"glow_enabled": environment != null and environment.glow_enabled,
+		"ssao_enabled": environment != null and environment.ssao_enabled,
+		"background_sky": environment != null and environment.background_mode == Environment.BG_SKY,
+		"ambient_from_sky": environment != null and environment.ambient_light_source == Environment.AMBIENT_SOURCE_SKY,
 	}
 
 
@@ -4195,10 +4266,18 @@ func _ensure_nodes() -> void:
 		environment.background_color = Color("050a16")
 		environment.ambient_light_color = Color("b0c7e5")
 		environment.ambient_light_energy = 0.42
+	var offmap_background_owned: bool = _terrain_map_data != null and _terrain_map_data.has_method("get_authored_visual_layout_id") and String(_terrain_map_data.call("get_authored_visual_layout_id")) == FRONTIER_GM01_LAYOUT_SCRIPT.LAYOUT_ID
+	if _mission_atmosphere_applied:
+		# Grafik 1: warmes Sky-Ambient, Himmelsverlauf, Staubnebel, Glow. Das echte GM01 behaelt
+		# seinen dunklen Aussenrand (BG_COLOR, siehe unten), nutzt den Himmel aber fuer das Umgebungslicht.
+		_frontier_art_profile.apply_mission_environment(environment, _mission_ssao_on, not offmap_background_owned)
+	elif environment.fog_enabled or environment.glow_enabled:
+		environment.fog_enabled = false
+		environment.glow_enabled = false
 	# This is empty space outside the saved Hex union, never decorative sand.
 	# Read the current MapData rather than the previous authored-root state:
 	# _ensure_nodes also runs before that root is swapped on a map change.
-	if _terrain_map_data != null and _terrain_map_data.has_method("get_authored_visual_layout_id") and String(_terrain_map_data.call("get_authored_visual_layout_id")) == FRONTIER_GM01_LAYOUT_SCRIPT.LAYOUT_ID:
+	if offmap_background_owned:
 		environment.background_color = AUTHORED_GM01_OFFMAP_BACKGROUND_COLOR
 
 
@@ -4219,6 +4298,8 @@ func _apply_editor_light_settings() -> void:
 	light.shadow_blur = EDITOR_LIGHT_SHADOW_BLUR
 	if _frontier_art_enabled:
 		_frontier_art_profile.apply_light(light)
+		if _mission_atmosphere_applied:
+			_frontier_art_profile.apply_mission_light(light)
 		_update_shadow_distance_for_camera()
 	if _is_mixed_ground_palette():
 		light.light_energy = 0.80
@@ -4296,6 +4377,7 @@ func _read_map_transform() -> void:
 	if _terrain_map_data == null:
 		_active_terrain_visual_theme_id = ""
 		_update_frontier_art_profile()
+		_sync_mission_atmosphere()
 		return
 	_grid_size = _terrain_map_data.call("get_grid_size")
 	var next_topology: String = String(_terrain_map_data.call("get_grid_topology")) if _terrain_map_data.has_method("get_grid_topology") else "square8"
@@ -4328,6 +4410,7 @@ func _read_map_transform() -> void:
 	# This resolver only changes visual selection/cache state. render_map calls
 	# us, so invoking the public setter here would recursively rebuild the map.
 	_update_frontier_art_profile()
+	_sync_mission_atmosphere()
 	var tile_size: Dictionary = Dictionary(_terrain_map_data.call("get_tile_size"))
 	_half_tile_width = maxf(float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH)), 0.001)
 	_half_tile_height = maxf(float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT)), 0.001)
@@ -4361,6 +4444,7 @@ func _update_camera_transform() -> void:
 		return
 	_camera.size = _camera_size
 	_update_shadow_distance_for_camera()
+	_update_mission_atmosphere_for_camera()
 	var focus_3d: Vector3 = _grid_to_3d_position(_focus_grid_position, 0.0)
 	var yaw_rad: float = deg_to_rad(_camera_yaw_degrees)
 	var pitch_rad: float = deg_to_rad(_camera_pitch_degrees)
@@ -5849,6 +5933,8 @@ func _make_hex_grid_material(authored: bool) -> ShaderMaterial:
 	if _orbital_station_view: key += "_orbital"
 	var arid_ink: bool = _is_arid_terrain_visual_context()
 	if arid_ink: key += "_arid"
+	# Endung "_mission" ist Vertrag mit _update_mission_atmosphere_for_camera (Deckkraft nach Zoom).
+	if _mission_atmosphere_applied: key += "_mission"
 	if _material_cache.has(key):
 		return _material_cache[key] as ShaderMaterial
 	var material := ShaderMaterial.new()
@@ -5873,6 +5959,14 @@ func _make_hex_grid_material(authored: bool) -> ShaderMaterial:
 	if not _orbital_station_view and not _homebase_visuals_enabled:
 		material.set_shader_parameter("minimum_pixel_width", 1.8)
 		material.set_shader_parameter("distant_contrast_floor", 0.70)
+	if _mission_atmosphere_applied:
+		# Grafik 1: dezentes, warmes Elfenbein-Gitter; die Deckkraft folgt dem Zoom
+		# (0,35 bis Standard, Richtung 0,15 in der Uebersicht), darum kein eigener Fernabfall.
+		var mission_color: Color = FRONTIER_ART_PROFILE_SCRIPT.MISSION_GRID_COLOR
+		mission_color.a = FRONTIER_ART_PROFILE_SCRIPT.mission_grid_alpha(_camera_size)
+		material.set_shader_parameter("line_color", mission_color)
+		material.set_shader_parameter("distant_contrast_floor", 1.0)
+		material.set_shader_parameter("minimum_pixel_width", 1.5)
 	material.set_shader_parameter("cell_size", _get_3d_cell_size())
 	_material_cache[key] = material
 	return material
@@ -15722,6 +15816,11 @@ func _make_editor_grid_material(is_highlight: bool = true) -> StandardMaterial3D
 
 func _get_tile_grid_line_color_for_release_polish(is_highlight: bool) -> Color:
 	var color: Color = TILE_GRID_LINE_COLOR if is_highlight else TILE_GRID_LINE_SHADOW_COLOR
+	if _mission_atmosphere_applied:
+		# Grafik 1 (Gitter ohne Hex-Weg): Elfenbein statt Cyan, Schattenlinie entsprechend schwaecher.
+		var mission_alpha: float = FRONTIER_ART_PROFILE_SCRIPT.mission_grid_alpha(_camera_size)
+		var mission_base: Color = FRONTIER_ART_PROFILE_SCRIPT.MISSION_GRID_COLOR if is_highlight else TILE_GRID_LINE_SHADOW_COLOR
+		color = Color(mission_base.r, mission_base.g, mission_base.b, mission_alpha if is_highlight else mission_alpha * 0.6)
 	if _is_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_fix_active():
 		color.a = minf(color.a, RELEASE_FIRST_EXCHANGE_FOLLOWUP_FIX_PLAYER_POLISH_FINAL_TUNING_FOLLOWUP_SECOND_FIX_GRID_NOISE_ALPHA if is_highlight else RELEASE_FIRST_EXCHANGE_FOLLOWUP_FIX_PLAYER_POLISH_FINAL_TUNING_FOLLOWUP_SECOND_FIX_GRID_SHADOW_ALPHA)
 	elif _is_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix_active():

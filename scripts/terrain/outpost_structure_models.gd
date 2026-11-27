@@ -25,6 +25,24 @@ static func lowest_ground(view: Node, center: Vector3, rotation_y: float, half: 
 	return 0.0 if low == INF else low
 
 
+## Setzt den Halter so, dass die echte Unterkante des Modells (tiefster Mesh-Punkt, aus den Mesh-AABBs mit ihren
+## Transformen bis zum Halter, nach der Skalierung) genau auf der Gelaendehoehe ground liegt. Keine Annahme ueber den Ursprung.
+static func _seat_on_ground(holder: Node3D, center: Vector3, ground: float) -> void:
+	var low := INF
+	for n in holder.find_children("*", "MeshInstance3D", true, false):
+		var m := n as MeshInstance3D
+		var t := Transform3D.IDENTITY
+		var node: Node = m
+		while node != null and node != holder:
+			if node is Node3D:
+				t = (node as Node3D).transform * t
+			node = node.get_parent()
+		low = minf(low, (t * m.get_aabb()).position.y)
+	if low == INF:
+		low = 0.0
+	holder.position = Vector3(center.x, ground - holder.scale.y * low, center.z)
+
+
 ## Haengt je passendem Eintrag (Kartenname + Marke vorhanden) genau ein Gebaeude in parent. Gibt den Wurzelknoten zurueck oder null.
 static func build(view: Node, parent: Node, map_data) -> Node3D:
 	var config: Dictionary = load_config()
@@ -52,14 +70,14 @@ static func build(view: Node, parent: Node, map_data) -> Node3D:
 		var center := Vector3(marker_3d.x + float(offset[0]), 0.0, marker_3d.z + float(offset[1]))
 		var footprint: Array = entry.get("footprint_m", [0.0, 0.0])
 		var half := Vector2(float(footprint[0]), float(footprint[1])) * 0.5 * scale_factor
-		center.y = lowest_ground(view, center, rotation_y, half)
+		var ground: float = lowest_ground(view, center, rotation_y, half)
 		var holder := Node3D.new()
 		holder.name = String(entry.get("id", "model"))
 		holder.set_meta("outpost_structure_id", String(entry.get("id", "model")))
-		holder.position = center
 		holder.rotation.y = rotation_y
-		holder.scale = Vector3.ONE * scale_factor
+		holder.scale = Vector3(scale_factor, scale_factor * float(entry.get("scale_y_factor", 1.0)), scale_factor)
 		holder.add_child(visual)
+		_seat_on_ground(holder, center, ground)
 		if root == null:
 			root = Node3D.new()
 			root.name = NODE_NAME
@@ -95,12 +113,12 @@ static func _build_extra(view: Node, root: Node3D, marker_3d: Vector3, extra: Di
 			return
 		var scale_factor: float = float(extra.get("scale", 1.0))
 		var footprint: Array = extra.get("footprint_m", [0.0, 0.0])
-		center.y = lowest_ground(view, center, rotation_y, Vector2(float(footprint[0]), float(footprint[1])) * 0.5 * scale_factor)
+		var ground: float = lowest_ground(view, center, rotation_y, Vector2(float(footprint[0]), float(footprint[1])) * 0.5 * scale_factor)
 		holder = Node3D.new()
-		holder.position = center
 		holder.rotation.y = rotation_y
-		holder.scale = Vector3.ONE * scale_factor
+		holder.scale = Vector3(scale_factor, scale_factor * float(extra.get("scale_y_factor", 1.0)), scale_factor)
 		holder.add_child(visual)
+		_seat_on_ground(holder, center, ground)
 	holder.name = String(extra.get("id", "extra"))
 	holder.set_meta("outpost_extra_id", String(extra.get("id", "extra")))
 	holder.set_meta("outpost_extra_kind", String(extra.get("kind", "model")))
