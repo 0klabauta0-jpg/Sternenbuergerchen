@@ -12,6 +12,8 @@ signal orbit_previewed(orbit_id: String, marker_id: String)
 ## Rechtsklick ohne Ziehen auf freier Flaeche: ein vorgemerktes Ziel verwerfen.
 signal preview_cleared
 signal location_selected(location_id: String)
+## Doppelklick auf einen Ortsmarker (der erste Klick hat den Ort schon gewaehlt): Ansicht auf den Ort, Kurs setzen. Startet keinen Flug.
+signal location_activated(location_id: String)
 signal craft_selected(craft_id: String)
 signal crafts_box_selected(craft_ids: Array, additive: bool)
 var _location_buttons: Dictionary={}
@@ -50,6 +52,8 @@ const MIN_ZOOM := 0.55
 const MAX_ZOOM := 32.0
 const MIN_ORBIT_RADIUS_PX := 10.0
 const MIN_LOCATION_DIAMETER_PX := 20.0
+## Mindestabstand zweier Ortsmarker (Mittelpunkt zu Mittelpunkt); naeher beieinander liegende Marker ruecken auseinander.
+const SITE_MIN_SEPARATION_PX := 22.0
 const HOME_LABEL := "Heimatbasis"
 const HOME_FONT_SIZE := 12
 var _home_marker_draws := 0
@@ -285,6 +289,14 @@ func _gui_input(event: InputEvent) -> void:
 	if _handle_gui_event(event):
 		accept_event()
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		if event.double_click:
+			# Ferner Ort (Schiff im Orbit woanders): sein Marker ist gesperrt und laesst Klicks durch; erst der Doppelklick greift ihn.
+			var remote_site := course_site_at(event.position)
+			if not remote_site.is_empty():
+				zoom_to_location(remote_site)
+				location_activated.emit(remote_site)
+				accept_event()
+				return
 		var craft_id := craft_at(event.position)
 		if not craft_id.is_empty():
 			if event.ctrl_pressed: crafts_box_selected.emit([craft_id], true)
@@ -307,6 +319,16 @@ func _gui_input(event: InputEvent) -> void:
 		_selection_additive = event.ctrl_pressed
 		_selection_active = true
 		accept_event()
+
+## Ort, dessen gesperrter Marker (Flugziel in der Ferne, "course_target") an diesem Leinwandpunkt liegt; leer, wenn keiner.
+func course_site_at(point: Vector2) -> String:
+	var ids: Array = _location_buttons.keys()
+	ids.sort()
+	for id in ids:
+		var button: Button = _location_buttons[id]
+		if button.disabled and bool(Dictionary(_locations.get(id, {})).get("course_target", false)) and Rect2(button.position, button.size).has_point(point):
+			return String(id)
+	return ""
 
 func craft_at(point: Vector2) -> String:
 	var routes: Dictionary = _travel.get("routes", {String(_travel.get("craft_id", "")): _travel})
@@ -407,6 +429,7 @@ func _child_gui_input(event: InputEvent, control: Control) -> void:
 		for id in _location_buttons:
 			if _location_buttons[id] == control:
 				zoom_to_location(String(id))
+				location_activated.emit(String(id))
 				control.accept_event()
 				return
 	if _handle_gui_event(event):
@@ -643,6 +666,7 @@ func _location_anchor(id: String) -> Vector2:
 	var body: Dictionary = _body_for_location(id)
 	if not body.is_empty() and _world != null:
 		return _hex_center(_location_marker_polygon(body))
+	if _site_centers.has(id): return _site_centers[id]
 	return map_to_screen(location_map_point(id))
 
 ## Namensschilder der Orte (id -> {text, rect, visible}) im Leinwandraum. Ab LABEL_ZOOM sichtbar; die Heimatbasis hat ihr eigenes Schild.
@@ -955,14 +979,52 @@ func location_map_point(id: String) -> Vector2:
 	return Vector2.ZERO
 
 
+## Mittelpunkte der Ortsmarker ohne Koerperflaeche (id -> Leinwandpunkt). Liegen zwei Marker naeher als SITE_MIN_SEPARATION_PX,
+## ruecken sie auseinander (Orte auf Koerpern bleiben stehen), damit jeder Marker einzeln anklickbar ist. Reihenfolge nach id, ohne Zufall.
+var _site_centers: Dictionary = {}
+
+func _spread_site_centers() -> void:
+	var ids: Array = _location_buttons.keys()
+	ids.sort()
+	var points: Dictionary = {}
+	var movable: Dictionary = {}
+	for id in ids:
+		var is_surface := not _body_for_location(String(id)).is_empty()
+		points[id] = map_to_screen(location_map_point(String(id)))
+		movable[id] = not is_surface
+	for pass_index in range(32):
+		var moved := false
+		for i in range(ids.size()):
+			for j in range(i + 1, ids.size()):
+				var a: Variant = ids[i]
+				var b: Variant = ids[j]
+				if not movable[a] and not movable[b]: continue
+				var delta: Vector2 = points[b] - points[a]
+				if delta.length() >= SITE_MIN_SEPARATION_PX - 0.01: continue
+				var direction := delta.normalized() if delta.length() > 0.001 else Vector2.from_angle(float(i * 7 + j * 3))
+				var missing := SITE_MIN_SEPARATION_PX - delta.length()
+				if movable[a] and movable[b]:
+					points[a] -= direction * missing * 0.5
+					points[b] += direction * missing * 0.5
+				elif movable[a]:
+					points[a] -= direction * missing
+				else:
+					points[b] += direction * missing
+				moved = true
+		if not moved: break
+	_site_centers.clear()
+	for id in ids:
+		if movable[id]: _site_centers[String(id)] = points[id]
+
 func _layout_location_buttons() -> void:
+	_spread_site_centers()
 	for id in _location_buttons:
 		var button: Button = _location_buttons[id]
 		var is_surface := not _body_for_location(id).is_empty()
 		var extent := maxf(MIN_LOCATION_DIAMETER_PX, clampf(_pixels_per_unit() * 1.8, 5.0, 18.0)) if is_surface else 18.0
 		button.custom_minimum_size = Vector2.ONE * extent
 		button.size = Vector2.ONE * extent
-		button.position = map_to_screen(location_map_point(id)) - button.size * 0.5
+		button.position = (_site_centers[id] if _site_centers.has(id) else map_to_screen(location_map_point(id))) - button.size * 0.5
 		button.mouse_filter = Control.MOUSE_FILTER_IGNORE if button.disabled else Control.MOUSE_FILTER_STOP
 		button.text = "" if is_surface else "◇"
 	if _recenter != null:
