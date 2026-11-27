@@ -1007,6 +1007,9 @@ func get_departure_block(craft_id: String) -> Dictionary:
 		var blocked := _unit_block_rejection(String(id))
 		if not blocked.is_empty(): return blocked
 	return {}
+## Laeuft gerade ein Einsteigen (Gruppe unterwegs zum Schiff)? Nur lesen.
+func is_boarding_in_progress(craft_id: String) -> bool:
+	return _board_groups.has(craft_id)
 func is_pilot_aboard(craft_id: String) -> bool:
 	var id := String(_screen.call("_get_assigned_pilot_id", craft_id))
 	return _states.has(id) and _states[id].status == "aboard" and _states[id].craft_id == craft_id
@@ -1216,10 +1219,9 @@ func _board_team(craft: String, payload: Dictionary) -> Dictionary:
 	if members.is_empty():
 		return _reject("empty_team", "Trupp ist leer")
 	var ids: Array = Array(members)
+	# Einsteigen geht auch ohne Piloten (Trupp sitzt an Bord); erst Abheben/Start verlangt einen (Meldung "Pilot zuweisen" dort).
 	var pilot := String(_screen.call("_get_assigned_pilot_id", craft))
-	if pilot.is_empty():
-		return _reject("pilot_missing", "Pilot zuweisen")
-	if not ids.has(pilot):
+	if not pilot.is_empty() and not ids.has(pilot):
 		ids.append(pilot)
 	for id in ids:
 		var wounded_block := _unit_block_rejection(String(id))

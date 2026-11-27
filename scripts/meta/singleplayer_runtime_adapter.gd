@@ -1246,7 +1246,16 @@ func preview_departure(craft_id: String) -> Dictionary:
 func preview_reapproach(craft_id: String) -> Dictionary:
 	return _validate_departure_gates(craft_id, false, true)
 
+## Einsteigen geht ohne Piloten, Abheben nicht: ohne zugewiesenen Piloten klare Meldung (sonst gilt "Pilot nicht an Bord").
+func _pilot_missing_gate(craft_id: String) -> Dictionary:
+	if _base_personnel != null and _screen != null and String(_screen.call("_get_assigned_pilot_id", craft_id)).is_empty():
+		return _reject("pilot_missing", "Pilot zuweisen")
+	return {}
+
 func _validate_departure_gates(craft_id: String, observe_progress: bool, reuse_departure: bool = false) -> Dictionary:
+	var no_pilot: Dictionary = _pilot_missing_gate(craft_id)
+	if not no_pilot.is_empty():
+		return no_pilot
 	if _base_personnel != null and not _base_personnel.is_pilot_aboard(craft_id):
 		return _reject("pilot_not_aboard", "Zugewiesener Pilot muss tatsaechlich im Schiff sein")
 	var travel: Dictionary = get_space_travel_snapshot(craft_id)
@@ -1939,6 +1948,9 @@ func _request_space_wing_command(command: Dictionary) -> Dictionary:
 func validate_space_launch(craft_id: String, observe_progress: bool = true) -> Dictionary:
 	if String(_travel.get_snapshot(craft_id).phase) != "grounded":
 		return _reject("trip_active", "Den laufenden Ausflug zuerst beenden")
+	var no_pilot: Dictionary = _pilot_missing_gate(craft_id)
+	if not no_pilot.is_empty():
+		return no_pilot
 	if _base_personnel != null and not _base_personnel.is_pilot_aboard(craft_id):
 		return _reject("pilot_not_aboard", "Zugewiesene Person muss tatsächlich am Pilotenplatz an Bord sein")
 	if _base_personnel != null and not bool(_base_personnel.get_payload_presence(craft_id).all_aboard):
