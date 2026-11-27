@@ -61,13 +61,18 @@ func _run() -> void:
 	var roster_path := "user://profiles/skirmish_prepared_test/roster_v1.json"
 	var before := FileAccess.get_file_as_bytes(roster_path)
 	menu.get_node("MenuRail/MenuMargin/MenuVBox/MenuButtons/SingleplayerButton").pressed.emit()
-	check(menu.get("_skirmish_dialog").visible, "Skirmish button opens explicit start selection")
+	check(menu.find_child("GefechtSubMenu", true, false).visible, "Gefecht button opens explicit start selection")
 	for id in ["early", "mid", "late"]:
 		menu.routed = ""
+		menu.call("_cancel_launch")
 		menu.find_child("SkirmishPreset_" + id, true, false).pressed.emit()
+		await process_frame
+		await process_frame
+		await process_frame
 		check(menu.routed.ends_with("meta_layer_test.tscn"), "Real preset button routes: " + id)
 		check(contract.consume_start(self).get("preset_id") == id, "Real button passes authored ID: " + id)
 	check(FileAccess.get_file_as_bytes(roster_path) == before, "Selection preserves saved roster bytes")
+	menu.call("_cancel_launch")
 	menu.find_child("SkirmishOwnTeam", true, false).pressed.emit()
 	check(not contract.consume_start(self).has("preset_id"), "Own-team start remains available")
 	menu.free()

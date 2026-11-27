@@ -38,9 +38,9 @@ func _run() -> void:
 	if not _press_campaign(menu):
 		await _finish()
 		return
-	var start_dialog: ConfirmationDialog = menu.get("_campaign_dialog")
+	var new_button: Button = menu.get("_campaign_new_button")
 	_check(bool(menu.get("_campaign_continue_button").disabled), "First real campaign dialog disables Continue without a checkpoint")
-	start_dialog.get_ok_button().pressed.emit()
+	new_button.pressed.emit()
 	if not await _wait_scene(FLOW_PATH, "First real New Campaign OK reaches the campaign scene"):
 		await _finish()
 		return
@@ -66,8 +66,8 @@ func _run() -> void:
 		await _finish()
 		return
 	_check(not bool(menu.get("_campaign_continue_button").disabled), "Valid existing checkpoint enables the real Continue button")
-	start_dialog = menu.get("_campaign_dialog")
-	start_dialog.get_ok_button().pressed.emit()
+	new_button = menu.get("_campaign_new_button")
+	new_button.pressed.emit()
 	var replace_dialog: ConfirmationDialog = menu.get("_campaign_replace_dialog")
 	_check(replace_dialog.visible and current_scene == menu, "Real New Campaign OK opens replacement confirmation without changing scene")
 	replace_dialog.get_cancel_button().pressed.emit()
@@ -77,7 +77,7 @@ func _run() -> void:
 	if not _press_campaign(menu):
 		await _finish()
 		return
-	start_dialog.get_ok_button().pressed.emit()
+	new_button.pressed.emit()
 	_check(replace_dialog.visible, "New Campaign opens replacement confirmation again after Cancel")
 	_stage = "replace_confirm_first_layout"
 	replace_dialog.get_ok_button().pressed.emit()
@@ -121,8 +121,8 @@ func _press_campaign(menu: Node) -> bool:
 	if not _check(button != null and button.is_visible_in_tree() and not button.disabled, "Actual current-scene Campaign button is usable"):
 		return false
 	button.pressed.emit()
-	var dialog: ConfirmationDialog = menu.get("_campaign_dialog")
-	return _check(dialog.visible and not dialog.get_ok_button().disabled, "Actual Campaign button presents the New Campaign dialog")
+	var entry: Button = menu.get("_campaign_new_button")
+	return _check(entry != null and not entry.disabled, "Actual Campaign button offers the New Campaign entry")
 
 func _wait_scene(path: String, label: String) -> bool:
 	var deadline: int = Time.get_ticks_msec() + 20000

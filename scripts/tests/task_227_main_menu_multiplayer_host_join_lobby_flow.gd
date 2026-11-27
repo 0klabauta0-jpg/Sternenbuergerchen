@@ -36,7 +36,7 @@ func _test_main_menu_routes_to_multiplayer_lobby() -> void:
 	var route_snapshot: Dictionary = Dictionary(main_menu.call("get_route_snapshot"))
 	_assert(String(route_snapshot.get("multiplayer", "")) == MULTIPLAYER_LOBBY_SCENE_PATH, "Main menu Multiplayer route points to the product lobby")
 	_assert(bool(route_snapshot.get("multiplayer_lobby", false)), "Main menu route snapshot marks Multiplayer as lobby flow")
-	var multiplayer_button := main_menu.get_node_or_null("MenuRail/MenuMargin/MenuVBox/MenuButtons/MultiplayerButton") as Button
+	var multiplayer_button := main_menu.get_node_or_null("MenuRail/MenuMargin/MenuVBox/MenuButtons/FreePlaySubMenu/MultiplayerButton") as Button
 	_assert(multiplayer_button != null and String(multiplayer_button.get_meta("route", "")) == MULTIPLAYER_LOBBY_SCENE_PATH, "Multiplayer button carries lobby route metadata")
 	_assert(ResourceLoader.exists(MULTIPLAYER_LOBBY_SCENE_PATH), "Multiplayer lobby scene exists")
 	_assert(ResourceLoader.load(MULTIPLAYER_LOBBY_SCENE_PATH) is PackedScene, "Multiplayer lobby scene loads as PackedScene")

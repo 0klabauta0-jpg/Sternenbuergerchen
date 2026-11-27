@@ -64,13 +64,40 @@ const TEAM_EDITOR_METRIC_GROUP_CONFIG: Dictionary = {
 @onready var _status_label: Label = get_node("MenuRail/MenuMargin/MenuVBox/StatusLabel")
 
 var _campaign_button: Button
-var _campaign_dialog: ConfirmationDialog
 var _campaign_continue_button: Button
 var _campaign_home_button: Button
 var _campaign_home_dialog: ConfirmationDialog
 var _campaign_replace_dialog: ConfirmationDialog
-var _skirmish_dialog: AcceptDialog
 var _skirmish_points_dialog: AcceptDialog
+# Hauptmenü 27.11.: Aufklapp-Bereiche, Ladevorhang, Teams-Bildschirm.
+var _main_menu_buttons: VBoxContainer = null
+var _continue_info_label: Label = null
+var _campaign_sub_menu: VBoxContainer = null
+var _campaign_new_button: Button = null
+var _free_play_button: Button = null
+var _free_play_sub_menu: VBoxContainer = null
+var _free_play_solo_button: Button = null
+var _free_play_vs_cpu_button: Button = null
+var _free_play_teams_button: Button = null
+var _gefecht_sub_menu: VBoxContainer = null
+var _gefecht_teams_button: Button = null
+var _save_load_button: Button = null
+var _save_load_sub_menu: VBoxContainer = null
+var _save_load_latest_button: Button = null
+var _save_load_home_button: Button = null
+var _save_load_empty_label: Label = null
+var _quit_button: Button = null
+var _quit_dialog: ConfirmationDialog = null
+var _campaign_error_dialog: AcceptDialog = null
+var _open_section: String = ""
+var _launching: bool = false
+var _loading_curtain: ColorRect = null
+var _loading_label: Label = null
+var _pending_tip_context: String = ""
+var _locked_buttons: Array = []
+var _teams_screen: Panel = null
+var _teams_back_button: Button = null
+var _teams_vbox: VBoxContainer = null
 
 var _settings_config_path: String = COMIC_BUBBLE_SETTINGS_SCRIPT.CONFIG_PATH
 var _comic_bubble_settings: Dictionary = {}
@@ -178,10 +205,10 @@ func _ready() -> void:
 	_ensure_audio_event_bus()
 	_ensure_settings_screen_nodes()
 	_ensure_start_roster_button()
-	_ensure_mission_save_load_buttons()
-	_apply_release_first_play_polish()
 	_ensure_campaign_entry()
 	_ensure_skirmish_entry()
+	_ensure_main_menu_structure()
+	_apply_release_first_play_polish()
 	_ensure_contextual_help_ui()
 	ensure_start_roster_exists()
 	HOVER_SCROLL_BEHAVIOR_SCRIPT.call("install", self)
@@ -193,9 +220,14 @@ func _ready() -> void:
 	if viewport != null and not viewport.size_changed.is_connected(_layout_native_shell_windows):
 		viewport.size_changed.connect(_layout_native_shell_windows)
 	_layout_native_shell_windows()
+	_refresh_save_state_entries()
+	_focus_primary_entry()
+	_status_label.text = _ready_status_text()
 	if get_tree().root.has_meta("campaign_start_error"):
-		_status_label.text = String(get_tree().root.get_meta("campaign_start_error"))
+		var start_error: String = String(get_tree().root.get_meta("campaign_start_error"))
+		_status_label.text = start_error
 		get_tree().root.remove_meta("campaign_start_error")
+		_show_campaign_error.call_deferred(start_error)
 	call_deferred("_apply_release_deeplink")
 
 
@@ -309,14 +341,14 @@ func _apply_release_singleplayer_deeplink() -> void:
 	_release_singleplayer_deeplink_target = SINGLEPLAYER_SCENE_PATH
 	set_meta("release_singleplayer_deeplink_requested", true)
 	set_meta("release_singleplayer_deeplink_target", SINGLEPLAYER_SCENE_PATH)
-	_status_label.text = "Singleplayer wird gestartet"
+	_status_label.text = "Freies Spiel wird gestartet …"
 	_start_skirmish("")
 
 
 func _apply_release_deeplink() -> void:
 	var args: PackedStringArray = _get_release_cmdline_user_args()
 	if args.has(RELEASE_MULTIPLAYER_HOST_DEEPLINK_ARG) or args.has(RELEASE_MULTIPLAYER_JOIN_DEEPLINK_ARG):
-		_status_label.text = "Multiplayer-Lobby wird gestartet"
+		_status_label.text = "Mehrspieler-Lobby wird gestartet …"
 		_on_multiplayer_pressed()
 		return
 	_apply_release_singleplayer_deeplink()
@@ -439,7 +471,7 @@ func get_team_editor_snapshot() -> Dictionary:
 		"budget_max": int(editor.get("point_budget_max", 0)),
 		"budget_used": int(editor.get("point_budget_used", 0)),
 		"budget_available": int(editor.get("point_budget_available", 0)),
-		"budget_explanation": "Team-Fokus fuer Generator/Balancing; einzelne NPC-Werte werden rechts separat editiert.",
+		"budget_explanation": "Team-Fokus für Generator/Balancing; einzelne NPC-Werte werden rechts separat editiert.",
 		"point_budget_policy": Dictionary(editor.get("point_budget_policy", {})).duplicate(true),
 		"team_size_policy": Dictionary(editor.get("team_size_policy", START_ROSTER_GENERATOR_SCRIPT.call("build_team_size_policy"))).duplicate(true),
 		"allocations": Dictionary(editor.get("stat_allocations", {})).duplicate(true),
@@ -608,7 +640,7 @@ func ensure_start_roster_exists(seed: String = "", roster_size: int = -1) -> Dic
 		_team_editor_selected_unit_id = _resolve_team_editor_selected_unit_id("")
 	_refresh_team_library()
 	_refresh_team_editor()
-	_status_label.text = "Roster ready" if bool(Dictionary(first_start.get("summary", {})).get("valid", false)) else "Roster invalid"
+	_status_label.text = _ready_status_text() if bool(Dictionary(first_start.get("summary", {})).get("valid", false)) else "Team ungültig – im Bereich Teams ein neues Team erzeugen."
 	return first_start
 
 
@@ -649,7 +681,7 @@ func request_new_start_roster() -> Dictionary:
 	if has_existing_roster:
 		_start_roster_reset_confirmation_pending = true
 		_refresh_start_roster_button()
-		_status_label.text = "Neues Team: bestaetigen"
+		_status_label.text = "Neues Team: noch einmal klicken zum Bestätigen."
 		return prompt
 	return confirm_new_start_roster()
 
@@ -660,7 +692,7 @@ func confirm_new_start_roster() -> Dictionary:
 	var reset_result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("reset_roster", next_seed, _start_roster_size, _start_roster_profile_id, _start_roster_save_path, true))
 	_last_start_roster_store_result = reset_result.duplicate(true)
 	if not bool(reset_result.get("ok", false)):
-		_status_label.text = "Roster save failed"
+		_status_label.text = "Team konnte nicht gespeichert werden."
 		return {
 			"created": false,
 			"reason": String(reset_result.get("reason", "roster_reset_failed")),
@@ -683,7 +715,7 @@ func confirm_new_start_roster() -> Dictionary:
 		_team_editor_selected_unit_id = _resolve_team_editor_selected_unit_id("")
 	_refresh_team_library()
 	_refresh_team_editor()
-	_status_label.text = "Neues Team bereit" if bool(reset_result.get("ok", false)) else "Roster save failed"
+	_status_label.text = "Neues Team ist bereit." if bool(reset_result.get("ok", false)) else "Team konnte nicht gespeichert werden."
 	return {
 		"created": true,
 		"reason": "confirmed_new_roster",
@@ -696,7 +728,7 @@ func confirm_new_start_roster() -> Dictionary:
 func cancel_new_start_roster() -> void:
 	_start_roster_reset_confirmation_pending = false
 	_refresh_start_roster_button()
-	_status_label.text = "Roster ready"
+	_status_label.text = _ready_status_text()
 
 
 func set_start_team_name(next_team_name: String) -> Dictionary:
@@ -708,7 +740,7 @@ func set_start_team_name(next_team_name: String) -> Dictionary:
 	_selected_roster_entry_path = _start_roster_save_path
 	_refresh_team_library()
 	_refresh_team_editor()
-	_status_label.text = "Team name saved" if bool(renamed.get("ok", false)) else "Team name save failed"
+	_status_label.text = "Teamname gespeichert." if bool(renamed.get("ok", false)) else "Teamname konnte nicht gespeichert werden."
 	return renamed
 
 
@@ -730,7 +762,7 @@ func set_comic_bubble_mode(mode: String) -> int:
 	var error: int = int(COMIC_BUBBLE_SETTINGS_SCRIPT.call("save_settings", _comic_bubble_settings, _settings_config_path))
 	_load_comic_bubble_settings()
 	_refresh_settings_controls_from_current()
-	_status_label.text = "Bubbles: %s" % _mode_label(String(_comic_bubble_settings.get("mode", "normal")))
+	_status_label.text = "Sprechblasen: %s" % _mode_label(String(_comic_bubble_settings.get("mode", "normal")))
 	return error
 
 
@@ -739,7 +771,7 @@ func set_fog_of_war_mode(mode: String) -> int:
 	var error: int = int(GAME_SETTINGS_CONTRACT_SCRIPT.call("save_settings", _gameplay_settings, _settings_config_path))
 	_load_comic_bubble_settings()
 	_refresh_settings_controls_from_current()
-	_status_label.text = "FoW: %s" % _mode_label(String(_gameplay_settings.get("fog_of_war_mode", "known_terrain")))
+	_status_label.text = "Sichtnebel: %s" % _mode_label(String(_gameplay_settings.get("fog_of_war_mode", "known_terrain")))
 	return error
 
 
@@ -748,7 +780,7 @@ func set_contextual_help_mode(mode: String) -> int:
 	var error: int = int(GAME_SETTINGS_CONTRACT_SCRIPT.call("save_settings", _gameplay_settings, _settings_config_path))
 	_load_comic_bubble_settings()
 	_refresh_settings_controls_from_current()
-	_status_label.text = "Help: %s" % _mode_label(String(_gameplay_settings.get(GAME_SETTINGS_CONTRACT_SCRIPT.KEY_CONTEXTUAL_HELP_MODE, GAME_SETTINGS_CONTRACT_SCRIPT.CONTEXTUAL_HELP_MODE_COMPACT)))
+	_status_label.text = "Hilfe: %s" % _mode_label(String(_gameplay_settings.get(GAME_SETTINGS_CONTRACT_SCRIPT.KEY_CONTEXTUAL_HELP_MODE, GAME_SETTINGS_CONTRACT_SCRIPT.CONTEXTUAL_HELP_MODE_COMPACT)))
 	return error
 
 
@@ -788,18 +820,18 @@ func apply_settings() -> int:
 		_draft_comic_bubble_settings = _comic_bubble_settings.duplicate(true)
 	var gameplay_error: int = int(GAME_SETTINGS_CONTRACT_SCRIPT.call("save_settings", _draft_gameplay_settings, _settings_config_path))
 	if gameplay_error != OK:
-		_status_label.text = "Settings failed"
+		_status_label.text = "Einstellungen konnten nicht gespeichert werden."
 		_play_ui_sfx("warning", "settings_apply_failed")
 		return gameplay_error
 	var bubble_error: int = int(COMIC_BUBBLE_SETTINGS_SCRIPT.call("save_settings", _draft_comic_bubble_settings, _settings_config_path))
 	if bubble_error != OK:
-		_status_label.text = "Settings failed"
+		_status_label.text = "Einstellungen konnten nicht gespeichert werden."
 		_play_ui_sfx("warning", "settings_bubbles_failed")
 		return bubble_error
 	_apply_runtime_settings(_draft_gameplay_settings)
 	_load_comic_bubble_settings()
 	_refresh_settings_controls_from_current()
-	_status_label.text = "Settings saved"
+	_status_label.text = "Einstellungen gespeichert."
 	_play_ui_sfx("confirm", "settings_apply")
 	return OK
 
@@ -808,7 +840,7 @@ func reset_settings_defaults() -> void:
 	_draft_gameplay_settings = Dictionary(GAME_SETTINGS_CONTRACT_SCRIPT.call("get_default_settings"))
 	_draft_comic_bubble_settings = Dictionary(COMIC_BUBBLE_SETTINGS_SCRIPT.call("get_default_settings"))
 	_refresh_settings_controls_from_draft()
-	_status_label.text = "Defaults ready"
+	_status_label.text = "Standardwerte bereit – mit Anwenden übernehmen."
 	_play_ui_sfx("switch", "settings_defaults")
 
 
@@ -828,14 +860,14 @@ func open_settings_panel() -> void:
 	_settings_panel.visible = true
 	_settings_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_settings_back_button.grab_focus()
-	_status_label.text = "Settings"
+	_status_label.text = "Einstellungen"
 	_play_ui_sfx("click", "settings_open")
 
 
 func close_settings_panel() -> void:
 	_settings_panel.visible = false
 	_settings_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_status_label.text = "Ready"
+	_status_label.text = _ready_status_text()
 
 
 func _apply_background_texture() -> void:
@@ -852,6 +884,8 @@ func _configure_routes() -> void:
 	_multiplayer_button.set_meta("route_adapter", "multiplayer_lobby_screen")
 	_editor_button.set_meta("route", EDITOR_SCENE_PATH)
 	_settings_button.set_meta("route", "local_settings_panel")
+	if _free_play_button != null:
+		_free_play_button.set_meta("route", "free_play_section")
 
 
 func _connect_signals() -> void:
@@ -861,10 +895,6 @@ func _connect_signals() -> void:
 	_settings_button.pressed.connect(open_settings_panel)
 	if _new_roster_button != null and not _new_roster_button.pressed.is_connected(_on_new_roster_pressed):
 		_new_roster_button.pressed.connect(_on_new_roster_pressed)
-	if _mission_save_button != null and not _mission_save_button.pressed.is_connected(_on_mission_save_pressed):
-		_mission_save_button.pressed.connect(_on_mission_save_pressed)
-	if _mission_load_button != null and not _mission_load_button.pressed.is_connected(_on_mission_load_pressed):
-		_mission_load_button.pressed.connect(_on_mission_load_pressed)
 	_settings_back_button.pressed.connect(cancel_settings_changes)
 	_master_volume_slider.value_changed.connect(_on_master_volume_changed)
 	_fullscreen_check.toggled.connect(_on_fullscreen_toggled)
@@ -1030,7 +1060,7 @@ func _layout_native_shell_windows() -> void:
 		_settings_panel.anchor_bottom = 0.0
 		_settings_panel.position = Vector2(maxf(32.0, viewport_size.x - settings_size.x - 48.0), 48.0)
 		_settings_panel.size = settings_size
-	if _team_library_panel != null:
+	if _team_library_panel != null and _team_library_panel.top_level:
 		var library_size := Vector2(minf(640.0, maxf(480.0, viewport_size.x - 600.0)), minf(320.0, viewport_size.y - 160.0))
 		_team_library_panel.position = Vector2(maxf(544.0, viewport_size.x - library_size.x - 32.0), maxf(80.0, viewport_size.y - library_size.y - 64.0))
 		_team_library_panel.size = library_size
@@ -1104,60 +1134,6 @@ func _ensure_start_roster_button() -> void:
 	_refresh_team_editor()
 
 
-func _ensure_mission_save_load_buttons() -> void:
-	var menu_buttons := get_node_or_null("MenuRail/MenuMargin/MenuVBox/MenuButtons") as VBoxContainer
-	if menu_buttons == null:
-		return
-	var row := menu_buttons.get_node_or_null("MissionSlotRow") as HBoxContainer
-	if row == null:
-		row = HBoxContainer.new()
-		row.name = "MissionSlotRow"
-		row.add_theme_constant_override("separation", 8)
-		menu_buttons.add_child(row)
-		var reference := menu_buttons.get_node_or_null("NewRosterButton")
-		if reference != null:
-			menu_buttons.move_child(row, reference.get_index())
-	_mission_save_button = row.get_node_or_null("MissionSaveButton") as Button
-	if _mission_save_button == null:
-		_mission_save_button = Button.new()
-		_mission_save_button.name = "MissionSaveButton"
-		_mission_save_button.text = "Szenenstart merken"
-		_mission_save_button.custom_minimum_size = Vector2(176.0, 42.0)
-		_mission_save_button.focus_mode = Control.FOCUS_ALL
-		row.add_child(_mission_save_button)
-	_mission_load_button = row.get_node_or_null("MissionLoadButton") as Button
-	if _mission_load_button == null:
-		_mission_load_button = Button.new()
-		_mission_load_button.name = "MissionLoadButton"
-		_mission_load_button.text = "Gemerkte Szene neu starten"
-		_mission_load_button.custom_minimum_size = Vector2(176.0, 42.0)
-		_mission_load_button.focus_mode = Control.FOCUS_ALL
-		row.add_child(_mission_load_button)
-	_refresh_mission_save_load_buttons()
-
-
-func _apply_release_first_play_polish() -> void:
-	if _singleplayer_button == null:
-		return
-	_singleplayer_button.custom_minimum_size = Vector2(360.0, 76.0)
-	_singleplayer_button.focus_mode = Control.FOCUS_ALL
-	_singleplayer_button.text = "Skirmish"
-	_singleplayer_button.tooltip_text = "Freier Einzelspieler: Sortie mit deinem Skirmish-Team vorbereiten."
-	_singleplayer_button.set_meta("release_first_play_style_id", RELEASE_FIRST_PLAY_STYLE_ID)
-	_singleplayer_button.set_meta("release_priority", "primary")
-	_singleplayer_button.set_meta("release_action_hint", "Freier Einzelspieler: Sortie mit deinem Skirmish-Team vorbereiten.")
-	TACTICAL_UI_THEME_SCRIPT.style_command_button(_singleplayer_button, "accent")
-	_singleplayer_button.add_theme_font_size_override("font_size", 20)
-	_singleplayer_button.call_deferred("grab_focus")
-	_apply_release_secondary_button_polish(_multiplayer_button, "secondary", "Host/Join-Lobby fuer Testteams.")
-	_apply_release_secondary_button_polish(_editor_button, "secondary", "Map-Editor oeffnen.")
-	_apply_release_secondary_button_polish(_settings_button, "secondary", "Anzeige, Audio und Eingabe anpassen.")
-	_apply_release_secondary_button_polish(_new_roster_button, "support", "Optional: neues Startteam erzeugen.")
-	_apply_release_secondary_button_polish(_team_editor_toggle_button, "support", "Optional: aktives Team bearbeiten.")
-	_apply_release_secondary_button_polish(_mission_save_button, "support", "Merkt nur die Szene; Fortschritt wird nicht gespeichert.")
-	_apply_release_secondary_button_polish(_mission_load_button, "support", "Startet die gemerkte Szene von vorn; kein gespeicherter Spielfortschritt.")
-
-
 func _apply_release_secondary_button_polish(button: Button, priority: String, tooltip: String) -> void:
 	if button == null:
 		return
@@ -1191,27 +1167,6 @@ func _build_release_first_play_button_style(background: Color, border: Color, bo
 	style.content_margin_top = 10.0
 	style.content_margin_bottom = 10.0
 	return style
-
-
-func _refresh_mission_save_load_buttons() -> void:
-	var shell = _get_global_escape_shell()
-	var has_shell: bool = shell != null
-	var campaign: bool = has_shell and bool(shell.call("_is_campaign_context"))
-	var has_save_slot: bool = false
-	if has_shell:
-		var slot: Dictionary = Dictionary(shell.call("get_save_slot_snapshot"))
-		has_save_slot = bool(slot.get("exists", false))
-	if _mission_save_button != null:
-		_mission_save_button.visible = true
-		_mission_save_button.disabled = not has_shell or not bool(shell.call("_can_save_current_scene"))
-		_mission_save_button.text = "Kampagne speichern" if campaign else "Szenenstart merken"
-		_mission_save_button.tooltip_text = "Speichert den Kampagnenstand über den vorhandenen Kampagnenowner." if campaign else "Merkt nur die Szene; Fortschritt wird nicht gespeichert."
-		if not has_shell: _mission_save_button.tooltip_text = "Globales Shell-Menü ist nicht bereit."
-	if _mission_load_button != null:
-		_mission_load_button.visible = true
-		_mission_load_button.disabled = not has_shell or campaign or not has_save_slot
-		_mission_load_button.text = "Im Hauptmenü fortsetzen" if campaign else "Gemerkte Szene neu starten"
-		_mission_load_button.tooltip_text = "Kampagne im Hauptmenü über Fortsetzen laden." if campaign else "Startet die gemerkte Szene von vorn; kein gespeicherter Spielfortschritt."
 
 
 func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
@@ -1281,7 +1236,7 @@ func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
 	if _team_library_delete_button == null:
 		_team_library_delete_button = Button.new()
 		_team_library_delete_button.name = "TeamLibraryDeleteButton"
-		_team_library_delete_button.text = "Loeschen"
+		_team_library_delete_button.text = "Löschen"
 		_team_library_delete_button.custom_minimum_size = Vector2(82.0, 32.0)
 		header_row.add_child(_team_library_delete_button)
 	if not _team_library_delete_button.pressed.is_connected(_on_team_library_delete_pressed):
@@ -1362,7 +1317,7 @@ func _ensure_team_editor_panel(_menu_buttons: VBoxContainer) -> void:
 	_team_editor_title_label.add_theme_font_size_override("font_size", 26)
 	_team_editor_title_label.clip_text = true
 	_team_editor_title_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	_team_editor_title_label.tooltip_text = "Eigene Ansicht fuer Teamname, Team-Bild, Rookie-Punkte und NPC-Karten."
+	_team_editor_title_label.tooltip_text = "Eigene Ansicht für Teamname, Team-Bild, Rookie-Punkte und NPC-Karten."
 
 	var view_row := header_row.get_node_or_null("TeamEditorViewModeRow") as HBoxContainer
 	if view_row == null:
@@ -1390,7 +1345,7 @@ func _ensure_team_editor_panel(_menu_buttons: VBoxContainer) -> void:
 		_team_editor_close_button.text = "Schliessen"
 		_team_editor_close_button.custom_minimum_size = Vector2(120.0, 44.0)
 		header_row.add_child(_team_editor_close_button)
-	_team_editor_close_button.tooltip_text = "Zurueck zum Hauptmenue."
+	_team_editor_close_button.tooltip_text = "Zurück zum Hauptmenü."
 	if not _team_editor_close_button.pressed.is_connected(_on_team_editor_close_pressed):
 		_team_editor_close_button.pressed.connect(_on_team_editor_close_pressed)
 
@@ -1481,7 +1436,7 @@ func _ensure_team_editor_panel(_menu_buttons: VBoxContainer) -> void:
 		_team_editor_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		side_vbox.add_child(_team_editor_summary_label)
 	_team_editor_summary_label.add_theme_font_size_override("font_size", 12)
-	_team_editor_summary_label.tooltip_text = "Zusammenfassung des geoeffneten Teams und des aktuellen Ansichtmodus."
+	_team_editor_summary_label.tooltip_text = "Zusammenfassung des geöffneten Teams und des aktuellen Ansichtmodus."
 	_team_editor_summary_label.visible = false
 	_team_editor_budget_label = side_vbox.get_node_or_null("TeamEditorBudgetLabel") as Label
 	if _team_editor_budget_label == null:
@@ -1490,7 +1445,7 @@ func _ensure_team_editor_panel(_menu_buttons: VBoxContainer) -> void:
 		side_vbox.add_child(_team_editor_budget_label)
 	_team_editor_budget_label.add_theme_font_size_override("font_size", 13)
 	_team_editor_budget_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_team_editor_budget_label.tooltip_text = "Team-Fokus: Generator-/Balancing-Vorgabe. Einzelne NPC-Werte werden rechts im Charakterblatt geaendert."
+	_team_editor_budget_label.tooltip_text = "Team-Fokus: Generator-/Balancing-Vorgabe. Einzelne NPC-Werte werden rechts im Charakterblatt geändert."
 	var scroll := side_vbox.get_node_or_null("TeamEditorStatsScroll") as ScrollContainer
 	if scroll == null:
 		scroll = ScrollContainer.new()
@@ -1618,15 +1573,15 @@ func _ensure_team_editor_view_button(parent: HBoxContainer, view_mode: String, l
 func _refresh_start_roster_button() -> void:
 	if _new_roster_button == null:
 		return
-	_new_roster_button.text = "Team neu bestaetigen" if _start_roster_reset_confirmation_pending else "Neues Skirmish-Team"
-	_new_roster_button.tooltip_text = "Ersetzt das Startteam erst nach Bestaetigung." if _start_roster_reset_confirmation_pending else "Automatisch ein neues Startteam generieren."
+	_new_roster_button.text = "Team neu bestätigen" if _start_roster_reset_confirmation_pending else "Neues Skirmish-Team"
+	_new_roster_button.tooltip_text = "Ersetzt das Startteam erst nach Bestätigung." if _start_roster_reset_confirmation_pending else "Automatisch ein neues Startteam generieren."
 
 
 func _refresh_team_editor_toggle() -> void:
 	if _team_editor_toggle_button == null:
 		return
 	_team_editor_toggle_button.text = "Skirmish-Team-Editor" if _team_editor_open else "Skirmish-Team erstellen"
-	_team_editor_toggle_button.tooltip_text = "Geoeffnetes Team-Editor-Fenster anzeigen." if _team_editor_open else "Eigenes Rookie-Team im grossen Team-Editor bearbeiten."
+	_team_editor_toggle_button.tooltip_text = "Geöffnetes Team-Editor-Fenster anzeigen." if _team_editor_open else "Eigenes Rookie-Team im großen Team-Editor bearbeiten."
 
 
 func _open_team_editor_for_path(entry_path: String = "") -> void:
@@ -1640,7 +1595,7 @@ func _open_team_editor_for_path(entry_path: String = "") -> void:
 	if not bool(load_result.get("ok", false)) and path == _start_roster_save_path and not _start_roster.is_empty():
 		roster = _start_roster.duplicate(true)
 	if roster.is_empty():
-		_status_label.text = "Team fehlt"
+		_status_label.text = "Team fehlt – im Bereich Teams ein neues Team erzeugen."
 		_play_ui_sfx("warning", "team_editor_missing_roster")
 		return
 	_team_editor_roster_path = path
@@ -1668,7 +1623,7 @@ func _set_team_editor_open(open: bool) -> void:
 		_team_library_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE if _team_editor_open else Control.MOUSE_FILTER_STOP
 	_refresh_team_editor_toggle()
 	if not _team_editor_open:
-		_status_label.text = "Ready"
+		_status_label.text = _ready_status_text()
 
 
 func _set_team_editor_view_mode(view_mode: String) -> void:
@@ -1687,7 +1642,7 @@ func _refresh_team_name_controls() -> void:
 		return
 	var snapshot: Dictionary = Dictionary(TEAM_NAME_GENERATOR_SCRIPT.call("build_team_identity_snapshot", _start_roster))
 	_team_name_edit.text = String(snapshot.get("team_name", ""))
-	_team_name_edit.tooltip_text = "Teamname fuer Roster/Homebase/FOB."
+	_team_name_edit.tooltip_text = "Teamname für Roster/Homebase/FOB."
 	if _team_name_suggest_button != null:
 		_team_name_suggest_button.tooltip_text = "Neuen Teamnamen vorschlagen."
 
@@ -1759,25 +1714,25 @@ func _refresh_team_library_status() -> void:
 		selected_name = "kein Team"
 	var selected_active: bool = bool(selected_entry.get("active", false))
 	if _team_library_status_label != null:
-		var prefix: String = "Ausgewaehlt"
+		var prefix: String = "Ausgewählt"
 		if selected_active:
-			prefix = "Ausgewaehlt aktiv"
+			prefix = "Ausgewählt aktiv"
 		elif bool(selected_entry.get("archived", false)):
-			prefix = "Ausgewaehlt Archiv"
+			prefix = "Ausgewählt Archiv"
 		_team_library_status_label.text = "%s: %s" % [prefix, selected_name]
 		_team_library_status_label.tooltip_text = "Bearbeiten oder Doppelklick öffnet den Team-Editor."
 	if _team_library_delete_button != null:
 		var can_delete: bool = not selected_entry.is_empty() and bool(selected_entry.get("can_delete", false)) and not selected_active
 		_team_library_delete_button.disabled = not can_delete
-		_team_library_delete_button.tooltip_text = "Archiv-Team loeschen." if can_delete else "Aktives Team bleibt geschuetzt."
+		_team_library_delete_button.tooltip_text = "Archiv-Team löschen." if can_delete else "Aktives Team bleibt geschützt."
 	if _team_library_activate_button != null:
 		var can_activate: bool = not selected_entry.is_empty() and not selected_active and bool(selected_entry.get("valid", false))
 		_team_library_activate_button.disabled = not can_activate
-		_team_library_activate_button.tooltip_text = "Archiv-Team als aktives Startteam verwenden." if can_activate else "Aktives Team ist bereits ausgewaehlt."
+		_team_library_activate_button.tooltip_text = "Archiv-Team als aktives Startteam verwenden." if can_activate else "Aktives Team ist bereits ausgewählt."
 	if _team_library_edit_button != null:
 		var can_edit: bool = not selected_entry.is_empty() and bool(selected_entry.get("valid", false))
 		_team_library_edit_button.disabled = not can_edit
-		_team_library_edit_button.tooltip_text = "Ausgewaehltes Team mit Name, Portraits, Karten und Rookie-Punkten bearbeiten." if can_edit else "Erst ein gueltiges Team auswaehlen."
+		_team_library_edit_button.tooltip_text = "Ausgewähltes Team mit Name, Portraits, Karten und Rookie-Punkten bearbeiten." if can_edit else "Erst ein gültiges Team auswählen."
 
 
 func _format_team_library_entry(entry: Dictionary) -> String:
@@ -1807,11 +1762,11 @@ func _delete_selected_team_entry(play_sound: bool = true) -> Dictionary:
 	var result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("delete_roster_entry", _selected_roster_entry_path, _start_roster_profile_id, _start_roster_save_path))
 	if bool(result.get("ok", false)):
 		_selected_roster_entry_path = _start_roster_save_path
-		_status_label.text = "Team geloescht"
+		_status_label.text = "Team gelöscht."
 		if play_sound:
 			_play_ui_sfx("confirm", "delete_roster_entry")
 	else:
-		_status_label.text = "Team bleibt aktiv" if String(result.get("reason", "")) == "active_roster_protected" else "Loeschen fehlgeschlagen"
+		_status_label.text = "Das aktive Team bleibt erhalten." if String(result.get("reason", "")) == "active_roster_protected" else "Löschen fehlgeschlagen."
 		if play_sound:
 			_play_ui_sfx("warning", "delete_roster_entry_failed")
 	_refresh_team_library()
@@ -1829,11 +1784,11 @@ func _activate_selected_team_entry(play_sound: bool = true) -> Dictionary:
 		_selected_roster_entry_path = _start_roster_save_path
 		_last_start_roster_store_result = Dictionary(result.get("save", result)).duplicate(true)
 		_refresh_team_name_controls()
-		_status_label.text = "Team aktiviert"
+		_status_label.text = "Team aktiviert."
 		if play_sound:
 			_play_ui_sfx("confirm", "activate_roster_entry")
 	else:
-		_status_label.text = "Aktivieren fehlgeschlagen"
+		_status_label.text = "Aktivieren fehlgeschlagen."
 		if play_sound:
 			_play_ui_sfx("warning", "activate_roster_entry_failed")
 	_refresh_team_library()
@@ -2051,7 +2006,7 @@ func _refresh_team_editor_sheet(roster: Dictionary) -> void:
 	var unit: Dictionary = _find_team_editor_unit(roster, _team_editor_selected_unit_id)
 	if unit.is_empty():
 		var empty_label := Label.new()
-		empty_label.text = "Keine NPC-Karte ausgewaehlt."
+		empty_label.text = "Keine NPC-Karte ausgewählt."
 		empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_team_editor_sheet_host.add_child(empty_label)
 		return
@@ -2155,7 +2110,7 @@ func _add_team_editor_character_edit_controls(host: VBoxContainer, unit: Diction
 	panel.name = "TeamEditorCharacterEditPanel"
 	panel.set_meta("character_editor_controls", true)
 	panel.set_meta("help_id", "character_sheet.identity")
-	panel.tooltip_text = "Name und Portrait werden direkt im geoeffneten Roster gespeichert."
+	panel.tooltip_text = "Name und Portrait werden direkt im geöffneten Roster gespeichert."
 	host.add_child(panel)
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 10)
@@ -2207,7 +2162,7 @@ func _add_team_editor_character_edit_controls(host: VBoxContainer, unit: Diction
 	_team_editor_unit_portrait_option.name = "TeamEditorUnitPortraitOption"
 	_team_editor_unit_portrait_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_team_editor_unit_portrait_option.custom_minimum_size = Vector2(220.0, 34.0)
-	_team_editor_unit_portrait_option.tooltip_text = "Portrait aus dem vorhandenen Portrait-Katalog auswaehlen. Die Vorschau links aendert sich sofort."
+	_team_editor_unit_portrait_option.tooltip_text = "Portrait aus dem vorhandenen Portrait-Katalog auswählen. Die Vorschau links ändert sich sofort."
 	_team_editor_unit_portrait_option.set_meta("help_id", "character_sheet.portrait")
 	_populate_team_editor_unit_portrait_options(_team_editor_unit_portrait_option, String(unit.get("portrait_id", "")), String(unit.get("portrait_path", "")))
 	_team_editor_unit_portrait_option.item_selected.connect(_on_team_editor_unit_portrait_selected.bind(unit_id, _team_editor_unit_portrait_option))
@@ -2298,7 +2253,7 @@ func _build_team_editor_unit_card(unit: Dictionary, card_size: Vector2, compact:
 			_unit_skill_value(unit, "fighter_piloting"),
 		]
 		flight_stats.add_theme_font_size_override("font_size", 10)
-		flight_stats.tooltip_text = "Drei Plattformwerte fuer Dropship-, Frachter- und Fighter-Piloten."
+		flight_stats.tooltip_text = "Drei Plattformwerte für Dropship-, Frachter- und Fighter-Piloten."
 		flight_stats.set_meta("help_id", "character_sheet.platform_skills")
 		info.add_child(flight_stats)
 		var action_row := HBoxContainer.new()
@@ -2309,7 +2264,7 @@ func _build_team_editor_unit_card(unit: Dictionary, card_size: Vector2, compact:
 		open_sheet_button.name = "TeamEditorOpenSheet_%s" % unit_id
 		open_sheet_button.text = "Blatt"
 		open_sheet_button.custom_minimum_size = Vector2(68.0, 24.0)
-		open_sheet_button.tooltip_text = "Diesen NPC im voll editierbaren Charakterblatt oeffnen."
+		open_sheet_button.tooltip_text = "Diesen NPC im voll editierbaren Charakterblatt öffnen."
 		open_sheet_button.set_meta("help_id", "character_sheet.identity")
 		open_sheet_button.pressed.connect(_on_team_editor_unit_sheet_button_pressed.bind(unit_id))
 		action_row.add_child(open_sheet_button)
@@ -2480,17 +2435,17 @@ func _team_editor_unit_stat_tooltip(stat_id: String) -> String:
 		"accuracy":
 			return "Accuracy: bestimmt Trefferchance und abgeleitete Shooter-/Meisterschuetze-Tendenz."
 		"speed":
-			return "Speed: beeinflusst Bewegung, Reaktionszeit und Scout-/Pilotengefuehl."
+			return "Speed: beeinflusst Bewegung, Reaktionszeit und Scout-/Pilotengefühl."
 		"leadership":
-			return "Leadership: wichtig fuer FTL, Befehlsruhe und Leader-Badges."
+			return "Leadership: wichtig für FTL, Befehlsruhe und Leader-Badges."
 		"toughness":
-			return "Toughness: haelt Druck, Verletzungen und Frustspitzen besser aus."
+			return "Toughness: hält Druck, Verletzungen und Frustspitzen besser aus."
 		"dropship_piloting":
-			return "Dropship Piloting: wichtig fuer LZ-Anflug, Touchdown und Rueckflug."
+			return "Dropship Piloting: wichtig für LZ-Anflug, Touchdown und Rückflug."
 		"freighter_piloting":
-			return "Freighter Piloting: wichtig fuer schwere Transporte und Cargo-Routen."
+			return "Freighter Piloting: wichtig für schwere Transporte und Cargo-Routen."
 		"fighter_piloting":
-			return "Fighter Piloting: wichtig fuer Begleitschutz, Abfangen und Strike-Rollen."
+			return "Fighter Piloting: wichtig für Begleitschutz, Abfangen und Strike-Rollen."
 		_:
 			return stat_id.capitalize()
 
@@ -2936,7 +2891,7 @@ func _build_team_editor_stat_row(editor: Dictionary, definition: Dictionary, val
 	var description: String = String(definition.get("description", ""))
 	var effect_text: String = String(definition.get("effect_text", "")).strip_edges()
 	var help_id: String = String(definition.get("help_id", "team_editor.stat.%s" % stat_id)).strip_edges()
-	var lock_text: String = "Gesperrt: Wert bleibt unveraendert." if locked else "Entsperrt: Erhoehen zieht Punkte gleichmaessig aus anderen entsperrten Teamfokus-Werten."
+	var lock_text: String = "Gesperrt: Wert bleibt unverändert." if locked else "Entsperrt: Erhöhen zieht Punkte gleichmäßig aus anderen entsperrten Teamfokus-Werten."
 	var tooltip: String = "%s\nWirkung: %s\nBereich: %d-%d\n%s" % [description, effect_text, stat_min, stat_max, lock_text]
 	var outer := VBoxContainer.new()
 	outer.name = "TeamEditorStat_%s" % stat_id
@@ -3009,7 +2964,7 @@ func _build_team_editor_stat_row(editor: Dictionary, definition: Dictionary, val
 	lock_button.custom_minimum_size = Vector2(24.0, 24.0)
 	lock_button.focus_mode = Control.FOCUS_ALL
 	lock_button.set_pressed_no_signal(locked)
-	lock_button.tooltip_text = "Diesen Teamfokus sperren, damit Budget-Aenderungen ihn nicht versehentlich veraendern."
+	lock_button.tooltip_text = "Diesen Teamfokus sperren, damit Budget-Änderungen ihn nicht versehentlich verändern."
 	lock_button.set_meta("help_id", "team_editor.stat.lock")
 	lock_button.toggled.connect(_on_team_editor_stat_lock_toggled.bind(stat_id))
 	row.add_child(lock_button)
@@ -3800,61 +3755,100 @@ func _get_global_escape_shell():
 	return get_node_or_null(GLOBAL_ESCAPE_MENU_NODE_PATH)
 
 
-func _on_mission_save_pressed() -> void:
-	var shell = _get_global_escape_shell()
-	if shell == null or not shell.has_method("save_current_mission_slot"):
-		_status_label.text = "Mission save unavailable"
-		_play_ui_sfx("warning", "mission_save_unavailable")
-		return
-	var result: Dictionary = Dictionary(shell.call("save_current_mission_slot"))
-	var ok: bool = bool(result.get("ok", false))
-	var saved_text := "Kampagne gespeichert." if bool(shell.call("_is_campaign_context")) else "Szenenstart gemerkt. Fortschritt wird nicht gespeichert."
-	_status_label.text = String(result.get("message", saved_text if ok else "Keine laufende Szene zum Merken"))
-	_play_ui_sfx("confirm" if ok else "warning", "mission_save")
-	_refresh_mission_save_load_buttons()
+func _load_campaign_checkpoint() -> Dictionary:
+	if not ResourceLoader.exists(CAMPAIGN_CHECKPOINT_STORE_PATH):
+		return {"ok": false, "reason": "checkpoint_store_unavailable"}
+	var store: GDScript = load(CAMPAIGN_CHECKPOINT_STORE_PATH)
+	return store.load_checkpoint()
 
 
-func _on_mission_load_pressed() -> void:
-	var shell = _get_global_escape_shell()
-	if shell == null or not shell.has_method("load_mission_slot"):
-		_status_label.text = "Mission load unavailable"
-		_play_ui_sfx("warning", "mission_load_unavailable")
+func _campaign_checkpoint_exists() -> bool:
+	# Even an invalid existing file must not be replaced without consent.
+	return FileAccess.file_exists("user://campaigns/introduction/checkpoint_v1.json") or bool(_load_campaign_checkpoint().get("ok", false))
+
+
+const MAIN_BUTTON_SIZE: Vector2 = Vector2(360.0, 52.0)
+const SUB_BUTTON_SIZE: Vector2 = Vector2(320.0, 40.0)
+const SECTION_HINTS: Dictionary = {
+	"campaign": "Kampagne: neue Kampagne beginnen oder den Basisstand laden.",
+	"free_play": "Freies Spiel: ohne Kampagnenführung – allein, gegen den Computer oder mit Mitspielern.",
+	"gefecht": "Gefecht: Truppe aus einer Vorlage oder per Punktebudget wählen.",
+	"save_load": "Laden: Spielstand wählen. Speichern geht im Spiel über Esc.",
+}
+
+
+func _ready_status_text() -> String:
+	return "Bereit – wähle Kampagne, Freies Spiel oder Gefecht."
+
+
+func _make_button(node_name: String, button_text: String) -> Button:
+	var button := Button.new()
+	button.name = node_name
+	button.text = button_text
+	return button
+
+
+func _make_sub_menu(node_name: String) -> VBoxContainer:
+	var box := VBoxContainer.new()
+	box.name = node_name
+	box.visible = false
+	box.add_theme_constant_override("separation", 6)
+	return box
+
+
+func _style_main_button(button: Button, priority: String, tooltip: String, accent: bool = false) -> void:
+	if button == null:
 		return
-	var result: Dictionary = Dictionary(shell.call("load_mission_slot"))
-	if bool(result.get("ok", false)):
-		_status_label.text = "Gemerkte Szene wird neu gestartet."
-		_play_ui_sfx("confirm", "mission_load")
-	else:
-		_status_label.text = String(result.get("message", "Noch kein Szenenstart gemerkt"))
-		_play_ui_sfx("warning", "mission_load_missing")
-	_refresh_mission_save_load_buttons()
+	_apply_release_secondary_button_polish(button, priority, tooltip)
+	TACTICAL_UI_THEME_SCRIPT.style_command_button(button, "accent" if accent else "neutral")
+	button.add_theme_font_size_override("font_size", 17)
+	button.custom_minimum_size = MAIN_BUTTON_SIZE
+	button.size_flags_horizontal = Control.SIZE_FILL
+	button.focus_mode = Control.FOCUS_ALL
+
+
+func _style_sub_button(button: Button, tooltip: String = "") -> void:
+	if button == null:
+		return
+	TACTICAL_UI_THEME_SCRIPT.style_command_button(button, "neutral")
+	button.add_theme_font_size_override("font_size", 15)
+	button.custom_minimum_size = SUB_BUTTON_SIZE
+	button.size_flags_horizontal = Control.SIZE_SHRINK_END
+	button.focus_mode = Control.FOCUS_ALL
+	button.set_meta("release_priority", "support")
+	if not tooltip.is_empty():
+		button.tooltip_text = tooltip
 
 
 func _ensure_campaign_entry() -> void:
 	var menu_buttons: VBoxContainer = _singleplayer_button.get_parent() as VBoxContainer
-	_campaign_button = Button.new()
-	_campaign_button.name = "CampaignButton"
-	_campaign_button.text = "Kampagne"
-	_campaign_button.custom_minimum_size = Vector2(360.0, 60.0)
-	_campaign_button.tooltip_text = "Einfuehrung mit zwei NPCs und eigenem Kampagnenstand."
+	_campaign_continue_button = _make_button("CampaignContinueButton", "Fortsetzen")
+	_campaign_continue_button.set_meta("help_id", "main_menu.campaign")
+	menu_buttons.add_child(_campaign_continue_button)
+	_campaign_continue_button.pressed.connect(_on_campaign_continue_pressed)
+	_continue_info_label = Label.new()
+	_continue_info_label.name = "ContinueInfoLabel"
+	_continue_info_label.add_theme_font_size_override("font_size", 13)
+	_continue_info_label.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT_MUTED)
+	_continue_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_continue_info_label.custom_minimum_size = Vector2(MAIN_BUTTON_SIZE.x, 0.0)
+	menu_buttons.add_child(_continue_info_label)
+	_campaign_button = _make_button("CampaignButton", "Kampagne")
+	_campaign_button.tooltip_text = "Einführung mit zwei NPCs und eigenem Kampagnenstand. Klappt auf: Neue Kampagne, Basisstand laden."
 	_campaign_button.set_meta("help_id", "main_menu.campaign")
-	TACTICAL_UI_THEME_SCRIPT.style_command_button(_campaign_button, "accent")
+	_campaign_button.toggle_mode = true
 	menu_buttons.add_child(_campaign_button)
-	menu_buttons.move_child(_campaign_button, _singleplayer_button.get_index())
 	_campaign_button.pressed.connect(_on_campaign_pressed)
-	_campaign_dialog = ConfirmationDialog.new()
-	_campaign_dialog.name = "CampaignStartDialog"
-	_campaign_dialog.title = "Kampagne"
-	_campaign_dialog.dialog_text = "Einführung mit Pilot und einem Leader.\nFortsetzen lädt den letzten gültigen Einsatzstand, sonst den Basisstand.\nEin beschädigter Einsatzstand wird nicht automatisch übersprungen."
-	_campaign_dialog.ok_button_text = "Neue Kampagne"
-	_campaign_dialog.cancel_button_text = "Zurueck"
-	add_child(_campaign_dialog)
-	_campaign_continue_button = _campaign_dialog.add_button("Fortsetzen", false, "continue")
-	_campaign_continue_button.name = "CampaignContinueButton"
-	_campaign_home_button = _campaign_dialog.add_button("Letzten Basisstand laden …", false, "continue_home")
-	_campaign_home_button.name = "CampaignHomeContinueButton"
-	_campaign_dialog.custom_action.connect(_on_campaign_dialog_action)
-	_campaign_dialog.confirmed.connect(_on_campaign_new_pressed)
+	_campaign_sub_menu = _make_sub_menu("CampaignSubMenu")
+	menu_buttons.add_child(_campaign_sub_menu)
+	_campaign_new_button = _make_button("CampaignNewButton", "Neue Kampagne")
+	_style_sub_button(_campaign_new_button, "Beginnt die Einführung von vorn. Ein vorhandener Stand wird erst nach Rückfrage ersetzt.")
+	_campaign_sub_menu.add_child(_campaign_new_button)
+	_campaign_new_button.pressed.connect(_on_campaign_new_pressed)
+	_campaign_home_button = _make_button("CampaignHomeLoadButton", "Basisstand laden")
+	_style_sub_button(_campaign_home_button, "Lädt ausdrücklich den letzten sicheren Basisstand.")
+	_campaign_sub_menu.add_child(_campaign_home_button)
+	_campaign_home_button.pressed.connect(_on_campaign_home_pressed)
 	_campaign_replace_dialog = ConfirmationDialog.new()
 	_campaign_replace_dialog.name = "CampaignReplaceDialog"
 	_campaign_replace_dialog.title = "Kampagne ersetzen?"
@@ -3871,53 +3865,135 @@ func _ensure_campaign_entry() -> void:
 	_campaign_home_dialog.cancel_button_text = "Abbrechen"
 	add_child(_campaign_home_dialog)
 	_campaign_home_dialog.confirmed.connect(_start_campaign.bind("continue_home"))
+	_campaign_error_dialog = AcceptDialog.new()
+	_campaign_error_dialog.name = "CampaignErrorDialog"
+	_campaign_error_dialog.title = "Die Kampagne konnte nicht gestartet werden"
+	_campaign_error_dialog.ok_button_text = "Schließen"
+	_campaign_error_dialog.dialog_autowrap = true
+	add_child(_campaign_error_dialog)
+	_campaign_error_dialog.add_button("Basisstand laden", false, "home")
+	_campaign_error_dialog.add_button("Neue Kampagne", false, "new")
+	_campaign_error_dialog.custom_action.connect(_on_campaign_error_action)
 
 
-func _load_campaign_checkpoint() -> Dictionary:
-	if not ResourceLoader.exists(CAMPAIGN_CHECKPOINT_STORE_PATH):
-		return {"ok": false, "reason": "checkpoint_store_unavailable"}
-	var store: GDScript = load(CAMPAIGN_CHECKPOINT_STORE_PATH)
-	return store.load_checkpoint()
+func _show_campaign_error(error_text: String) -> void:
+	if _campaign_error_dialog == null:
+		return
+	var detail: String = error_text.strip_edges()
+	if detail.is_empty():
+		detail = "Der Kampagnenstand konnte nicht geladen werden."
+	_campaign_error_dialog.dialog_text = detail + "\n\nDein vorhandener Stand bleibt erhalten. Du kannst den Basisstand laden, eine neue Kampagne beginnen oder das Fenster schließen."
+	_campaign_error_dialog.popup_centered(Vector2i(660, 300))
 
 
-func _campaign_checkpoint_exists() -> bool:
-	# Even an invalid existing file must not be replaced without consent.
-	return FileAccess.file_exists("user://campaigns/introduction/checkpoint_v1.json") or bool(_load_campaign_checkpoint().get("ok", false))
+func _on_campaign_error_action(action: StringName) -> void:
+	if _campaign_error_dialog != null:
+		_campaign_error_dialog.hide()
+	if action == &"home":
+		_on_campaign_home_pressed()
+	elif action == &"new":
+		_on_campaign_new_pressed()
+
+
+func _inspect_campaign_saved() -> Dictionary:
+	var projection_script: GDScript = load("res://scripts/meta/campaign_save_projection.gd")
+	return Dictionary(projection_script.call("inspect_saved", _load_campaign_checkpoint()))
+
+
+func _find_saved_credits(inspected: Dictionary) -> int:
+	var sources: Array = []
+	var active: Dictionary = Dictionary(inspected.get("active", {}))
+	if bool(active.get("ok", false)):
+		sources.append(Dictionary(active.get("payload", {})))
+	sources.append(Dictionary(Dictionary(inspected.get("home", {})).get("payload", {})))
+	for payload_variant in sources:
+		var payload: Dictionary = Dictionary(payload_variant)
+		var supply: Variant = payload.get("supply", null)
+		if supply is Dictionary and Dictionary(supply).has("credits"):
+			return int(Dictionary(supply).get("credits", 0))
+		var components: Variant = payload.get("components", null)
+		if components is Dictionary:
+			var component_supply: Variant = Dictionary(components).get("supply", null)
+			if component_supply is Dictionary and Dictionary(component_supply).has("credits"):
+				return int(Dictionary(component_supply).get("credits", 0))
+	return -1
+
+
+func _format_local_time(stamp: int) -> String:
+	if stamp <= 0:
+		return "Zeit unbekannt"
+	var bias_minutes: int = int(Dictionary(Time.get_time_zone_from_system()).get("bias", 0))
+	var local: Dictionary = Time.get_datetime_dict_from_unix_time(stamp + bias_minutes * 60)
+	return "%02d.%02d.%04d %02d:%02d" % [int(local.day), int(local.month), int(local.year), int(local.hour), int(local.minute)]
+
+
+func _build_continue_info_text(projection: Dictionary, inspected: Dictionary) -> String:
+	if not bool(projection.get("home_available", false)):
+		return ""
+	if not bool(projection.get("continue_available", false)):
+		return String(projection.get("summary", ""))
+	var place: String = String(projection.get("location", "Basis"))
+	var credits: int = _find_saved_credits(inspected)
+	var credit_text: String = "%d Credits" % credits if credits >= 0 else "Credits unbekannt"
+	return "%s · %s · %s" % [place, _format_local_time(int(projection.get("saved_at_unix", 0))), credit_text]
+
+
+func _refresh_save_state_entries() -> void:
+	var inspected: Dictionary = _inspect_campaign_saved()
+	var projection: Dictionary = Dictionary(inspected.get("projection", {}))
+	var continue_available: bool = bool(projection.get("continue_available", false))
+	var home_available: bool = bool(projection.get("home_available", false))
+	var summary: String = String(projection.get("summary", ""))
+	if _campaign_continue_button != null:
+		_campaign_continue_button.visible = home_available
+		_campaign_continue_button.disabled = not continue_available
+		_campaign_continue_button.tooltip_text = "Lädt mit einem Klick den neuesten Spielstand." if continue_available else summary
+	if _continue_info_label != null:
+		_continue_info_label.visible = home_available
+		_continue_info_label.text = _build_continue_info_text(projection, inspected)
+	if _campaign_home_button != null:
+		_campaign_home_button.disabled = not home_available
+	if _save_load_latest_button != null:
+		_save_load_latest_button.visible = home_available
+		_save_load_latest_button.disabled = not continue_available
+		_save_load_latest_button.tooltip_text = _build_continue_info_text(projection, inspected)
+	if _save_load_home_button != null:
+		_save_load_home_button.visible = home_available
+		_save_load_home_button.disabled = not home_available
+	if _save_load_empty_label != null:
+		_save_load_empty_label.visible = not home_available
 
 
 func _on_campaign_pressed() -> void:
-	var projection: Dictionary = load("res://scripts/meta/campaign_save_projection.gd").inspect_saved(_load_campaign_checkpoint()).projection
-	_campaign_continue_button.disabled = not projection.continue_available
-	_campaign_home_button.disabled = not projection.home_available
-	_campaign_dialog.dialog_text = "Einführung mit Pilot und einem Leader.\n\nFortsetzen:\n" + String(projection.summary)
-	_campaign_dialog.popup_centered(Vector2i(760, 260))
+	_toggle_section("campaign")
+	_refresh_save_state_entries()
 
 
-func _on_campaign_dialog_action(action: StringName) -> void:
-	if action == &"continue":
-		_on_campaign_continue_pressed()
-	elif action == &"continue_home":
-		if not bool(_load_campaign_checkpoint().get("ok", false)):
-			_status_label.text = "Kein gültiger Basisstand vorhanden"
-			return
-		_campaign_dialog.hide()
-		_campaign_home_dialog.popup_centered(Vector2i(600, 220))
+func _on_campaign_home_pressed() -> void:
+	if _launching:
+		return
+	if not bool(_load_campaign_checkpoint().get("ok", false)):
+		_status_label.text = "Kein gültiger Basisstand vorhanden."
+		return
+	_campaign_home_dialog.popup_centered(Vector2i(600, 220))
 
 
 func _on_campaign_continue_pressed() -> void:
-	# Revalidate on activation: the file may have changed while the dialog was open.
-	var projection: Dictionary = load("res://scripts/meta/campaign_save_projection.gd").inspect_saved(_load_campaign_checkpoint()).projection
-	if not projection.continue_available:
-		_campaign_continue_button.disabled = true
-		_status_label.text = String(projection.summary)
-		_campaign_dialog.dialog_text = String(projection.summary)
+	if _launching:
 		return
-	_campaign_dialog.hide()
+	# Revalidate on activation: the file may have changed since the menu was built.
+	var projection: Dictionary = Dictionary(_inspect_campaign_saved().get("projection", {}))
+	if not bool(projection.get("continue_available", false)):
+		if _campaign_continue_button != null:
+			_campaign_continue_button.disabled = true
+		_status_label.text = String(projection.get("summary", "Es gibt keinen Spielstand zum Fortsetzen."))
+		return
 	_start_campaign("continue")
 
 
 func _on_campaign_new_pressed() -> void:
-	_campaign_dialog.hide()
+	if _launching:
+		return
 	if _campaign_checkpoint_exists():
 		_campaign_replace_dialog.popup_centered(Vector2i(560, 180))
 		return
@@ -3925,64 +4001,65 @@ func _on_campaign_new_pressed() -> void:
 
 
 func _start_campaign(action: String) -> void:
-	_campaign_dialog.hide()
-	_campaign_replace_dialog.hide()
-	_campaign_home_dialog.hide()
-	GAME_START_CONTRACT_SCRIPT.request_start(get_tree(), "campaign", action)
+	if _launching:
+		return
+	if _campaign_replace_dialog != null:
+		_campaign_replace_dialog.hide()
+	if _campaign_home_dialog != null:
+		_campaign_home_dialog.hide()
+	var result: Dictionary = GAME_START_CONTRACT_SCRIPT.request_start(get_tree(), "campaign", action)
+	if not bool(result.get("ok", false)):
+		var failure: String = "Die Kampagne konnte nicht gestartet werden (%s)." % String(result.get("reason", "unbekannt"))
+		_status_label.text = failure
+		_show_campaign_error(failure)
+		return
 	_play_ui_sfx("confirm", "campaign")
-	_change_scene(SINGLEPLAYER_SCENE_PATH)
-
-
-func _on_singleplayer_pressed() -> void:
-	_skirmish_dialog.popup_centered(Vector2i(680, 520))
+	_launch_scene(SINGLEPLAYER_SCENE_PATH, "Kampagne", "kampagne")
 
 
 func _ensure_skirmish_entry() -> void:
-	_skirmish_dialog = AcceptDialog.new()
-	_skirmish_dialog.name = "SkirmishStartDialog"
-	_skirmish_dialog.title = "Skirmish"
-	_skirmish_dialog.ok_button_text = "Zurück"
-	add_child(_skirmish_dialog)
-	var content := VBoxContainer.new()
-	content.add_theme_constant_override("separation", 12)
-	_skirmish_dialog.add_child(content)
-	var heading := Label.new()
-	heading.text = "Offene Ortswahl ohne Kampagnenführung. Jeder Start beginnt frisch."
-	heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	heading.custom_minimum_size.x = 620
-	content.add_child(heading)
-	var points := Button.new()
-	points.name = "SkirmishPointsStart"
-	points.text = "Mit Punktebudget zusammenstellen"
-	points.custom_minimum_size.y = 42
-	TACTICAL_UI_THEME_SCRIPT.style_command_button(points, "accent")
-	content.add_child(points)
-	points.pressed.connect(_open_skirmish_points)
+	var menu_buttons: VBoxContainer = _singleplayer_button.get_parent() as VBoxContainer
+	_gefecht_sub_menu = _make_sub_menu("GefechtSubMenu")
+	menu_buttons.add_child(_gefecht_sub_menu)
+	var hint := Label.new()
+	hint.name = "GefechtHintLabel"
+	hint.text = "Ein einzelnes Gefecht. Truppe wählen; die Kartenwahl kommt noch."
+	hint.add_theme_font_size_override("font_size", 13)
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.custom_minimum_size = Vector2(SUB_BUTTON_SIZE.x, 0.0)
+	hint.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_gefecht_sub_menu.add_child(hint)
 	var presets: Dictionary = load("res://scripts/meta/skirmish_start_configuration.gd").get_presets()
+	var preset_row := HBoxContainer.new()
+	preset_row.name = "GefechtPresetRow"
+	preset_row.add_theme_constant_override("separation", 6)
+	preset_row.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_gefecht_sub_menu.add_child(preset_row)
+	var short_titles: Dictionary = {"early": "Früh", "mid": "Mittel", "late": "Spät"}
 	for id: String in ["early", "mid", "late"]:
 		var data: Dictionary = presets.get(id, {})
-		var button := Button.new()
-		button.name = "SkirmishPreset_" + id
-		button.text = String(data.get("title", id))
-		button.custom_minimum_size.y = 42
-		button.tooltip_text = String(data.get("description", ""))
-		TACTICAL_UI_THEME_SCRIPT.style_command_button(button, "accent" if id == "early" else "default")
-		content.add_child(button)
+		var button := _make_button("SkirmishPreset_" + id, String(short_titles.get(id, id)))
+		_style_sub_button(button, "%s\n%s" % [String(data.get("title", id)), String(data.get("description", ""))])
+		button.custom_minimum_size = Vector2(102.0, SUB_BUTTON_SIZE.y)
+		button.size_flags_horizontal = Control.SIZE_FILL
+		preset_row.add_child(button)
 		button.pressed.connect(_start_skirmish.bind(id))
-		var description := Label.new()
-		description.text = String(data.get("description", ""))
-		description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		content.add_child(description)
-	var own := Button.new()
-	own.name = "SkirmishOwnTeam"
-	own.text = "Mit eigenem gespeicherten Team starten"
-	own.custom_minimum_size.y = 42
-	content.add_child(own)
+	var points := _make_button("SkirmishPointsStart", "Mit Punktebudget zusammenstellen")
+	_style_sub_button(points, "Truppe selbst mit einem Punktebudget zusammenstellen.")
+	_gefecht_sub_menu.add_child(points)
+	points.pressed.connect(_open_skirmish_points)
+	var own := _make_button("SkirmishOwnTeam", "Mit eigenem Team starten")
+	_style_sub_button(own, "Startet mit deinem gespeicherten Team. Fahrzeugtransport, Trägerhangar, Wiederbewaffnung und Medic Bed sind vorgemerkt, derzeit nicht bedienbar.")
+	_gefecht_sub_menu.add_child(own)
 	own.pressed.connect(_start_skirmish.bind(""))
-	var note := Label.new()
-	note.text = "Gespeicherte Teams bleiben erhalten. Fahrzeugtransport, Trägerhangar, Wiederbewaffnung und Medic Bed sind vorgemerkt; derzeit nicht bedienbar."
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	content.add_child(note)
+	_gefecht_teams_button = _make_button("GefechtTeamsButton", "Teams")
+	_style_sub_button(_gefecht_teams_button, "Teamname, neues Team, Team-Editor und Team-Bibliothek.")
+	_gefecht_sub_menu.add_child(_gefecht_teams_button)
+	_gefecht_teams_button.pressed.connect(open_teams_screen)
+
+
+func _on_singleplayer_pressed() -> void:
+	_toggle_section("gefecht")
 
 
 func _open_skirmish_points() -> void:
@@ -3990,31 +4067,388 @@ func _open_skirmish_points() -> void:
 		_skirmish_points_dialog = load("res://scripts/ui/skirmish_points_dialog.gd").new()
 		_skirmish_points_dialog.connect("start_requested", func(draft: Dictionary) -> void: _start_skirmish("", draft))
 		add_child(_skirmish_points_dialog)
-		_skirmish_points_dialog.canceled.connect(func() -> void: _on_singleplayer_pressed.call_deferred())
-		_skirmish_points_dialog.confirmed.connect(func() -> void: _on_singleplayer_pressed.call_deferred())
-	_skirmish_dialog.hide()
+		_skirmish_points_dialog.canceled.connect(func() -> void: _set_section_open.call_deferred("gefecht"))
+		_skirmish_points_dialog.confirmed.connect(func() -> void: _set_section_open.call_deferred("gefecht"))
 	_skirmish_points_dialog.popup_centered(Vector2i(740, 500))
 
 
 func _start_skirmish(preset_id: String = "", points_draft: Dictionary = {}) -> void:
+	if _launching:
+		return
 	var result: Dictionary = GAME_START_CONTRACT_SCRIPT.request_start(get_tree(), "skirmish", "new", preset_id, points_draft)
-	if not result.get("ok", false): return
-	if _skirmish_dialog != null: _skirmish_dialog.hide()
-	if _skirmish_points_dialog != null: _skirmish_points_dialog.hide()
+	if not result.get("ok", false):
+		_status_label.text = "Der Start ist nicht möglich: %s" % String(result.get("reason", "unbekannt"))
+		return
+	if _skirmish_points_dialog != null:
+		_skirmish_points_dialog.hide()
 	_play_ui_sfx("confirm", "singleplayer")
-	_change_scene(SINGLEPLAYER_SCENE_PATH)
+	var gefecht: bool = not preset_id.is_empty() or not points_draft.is_empty() or _open_section == "gefecht"
+	_launch_scene(SINGLEPLAYER_SCENE_PATH, "Gefecht" if gefecht else "Freies Spiel", "gefecht" if gefecht else "frei")
 
 
 func _on_multiplayer_pressed() -> void:
+	if _launching:
+		return
 	GAME_START_CONTRACT_SCRIPT.clear_start(get_tree())
 	_play_ui_sfx("confirm", "multiplayer")
-	_change_scene(MULTIPLAYER_SCENE_PATH)
+	_launch_scene(MULTIPLAYER_SCENE_PATH, "Mehrspieler-Lobby", "mehrspieler")
 
 
 func _on_editor_pressed() -> void:
+	if _launching:
+		return
 	GAME_START_CONTRACT_SCRIPT.clear_start(get_tree())
 	_play_ui_sfx("confirm", "editor")
-	_change_scene(EDITOR_SCENE_PATH)
+	_launch_scene(EDITOR_SCENE_PATH, "Editor", "editor")
+
+
+func _on_quit_pressed() -> void:
+	if _launching or _quit_dialog == null:
+		return
+	_quit_dialog.popup_centered(Vector2i(420, 160))
+
+
+func _quit_game() -> void:
+	get_tree().quit()
+
+
+# --- Aufklappbereiche -------------------------------------------------------
+
+func _toggle_section(section: String) -> void:
+	_set_section_open("" if _open_section == section else section)
+
+
+func _set_section_open(section: String) -> void:
+	_open_section = section
+	var pairs: Dictionary = {
+		"campaign": [_campaign_button, _campaign_sub_menu],
+		"free_play": [_free_play_button, _free_play_sub_menu],
+		"gefecht": [_singleplayer_button, _gefecht_sub_menu],
+		"save_load": [_save_load_button, _save_load_sub_menu],
+	}
+	for key: String in pairs.keys():
+		var pair: Array = pairs[key]
+		var button := pair[0] as Button
+		var sub_menu := pair[1] as Control
+		if sub_menu != null:
+			sub_menu.visible = key == section
+		if button != null:
+			button.set_pressed_no_signal(key == section)
+	if section == "save_load":
+		_refresh_save_state_entries()
+	if _status_label != null:
+		_status_label.text = String(SECTION_HINTS.get(section, _ready_status_text()))
+
+
+func get_main_menu_snapshot() -> Dictionary:
+	return {
+		"open_section": _open_section,
+		"launching": _launching,
+		"curtain_visible": _loading_curtain != null and _loading_curtain.visible,
+		"curtain_text": _loading_label.text if _loading_label != null else "",
+		"continue_visible": _campaign_continue_button != null and _campaign_continue_button.visible,
+		"continue_disabled": _campaign_continue_button != null and _campaign_continue_button.disabled,
+		"continue_info": _continue_info_label.text if _continue_info_label != null else "",
+		"vs_computer_disabled": _free_play_vs_cpu_button != null and _free_play_vs_cpu_button.disabled,
+		"vs_computer_tooltip": _free_play_vs_cpu_button.tooltip_text if _free_play_vs_cpu_button != null else "",
+		"save_disabled": _mission_save_button != null and _mission_save_button.disabled,
+		"save_tooltip": _mission_save_button.tooltip_text if _mission_save_button != null else "",
+		"teams_screen_visible": _teams_screen != null and _teams_screen.visible,
+		"pending_tip_context": _pending_tip_context,
+	}
+
+
+# --- Ladevorhang ------------------------------------------------------------
+
+func _launch_scene(scene_path: String, label: String, tip_context: String) -> void:
+	if _launching:
+		return
+	_launching = true
+	_pending_tip_context = tip_context
+	_set_menu_locked(true)
+	_show_loading_curtain(label)
+	_status_label.text = "%s wird geladen …" % label
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if not is_inside_tree() or not _launching:
+		return
+	_change_scene(scene_path)
+
+
+func _cancel_launch() -> void:
+	if not _launching:
+		return
+	_launching = false
+	if _loading_curtain != null:
+		_loading_curtain.visible = false
+	_set_menu_locked(false)
+
+
+func _show_loading_curtain(label: String) -> void:
+	if _loading_curtain == null:
+		return
+	if _loading_label != null:
+		_loading_label.text = "%s wird geladen …" % label
+	_loading_curtain.visible = true
+
+
+func _collect_enabled_buttons(node: Node, out: Array) -> void:
+	for child in node.get_children():
+		if child is Window or child == _loading_curtain:
+			continue
+		if child is BaseButton and not (child as BaseButton).disabled:
+			out.append(child)
+		_collect_enabled_buttons(child, out)
+
+
+func _set_menu_locked(locked: bool) -> void:
+	if locked:
+		_locked_buttons.clear()
+		_collect_enabled_buttons(self, _locked_buttons)
+		for button_variant in _locked_buttons:
+			(button_variant as BaseButton).disabled = true
+	else:
+		for button_variant in _locked_buttons:
+			if is_instance_valid(button_variant):
+				(button_variant as BaseButton).disabled = false
+		_locked_buttons.clear()
+
+
+func _ensure_loading_curtain() -> void:
+	_loading_curtain = ColorRect.new()
+	_loading_curtain.name = "LoadingCurtain"
+	_loading_curtain.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_loading_curtain.color = Color(0.02, 0.04, 0.05, 0.92)
+	_loading_curtain.mouse_filter = Control.MOUSE_FILTER_STOP
+	_loading_curtain.z_index = 100
+	_loading_curtain.visible = false
+	add_child(_loading_curtain)
+	var center := CenterContainer.new()
+	center.name = "LoadingCenter"
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_loading_curtain.add_child(center)
+	_loading_label = Label.new()
+	_loading_label.name = "LoadingLabel"
+	_loading_label.add_theme_font_size_override("font_size", 34)
+	center.add_child(_loading_label)
+
+
+# --- Hauptknoepfe -----------------------------------------------------------
+
+func _ensure_main_menu_structure() -> void:
+	_main_menu_buttons = get_node_or_null("MenuRail/MenuMargin/MenuVBox/MenuButtons") as VBoxContainer
+	if _main_menu_buttons == null:
+		return
+	_main_menu_buttons.add_theme_constant_override("separation", 10)
+	var title := get_node_or_null("MenuRail/MenuMargin/MenuVBox/TitleLabel") as Label
+	if title != null:
+		title.text = "STERNENBÜRGERCHEN"
+		title.add_theme_font_size_override("font_size", 34)
+	# Freies Spiel (ohne Kampagnenfuehrung) mit Allein / Gegen Computer / Mehrspieler / Teams.
+	_free_play_button = _make_button("FreePlayButton", "Freies Spiel")
+	_free_play_button.toggle_mode = true
+	_free_play_button.pressed.connect(_toggle_section.bind("free_play"))
+	_free_play_sub_menu = _make_sub_menu("FreePlaySubMenu")
+	_main_menu_buttons.add_child(_free_play_sub_menu)
+	_free_play_solo_button = _make_button("FreePlaySoloButton", "Allein")
+	_style_sub_button(_free_play_solo_button, "Offene Welt ohne Kampagnenführung, allein mit deinem gespeicherten Team.")
+	_free_play_solo_button.pressed.connect(_start_skirmish.bind(""))
+	_free_play_sub_menu.add_child(_free_play_solo_button)
+	_free_play_vs_cpu_button = _make_button("FreePlayVsComputerButton", "Gegen Computer")
+	_style_sub_button(_free_play_vs_cpu_button, "Kommt noch: Computergegner im freien Spiel")
+	_free_play_vs_cpu_button.disabled = true
+	_free_play_sub_menu.add_child(_free_play_vs_cpu_button)
+	_multiplayer_button.reparent(_free_play_sub_menu, false)
+	_multiplayer_button.text = "Mehrspieler"
+	_multiplayer_button.tooltip_text = "Host/Join-Lobby für Testteams."
+	_style_sub_button(_multiplayer_button)
+	_free_play_teams_button = _make_button("FreePlayTeamsButton", "Teams")
+	_style_sub_button(_free_play_teams_button, "Teamname, neues Team, Team-Editor und Team-Bibliothek.")
+	_free_play_teams_button.pressed.connect(open_teams_screen)
+	_free_play_sub_menu.add_child(_free_play_teams_button)
+	# Speichern/Laden: im Hauptmenue laeuft kein Spiel, also nur Laden.
+	_save_load_button = _make_button("SaveLoadButton", "Speichern/Laden")
+	_save_load_button.toggle_mode = true
+	_save_load_button.pressed.connect(_toggle_section.bind("save_load"))
+	_save_load_sub_menu = _make_sub_menu("SaveLoadSubMenu")
+	_mission_save_button = _make_button("SaveButton", "Speichern")
+	_style_sub_button(_mission_save_button, "Speichern geht im Spiel über Esc")
+	_mission_save_button.disabled = true
+	_save_load_sub_menu.add_child(_mission_save_button)
+	_save_load_latest_button = _make_button("LoadLatestButton", "Laden: neuester Stand")
+	_style_sub_button(_save_load_latest_button)
+	_save_load_latest_button.pressed.connect(_on_campaign_continue_pressed)
+	_save_load_sub_menu.add_child(_save_load_latest_button)
+	_mission_load_button = _save_load_latest_button
+	_save_load_home_button = _make_button("LoadHomeButton", "Laden: Basisstand")
+	_style_sub_button(_save_load_home_button, "Lädt ausdrücklich den letzten sicheren Basisstand.")
+	_save_load_home_button.pressed.connect(_on_campaign_home_pressed)
+	_save_load_sub_menu.add_child(_save_load_home_button)
+	_save_load_empty_label = Label.new()
+	_save_load_empty_label.name = "LoadEmptyLabel"
+	_save_load_empty_label.text = "Noch kein Spielstand vorhanden."
+	_save_load_empty_label.add_theme_font_size_override("font_size", 13)
+	_save_load_empty_label.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_save_load_sub_menu.add_child(_save_load_empty_label)
+	# Beenden mit Rueckfrage.
+	_quit_button = _make_button("QuitButton", "Beenden")
+	_quit_button.pressed.connect(_on_quit_pressed)
+	_quit_dialog = ConfirmationDialog.new()
+	_quit_dialog.name = "QuitConfirmDialog"
+	_quit_dialog.title = "Spiel beenden?"
+	_quit_dialog.dialog_text = "Spiel beenden?"
+	_quit_dialog.ok_button_text = "Beenden"
+	_quit_dialog.cancel_button_text = "Weiterspielen"
+	add_child(_quit_dialog)
+	_quit_dialog.confirmed.connect(_quit_game)
+	_ensure_teams_screen()
+	_ensure_loading_curtain()
+	var order: Array = [
+		_campaign_continue_button, _continue_info_label,
+		_campaign_button, _campaign_sub_menu,
+		_free_play_button, _free_play_sub_menu,
+		_singleplayer_button, _gefecht_sub_menu,
+		_editor_button,
+		_save_load_button, _save_load_sub_menu,
+		_settings_button,
+		_quit_button,
+	]
+	var index: int = 0
+	for node_variant in order:
+		var node := node_variant as Node
+		if node == null:
+			continue
+		if node.get_parent() != _main_menu_buttons:
+			_main_menu_buttons.add_child(node)
+		_main_menu_buttons.move_child(node, index)
+		index += 1
+
+
+func _apply_release_first_play_polish() -> void:
+	if _singleplayer_button == null:
+		return
+	var gefecht_hint: String = "Ein einzelnes Gefecht: Truppe aus Vorlagen oder per Punktebudget wählen. Die Kartenwahl kommt noch."
+	_singleplayer_button.text = "Gefecht"
+	_singleplayer_button.toggle_mode = true
+	_singleplayer_button.tooltip_text = gefecht_hint
+	_singleplayer_button.set_meta("release_first_play_style_id", RELEASE_FIRST_PLAY_STYLE_ID)
+	_singleplayer_button.set_meta("release_action_hint", gefecht_hint)
+	_style_main_button(_singleplayer_button, "primary", gefecht_hint)
+	_style_main_button(_campaign_continue_button, "primary", "Lädt mit einem Klick den neuesten Spielstand.", true)
+	_style_main_button(_campaign_button, "primary", _campaign_button.tooltip_text if _campaign_button != null else "")
+	_style_main_button(_free_play_button, "primary", "Ohne Kampagnenführung: allein, gegen den Computer oder mit Mitspielern.")
+	_style_main_button(_editor_button, "secondary", "Karten-Editor öffnen.")
+	_style_main_button(_save_load_button, "secondary", "Spielstand laden. Speichern geht im Spiel über Esc.")
+	_style_main_button(_settings_button, "secondary", "Anzeige, Audio und Eingabe anpassen.")
+	_style_main_button(_quit_button, "secondary", "Das Spiel beenden.")
+	_style_sub_button(_new_roster_button, "")
+	_style_sub_button(_team_editor_toggle_button, "")
+	for team_button in [_new_roster_button, _team_editor_toggle_button]:
+		if team_button != null:
+			team_button.custom_minimum_size = Vector2(320.0, 48.0)
+			team_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+
+func _focus_primary_entry() -> void:
+	var first_focus: Button = _campaign_continue_button if _campaign_continue_button != null and _campaign_continue_button.visible and not _campaign_continue_button.disabled else _campaign_button
+	if first_focus != null and first_focus.is_visible_in_tree():
+		first_focus.call_deferred("grab_focus")
+
+
+# --- Teams-Bildschirm -------------------------------------------------------
+
+func _ensure_teams_screen() -> void:
+	if _team_name_edit == null or _main_menu_buttons == null:
+		return
+	_teams_screen = Panel.new()
+	_teams_screen.name = "TeamsScreen"
+	_teams_screen.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_teams_screen.offset_left = 56.0
+	_teams_screen.offset_top = 56.0
+	_teams_screen.offset_right = -56.0
+	_teams_screen.offset_bottom = -56.0
+	_teams_screen.z_index = 55
+	_teams_screen.visible = false
+	_teams_screen.mouse_filter = Control.MOUSE_FILTER_STOP
+	_teams_screen.clip_contents = true
+	add_child(_teams_screen)
+	var margin := MarginContainer.new()
+	margin.name = "TeamsMargin"
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	for side in ["left", "top", "right", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 24)
+	_teams_screen.add_child(margin)
+	_teams_vbox = VBoxContainer.new()
+	_teams_vbox.name = "TeamsVBox"
+	_teams_vbox.add_theme_constant_override("separation", 12)
+	margin.add_child(_teams_vbox)
+	var header := HBoxContainer.new()
+	header.name = "TeamsHeaderRow"
+	header.add_theme_constant_override("separation", 12)
+	_teams_vbox.add_child(header)
+	var header_label := Label.new()
+	header_label.name = "TeamsTitleLabel"
+	header_label.text = "Teams"
+	header_label.add_theme_font_size_override("font_size", 30)
+	header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(header_label)
+	_teams_back_button = _make_button("TeamsBackButton", "Zurück")
+	_teams_back_button.custom_minimum_size = Vector2(160.0, 44.0)
+	_teams_back_button.focus_mode = Control.FOCUS_ALL
+	TACTICAL_UI_THEME_SCRIPT.style_command_button(_teams_back_button, "accent")
+	_teams_back_button.pressed.connect(close_teams_screen)
+	header.add_child(_teams_back_button)
+	var intro := Label.new()
+	intro.name = "TeamsIntroLabel"
+	intro.text = "Teamname ändern, ein neues Team erzeugen, das Team im Editor bearbeiten oder ein gespeichertes Team aktivieren."
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_teams_vbox.add_child(intro)
+	var team_name_row := _main_menu_buttons.get_node_or_null("TeamNameRow")
+	if team_name_row != null:
+		team_name_row.reparent(_teams_vbox, false)
+		if _team_name_edit != null:
+			_team_name_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var action_row := HBoxContainer.new()
+	action_row.name = "TeamsActionRow"
+	action_row.add_theme_constant_override("separation", 12)
+	_teams_vbox.add_child(action_row)
+	for team_button in [_new_roster_button, _team_editor_toggle_button]:
+		if team_button != null:
+			team_button.reparent(action_row, false)
+	if _team_library_panel != null:
+		_team_library_panel.reparent(_teams_vbox, false)
+		_team_library_panel.set_as_top_level(false)
+		_team_library_panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		_team_library_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_team_library_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	if _team_editor_close_button != null:
+		_team_editor_close_button.tooltip_text = "Zurück zu den Teams."
+
+
+func open_teams_screen() -> void:
+	if _teams_screen == null or _launching:
+		return
+	_teams_screen.visible = true
+	_refresh_team_library()
+	_status_label.text = "Teams: Name, neues Team, Team-Editor und Bibliothek."
+	if _teams_back_button != null:
+		_teams_back_button.call_deferred("grab_focus")
+	_play_ui_sfx("click", "teams_open")
+
+
+func close_teams_screen() -> void:
+	if _teams_screen == null:
+		return
+	if _team_editor_open:
+		close_team_editor()
+	_teams_screen.visible = false
+	_status_label.text = _ready_status_text()
+	_play_ui_sfx("cancel", "teams_close")
+
+
+func is_teams_screen_open() -> bool:
+	return _teams_screen != null and _teams_screen.visible
 
 
 func _on_new_roster_pressed() -> void:
@@ -4031,7 +4465,7 @@ func _on_new_roster_pressed() -> void:
 
 func _on_team_editor_toggle_pressed() -> void:
 	toggle_team_editor()
-	_status_label.text = "Skirmish-Team-Editor" if _team_editor_open else "Ready"
+	_status_label.text = "Team-Editor geöffnet." if _team_editor_open else _ready_status_text()
 	_play_ui_sfx("switch", "team_editor_toggle")
 
 
@@ -4044,7 +4478,7 @@ func _on_team_editor_save_pressed() -> void:
 	if _team_editor_metric_save_queued:
 		_flush_team_editor_metric_save()
 	var save_result: Dictionary = _save_team_editor_roster_state("team_editor_manual_save") if _editing_team_editor_roster() else _save_start_roster_state("team_editor_manual_save")
-	_status_label.text = "Team gespeichert" if bool(save_result.get("ok", false)) else "Team speichern fehlgeschlagen"
+	_status_label.text = "Team gespeichert." if bool(save_result.get("ok", false)) else "Team speichern fehlgeschlagen."
 	_play_ui_sfx("confirm" if bool(save_result.get("ok", false)) else "warning", "team_editor_save")
 
 
@@ -4185,25 +4619,34 @@ func _on_global_help_pressed() -> void:
 	var active: bool = bool(_help_service.call("toggle_global_help_active"))
 	if active:
 		_show_contextual_help_for("shell.global_help_button", _global_help_button, true)
-		_status_label.text = "Help mode"
+		_status_label.text = "Hilfemodus an"
 	else:
 		if _contextual_help_popup != null:
 			_contextual_help_popup.call("hide_help")
-		_status_label.text = "Ready"
+		_status_label.text = _ready_status_text()
 	_play_ui_sfx("switch", "contextual_help")
 
 
 func _change_scene(scene_path: String) -> void:
 	if not ResourceLoader.exists(scene_path):
-		_status_label.text = "Missing"
+		_status_label.text = "Diese Szene fehlt und kann nicht geladen werden."
 		_play_ui_sfx("warning", "missing_scene")
 		push_warning("Main menu route missing: %s" % scene_path)
+		_cancel_launch()
 		return
-	var error: Error = get_tree().change_scene_to_file(scene_path)
+	var error: int = OK
+	var service := get_node_or_null("/root/SceneLoadingService")
+	if service != null and service.has_method("change_scene"):
+		var service_result: Variant = service.call("change_scene", scene_path, {"tip_context": _pending_tip_context})
+		if service_result is int:
+			error = int(service_result)
+	else:
+		error = get_tree().change_scene_to_file(scene_path)
 	if error != OK:
-		_status_label.text = "Failed"
+		_status_label.text = "Das Laden hat nicht geklappt. Bitte noch einmal versuchen."
 		_play_ui_sfx("warning", "scene_change_failed")
 		push_warning("Main menu route failed: %s (%d)" % [scene_path, error])
+		_cancel_launch()
 
 
 func _apply_runtime_settings(settings: Dictionary) -> void:
@@ -4250,14 +4693,14 @@ func _parse_resolution_preset(resolution_preset: String) -> Vector2i:
 func _on_master_volume_changed(value: float) -> void:
 	_draft_gameplay_settings["master_volume"] = clampf(value, 0.0, 100.0)
 	_refresh_audio_value_labels(_draft_gameplay_settings)
-	_status_label.text = "Settings changed"
+	_status_label.text = "Einstellung geändert – mit Anwenden übernehmen."
 
 
 func _on_fullscreen_toggled(enabled: bool) -> void:
 	_draft_gameplay_settings["window_mode"] = "fullscreen" if enabled else "windowed"
 	if _window_mode_option != null:
 		SETTINGS_SCREEN_SCRIPT.call("select_option_metadata", _window_mode_option, String(_draft_gameplay_settings.get("window_mode", "windowed")))
-	_status_label.text = "Settings changed"
+	_status_label.text = "Einstellung geändert – mit Anwenden übernehmen."
 	_play_ui_sfx("switch", "fullscreen")
 
 
@@ -4266,7 +4709,7 @@ func _on_bubble_mode_selected(index: int) -> void:
 		return
 	var mode: String = String(_bubble_mode_option.get_item_metadata(index))
 	_draft_comic_bubble_settings["mode"] = COMIC_BUBBLE_SETTINGS_SCRIPT.call("normalize_mode", mode)
-	_status_label.text = "Settings changed"
+	_status_label.text = "Einstellung geändert – mit Anwenden übernehmen."
 	_play_ui_sfx("switch", "bubble_mode")
 
 
@@ -4274,7 +4717,7 @@ func _on_resolution_selected(index: int) -> void:
 	if _resolution_option == null or index < 0 or index >= _resolution_option.item_count:
 		return
 	_draft_gameplay_settings["resolution_preset"] = String(_resolution_option.get_item_metadata(index))
-	_status_label.text = "Settings changed"
+	_status_label.text = "Einstellung geändert – mit Anwenden übernehmen."
 	_play_ui_sfx("switch", "resolution")
 
 
@@ -4284,33 +4727,33 @@ func _on_window_mode_selected(index: int) -> void:
 	var window_mode: String = String(_window_mode_option.get_item_metadata(index))
 	_draft_gameplay_settings["window_mode"] = window_mode
 	_fullscreen_check.set_pressed_no_signal(window_mode == "fullscreen")
-	_status_label.text = "Settings changed"
+	_status_label.text = "Einstellung geändert – mit Anwenden übernehmen."
 	_play_ui_sfx("switch", "window_mode")
 
 
 func _on_vsync_toggled(enabled: bool) -> void:
 	_draft_gameplay_settings["vsync_enabled"] = enabled
-	_status_label.text = "Settings changed"
+	_status_label.text = "Einstellung geändert – mit Anwenden übernehmen."
 	_play_ui_sfx("switch", "vsync")
 
 
 func _on_music_volume_changed(value: float) -> void:
 	_draft_gameplay_settings["music_volume"] = clampf(value, 0.0, 100.0)
 	_refresh_audio_value_labels(_draft_gameplay_settings)
-	_status_label.text = "Settings changed"
+	_status_label.text = "Einstellung geändert – mit Anwenden übernehmen."
 
 
 func _on_sfx_volume_changed(value: float) -> void:
 	_draft_gameplay_settings["sfx_volume"] = clampf(value, 0.0, 100.0)
 	_refresh_audio_value_labels(_draft_gameplay_settings)
-	_status_label.text = "Settings changed"
+	_status_label.text = "Einstellung geändert – mit Anwenden übernehmen."
 
 
 func _on_fog_of_war_mode_selected(index: int) -> void:
 	if _fog_of_war_option == null or index < 0 or index >= _fog_of_war_option.item_count:
 		return
 	_draft_gameplay_settings["fog_of_war_mode"] = String(_fog_of_war_option.get_item_metadata(index))
-	_status_label.text = "Settings changed"
+	_status_label.text = "Einstellung geändert – mit Anwenden übernehmen."
 	_play_ui_sfx("switch", "fog_of_war_mode")
 
 
@@ -4319,13 +4762,13 @@ func _on_contextual_help_mode_selected(index: int) -> void:
 		return
 	_draft_gameplay_settings[GAME_SETTINGS_CONTRACT_SCRIPT.KEY_CONTEXTUAL_HELP_MODE] = String(_contextual_help_option.get_item_metadata(index))
 	_apply_contextual_help_mode_to_service(_draft_gameplay_settings)
-	_status_label.text = "Settings changed"
+	_status_label.text = "Einstellung geändert – mit Anwenden übernehmen."
 	_play_ui_sfx("switch", "contextual_help_mode")
 
 
 func _on_respawn_limit_changed(value: float) -> void:
 	_draft_gameplay_settings[GAME_SETTINGS_CONTRACT_SCRIPT.KEY_CAMPAIGN_RESPAWN_LIMIT] = int(GAME_SETTINGS_CONTRACT_SCRIPT.call("normalize_campaign_respawn_limit", value))
-	_status_label.text = "Settings changed"
+	_status_label.text = "Einstellung geändert – mit Anwenden übernehmen."
 
 
 func _sanitize_test_profile_fragment(text: String) -> String:

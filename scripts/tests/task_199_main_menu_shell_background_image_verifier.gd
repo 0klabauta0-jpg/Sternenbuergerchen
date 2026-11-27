@@ -13,13 +13,13 @@ const EXPECTED_ROUTES: Dictionary = {
 }
 const BUTTON_PATHS: Dictionary = {
 	"singleplayer": "MenuRail/MenuMargin/MenuVBox/MenuButtons/SingleplayerButton",
-	"multiplayer": "MenuRail/MenuMargin/MenuVBox/MenuButtons/MultiplayerButton",
+	"multiplayer": "MenuRail/MenuMargin/MenuVBox/MenuButtons/FreePlaySubMenu/MultiplayerButton",
 	"editor": "MenuRail/MenuMargin/MenuVBox/MenuButtons/EditorButton",
 	"settings": "MenuRail/MenuMargin/MenuVBox/MenuButtons/SettingsButton",
 }
 const BUTTON_TEXTS: Dictionary = {
-	"singleplayer": "Einzelspieler",
-	"multiplayer": "Multiplayer",
+	"singleplayer": "Gefecht",
+	"multiplayer": "Mehrspieler",
 	"editor": "Editor",
 	"settings": "Einstellungen",
 }

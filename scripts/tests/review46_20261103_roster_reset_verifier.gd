@@ -160,7 +160,7 @@ func _test_real_new_roster_button_preserves_failure_state() -> void:
 	await process_frame
 	await process_frame
 	menu.ensure_start_roster_exists(original_seed, 20)
-	var button := menu.get_node("MenuRail/MenuMargin/MenuVBox/MenuButtons/NewRosterButton") as Button
+	var button := menu.get_node("TeamsScreen/TeamsMargin/TeamsVBox/TeamsActionRow/NewRosterButton") as Button
 	var status_label := menu.get_node("MenuRail/MenuMargin/MenuVBox/StatusLabel") as Label
 	var archive_blocker: String = "%s/archive" % path.get_base_dir()
 	if not _write_text(archive_blocker, "review46 owned button archive blocker"):
