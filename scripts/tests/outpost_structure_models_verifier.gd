@@ -94,6 +94,8 @@ func _run() -> void:
 			# Modell nicht in Metern (Wohn-Pod der Heimatbasis): Faktor der Heimatbasis x Figur hier / Figur dort
 			expected_scale = float(home_ref.get("home_scale", 0.0)) * figure / float(home_ref.get("home_figure", 1.0))
 		_check(absf(holder.scale.x - expected_scale) <= 0.01 and absf(holder.scale.x - float(entry.get("scale", -1.0))) <= 0.0005, "Faktor %.4f = erwartet %.4f (Figur/1,8 m = %.4f): %s" % [holder.scale.x, expected_scale, ratio, id])
+		var sy: float = float(entry.get("scale_y_factor", 1.0))
+		_check(absf(holder.scale.y - holder.scale.x * sy) <= 0.0005, "Hoehen-Stauchung: Y-Skala %.4f = Faktor %.4f x %.2f: %s" % [holder.scale.y, holder.scale.x, sy, id])
 		var door_real := float(entry.get("door_height_m", 0.0))
 		_check(door_real >= 1.95 and door_real <= 2.35, "Tuerhoehe im Menschenmass %.2f m (aus den Daten, am Modell geschaetzt): %s" % [door_real, id])
 		var real_h: float = box.size.y / ratio
@@ -110,7 +112,7 @@ func _run() -> void:
 				var y: float = view.call("_get_world_surface_y", w)
 				low = minf(low, y)
 				high = maxf(high, y)
-		_check(absf(box.position.y - low) <= 0.1, "Unterkante %.3f auf tiefster Gelaendeecke %.3f (Hang %.3f): %s" % [box.position.y, low, high - low, id])
+		_check(absf(box.position.y - low) <= 0.05, "Unterkante %.3f auf tiefster Gelaendeecke %.3f (Hang %.3f): %s" % [box.position.y, low, high - low, id])
 		# Marker, Zielpunkte, Landeplaetze, Startpunkte: keiner im Grundriss
 		var rect := Rect2(box.position.x, box.position.z, box.size.x, box.size.z)
 		var near: Array = []

@@ -41,6 +41,19 @@ uniform sampler2D ground_tex_rock : source_color, filter_linear_mipmap, repeat_e
 const bool GROUND_BASE_OWN_TEXTURE = false;
 uniform sampler2D ground_tex_base : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D ground_tex_paving : source_color, filter_linear_mipmap, repeat_enable;
+// Grafik 1 (27.11.), nur Einsatz-Stimmung (mission_variation > 0): geschichteter Canyon-Fels (04)
+// und helle Sandsteinflecken (05) statt 01 auf Erhoehungen; Sand (07) und der staubige
+// Wegrand mit Grauplatten (10). Jede Abfrage steht hinter einer Gewichtsschwelle,
+// ein Pixel liest im Regelfall hoechstens drei bis vier Texturen.
+uniform sampler2D ground_tex_rock_canyon : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D ground_tex_rock_light : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D ground_tex_sand : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D ground_tex_paving_edge : source_color, filter_linear_mipmap, repeat_enable;
+// Anteil heller Sandsteinflecken auf Fels (Schwelle des Rauschens: hoeher = weniger Flaeche).
+uniform float ground_rock_light_threshold : hint_range(0.0, 1.0) = 0.50;
+// Grossflaechiges Farb-/Helligkeitsrauschen (Einsatzkarten). 0 = aus (Vorgabe, Heimatbasis, Editor).
+// Wellenlaenge rund 20 bis 45 m; Staerke 1.0 = plus/minus etwa 8 % Helligkeit.
+uniform float mission_variation : hint_range(0.0, 2.0) = 0.0;
 // Edge length of one texture tile in metres (one field is about 1 m).
 uniform float ground_tile_meters : hint_range(1.0, 16.0) = 4.0;
 // The ONE brightness knob for all ground textures (old ground was about 0.43 luminance).
@@ -162,6 +175,7 @@ void fragment() {
 	float tile_road = 0.0;
 	float tile_rock = 0.0;
 	float tile_water = 0.0;
+	float tile_sand = 0.0;
 	// Authored tints are sRGB ratios; a linear target needs the matching power.
 	float tint_gamma = OUTPUT_IS_SRGB ? 1.0 : 2.2;
 	float drift_mask = paved_surface ? 0.30 : 1.0;
@@ -277,6 +291,9 @@ void fragment() {
 			// to the surrounding ground than a full sand field.
 			sand = clamp(core*0.62+verge*smoothstep(0.35,0.75,broad_patch(p*2.3+vec2(5.0,1.0)))*0.30,0.0,1.0);
 		}
+		// Sand-Gewicht fuer die Sandtextur (07): ohne Strasse und Wasser; bei Wegspuren
+		// ist `sand` oben schon auf den schmalen Pfad zurueckgenommen.
+		tile_sand = sand * (1.0 - road) * (1.0 - clamp(weights.a, 0.0, 1.0));
 		vec3 earth = mix(vec3(0.65,0.36,0.25),vec3(0.81,0.54,0.34),sand);
 		earth = mix(earth,vec3(0.62,0.38,0.30),rock*0.65);
 		// Dust remains at the irregular road shoulder and in small worn patches.
@@ -394,19 +411,55 @@ void fragment() {
 				tile_color = mix(tile_color, textureGrad(ground_tex_clay, tile_uv, tile_dx, tile_dy).rgb, clay_w);
 			}
 		}
+		// Grafik 1: die neuen Kacheln gehoeren zur Einsatz-Stimmung (mission_variation > 0);
+		// Heimatbasis und Editor behalten genau ihr bisheriges Bild.
+		bool mission_tiles = mission_variation > 0.0;
+		if (mission_tiles && tile_sand > 0.02) {
+			tile_color = mix(tile_color, textureGrad(ground_tex_sand, tile_uv, tile_dx, tile_dy).rgb, clamp(tile_sand * 0.85, 0.0, 1.0));
+		}
 		float paving_w = (paved_surface && !surface_blending) ? 1.0 : clamp(tile_road, 0.0, 1.0);
 		if (paving_w > 0.001) {
-			tile_color = mix(tile_color, textureGrad(ground_tex_paving, tile_uv, tile_dx, tile_dy).rgb, paving_w);
+			vec3 paving_color = textureGrad(ground_tex_paving, tile_uv, tile_dx, tile_dy).rgb;
+			// Staubiger Wegrand mit Grauplatten (10) nur im Uebergang Boden/Strasse.
+			float road_edge = (mission_tiles && !(paved_surface && !surface_blending)) ? clamp(4.0 * paving_w * (1.0 - paving_w), 0.0, 1.0) : 0.0;
+			if (road_edge > 0.03) {
+				paving_color = mix(paving_color, textureGrad(ground_tex_paving_edge, tile_uv, tile_dx, tile_dy).rgb, road_edge * 0.8);
+			}
+			tile_color = mix(tile_color, paving_color, paving_w);
 		}
 		float rock_w = rock_strata ? smoothstep(0.40, 0.88, ground_world_normal.y) : clamp(tile_rock, 0.0, 1.0) * 0.85;
 		if (rock_w > 0.001) {
-			tile_color = mix(tile_color, textureGrad(ground_tex_rock, tile_uv, tile_dx, tile_dy).rgb, rock_w);
+			vec3 rock_color;
+			if (mission_tiles) {
+				// Erhoehungen: geschichteter Canyon-Fels, dazu helle Sandsteinflecken statt dunkler Platten.
+				rock_color = textureGrad(ground_tex_rock_canyon, tile_uv, tile_dx, tile_dy).rgb;
+				float light_w = smoothstep(ground_rock_light_threshold, ground_rock_light_threshold + 0.18, broad_patch(ground_world_position.xz * 0.085 + vec2(23.0, 47.0)));
+				if (light_w > 0.01) {
+					rock_color = mix(rock_color, textureGrad(ground_tex_rock_light, tile_uv, tile_dx, tile_dy).rgb, light_w);
+				}
+			} else {
+				rock_color = textureGrad(ground_tex_rock, tile_uv, tile_dx, tile_dy).rgb;
+			}
+			tile_color = mix(tile_color, rock_color, rock_w);
 		}
 		float slope_keep = slope_normal_softening > 0.0 ? 1.0 - 0.18 * smoothstep(0.05, 0.32, ramp_incline) : 1.0;
 		vec3 tiled_albedo = tile_color * ground_tile_brightness * slope_keep * mix(1.0, tile_detail, ground_detail_keep);
 		// Cliff walls and water keep their old colour; only the flat tops take the texture.
 		float tiled_amount = rock_strata ? rock_w : 1.0 - clamp(tile_water, 0.0, 1.0);
 		final_albedo = mix(old_albedo, tiled_albedo, tiled_amount);
+	}
+	if (mission_variation > 0.0 && !marking_surface) {
+		// Grossflaechiges Rauschen (Wellenlaenge ~20 bis 45 m, Weltkoordinaten, daher ohne
+		// Kachel- oder Hexnaht): bricht das Kachelmuster in der Uebersicht. Nur Helligkeit
+		// und ein leichter Farbstich; drei weiche Werte-Rauschen, keine Texturabfrage.
+		vec2 vw = ground_world_position.xz;
+		float vn_a = broad_patch(vw * 0.034 + vec2(71.3, 12.9));
+		float vn_b = broad_patch(vw * 0.021 + vec2(5.7, 88.1));
+		float vn_c = broad_patch(vw * 0.027 + vec2(40.2, 63.4));
+		float vn = clamp(((vn_a * 0.62 + vn_b * 0.38) - 0.5) * 2.4, -1.0, 1.0);
+		float vb = 1.0 + vn * 0.08 * mission_variation;
+		vec3 vtint = mix(vec3(0.96, 0.985, 1.03), vec3(1.045, 1.0, 0.94), clamp((vn_c - 0.5) * 2.0 + 0.5, 0.0, 1.0));
+		final_albedo *= vb * mix(vec3(1.0), vtint, clamp(mission_variation, 0.0, 1.0));
 	}
 	ALBEDO = final_albedo;
 	if (rock_strata) {

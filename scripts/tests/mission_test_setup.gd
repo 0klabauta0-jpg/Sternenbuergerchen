@@ -1643,6 +1643,9 @@ func _configure_primary_3d_view(view: Node, unit_nodes: Array) -> void:
 	if not view.is_inside_tree():
 		call_deferred("_configure_primary_3d_view", view, unit_nodes)
 		return
+	# Grafik 1 (27.11.): Einsatz-Stimmung; Heimatbasis und Karteneditor bauen ihre Ansicht selbst und fragen nie an.
+	if view.has_method("set_mission_atmosphere_enabled"):
+		view.call("set_mission_atmosphere_enabled", true)
 	if _hex_setup_presentation_only:
 		view.call("set_fog_of_war_state", get_fog_of_war_runtime_snapshot())
 	if view.has_method("set_runtime_terrain_registry"):
