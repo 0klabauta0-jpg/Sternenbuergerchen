@@ -91,7 +91,7 @@ func _opened_standing(board: Control, id: String, title: String) -> bool:
 
 
 func _run() -> void:
-	root.size = Vector2i(1600, 1500)
+	root.size = Vector2i(1600, 1900)
 	var campaign_owner := CAMPAIGN.new()
 	var travel_owner := TRAVEL.new()
 	_check(campaign_owner.configure().get("ok", false) and travel_owner.configure("ship").get("ok", false), "echte Kampagne und Reise konfigurieren")
@@ -125,7 +125,8 @@ func _run() -> void:
 	for child: Node in standing_box.get_children():
 		if child is Button:
 			standing_cards.append(child)
-	_check(standing_cards.size() == 6, "jeder der sechs Dauerauftraege ist ein eigenes Feld (Knopf) (beobachtet %d)" % standing_cards.size())
+	var defined_orders: int = Array(Dictionary(JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/standing_orders.json"))).get("orders", [])).size()
+	_check(standing_cards.size() == defined_orders and defined_orders > 0, "jeder der %d Dauerauftraege der Datei ist ein eigenes Feld (Knopf) (beobachtet %d)" % [defined_orders, standing_cards.size()])
 	var heading_ok := false
 	for child: Node in standing_box.get_children():
 		if child is Label and String(child.name) == "StandingOrdersHeading" and (child as Label).text == "Daueraufträge":
@@ -305,8 +306,8 @@ func _run() -> void:
 		chooser.item_selected.emit(0)
 		await process_frame
 		_check(String(board.get("_standing_id")).is_empty() and String(board.get("_job_id")) == String(chooser.get_item_metadata(0)), "schmale Ansicht: Wahl im Auswahlfeld fuehrt aus dem Dauerauftrag zurueck zum Auftrag")
-	root.size = Vector2i(1600, 1500)
-	root.content_scale_size = Vector2i(1600, 1500)
+	root.size = Vector2i(1600, 1900)
+	root.content_scale_size = Vector2i(1600, 1900)
 	for i in 4:
 		await process_frame
 	screen.queue_free()
