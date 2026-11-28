@@ -37,6 +37,33 @@
       "side_thrust": 1.8,
       "turn_acceleration": 1.1,
       "thrust_fraction": 1.0
+    },
+    "valkyrie": {
+      "footprint_hexes": [[0, 0], [1, 0]],
+      "mass": 1.3,
+      "main_thrust": 1.9,
+      "reverse_thrust": 0.95,
+      "side_thrust": 1.1,
+      "turn_acceleration": 0.55,
+      "thrust_fraction": 1.0
+    },
+    "vanguard": {
+      "footprint_hexes": [[0, 0], [1, 0]],
+      "mass": 1.2,
+      "main_thrust": 2.2,
+      "reverse_thrust": 1.1,
+      "side_thrust": 1.3,
+      "turn_acceleration": 0.7,
+      "thrust_fraction": 1.0
+    },
+    "hercules": {
+      "footprint_hexes": [[0, 0], [1, 0]],
+      "mass": 2.2,
+      "main_thrust": 1.8,
+      "reverse_thrust": 0.9,
+      "side_thrust": 0.9,
+      "turn_acceleration": 0.35,
+      "thrust_fraction": 1.0
     }
   },
   "items": {
