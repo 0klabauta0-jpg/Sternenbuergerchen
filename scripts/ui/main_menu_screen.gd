@@ -81,6 +81,8 @@ var _free_play_vs_cpu_button: Button = null
 var _free_play_teams_button: Button = null
 var _gefecht_sub_menu: VBoxContainer = null
 var _gefecht_teams_button: Button = null
+var _gefecht_map_buttons: Array[Button] = []
+var _gefecht_map_path: String = ""
 var _save_load_button: Button = null
 var _save_load_sub_menu: VBoxContainer = null
 var _save_load_latest_button: Button = null
@@ -4060,12 +4062,19 @@ func _ensure_skirmish_entry() -> void:
 	menu_buttons.add_child(_gefecht_sub_menu)
 	var hint := Label.new()
 	hint.name = "GefechtHintLabel"
-	hint.text = "Ein einzelnes Gefecht. Truppe wählen; die Kartenwahl kommt noch."
+	hint.text = "Ein einzelnes Gefecht: erst Karte, dann Truppe wählen."
 	hint.add_theme_font_size_override("font_size", 13)
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.custom_minimum_size = Vector2(SUB_BUTTON_SIZE.x, 0.0)
 	hint.size_flags_horizontal = Control.SIZE_SHRINK_END
 	_gefecht_sub_menu.add_child(hint)
+	_build_skirmish_map_choice()
+	var troop_label := Label.new()
+	troop_label.name = "GefechtTroopLabel"
+	troop_label.text = "Truppe:"
+	troop_label.add_theme_font_size_override("font_size", 13)
+	troop_label.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_gefecht_sub_menu.add_child(troop_label)
 	var presets: Dictionary = load("res://scripts/meta/skirmish_start_configuration.gd").get_presets()
 	var preset_row := HBoxContainer.new()
 	preset_row.name = "GefechtPresetRow"
@@ -4095,6 +4104,50 @@ func _ensure_skirmish_entry() -> void:
 	_gefecht_teams_button.pressed.connect(open_teams_screen)
 
 
+## Kartenwahl fuer "Gefecht": eine Reihe Umschaltknoepfe, genau einer gewaehlt (Vorgabe: die erste Karte).
+func _build_skirmish_map_choice() -> void:
+	var maps: Array = SIMPLE_PROFILE_CONFIG.playable_maps()
+	var map_label := Label.new()
+	map_label.name = "GefechtMapLabel"
+	map_label.text = "Karte:"
+	map_label.add_theme_font_size_override("font_size", 13)
+	map_label.size_flags_horizontal = Control.SIZE_SHRINK_END
+	_gefecht_sub_menu.add_child(map_label)
+	var group := ButtonGroup.new()
+	_gefecht_map_buttons.clear()
+	for entry: Dictionary in maps:
+		var button := _make_button("GefechtMap_%d" % _gefecht_map_buttons.size(), String(entry.title))
+		_style_sub_button(button, "Das Gefecht wird auf dieser Karte ausgetragen.")
+		button.toggle_mode = true
+		button.button_group = group
+		button.set_meta("map_path", String(entry.path))
+		button.set_meta("map_title", String(entry.title))
+		button.toggled.connect(_on_gefecht_map_toggled.bind(button))
+		_gefecht_sub_menu.add_child(button)
+		_gefecht_map_buttons.append(button)
+	if _gefecht_map_buttons.is_empty():
+		_gefecht_map_path = ""
+		return
+	_gefecht_map_buttons[0].button_pressed = true
+	_refresh_gefecht_map_buttons()
+
+
+func _on_gefecht_map_toggled(pressed: bool, button: Button) -> void:
+	if pressed:
+		_gefecht_map_path = String(button.get_meta("map_path", ""))
+	_refresh_gefecht_map_buttons()
+
+
+func _refresh_gefecht_map_buttons() -> void:
+	for button: Button in _gefecht_map_buttons:
+		var title: String = String(button.get_meta("map_title", ""))
+		button.text = "[ %s ]" % title if button.button_pressed else title
+
+
+func get_gefecht_map_path() -> String:
+	return _gefecht_map_path
+
+
 func _on_singleplayer_pressed() -> void:
 	_toggle_section("gefecht")
 
@@ -4112,14 +4165,15 @@ func _open_skirmish_points() -> void:
 func _start_skirmish(preset_id: String = "", points_draft: Dictionary = {}) -> void:
 	if _launching:
 		return
-	var result: Dictionary = GAME_START_CONTRACT_SCRIPT.request_start(get_tree(), "skirmish", "new", preset_id, points_draft)
+	var gefecht: bool = not preset_id.is_empty() or not points_draft.is_empty() or _open_section == "gefecht"
+	var map_path: String = _gefecht_map_path if gefecht else ""
+	var result: Dictionary = GAME_START_CONTRACT_SCRIPT.request_start(get_tree(), "skirmish", "new", preset_id, points_draft, map_path)
 	if not result.get("ok", false):
 		_status_label.text = "Der Start ist nicht möglich: %s" % String(result.get("reason", "unbekannt"))
 		return
 	if _skirmish_points_dialog != null:
 		_skirmish_points_dialog.hide()
 	_play_ui_sfx("confirm", "singleplayer")
-	var gefecht: bool = not preset_id.is_empty() or not points_draft.is_empty() or _open_section == "gefecht"
 	_launch_scene(SINGLEPLAYER_SCENE_PATH, "Gefecht" if gefecht else "Freies Spiel", "gefecht" if gefecht else "frei")
 
 
@@ -4441,7 +4495,7 @@ func _ensure_main_menu_structure() -> void:
 func _apply_release_first_play_polish() -> void:
 	if _singleplayer_button == null:
 		return
-	var gefecht_hint: String = "Ein einzelnes Gefecht: Truppe aus Vorlagen oder per Punktebudget wählen. Die Kartenwahl kommt noch."
+	var gefecht_hint: String = "Ein einzelnes Gefecht: Karte wählen, dann Truppe aus Vorlagen oder per Punktebudget."
 	_singleplayer_button.text = "Gefecht"
 	_singleplayer_button.toggle_mode = true
 	_singleplayer_button.tooltip_text = gefecht_hint

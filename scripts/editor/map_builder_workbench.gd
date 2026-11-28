@@ -171,7 +171,46 @@ func _should_launch_runtime_map_editor() -> bool:
 func _launch_runtime_map_editor() -> void:
 	if get_tree() == null or not FileAccess.file_exists(RUNTIME_MAP_EDITOR_SCENE_PATH):
 		return
-	_change_scene_via_service(get_tree(), RUNTIME_MAP_EDITOR_SCENE_PATH, "editor")
+	var error: Error = await _change_scene_checked(RUNTIME_MAP_EDITOR_SCENE_PATH, "editor")
+	if error != OK:
+		_show_runtime_message("Der Karten-Editor konnte nicht geladen werden (Fehler %d). Bitte noch einmal versuchen." % error)
+
+
+## Wie _change_scene_via_service, wartet aber bei ERR_BUSY (Dienst laedt noch) einige Bilder und versucht es erneut; scheitert es am
+## Ende, wird der direkte Wechsel versucht. Gibt den letzten Fehler zurueck (OK = Wechsel laeuft).
+func _change_scene_checked(scene_path: String, tip_context: String = "") -> Error:
+	var error: Error = ERR_UNCONFIGURED
+	for attempt in range(120):
+		if not is_inside_tree():
+			return ERR_UNCONFIGURED
+		error = _change_scene_via_service(get_tree(), scene_path, tip_context)
+		if error != ERR_BUSY:
+			break
+		await get_tree().process_frame
+	if error != OK and is_inside_tree():
+		push_warning("Szenenwechsel ueber den Ladedienst gescheitert (%d): %s; direkter Wechsel." % [error, scene_path])
+		error = get_tree().change_scene_to_file(scene_path)
+	return error
+
+
+func _show_runtime_message(text: String) -> void:
+	var layer := get_node_or_null("RuntimeMessageLayer") as CanvasLayer
+	if layer == null:
+		layer = CanvasLayer.new()
+		layer.name = "RuntimeMessageLayer"
+		add_child(layer)
+		var panel := PanelContainer.new()
+		panel.position = Vector2(16.0, 16.0)
+		panel.custom_minimum_size = Vector2(520.0, 0.0)
+		layer.add_child(panel)
+		var label := Label.new()
+		label.name = "MessageLabel"
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		panel.add_child(label)
+	var message_label := layer.find_child("MessageLabel", true, false) as Label
+	if message_label != null:
+		message_label.text = text
+	push_warning(text)
 
 
 func _show_runtime_hint() -> void:

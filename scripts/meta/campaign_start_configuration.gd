@@ -30,7 +30,7 @@ func configure(flow: Node, request: Dictionary) -> void:
 	if action in ["continue", "continue_home"]:
 		var loaded: Dictionary = STORE.load_checkpoint()
 		if not bool(loaded.get("ok", false)):
-			error_message = "Kampagnenstand konnte nicht geladen werden. Zurueck zum Menue."
+			error_message = "Kampagnenstand konnte nicht geladen werden. Zurück zum Menü."
 			return
 		if loaded.payload.has("hex_tactical"):
 			var adapter = load("res://scripts/meta/singleplayer_runtime_adapter.gd")
@@ -63,7 +63,7 @@ func configure(flow: Node, request: Dictionary) -> void:
 					checkpoint["hex_tactical"] = active_pending.home_hex_tactical.duplicate(true)
 	var run: Dictionary = resolve_checkpoint_run_id(run_source if not run_source.is_empty() else checkpoint, action == "new")
 	if not run.get("ok", false):
-		error_message = "Kampagnenkennung ist ungültig. Zurueck zum Menue."
+		error_message = "Kampagnenkennung ist ungültig. Zurück zum Menü."
 		return
 	if action == "continue_home" and FileAccess.file_exists(ACTIVE_STORE.DEFAULT_PATH):
 		var archived: Dictionary = ACTIVE_STORE.archive_checkpoint(FileAccess.get_sha256(ACTIVE_STORE.DEFAULT_PATH))

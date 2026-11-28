@@ -5,6 +5,38 @@ const GENERATOR = preload("res://scripts/meta/start_roster_generator.gd")
 const RELATIONSHIPS = preload("res://scripts/meta/roster_relationship_model.gd")
 const POINTS = preload("res://scripts/meta/skirmish_points_catalog.gd")
 const PRESET_IDS := ["early", "mid", "late"]
+const GROUND_MAPS = preload("res://scripts/mission/productive_ground_maps.gd")
+## Karten fuer "Gefecht": nur spielbare Hex-Karten (Auswahlliste der Spielkarten) mit eigenem Einsatz samt Gegnern.
+## Orte ohne Gegner (Absturzstelle, Handelsposten, Polisa) und Test-/Uebungskarten werden nicht angeboten.
+const SKIRMISH_MAPS: Array = [
+	{"path": "res://maps/Ground_Mission01_32x32.json", "title": "Patrouille und Verteidigung (klein)",
+		"scenario": "res://data/mission_scenarios/ground_mission01_default.json", "time_limit": 1200.0, "win_condition": ""},
+	{"path": "res://maps/Ground_Mission02_128x128.json", "title": "Relay Ridge (groß)",
+		"scenario": "res://data/mission_scenarios/ground_mission02_128x128.json", "time_limit": 1800.0, "win_condition": ""},
+	{"path": "res://maps/windbruch_outpost.json", "title": "Windbruch – Rebellenlager",
+		"scenario": "res://data/mission_scenarios/windbruch_free_camp.json", "time_limit": 1200.0, "win_condition": "objective_capture"},
+]
+
+## Angebotene Gefecht-Karten in Anzeigereihenfolge (nur vorhandene, in der Spieler-Auswahlliste stehende Dateien).
+static func playable_maps() -> Array:
+	var offered: Array = []
+	var selectable: PackedStringArray = GROUND_MAPS.selectable_paths()
+	for entry: Dictionary in SKIRMISH_MAPS:
+		if selectable.has(String(entry.path)) and FileAccess.file_exists(String(entry.scenario)):
+			offered.append(entry.duplicate(true))
+	return offered
+
+
+static func map_entry(map_path: String) -> Dictionary:
+	for entry: Dictionary in playable_maps():
+		if String(entry.path) == map_path:
+			return entry
+	return {}
+
+
+static func is_playable_map(map_path: String) -> bool:
+	return not map_entry(map_path).is_empty()
+
 
 static func get_presets() -> Dictionary:
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(DATA_PATH))

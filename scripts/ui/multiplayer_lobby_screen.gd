@@ -685,7 +685,28 @@ func return_to_main_menu() -> void:
 	disconnect_game()
 	back_requested.emit()
 	if get_tree() != null and ResourceLoader.exists(MAIN_MENU_SCENE_PATH):
-		_change_scene_via_service(get_tree(), MAIN_MENU_SCENE_PATH, "main_menu")
+		var error: Error = await _change_scene_checked(MAIN_MENU_SCENE_PATH, "main_menu")
+		if error != OK:
+			_status_label.text = "Das Hauptmenü konnte nicht geladen werden. Bitte noch einmal versuchen."
+			_play_ui_sfx("warning", "scene_change_failed")
+			push_warning("Lobby: Rueckweg zum Hauptmenue gescheitert (%d)" % error)
+
+
+## Wie _change_scene_via_service, wartet aber bei ERR_BUSY (Dienst laedt noch) einige Bilder und versucht es erneut; scheitert es am
+## Ende, wird der direkte Wechsel versucht. Gibt den letzten Fehler zurueck (OK = Wechsel laeuft).
+func _change_scene_checked(scene_path: String, tip_context: String = "") -> Error:
+	var error: Error = ERR_UNCONFIGURED
+	for attempt in range(120):
+		if not is_inside_tree():
+			return ERR_UNCONFIGURED
+		error = _change_scene_via_service(get_tree(), scene_path, tip_context)
+		if error != ERR_BUSY:
+			break
+		await get_tree().process_frame
+	if error != OK and is_inside_tree():
+		push_warning("Szenenwechsel ueber den Ladedienst gescheitert (%d): %s; direkter Wechsel." % [error, scene_path])
+		error = get_tree().change_scene_to_file(scene_path)
+	return error
 
 
 func set_settings_path_for_tests(config_path: String) -> void:
