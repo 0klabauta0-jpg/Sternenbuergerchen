@@ -8,7 +8,8 @@ const LIFECYCLE = preload("res://scripts/mission/stable_mission_lifecycle_checkp
 
 # Instantiate without attaching or publishing. The caller adds it to a hidden
 # holder, waits for setup and initial effects, then prepares all participants.
-static func instantiate_scene(data: Dictionary, home: Dictionary) -> Dictionary:
+## packed (optional): schon im Hintergrund geladene Einsatz-Szene; ohne sie wird wie bisher synchron geladen.
+static func instantiate_scene(data: Dictionary, home: Dictionary, packed: PackedScene = null) -> Dictionary:
 	var identity: Variant = data.get("identity")
 	var active: Variant = data.get("active_ids")
 	var roster: Variant = data.get("roster")
@@ -38,7 +39,8 @@ static func instantiate_scene(data: Dictionary, home: Dictionary) -> Dictionary:
 	var teams: Array = Array(visit.get("fireteam_ids", [])).duplicate()
 	while teams.size() < ids.size(): teams.append("ft1")
 	if teams.size() != ids.size(): return _bad("mission_scene_identity")
-	var scene: Node = load("res://scenes/tests/mission_reactivity_test.tscn").instantiate()
+	var scene_resource: PackedScene = packed if packed != null else (load("res://scenes/tests/mission_reactivity_test.tscn") as PackedScene)
+	var scene: Node = scene_resource.instantiate()
 	scene.process_mode = Node.PROCESS_MODE_DISABLED
 	scene.set_meta("singleplayer_mission_identity", identity.duplicate(true))
 	scene.set_meta("singleplayer_visit_identities", payload.visits.duplicate(true))

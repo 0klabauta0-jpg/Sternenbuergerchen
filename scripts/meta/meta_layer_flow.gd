@@ -473,6 +473,20 @@ func _get_mission_test_scene() -> PackedScene:
 	return _mission_test_scene_cache
 
 
+## Wie _get_mission_test_scene, aber ohne das Bild anzuhalten: wartet bilderweise auf das Hintergrundladen. Kopflos oder bei Fehler
+## der alte synchrone Weg.
+func _load_mission_scene_async() -> PackedScene:
+	if _mission_test_scene_cache != null or DisplayServer.get_name() == "headless":
+		return _get_mission_test_scene()
+	if not _mission_test_scene_preload_requested:
+		if ResourceLoader.load_threaded_request(MISSION_TEST_SCENE_PATH, "PackedScene", true) != OK:
+			return _get_mission_test_scene()
+		_mission_test_scene_preload_requested = true
+	while is_inside_tree() and ResourceLoader.load_threaded_get_status(MISSION_TEST_SCENE_PATH) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+		await get_tree().process_frame
+	return _get_mission_test_scene()
+
+
 ## Szenenwechsel ueber den zentralen Ladedienst (Hintergrundladen mit Balken); ohne Dienst der alte Weg.
 func _change_scene_via_service(tree: SceneTree, scene_path: String, tip_context: String = "") -> Error:
 	if tree == null:
@@ -481,6 +495,23 @@ func _change_scene_via_service(tree: SceneTree, scene_path: String, tip_context:
 	if service != null and service.has_method("change_scene"):
 		return int(service.call("change_scene", scene_path, {"tip_context": tip_context})) as Error
 	return tree.change_scene_to_file(scene_path)
+
+
+## Wie _change_scene_via_service, wartet aber bei ERR_BUSY (Dienst laedt noch) einige Bilder und versucht es erneut; scheitert es am
+## Ende, wird der Alt-Weg (change_scene_to_file) versucht. Gibt den letzten Fehler zurueck (OK = Wechsel laeuft).
+func _change_scene_checked(scene_path: String, tip_context: String = "") -> Error:
+	var error: Error = ERR_UNCONFIGURED
+	for attempt in range(120):
+		if not is_inside_tree():
+			return ERR_UNCONFIGURED
+		error = _change_scene_via_service(get_tree(), scene_path, tip_context)
+		if error != ERR_BUSY:
+			break
+		await get_tree().process_frame
+	if error != OK and is_inside_tree():
+		push_warning("Szenenwechsel ueber den Ladedienst gescheitert (%d): %s; direkter Wechsel." % [error, scene_path])
+		error = get_tree().change_scene_to_file(scene_path)
+	return error
 
 
 func _ladezeit(label: String) -> void:
@@ -500,7 +531,15 @@ func _restore_active_campaign() -> void:
 	if _campaign_start == null or not bool(_campaign_start.get("active_restore_in_progress")): return
 	var data: Dictionary = _campaign_start.get("active_pending")
 	var factory = load("res://scripts/mission/campaign_active_scene_preflight.gd")
-	var created: Dictionary = factory.instantiate_scene(data,_campaign_start.get("checkpoint"))
+	# Die grosse Einsatz-Szene im Hintergrund holen (mit Ladebild), statt sie in einem Bild synchron zu laden.
+	var loading_service: Node = get_node_or_null("/root/SceneLoadingService") if is_inside_tree() else null
+	if loading_service != null:
+		loading_service.call("begin_external_wait", "Einsatzstand wird geladen", "campaign")
+	var mission_packed: PackedScene = await _load_mission_scene_async()
+	if loading_service != null and is_instance_valid(loading_service):
+		loading_service.call("end_external_wait")
+	if not is_inside_tree(): return
+	var created: Dictionary = factory.instantiate_scene(data,_campaign_start.get("checkpoint"),mission_packed)
 	if not created.get("ok",false):
 		set_meta("campaign_active_restore_error",created)
 		call_deferred("_campaign_load_failed")
@@ -4374,8 +4413,15 @@ func _continue_campaign_after_failed_extraction() -> bool:
 		return false
 	# This is an explicit rollback, never a physical arrival or a fresh save.
 	load("res://scripts/meta/game_start_contract.gd").request_start(get_tree(), "campaign", "continue_home")
-	_change_scene_via_service(get_tree(), "res://scenes/meta/meta_layer_test.tscn", "campaign")
+	_retry_campaign_scene_after_failed_extraction() # laeuft bis zum ersten Warten sofort (wie bisher), danach ggf. erneut
 	return true
+
+
+func _retry_campaign_scene_after_failed_extraction() -> void:
+	var error: Error = await _change_scene_checked("res://scenes/meta/meta_layer_test.tscn", "campaign")
+	if error != OK:
+		set_meta("campaign_scene_change_error", error)
+		_show_save_feedback("Der Rückweg zur Basis hat nicht geklappt. Bitte mit Esc ins Hauptmenü gehen und den Stand laden.")
 
 
 ## Freies Lager (data/singleplayer/open_garrisons.json): jeder NEUE Besuch ohne Auftrag baut Besatzung und Kiste frisch auf, statt die alte
@@ -9945,7 +9991,12 @@ func _campaign_load_failed() -> void:
 	push_warning("Kampagnenstand ungueltig; kein neuer Stand wird angelegt.")
 	var detail := String(_campaign_start.get("error_message")) if _campaign_start != null else ""
 	get_tree().root.set_meta("campaign_start_error", detail if not detail.is_empty() else "Kampagnenstand konnte nicht geladen werden. Vorhandener Stand bleibt erhalten. Im Kampagnenmenü ist der letzte Basisstand separat erreichbar.")
-	_change_scene_via_service(get_tree(), "res://scenes/ui/main_menu.tscn", "main_menu")
+	var error: Error = await _change_scene_checked("res://scenes/ui/main_menu.tscn", "main_menu")
+	if error != OK:
+		# Der Rueckweg ins Hauptmenue ist gescheitert: sichtbar melden statt leerer Basis ohne Hinweis.
+		set_meta("campaign_scene_change_error", error)
+		push_error("Rueckweg ins Hauptmenue gescheitert (%d)." % error)
+		_show_save_feedback("Der Kampagnenstand konnte nicht geladen werden, und das Hauptmenü ließ sich nicht öffnen. Bitte das Spiel neu starten; der Stand bleibt erhalten.")
 
 
 func is_context_overlay_obscured() -> bool:
