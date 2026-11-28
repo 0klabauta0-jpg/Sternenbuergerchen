@@ -118,6 +118,12 @@ func _handle_quick_save_input(event: InputEvent) -> bool:
 		return false
 	if not key_event.is_action_pressed(QUICK_SAVE_ACTION, false):
 		return false
+	if _is_scene_loading():
+		# Waehrend eines Szenenwechsels wird nichts gespeichert (die Szene wird gerade ersetzt).
+		var loading_viewport := get_viewport()
+		if loading_viewport != null:
+			loading_viewport.set_input_as_handled()
+		return true
 	if not _is_campaign_context():
 		return false
 	var viewport := get_viewport()
@@ -155,6 +161,12 @@ func _handle_escape_input(event: InputEvent) -> void:
 		return
 	if key_event.keycode != KEY_ESCAPE:
 		return
+	if _is_scene_loading():
+		# Das Spielmenue soll nicht ueber dem Ladebild aufgehen.
+		var loading_viewport := get_viewport()
+		if loading_viewport != null:
+			loading_viewport.set_input_as_handled()
+		return
 	if _exit_panel != null and _exit_panel.is_visible_in_tree():
 		_cancel_exit()
 	elif is_settings_visible() or is_controls_visible():
@@ -183,7 +195,18 @@ func set_settings_path_for_tests(path: String) -> void:
 		_settings_config_path = normalized_path
 
 
+## Laeuft gerade ein Szenenwechsel ueber den Ladedienst (Hintergrundladen, Ladebild oder Nachlauf)?
+func _is_scene_loading() -> bool:
+	var tree := get_tree()
+	var service: Node = tree.root.get_node_or_null("SceneLoadingService") if tree != null and tree.root != null else null
+	if service == null or not service.has_method("is_loading"):
+		return false
+	return bool(service.call("is_loading")) or (service.has_method("is_external_wait") and bool(service.call("is_external_wait")))
+
+
 func open_menu(status_text: String = "") -> void:
+	if _is_scene_loading():
+		return
 	_ensure_overlay()
 	_begin_modal_input()
 	_overlay_root.visible = true

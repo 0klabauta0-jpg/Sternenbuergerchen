@@ -94,6 +94,11 @@ var _launching: bool = false
 var _loading_curtain: ColorRect = null
 var _loading_label: Label = null
 var _pending_tip_context: String = ""
+var _pending_launch_label: String = ""
+var _checkpoint_cache_key: String = ""
+var _checkpoint_cache: Dictionary = {}
+var _inspect_cache_key: String = ""
+var _inspect_cache: Dictionary = {}
 var _locked_buttons: Array = []
 var _teams_screen: Panel = null
 var _teams_back_button: Button = null
@@ -1134,7 +1139,7 @@ func _ensure_start_roster_button() -> void:
 		_team_editor_toggle_button.focus_mode = Control.FOCUS_ALL
 		menu_buttons.add_child(_team_editor_toggle_button)
 	_team_editor_toggle_button.set_meta("roster_action", "toggle_team_editor")
-	_team_editor_toggle_button.tooltip_text = "Eigenes Rookie-Team mit Bild und Startpunkten bearbeiten."
+	_team_editor_toggle_button.tooltip_text = "Eigenes Neulings-Team mit Bild und Startpunkten bearbeiten."
 	if not _team_editor_toggle_button.pressed.is_connected(_on_team_editor_toggle_pressed):
 		_team_editor_toggle_button.pressed.connect(_on_team_editor_toggle_pressed)
 	_ensure_team_library_panel(menu_buttons)
@@ -1224,7 +1229,7 @@ func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
 		header_label.name = "TeamLibraryHeaderLabel"
 		header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		header_row.add_child(header_label)
-	header_label.text = "Skirmish-Teambibliothek"
+	header_label.text = "Gefechts-Teambibliothek"
 	header_label.add_theme_font_size_override("font_size", 20)
 	_team_library_activate_button = header_row.get_node_or_null("TeamLibraryActivateButton") as Button
 	if _team_library_activate_button == null:
@@ -1325,11 +1330,11 @@ func _ensure_team_editor_panel(_menu_buttons: VBoxContainer) -> void:
 		_team_editor_title_label.name = "TeamEditorHeaderLabel"
 		_team_editor_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		header_row.add_child(_team_editor_title_label)
-	_team_editor_title_label.text = "Skirmish-Team-Editor"
+	_team_editor_title_label.text = "Gefechts-Team-Editor"
 	_team_editor_title_label.add_theme_font_size_override("font_size", 26)
 	_team_editor_title_label.clip_text = true
 	_team_editor_title_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	_team_editor_title_label.tooltip_text = "Eigene Ansicht für Teamname, Team-Bild, Rookie-Punkte und NPC-Karten."
+	_team_editor_title_label.tooltip_text = "Eigene Ansicht für Teamname, Team-Bild, Neulings-Punkte und NPC-Karten."
 
 	var view_row := header_row.get_node_or_null("TeamEditorViewModeRow") as HBoxContainer
 	if view_row == null:
@@ -1398,7 +1403,7 @@ func _ensure_team_editor_panel(_menu_buttons: VBoxContainer) -> void:
 		side_vbox.add_child(name_label)
 	name_label.text = "Teamname"
 	name_label.add_theme_font_size_override("font_size", 13)
-	name_label.tooltip_text = "Name dieses Skirmish-Teams."
+	name_label.tooltip_text = "Name dieses Gefechts-Teams."
 	name_label.set_meta("help_id", "team_editor.team_name")
 	_team_editor_name_edit = side_vbox.get_node_or_null("TeamEditorNameEdit") as LineEdit
 	if _team_editor_name_edit == null:
@@ -1592,8 +1597,8 @@ func _refresh_start_roster_button() -> void:
 func _refresh_team_editor_toggle() -> void:
 	if _team_editor_toggle_button == null:
 		return
-	_team_editor_toggle_button.text = "Skirmish-Team-Editor" if _team_editor_open else "Skirmish-Team erstellen"
-	_team_editor_toggle_button.tooltip_text = "Geöffnetes Team-Editor-Fenster anzeigen." if _team_editor_open else "Eigenes Rookie-Team im großen Team-Editor bearbeiten."
+	_team_editor_toggle_button.text = "Gefechts-Team-Editor" if _team_editor_open else "Gefechts-Team erstellen"
+	_team_editor_toggle_button.tooltip_text = "Geöffnetes Team-Editor-Fenster anzeigen." if _team_editor_open else "Eigenes Neulings-Team im großen Team-Editor bearbeiten."
 
 
 func _open_team_editor_for_path(entry_path: String = "") -> void:
@@ -1618,7 +1623,7 @@ func _open_team_editor_for_path(entry_path: String = "") -> void:
 	_set_team_editor_open(true)
 	_refresh_team_library()
 	_refresh_team_editor()
-	_status_label.text = "Skirmish-Team-Editor"
+	_status_label.text = "Gefechts-Team-Editor"
 	_play_ui_sfx("click", "team_editor_open")
 
 
@@ -1744,7 +1749,7 @@ func _refresh_team_library_status() -> void:
 	if _team_library_edit_button != null:
 		var can_edit: bool = not selected_entry.is_empty() and bool(selected_entry.get("valid", false))
 		_team_library_edit_button.disabled = not can_edit
-		_team_library_edit_button.tooltip_text = "Ausgewähltes Team mit Name, Portraits, Karten und Rookie-Punkten bearbeiten." if can_edit else "Erst ein gültiges Team auswählen."
+		_team_library_edit_button.tooltip_text = "Ausgewähltes Team mit Name, Portraits, Karten und Neulings-Punkten bearbeiten." if can_edit else "Erst ein gültiges Team auswählen."
 
 
 func _format_team_library_entry(entry: Dictionary) -> String:
@@ -1906,7 +1911,7 @@ func _refresh_team_editor() -> void:
 	var editor: Dictionary = _get_normalized_team_editor(false)
 	var identity: Dictionary = Dictionary(TEAM_NAME_GENERATOR_SCRIPT.call("build_team_identity_snapshot", roster))
 	if _team_editor_title_label != null:
-		_team_editor_title_label.text = "Skirmish-Team-Editor | %s" % String(identity.get("team_name", "Team"))
+		_team_editor_title_label.text = "Gefechts-Team-Editor | %s" % String(identity.get("team_name", "Team"))
 	if _team_editor_name_edit != null:
 		_team_editor_name_edit.text = String(identity.get("team_name", ""))
 	if _team_editor_summary_label != null:
@@ -2252,7 +2257,7 @@ func _build_team_editor_unit_card(unit: Dictionary, card_size: Vector2, compact:
 			_unit_skill_value(unit, "fighter_piloting"),
 		]
 		compact_stats.add_theme_font_size_override("font_size", 10)
-		compact_stats.tooltip_text = "Accuracy, Speed, Leadership, Toughness sowie Dropship/Frachter/Fighter-Piloting."
+		compact_stats.tooltip_text = "Treffsicherheit, Tempo, Führung, Zähigkeit sowie Fliegen von Landungsschiff, Frachter und Jäger."
 		compact_stats.set_meta("help_id", "character_sheet.core_values")
 		info.add_child(compact_stats)
 	else:
@@ -2341,7 +2346,7 @@ func _add_team_editor_badge_row(host: VBoxContainer, unit: Dictionary) -> void:
 		badge_grid.add_child(badge_cell)
 	if badge_grid.get_child_count() == 0:
 		var no_badge := Label.new()
-		no_badge.text = "Rookie"
+		no_badge.text = "Neuling"
 		no_badge.add_theme_font_size_override("font_size", 10)
 		no_badge.tooltip_text = "Noch keine starke abgeleitete Spezialisierung."
 		no_badge.set_meta("help_id", "character_sheet.rank_badges")
@@ -3770,8 +3775,21 @@ func _get_global_escape_shell():
 func _load_campaign_checkpoint() -> Dictionary:
 	if not ResourceLoader.exists(CAMPAIGN_CHECKPOINT_STORE_PATH):
 		return {"ok": false, "reason": "checkpoint_store_unavailable"}
+	# Entscheidung R1-7: den Stand nur einmal lesen; neu gelesen wird erst, wenn sich die Datei (Zeit/Groesse) aendert.
+	var key: String = _checkpoint_file_key("user://campaigns/introduction/checkpoint_v1.json")
+	if not _checkpoint_cache.is_empty() and key == _checkpoint_cache_key:
+		return _checkpoint_cache
 	var store: GDScript = load(CAMPAIGN_CHECKPOINT_STORE_PATH)
-	return store.load_checkpoint()
+	_checkpoint_cache = Dictionary(store.load_checkpoint())
+	_checkpoint_cache_key = key
+	return _checkpoint_cache
+
+
+func _checkpoint_file_key(path: String) -> String:
+	if not FileAccess.file_exists(path):
+		return "missing"
+	# Pruefsumme statt nur Zeit/Groesse: erkennt jede Aenderung der Datei; spart die teure Auswertung.
+	return FileAccess.get_sha256(path)
 
 
 func _campaign_checkpoint_exists() -> bool:
@@ -3908,8 +3926,15 @@ func _on_campaign_error_action(action: StringName) -> void:
 
 
 func _inspect_campaign_saved() -> Dictionary:
+	var loaded: Dictionary = _load_campaign_checkpoint()
+	# Gleicher Stand und gleiche Einsatzdatei: Ergebnis wiederverwenden (der Einsatzstand wird sonst jedes Mal neu geprueft).
+	var key: String = "%d|%s|%s" % [loaded.hash(), _checkpoint_file_key("user://campaigns/introduction/checkpoint_v1.json"), _checkpoint_file_key("user://campaigns/introduction/active_checkpoint_v1.json")]
+	if not _inspect_cache.is_empty() and key == _inspect_cache_key:
+		return _inspect_cache
 	var projection_script: GDScript = load("res://scripts/meta/campaign_save_projection.gd")
-	return Dictionary(projection_script.call("inspect_saved", _load_campaign_checkpoint()))
+	_inspect_cache = Dictionary(projection_script.call("inspect_saved", loaded))
+	_inspect_cache_key = key
+	return _inspect_cache
 
 
 func _find_saved_credits(inspected: Dictionary) -> int:
@@ -4061,7 +4086,7 @@ func _ensure_skirmish_entry() -> void:
 	_gefecht_sub_menu.add_child(points)
 	points.pressed.connect(_open_skirmish_points)
 	var own := _make_button("SkirmishOwnTeam", "Mit eigenem Team starten")
-	_style_sub_button(own, "Startet mit deinem gespeicherten Team. Fahrzeugtransport, Trägerhangar, Wiederbewaffnung und Medic Bed sind vorgemerkt, derzeit nicht bedienbar.")
+	_style_sub_button(own, "Startet mit deinem gespeicherten Team. Fahrzeugtransport, Trägerhangar, Wiederbewaffnung und Sanitätsbett sind vorgemerkt, derzeit nicht bedienbar.")
 	_gefecht_sub_menu.add_child(own)
 	own.pressed.connect(_start_skirmish.bind(""))
 	_gefecht_teams_button = _make_button("GefechtTeamsButton", "Teams")
@@ -4222,14 +4247,43 @@ func _launch_scene(scene_path: String, label: String, tip_context: String) -> vo
 		return
 	_launching = true
 	_pending_tip_context = tip_context
+	_pending_launch_label = label
+	_connect_loading_service_signal()
 	_set_menu_locked(true)
-	_show_loading_curtain(label)
 	_status_label.text = "%s wird geladen …" % label
+	if _service_overlay_available():
+		# Im Fenster zeigt allein der Ladebildschirm des Dienstes den Fortschritt (nur ein Vorhang, kein zweiter vom Menue).
+		_change_scene(scene_path)
+		return
+	_show_loading_curtain(label)
 	await get_tree().process_frame
 	await get_tree().process_frame
 	if not is_inside_tree() or not _launching:
 		return
 	_change_scene(scene_path)
+
+
+func _service_overlay_available() -> bool:
+	if DisplayServer.get_name() == "headless":
+		return false
+	var service := get_node_or_null("/root/SceneLoadingService")
+	return service != null and service.has_method("change_scene")
+
+
+func _connect_loading_service_signal() -> void:
+	var service := get_node_or_null("/root/SceneLoadingService")
+	if service != null and service.has_signal("loading_finished") and not service.is_connected("loading_finished", _on_loading_service_finished):
+		service.connect("loading_finished", _on_loading_service_finished)
+
+
+## Scheitert das Laden (auch spaet, nach dem Start), hebt das Menue die Sperre auf und sagt es.
+func _on_loading_service_finished(path: String, error: int) -> void:
+	if error == OK or not _launching:
+		return
+	_status_label.text = "Das Laden hat nicht geklappt. Bitte noch einmal versuchen."
+	_play_ui_sfx("warning", "scene_change_failed")
+	push_warning("Main menu route failed late: %s (%d)" % [path, error])
+	_cancel_launch()
 
 
 func _cancel_launch() -> void:
@@ -4697,7 +4751,7 @@ func _change_scene(scene_path: String) -> void:
 	var error: int = OK
 	var service := get_node_or_null("/root/SceneLoadingService")
 	if service != null and service.has_method("change_scene"):
-		var service_result: Variant = service.call("change_scene", scene_path, {"tip_context": _pending_tip_context})
+		var service_result: Variant = service.call("change_scene", scene_path, {"tip_context": _pending_tip_context, "show_immediately": _service_overlay_available()})
 		if service_result is int:
 			error = int(service_result)
 	else:
