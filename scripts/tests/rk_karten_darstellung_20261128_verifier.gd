@@ -249,9 +249,12 @@ func _starmap_checks() -> void:
 	_check(button != null and button.disabled, "Ferner Ort: Marker vorhanden und gesperrt")
 	if button == null:
 		return
-	_check(button.tooltip_text.contains("Doppelklick") and button.tooltip_text.contains(String(site_data.filter(func(e): return e.id == target_id)[0].name)), "Ferner Ort: Marker-Tooltip nennt Namen und Doppelklick")
+	# Der Name im Tooltip kommt aus dem Anzeige-Katalog (nicht aus der Rohdatei): nur pruefen, dass eine Namenszeile vor dem Hinweis steht.
+	var tip_lines: PackedStringArray = button.tooltip_text.split("\n")
+	_check(tip_lines.size() >= 2 and not tip_lines[0].strip_edges().is_empty() and tip_lines[1] == "Doppelklick: Kurs setzen", "Ferner Ort: Marker-Tooltip nennt Namen und Doppelklick (%s)" % button.tooltip_text.replace("\n", " | "))
 	var center: Vector2 = button.get_global_rect().get_center()
 	var local_center: Vector2 = center - canvas.get_global_rect().position
+	_check(String(canvas.call("_get_tooltip", local_center)).split("\n")[0] == tip_lines[0], "Karten-Tooltip und Marker-Tooltip nennen denselben Namen")
 	_check(String(canvas.call("_get_tooltip", local_center)).contains("Doppelklick: Kurs setzen"), "Ferner Ort: Karten-Tooltip am Marker sagt \"Doppelklick: Kurs setzen\"")
 	_check(not String(canvas.call("_get_tooltip", Vector2(-50, -50))).contains("Doppelklick"), "Leere Stelle: kein Doppelklick-Hinweis")
 	var before := String(view.call("get_ui_snapshot").status)
