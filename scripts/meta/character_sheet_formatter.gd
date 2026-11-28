@@ -8,6 +8,7 @@ const ROSTER_RELATIONSHIP_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/r
 const FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_behavior_resolver.gd")
 const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 const COPY: GDScript = preload("res://scripts/meta/character_sheet_copy.gd")
+const PERSONALITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/personality_catalog.gd")
 const PERSONNEL_RECOVERY_RUNTIME_SCRIPT: GDScript = preload("res://scripts/core/personnel_recovery_runtime.gd")
 const EXPERIENCE_CONFIG: GDScript = preload("res://scripts/meta/skirmish_start_configuration.gd")
 const CORE_ORDER: Array = [
@@ -221,10 +222,27 @@ static func build_sheet_blocks(profile, options: Dictionary = {}) -> Dictionary:
 	}
 
 
+static func _read_personality(profile) -> String:
+	var raw: Variant = profile.get("personality") if profile is Object else null
+	return PERSONALITY_CATALOG_SCRIPT.normalize(raw)
+
+
+## "Persönlichkeit: <Name>" fürs Charakterblatt; fehlt das Feld, gilt Profi.
+static func build_personality_text(profile) -> String:
+	return "Persönlichkeit: %s" % PERSONALITY_CATALOG_SCRIPT.display_name(_read_personality(profile))
+
+
+## Ein Satz Beschreibung der Persönlichkeit.
+static func build_personality_description(profile) -> String:
+	return PERSONALITY_CATALOG_SCRIPT.description(_read_personality(profile))
+
+
 static func build_sheet_view_model(profile, options: Dictionary = {}) -> Dictionary:
 	if profile == null:
 		return {
 			"name": "No operator selected",
+			"personality_text": "",
+			"personality_description": "",
 			"trait_text": "Keine Eigenschaften hinterlegt.",
 			"trait_rows": [],
 			"short_description": "Keine Kurzbeschreibung verfuegbar.",
@@ -258,6 +276,8 @@ static func build_sheet_view_model(profile, options: Dictionary = {}) -> Diction
 
 	return {
 		"name": _optional_text(String(profile.display_name), "Unbekannte Person"),
+		"personality_text": build_personality_text(profile),
+		"personality_description": build_personality_description(profile),
 		"start_role_text": _start_role_text(profile),
 		"current_assignment_text": _optional_text(String(options.get("current_assignment_text", "")), "Im Profil nicht belegt"),
 		"suitability_rows": suitability_rows,

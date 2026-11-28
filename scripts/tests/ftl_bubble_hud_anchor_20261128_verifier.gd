@@ -50,7 +50,14 @@ func _check_text_catalogs() -> void:
 	var copy_catalog: Dictionary = _read_json(COPY_PATH)
 	_assert(not copy_catalog.is_empty(), "Satzdatei tactical_communication_copy.json ist lesbar")
 	_collect_copy_strings(copy_catalog, copy_texts)
-	_assert(copy_texts.size() > 60, "Satzdatei enthaelt die Saetze fuer Ereignisse, Anlaesse, Befehle und Pruefmeldungen (%d)" % copy_texts.size())
+	# Seit Paket 3 stehen die Saetze in data/comms/funk_saetze.json; hier bleiben Kartentexte und Pruefmeldungen.
+	_assert(copy_texts.size() > 35, "Datei tactical_communication_copy.json enthaelt Kartentexte und Pruefmeldungen (%d)" % copy_texts.size())
+	var funk_katalog: Dictionary = _read_json("res://data/comms/funk_saetze.json")
+	for anlass in ["befehl_verstanden", "unterwegs", "ziel_erreicht", "feindkontakt", "blockiert", "braucht_befehl", "abgesetzt", "schiff_in_gefahr", "auftrag_erfuellt", "rueckzug"]:
+		for typ_variant in Dictionary(funk_katalog.get(anlass, {})).values():
+			for stufe_variant in Dictionary(typ_variant).values():
+				for satz_variant in Array(stufe_variant):
+					copy_texts.append(String(satz_variant))
 	var comms_texts: PackedStringArray = PackedStringArray()
 	for line_variant in Array(_read_json(COMMS_PATH).get("lines", [])):
 		var line: Dictionary = Dictionary(line_variant)
@@ -145,7 +152,7 @@ func _check_mission(window_size: Vector2i) -> void:
 		var problems: PackedStringArray = PackedStringArray()
 		_collect_text_problems(text, problems)
 		_assert(problems.is_empty() and not text.strip_edges().is_empty(), prefix + "Satz '%s' ist verstaendlich deutsch" % text)
-		_assert(String(bubble.get("text_source", "")) in ["tactical_communication_copy", "command_validation"], prefix + "Satzquelle ist die Satzdatei (%s)" % String(bubble.get("text_source", "")))
+		_assert(String(bubble.get("text_source", "")) in ["funk_saetze", "command_validation"], prefix + "Satzquelle ist die Satzdatei (%s)" % String(bubble.get("text_source", "")))
 	for team in per_team.keys():
 		_assert(int(per_team[team]) == 1, prefix + "%s hat hoechstens eine Blase" % team)
 

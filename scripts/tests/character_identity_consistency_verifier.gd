@@ -18,6 +18,7 @@ func _signature(roster: Dictionary) -> String:
 	for unit: Dictionary in units:
 		unit.erase("portrait_id")
 		unit.erase("portrait_path")
+		unit.erase("personality")  # neues Feld seit Funk Paket 3, gehoert nicht zur alten Vorgabe
 	return JSON.stringify(units, "", true).sha256_text()
 
 func _run() -> void:

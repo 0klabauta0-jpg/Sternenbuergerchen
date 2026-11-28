@@ -1,0 +1,15 @@
+{
+	"purpose": "Persönlichkeiten der Personen (Feld personality). Schlüssel, deutscher Name und ein Satz Beschreibung für das Charakterblatt; Startwerte der zwei Startleute der Kampagne (änderbar hier). Fehlt das Feld bei einer Person, gilt standard.",
+	"standard": "profi",
+	"typen": {
+		"profi": {"name": "Profi", "beschreibung": "Ruhig, knapp und ernst: meldet nur, was wichtig ist."},
+		"draufgaenger": {"name": "Draufgänger", "beschreibung": "Laut, frech und ungeduldig: will immer sofort nach vorn."},
+		"vorsichtig": {"name": "Vorsichtig", "beschreibung": "Angespannt und ernst: warnt früh und oft."},
+		"spassvogel": {"name": "Spaßvogel", "beschreibung": "Macht Witze, auch unter Beschuss, aber nie über Gefallene."},
+		"brummbaer": {"name": "Brummbär", "beschreibung": "Meckert trocken, macht aber trotzdem mit."}
+	},
+	"startleute": {
+		"campaign_leader": "profi",
+		"campaign_pilot": "spassvogel"
+	}
+}

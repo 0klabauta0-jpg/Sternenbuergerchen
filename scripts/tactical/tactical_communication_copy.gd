@@ -1,11 +1,14 @@
 class_name TacticalCommunicationCopy
 extends RefCounted
-## Einzige Satzquelle fuer die Truppfuehrer-Blase (data/tactical_communication_copy.json).
-## Nur Text und Anzeigedauer; keine Spiellogik. Die uebrigen Wege (Befehlskontext,
-## comms_lines, comic_bubble_text_catalog) liefern fuer die Blase keinen Satz mehr.
+## Anlass-Zuordnung, Anzeigedauer, Vorrang und Pruefmeldungen der Truppfuehrer-Blase (data/tactical_communication_copy.json).
+## Die Saetze selbst kommen aus data/comms/funk_saetze.json (FunkSaetze) mit der Persoenlichkeit des Truppfuehrers;
+## die Funkguete waehlt die kurze (schlecht) oder genaue Fassung. Keine Spiellogik.
+
+const FUNK_SAETZE_SCRIPT: GDScript = preload("res://scripts/tactical/funk_saetze.gd")
+const TRUPP_FARBEN_SCRIPT: GDScript = preload("res://scripts/tactical/trupp_farben.gd")
 
 const CATALOG_PATH: String = "res://data/tactical_communication_copy.json"
-const TEXT_SOURCE_ID: String = "tactical_communication_copy"
+const TEXT_SOURCE_ID: String = "funk_saetze"
 const TIER_LOW: String = "low"
 const TIER_NEUTRAL: String = "neutral"
 const TIER_HIGH: String = "high"
@@ -50,23 +53,60 @@ static func normalize_tier(tier: String) -> String:
 	return TIER_NEUTRAL
 
 
-## Satz fuer Befehlsrueckmeldungen (Aktion + Zustand). Schlechte Funkguete = kurz, gute = genauer.
-static func command_text(action: String, state: String, tier: String, context: Dictionary = {}) -> Dictionary:
-	var table: Dictionary = Dictionary(load_catalog().get("command_feedback", {}))
-	var key: String = "%s.%s" % [action, state]
+## Wie oft ein Truppfuehrer einen Anlass schon gesagt hat ("Einheit|Anlass" -> Anzahl); bestimmt mit, welche Fassung drankommt.
+static var _counters: Dictionary = {}
+
+
+static func reset_counters() -> void:
+	_counters.clear()
+
+
+## Anlass (Schluessel in funk_saetze.json) fuer Befehlsaktion und -zustand, z. B. move + accepted -> befehl_verstanden.
+static func occasion_for_command(action: String, state: String) -> String:
+	var table: Dictionary = Dictionary(load_catalog().get("command_occasions", {}))
+	var key: String = "%s.%s" % [action.strip_edges().to_lower(), state.strip_edges().to_lower()]
 	if not table.has(key):
-		key = "default.%s" % state
+		key = "default.%s" % state.strip_edges().to_lower()
 	if not table.has(key):
 		key = "default.accepted"
-	var entry: Dictionary = Dictionary(table.get(key, {}))
-	if entry.is_empty():
-		return {}
-	var normalized_tier: String = normalize_tier(tier)
-	var template: String = String(entry.get(normalized_tier, entry.get(TIER_NEUTRAL, ""))).strip_edges()
-	var text: String = format_text(template, context)
-	if text.is_empty():
-		return {}
-	return {"text": text, "text_source": TEXT_SOURCE_ID, "text_key": "command_feedback.%s.%s" % [key, normalized_tier]}
+	return String(table.get(key, ""))
+
+
+## Anlass fuer ein Ereignis; ein Ausloeser (copy_trigger) geht vor der Ereignisart.
+static func occasion_for_event(event_type: String, trigger: String = "") -> String:
+	var from_trigger: String = String(trigger_entry(trigger).get("occasion", ""))
+	if not from_trigger.is_empty():
+		return from_trigger
+	return String(event_entry(event_type).get("occasion", ""))
+
+
+## Truppfuehrer-Satz: Anlass + Persoenlichkeit (Funkguetestufe "low" = kurz, sonst genau).
+## `advance` zaehlt den Anlass fuer diese Einheit weiter (naechstes Mal eine andere Fassung); false liest nur.
+static func leader_text(occasion: String, personality: String, skill_tier: String, seed_key: String, context: Dictionary = {}, advance: bool = true) -> String:
+	var key: String = occasion.strip_edges().to_lower()
+	if key.is_empty():
+		return ""
+	var counter_key: String = "%s|%s" % [seed_key, key]
+	var counter: int = int(_counters.get(counter_key, 0))
+	var tier: String = FUNK_SAETZE_SCRIPT.TIER_KURZ if normalize_tier(skill_tier) == TIER_LOW else FUNK_SAETZE_SCRIPT.TIER_GENAU
+	var text: String = String(FUNK_SAETZE_SCRIPT.call("pick_tier", key, personality, tier, seed_key, counter, build_fill_context(context)))
+	if advance and not text.is_empty():
+		_counters[counter_key] = counter + 1
+	return text
+
+
+## Werte fuer {team}, {richtung}, {ziel}, {name}, {kamerad} aus dem Ereignis-Kontext; fehlende bleiben leer (FunkSaetze waehlt dann passende Fassungen).
+static func build_fill_context(context: Dictionary) -> Dictionary:
+	var team_text: String = str(context.get("team", context.get("display_label", context.get("fireteam_label", "")))).strip_edges()
+	if team_text.is_empty():
+		team_text = str(context.get("fireteam_id", "")).strip_edges()
+	return {
+		"team": TRUPP_FARBEN_SCRIPT.display_name(team_text, team_text.to_upper()) if not team_text.is_empty() else "",
+		"richtung": format_direction(str(context.get("direction_label", context.get("direction", "")))),
+		"ziel": str(context.get("objective_label", context.get("ziel", ""))).strip_edges(),
+		"name": str(context.get("name", context.get("leader_name", ""))).strip_edges(),
+		"kamerad": str(context.get("kamerad", "")).strip_edges(),
+	}
 
 
 ## Verstaendliche Fehlermeldung der Befehlspruefung.

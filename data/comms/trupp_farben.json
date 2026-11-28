@@ -1,0 +1,15 @@
+{
+	"purpose": "Anzeigenamen der Trupps im Meldungsfenster und in den Funksätzen (deutsche Farbnamen). Schlüssel sind die internen Kennungen in Kleinbuchstaben; nicht aufgeführte Kennungen werden wie bisher angezeigt.",
+	"farben": {
+		"blue": "Blau",
+		"red": "Rot",
+		"green": "Grün",
+		"yellow": "Gelb",
+		"gold": "Gold",
+		"white": "Weiß",
+		"black": "Schwarz",
+		"orange": "Orange",
+		"purple": "Violett",
+		"silver": "Silber"
+	}
+}

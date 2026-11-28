@@ -9,6 +9,7 @@ const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/p
 const ROSTER_RELATIONSHIP_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/roster_relationship_model.gd")
 const FIRETEAM_COHESION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/fireteam_cohesion_resolver.gd")
 const TEAM_NAME_GENERATOR_SCRIPT: GDScript = preload("res://scripts/meta/team_name_generator.gd")
+const PERSONALITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/personality_catalog.gd")
 
 const SCHEMA_VERSION: int = 1
 const DEFAULT_SEED: String = "sternenbuergerchen_start_roster_v1"
@@ -222,6 +223,9 @@ static func generate_start_roster(seed: String = DEFAULT_SEED, roster_size: int 
 	var normalized_size: int = clampi(roster_size, MIN_ROSTER_SIZE, MAX_ROSTER_SIZE)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = _seed_to_int("%s:%d:%s" % [normalized_seed, normalized_size, player_profile_id])
+	# Persoenlichkeit: eigener Strang aus demselben Startwert, damit Namen, Bilder und Werte der Rekruten unveraendert bleiben.
+	var personality_rng := RandomNumberGenerator.new()
+	personality_rng.seed = _seed_to_int("%s:%d:%s:personality" % [normalized_seed, normalized_size, player_profile_id])
 	var role_plan: PackedStringArray = _build_role_plan(normalized_size)
 	var portrait_entries: Array = _build_portrait_assignment_pool(normalized_seed, normalized_size, role_plan)
 	var used_names: Dictionary = {}
@@ -237,6 +241,7 @@ static func generate_start_roster(seed: String = DEFAULT_SEED, roster_size: int 
 		profile_data["roster_role_category"] = role_category
 		profile_data["roster_seed_index"] = index
 		profile_data["player_profile_id"] = player_profile_id
+		profile_data["personality"] = PERSONALITY_CATALOG_SCRIPT.from_roll(personality_rng.randf())
 		profile_data["rank_badges"] = NPC_RANK_BADGE_RESOLVER_SCRIPT.call("get_badges_for_profile", profile_data, 1)
 		units.append(profile_data)
 	var relationship_pairs: Array = ROSTER_RELATIONSHIP_MODEL_SCRIPT.call("build_deterministic_start_relationships", units, normalized_seed)

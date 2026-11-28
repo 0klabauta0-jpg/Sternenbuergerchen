@@ -323,6 +323,10 @@ static func _add_compact_identity_overview(host: VBoxContainer, model: Dictionar
 	_overview_label(facts, "CharacterStartRole", "Hauptrolle: " + COPY.text(String(profile.role_name)) if profile!=null else "Hauptrolle: —", 14)
 	_overview_label(facts, "CharacterAssignment", "Nebenrolle: " + COPY.text(String(profile.secondary_specialty)) if profile!=null and not String(profile.secondary_specialty).is_empty() else "Nebenrolle: —", 14)
 	_overview_label(facts, "CharacterStatus", "Status: " + String(model.get("overview_status_text", "Im Profil nicht belegt")), 14, true)
+	if not String(model.get("personality_text", "")).is_empty():
+		var personality_label := _overview_label(facts, "CharacterPersonality", String(model.get("personality_text", "")), 14)
+		personality_label.tooltip_text = String(model.get("personality_description", ""))
+		_overview_label(facts, "CharacterPersonalityDescription", String(model.get("personality_description", "")), 13, true)
 	_add_badge_row(facts, profile, options)
 
 
@@ -412,6 +416,11 @@ static func _add_identity_block(host: VBoxContainer, model: Dictionary, profile,
 	_set_help_id(name_label, "character_sheet.name")
 	META_UI_SKIN_SCRIPT.style_header_label(name_label, 16)
 	summary_vbox.add_child(name_label)
+
+	if not String(model.get("personality_text", "")).is_empty():
+		var personality_label := _overview_label(summary_vbox, "CharacterPersonality", String(model.get("personality_text", "")), 12)
+		personality_label.tooltip_text = String(model.get("personality_description", ""))
+		_overview_label(summary_vbox, "CharacterPersonalityDescription", String(model.get("personality_description", "")), 11, true)
 
 	_add_badge_row(summary_vbox, profile, options)
 	if not bool(options.get("compact_sheet", false)):

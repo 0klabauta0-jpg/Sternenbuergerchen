@@ -4,7 +4,8 @@ extends RefCounted
 const PRESETS = preload("res://scripts/npc/unit_roster_presets.gd")
 const STORE = preload("res://scripts/meta/campaign_checkpoint_store.gd")
 const ACTIVE_STORE = preload("res://scripts/meta/campaign_active_checkpoint_store.gd")
-const BASE_MAP := "res://maps/campaign_intro_base.json"
+const PERSONALITIES = preload("res://scripts/meta/personality_catalog.gd")
+const BASE_MAP :="res://maps/campaign_intro_base.json"
 const HEX_AUTOSAVE_INTERVAL_MSEC := 5 * 60 * 1000
 const HEX_AUTOSAVE_RETRY_MSEC := 1000
 var entry: Dictionary = {}
@@ -174,6 +175,9 @@ func _initial_roster() -> Array:
 	if pilot.is_empty():
 		pilot = Dictionary(presets.back()).duplicate(true)
 	pilot.merge({"unit_id": "campaign_pilot", "roster_role_category": "pilot", "role_name": "Dropship Pilot", "dropship_piloting": 0.7, "fireteam_id": "", "armor":"suit", "armor_id":"suit", "weapon_1":"none", "weapon_1_id":"none", "weapon_2":"none", "weapon_2_id":"none"}, true)
+	# Persoenlichkeit der zwei Startleute steht in data/comms/persoenlichkeiten.json (Truppfuehrer profi, zweite Person spassvogel).
+	leader["personality"] = PERSONALITIES.normalize(PERSONALITIES.start_value("campaign_leader"))
+	pilot["personality"] = PERSONALITIES.normalize(PERSONALITIES.start_value("campaign_pilot"))
 	return [leader, pilot]
 
 func _hex_save_throttled(scope: String, now: int, force: bool) -> bool:

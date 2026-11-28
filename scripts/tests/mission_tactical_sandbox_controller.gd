@@ -191,6 +191,7 @@ const COMIC_BUBBLE_RUNTIME_GATE_SCRIPT: GDScript = preload("res://scripts/ui/com
 const NPC_THOUGHT_BUBBLE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/ui/npc_thought_bubble_resolver.gd")
 const FUNK_BAND_LINES_SCRIPT: GDScript = preload("res://scripts/tactical/funk_band_lines.gd")
 const FUNK_SAETZE_SCRIPT: GDScript = preload("res://scripts/tactical/funk_saetze.gd")
+const PERSONALITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/personality_catalog.gd")
 const FUNK_CHARACTER_GAMEPLAY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/character_gameplay_resolver.gd")
 const FUNK_BAND_PORTRAITS_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/A5TeamPortraits"
 const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
@@ -21627,7 +21628,7 @@ func report_member_funk_event(unit, occasion: String, context: Dictionary = {}, 
 		resolved_occasion = "mut"
 	var line_context: Dictionary = context.duplicate()
 	if not line_context.has("team"):
-		line_context["team"] = _get_fireteam_display_label(String(person.get("fireteam_id", ""))).capitalize()
+		line_context["team"] = String(load("res://scripts/tactical/trupp_farben.gd").call("display_name", String(person.get("fireteam_id", "")), _get_fireteam_display_label(String(person.get("fireteam_id", ""))).capitalize()))
 	var line: Dictionary = Dictionary(_ensure_funk_band_lines().call("offer", person, resolved_occasion, line_context, now))
 	if line.is_empty():
 		return {}
@@ -21645,11 +21646,7 @@ func _build_funk_person(unit) -> Dictionary:
 		display_name = String(unit.call("get_callsign")).strip_edges()
 	if display_name.is_empty():
 		display_name = unit_id
-	# Persoenlichkeit: kommt mit Paket 3 als Feld "personality"; bis dahin spricht jeder wie "profi".
-	var personality: String = ""
-	var personality_variant: Variant = unit.get("personality")
-	if personality_variant != null:
-		personality = String(personality_variant)
+	var personality: String = _resolve_unit_personality(unit)
 	return {
 		"unit_id": unit_id,
 		"fireteam_id": fireteam_id,
@@ -21659,6 +21656,21 @@ func _build_funk_person(unit) -> Dictionary:
 		"morale_state": String(state.get("morale_state", "")),
 		"is_leader": _is_unit_current_fireteam_lead(unit),
 	}
+
+
+## Persoenlichkeit einer Einheit fuer ihre Funksaetze: Feld "personality"; fehlt es, sprechen eigene Leute wie "profi",
+## Gegner und Neutrale bekommen einen festen Typ aus ihrer Kennung (ohne eigene Anzeige).
+func _resolve_unit_personality(unit) -> String:
+	var value: String = ""
+	var raw: Variant = unit.get("personality")
+	if raw != null:
+		value = String(raw).strip_edges()
+	if not value.is_empty():
+		return PERSONALITY_CATALOG_SCRIPT.normalize(value)
+	var team: String = String(unit.call("get_team_id")) if unit.has_method("get_team_id") else FRIENDLY_TEAM_ID
+	if team != FRIENDLY_TEAM_ID and unit.has_method("get_unit_id"):
+		return PERSONALITY_CATALOG_SCRIPT.from_id(String(unit.call("get_unit_id")))
+	return PERSONALITY_CATALOG_SCRIPT.default_type()
 
 
 func _record_funk_member_log_event(line: Dictionary, now_msec: int) -> void:
