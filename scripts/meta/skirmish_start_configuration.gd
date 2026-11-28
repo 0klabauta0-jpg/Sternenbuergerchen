@@ -6,8 +6,8 @@ const RELATIONSHIPS = preload("res://scripts/meta/roster_relationship_model.gd")
 const POINTS = preload("res://scripts/meta/skirmish_points_catalog.gd")
 const PRESET_IDS := ["early", "mid", "late"]
 const GROUND_MAPS = preload("res://scripts/mission/productive_ground_maps.gd")
-## Karten fuer "Gefecht": nur spielbare Hex-Karten (Auswahlliste der Spielkarten) mit eigenem Einsatz samt Gegnern.
-## Orte ohne Gegner (Absturzstelle, Handelsposten, Polisa) und Test-/Uebungskarten werden nicht angeboten.
+## Karten fuer "Gefecht": nur spielbare Hex-Karten (Auswahlliste der Spielkarten) mit eigenem Einsatz.
+## Absturzstelle und Handelsposten auf Bjoerns Wunsch (28.11.) trotz Einsatz ohne Gegner dabei; Polisa und Test-/Uebungskarten nicht.
 const SKIRMISH_MAPS: Array = [
 	{"path": "res://maps/Ground_Mission01_32x32.json", "title": "Patrouille und Verteidigung (klein)",
 		"scenario": "res://data/mission_scenarios/ground_mission01_default.json", "time_limit": 1200.0, "win_condition": ""},
@@ -15,6 +15,10 @@ const SKIRMISH_MAPS: Array = [
 		"scenario": "res://data/mission_scenarios/ground_mission02_128x128.json", "time_limit": 1800.0, "win_condition": ""},
 	{"path": "res://maps/windbruch_outpost.json", "title": "Windbruch – Rebellenlager",
 		"scenario": "res://data/mission_scenarios/windbruch_free_camp.json", "time_limit": 1200.0, "win_condition": "objective_capture"},
+	{"path": "res://maps/satellite_crash_site.json", "title": "Absturzstelle",
+		"scenario": "res://data/mission_scenarios/satellite_recovery.json", "time_limit": 2400.0, "win_condition": "objective_capture"},
+	{"path": "res://maps/trade_outpost.json", "title": "Handelsposten",
+		"scenario": "res://data/mission_scenarios/trade_outpost_visit.json", "time_limit": 1200.0, "win_condition": "objective_capture"},
 ]
 
 ## Angebotene Gefecht-Karten in Anzeigereihenfolge (nur vorhandene, in der Spieler-Auswahlliste stehende Dateien).

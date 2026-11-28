@@ -4,6 +4,7 @@ const START = preload("res://scripts/meta/game_start_contract.gd")
 const CONFIG = preload("res://scripts/meta/skirmish_start_configuration.gd")
 const GROUND_MAPS = preload("res://scripts/mission/productive_ground_maps.gd")
 const ROSTER = preload("res://scripts/meta/player_roster_store.gd")
+const WITHOUT_ENEMIES: PackedStringArray = ["res://maps/satellite_crash_site.json", "res://maps/trade_outpost.json"]
 
 class MenuProbe:
 	extends "res://scripts/ui/main_menu_screen.gd"
@@ -59,12 +60,16 @@ func _check_catalog_and_contract() -> void:
 		check(not GROUND_MAPS.TEST_ONLY.has(path), "Keine Test-/Uebungskarte: " + path)
 		check(FileAccess.file_exists(String(entry.scenario)), "Einsatzdatei vorhanden: " + String(entry.scenario))
 		var scenario: Variant = JSON.parse_string(FileAccess.get_file_as_string(String(entry.scenario)))
-		check(scenario is Dictionary and not Array(Dictionary(scenario).get("enemy_groups", [])).is_empty(), "Gefecht hat Gegner: " + path)
+		# Absturzstelle und Handelsposten sind auf Bjoerns Wunsch (28.11.) ohne Gegner dabei; alle anderen Gefecht-Karten brauchen Gegner.
+		if not WITHOUT_ENEMIES.has(path):
+			check(scenario is Dictionary and not Array(Dictionary(scenario).get("enemy_groups", [])).is_empty(), "Gefecht hat Gegner: " + path)
 		check(CONFIG.is_playable_map(path), "is_playable_map erkennt " + path)
 		check(START.request_start(self, "skirmish", "new", "early", {}, path).ok, "Vertrag nimmt Karte an: " + path)
 		var consumed: Dictionary = START.consume_start(self)
 		check(consumed == {"mode": "skirmish", "action": "new", "preset_id": "early", "map_path": path}, "Karte ueberlebt den Vertrag einmal: " + path)
-	for bad in ["res://maps/test_mission.json", "res://maps/wall_test_4x4.json", "res://maps/station_outpost_64x64.json", "res://maps/fireteam_command_drill_24x24.json", "res://maps/trade_outpost.json", "res://maps/gibt_es_nicht.json"]:
+	for wanted in WITHOUT_ENEMIES:
+		check(CONFIG.is_playable_map(wanted), "Auf Wunsch angeboten: " + wanted)
+	for bad in ["res://maps/test_mission.json", "res://maps/wall_test_4x4.json", "res://maps/station_outpost_64x64.json", "res://maps/fireteam_command_drill_24x24.json", "res://maps/polisa_station.json", "res://maps/gibt_es_nicht.json"]:
 		check(not CONFIG.is_playable_map(bad), "Nicht angeboten: " + bad)
 		check(not START.request_start(self, "skirmish", "new", "", {}, bad).ok, "Vertrag lehnt ab: " + bad)
 		check(START.consume_start(self).get("mode") == "skirmish" and not START.consume_start(self).has("map_path"), "Abgelehnte Karte hinterlaesst nichts: " + bad)
