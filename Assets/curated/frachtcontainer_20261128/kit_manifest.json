@@ -1,0 +1,27 @@
+{
+ "frachtcontainer_01": {
+  "file": "frachtcontainer_01.glb",
+  "type_id": "aussenposten_frachtcontainer_01",
+  "paket": "Grafik-Paket 1, Requisite 01",
+  "zweck": "Lager und Deckung auf Aussenposten (volle Deckung 70, blockiert Sicht)",
+  "triangles": 1791,
+  "size_x_length": 6.0,
+  "size_z_depth": 2.5,
+  "height": 2.6,
+  "textur": 1024,
+  "ursprung": "Mitte der Unterkante, Unterkante y=0",
+  "tueren": "kurze Seite in +X",
+  "quelle": {
+   "werkzeug": "Tripo Studio image_to_model",
+   "familie": "smart_mesh",
+   "version": "Nexus-v2.0-20260801",
+   "face_limit": 2000,
+   "pbr": true,
+   "referenzbild": "Assets/paket01/3D_Referenzen/01_Frachtcontainer.png",
+   "task_id": "01a2213d-df31-7852-aefc-57a656b3afbb",
+   "model_id": "01a2213e-86cb-7566-ac5d-a4122ed98de3"
+  },
+  "nachbearbeitung": "Meshopt mit gltf-transform 4.5.1 entpackt; Blender 5.1 kopflos: ungleichmaessig auf 6,0 x 2,5 x 2,6 skaliert (Tripo-Rohmass 1,00 x 0,29 x 0,39), Unterseite geloescht, Textur 1024, ein Material",
+  "umriss": "Simulation belegt nur die Ankerkachel; fuer den vollen Umriss frontier_scene_solid-Kacheln darunter setzen (wie bei Gebaeuden)"
+ }
+}
