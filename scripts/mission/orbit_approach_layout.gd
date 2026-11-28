@@ -50,6 +50,15 @@ static func build(body_id: String) -> Dictionary:
 			"circle_center":CIRCLE_CENTER,"radius":RADIUS},
 		"body_cells":body_cells,"gate_cells":candidates}
 
+static var _cache: Dictionary = {}
+
+## Wie build(), aber nur einmal je Koerper gebaut. NUR LESEN: das Ergebnis ist geteilt, wer es veraendern will, nimmt build().
+static func build_cached(body_id: String) -> Dictionary:
+	if _cache.has(body_id): return _cache[body_id]
+	var result := build(body_id)
+	if bool(result.get("ok", false)): _cache[body_id] = result
+	return result
+
 static func gate_cells(body_id: String) -> Array[Vector2i]:
 	var result := build(body_id)
 	var cells: Array[Vector2i] = []

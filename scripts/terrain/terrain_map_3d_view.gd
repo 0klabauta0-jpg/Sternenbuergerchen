@@ -934,6 +934,8 @@ var _drop_root: Node3D = null
 var _status_root: Node3D = null
 var _camera: Camera3D = null
 var _environment: WorldEnvironment = null
+## Eingaenge, mit denen die Umgebung zuletzt gesetzt wurde (leer = noch nie); gleich = nichts zu tun.
+var _environment_signature: Array = []
 
 var _terrain_map_data = null
 var _tile_catalog = null
@@ -4266,6 +4268,12 @@ func _ensure_nodes() -> void:
 	if _environment.environment == null:
 		_environment.environment = Environment.new()
 	var environment := _environment.environment
+	# Nur bei Aenderung setzen: _ensure_nodes laeuft mehrfach je Bild, die Werte unten haengen nur von diesen Eingaengen ab.
+	var offmap_owned: bool = _terrain_map_data != null and _terrain_map_data.has_method("get_authored_visual_layout_id") and String(_terrain_map_data.call("get_authored_visual_layout_id")) == FRONTIER_GM01_LAYOUT_SCRIPT.LAYOUT_ID
+	var env_signature: Array = [_environment.get_instance_id(), environment.get_instance_id(), _frontier_art_enabled, _is_mixed_ground_palette(), _orbital_station_view, offmap_owned, _mission_atmosphere_applied, _mission_ssao_on]
+	if env_signature == _environment_signature:
+		return
+	_environment_signature = env_signature
 	environment.background_mode = Environment.BG_COLOR
 	environment.background_color = EDITOR_EMPTY_BACKGROUND_COLOR
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
@@ -14619,8 +14627,12 @@ func _update_unit_visual_animation(proxy: Node3D, is_moving: bool, is_firing: bo
 	var is_death_clip: bool = desired_animation == UNIT_DEATH_ANIMATION_NAME
 	# Der Tod-Clip laeuft einmal und bleibt am Ende stehen (is_playing() ist dann false): nicht neu starten.
 	var death_already_played: bool = is_death_clip and String(proxy.get_meta("unit_visual_animation_name", "")) == desired_animation
+	# Neu aufgebaute Figur, die schon am Boden liegt (erste Animation ueberhaupt ist der Tod-Clip): ans Ende setzen statt neu abspielen.
+	var dead_on_first_sight: bool = is_death_clip and not death_already_played and not proxy.has_meta("unit_anim_phase_applied")
 	if not death_already_played and (animation_player.current_animation != desired_animation or not animation_player.is_playing()):
-		animation_player.play(desired_animation, UNIT_ANIM_BLEND_SECONDS)
+		animation_player.play(desired_animation, 0.0 if dead_on_first_sight else UNIT_ANIM_BLEND_SECONDS)
+		if dead_on_first_sight and animation_player.current_animation_length > 0.0:
+			animation_player.seek(animation_player.current_animation_length, true)
 		changed = true
 	if String(proxy.get_meta("unit_visual_animation_name", "")) != desired_animation:
 		proxy.set_meta("unit_visual_animation_name", desired_animation)

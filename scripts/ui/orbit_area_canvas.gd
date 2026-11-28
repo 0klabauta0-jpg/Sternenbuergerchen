@@ -15,8 +15,10 @@ signal move_requested(craft_id: String, target_hex: Vector2i)
 ## Klick auf ein Schiff bzw. Rahmen um Schiffe (wie auf der Systemkarte). Nur Auswahl, kein Befehl.
 signal craft_selected(craft_id: String)
 signal crafts_box_selected(craft_ids: Array, additive: bool)
-## Ab so vielen Pixeln Bewegung bei gedrueckter linker Maustaste gilt es als Rahmen, darunter als Klick.
-const BOX_THRESHOLD := 6.0
+## Ab so vielen Pixeln Bewegung bei gedrueckter linker Maustaste gilt es als Rahmen, darunter als Klick (verwackelter Klick bleibt Klick).
+const BOX_THRESHOLD := 10.0
+## Kurzer Bedienhinweis, unten auf der Karte eingeblendet.
+const HINT_TEXT := "Rechtsklick: Kurs setzen  |  Linksklick: Schiff wählen  |  Ziehen: Rahmen  |  Mittlere Taste: Karte verschieben"
 var _press_active := false
 var _box_active := false
 var _press_position := Vector2.ZERO
@@ -364,6 +366,9 @@ func _draw() -> void:
 		draw_rect(frame,Color("77dce9"),false,1.0)
 	var name: String = str(_body_visual.get("name",_layout.body_id))
 	draw_string(ThemeDB.fallback_font,Vector2(16,22),name+" Orbit",HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("b0c8d5"))
+	if size.y > 60.0:
+		draw_string(ThemeDB.fallback_font,Vector2(17,size.y-9),HINT_TEXT,HORIZONTAL_ALIGNMENT_LEFT,maxf(size.x-24.0,100.0),14,Color(0,0,0,0.8))
+		draw_string(ThemeDB.fallback_font,Vector2(16,size.y-10),HINT_TEXT,HORIZONTAL_ALIGNMENT_LEFT,maxf(size.x-24.0,100.0),14,Color("c9dce6"))
 
 ## Schiffe, deren Mittelpunkt im Bildschirmrechteck liegt (Rahmenauswahl). Nur Schiffe dieses Orbitbereichs.
 func crafts_in_rect(box: Rect2) -> Array:
@@ -402,8 +407,12 @@ func _gui_input(event: InputEvent) -> void:
 		elif event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP,MOUSE_BUTTON_WHEEL_DOWN]:
 			zoom_at(event.position,_zoom*(1.15 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0/1.15))
 			accept_event()
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			# Rechtsklick = Kurs setzen fuer das gewaehlte Schiff (beim Druck; ein laufender Linksdruck bleibt unberuehrt).
+			if event.pressed and not _press_active: request_move_at(event.position)
+			accept_event()
 		elif event.button_index == MOUSE_BUTTON_LEFT:
-			# Druck merkt sich nur den Punkt. Erst beim Loslassen entscheidet sich: kleine Bewegung = Klick (Kurs setzen bzw. Schiff waehlen),
+			# Druck merkt sich nur den Punkt. Erst beim Loslassen entscheidet sich: kleine Bewegung = Klick (Schiff waehlen; ins Leere: nichts),
 			# ab BOX_THRESHOLD Pixeln Bewegung = Rahmenauswahl. So verschluckt der Rahmen den einfachen Klick nicht.
 			if event.pressed:
 				_press_active = true
@@ -424,7 +433,7 @@ func _gui_input(event: InputEvent) -> void:
 					if not hit.is_empty():
 						if _press_additive: crafts_box_selected.emit([hit],true)
 						else: craft_selected.emit(hit)
-					else: request_move_at(event.position)
+					# Klick ins Leere: nichts (Kurs nur per Rechtsklick, Auswahl bleibt).
 				accept_event()
 	elif event is InputEventMouseMotion:
 		if _press_active:
