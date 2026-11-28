@@ -307,7 +307,8 @@ func refresh() -> void:
 		for child:Node in _side_cards.get_children():_side_cards.remove_child(child);child.queue_free()
 		_side_visible_count = 0
 		for id in jobs:
-			if not bool(Dictionary(availability.get(id, {})).get("visible", false)): continue
+			# Nebenauftrag in der Sperrzeit: grau sichtbar mit Restzeit (visible bleibt false, damit Sternkarte und Annahme ihn nicht kennen).
+			if not bool(Dictionary(availability.get(id, {})).get("visible", false)) and not (bool(jobs[id].get("side", false)) and bool(Dictionary(availability.get(id, {})).get("waiting", false))): continue
 			_visible_job_ids.append(String(id))
 			_jobs.add_item(String(jobs[id].title))
 			_jobs.set_item_metadata(_jobs.item_count - 1, id)
@@ -321,7 +322,7 @@ func refresh() -> void:
 				_job_cards.add_child(card)
 			card.alignment=HORIZONTAL_ALIGNMENT_LEFT;card.icon=MENU_ICONS.get_icon("satellite_chip");card.expand_icon=true;card.add_theme_constant_override("icon_max_width",30)
 			# Das ganze Feld ist der Treffer (Maus ueberall im Feld, Fokus + Enter); das Zeichen vor dem Titel ist nur Zierde.
-			var locked_card: bool = bool(Dictionary(availability.get(id, {})).get("shown_as_locked", false)) or bool(jobs[id].get("locked", false))
+			var locked_card: bool = bool(Dictionary(availability.get(id, {})).get("shown_as_locked", false)) or bool(Dictionary(availability.get(id, {})).get("waiting", false)) or bool(jobs[id].get("locked", false))
 			_style_card(card, locked_card)
 			var target_id:String=String(id)
 			card.pressed.connect(_toggle_job_details.bind(target_id))
@@ -414,8 +415,9 @@ func refresh() -> void:
 		_abandon.disabled = not bounty_active
 		_abandon.tooltip_text = _abandon.text
 	else:
-		_abandon.text = "Auftrag abbrechen"
-		_abandon.tooltip_text = _abandon.text  # nach der Kopfgeld-Karte nicht den alten Tooltip behalten (Nachpruefung S3)
+		var side_selected: bool = bool(job.get("side", false))
+		_abandon.text = "Auftrag abgeben" if side_selected else "Auftrag abbrechen"
+		_abandon.tooltip_text = "Auftrag abgeben: er kommt nach der Sperrzeit wieder ins Angebot." if side_selected else _abandon.text  # nach der Kopfgeld-Karte nicht den alten Tooltip behalten (Nachpruefung S3)
 		_accept.tooltip_text = _accept.text if accept_message.is_empty() else accept_message
 	_detail_card.visible=_details_expanded;_objectives.visible=_details_expanded and not standing_open;_actions.visible=_details_expanded and (not standing_open or bounty_open)
 	_footer.visible = _details_expanded and (not standing_open or bounty_open)
@@ -478,6 +480,13 @@ func _side_reward_text(job: Dictionary, campaign: Dictionary) -> String:
 func _side_state_text(job: Dictionary, entry: Dictionary) -> String:
 	var parts: PackedStringArray = PackedStringArray()
 	var status := String(job.get("status", "offered"))
+	if bool(entry.get("waiting", false)):
+		# Sperrzeit nach Abschluss, Aufgabe oder abgelaufenem Angebot: grau, mit Restzeit.
+		var wait := maxi(1, int(entry.get("wait_landings", 1)))
+		parts.append("Wieder verfügbar in %d Heimlandung%s" % [wait, "" if wait == 1 else "en"])
+		var done_waiting := int(job.get("completions", 0))
+		if done_waiting > 0: parts.append("Schon %d× erledigt" % done_waiting)
+		return "\n".join(parts)
 	if bool(entry.get("shown_as_locked", false)) and not String(entry.get("message", "")).is_empty():
 		parts.append("Gesperrt: " + String(entry.message))
 	elif status != "offered":

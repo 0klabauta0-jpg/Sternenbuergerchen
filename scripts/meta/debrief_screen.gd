@@ -888,7 +888,11 @@ func _apply_player_readout_texts() -> void:
 		_native_review_confirmation.text += "\n" + loot_text
 	# Nebenauftraege (N1): Belohnungsmeldung des Adapters (Credits, Gegenstaende, neue Person, Ruf).
 	if typeof(_mission_result.get("side_job_message")) == TYPE_STRING and not String(_mission_result.side_job_message).is_empty():
-		_native_review_confirmation.text += "\n" + String(_mission_result.side_job_message)
+		var side_text := String(_mission_result.side_job_message)
+		# Rekrut kommt erst zu Hause an: steht der Hinweis noch nicht in der Meldung, kommt er hier dazu.
+		if side_text.contains("neue Person") and not side_text.contains("Heimlandung"):
+			side_text += "\nDie neue Person trifft bei der Heimlandung ein."
+		_native_review_confirmation.text += "\n" + side_text
 	var bounty_text := build_bounty_text(_mission_result)
 	if not bounty_text.is_empty():
 		_native_review_confirmation.text += "\n" + bounty_text

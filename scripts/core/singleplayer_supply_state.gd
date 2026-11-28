@@ -771,6 +771,61 @@ func retry_pending_side_items() -> Array:
 		_revision += 1
 	return booked
 
+## Namen fuer Rekruten aus Nebenauftraegen; der Name folgt aus Auftrag, Ausfuehrung und Nummer (bei jedem Aufruf derselbe), nie aus der Startperson.
+const SIDE_RECRUIT_NAMES: Array = ["Jonas Falk", "Mara Voss", "Teo Brandt", "Lena Krüger", "Ilja Roth", "Nora Henning", "Bruno Keller", "Sana Vogt", "Aike Lorenz", "Pia Sommer", "Dario Weiss", "Fenja Albers", "Kaan Yildiz", "Ruth Moll", "Emil Haas", "Tessa Ahrens"]
+
+static func side_recruit_unit_id(job_id: String, completion_number: int, index: int) -> String:
+	return "%s_%d_%d" % [job_id, completion_number, index]
+
+static func side_recruit_name(job_id: String, completion_number: int, index: int) -> String:
+	var hash_value: int = side_recruit_unit_id(job_id, completion_number, index).sha256_text().substr(0, 6).hex_to_int()
+	return String(SIDE_RECRUIT_NAMES[hash_value % SIDE_RECRUIT_NAMES.size()])
+
+## Meldung fuer die Auswertung, nur aus dem WIRKLICH Gebuchten: Credits, gebuchte Gegenstaende (reward_result.side_items_booked),
+## "Lager voll - X liegt bereit" fuer das Ausstehende (side_items_pending), neue Personen mit Namen und dem Hinweis auf die Heimlandung, Ruf.
+## labels: Gegenstandskennung -> Anzeigename; factions: Fraktion -> Anzeigename.
+static func side_job_message(receipt: Dictionary, reward_result: Dictionary, labels: Dictionary, factions: Dictionary) -> String:
+	var reward: Dictionary = Dictionary(receipt.get("reward", {}))
+	var parts: PackedStringArray = []
+	if int(reward.get("credits", 0)) > 0: parts.append("+%d Cr" % int(reward.credits))
+	for entry_variant: Variant in Array(reward_result.get("side_items_booked", [])):
+		var entry: Dictionary = Dictionary(entry_variant)
+		var label := String(labels.get(String(entry.get("item_id", "")), String(entry.get("item_id", ""))))
+		parts.append(label if int(entry.get("quantity", 1)) <= 1 else "%d× %s" % [int(entry.get("quantity", 1)), label])
+	for entry_variant: Variant in Array(reward_result.get("side_items_pending", [])):
+		var entry: Dictionary = Dictionary(entry_variant)
+		var label := String(labels.get(String(entry.get("item_id", "")), String(entry.get("item_id", ""))))
+		parts.append("Lager voll – %s liegt bereit" % (label if int(entry.get("quantity", 1)) <= 1 else "%d× %s" % [int(entry.get("quantity", 1)), label]))
+	var recruits := int(reward.get("recruits", 0))
+	var number := String(receipt.get("completion_id", "")).get_slice(":", 2).to_int()
+	for index in range(1, recruits + 1):
+		parts.append("%s trifft bei der Heimlandung ein" % side_recruit_name(String(receipt.get("job_id", "")), number, index))
+	var gains: Dictionary = Dictionary(reward.get("reputation", {}))
+	for faction: Variant in gains:
+		if int(gains[faction]) == 0: continue
+		parts.append("Ruf %s %s%d" % [String(factions.get(String(faction), faction)), "+" if int(gains[faction]) > 0 else "−", absi(int(gains[faction]))])
+	return "Nebenauftrag erledigt: " + " · ".join(parts)
+
+## Beim Oeffnen des Lagers: erst Ausstehendes nachbuchen, dann Hinweistext (leer, wenn nichts zu melden ist):
+## "Ins Lager nachgeliefert: Raketenwerfer" und/oder "Lager voll – Rakete liegt bereit". Aufrufer: Lager-Ansicht der Basis (Nachtrag, siehe Bericht).
+func side_items_notice_on_open(labels: Dictionary) -> String:
+	var booked: Array = retry_pending_side_items()
+	var parts: PackedStringArray = []
+	if not booked.is_empty():
+		var names: PackedStringArray = []
+		for entry: Variant in booked:
+			var e: Dictionary = Dictionary(entry)
+			var label := String(labels.get(String(e.item_id), String(e.item_id)))
+			names.append(label if int(e.quantity) <= 1 else "%d× %s" % [int(e.quantity), label])
+		parts.append("Ins Lager nachgeliefert: " + ", ".join(names))
+	if not _pending_side_items.is_empty():
+		var waiting: PackedStringArray = []
+		for entry: Dictionary in _pending_side_items:
+			var label := String(labels.get(String(entry.item_id), String(entry.item_id)))
+			waiting.append(label if int(entry.quantity) <= 1 else "%d× %s" % [int(entry.quantity), label])
+		parts.append("Lager voll – %s liegt bereit" % ", ".join(waiting))
+	return "\n".join(parts)
+
 ## Gespeicherte ausstehende Gegenstaende lesen (tolerant: fehlt der Schluessel oder ist ein Eintrag unbrauchbar, wird er verworfen).
 static func _parse_pending_side_items(raw: Variant) -> Array:
 	var parsed: Array = []
@@ -1017,19 +1072,20 @@ func restore_state(data: Dictionary) -> Dictionary:
 	var campaign = load("res://scripts/core/singleplayer_campaign_state.gd").new()
 	campaign.configure()
 	var jobs: Dictionary = campaign.get_campaign_snapshot().jobs
-	var dropped_side_receipts: Array = []
 	for receipt_id in data.reward_receipts:
 		var receipt: Variant = data.reward_receipts[receipt_id]
 		# Nebenauftraege (N1): Beleg "<id>:completed:<n>" (side=true). Die Belohnung wird NICHT mit der heutigen Definition verglichen
-		# (Inhalt darf sich aendern); Belege von Nebenauftraegen, die es nicht mehr gibt, werden still verworfen (die Kampagne verwirft denselben Beleg).
+		# (Inhalt darf sich aendern); Belege von Nebenauftraegen, die es nicht mehr gibt, bleiben erhalten.
 		if typeof(receipt) == TYPE_DICTIONARY and receipt.get("side") == true:
 			var side_job_id := String(receipt.get("job_id", ""))
 			var side_prefix := side_job_id + ":completed:"
 			var side_number := String(receipt_id).substr(side_prefix.length()) if String(receipt_id).begins_with(side_prefix) else ""
 			if typeof(receipt_id) != TYPE_STRING or not side_number.is_valid_int() or int(side_number) < 1 or str(int(side_number)) != side_number or receipt.get("completion_id") != receipt_id or receipt.get("runtime_verified") != true or typeof(receipt.get("reward")) != TYPE_DICTIONARY:
 				return _reject("invalid_reward_receipt", "Nebenauftragsbeleg ungueltig")
-			if not jobs.has(side_job_id) or not bool(Dictionary(jobs[side_job_id]).get("side", false)):
-				dropped_side_receipts.append(receipt_id)
+			# side=true gehoert nie zu einem Kampagnenauftrag (den es heute gibt): abgelehnt.
+			if jobs.has(side_job_id) and not bool(Dictionary(jobs[side_job_id]).get("side", false)):
+				return _reject("invalid_reward_receipt", "Nebenauftragsbeleg gehoert zu einem Kampagnenauftrag")
+			# Belege entfernter Nebenauftraege bleiben (wie im Kampagnenstand): der Rekrut behaelt seine Deckung im Kader.
 			continue
 		if typeof(receipt) != TYPE_DICTIONARY or not jobs.has(receipt.get("job_id", "")):
 			return _reject("invalid_reward_receipt", "Belohnungsbeleg ungueltig")
@@ -1037,7 +1093,6 @@ func restore_state(data: Dictionary) -> Dictionary:
 		if receipt_id != String(receipt.job_id) + ":completed" or receipt.get("completion_id") != receipt_id or receipt.get("runtime_verified") != true or receipt.get("scenario_id") != job.scenario_id or JSON.stringify(JSON.parse_string(JSON.stringify(receipt.get("reward"))), "", true) != JSON.stringify(JSON.parse_string(JSON.stringify(job.reward)), "", true):
 			return _reject("invalid_reward_receipt", "Belohnungsbeleg widerspricht Auftrag")
 	var restored_receipts: Dictionary = data.reward_receipts.duplicate(true)
-	for dropped_id in dropped_side_receipts: restored_receipts.erase(dropped_id)
 	for request_id in data.requests:
 		var request: Variant = data.requests[request_id]
 		if typeof(request_id) != TYPE_STRING or String(request_id).strip_edges().is_empty() or typeof(request) != TYPE_DICTIONARY or typeof(request.get("signature")) != TYPE_STRING or typeof(request.get("result")) != TYPE_DICTIONARY or request.result.get("ok") != true:
