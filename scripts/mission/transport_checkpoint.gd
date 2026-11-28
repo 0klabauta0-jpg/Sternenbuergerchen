@@ -179,9 +179,12 @@ static func validate_data(owner: Node, data: Dictionary, bindings: Dictionary) -
 			seen[id] = true
 		var expected_count := 0
 		for id in membership:
+			# Paket I (c): ein an Bord gebliebener Pilot steht nicht in der Absetzfolge (_drop_units_without_kept_pilot).
+			if id == cards[craft].get("pilot_unit_id", "") and not seen.has(id) and data.fields._embarked_unit_ids.has(id) and not data.fields._deployed_unit_ids.has(id): continue
 			if membership[id] == craft: expected_count += 1
 		if seen.size() != expected_count: return bad("transport_sequence_crew_missing")
 		for id in sequence.embarked_unit_ids:
+			if not seen.has(id) and id == cards[craft].get("pilot_unit_id", "") and data.fields._embarked_unit_ids.has(id) and not data.fields._deployed_unit_ids.has(id): continue
 			if not seen.has(id) or data.fields._deployed_unit_ids.has(id) or sequence.embarked_unit_ids[id] != true: return bad("transport_sequence_presence_invalid")
 	for craft in data.visits:
 		if not sequences.has(craft): return bad("transport_sequence_missing")
@@ -277,6 +280,8 @@ static func publish(owner: Node, candidate: Dictionary) -> void:
 	if candidate.bindings.has("presence_bindings"):
 		for id in candidate.bindings.presence_bindings:
 			candidate.bindings.actors[id].set_meta("dropship_embarked", candidate.bindings.presence_bindings[id])
+			# Paket I (c): wie beim echten Einsteigen (simulation_root _publish_hex_embarked_actors): eingeschifft heisst unsichtbar.
+			if candidate.bindings.presence_bindings[id] and candidate.bindings.actors[id].visible: candidate.bindings.actors[id].visible = false
 
 static func bad(reason: String) -> Dictionary:
 	return {"ok":false, "reason":reason}

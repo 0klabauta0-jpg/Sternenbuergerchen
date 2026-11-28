@@ -17,11 +17,17 @@ func _prepare_initial_base() -> bool:
 	return await _board_actual_base_crew()
 
 # Haengt sich vor dem Absetzen in die geerbte _launch_and_land: _landing_target wird direkt vor dem Klick auf "Absetzen" gefragt.
+func _pilot_disembarks_in_fixture() -> bool:
+	return false
+
 func _landing_target(map) -> Vector2:
 	var controller: Node = _flow.get("_active_mission").get_node("TacticalController")
-	_check(bool(controller.call("_is_pilot_disembark_selected", _craft_id)) and not bool(controller.call("_is_pilot_kept_aboard", _craft_id, _pilot_id)), "Vorgabe vor dem Absetzen: der Pilot steigt aus")
+	# Seit 28.11. (Paket I, Bjoern) ist die Vorgabe "Pilot bleibt an Bord"; der Schalter legt auf "steigt aus" um und wieder zurueck.
+	_check(not bool(controller.call("_is_pilot_disembark_selected", _craft_id)) and bool(controller.call("_is_pilot_kept_aboard", _craft_id, _pilot_id)), "Vorgabe vor dem Absetzen: der Pilot bleibt an Bord")
 	var toggled: Dictionary = controller.call("request_campaign_pilot_disembark_toggle", _craft_id)
-	_check(bool(toggled.get("ok", false)) and not bool(toggled.get("pilot_disembarks", true)) and bool(controller.call("_is_pilot_kept_aboard", _craft_id, _pilot_id)), "Schalter vor dem Absetzen: der Pilot bleibt an Bord")
+	_check(bool(toggled.get("ok", false)) and bool(toggled.get("pilot_disembarks", false)) and bool(controller.call("_is_pilot_disembark_selected", _craft_id)), "Schalter vor dem Absetzen: der Pilot steigt aus")
+	toggled = controller.call("request_campaign_pilot_disembark_toggle", _craft_id)
+	_check(bool(toggled.get("ok", false)) and not bool(toggled.get("pilot_disembarks", true)) and bool(controller.call("_is_pilot_kept_aboard", _craft_id, _pilot_id)), "Schalter zurueck: der Pilot bleibt an Bord")
 	_stay_aboard_landing = true
 	return super._landing_target(map)
 

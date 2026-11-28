@@ -292,6 +292,9 @@ func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 	if not await _wait(func(): return String(Dictionary(controller.call("_find_mission_dropship_card_entry", _craft_id)).get("state", "")) == "waiting", 30000, scenario_id + " actual outbound transit reaches waiting craft"):
 		_dump("outbound_transit")
 		return false
+	# Seit 28.11. (Paket I) ist die Vorgabe "Pilot bleibt an Bord". Diese Ablaeufe pruefen den Weg "Pilot steigt mit dem Trupp aus" und stellen ihn wie der Spieler ueber den Schalter ein.
+	if _pilot_disembarks_in_fixture() and not bool(controller.call("_is_pilot_disembark_selected", _craft_id)):
+		controller.call("request_campaign_pilot_disembark_toggle", _craft_id)
 	var map = MAP.load_from_file(map_path)
 	var view: Node = mission.get_node("Primary3DView")
 	var lz: Vector2 = _landing_target(map)
@@ -479,6 +482,9 @@ func _finish() -> void:
 	await process_frame
 	print("SINGLEPLAYER_LOOP_RESULTS passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
+
+func _pilot_disembarks_in_fixture() -> bool:
+	return true
 
 func _landing_target(map) -> Vector2:
 	return map.get_marker_position("spawn_alpha")

@@ -2254,6 +2254,11 @@ func _request_space_operation(operation: String, data: Dictionary, request_id: S
 			return departure
 		var result: Dictionary = departure.travel_result
 		_remember_space_operation(request_id, signature, result)
+		# Speichern nach Handflug (Paket I a): landet das Schiff von Hand, bliebe der Anflug-Vorsatz auf "manual"; der Speicherstand verlangt "arrived".
+		if not station_dock and not station_landing and result.get("ok", false) and not bool(result.get("replayed", false)):
+			var hand_intent: Dictionary = _surface_orbit_intents.get(craft_id, {})
+			if not hand_intent.is_empty() and hand_intent.get("direction") == "inbound" and hand_intent.get("location_id") == location_id and hand_intent.get("status") in ["manual", "flying", "arrived"]:
+				hand_intent["status"] = "arrived"
 		if not station_dock and not station_landing: _simulation.publish_singleplayer_departure_events(self, String(_departure_token_by_craft.get(craft_id, "")))
 		if _campaign_mode and not station_dock and not station_landing and not departure.get("replayed", false): observe_campaign_progress()
 		if result.get("ok", false) and not bool(result.get("replayed", false)):

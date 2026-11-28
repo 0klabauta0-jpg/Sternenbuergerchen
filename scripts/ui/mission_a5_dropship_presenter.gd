@@ -295,10 +295,10 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 			"pilot":
 				button.visible = allowed
 				(button.get_parent() as Control).visible = allowed
-				# Haekchen = Pilot bleibt beim Absetzen an Bord; ohne Haekchen steigt er mit aus (Vorgabe).
+				# Haekchen = Pilot bleibt beim Absetzen an Bord; ohne Haekchen steigt er mit aus. Vorgabe seit 28.11.: Haekchen gesetzt (Pilot bleibt an Bord).
 				button.set_pressed_no_signal(not bool(controller.call("_is_pilot_disembark_selected", craft_id)))
 				button.text = "Pilot bleibt an Bord"
-				button.tooltip_text = "Mit Häkchen bleibt der Pilot beim Absetzen an Bord (Speichern im Einsatz ist dann gesperrt). Ohne Häkchen steigt er mit aus."
+				button.tooltip_text = "Mit Häkchen bleibt der Pilot beim Absetzen an Bord. Ohne Häkchen steigt er mit aus."
 	var approach_row := card.get_node("Contents/ApproachRow") as Control
 	approach_row.visible = not landed and not selected_card.is_empty()
 	approach_row.get_node("ApproachDial").call("set_direction", String(selected_card.get("approach_angle", "NW")))

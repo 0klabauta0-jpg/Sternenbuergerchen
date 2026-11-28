@@ -680,7 +680,9 @@ var _drop_sequence_lz_position: Vector2 = Vector2.ZERO
 var _drop_sequence_approach_angle: String = "NW"
 var _drop_sequence_embarked_unit_ids: Dictionary = {}
 var _parallel_drop_sequences_by_craft: Dictionary = {}
-# Laufzeit-only (kein Speicherformat): craft_id -> true, wenn der Pilot beim Absetzen an Bord bleibt. Vorgabe fehlt = Pilot steigt aus (Speichern im Einsatz braucht alle Einheiten draussen).
+# Laufzeit-only (kein Speicherformat): craft_id -> true, wenn der Pilot beim Absetzen an Bord bleibt. Vorgabe (Eintrag fehlt) seit 28.11. (Paket I, Bjoern): Pilot bleibt an Bord;
+# Speichern im Einsatz sichert den eingeschifften Piloten mit. Verifier mit der alten Vorgabe stellen auf "steigt aus" um.
+const PILOT_STAYS_ABOARD_DEFAULT := true
 var _pilot_stays_aboard_by_craft: Dictionary = {}
 var _embarked_unit_ids: Dictionary = {}
 var _deployed_unit_ids: Dictionary = {}
@@ -14823,7 +14825,7 @@ func _can_deploy_parked_campaign_crew(craft_id: String) -> bool:
 
 func _is_pilot_kept_aboard(craft_id: String, unit_id: String) -> bool:
 	var normalized_unit_id: String = unit_id.strip_edges()
-	if normalized_unit_id.is_empty() or not bool(_pilot_stays_aboard_by_craft.get(craft_id, false)):
+	if normalized_unit_id.is_empty() or not bool(_pilot_stays_aboard_by_craft.get(craft_id, PILOT_STAYS_ABOARD_DEFAULT)):
 		return false
 	return normalized_unit_id == String(_find_mission_dropship_card_entry(craft_id).get("pilot_unit_id", "")).strip_edges()
 
@@ -14842,14 +14844,14 @@ func request_campaign_pilot_disembark_toggle(craft_id: String) -> Dictionary:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	if normalized_craft_id.is_empty() or _find_mission_dropship_card_entry(normalized_craft_id).is_empty():
 		return {"ok":false,"reason":"craft_unavailable","message":"Schiff nicht gefunden"}
-	var stays_aboard: bool = not bool(_pilot_stays_aboard_by_craft.get(normalized_craft_id, false))
+	var stays_aboard: bool = not bool(_pilot_stays_aboard_by_craft.get(normalized_craft_id, PILOT_STAYS_ABOARD_DEFAULT))
 	_pilot_stays_aboard_by_craft[normalized_craft_id] = stays_aboard
 	_emit_planning_state_changed()
 	return {"ok":true,"pilot_disembarks":not stays_aboard}
 
 
 func _is_pilot_disembark_selected(craft_id: String) -> bool:
-	return not bool(_pilot_stays_aboard_by_craft.get(craft_id.strip_edges(), false))
+	return not bool(_pilot_stays_aboard_by_craft.get(craft_id.strip_edges(), PILOT_STAYS_ABOARD_DEFAULT))
 
 
 func _on_mission_dropship_pilot_disembark_pressed(craft_id: String) -> void:
