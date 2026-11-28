@@ -25,7 +25,7 @@ func _run() -> void:
 			if not _positive(profile.get(key)): complete = false
 		check(complete and float(profile.get("thrust_fraction", 2.0)) <= 1.0, "%s: Flugprofil vollstaendig und gueltig" % model_id)
 		var footprint: Array = Array(profile.get("footprint_hexes", []))
-		check(not footprint.is_empty() and footprint.size() <= 64 and footprint.has([0, 0]), "%s: Footprint enthaelt den Ursprung" % model_id)
+		check(not footprint.is_empty() and footprint.size() <= 64 and footprint.any(func(h): return h is Array and h.size() == 2 and int(h[0]) == 0 and int(h[1]) == 0),"%s: Footprint enthaelt den Ursprung" % model_id)
 		var loadout: Dictionary = CATALOG.default_loadout(model_id)
 		check(CATALOG.validate_loadout(model_id, loadout).get("ok", false), "%s: Standardbestueckung ist gueltig" % model_id)
 		var inputs: Dictionary = CATALOG.flight_inputs(model_id, loadout)
