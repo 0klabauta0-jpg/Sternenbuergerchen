@@ -1,6 +1,7 @@
 extends SceneTree
-## Flugdeck-Rest (20261127): 1) Einsteigen ohne Pilot, Abheben verlangt "Pilot zuweisen"; 2) Einzelperson auf Passagierplatz; 3) Turmschuetzenplatz belegbar.
-## Die Turmschuetzen-Belegung ist nur Anzeige und Zaehlung "an Bord" (keine Schusslogik, nicht im Speicherstand).
+## Flugdeck-Rest (20261127): 1) Einsteigen ohne Pilot, Abheben verlangt einen Piloten; 2) Einzelperson auf Passagierplatz; 3) Turmschuetzenplatz belegbar.
+## Die Turmschuetzen-Belegung ist Anzeige und Zaehlung "an Bord" (keine Schusslogik); der Speicherstand wird in gunner_checkpoint_20261128_verifier geprueft.
+## Seit 28.11. nennen die Hinweise ohne Pilot die Handlung ("Ziehe eine Person auf den Pilotenplatz") statt "Pilot zuweisen".
 var checks := 0
 var failures := 0
 func _init() -> void: call_deferred("_run")
@@ -53,11 +54,11 @@ func _run() -> void:
 	check(result.get("ok", false) and String(result.get("reason", "")) != "pilot_missing", "Trupp darf ohne Pilot einsteigen " + str(result))
 	check(await advance_until(runtime, sim, team_ids, "aboard"), "Trupp sitzt ohne Pilot wirklich an Bord")
 	var entry: Dictionary = _craft(screen, craft_id)
-	check(not bool(entry.can_start) and String(entry.status) == "Pilot fehlt" and String(entry.next_step) == "Pilot zuweisen", "Ohne Pilot: kein Start, Hinweis 'Pilot zuweisen' " + str([entry.status, entry.next_step]))
+	check(not bool(entry.can_start) and String(entry.status) == "Pilot fehlt" and String(entry.next_step) == "Ziehe eine Person auf den Pilotenplatz", "Ohne Pilot: kein Start, Hinweis mit Handlung (Person auf den Pilotenplatz ziehen) " + str([entry.status, entry.next_step]))
 	result = screen.request_operation("start", {"craft_id": craft_id})
-	check(not result.get("ok", true) and String(result.get("reason", "")) == "pilot_missing" and String(result.get("message", "")) == "Pilot zuweisen", "Start ohne Pilot: klare Meldung 'Pilot zuweisen' " + str(result))
+	check(not result.get("ok", true) and String(result.get("reason", "")) == "pilot_missing" and String(result.get("message", "")) == "Ziehe eine Person auf den Pilotenplatz", "Start ohne Pilot: klare Meldung mit Handlungshinweis " + str(result))
 	var gate: Dictionary = flow.get("_singleplayer_runtime").validate_space_launch(craft_id, false)
-	check(not gate.get("ok", true) and String(gate.get("reason", "")) == "pilot_missing" and String(gate.get("message", "")) == "Pilot zuweisen", "Abheben (Laufzeit-Pruefung) ohne Pilot: 'Pilot zuweisen' " + str(gate))
+	check(not gate.get("ok", true) and String(gate.get("reason", "")) == "pilot_missing" and String(gate.get("message", "")) == "Ziehe eine Person auf den Pilotenplatz", "Abheben (Laufzeit-Pruefung) ohne Pilot: Handlungshinweis " + str(gate))
 	# --- 2) Einzelperson als Passagier (der ehemalige Pilot ist jetzt eine freie Person) ---
 	var before_count: int = int(entry.passenger_count)
 	result = screen.request_operation("board_person", {"unit_id": pilot_id, "craft_id": craft_id, "seat": "passenger"})

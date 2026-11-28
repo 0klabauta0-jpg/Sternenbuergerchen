@@ -761,7 +761,7 @@ func _build_flightdeck() -> void:
 	_flight_actions.name = "FlightdeckActions"
 	_flight_actions.add_theme_constant_override("separation", 6)
 	content.add_child(_flight_actions)
-	_board = _button("Boarding starten", false)
+	_board = _button("Trupp einsteigen", false)
 	_board.name = "BoardFireteam"
 	_flight_actions.add_child(_board)
 	_board.pressed.connect(func(): _act("board", {"fireteam_id": _fireteam_id, "craft_id": _craft_id}))

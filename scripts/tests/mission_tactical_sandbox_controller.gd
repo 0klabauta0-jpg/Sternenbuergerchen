@@ -5386,11 +5386,16 @@ func _filter_ground_fireteam_card_units(units: Array) -> Array:
 	return _mission_fireteam_runtime_state.filter_ground_units(units, _build_hud_embarked_unit_state(), _deployed_unit_ids)
 
 
-func _is_unit_embarked_without_deployment(unit) -> bool:
-	return _mission_fireteam_runtime_state.is_unit_embarked_without_deployment(unit, _build_hud_embarked_unit_state(), _deployed_unit_ids)
+## "hud_embarked_state": den Einsteige-Zustand einmal je Auffrischung bauen und hier durchreichen (Schleifen ueber Einheiten),
+## statt ihn fuer jede Einheit neu aufzubauen. Ohne Angabe wird er wie bisher frisch gebaut.
+func _is_unit_embarked_without_deployment(unit, hud_embarked_state: Variant = null) -> bool:
+	var embarked_state: Dictionary = hud_embarked_state if hud_embarked_state is Dictionary else _build_hud_embarked_unit_state()
+	return _mission_fireteam_runtime_state.is_unit_embarked_without_deployment(unit, embarked_state, _deployed_unit_ids)
 
 
 ## Truppkarte links: Steht ein Kampagnenschiff gelandet am Boden, bleibt der Trupp auf der Karte, auch wenn Mitglieder (oder alle) aufgesessen sind.
+## Gewertet wird nur das EIGENE Schiff des Trupps und nur, wer dort wirklich eingestiegen ist: ein Trupp im anfliegenden Zweitschiff
+## bleibt "unterwegs" und erscheint nicht als "An Bord", nur weil irgendein anderes Schiff schon steht.
 ## Sonst (Anflug, Absetzen, keine Kampagne) gilt wie bisher nur, wer am Boden ist.
 func _get_fireteam_mini_card_units(fireteam_id: String) -> Array:
 	var ground_units: Array = _filter_ground_fireteam_card_units(_get_fireteam_units(fireteam_id, not _use_visible_units_for_fireteam_ui()))
@@ -5398,7 +5403,40 @@ func _get_fireteam_mini_card_units(fireteam_id: String) -> Array:
 		return ground_units
 	# Aufgesessene Einheiten sind ausgeblendet ("hidden"): die Gesamtliste des Trupps immer mit versteckten holen.
 	var all_units: Array = _get_fireteam_units(fireteam_id, true)
-	return ground_units if all_units.size() <= ground_units.size() else all_units
+	if all_units.size() <= ground_units.size():
+		return ground_units
+	var parked_crew: Dictionary = _parked_campaign_crew_id_set()
+	var shown: Array = []
+	for unit in all_units:
+		if ground_units.has(unit):
+			shown.append(unit)
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")) if unit != null and unit.has_method("get_unit_id") else ""
+		if not unit_id.is_empty() and parked_crew.has(unit_id) and _embarked_unit_ids.has(unit_id):
+			shown.append(unit)
+	return shown if shown.size() > ground_units.size() else ground_units
+
+
+## Besatzung aller gerade gelandeten Kampagnenschiffe als Menge (unit_id -> true). Nur lesen.
+func _parked_campaign_crew_id_set() -> Dictionary:
+	var craft_ids: Array = []
+	var own_craft_id: String = _mission_drop_craft_id.strip_edges()
+	if not own_craft_id.is_empty():
+		craft_ids.append(own_craft_id)
+	for card_variant in _mission_drop_cards:
+		if typeof(card_variant) != TYPE_DICTIONARY:
+			continue
+		var card_craft_id: String = String(Dictionary(card_variant).get("craft_id", "")).strip_edges()
+		if not card_craft_id.is_empty() and not craft_ids.has(card_craft_id):
+			craft_ids.append(card_craft_id)
+	var crew: Dictionary = {}
+	for craft_id_variant in craft_ids:
+		var craft_id: String = String(craft_id_variant)
+		if not _is_parked_campaign_dropship(craft_id):
+			continue
+		for unit_id_variant in _campaign_craft_crew_ids(craft_id):
+			crew[String(unit_id_variant)] = true
+	return crew
 
 
 func _is_any_campaign_dropship_parked() -> bool:
@@ -5645,8 +5683,9 @@ func _apply_native_a5_fireteam_card(card: Control, fireteam_id: String, units: A
 	var snapshot: Dictionary = card.get_meta("mission_fireteam_status_card_snapshot", {})
 	var status := card.get_node("Margin/VBox/StageLabel") as Label
 	var aboard_count: int = 0
+	var member_embarked_state: Dictionary = _build_hud_embarked_unit_state()
 	for member in units:
-		if _is_unit_embarked_without_deployment(member):
+		if _is_unit_embarked_without_deployment(member, member_embarked_state):
 			aboard_count += 1
 	if aboard_count > 0 and aboard_count == units.size():
 		status.text = "An Bord"
@@ -6719,6 +6758,7 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		strip.add_child(portrait)
+	var strip_embarked_state: Dictionary = _build_hud_embarked_unit_state()
 	for index in range(resolved_units.size()):
 		var unit := resolved_units[index] as Node
 		var portrait_rect := strip.get_child(index) as TextureRect
@@ -6732,7 +6772,7 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		if portrait_path.is_empty() and unit.has_method("get_portrait_path"):
 			portrait_path = String(unit.call("get_portrait_path")).strip_edges()
 		portrait_rect.texture = _load_portrait_identity_texture(portrait_id, portrait_path)
-		var member_aboard: bool = _is_unit_embarked_without_deployment(unit)
+		var member_aboard: bool = _is_unit_embarked_without_deployment(unit, strip_embarked_state)
 		portrait_rect.modulate = Color.WHITE if portrait_rect.texture != null else Color(0.42, 0.46, 0.50, 1.0)
 		if member_aboard:
 			# An Bord: Portrait bleibt, gedaempft und mit Hinweis im Tooltip.
@@ -6757,6 +6797,7 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 
 func _build_fireteam_mini_member_portrait_signature(units: Array) -> String:
 	var tokens: PackedStringArray = PackedStringArray()
+	var signature_embarked_state: Dictionary = _build_hud_embarked_unit_state()
 	for unit_variant in units:
 		var unit := unit_variant as Node
 		if unit == null:
@@ -6769,7 +6810,7 @@ func _build_fireteam_mini_member_portrait_signature(units: Array) -> String:
 		var portrait_path: String = String(profile.get("portrait_path", "")).strip_edges()
 		if portrait_path.is_empty() and unit.has_method("get_portrait_path"):
 			portrait_path = String(unit.call("get_portrait_path")).strip_edges()
-		tokens.append("%s|%s|%s|%s" % [unit_id, portrait_id, portrait_path, str(_is_unit_embarked_without_deployment(unit))])
+		tokens.append("%s|%s|%s|%s" % [unit_id, portrait_id, portrait_path, str(_is_unit_embarked_without_deployment(unit, signature_embarked_state))])
 	return ";".join(tokens)
 
 
@@ -13531,7 +13572,7 @@ func _refresh_mission_dropship_panel() -> void:
 				"primary_action": {
 					"visible": _can_request_mission_dropship_return(card),
 					"text": _dropship_return_button_text(craft_id, "Heim" if get_parent().has_meta("campaign_ground_pilot_id") else "FOB"),
-					"tooltip_text": _dropship_return_button_tooltip(craft_id, "Am Schiff einsteigen; nach bestaetigtem Boarding Heimflug starten." if get_parent().has_meta("campaign_ground_pilot_id") else "Return this dropship to FOB."),
+					"tooltip_text": _dropship_return_button_tooltip(craft_id, "Am Schiff einsteigen; nach bestätigtem Einsteigen den Heimflug starten." if get_parent().has_meta("campaign_ground_pilot_id") else "Return this dropship to FOB."),
 					"disabled": _is_network_dropship_command_pending(craft_id) or not _can_request_mission_dropship_return(card),
 					"square_size": 42.0,
 					"ready_style": true,
@@ -14715,7 +14756,7 @@ func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: Stri
 		fit_seen = true
 		if not _deployed_unit_ids.has(id) and not (hex_required and not simulation.get_hex_unit_state(id).is_empty()):continue
 		if not unit is Node2D or int(unit.call("get_health")) <= 0:
-			return {"ok": false, "reason": "crew_unavailable", "message": "Bodenteam ist nicht boardingbereit"}
+			return {"ok": false, "reason": "crew_unavailable", "message": "Das Bodenteam kann noch nicht einsteigen"}
 		var unit_position:Vector2=(unit as Node2D).global_position
 		if hex_required:
 			var ground:Dictionary=simulation.get_hex_unit_state(id)
