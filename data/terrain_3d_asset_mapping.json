@@ -3198,6 +3198,78 @@
 			"scale": 1,
 			"y_offset": 0,
 			"rotation_degrees_offset": 0
+		},
+		"aussenposten_frachtcontainer_01": {
+			"layer": "object",
+			"source_id": "tripo_paket01_20261128",
+			"model_path": "res://Assets/curated/frachtcontainer_20261128/frachtcontainer_01.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"aussenposten_fass_01": {
+			"layer": "object",
+			"source_id": "tripo_paket01_20261128",
+			"model_path": "res://Assets/curated/paket01_requisiten_20261128/fass_01.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"aussenposten_kistenstapel_01": {
+			"layer": "object",
+			"source_id": "tripo_paket01_20261128",
+			"model_path": "res://Assets/curated/paket01_requisiten_20261128/kistenstapel_01.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"aussenposten_flutlichtmast_01": {
+			"layer": "object",
+			"source_id": "tripo_paket01_20261128",
+			"model_path": "res://Assets/curated/paket01_requisiten_20261128/flutlichtmast_01.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"aussenposten_funkmast_01": {
+			"layer": "object",
+			"source_id": "tripo_paket01_20261128",
+			"model_path": "res://Assets/curated/paket01_requisiten_20261128/funkmast_01.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"aussenposten_drucktank_01": {
+			"layer": "object",
+			"source_id": "tripo_paket01_20261128",
+			"model_path": "res://Assets/curated/paket01_requisiten_20261128/drucktank_01.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"aussenposten_barriere_01": {
+			"layer": "object",
+			"source_id": "tripo_paket01_20261128",
+			"model_path": "res://Assets/curated/paket01_requisiten_20261128/barriere_01.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"aussenposten_schrotthaufen_01": {
+			"layer": "object",
+			"source_id": "tripo_paket01_20261128",
+			"model_path": "res://Assets/curated/paket01_requisiten_20261128/schrotthaufen_01.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"aussenposten_generator_01": {
+			"layer": "object",
+			"source_id": "tripo_paket01_20261128",
+			"model_path": "res://Assets/curated/paket01_requisiten_20261128/generator_01.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		}
 	}
 }

@@ -1,0 +1,15 @@
+{
+ "quelle": "Grafik-Paket 1, Referenzbilder Assets/paket01/3D_Referenzen/02-10, Tripo Studio image_to_model (Smart Mesh Nexus-v2.0-20260801) 28.11.2026",
+ "einheiten": "Meter; size_x = Laenge, height = Hoehe, size_z_depth = Tiefe; Ursprung Mitte der Unterkante, Unterkante y=0",
+ "nachbearbeitung": "Meshopt mit gltf-transform 4.5.1 entpackt; Blender 5.1 kopflos: vereint, laengste Seite auf X, auf Planmasse skaliert, Unterseite geloescht, Flaechen-Obergrenze (Kleinteile 1500), Textur 512 (Kleinteile) bzw. 1024, ein Material",
+ "deckung": "Stufen wie im Code (>=70 voll, >=35 teilweise): voll 70, halb 45; Masten nur blockierend (Funkmast-Geraetehaus 70)",
+ "offen": "07 Solarpaneel-Reihe: Tripo baut nur das Gestell ohne Paneele (Bild: Smart Mesh P2 und HD v3.1) - nicht aufgenommen",
+ "fass_01": {"type_id": "aussenposten_fass_01", "triangles": 1024, "size_x": 0.6, "height": 0.9, "size_z_depth": 0.6, "textur": 512, "cover_value": 45, "task_id": "01a22146-c693-738d-8e65-eed8bd4f2309"},
+ "kistenstapel_01": {"type_id": "aussenposten_kistenstapel_01", "triangles": 1455, "size_x": 1.6, "height": 1.4, "size_z_depth": 1.21, "textur": 512, "cover_value": 70, "task_id": "01a22146-ce3b-7bb0-959f-9804b2b99b75"},
+ "flutlichtmast_01": {"type_id": "aussenposten_flutlichtmast_01", "triangles": 2765, "size_x": 6.22, "height": 8.0, "size_z_depth": 2.0, "textur": 1024, "cover_value": 0, "skalierung": "gleichmaessig auf Hoehe 8", "task_id": "01a22146-d4cf-7df7-88fa-799c0dbb79c6"},
+ "funkmast_01": {"type_id": "aussenposten_funkmast_01", "triangles": 3299, "size_x": 2.84, "height": 10.0, "size_z_depth": 2.94, "textur": 1024, "cover_value": 70, "skalierung": "gleichmaessig auf Hoehe 10", "task_id": "01a22146-d9a1-7e30-ba14-4a857c734043"},
+ "drucktank_01": {"type_id": "aussenposten_drucktank_01", "triangles": 2203, "size_x": 5.0, "height": 2.6, "size_z_depth": 2.0, "textur": 1024, "cover_value": 70, "task_id": "01a22146-e0f1-7ef8-ba02-840193fdbd89"},
+ "barriere_01": {"type_id": "aussenposten_barriere_01", "triangles": 931, "size_x": 2.0, "height": 0.9, "size_z_depth": 0.6, "textur": 1024, "cover_value": 45, "task_id": "01a22146-e99e-70e5-a298-caa991e9559e"},
+ "schrotthaufen_01": {"type_id": "aussenposten_schrotthaufen_01", "triangles": 3006, "size_x": 3.0, "height": 1.2, "size_z_depth": 2.5, "textur": 1024, "cover_value": 45, "task_id": "01a22146-f0eb-722c-9c3f-a59e787bc154"},
+ "generator_01": {"type_id": "aussenposten_generator_01", "triangles": 1845, "size_x": 2.5, "height": 1.6, "size_z_depth": 1.5, "textur": 1024, "cover_value": 70, "task_id": "01a22146-f7ea-7e51-ab1b-bdfef8632421"}
+}
