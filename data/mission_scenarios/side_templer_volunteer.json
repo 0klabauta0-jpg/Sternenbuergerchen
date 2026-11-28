@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "scenario_id": "side_templer_volunteer",
+  "display_name": "Ein Freiwilliger",
+  "map_file_path": "res://maps/windbruch_outpost.json",
+  "time_limit_seconds": 1800.0,
+  "mission_slot_count_override": 4,
+  "win_condition": "objective_capture",
+  "objective": {
+    "marker_id": "objective_point",
+    "capture_radius": 80.0
+  },
+  "enemy_groups": [],
+  "wave_config": {
+    "wave_delay_seconds": 0.0,
+    "wave_count": 0,
+    "first_wave_delay_seconds": 0.0,
+    "units_per_wave": 1
+  },
+  "patrol_bindings": [],
+  "briefing": {
+    "summary": "Ein Templer will sich der Basis anschließen. Ihn am Fuß der Hauptrampe abholen und zum Schiff zurückkehren. Der Händler bleibt erreichbar.",
+    "minimap_mode": "terrain_only",
+    "objectives": [
+      {
+        "target_id": "rally_hauptrampe",
+        "text": "Freiwilligen abholen"
+      },
+      {
+        "target_id": "ship_return",
+        "text": "Zum Schiff zurückkehren"
+      }
+    ],
+    "title": "Ein Freiwilliger"
+  },
+  "vertical_slice": {
+    "scenario_kind": "singleplayer_job",
+    "team_slots": [
+      {
+        "role": "recovery",
+        "player_assignable_modes": [
+          "singleplayer"
+        ],
+        "spawn_marker_id": "spawn_alpha",
+        "team_id": "team_alpha",
+        "npc_owned": false
+      }
+    ],
+    "play_modes": [
+      "singleplayer"
+    ],
+    "contract_version": 1,
+    "interaction_points": [
+      {
+        "gate_id": "collect_volunteer",
+        "step_id": "collect_volunteer",
+        "duration_seconds": 4.0,
+        "required_state": "collect_volunteer_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Freiwilligen abholen",
+        "interaction_id": "rally_hauptrampe",
+        "marker_id": "rally_hauptrampe"
+      },
+      {
+        "gate_id": "return_to_ship",
+        "step_id": "return_to_ship",
+        "duration_seconds": 3.0,
+        "required_state": "return_to_ship_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Zum Schiff zurückkehren",
+        "interaction_id": "ship_return",
+        "marker_id": "ship_return",
+        "requires_step_id": "collect_volunteer"
+      }
+    ],
+    "flow_steps": [
+      {
+        "step_id": "collect_volunteer",
+        "min_hold_seconds": 4.0,
+        "objective_type": "interaction_use",
+        "required_state": "collect_volunteer_done",
+        "target_marker_id": "rally_hauptrampe"
+      },
+      {
+        "step_id": "return_to_ship",
+        "min_hold_seconds": 3.0,
+        "objective_type": "interaction_use",
+        "required_state": "return_to_ship_done",
+        "target_marker_id": "ship_return",
+        "requires_step_id": "collect_volunteer"
+      }
+    ]
+  },
+  "notes": [
+    "Nebenauftrag N1 (28.11.2026): gleiche Karte wie templanon_visit (windbruch_outpost.json); der Haendlermarker recon_altfeld bleibt der Handelsmarker (small_outposts.json). Friedlich, ohne Gegner.",
+    "Runtime gates, not UI clicks, determine completion."
+  ]
+}

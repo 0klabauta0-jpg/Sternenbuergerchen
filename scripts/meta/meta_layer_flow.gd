@@ -9669,6 +9669,8 @@ func _finish_space_home_landing(craft_id: String, retirement_record: Dictionary 
 	_restore_returning_visit_membership(craft_id)
 	_aircraft_location_by_craft[craft_id] = "homebase"
 	_restock_market_after_landing() # Handel H2: Marktbestaende der Benit-Warenboerse bei der Heimlandung auffuellen
+	# Nebenauftraege (N1): Heimlandung zaehlen (Angebote kommen und gehen), ausstehende Belohnungsgegenstaende und Rekruten nachholen.
+	if _singleplayer_runtime != null and _singleplayer_runtime.has_method("record_home_landing"): _singleplayer_runtime.call("record_home_landing")
 	_admit_unplaced_aboard_crew(craft_id)
 	_remove_pending_mission_craft_transfer(craft_id)
 	# Ein Rueckzug ohne Ausfaelle (Regel 8) hat keinen Debrief, der die Ortsinstanz freigibt. Bleibt sie fokussiert, gilt das Schiff

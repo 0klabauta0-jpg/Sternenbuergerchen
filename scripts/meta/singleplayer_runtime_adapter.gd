@@ -1509,7 +1509,34 @@ func record_mission_result(result: Dictionary, authoritative_mission_identity: D
 				result["loot_items"] = loot_items
 	var receipt: Dictionary = committed.get("completion_receipt", {})
 	if not receipt.is_empty():
-		_commit("singleplayer_supply", "apply_reward", {"completion_id": receipt.completion_id}, "reward:" + String(receipt.completion_id), {"completion_receipt": receipt})
+		var reward_result: Dictionary = _commit("singleplayer_supply", "apply_reward", {"completion_id": receipt.completion_id}, "reward:" + String(receipt.completion_id), {"completion_receipt": receipt})
+		# Nebenauftraege (N1): Gegenstaende bucht der Versorgungsstand in derselben Buchung; hier nur die Meldung fuer die Auswertung.
+		if bool(receipt.get("side", false)) and bool(reward_result.get("ok", false)) and not bool(reward_result.get("already_rewarded", false)):
+			result["side_job_message"] = _side_job_message(receipt, reward_result)
+
+## Nebenauftraege (N1): "Nebenauftrag erledigt: +100 Cr · Leichte Rüstung · 1 neue Person · Ruf Templer +5" (+ "Lager voll – <Name> liegt bereit").
+func _side_job_message(receipt: Dictionary, reward_result: Dictionary) -> String:
+	var reward: Dictionary = Dictionary(receipt.get("reward", {}))
+	var labels: Dictionary = load("res://scripts/ui/components/personnel_inventory_panel.gd").LABELS
+	var parts: PackedStringArray = []
+	if int(reward.get("credits", 0)) > 0: parts.append("+%d Cr" % int(reward.credits))
+	for entry_variant: Variant in Array(reward.get("items", [])):
+		if typeof(entry_variant) != TYPE_DICTIONARY: continue
+		var entry: Dictionary = entry_variant
+		var label := String(labels.get(String(entry.get("item_id", "")), String(entry.get("item_id", ""))))
+		parts.append(label if int(entry.get("quantity", 1)) <= 1 else "%d× %s" % [int(entry.quantity), label])
+	var recruits := int(reward.get("recruits", 0))
+	if recruits == 1: parts.append("1 neue Person")
+	elif recruits > 1: parts.append("%d neue Personen" % recruits)
+	var factions: Dictionary = Dictionary(_campaign.get_campaign_snapshot().get("factions", {})) if _campaign != null else {}
+	var gains: Dictionary = Dictionary(reward.get("reputation", {}))
+	for faction: Variant in gains:
+		if int(gains[faction]) == 0: continue
+		parts.append("Ruf %s %s%d" % [String(factions.get(String(faction), faction)), "+" if int(gains[faction]) > 0 else "−", absi(int(gains[faction]))])
+	for entry_variant: Variant in Array(reward_result.get("side_items_pending", [])):
+		var entry: Dictionary = Dictionary(entry_variant)
+		parts.append("Lager voll – %s liegt bereit" % String(labels.get(String(entry.get("item_id", "")), String(entry.get("item_id", "")))))
+	return "Nebenauftrag erledigt: " + " · ".join(parts)
 
 ## Interaction runtime states of the live mission of this craft ({} when the mission is already gone).
 func _completed_interaction_states(craft_id: String) -> Dictionary:
@@ -2332,7 +2359,15 @@ func _request_standing(operation: String, data: Dictionary, request_id: String) 
 func _setup_standing_orders() -> void:
 	if not _campaign_mode or _supply == null: return
 	if _supply.enable_standing_orders():
-		_supply.set_standing_orders_names(load("res://scripts/mission/campaign_display_catalog.gd").LOCATION_NAMES, load("res://scripts/ui/components/personnel_inventory_panel.gd").LABELS)
+		# Ortsnamen: die Anzeigetabelle kennt die neuen Posten (Farm, Labor, Templer, Relaisgrat) nicht; ihr Name steht in locations.json.
+		# Gegenstandsnamen (Heilkraeuter, Duenger, Aufputschmittel) stehen schon in den Beschriftungen des Inventars.
+		var place_names: Dictionary = Dictionary(load("res://scripts/mission/campaign_display_catalog.gd").LOCATION_NAMES).duplicate()
+		if _campaign != null:
+			var place_records: Dictionary = Dictionary(_campaign.get_campaign_snapshot().get("locations", {}))
+			for place_id: Variant in place_records:
+				if not place_names.has(place_id) and not String(Dictionary(place_records[place_id]).get("name", "")).is_empty():
+					place_names[place_id] = String(Dictionary(place_records[place_id]).name)
+		_supply.set_standing_orders_names(place_names, load("res://scripts/ui/components/personnel_inventory_panel.gd").LABELS)
 
 ## Dauerauftraege (H3): der Schluessel steht nur im Kampagnen-Snapshot (Skirmish und alte Staende: kein Schluessel).
 func _attach_standing_orders(campaign: Dictionary) -> void:
@@ -2474,6 +2509,56 @@ func _polisa_buy_orders(supply: Dictionary) -> Dictionary:
 func replenish_market() -> int:
 	if _supply == null: return 0
 	return int(_supply.replenish_market_stock())
+
+## Nebenauftraege (N1): Heimlandung eines Spielerschiffs. Bucht den Befehl home_landing (eigene request_id aus dem Landungszaehler;
+## Angebote kommen und gehen), versucht danach ausstehende Belohnungsgegenstaende und noch fehlende Rekruten erneut.
+## Rueckgabe: {ok, landings, items:[{item_id,quantity}], recruits:[unit_id]}; ausserhalb der Kampagne {ok:false}.
+func record_home_landing() -> Dictionary:
+	if not _campaign_mode or _campaign == null or _simulation == null: return {"ok": false}
+	var next: int = int(_campaign.get_campaign_snapshot().get("home_landings", 0)) + 1
+	var committed: Dictionary = _commit("singleplayer_campaign", "home_landing", {}, "home_landing:%d" % next)
+	var report := {"ok": bool(committed.get("ok", false)), "landings": next, "items": [], "recruits": []}
+	if _supply != null: report["items"] = _supply.retry_pending_side_items()
+	report["recruits"] = _settle_side_recruits()
+	return report
+
+## Nebenauftraege (N1): fuer jeden Nebenauftragsbeleg mit Rekruten die Person "<auftrag>_<n>_<i>" in die Basis aufnehmen, falls sie
+## weder im Kader noch bei den Gefallenen steht. Idempotent ueber die Kennung (Neuladen, Wiederholung, fehlgeschlagene Aufnahme: spaeter erneut).
+func _settle_side_recruits() -> Array:
+	var created: Array = []
+	if not _campaign_mode or _campaign == null or _flow == null or _supply == null or _simulation == null or not _flow.has_method("register_campaign_recruit"): return created
+	var receipts: Dictionary = Dictionary(_campaign.get_campaign_snapshot().get("completion_receipts", {}))
+	var known := {}
+	for unit: Variant in Array(_flow.get("_all_team_units")): known[String(Dictionary(unit).get("unit_id", ""))] = true
+	for fallen: Variant in _fallen: known[String(Dictionary(fallen).get("unit_id", ""))] = true
+	var receipt_ids: Array = receipts.keys()
+	receipt_ids.sort()
+	for receipt_id: Variant in receipt_ids:
+		var receipt: Dictionary = Dictionary(receipts[receipt_id])
+		if not bool(receipt.get("side", false)): continue
+		var count := int(Dictionary(receipt.get("reward", {})).get("recruits", 0))
+		var number := String(receipt_id).get_slice(":", 2).to_int()
+		for index in range(1, count + 1):
+			var unit_id := "%s_%d_%d" % [String(receipt.get("job_id", "")), number, index]  # Auftragskennung beginnt mit "side_"
+			if known.has(unit_id): continue
+			if _admit_side_recruit(unit_id, number + index):
+				created.append(unit_id)
+	return created
+
+## Eine Person fuer die Basis anlegen (Weg des Polisa-Anwerbens ohne Stationsaufenthalt: Profil, Kader, Ausruestung, volles Fach).
+func _admit_side_recruit(unit_id: String, name_seed: int) -> bool:
+	var names: Array = ["Jonas Falk", "Mara Voss", "Teo Brandt", "Lena Krüger", "Ilja Roth", "Nora Henning", "Bruno Keller", "Sana Vogt"]
+	var profile: Dictionary = load("res://scripts/meta/campaign_start_configuration.gd").new()._initial_roster()[0].duplicate(true)
+	profile.merge({"unit_id": unit_id, "display_name": String(names[name_seed % names.size()]), "fireteam_id": "", "armor": "light", "armor_id": "light", "weapon_1": "pistol", "weapon_1_id": "pistol", "weapon_2": "none", "weapon_2_id": "none"}, true)
+	var registered: Dictionary = _flow.call("register_campaign_recruit", profile)
+	if not bool(registered.get("ok", false)): return false
+	_supply.configure_inventory([unit_id], [], true)
+	var already_configured: bool = _simulation.get_personnel_loadout_state().has_unit(unit_id)
+	_simulation.request_personnel_loadout_command("configure_roster", {"roster": [profile]})
+	if not already_configured:
+		_simulation.request_personnel_loadout_command("set_loadout", {"unit_id": unit_id, "loadout": {"armor": profile.get("armor", "suit"), "weapon_1": profile.get("weapon_1", "pistol"), "weapon_2": profile.get("weapon_2", "none")}})
+	_supply.provision_new_person(unit_id)
+	return true
 
 ## M6b (B1): KEIN automatisches Auffuellen mehr (weder beim Abflug noch bei der Heimkehr): Magazine kommen von Hand per Drag and Drop
 ## ins Fach. Beim bestaetigten Abflug von der Heimatbasis nur der Hinweis, wie viele Faecher der Mitfliegenden (an Bord plus zugeteilter

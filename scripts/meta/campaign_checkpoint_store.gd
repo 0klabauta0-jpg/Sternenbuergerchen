@@ -204,7 +204,7 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 	for id: String in ids:
 		if id.begins_with("polisa_recruit_") and not (base_units is Dictionary and Dictionary(base_units).has(id)): return {"ok":false,"reason":"checkpoint_recruit_presence_missing"}
 		if id.begins_with("polisa_recruit_") and not recruit_receipts.has(id): return {"ok":false,"reason":"checkpoint_recruit_receipt_missing"}
-		if ids.size() > 4 and id not in [String(leader.get("unit_id", "")), String(pilot.get("unit_id", "")), "campaign_outpost_recruit", "campaign_rescue_pilot"] and not recruit_receipts.has(id): return {"ok":false,"reason":"checkpoint_recruit_receipt_missing"}
+		if ids.size() > 4 and id not in [String(leader.get("unit_id", "")), String(pilot.get("unit_id", "")), "campaign_outpost_recruit", "campaign_rescue_pilot"] and not recruit_receipts.has(id) and not _side_recruit_backed(id, payload.campaign.get("completion_receipts", {})): return {"ok":false,"reason":"checkpoint_recruit_receipt_missing"}
 	if payload.has("polisa_recruitment_market"):
 		if typeof(payload.polisa_recruitment_market) != TYPE_DICTIONARY: return {"ok":false,"reason":"invalid_recruit_market"}
 		var market = load("res://scripts/meta/polisa_recruitment_market.gd").new()
@@ -305,6 +305,17 @@ static func _lost_dropship_recorded(payload: Dictionary) -> bool:
 		if typeof(lost) == TYPE_DICTIONARY and typeof(lost.get("definition")) == TYPE_DICTIONARY and lost.definition.get("craft_type") == "dropship" and String(lost.definition.get("craft_id", "")) == String(lost.get("craft_id", "x")):
 			return true
 	return false
+## Nebenauftraege (N1): Eine Person "<auftrag>_<n>_<i>" (i ab 1) ist durch den Nebenauftragsbeleg "<auftrag>:completed:<n>"
+## (side == true) gedeckt, wenn dessen Belohnung mindestens i Rekruten nennt. Ohne solchen Beleg nie gedeckt.
+static func _side_recruit_backed(unit_id: String, receipts: Variant) -> bool:
+	if typeof(receipts) != TYPE_DICTIONARY: return false
+	var parts: PackedStringArray = unit_id.split("_")
+	if parts.size() < 3 or not parts[parts.size() - 1].is_valid_int() or not parts[parts.size() - 2].is_valid_int(): return false
+	var job_id := "_".join(parts.slice(0, parts.size() - 2))
+	var receipt: Variant = Dictionary(receipts).get("%s:completed:%d" % [job_id, parts[parts.size() - 2].to_int()])
+	if typeof(receipt) != TYPE_DICTIONARY or Dictionary(receipt).get("side") != true or typeof(Dictionary(receipt).get("reward")) != TYPE_DICTIONARY: return false
+	var index: int = parts[parts.size() - 1].to_int()
+	return index >= 1 and index <= int(Dictionary(Dictionary(receipt).reward).get("recruits", 0))
 ## Gefallenenliste: Array aus Dictionaries mit nicht leerem String unit_id; die drei anderen Schluessel sind optional, aber Strings.
 static func _valid_fallen(value: Variant) -> bool:
 	if typeof(value) != TYPE_ARRAY: return false
