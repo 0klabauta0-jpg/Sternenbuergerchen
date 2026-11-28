@@ -102,6 +102,8 @@ var _combat_weapon_slot: int = 1
 @export_range(-1.0, 1.0, 0.01) var freighter_piloting: float = -1.0
 @export_range(-1.0, 1.0, 0.01) var fighter_piloting: float = -1.0
 @export var trait_ids: PackedStringArray = []
+## Persoenlichkeit (Ton der Funksaetze); leer = nicht gesetzt (eigene Leute sprechen dann wie "profi", Gegner und Neutrale folgen ihrer Kennung).
+@export var personality: String = ""
 @export var is_fireteam_lead: bool = false
 @export var show_world_debug_labels: bool = false
 @export var show_world_event_labels: bool = true
@@ -428,6 +430,10 @@ func get_traits() -> Array:
 	return _traits.duplicate()
 
 
+func get_personality() -> String:
+	return personality
+
+
 func get_trait_ids() -> PackedStringArray:
 	return trait_ids.duplicate()
 
@@ -702,6 +708,9 @@ func apply_identity_config(identity_config: Dictionary, publish_visuals:bool=tru
 
 	if identity_config.has("trait_ids"):
 		trait_ids = _coerce_trait_ids(identity_config["trait_ids"])
+
+	if identity_config.has("personality"):
+		personality = String(identity_config["personality"]).strip_edges().to_lower()
 
 	if should_rebuild_identity_data:
 		_rebuild_identity_data()

@@ -47,6 +47,9 @@ var cooldown_key: String = ""
 var source: String = SOURCE_ID
 var visual_only: bool = true
 var metadata: Dictionary = {}
+## Was die Blase sagen soll: Anlass (Schluessel in data/comms/funk_saetze.json), Funkgueteklasse und Werte fuer {team}, {richtung}, {ziel}.
+## Die Persoenlichkeit kommt erst bei der Blase vom Truppfuehrer.
+var speech: Dictionary = {}
 var anchor_position = null
 var target_position = null
 
@@ -71,6 +74,7 @@ static func from_dict(data: Dictionary):
 		event.source = SOURCE_ID
 	event.visual_only = bool(data.get("visual_only", true))
 	event.metadata = Dictionary(data.get("metadata", {})).duplicate(true)
+	event.speech = Dictionary(data.get("speech", {})).duplicate(true)
 	event.anchor_position = _coerce_vector2_or_null(data.get("anchor_position", data.get("planned_position", null)))
 	event.target_position = _coerce_vector2_or_null(data.get("target_position", null))
 	event.event_id = String(data.get("event_id", "")).strip_edges()
@@ -109,6 +113,7 @@ func to_dict() -> Dictionary:
 		"source": source,
 		"visual_only": visual_only,
 		"metadata": metadata.duplicate(true),
+		"speech": speech.duplicate(true),
 	}
 	if typeof(anchor_position) == TYPE_VECTOR2:
 		result["anchor_position"] = Vector2(anchor_position)

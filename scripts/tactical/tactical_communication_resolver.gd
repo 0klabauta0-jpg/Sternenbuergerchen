@@ -4,6 +4,8 @@ extends RefCounted
 const TACTICAL_COMMUNICATION_EVENT_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_event.gd")
 const FIRETEAMLEADER_FEEDBACK_BUBBLE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/ui/fireteamleader_feedback_bubble_resolver.gd")
 const TACTICAL_COMMUNICATION_COPY_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_copy.gd")
+const PERSONALITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/personality_catalog.gd")
+const TRUPP_FARBEN_SCRIPT: GDScript = preload("res://scripts/tactical/trupp_farben.gd")
 
 const COPY_CATALOG_PATH: String = "res://data/tactical_communication_copy.json"
 const SOURCE_ID: String = "tactical_communication_feedback"
@@ -24,16 +26,18 @@ static func build_event(event_type: String, context: Dictionary = {}, options: D
 	var trigger_entry: Dictionary = TACTICAL_COMMUNICATION_COPY_SCRIPT.call("trigger_entry", String(context.get("copy_trigger", "")))
 	var has_catalog_copy: bool = not copy_entry.is_empty() or not trigger_entry.is_empty()
 	if not trigger_entry.is_empty():
-		# Der Anlass (z. B. Sanitaeter, Munition) bestimmt den Satz; die Ereignisart liefert Prioritaet und Kanaele.
+		# Der Ausloeser (z. B. Sanitaeter, Munition) bestimmt Anlass und Kartentext; die Ereignisart liefert Prioritaet und Kanaele.
 		copy_entry = copy_entry.duplicate(true)
-		copy_entry["copy"] = trigger_entry.get("copy", {})
 		copy_entry["map_label"] = trigger_entry.get("map_label", copy_entry.get("map_label", ""))
 	var skill_tier: String = _resolve_skill_tier(context)
-	var template_payload: Dictionary = Dictionary(Dictionary(copy_entry.get("copy", {})).get(skill_tier, Dictionary(Dictionary(copy_entry.get("copy", {})).get("neutral", {})))).duplicate(true)
-	# Eine Satzquelle: Gibt es Katalogtext, gewinnt er gegen mitgegebene Texte (nur die Detailzeile darf vom Aufrufer kommen).
-	var short_template: String = String(template_payload.get("short", "")) if has_catalog_copy and not template_payload.is_empty() else String(context.get("short_text", template_payload.get("short", "")))
-	var short_text: String = _format_copy(short_template.strip_edges(), context, skill_tier)
-	var detail_text: String = _format_copy(String(context.get("detail_text", template_payload.get("detail", ""))).strip_edges(), context, skill_tier)
+	var occasion: String = String(TACTICAL_COMMUNICATION_COPY_SCRIPT.call("occasion_for_event", normalized_type, String(context.get("copy_trigger", ""))))
+	# Eine Satzquelle: data/comms/funk_saetze.json (Anlass + Persoenlichkeit + Funkguete). Gibt es dort einen Satz, gewinnt er
+	# gegen mitgegebene Texte; die Detailzeile darf vom Aufrufer kommen. Dieser Satz zaehlt den Anlass nicht weiter (die Blase tut es).
+	var funk_text: String = ""
+	if not occasion.is_empty():
+		funk_text = String(TACTICAL_COMMUNICATION_COPY_SCRIPT.call("leader_text", occasion, PERSONALITY_CATALOG_SCRIPT.normalize(context.get("personality", "")), skill_tier, _funk_seed_key(context), context, false))
+	var short_text: String = funk_text if not funk_text.is_empty() else _format_copy(String(context.get("short_text", "")).strip_edges(), context, skill_tier)
+	var detail_text: String = _format_copy(String(context.get("detail_text", short_text)).strip_edges(), context, skill_tier)
 	var map_label_template: String = String(copy_entry.get("map_label", "")) if has_catalog_copy and not String(copy_entry.get("map_label", "")).is_empty() else String(context.get("map_label", copy_entry.get("map_label", short_text)))
 	var map_label: String = _format_copy(map_label_template.strip_edges(), context, skill_tier)
 	var phase: int = maxi(int(context.get("phase", context.get("plan_phase_index", options.get("phase", 0)))), 0)
@@ -69,6 +73,13 @@ static func build_event(event_type: String, context: Dictionary = {}, options: D
 		"source": SOURCE_ID,
 		"visual_only": true,
 		"metadata": _build_public_metadata(context, skill_tier),
+		"speech": {
+			"occasion": occasion,
+			"skill_tier": skill_tier,
+			"team": str(context.get("team", context.get("display_label", ""))),
+			"direction_label": str(context.get("direction_label", context.get("direction", ""))),
+			"objective_label": str(context.get("objective_label", "")),
+		},
 	}
 	if typeof(context.get("anchor_position", null)) == TYPE_VECTOR2:
 		event_data["anchor_position"] = Vector2(context.get("anchor_position"))
@@ -197,7 +208,7 @@ static func build_selected_fireteam_text(events: Array, selected_fireteam_ids: P
 		if short_text.is_empty():
 			continue
 		# Mehrere Trupps im Fenster: der Satz steht in Ich-Form, daher den Trupp voranstellen.
-		lines.append("%s: %s" % [fireteam_id.to_upper(), short_text] if not fireteam_id.is_empty() else short_text)
+		lines.append("%s: %s" % [TRUPP_FARBEN_SCRIPT.display_name(fireteam_id), short_text] if not fireteam_id.is_empty() else short_text)
 		if lines.size() >= maxi(limit, 1):
 			break
 	return "\n".join(lines)
@@ -235,13 +246,40 @@ static func build_bubble_payload(event: Dictionary, leader, anchor_position: Vec
 			"tactical_event_type": String(event.get("event_type", "")),
 			"event_type": String(event.get("event_type", "")),
 			"active_command": String(event.get("feedback_action", "")),
+			"personality": String(context.get("personality", "")),
+			"funk_peek": true,
 		}
 	))
 	if not bool(payload.get("ok", false)):
 		return {}
-	# Einzige Satzquelle: der Satz des Ereignisses (tactical_communication_copy.json). Der Ersatz aus der
-	# Befehlsrueckmeldung gilt nur, wenn das Ereignis keinen Satz hat.
+	# Einzige Satzquelle: data/comms/funk_saetze.json. Der Satz des Ereignisses wird hier mit der Persoenlichkeit des
+	# Truppfuehrers gewaehlt; der Ersatz aus der Befehlsrueckmeldung gilt nur, wenn das Ereignis keinen Anlass hat.
+	var speech: Dictionary = Dictionary(event.get("speech", {}))
+	var occasion: String = String(speech.get("occasion", "")).strip_edges()
 	var event_text: String = String(event.get("short_text", "")).strip_edges()
+	if not occasion.is_empty():
+		var fill_context: Dictionary = {
+			"team": String(speech.get("team", "")),
+			"fireteam_id": String(event.get("fireteam_id", context.get("fireteam_id", ""))),
+			"direction_label": String(speech.get("direction_label", "")),
+			"objective_label": String(speech.get("objective_label", "")),
+		}
+		var seed_key: String = String(event.get("unit_id", "")).strip_edges()
+		if seed_key.is_empty() and leader != null and leader is Object and leader.has_method("get_unit_id"):
+			seed_key = String(leader.call("get_unit_id")).strip_edges()
+		if seed_key.is_empty():
+			seed_key = String(event.get("fireteam_id", "")).strip_edges().to_lower()
+		var spoken: String = String(TACTICAL_COMMUNICATION_COPY_SCRIPT.call(
+			"leader_text",
+			occasion,
+			FIRETEAMLEADER_FEEDBACK_BUBBLE_RESOLVER_SCRIPT.call("resolve_leader_personality", leader, context),
+			String(speech.get("skill_tier", "neutral")),
+			seed_key,
+			fill_context,
+			true
+		))
+		if not spoken.is_empty():
+			event_text = spoken
 	if not event_text.is_empty():
 		payload["text"] = event_text.replace("\n", " ")
 		payload["text_source"] = TACTICAL_COMMUNICATION_COPY_SCRIPT.TEXT_SOURCE_ID
@@ -315,6 +353,12 @@ static func _sort_events_for_text(events: Array) -> Array:
 		return a_priority > b_priority
 	)
 	return result
+
+
+## Schluessel fuer die Fassungswahl: die sprechende Einheit, sonst der Trupp.
+static func _funk_seed_key(context: Dictionary) -> String:
+	var unit_id: String = String(context.get("unit_id", context.get("leader_unit_id", ""))).strip_edges()
+	return unit_id if not unit_id.is_empty() else String(context.get("fireteam_id", "")).strip_edges().to_lower()
 
 
 static func _build_public_metadata(context: Dictionary, skill_tier: String) -> Dictionary:

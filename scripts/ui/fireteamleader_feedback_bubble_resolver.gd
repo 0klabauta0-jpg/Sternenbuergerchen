@@ -5,6 +5,7 @@ const COMIC_BUBBLE_VISUAL_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/
 const COMIC_BUBBLE_TEXT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_text_resolver.gd")
 const CHARACTER_GAMEPLAY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/character_gameplay_resolver.gd")
 const TACTICAL_COMMUNICATION_COPY_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_copy.gd")
+const PERSONALITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/personality_catalog.gd")
 
 const SOURCE_ID: String = "fireteamleader_command_feedback"
 const DEFAULT_ENABLED: bool = true
@@ -71,7 +72,8 @@ static func build_command_feedback(
 	var text_context: Dictionary = context.duplicate(true)
 	text_context["skill_tier"] = skill_tier
 	text_context["character_gameplay_context"] = character_context
-	# Einzige Satzquelle: data/tactical_communication_copy.json (ueber TacticalCommunicationCopy).
+	# Einzige Satzquelle: data/comms/funk_saetze.json. tactical_communication_copy.json ordnet nur den Anlass zu;
+	# die Persoenlichkeit des Truppfuehrers waehlt den Satz, die Funkguete die kurze oder genaue Fassung.
 	# Befehlskontext, comms_lines und comic_bubble_text_catalog liefern hier keinen Satz mehr.
 	var text_payload: Dictionary = {}
 	if not validation_feedback.is_empty():
@@ -85,7 +87,19 @@ static func build_command_feedback(
 			"delay_seconds": 0.0,
 		}
 	else:
-		text_payload = Dictionary(TACTICAL_COMMUNICATION_COPY_SCRIPT.call("command_text", action, state, skill_tier, text_context))
+		var occasion: String = String(TACTICAL_COMMUNICATION_COPY_SCRIPT.call("occasion_for_command", action, state))
+		var leader_unit_id: String = _resolve_unit_id(leader, String(context.get("unit_id", "")))
+		var funk_text: String = String(TACTICAL_COMMUNICATION_COPY_SCRIPT.call(
+			"leader_text",
+			occasion,
+			resolve_leader_personality(leader, context),
+			skill_tier,
+			leader_unit_id if not leader_unit_id.is_empty() else String(context.get("fireteam_id", "")),
+			text_context,
+			not bool(context.get("funk_peek", false))
+		))
+		if not funk_text.is_empty():
+			text_payload = {"text": funk_text, "text_source": TACTICAL_COMMUNICATION_COPY_SCRIPT.TEXT_SOURCE_ID, "text_key": "funk_saetze.%s" % occasion}
 		text_payload["ok"] = not text_payload.is_empty()
 		text_payload["trigger"] = String(text_context.get("comms_trigger", "order_confirmed"))
 		text_payload["quality_level"] = -1
@@ -282,6 +296,16 @@ static func _normalize_validation_key(raw_key: String) -> String:
 static func _validation_message_for_key(validation_key: String, _action: String) -> String:
 	# Verstaendliche Meldungen stehen in data/tactical_communication_copy.json (Abschnitt "validation").
 	return String(TACTICAL_COMMUNICATION_COPY_SCRIPT.call("validation_text", validation_key))
+
+
+## Persoenlichkeit des Truppfuehrers: erst aus dem Kontext, sonst vom Truppfuehrer selbst (Feld "personality"); leer = profi.
+static func resolve_leader_personality(leader, context: Dictionary = {}) -> String:
+	var value: String = String(context.get("personality", "")).strip_edges()
+	if value.is_empty() and leader != null and leader is Object:
+		var raw: Variant = leader.get("personality")
+		if raw != null:
+			value = String(raw).strip_edges()
+	return PERSONALITY_CATALOG_SCRIPT.normalize(value)
 
 
 static func _resolve_unit_id(leader, fallback: String = "") -> String:

@@ -96,13 +96,32 @@ static func variant_index(count: int, seed_key: String, occasion: String, counte
 
 ## Satz fuer Anlass, Persoenlichkeit und Funkguete. `counter` zaehlt, wie oft diese Einheit diesen Anlass schon gesprochen hat.
 static func pick(occasion: String, personality: String, clarity: float, seed_key: String, counter: int, context: Dictionary = {}) -> String:
-	var list: Array = variants(occasion, personality, tier_for_clarity(clarity))
+	return pick_tier(occasion, personality, tier_for_clarity(clarity), seed_key, counter, context)
+
+
+## Wie pick, aber die Stufe ("kurz" oder "genau") ist schon entschieden (z. B. aus der Funkgueteklasse des Truppfuehrers).
+static func pick_tier(occasion: String, personality: String, tier: String, seed_key: String, counter: int, context: Dictionary = {}) -> String:
+	var list: Array = prefer_fillable(variants(occasion, personality, tier), context)
 	if list.is_empty():
 		return ""
 	var index: int = variant_index(list.size(), seed_key, occasion.strip_edges().to_lower(), counter)
 	if index < 0:
 		return ""
 	return fill(String(list[index]), context)
+
+
+## Fassungen, deren Platzhalter alle mit echten Werten gefuellt werden koennen; gibt es keine, bleibt die ganze Liste (dann greifen die Ersatzwerte).
+static func prefer_fillable(list: Array, context: Dictionary) -> Array:
+	var fillable: Array = []
+	for entry in list:
+		var complete: bool = true
+		for key in PLACEHOLDER_FALLBACKS.keys():
+			if String(entry).contains("{%s}" % String(key)) and String(context.get(key, "")).strip_edges().is_empty():
+				complete = false
+				break
+		if complete:
+			fillable.append(entry)
+	return fillable if not fillable.is_empty() else list
 
 
 ## Ersetzt {name} {team} {richtung} {ziel} {kamerad}; fehlende Werte bekommen deutsche Ersatzwerte.

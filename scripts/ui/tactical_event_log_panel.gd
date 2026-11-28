@@ -452,6 +452,9 @@ func _format_event_text(entry: Dictionary) -> String:
 	var team_label: String = String(_fireteam_display_labels.get(String(entry.get("fireteam_id", "")).strip_edges().to_lower(), "")).strip_edges()
 	if not team_label.is_empty():
 		team = team_label
+	# Deutsche Farbnamen (Blau, Rot, ...) aus data/comms/trupp_farben.json; ohne Zuordnung bleibt die bisherige Anzeige.
+	if not team.is_empty():
+		team = String(load("res://scripts/tactical/trupp_farben.gd").call("display_name", String(entry.get("fireteam_id", "")), team))
 	var text: String = String(entry.get("short_text", entry.get("map_label", ""))).strip_edges()
 	if text.is_empty():
 		text = String(entry.get("event_type", "event")).strip_edges().replace("_", " ").to_upper()
