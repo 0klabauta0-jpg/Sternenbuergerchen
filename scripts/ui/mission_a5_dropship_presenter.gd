@@ -97,7 +97,12 @@ static func ensure(controller: Node) -> Control:
 		box.add_child(pilot_row)
 		box.move_child(pilot_row, actions.get_index() + 1)
 		for action in ["set_lz", "drop", "board", "return", "pilot"]:
-			var button := Button.new()
+			# Der Pilot-Schalter ist ein Haekchen (Zustand sichtbar: gesetzt = Pilot bleibt an Bord), kein Befehlsknopf.
+			var button: Button
+			if action == "pilot":
+				button = CheckBox.new()
+			else:
+				button = Button.new()
 			button.name = action
 			button.custom_minimum_size = Vector2(0, 30)
 			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -269,7 +274,7 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 				"return": allowed = bool(controller.call("_can_request_mission_dropship_return", selected_card)) and (not landed or bool(controller.call("get_campaign_pilot_flight_guard", craft_id).get("ok", false)))
 				"pilot": allowed = not String(selected_card.get("pilot_unit_id", "")).strip_edges().is_empty()
 		button.disabled = pending or not allowed
-		button.text = {"set_lz":"Landezone waehlen", "drop":"Trupp absetzen" if landed else "Landen", "board":"Einsteigen", "return":"Abheben", "pilot":"Pilot: bleibt an Bord"}[action]
+		button.text = {"set_lz":"Landezone waehlen", "drop":"Trupp absetzen" if landed else "Landen", "board":"Einsteigen", "return":"Abheben", "pilot":"Pilot bleibt an Bord"}[action]
 		if action == "set_lz": button.text = "Landezone waehlen"
 		button.tooltip_text = "Alle Bodenpersonen muessen zum Schiff. Einsteigen wird nach Ankunft bestaetigt." if action == "board" else ("Pilot und Besatzung muessen an Bord sein." if action == "return" else "Landezone und Anflug des ausgewaehlten Schiffs")
 		if action == "return" and not selected_card.is_empty():
@@ -290,8 +295,10 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 			"pilot":
 				button.visible = allowed
 				(button.get_parent() as Control).visible = allowed
-				button.text = "Pilot: steigt aus" if bool(controller.call("_is_pilot_disembark_selected", craft_id)) else "Pilot: bleibt an Bord"
-				button.tooltip_text = "Vorgabe: Der Pilot steigt mit aus. Bleibt er an Bord, ist Speichern im Einsatz gesperrt."
+				# Haekchen = Pilot bleibt beim Absetzen an Bord; ohne Haekchen steigt er mit aus (Vorgabe).
+				button.set_pressed_no_signal(not bool(controller.call("_is_pilot_disembark_selected", craft_id)))
+				button.text = "Pilot bleibt an Bord"
+				button.tooltip_text = "Mit Häkchen bleibt der Pilot beim Absetzen an Bord (Speichern im Einsatz ist dann gesperrt). Ohne Häkchen steigt er mit aus."
 	var approach_row := card.get_node("Contents/ApproachRow") as Control
 	approach_row.visible = not landed and not selected_card.is_empty()
 	approach_row.get_node("ApproachDial").call("set_direction", String(selected_card.get("approach_angle", "NW")))
