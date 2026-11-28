@@ -1082,6 +1082,9 @@ func restore_state(data: Dictionary) -> Dictionary:
 			var side_number := String(receipt_id).substr(side_prefix.length()) if String(receipt_id).begins_with(side_prefix) else ""
 			if typeof(receipt_id) != TYPE_STRING or not side_number.is_valid_int() or int(side_number) < 1 or str(int(side_number)) != side_number or receipt.get("completion_id") != receipt_id or receipt.get("runtime_verified") != true or typeof(receipt.get("reward")) != TYPE_DICTIONARY:
 				return _reject("invalid_reward_receipt", "Nebenauftragsbeleg ungueltig")
+			# side=true gehoert nie zu einem Kampagnenauftrag (den es heute gibt): abgelehnt.
+			if jobs.has(side_job_id) and not bool(Dictionary(jobs[side_job_id]).get("side", false)):
+				return _reject("invalid_reward_receipt", "Nebenauftragsbeleg gehoert zu einem Kampagnenauftrag")
 			# Belege entfernter Nebenauftraege bleiben (wie im Kampagnenstand): der Rekrut behaelt seine Deckung im Kader.
 			continue
 		if typeof(receipt) != TYPE_DICTIONARY or not jobs.has(receipt.get("job_id", "")):
