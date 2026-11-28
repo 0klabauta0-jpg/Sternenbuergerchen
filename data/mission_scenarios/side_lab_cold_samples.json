@@ -1,0 +1,143 @@
+{
+  "version": 1,
+  "scenario_id": "side_lab_cold_samples",
+  "display_name": "Proben ohne Fragen",
+  "map_file_path": "res://maps/Ground_Mission02_128x128.json",
+  "time_limit_seconds": 1800.0,
+  "mission_slot_count_override": 4,
+  "win_condition": "objective_capture",
+  "objective": {
+    "marker_id": "objective_point",
+    "capture_radius": 80.0
+  },
+  "enemy_groups": [
+    {
+      "group_id": "lab_guards",
+      "display_name": "Laborwache",
+      "team_id": "team_bravo",
+      "spawn_marker_id": "spawn_enemy_defense",
+      "skill_accuracy": 0.15,
+      "enemy_ids": [
+        "side_lab_cold_samples_guard_01",
+        "side_lab_cold_samples_guard_02",
+        "side_lab_cold_samples_guard_03"
+      ],
+      "tactics": {
+        "profile_id": "defensive_cover",
+        "stance": "defend",
+        "cover_behavior": "hold_best_cover",
+        "security_mode": "cover_arc",
+        "facing": "east",
+        "advance_style": "hold",
+        "allowed_weapon_roles": [
+          "sidearm"
+        ],
+        "sight_behavior": "cover_arc",
+        "contact_behavior": "suppress_from_cover",
+        "weapon_profile": "standard_close",
+        "visual_archetype": "enemy_space_suit_orange",
+        "movement_posture_policy": "hold_ready",
+        "ready_distance_world": 320.0,
+        "travel_speed_factor": 0.3,
+        "ready_speed_factor": 0.2,
+        "aim_move_speed_factor": 0.15,
+        "heavy_weapon_role": "none",
+        "anti_armor_threat": false,
+        "air_asset_risk_profile": "none",
+        "communication_intensity": "low",
+        "weapon_id": "pistol"
+      }
+    }
+  ],
+  "wave_config": {
+    "wave_delay_seconds": 0.0,
+    "wave_count": 1,
+    "first_wave_delay_seconds": 0.0,
+    "units_per_wave": 3
+  },
+  "patrol_bindings": [],
+  "briefing": {
+    "summary": "Das Labor will eine Probenkiste abgeholt haben, ohne Fragen. Die Kiste holen (die Laborwache passt auf) und zum Schiff zurückkehren. Der Händler bleibt erreichbar.",
+    "minimap_mode": "terrain_only",
+    "objectives": [
+      {
+        "target_id": "objective_point",
+        "text": "Probenkiste holen"
+      },
+      {
+        "target_id": "ship_return",
+        "text": "Zum Schiff zurückkehren"
+      }
+    ],
+    "title": "Proben ohne Fragen"
+  },
+  "vertical_slice": {
+    "scenario_kind": "singleplayer_job",
+    "team_slots": [
+      {
+        "role": "recovery",
+        "player_assignable_modes": [
+          "singleplayer"
+        ],
+        "spawn_marker_id": "spawn_alpha",
+        "team_id": "team_alpha",
+        "npc_owned": false
+      }
+    ],
+    "play_modes": [
+      "singleplayer"
+    ],
+    "contract_version": 1,
+    "interaction_points": [
+      {
+        "gate_id": "fetch_sample_crate",
+        "step_id": "fetch_sample_crate",
+        "duration_seconds": 4.0,
+        "required_state": "fetch_sample_crate_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Probenkiste holen",
+        "interaction_id": "objective_point",
+        "marker_id": "objective_point"
+      },
+      {
+        "gate_id": "return_to_ship",
+        "step_id": "return_to_ship",
+        "duration_seconds": 3.0,
+        "required_state": "return_to_ship_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Zum Schiff zurückkehren",
+        "interaction_id": "ship_return",
+        "marker_id": "ship_return",
+        "requires_step_id": "fetch_sample_crate"
+      }
+    ],
+    "flow_steps": [
+      {
+        "step_id": "fetch_sample_crate",
+        "min_hold_seconds": 4.0,
+        "objective_type": "interaction_use",
+        "required_state": "fetch_sample_crate_done",
+        "target_marker_id": "objective_point"
+      },
+      {
+        "step_id": "return_to_ship",
+        "min_hold_seconds": 3.0,
+        "objective_type": "interaction_use",
+        "required_state": "return_to_ship_done",
+        "target_marker_id": "ship_return",
+        "requires_step_id": "fetch_sample_crate"
+      }
+    ],
+    "finite_enemy_roster": true
+  },
+  "notes": [
+    "Nebenauftrag N1 (28.11.2026): gleiche Karte wie shady_lab_visit (Ground_Mission02); der Haendlermarker spawn_bravo bleibt der Handelsmarker (small_outposts.json). Die Wachen muessen nicht ausgeschaltet werden.",
+    "Runtime gates, not UI clicks, determine completion."
+  ]
+}

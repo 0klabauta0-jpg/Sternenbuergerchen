@@ -6,6 +6,9 @@
     {"id": "mining:satellite_crash:a_benit", "kind": "mining", "origin": "satellite_crash", "item": "a_benit", "requires_item": "mining_tool", "pay_per_unit": 8, "playable": false},
     {"id": "mining:trade_outpost:c_benit", "kind": "mining", "origin": "trade_outpost", "item": "c_benit", "requires_item": "mining_tool", "pay_per_unit": 8, "playable": false},
     {"id": "salvage:satellite_crash:salvage", "kind": "salvage", "origin": "satellite_crash", "item": "salvage", "requires_item": "salvage_tool", "pay_per_unit": 8, "playable": false},
-    {"id": "bounty:rebels", "kind": "bounty", "origin": "homebase", "item": "rebel", "pay_per_unit": 50, "name": "Rebellen hetzen", "briefing": "Die Rebellen machen die Gegend unsicher. Für jeden Rebellen, den du in einem Einsatz ausschaltest, zahlt dir die Verwaltung 50 Credits. Der Auftrag läuft, bis du ihn abgibst."}
+    {"id": "bounty:rebels", "kind": "bounty", "origin": "homebase", "item": "rebel", "pay_per_unit": 50, "name": "Rebellen hetzen", "briefing": "Die Rebellen machen die Gegend unsicher. Für jeden Rebellen, den du in einem Einsatz ausschaltest, zahlt dir die Verwaltung 50 Credits. Der Auftrag läuft, bis du ihn abgibst."},
+    {"id": "freight:muellers_farm:heilkraeuter", "kind": "freight", "origin": "muellers_farm", "destination": "templanon", "item": "heilkraeuter", "crates": 4, "pay": 35},
+    {"id": "freight:shady_lab:duenger", "kind": "freight", "origin": "shady_lab", "destination": "muellers_farm", "item": "duenger", "crates": 4, "pay": 35},
+    {"id": "freight:templanon:aufputschmittel", "kind": "freight", "origin": "templanon", "destination": "shady_lab", "item": "aufputschmittel", "crates": 4, "pay": 40}
   ]
 }

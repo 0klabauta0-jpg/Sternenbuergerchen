@@ -61,6 +61,8 @@ const STANDING_CRATE := "cargo_crate"
 var _standing_orders: RefCounted = null
 var _requests: Dictionary = {}
 var _reward_receipts: Dictionary = {}
+## Nebenauftraege (N1): Gegenstaende, die bei der Belohnung nicht ins Basislager passten. [{completion_id, item_id, quantity}]
+var _pending_side_items: Array = []
 var _research_receipts: Dictionary = {}
 var _research_snapshot_cache: Dictionary = {}
 var _research_snapshot_revision := -1
@@ -136,6 +138,7 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 	_stock_by_offer_id.clear()
 	_requests.clear()
 	_reward_receipts.clear()
+	_pending_side_items.clear()
 	_research_receipts.clear()
 	_research_snapshot_revision = -1
 	_open_tanker_cache_revision = -1
@@ -706,7 +709,80 @@ func _reward(payload: Dictionary, context: Dictionary) -> Dictionary:
 	_credits += int(amount)
 	_reward_receipts[completion_id] = receipt.duplicate(true)
 	_revision += 1
-	return {"ok": true, "completion_id": completion_id, "credits_added": int(amount), "message": "Auftragsbelohnung gutgeschrieben"}
+	var result := {"ok": true, "completion_id": completion_id, "credits_added": int(amount), "message": "Auftragsbelohnung gutgeschrieben"}
+	# Nebenauftraege (N1): Gegenstaende der Belohnung in derselben Buchung ins Basislager (Rest: ausstehend). Idempotent, weil der Beleg es ist.
+	if bool(receipt.get("side", false)):
+		var booking: Dictionary = _book_side_items(completion_id, Array(reward.get("items", [])) if typeof(reward.get("items", [])) == TYPE_ARRAY else [])
+		result["side_items_booked"] = booking.booked
+		result["side_items_pending"] = booking.pending
+	return result
+
+## Gegenstaende eines Nebenauftrags ins Basislager buchen. Was nicht passt, bleibt ausstehend (nie verloren, nie doppelt).
+## Rueckgabe {booked:[{item_id,quantity}], pending:[{item_id,quantity}]} (nur dieser Aufruf).
+func _book_side_items(completion_id: String, items: Array) -> Dictionary:
+	var booked: Array = []
+	var pending: Array = []
+	var base: Dictionary = _inventory.get("base:homebase", {})
+	for entry_variant: Variant in items:
+		if typeof(entry_variant) != TYPE_DICTIONARY: continue
+		var item_id := String(Dictionary(entry_variant).get("item_id", ""))
+		var wanted: Variant = Dictionary(entry_variant).get("quantity", 0)
+		if item_id.is_empty() or not INVENTORY.known(item_id) or not _valid_positive_integer(wanted) or int(wanted) > 10: continue
+		var amount := int(wanted)
+		var fitted := 0
+		if not base.is_empty():
+			fitted = amount
+			while fitted > 0 and not INVENTORY.has_space(base, item_id, fitted): fitted -= 1
+			if fitted > 0:
+				base.items[item_id] = int(base.items.get(item_id, 0)) + fitted
+				booked.append({"item_id": item_id, "quantity": fitted})
+		if amount - fitted > 0:
+			_add_pending_side_item(completion_id, item_id, amount - fitted)
+			pending.append({"item_id": item_id, "quantity": amount - fitted})
+	return {"booked": booked, "pending": pending}
+
+func _add_pending_side_item(completion_id: String, item_id: String, quantity: int) -> void:
+	for entry: Dictionary in _pending_side_items:
+		if String(entry.completion_id) == completion_id and String(entry.item_id) == item_id:
+			entry.quantity = int(entry.quantity) + quantity
+			return
+	_pending_side_items.append({"completion_id": completion_id, "item_id": item_id, "quantity": quantity})
+
+func get_pending_side_items() -> Array:
+	return _pending_side_items.duplicate(true)
+
+## Ausstehende Nebenauftrags-Gegenstaende erneut versuchen (Heimlandung, Basis oeffnen). Rueckgabe: jetzt gebuchte [{item_id, quantity}].
+func retry_pending_side_items() -> Array:
+	var booked: Array = []
+	var base: Dictionary = _inventory.get("base:homebase", {})
+	if base.is_empty() or _pending_side_items.is_empty(): return booked
+	var kept: Array = []
+	for entry: Dictionary in _pending_side_items:
+		var item_id := String(entry.item_id)
+		var fitted := int(entry.quantity)
+		while fitted > 0 and not INVENTORY.has_space(base, item_id, fitted): fitted -= 1
+		if fitted > 0:
+			base.items[item_id] = int(base.items.get(item_id, 0)) + fitted
+			booked.append({"item_id": item_id, "quantity": fitted})
+		if int(entry.quantity) - fitted > 0:
+			kept.append({"completion_id": String(entry.completion_id), "item_id": item_id, "quantity": int(entry.quantity) - fitted})
+	if not booked.is_empty():
+		_pending_side_items = kept
+		_revision += 1
+	return booked
+
+## Gespeicherte ausstehende Gegenstaende lesen (tolerant: fehlt der Schluessel oder ist ein Eintrag unbrauchbar, wird er verworfen).
+static func _parse_pending_side_items(raw: Variant) -> Array:
+	var parsed: Array = []
+	if typeof(raw) != TYPE_ARRAY: return parsed
+	for entry_variant: Variant in raw:
+		if typeof(entry_variant) != TYPE_DICTIONARY: continue
+		var entry: Dictionary = entry_variant
+		var quantity: Variant = entry.get("quantity")
+		if typeof(entry.get("completion_id")) != TYPE_STRING or typeof(entry.get("item_id")) != TYPE_STRING or not INVENTORY.known(String(entry.item_id)): continue
+		if typeof(quantity) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(quantity)) or float(quantity) != floor(float(quantity)) or float(quantity) < 1.0 or float(quantity) > 1000.0: continue
+		parsed.append({"completion_id": String(entry.completion_id), "item_id": String(entry.item_id), "quantity": int(quantity)})
+	return parsed
 
 func _has_service(location_id: String, service: String) -> bool:
 	if service == "trade" and _trade_places.has(location_id): return true
@@ -733,6 +809,8 @@ func export_state() -> Dictionary:
 	if _credits < 0 and _debt_remaining >= 0.0: exported["debt_interest_remaining"] = _debt_remaining
 	# M4b: optionaler Merker (fehlt in alten Staenden: die Startausstattung mit Magazinen wird dann einmal nachgereicht).
 	if _ammo_start_granted: exported["ammo_start_granted"] = true
+	# Nebenauftraege (N1): ausstehende Belohnungsgegenstaende (additiver Schluessel; fehlt er, ist die Liste leer).
+	if not _pending_side_items.is_empty(): exported["pending_side_items"] = _pending_side_items.duplicate(true)
 	# Handel H2: Marktbestaende (additiver Schluessel; fehlt er, laedt der Stand mit vollem Bestand).
 	if not _market_stock.is_empty(): exported["market_stock"] = _market_stock.duplicate()
 	# Dauerauftraege (H3): Uhr, Sperren, laufende Auftraege und Zaehler; nur in der Kampagne, alle Schluessel optional.
@@ -939,13 +1017,27 @@ func restore_state(data: Dictionary) -> Dictionary:
 	var campaign = load("res://scripts/core/singleplayer_campaign_state.gd").new()
 	campaign.configure()
 	var jobs: Dictionary = campaign.get_campaign_snapshot().jobs
+	var dropped_side_receipts: Array = []
 	for receipt_id in data.reward_receipts:
 		var receipt: Variant = data.reward_receipts[receipt_id]
+		# Nebenauftraege (N1): Beleg "<id>:completed:<n>" (side=true). Die Belohnung wird NICHT mit der heutigen Definition verglichen
+		# (Inhalt darf sich aendern); Belege von Nebenauftraegen, die es nicht mehr gibt, werden still verworfen (die Kampagne verwirft denselben Beleg).
+		if typeof(receipt) == TYPE_DICTIONARY and receipt.get("side") == true:
+			var side_job_id := String(receipt.get("job_id", ""))
+			var side_prefix := side_job_id + ":completed:"
+			var side_number := String(receipt_id).substr(side_prefix.length()) if String(receipt_id).begins_with(side_prefix) else ""
+			if typeof(receipt_id) != TYPE_STRING or not side_number.is_valid_int() or int(side_number) < 1 or str(int(side_number)) != side_number or receipt.get("completion_id") != receipt_id or receipt.get("runtime_verified") != true or typeof(receipt.get("reward")) != TYPE_DICTIONARY:
+				return _reject("invalid_reward_receipt", "Nebenauftragsbeleg ungueltig")
+			if not jobs.has(side_job_id) or not bool(Dictionary(jobs[side_job_id]).get("side", false)):
+				dropped_side_receipts.append(receipt_id)
+			continue
 		if typeof(receipt) != TYPE_DICTIONARY or not jobs.has(receipt.get("job_id", "")):
 			return _reject("invalid_reward_receipt", "Belohnungsbeleg ungueltig")
 		var job: Dictionary = jobs[receipt.job_id]
 		if receipt_id != String(receipt.job_id) + ":completed" or receipt.get("completion_id") != receipt_id or receipt.get("runtime_verified") != true or receipt.get("scenario_id") != job.scenario_id or JSON.stringify(JSON.parse_string(JSON.stringify(receipt.get("reward"))), "", true) != JSON.stringify(JSON.parse_string(JSON.stringify(job.reward)), "", true):
 			return _reject("invalid_reward_receipt", "Belohnungsbeleg widerspricht Auftrag")
+	var restored_receipts: Dictionary = data.reward_receipts.duplicate(true)
+	for dropped_id in dropped_side_receipts: restored_receipts.erase(dropped_id)
 	for request_id in data.requests:
 		var request: Variant = data.requests[request_id]
 		if typeof(request_id) != TYPE_STRING or String(request_id).strip_edges().is_empty() or typeof(request) != TYPE_DICTIONARY or typeof(request.get("signature")) != TYPE_STRING or typeof(request.get("result")) != TYPE_DICTIONARY or request.result.get("ok") != true:
@@ -964,7 +1056,7 @@ func restore_state(data: Dictionary) -> Dictionary:
 	var research: Variant = data.get("research_receipts", {})
 	if not _valid_campaign_fabrication_requests(data.requests):
 		return _reject("invalid_fabrication_receipts", "Herstellungsbelege widersprechen dem Rezept")
-	if not RESEARCH.validate_receipts(research, data.reward_receipts, data.requests):
+	if not RESEARCH.validate_receipts(research, restored_receipts, data.requests):
 		return _reject("invalid_research_receipts", "Entwicklungsbelege widersprechen ihren Voraussetzungen")
 	var containers: Variant = data.get("inventory", {})
 	if typeof(containers)!=TYPE_DICTIONARY:
@@ -1031,7 +1123,8 @@ func restore_state(data: Dictionary) -> Dictionary:
 	for offer_id in _stock_by_offer_id:
 		_stock_by_offer_id[offer_id] = int(_stock_by_offer_id[offer_id])
 	_requests = data.requests.duplicate(true)
-	_reward_receipts = data.reward_receipts.duplicate(true)
+	_reward_receipts = restored_receipts
+	_pending_side_items = _parse_pending_side_items(data.get("pending_side_items", []))
 	_research_receipts = research.duplicate(true)
 	_research_snapshot_revision = -1
 	_open_tanker_cache_revision = -1

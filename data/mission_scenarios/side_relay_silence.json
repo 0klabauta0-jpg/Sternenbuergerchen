@@ -1,0 +1,156 @@
+{
+  "version": 1,
+  "scenario_id": "side_relay_silence",
+  "display_name": "Funkstille",
+  "map_file_path": "res://maps/Ground_Mission02_128x128.json",
+  "time_limit_seconds": 1800.0,
+  "mission_slot_count_override": 4,
+  "win_condition": "objective_capture",
+  "objective": {
+    "marker_id": "objective_point",
+    "capture_radius": 80.0
+  },
+  "enemy_groups": [],
+  "wave_config": {
+    "wave_delay_seconds": 0.0,
+    "wave_count": 0,
+    "first_wave_delay_seconds": 0.0,
+    "units_per_wave": 1
+  },
+  "patrol_bindings": [],
+  "briefing": {
+    "summary": "Am Relaisgrat ist der Funk ausgefallen. Drei Antennen prüfen und zum Schiff zurückkehren. Der Händler bleibt erreichbar.",
+    "minimap_mode": "terrain_only",
+    "objectives": [
+      {
+        "target_id": "objective_point",
+        "text": "Antenne 1 prüfen"
+      },
+      {
+        "target_id": "spawn_enemy_defense",
+        "text": "Antenne 2 prüfen"
+      },
+      {
+        "target_id": "objective_ridge_aa",
+        "text": "Antenne 3 prüfen"
+      },
+      {
+        "target_id": "ship_return",
+        "text": "Zum Schiff zurückkehren"
+      }
+    ],
+    "title": "Funkstille"
+  },
+  "vertical_slice": {
+    "scenario_kind": "singleplayer_job",
+    "team_slots": [
+      {
+        "role": "recovery",
+        "player_assignable_modes": [
+          "singleplayer"
+        ],
+        "spawn_marker_id": "spawn_alpha",
+        "team_id": "team_alpha",
+        "npc_owned": false
+      }
+    ],
+    "play_modes": [
+      "singleplayer"
+    ],
+    "contract_version": 1,
+    "interaction_points": [
+      {
+        "gate_id": "check_antenna_1",
+        "step_id": "check_antenna_1",
+        "duration_seconds": 4.0,
+        "required_state": "check_antenna_1_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Antenne 1 prüfen",
+        "interaction_id": "objective_point",
+        "marker_id": "objective_point"
+      },
+      {
+        "gate_id": "check_antenna_2",
+        "step_id": "check_antenna_2",
+        "duration_seconds": 4.0,
+        "required_state": "check_antenna_2_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Antenne 2 prüfen",
+        "interaction_id": "spawn_enemy_defense",
+        "marker_id": "spawn_enemy_defense",
+        "requires_step_id": "check_antenna_1"
+      },
+      {
+        "gate_id": "check_antenna_3",
+        "step_id": "check_antenna_3",
+        "duration_seconds": 4.0,
+        "required_state": "check_antenna_3_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Antenne 3 prüfen",
+        "interaction_id": "objective_ridge_aa",
+        "marker_id": "objective_ridge_aa",
+        "requires_step_id": "check_antenna_2"
+      },
+      {
+        "gate_id": "return_to_ship",
+        "step_id": "return_to_ship",
+        "duration_seconds": 3.0,
+        "required_state": "return_to_ship_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Zum Schiff zurückkehren",
+        "interaction_id": "ship_return",
+        "marker_id": "ship_return",
+        "requires_step_id": "check_antenna_3"
+      }
+    ],
+    "flow_steps": [
+      {
+        "step_id": "check_antenna_1",
+        "min_hold_seconds": 4.0,
+        "objective_type": "interaction_use",
+        "required_state": "check_antenna_1_done",
+        "target_marker_id": "objective_point"
+      },
+      {
+        "step_id": "check_antenna_2",
+        "min_hold_seconds": 4.0,
+        "objective_type": "interaction_use",
+        "required_state": "check_antenna_2_done",
+        "target_marker_id": "spawn_enemy_defense",
+        "requires_step_id": "check_antenna_1"
+      },
+      {
+        "step_id": "check_antenna_3",
+        "min_hold_seconds": 4.0,
+        "objective_type": "interaction_use",
+        "required_state": "check_antenna_3_done",
+        "target_marker_id": "objective_ridge_aa",
+        "requires_step_id": "check_antenna_2"
+      },
+      {
+        "step_id": "return_to_ship",
+        "min_hold_seconds": 3.0,
+        "objective_type": "interaction_use",
+        "required_state": "return_to_ship_done",
+        "target_marker_id": "ship_return",
+        "requires_step_id": "check_antenna_3"
+      }
+    ]
+  },
+  "notes": [
+    "Nebenauftrag N1 (28.11.2026): gleiche Karte wie relay_ridge_visit, friedlich, ohne Gegner. Der Haendlermarker spawn_enemy_patrol bleibt unbenutzt, damit der Handel (small_outposts.json visit_trade_markers) wie im freien Besuch funktioniert.",
+    "Runtime gates, not UI clicks, determine completion."
+  ]
+}

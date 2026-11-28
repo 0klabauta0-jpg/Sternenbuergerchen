@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "scenario_id": "side_farm_night_watch",
+  "display_name": "Nachtwache bei Müller",
+  "map_file_path": "res://maps/trade_outpost.json",
+  "time_limit_seconds": 1800.0,
+  "mission_slot_count_override": 4,
+  "win_condition": "objective_capture",
+  "objective": {
+    "marker_id": "objective_point",
+    "capture_radius": 80.0
+  },
+  "enemy_groups": [
+    {
+      "group_id": "looters",
+      "display_name": "Plünderer",
+      "team_id": "team_bravo",
+      "spawn_marker_id": "spawn_enemy_defense",
+      "skill_accuracy": 0.15,
+      "enemy_ids": [
+        "side_farm_night_watch_looter_01",
+        "side_farm_night_watch_looter_02",
+        "side_farm_night_watch_looter_03"
+      ],
+      "tactics": {
+        "profile_id": "defensive_cover",
+        "stance": "defend",
+        "cover_behavior": "hold_best_cover",
+        "security_mode": "cover_arc",
+        "facing": "east",
+        "advance_style": "hold",
+        "allowed_weapon_roles": [
+          "sidearm"
+        ],
+        "sight_behavior": "cover_arc",
+        "contact_behavior": "suppress_from_cover",
+        "weapon_profile": "standard_close",
+        "visual_archetype": "enemy_space_suit_orange",
+        "movement_posture_policy": "hold_ready",
+        "ready_distance_world": 320.0,
+        "travel_speed_factor": 0.3,
+        "ready_speed_factor": 0.2,
+        "aim_move_speed_factor": 0.15,
+        "heavy_weapon_role": "none",
+        "anti_armor_threat": false,
+        "air_asset_risk_profile": "none",
+        "communication_intensity": "low",
+        "weapon_id": "pistol"
+      }
+    }
+  ],
+  "wave_config": {
+    "wave_delay_seconds": 0.0,
+    "wave_count": 1,
+    "first_wave_delay_seconds": 0.0,
+    "units_per_wave": 3
+  },
+  "patrol_bindings": [],
+  "briefing": {
+    "summary": "Müllers Farm wird nachts geplündert. Das Gewächshaus prüfen, die Plünderer am Lager vertreiben, das Lager prüfen und zum Schiff zurückkehren. Der Händler bleibt erreichbar.",
+    "minimap_mode": "terrain_only",
+    "objectives": [
+      {
+        "target_id": "spawn_bravo",
+        "text": "Gewächshaus prüfen"
+      },
+      {
+        "target_id": "spawn_enemy_defense",
+        "text": "Plünderer vertreiben"
+      },
+      {
+        "target_id": "objective_point",
+        "text": "Lager prüfen"
+      },
+      {
+        "target_id": "ship_return",
+        "text": "Zum Schiff zurückkehren"
+      }
+    ],
+    "title": "Nachtwache bei Müller"
+  },
+  "vertical_slice": {
+    "scenario_kind": "singleplayer_job",
+    "team_slots": [
+      {
+        "role": "recovery",
+        "player_assignable_modes": [
+          "singleplayer"
+        ],
+        "spawn_marker_id": "spawn_alpha",
+        "team_id": "team_alpha",
+        "npc_owned": false
+      }
+    ],
+    "play_modes": [
+      "singleplayer"
+    ],
+    "contract_version": 1,
+    "interaction_points": [
+      {
+        "gate_id": "check_greenhouse",
+        "step_id": "check_greenhouse",
+        "duration_seconds": 3.0,
+        "required_state": "check_greenhouse_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Gewächshaus prüfen",
+        "interaction_id": "spawn_bravo",
+        "marker_id": "spawn_bravo"
+      },
+      {
+        "gate_id": "check_storage",
+        "step_id": "check_storage",
+        "duration_seconds": 3.0,
+        "required_state": "check_storage_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Lager prüfen",
+        "interaction_id": "objective_point",
+        "marker_id": "objective_point",
+        "requires_step_id": "clear_looters"
+      },
+      {
+        "gate_id": "return_to_ship",
+        "step_id": "return_to_ship",
+        "duration_seconds": 3.0,
+        "required_state": "return_to_ship_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Zum Schiff zurückkehren",
+        "interaction_id": "ship_return",
+        "marker_id": "ship_return",
+        "requires_step_id": "check_storage"
+      }
+    ],
+    "flow_steps": [
+      {
+        "step_id": "check_greenhouse",
+        "min_hold_seconds": 3.0,
+        "objective_type": "interaction_use",
+        "required_state": "check_greenhouse_done",
+        "target_marker_id": "spawn_bravo"
+      },
+      {
+        "step_id": "clear_looters",
+        "objective_type": "air_defense_shutdown",
+        "enemy_group_id": "looters",
+        "required_state": "looters_cleared",
+        "target_marker_id": "spawn_enemy_defense",
+        "min_hold_seconds": 0.0
+      },
+      {
+        "step_id": "check_storage",
+        "min_hold_seconds": 3.0,
+        "objective_type": "interaction_use",
+        "required_state": "check_storage_done",
+        "target_marker_id": "objective_point",
+        "requires_step_id": "clear_looters"
+      },
+      {
+        "step_id": "return_to_ship",
+        "min_hold_seconds": 3.0,
+        "objective_type": "interaction_use",
+        "required_state": "return_to_ship_done",
+        "target_marker_id": "ship_return",
+        "requires_step_id": "check_storage"
+      }
+    ],
+    "finite_enemy_roster": true
+  },
+  "notes": [
+    "Nebenauftrag N1 (28.11.2026): gleiche Karte wie muellers_farm_visit (trade_outpost.json); der Haendlermarker spawn_bravo bleibt der Handelsmarker (small_outposts.json). Die Plünderer sind Rebellen.",
+    "Runtime gates, not UI clicks, determine completion."
+  ]
+}

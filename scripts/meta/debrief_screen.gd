@@ -886,6 +886,9 @@ func _apply_player_readout_texts() -> void:
 	var loot_text := build_loot_text(_mission_result)
 	if not loot_text.is_empty():
 		_native_review_confirmation.text += "\n" + loot_text
+	# Nebenauftraege (N1): Belohnungsmeldung des Adapters (Credits, Gegenstaende, neue Person, Ruf).
+	if typeof(_mission_result.get("side_job_message")) == TYPE_STRING and not String(_mission_result.side_job_message).is_empty():
+		_native_review_confirmation.text += "\n" + String(_mission_result.side_job_message)
 	var bounty_text := build_bounty_text(_mission_result)
 	if not bounty_text.is_empty():
 		_native_review_confirmation.text += "\n" + bounty_text
