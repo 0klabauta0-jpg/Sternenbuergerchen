@@ -126,6 +126,7 @@ const MISSION_DROP_SOURCE_FOB := "fob"
 const MISSION_DROP_SOURCE_HOMEBASE_DIRECT := "homebase_direct"
 const MISSION_DROP_SOURCE_HOMEBASE_DIRECT_THEN_FOB := "homebase_direct_then_fob"
 const SINGLEPLAYER_RELEASE_DEFAULT_MISSION_ID := "grid_sweep"
+const SKIRMISH_MAP_MISSION_ID := "gefecht_karte" # Gefecht mit Kartenwahl: wird zur Laufzeit in den Einsatzkatalog gesetzt
 const SINGLEPLAYER_BOOTSTRAP_FIRETEAM_ID := "ft1"
 const SINGLEPLAYER_BOOTSTRAP_CRAFT_TYPE := "dropship"
 const SINGLEPLAYER_BOOTSTRAP_FIRETEAM_SIZE := 3
@@ -432,6 +433,8 @@ func _ready() -> void:
 	call_deferred("_apply_release_start_mission_deeplink")
 	call_deferred("_apply_release_lz_drop_preview_deeplink")
 	call_deferred("_apply_release_first_go_firefight_deeplink")
+	if not is_campaign_start() and _game_start_request.has("map_path"):
+		call_deferred("_apply_skirmish_map_start")
 	if is_campaign_start() and _campaign_start != null and bool(_campaign_start.get("active_restore_in_progress")):
 		call_deferred("_restore_active_campaign")
 	_ladezeit("Basis _ready Ende")
@@ -1070,6 +1073,79 @@ func _apply_release_start_mission_deeplink(user_args: PackedStringArray = Packed
 	_release_start_mission_deeplink_status = "applied" if _release_start_mission_deeplink_applied else "blocked"
 	_release_start_mission_deeplink_reason = "" if _release_start_mission_deeplink_applied else "mission_view_not_visible"
 	set_meta("release_start_mission_deeplink_applied", _release_start_mission_deeplink_applied)
+
+
+## Gefecht mit Kartenwahl: das Hauptmenue hat eine Karte gewaehlt (game_start_contract, "map_path"). Nach dem Aufbau der Basis
+## wird ein Einsatz auf genau dieser Karte mit der gewaehlten Truppe gestartet; der Spieler landet im Einsatz, nicht im offenen Spiel.
+## Status in Meta "skirmish_map_start_status": "applied" oder ein Fehlergrund (dann bleibt die Basis offen und die Zeile unten meldet es).
+func _apply_skirmish_map_start() -> void:
+	var map_path: String = String(_game_start_request.get("map_path", ""))
+	var entry: Dictionary = load("res://scripts/meta/skirmish_start_configuration.gd").map_entry(map_path)
+	if entry.is_empty():
+		_fail_skirmish_map_start("unknown_map")
+		return
+	# Die Anlauf-Wächter der Basis (Standardauswahl "grid_sweep") laufen in den ersten Bildern; erst danach die Karte setzen.
+	for i in range(4):
+		await get_tree().process_frame
+		if not is_inside_tree():
+			return
+	if _active_mission != null:
+		_fail_skirmish_map_start("mission_already_active")
+		return
+	var definition: Dictionary = {
+		"mission_id": SKIRMISH_MAP_MISSION_ID,
+		"player_visible": false,
+		"mission_name": "Gefecht: %s" % String(entry.title),
+		"map_file_path": map_path,
+		"scenario_file_path": String(entry.scenario),
+		"time_limit_seconds": float(entry.time_limit),
+	}
+	if not String(entry.get("win_condition", "")).is_empty():
+		definition["win_condition"] = String(entry.win_condition)
+	var catalog: Array = []
+	for existing_variant in _mission_catalog:
+		if String(Dictionary(existing_variant).get("mission_id", "")) != SKIRMISH_MAP_MISSION_ID:
+			catalog.append(existing_variant)
+	catalog.append(definition)
+	_mission_catalog = catalog
+	set_meta("skirmish_map_path", map_path) # haelt die Standard-Wächter der offenen Basis aus der gewählten Karte heraus
+	_selected_mission_id = SKIRMISH_MAP_MISSION_ID
+	_selected_mission_map_path = map_path
+	_refresh_homebase_screen()
+	_refresh_fob_screen()
+	_refresh_map_screen()
+	var homebase_screen = _get_homebase_screen()
+	if homebase_screen == null or not homebase_screen.has_method("request_mission_start"):
+		_fail_skirmish_map_start("start_not_ready")
+		return
+	# Die Einschiffung der Truppe laeuft ueber Zeit; der Gefechtsstart setzt sie wie der Spielstart-Helfer sofort auf "fertig".
+	for attempt in range(90):
+		if bool(homebase_screen.call("can_request_mission_start")):
+			break
+		if attempt % 5 == 0:
+			_seed_singleplayer_bootstrap_homebase_payload()
+			_refresh_homebase_screen()
+		await get_tree().process_frame
+		if not is_inside_tree():
+			return
+	if not bool(homebase_screen.call("can_request_mission_start")):
+		_fail_skirmish_map_start("start_not_ready")
+		return
+	homebase_screen.call("request_mission_start")
+	for i in range(6):
+		if _current_meta_view == "mission" and _active_mission != null:
+			break
+		await get_tree().process_frame
+	if _current_meta_view == "mission" and _active_mission != null:
+		set_meta("skirmish_map_start_status", "applied")
+	else:
+		_fail_skirmish_map_start("mission_not_visible")
+
+
+func _fail_skirmish_map_start(reason: String) -> void:
+	set_meta("skirmish_map_start_status", reason)
+	push_warning("Gefecht mit Kartenwahl konnte nicht gestartet werden: %s" % reason)
+	_show_save_feedback("Das Gefecht konnte nicht gestartet werden. Bitte mit Esc ins Hauptmenü gehen und es noch einmal versuchen.")
 
 
 func get_release_lz_drop_preview_deeplink_snapshot(user_args: PackedStringArray = PackedStringArray()) -> Dictionary:
@@ -6756,7 +6832,7 @@ func _seed_singleplayer_bootstrap_homebase_payload() -> void:
 
 
 func _ensure_singleplayer_visible_homebase_actionability() -> void:
-	if has_meta("skirmish_preset_id"):
+	if has_meta("skirmish_preset_id") or has_meta("skirmish_map_path"):
 		return
 	# Startup recovery must never rebuild an established multi-place roster.
 	if not _location_contexts.is_empty(): return
@@ -6795,7 +6871,7 @@ func _ensure_singleplayer_visible_homebase_actionability() -> void:
 
 
 func _schedule_singleplayer_visible_homebase_actionability_guard() -> void:
-	if has_meta("skirmish_preset_id"):
+	if has_meta("skirmish_preset_id") or has_meta("skirmish_map_path"):
 		return
 	if not _location_contexts.is_empty(): return
 	if is_campaign_start():
