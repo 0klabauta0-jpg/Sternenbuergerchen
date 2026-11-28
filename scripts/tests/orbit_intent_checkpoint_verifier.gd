@@ -114,8 +114,9 @@ func run() -> void:
  check(not HELPER.prepare(target.adapter,saved,conflicting).ok,"already replayed pending request ID rejects")
  corrupt=data.duplicate(true); corrupt["_surface_orbit_path_enabled"]=true
  check(not HELPER.prepare(target.adapter,wire(corrupt),bindings(target)).ok,"wire cannot activate capability")
- corrupt=data.duplicate(true); corrupt.auto_disabled[CRAFT]=false
- check(not HELPER.prepare(target.adapter,wire(corrupt),bindings(target)).ok,"false disable entry rejects")
+ # Seit 1a74be4f9 ("Handflug ist Vorgabe") schreibt der Adapter selbst false-Eintraege ("Automatik ausdruecklich an"); Bjoern 28.11.: false wird angenommen.
+ var explicit_auto:=data.duplicate(true); explicit_auto.auto_disabled[CRAFT]=false
+ check(HELPER.prepare(target.adapter,wire(explicit_auto),bindings(target)).ok,"false disable entry (Automatik ausdruecklich an) is accepted")
  corrupt=data.duplicate(true); corrupt.intents[CRAFT].target_orbit_id="fake"
  check(not HELPER.prepare(target.adapter,wire(corrupt),bindings(target)).ok,"unmatched canonical route rejects")
  corrupt=data.duplicate(true); corrupt.intents[CRAFT].status="arrived"
