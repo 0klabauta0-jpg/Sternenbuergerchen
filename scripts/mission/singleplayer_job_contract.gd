@@ -75,3 +75,81 @@ static func normalize_job(raw: Dictionary, locations: Dictionary) -> Dictionary:
 	if not hint.is_empty():
 		normalized["locked_hint"] = hint
 	return normalized
+
+static func _whole_in_range(value: Variant, low: int, high: int) -> bool:
+	return typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)) and float(value) == floor(float(value)) and float(value) >= float(low) and float(value) <= float(high)
+
+## Nebenauftrag (side_jobs.json): wie normalize_job, dazu Fraktion, Vorgaengerliste, Mindestruf, Wiederholung, Fristen und die
+## erweiterte Belohnung (Gegenstaende, Rekruten, Ruf). factions = Fraktions-ID -> Anzeigename. {} bei jeder Fehlform.
+static func normalize_side_job(raw: Dictionary, locations: Dictionary, factions: Dictionary) -> Dictionary:
+	var id: String = String(raw.get("id", raw.get("job_id", ""))).strip_edges()
+	var location_id: String = String(raw.get("location_id", ""))
+	var scenario_id: String = String(raw.get("scenario_id", "")).strip_edges()
+	if id.is_empty() or String(raw.get("title", "")).strip_edges().is_empty() or not locations.has(location_id) or scenario_id.is_empty():
+		return {}
+	var faction := String(raw.get("faction", "")).strip_edges()
+	if faction.is_empty() or not factions.has(faction):
+		return {}
+	var raw_steps: Variant = raw.get("required_step_ids", [])
+	if typeof(raw_steps) != TYPE_ARRAY or raw_steps.is_empty():
+		return {}
+	var steps: Array = []
+	for step in raw_steps:
+		if typeof(step) != TYPE_STRING or String(step).strip_edges().is_empty() or steps.has(step):
+			return {}
+		steps.append(step)
+	var raw_prereq: Variant = raw.get("prerequisite_job_ids", [])
+	if typeof(raw_prereq) != TYPE_ARRAY:
+		return {}
+	var prerequisites: Array = []
+	for prior in raw_prereq:
+		if typeof(prior) != TYPE_STRING or String(prior).strip_edges().is_empty() or String(prior) == id or prerequisites.has(prior):
+			return {}
+		prerequisites.append(String(prior))
+	var raw_min: Variant = raw.get("min_reputation", {})
+	if typeof(raw_min) != TYPE_DICTIONARY:
+		return {}
+	var min_reputation: Dictionary = {}
+	for key in raw_min:
+		if not factions.has(String(key)) or not _whole_in_range(raw_min[key], -100, 100):
+			return {}
+		min_reputation[String(key)] = int(raw_min[key])
+	var repeatable: Variant = raw.get("repeatable", true)
+	if typeof(repeatable) != TYPE_BOOL:
+		return {}
+	var landings: Dictionary = {}
+	for field in ["cooldown_landings", "offer_landings", "reappear_landings"]:
+		var value: Variant = raw.get(field, 0)
+		if not _whole_in_range(value, 0, 20):
+			return {}
+		landings[field] = int(value)
+	var reward: Variant = raw.get("reward", {})
+	if typeof(reward) != TYPE_DICTIONARY or not _whole_in_range(reward.get("credits", 0), 0, 1000000):
+		return {}
+	var raw_items: Variant = reward.get("items", [])
+	if typeof(raw_items) != TYPE_ARRAY or raw_items.size() > 4:
+		return {}
+	var items: Array = []
+	for entry in raw_items:
+		if typeof(entry) != TYPE_DICTIONARY or typeof(entry.get("item_id")) != TYPE_STRING or String(entry.item_id).strip_edges().is_empty() or not _whole_in_range(entry.get("quantity", 1), 1, 10):
+			return {}
+		items.append({"item_id": String(entry.item_id).strip_edges(), "quantity": int(entry.get("quantity", 1))})
+	if not _whole_in_range(reward.get("recruits", 0), 0, 2):
+		return {}
+	var raw_rep: Variant = reward.get("reputation", {})
+	if typeof(raw_rep) != TYPE_DICTIONARY:
+		return {}
+	var reputation: Dictionary = {}
+	for key in raw_rep:
+		if not factions.has(String(key)) or not _whole_in_range(raw_rep[key], -50, 50):
+			return {}
+		reputation[String(key)] = int(raw_rep[key])
+	var normalized := {"id": id, "title": String(raw.title), "description": String(raw.get("description", "")), "location_id": location_id, "scenario_id": scenario_id,
+		"required_step_ids": steps, "prerequisite_job_id": "", "prerequisite_job_ids": prerequisites, "home_upload": false, "side": true, "faction": faction,
+		"min_reputation": min_reputation, "repeatable": bool(repeatable), "cooldown_landings": int(landings.cooldown_landings), "offer_landings": int(landings.offer_landings),
+		"reappear_landings": int(landings.reappear_landings),
+		"reward": {"credits": int(float(reward.get("credits", 0))), "blueprint_id": String(reward.get("blueprint_id", "")), "items": items, "recruits": int(reward.get("recruits", 0)), "reputation": reputation}}
+	var hint := String(raw.get("locked_hint", "")).strip_edges()
+	if not hint.is_empty():
+		normalized["locked_hint"] = hint
+	return normalized

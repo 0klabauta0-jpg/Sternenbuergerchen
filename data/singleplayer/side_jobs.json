@@ -1,0 +1,95 @@
+{
+  "factions": {
+    "verwaltung": "Verwaltung",
+    "mueller": "Müllers Hof",
+    "templer": "Templer",
+    "labor": "Shady Lab"
+  },
+  "jobs": {
+    "side_relay_silence": {
+      "id": "side_relay_silence",
+      "title": "Funkstille",
+      "description": "Am Relaisgrat ist der Funk ausgefallen. Drei Antennen prüfen und danach zum Schiff zurückkehren. Die Verwaltung zahlt 100 Credits.",
+      "location_id": "relay_ridge",
+      "scenario_id": "side_relay_silence",
+      "required_step_ids": ["check_antenna_1", "check_antenna_2", "check_antenna_3", "return_to_ship"],
+      "faction": "verwaltung",
+      "prerequisite_job_ids": ["outpost_recovery"],
+      "repeatable": true,
+      "cooldown_landings": 2,
+      "offer_landings": 3,
+      "reappear_landings": 2,
+      "reward": {
+        "credits": 100,
+        "blueprint_id": "",
+        "items": [],
+        "recruits": 0,
+        "reputation": {"verwaltung": 5}
+      }
+    },
+    "side_farm_night_watch": {
+      "id": "side_farm_night_watch",
+      "title": "Nachtwache bei Müller",
+      "description": "Müllers Farm wird nachts geplündert. Zwei Stellen prüfen, die Plünderer vertreiben und zum Schiff zurückkehren.",
+      "location_id": "muellers_farm",
+      "scenario_id": "side_farm_night_watch",
+      "required_step_ids": ["check_greenhouse", "check_storage", "clear_looters", "return_to_ship"],
+      "faction": "mueller",
+      "prerequisite_job_ids": ["outpost_recovery"],
+      "repeatable": true,
+      "cooldown_landings": 2,
+      "offer_landings": 4,
+      "reappear_landings": 2,
+      "reward": {
+        "credits": 80,
+        "blueprint_id": "",
+        "items": [{"item_id": "armor_light", "quantity": 1}],
+        "recruits": 0,
+        "reputation": {"mueller": 5, "templer": 2}
+      }
+    },
+    "side_lab_cold_samples": {
+      "id": "side_lab_cold_samples",
+      "title": "Proben ohne Fragen",
+      "description": "Das Labor will eine Probenkiste abgeholt haben, ohne Fragen. Kiste holen und zum Schiff bringen. Die Templer sehen das nicht gern.",
+      "location_id": "shady_lab",
+      "scenario_id": "side_lab_cold_samples",
+      "required_step_ids": ["fetch_sample_crate", "return_to_ship"],
+      "faction": "labor",
+      "prerequisite_job_ids": ["benit_delivery"],
+      "repeatable": true,
+      "cooldown_landings": 3,
+      "offer_landings": 3,
+      "reappear_landings": 3,
+      "reward": {
+        "credits": 120,
+        "blueprint_id": "",
+        "items": [{"item_id": "rocket_launcher", "quantity": 1}, {"item_id": "ammo_rocket", "quantity": 2}],
+        "recruits": 0,
+        "reputation": {"labor": 5, "templer": -3}
+      }
+    },
+    "side_templer_volunteer": {
+      "id": "side_templer_volunteer",
+      "title": "Ein Freiwilliger",
+      "description": "Ein Templer will sich der Basis anschließen. Ihn in Templanon abholen und zum Schiff begleiten. Nur für Freunde der Templer. Das Labor sieht das nicht gern.",
+      "location_id": "templanon",
+      "scenario_id": "side_templer_volunteer",
+      "required_step_ids": ["collect_volunteer", "return_to_ship"],
+      "faction": "templer",
+      "prerequisite_job_ids": ["satellite_recovery"],
+      "min_reputation": {"templer": 0},
+      "repeatable": true,
+      "cooldown_landings": 4,
+      "offer_landings": 3,
+      "reappear_landings": 2,
+      "reward": {
+        "credits": 60,
+        "blueprint_id": "",
+        "items": [],
+        "recruits": 1,
+        "reputation": {"templer": 5, "labor": -2}
+      }
+    }
+  }
+}

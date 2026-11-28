@@ -19,8 +19,16 @@ const ADDITIVE_JOB_IDS: Array = ["wreck_crater_salvage", "stranded_refuel", "fla
 const ORBIT_LOCATION_PRIORITY: GDScript = preload("res://scripts/core/orbit_location_priority.gd")
 const ADDITIVE_LOCATION_IDS: Array = ORBIT_LOCATION_PRIORITY.ADDITIVE_LOCATION_IDS  # eine Quelle: orbit_location_priority.gd
 
+## Nebenauftraege (N1, 28.11.2026): eigene Datei, Eintraege tragen "side": true. Laufen durch dieselbe Pipeline wie Kampagnenauftraege.
+const SIDE_JOBS_PATH := "res://data/singleplayer/side_jobs.json"
+const SIDE_ONLY_STATUSES: Array = ["cooldown", "expired"]
+const REPUTATION_LIMIT := 100
+
 var _locations: Dictionary = {}
 var _jobs: Dictionary = {}
+var _factions: Dictionary = {}  # Fraktion -> Anzeigename (aus side_jobs.json)
+var _reputation: Dictionary = {}  # Fraktion -> int (-100..100)
+var _home_landings: int = 0
 var _selected_location_id: String = "homebase"
 var _selected_job_id: String = ""
 var _departures_by_craft_id: Dictionary = {}
@@ -35,7 +43,9 @@ var _departure_preparation_epoch := 0
 var _departure_preparation_seal := ""
 var _prepared_departure_receipts: Dictionary = {}
 
-func configure(locations: Dictionary = {}, jobs: Dictionary = {}, enforce_sequence: bool = true) -> Dictionary:
+## side_jobs: null = side_jobs.json laden (auch wenn locations/jobs uebergeben werden; dann werden nicht aufloesbare Nebenauftraege still
+## uebersprungen), {} = keine Nebenauftraege, Dictionary {"factions":{}, "jobs":{}} = genau diese Definitionen (streng).
+func configure(locations: Dictionary = {}, jobs: Dictionary = {}, enforce_sequence: bool = true, side_jobs: Variant = null) -> Dictionary:
 	_enforce_sequence = enforce_sequence
 	var raw_locations: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/locations.json")) if locations.is_empty() else locations
 	var raw_jobs: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/jobs.json")) if jobs.is_empty() else jobs
@@ -60,9 +70,19 @@ func configure(locations: Dictionary = {}, jobs: Dictionary = {}, enforce_sequen
 			return _reject("invalid_job", "Auftrag oder Zielort ungueltig")
 		job["status"] = "offered"
 		normalized_jobs[String(key)] = job
+	var side_result: Dictionary = _load_side_jobs(side_jobs, normalized_locations, normalized_jobs, locations.is_empty() and jobs.is_empty())
+	if not bool(side_result.get("ok", false)):
+		return side_result
+	for side_id in side_result.jobs:
+		normalized_jobs[String(side_id)] = side_result.jobs[side_id]
 	_reset_departure_preparation()
 	_locations = normalized_locations
 	_jobs = normalized_jobs
+	_factions = Dictionary(side_result.factions).duplicate(true)
+	_reputation = {}
+	for faction in _factions:
+		_reputation[String(faction)] = 0
+	_home_landings = 0
 	_selected_location_id = "homebase"
 	_selected_job_id = ""
 	_departures_by_craft_id.clear()
@@ -72,14 +92,125 @@ func configure(locations: Dictionary = {}, jobs: Dictionary = {}, enforce_sequen
 	_progress = {"recruited_outpost":false,"recruited_pilot":false,"crate_loaded":false,"crate_delivered":false,"second_pad_built":false}
 	return {"ok": true}
 
+## Nebenauftraege aus source (siehe configure) laden und normalisieren. {"ok", "jobs", "factions"}.
+func _load_side_jobs(source: Variant, locations: Dictionary, campaign_jobs: Dictionary, default_strict: bool) -> Dictionary:
+	var strict: bool = source != null or default_strict
+	var raw: Variant = source
+	if source == null:
+		if not FileAccess.file_exists(SIDE_JOBS_PATH):
+			return {"ok": true, "jobs": {}, "factions": {}}
+		raw = JSON.parse_string(FileAccess.get_file_as_string(SIDE_JOBS_PATH))
+	if typeof(raw) != TYPE_DICTIONARY:
+		return _reject("invalid_side_jobs", "Nebenauftragsdaten ungueltig")
+	if Dictionary(raw).is_empty():
+		return {"ok": true, "jobs": {}, "factions": {}}
+	var raw_factions: Variant = Dictionary(raw).get("factions", {})
+	var raw_jobs: Variant = Dictionary(raw).get("jobs", {})
+	if typeof(raw_factions) != TYPE_DICTIONARY or typeof(raw_jobs) != TYPE_DICTIONARY:
+		return _reject("invalid_side_jobs", "Nebenauftragsdaten ungueltig")
+	var factions: Dictionary = {}
+	for faction in raw_factions:
+		if typeof(faction) != TYPE_STRING or String(faction).strip_edges().is_empty() or typeof(raw_factions[faction]) != TYPE_STRING or String(raw_factions[faction]).strip_edges().is_empty():
+			return _reject("invalid_side_jobs", "Fraktionsdaten ungueltig")
+		factions[String(faction)] = String(raw_factions[faction])
+	var side: Dictionary = {}
+	for key in raw_jobs:
+		var job: Dictionary = {}
+		if typeof(raw_jobs[key]) == TYPE_DICTIONARY:
+			job = JOBS.normalize_side_job(raw_jobs[key], locations, factions)
+		if job.is_empty() or String(job.id) != String(key) or campaign_jobs.has(String(key)):
+			if strict:
+				return _reject("invalid_side_job", "Nebenauftrag ungueltig: " + String(key))
+			continue
+		job["status"] = "offered"
+		job["completions"] = 0
+		job["window_start"] = -1
+		job["cooldown_until"] = 0
+		side[String(key)] = job
+	# Vorgaenger muessen es geben (Kampagne oder Nebenauftrag); im nachgiebigen Fall (eigene Auftragsliste) fallen solche Eintraege weg.
+	var changed := true
+	while changed:
+		changed = false
+		for id in side.keys():
+			for prior in side[id].prerequisite_job_ids:
+				if not campaign_jobs.has(String(prior)) and not side.has(String(prior)):
+					if strict:
+						return _reject("invalid_side_job", "Vorgaenger unbekannt: " + String(id))
+					side.erase(id)
+					changed = true
+					break
+	return {"ok": true, "jobs": side, "factions": factions}
+
+func _is_side(job_id: String) -> bool:
+	return _jobs.has(job_id) and bool(Dictionary(_jobs[job_id]).get("side", false))
+
+## Kampagnenauftrag: completed. Nebenauftrag: mindestens einmal erledigt (auch wenn er gerade in cooldown/expired steht oder neu angeboten wird).
+func _job_done(job_id: String) -> bool:
+	if not _jobs.has(job_id):
+		return false
+	var job: Dictionary = _jobs[job_id]
+	if bool(job.get("side", false)):
+		return int(job.get("completions", 0)) >= 1
+	return String(job.status) == "completed"
+
+func _side_prerequisites_met(job: Dictionary) -> bool:
+	for prior in Array(job.get("prerequisite_job_ids", [])):
+		if not _job_done(String(prior)):
+			return false
+	return true
+
+## Erste nicht erreichte Mindestruf-Bedingung als {"faction","need"}; {} wenn alle erfuellt.
+func _side_reputation_gap(job: Dictionary) -> Dictionary:
+	var minimum: Dictionary = Dictionary(job.get("min_reputation", {}))
+	var factions: Array = minimum.keys()
+	factions.sort()
+	for faction in factions:
+		if int(_reputation.get(String(faction), 0)) < int(minimum[faction]):
+			return {"faction": String(faction), "need": int(minimum[faction])}
+	return {}
+
+func _side_acceptance_gate(job_id: String) -> Dictionary:
+	var job: Dictionary = _jobs[job_id]
+	var status := String(job.status)
+	if status in SIDE_ONLY_STATUSES:
+		return _reject("side_offer_gone", "Dieses Angebot gibt es gerade nicht")
+	if status == "offered" and _enforce_sequence:
+		if not _side_prerequisites_met(job):
+			var hint := String(job.get("locked_hint", ""))
+			return _reject("previous_job_required", hint if not hint.is_empty() else "Zuerst den vorherigen Auftrag abschließen")
+		var gap: Dictionary = _side_reputation_gap(job)
+		if not gap.is_empty():
+			return _reject("reputation_required", "Braucht Ruf %d bei %s." % [int(gap.need), String(_factions.get(String(gap.faction), gap.faction))])
+	if status not in ["offered", "accepted", "active"]:
+		return _reject("job_closed", "Auftrag bereits abgeschlossen")
+	return {"ok": true}
+
+## Heimlandungen, bis das Angebot verschwindet (-1 = unbegrenzt oder nicht betroffen).
+func _side_landings_left(job: Dictionary) -> int:
+	if not bool(job.get("side", false)) or String(job.status) != "offered" or int(job.get("offer_landings", 0)) <= 0:
+		return -1
+	if int(job.get("window_start", -1)) < 0:
+		return int(job.offer_landings)
+	return maxi(0, int(job.window_start) + int(job.offer_landings) - _home_landings)
+
+## Heimlandungen, bis ein Nebenauftrag in cooldown/expired wieder angeboten wird; sonst 0.
+func _side_cooldown_left(job: Dictionary) -> int:
+	if bool(job.get("side", false)) and String(job.status) in SIDE_ONLY_STATUSES:
+		return maxi(0, int(job.get("cooldown_until", 0)) - _home_landings)
+	return 0
+
 func get_campaign_snapshot() -> Dictionary:
 	var accepted: Array = []
 	for id in _jobs:
 		if String(_jobs[id].status) in ["accepted", "active"]:
 			accepted.append(String(id))
 	accepted.sort()
-	var snapshot := {"locations": _locations.duplicate(true), "jobs": _jobs.duplicate(true), "accepted_job_ids": accepted, "selected_job_id": _selected_job_id, "selected_location_id": _selected_location_id, "departures_by_craft_id": _departures_by_craft_id.duplicate(true), "completion_receipts": _completion_receipts.duplicate(true), "progress":_progress.duplicate(true), "revision": _revision}
+	var snapshot := {"locations": _locations.duplicate(true), "jobs": _jobs.duplicate(true), "accepted_job_ids": accepted, "selected_job_id": _selected_job_id, "selected_location_id": _selected_location_id, "departures_by_craft_id": _departures_by_craft_id.duplicate(true), "completion_receipts": _completion_receipts.duplicate(true), "progress":_progress.duplicate(true), "revision": _revision,
+		"home_landings": _home_landings, "reputation": _reputation.duplicate(true), "factions": _factions.duplicate(true)}
 	for id in snapshot.jobs:
+		if bool(snapshot.jobs[id].get("side", false)):
+			snapshot.jobs[id]["locked"] = _enforce_sequence and (not _side_prerequisites_met(_jobs[id]) or not _side_reputation_gap(_jobs[id]).is_empty())
+			continue
 		var prior := String(snapshot.jobs[id].get("prerequisite_job_id",""))
 		snapshot.jobs[id]["locked"] = _enforce_sequence and not prior.is_empty() and String(Dictionary(_jobs.get(prior,{})).get("status","")) != "completed"
 	return snapshot
@@ -119,6 +250,7 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		"retry_failed_job": result = _retry_failed(payload)
 		"reopen_retreated_job": result = _reopen_retreated(payload)
 		"upload_job": result = _upload(payload, authority_context)
+		"home_landing": result = _home_landing(payload)
 		"claim_recruit", "load_crate", "unload_crate", "deliver_crate", "build_pad": result = _progress_action(String(command.operation),payload,authority_context)
 		_: result = _reject("unknown_operation", "Aktion unbekannt")
 	if bool(result.get("ok", false)):
@@ -130,6 +262,8 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 func _acceptance_gate(job_id: String) -> Dictionary:
 	if not _jobs.has(job_id):
 		return _reject("unknown_job", "Auftrag unbekannt")
+	if bool(_jobs[job_id].get("side", false)):
+		return _side_acceptance_gate(job_id)
 	var prior := String(_jobs[job_id].get("prerequisite_job_id", ""))
 	if _enforce_sequence and not prior.is_empty() and String(Dictionary(_jobs.get(prior, {})).get("status", "")) != "completed":
 		var hint := String(_jobs[job_id].get("locked_hint", ""))
@@ -154,16 +288,24 @@ func get_job_availability(retry_allowed: bool = false) -> Dictionary:
 		# Anfliegbar macht ihn das nicht: validate_location_visit ueberspringt gesperrt gelistete Auftraege.
 		# Nicht zu verwechseln mit jobs[id].locked im Schnappschuss (dort: Vorgaenger noch offen).
 		var shown_as_locked := status == "offered" and String(gate.get("reason", "")) == "outpost_preparation_required"
+		var is_side: bool = bool(_jobs[id].get("side", false))
+		var side_hidden := false
+		if is_side:
+			# Nebenauftrag: Vorgaenger offen oder Angebot weg (cooldown/expired) = unsichtbar; zu wenig Ruf = sichtbar, aber gesperrt (Grund steht in reason/message).
+			shown_as_locked = status == "offered" and String(gate.get("reason", "")) == "reputation_required"
+			side_hidden = status in SIDE_ONLY_STATUSES or (status == "offered" and String(gate.get("reason", "")) == "previous_job_required")
 		# Kapitel 2: ein neuer Auftrag mit locked_hint wird gesperrt gelistet, sobald sein Vorgaenger angenommen ist (oder gescheitert).
-		if status == "offered" and String(gate.get("reason", "")) == "previous_job_required" and not String(_jobs[id].get("locked_hint", "")).is_empty():
+		elif status == "offered" and String(gate.get("reason", "")) == "previous_job_required" and not String(_jobs[id].get("locked_hint", "")).is_empty():
 			var prior_status := String(Dictionary(_jobs.get(String(_jobs[id].get("prerequisite_job_id", "")), {})).get("status", ""))
 			shown_as_locked = shown_as_locked or prior_status in ["accepted", "active", "pending_upload", "failed"]
-		result[id] = {"visible":status in ["accepted", "active", "completed", "pending_upload"] or bool(gate.ok) or shown_as_locked, "can_accept":status in ["offered", "failed"] and bool(gate.ok), "shown_as_locked":shown_as_locked, "reason":String(gate.get("reason", "")), "message":String(gate.get("message", ""))}
+		result[id] = {"visible":not side_hidden and (status in ["accepted", "active", "completed", "pending_upload"] or bool(gate.ok) or shown_as_locked), "can_accept":status in ["offered", "failed"] and bool(gate.ok), "shown_as_locked":shown_as_locked, "reason":String(gate.get("reason", "")), "message":String(gate.get("message", "")),
+			"side":is_side, "faction":String(_jobs[id].get("faction", "")), "landings_left":_side_landings_left(_jobs[id]), "cooldown_left":_side_cooldown_left(_jobs[id])}
 	return result
 
 ## true, wenn an diesem Ort ein Auftrag angenommen/aktiv/hochzuladen ist (dann gilt dessen Szenario bzw. die Begegnung).
 func has_open_job_at(location_id: String) -> bool:
 	for id: String in _jobs:
+		if bool(_jobs[id].get("side", false)): continue  # Nebenauftraege: Handel und freier Besuch bleiben; das Szenario kommt vom gewaehlten Auftrag
 		if String(_jobs[id].location_id) == location_id and String(_jobs[id].status) in ["accepted", "active", "pending_upload"]: return true
 	return false
 
@@ -189,6 +331,8 @@ func validate_location_visit(location_id: String, retry_allowed: bool = false) -
 			if String(_jobs[id].location_id) == location_id and bool(availability[id].shown_as_locked): any_locked = true
 		if not any_locked: return {"ok":true}
 	for id: String in _jobs:
+		# Nebenauftraege schalten keinen Ort frei (ihr Vorgaenger ist immer ein Kampagnenauftrag, der den Ort schon oeffnet).
+		if bool(_jobs[id].get("side", false)): continue
 		# Ein gesperrt gelisteter Auftrag oeffnet seinen Ort nicht.
 		if String(_jobs[id].location_id) == location_id and bool(availability[id].visible) and not bool(availability[id].shown_as_locked): return {"ok":true}
 	# Freigabe 25.11.2026: Orte mit freiem Besuchsszenario (open_outposts.json) sind auch ohne Auftrag anfliegbar.
@@ -205,6 +349,7 @@ func free_visit_scenario_id(location_id: String) -> String:
 	var visits: Variant = JSON.parse_string(FileAccess.get_file_as_string(OPEN_OUTPOSTS_PATH)) if FileAccess.file_exists(OPEN_OUTPOSTS_PATH) else {}
 	if typeof(visits) != TYPE_DICTIONARY or not Dictionary(visits).has(location_id): return ""
 	for id: String in _jobs:
+		if bool(_jobs[id].get("side", false)): continue
 		if String(_jobs[id].location_id) == location_id and String(_jobs[id].status) in ["accepted", "active", "pending_upload"]: return ""  # gescheitert sperrt den freien Besuch nicht (Wunsch 25.11.); nur die Wiederholung des Auftrags bleibt an die Heimat-Regel gebunden
 	return String(Dictionary(visits)[location_id])
 
@@ -249,6 +394,7 @@ func open_garrison_scenario_id(location_id: String) -> String:
 	var garrisons: Variant = JSON.parse_string(FileAccess.get_file_as_string(OPEN_GARRISONS_PATH)) if FileAccess.file_exists(OPEN_GARRISONS_PATH) else {}
 	if typeof(garrisons) != TYPE_DICTIONARY or not Dictionary(garrisons).has(location_id): return ""
 	for id: String in _jobs:
+		if bool(_jobs[id].get("side", false)): continue
 		if String(_jobs[id].location_id) == location_id and String(_jobs[id].status) in ["accepted", "active", "pending_upload"]: return ""
 	return String(Dictionary(garrisons)[location_id])
 
@@ -346,6 +492,8 @@ func _complete(payload: Dictionary, context: Dictionary) -> Dictionary:
 
 func _finalize(job_id: String) -> Dictionary:
 	var job: Dictionary = _jobs[job_id]
+	if bool(job.get("side", false)):
+		return _finalize_side(job_id)
 	var completion_id: String = job_id + ":completed"
 	var receipt := {"completion_id": completion_id, "job_id": job_id, "scenario_id": String(job.scenario_id), "craft_id": String(job.get("craft_id", "")), "reward": Dictionary(job.reward).duplicate(true), "runtime_verified": true}
 	_completion_receipts[completion_id] = receipt
@@ -354,6 +502,65 @@ func _finalize(job_id: String) -> Dictionary:
 		_selected_job_id = ""
 	_revision += 1
 	return {"ok": true, "job_id": job_id, "completion_receipt": receipt.duplicate(true), "message": "Auftrag abgeschlossen"}
+
+## Nebenauftrag abschliessen: je Ausfuehrung eine neue completion_id ("<id>:completed:<n>"), damit apply_reward die Belohnung jedes Mal bucht.
+func _finalize_side(job_id: String) -> Dictionary:
+	var job: Dictionary = _jobs[job_id]
+	var completions: int = int(job.get("completions", 0)) + 1
+	var completion_id: String = "%s:completed:%d" % [job_id, completions]
+	var reward: Dictionary = Dictionary(job.reward).duplicate(true)
+	var receipt := {"completion_id": completion_id, "job_id": job_id, "scenario_id": String(job.scenario_id), "craft_id": String(job.get("craft_id", "")), "reward": reward, "runtime_verified": true, "side": true}
+	_completion_receipts[completion_id] = receipt
+	var gains: Dictionary = Dictionary(reward.get("reputation", {}))
+	for faction in gains:
+		if _reputation.has(String(faction)):
+			_reputation[String(faction)] = clampi(int(_reputation[String(faction)]) + int(gains[faction]), -REPUTATION_LIMIT, REPUTATION_LIMIT)
+	_jobs[job_id].completions = completions
+	if bool(job.get("repeatable", true)):
+		_jobs[job_id].status = "cooldown"
+		_jobs[job_id].cooldown_until = _home_landings + int(job.get("cooldown_landings", 0))
+	else:
+		_jobs[job_id].status = "completed"
+	_jobs[job_id].erase("craft_id")
+	if _selected_job_id == job_id:
+		_selected_job_id = ""
+	_revision += 1
+	return {"ok": true, "job_id": job_id, "completion_receipt": receipt.duplicate(true), "message": "Nebenauftrag abgeschlossen"}
+
+## Heimlandung (Befehl home_landing, je gelandetem Schiff eine eigene request_id): Zaehler hoch, Angebote kommen und gehen.
+## Angenommene, aktive und gescheiterte Nebenauftraege laufen nie ab.
+func _home_landing(payload: Dictionary) -> Dictionary:
+	if not payload.is_empty():
+		return _reject("invalid_payload", "Heimlandung braucht keine Angaben")
+	_home_landings += 1
+	var changed: Array = []
+	var ids: Array = _jobs.keys()
+	ids.sort()
+	for id in ids:
+		var job: Dictionary = _jobs[id]
+		if not bool(job.get("side", false)):
+			continue
+		var status := String(job.status)
+		var offer := int(job.get("offer_landings", 0))
+		if status == "cooldown" and _home_landings >= int(job.get("cooldown_until", 0)):
+			_jobs[id].status = "offered"
+			_jobs[id].window_start = _home_landings
+			changed.append(String(id))
+		elif status == "offered" and offer > 0:
+			if int(job.get("window_start", -1)) < 0:
+				# Das Fenster beginnt mit der ersten Heimlandung, an der der Vorgaenger erledigt ist.
+				if _side_prerequisites_met(job):
+					_jobs[id].window_start = _home_landings
+			elif _home_landings >= int(job.window_start) + offer:
+				_jobs[id].status = "expired"
+				_jobs[id].cooldown_until = _home_landings + int(job.get("reappear_landings", 0))
+				changed.append(String(id))
+		elif status == "expired" and _home_landings >= int(job.get("cooldown_until", 0)):
+			_jobs[id].status = "offered"
+			_jobs[id].window_start = _home_landings
+			changed.append(String(id))
+	_revision += 1
+	return {"ok": true, "home_landings": _home_landings, "changed_job_ids": changed}
 
 func _upload(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var id := String(payload.get("job_id",""))
@@ -462,6 +669,35 @@ func export_state() -> Dictionary:
 	state["requests"] = _requests.duplicate(true)
 	return state
 
+## Nebenauftraege, die der Stand kennt (Eintrag mit side=true), die es heute aber nicht mehr gibt: werden beim Laden still verworfen.
+func _dropped_side_ids(data: Dictionary) -> Array:
+	var dropped: Array = []
+	var saved_jobs: Variant = data.get("jobs", {})
+	if typeof(saved_jobs) != TYPE_DICTIONARY:
+		return dropped
+	for saved_id in saved_jobs:
+		if not _jobs.has(saved_id) and typeof(saved_jobs[saved_id]) == TYPE_DICTIONARY and bool(Dictionary(saved_jobs[saved_id]).get("side", false)):
+			dropped.append(String(saved_id))
+	return dropped
+
+## Spielstand eines Nebenauftrags (Status steht schon); Definition, Belohnung und Fristen gelten wie heute in side_jobs.json.
+func _restore_side_job(job_id: String, data: Dictionary) -> void:
+	var saved: Dictionary = data.jobs[job_id]
+	for field in ["completions", "cooldown_until", "window_start"]:
+		if saved.has(field):
+			_jobs[job_id][field] = int(saved[field])
+	# Hoechster gespeicherter Belegzaehler: die Zahl der Ausfuehrungen kann nie kleiner sein (sonst waere die naechste completion_id doppelt).
+	for receipt_id in data.completion_receipts:
+		var receipt: Variant = data.completion_receipts[receipt_id]
+		if typeof(receipt) == TYPE_DICTIONARY and String(receipt.get("job_id", "")) == job_id and bool(receipt.get("side", false)):
+			_jobs[job_id].completions = maxi(int(_jobs[job_id].completions), String(receipt_id).get_slice(":", 2).to_int())
+	# Es gilt die heutige Definition: nicht mehr wiederholbar -> cooldown wird completed; neu wiederholbar -> completed wird cooldown.
+	var repeatable: bool = bool(_jobs[job_id].get("repeatable", true))
+	if String(_jobs[job_id].status) == "cooldown" and not repeatable:
+		_jobs[job_id].status = "completed"
+	elif String(_jobs[job_id].status) == "completed" and repeatable:
+		_jobs[job_id].status = "cooldown"
+
 func restore_state(data: Dictionary) -> Dictionary:
 	# Rebuild definitions from current content, never trust persisted mission/reward definitions.
 	var fresh = get_script().new()
@@ -485,13 +721,31 @@ func restore_state(data: Dictionary) -> Dictionary:
 			_jobs[job_id]["retreat_count"] = int(data.jobs[job_id].retreat_count)
 		if data.jobs[job_id].has("reopen_at_home"):
 			_jobs[job_id]["reopen_at_home"] = bool(data.jobs[job_id].reopen_at_home)
+		if bool(_jobs[job_id].get("side", false)):
+			_restore_side_job(job_id, data)
+	var dropped_side_ids: Array = _dropped_side_ids(data)
+	_factions = fresh._factions.duplicate(true)
+	_reputation = fresh._reputation.duplicate(true)
+	var saved_reputation: Variant = data.get("reputation", {})
+	for faction in _reputation:
+		if typeof(saved_reputation) == TYPE_DICTIONARY and Dictionary(saved_reputation).has(faction):
+			_reputation[faction] = clampi(int(saved_reputation[faction]), -REPUTATION_LIMIT, REPUTATION_LIMIT)
+	_home_landings = int(data.get("home_landings", 0))
 	_selected_location_id = String(data.selected_location_id)
 	# Ein Stand, der einen additiven Ort anwaehlt, den sein eigener Ortsblock nicht kennt, ist nicht stimmig: Auswahl auf den Ausgangsort zuruecksetzen statt ablehnen.
 	if ADDITIVE_LOCATION_IDS.has(_selected_location_id) and not data.locations.has(_selected_location_id):
 		_selected_location_id = "homebase"
 	_selected_job_id = String(data.selected_job_id)
+	if dropped_side_ids.has(_selected_job_id):
+		_selected_job_id = ""
 	_departures_by_craft_id = data.departures_by_craft_id.duplicate(true)
+	for craft_id in _departures_by_craft_id.keys():
+		if dropped_side_ids.has(String(Dictionary(_departures_by_craft_id[craft_id]).get("job_id", ""))):
+			_departures_by_craft_id.erase(craft_id)
 	_completion_receipts = data.completion_receipts.duplicate(true)
+	for receipt_id in _completion_receipts.keys():
+		if dropped_side_ids.has(String(Dictionary(_completion_receipts[receipt_id]).get("job_id", ""))):
+			_completion_receipts.erase(receipt_id)
 	_requests = data.requests.duplicate(true)
 	_progress = Dictionary(data.get("progress",_progress)).duplicate(true)
 	_revision = int(data.revision)
@@ -518,11 +772,21 @@ func _validate_saved_state(data: Dictionary) -> Dictionary:
 	if not location_verdict.ok or not _locations.has(data.get("selected_location_id", "")):
 		return _reject("stale_campaign_definitions", "Ortsdaten geaendert")
 	# Auftragsmenge: jede gespeicherte Kennung muss es noch geben; fehlen darf nur eine additive neue Kennung.
+	# Nebenauftraege (side) sind davon ausgenommen: ein unbekannter gespeicherter wird still verworfen, ein im Stand fehlender gilt als neu.
+	var dropped_side_ids: Array = _dropped_side_ids(data)
 	for saved_id in data.jobs:
-		if not _jobs.has(saved_id):
+		if not _jobs.has(saved_id) and not dropped_side_ids.has(String(saved_id)):
 			return _reject("stale_campaign_definitions", "Auftragsdaten geaendert")
+	if data.has("home_landings") and not _saved_integer(data.home_landings):
+		return _reject("invalid_campaign_state", "Heimlandungszaehler ungueltig")
+	if data.has("reputation"):
+		if typeof(data.reputation) != TYPE_DICTIONARY:
+			return _reject("invalid_campaign_state", "Rufstand ungueltig")
+		for faction in data.reputation:
+			if typeof(data.reputation[faction]) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(data.reputation[faction])):
+				return _reject("invalid_campaign_state", "Rufstand ungueltig")
 	for current_id in _jobs:
-		if not data.jobs.has(current_id) and not ADDITIVE_JOB_IDS.has(String(current_id)):
+		if not data.jobs.has(current_id) and not ADDITIVE_JOB_IDS.has(String(current_id)) and not bool(_jobs[current_id].get("side", false)):
 			return _reject("stale_campaign_definitions", "Auftragsdaten geaendert")
 		# Ein neuer Auftrag, den der Stand nicht kennt, kann keinen Abschlussbeleg haben.
 		if not data.jobs.has(current_id) and data.completion_receipts.has(String(current_id) + ":completed"):
@@ -532,6 +796,11 @@ func _validate_saved_state(data: Dictionary) -> Dictionary:
 			continue # additiver neuer Auftrag: gilt als offered
 		if typeof(data.jobs.get(job_id)) != TYPE_DICTIONARY:
 			return _reject("invalid_job_state", "Auftrag fehlt")
+		if bool(_jobs[job_id].get("side", false)):
+			var side_verdict: Dictionary = _validate_saved_side_job(data.jobs[job_id])
+			if not side_verdict.ok:
+				return side_verdict
+			continue
 		var saved: Dictionary = data.jobs[job_id].duplicate(true)
 		saved.erase("locked")
 		# Rueckzugsfelder sind Spielstand, keine Auftragsdefinition: getrennt auf Typ pruefen, vor dem Definitionsvergleich entfernen.
@@ -559,9 +828,17 @@ func _validate_saved_state(data: Dictionary) -> Dictionary:
 			return _reject("invalid_completion_receipt", "Auftragsbeleg fehlt")
 	for receipt_id in data.completion_receipts:
 		var receipt: Variant = data.completion_receipts[receipt_id]
+		if typeof(receipt) == TYPE_DICTIONARY and dropped_side_ids.has(String(receipt.get("job_id", ""))):
+			continue
 		if typeof(receipt) != TYPE_DICTIONARY or not _jobs.has(receipt.get("job_id", "")):
 			return _reject("invalid_completion_receipt", "Auftragsbeleg ungueltig")
 		var job: Dictionary = _jobs[receipt.job_id]
+		if bool(job.get("side", false)):
+			# Nebenauftragsbeleg: Kennung "<id>:completed:<n>", Szenario wie heute; die Belohnung steht im Beleg und wird nicht mit der heutigen Datei verglichen.
+			var count_text := String(receipt_id).trim_prefix(String(receipt.job_id) + ":completed:")
+			if not count_text.is_valid_int() or count_text.to_int() < 1 or receipt.get("side") != true or receipt.get("completion_id") != receipt_id or receipt.get("runtime_verified") != true or receipt.get("scenario_id") != job.scenario_id or typeof(receipt.get("reward")) != TYPE_DICTIONARY:
+				return _reject("invalid_completion_receipt", "Nebenauftragsbeleg ungueltig")
+			continue
 		if String(receipt_id) != String(receipt.job_id) + ":completed" or receipt.get("completion_id") != receipt_id or receipt.get("runtime_verified") != true or receipt.get("scenario_id") != job.scenario_id or not _saved_equal(receipt.get("reward"), job.reward):
 			return _reject("invalid_completion_receipt", "Auftragsbeleg widerspricht Daten")
 	for craft_id in data.departures_by_craft_id:
@@ -571,10 +848,12 @@ func _validate_saved_state(data: Dictionary) -> Dictionary:
 		if not Array(_locations[departure.origin_location_id].landing_pad_ids).has(departure.get("landing_pad_id", "")) or departure.origin_location_id == departure.destination_location_id:
 			return _reject("invalid_saved_departure", "Abflugpad ungueltig")
 		var departure_job := String(departure.get("job_id", ""))
+		if dropped_side_ids.has(departure_job):
+			continue  # Nebenauftrag, den es nicht mehr gibt: die Bindung wird beim Laden verworfen
 		if not departure_job.is_empty() and (not _jobs.has(departure_job) or not data.jobs.has(departure_job) or String(data.jobs[departure_job].location_id) != String(departure.destination_location_id)):
 			return _reject("invalid_saved_departure", "Abflugstand ungueltig")
 	var selected := String(data.get("selected_job_id", ""))
-	if not selected.is_empty() and (not _jobs.has(selected) or not data.jobs.has(selected) or String(data.jobs[selected].status) not in ["accepted", "active"] or String(data.jobs[selected].location_id) != String(data.selected_location_id)):
+	if not selected.is_empty() and not dropped_side_ids.has(selected) and (not _jobs.has(selected) or not data.jobs.has(selected) or String(data.jobs[selected].status) not in ["accepted", "active"] or String(data.jobs[selected].location_id) != String(data.selected_location_id)):
 		return _reject("invalid_selected_job", "Auftragsauswahl ungueltig")
 	for request_id in data.requests:
 		var request: Variant = data.requests[request_id]
@@ -586,6 +865,22 @@ func _validate_saved_state(data: Dictionary) -> Dictionary:
 	if not location_verdict.relocated.is_empty():
 		return {"ok":true, "relocated_location_ids":location_verdict.relocated}
 	return {"ok":true}
+
+## Gespeicherter Nebenauftrag: nur Zustandsfelder pruefen; die Definition (Titel, Belohnung, Fristen) gilt aus side_jobs.json von heute.
+func _validate_saved_side_job(saved: Variant) -> Dictionary:
+	if typeof(saved) != TYPE_DICTIONARY:
+		return _reject("invalid_job_state", "Auftrag fehlt")
+	var entry: Dictionary = saved
+	if String(entry.get("status", "")) not in ["offered", "accepted", "active", "completed", "failed", "cooldown", "expired"]:
+		return _reject("invalid_job_status", "Auftragsstatus ungueltig")
+	for field in ["retreat_count", "completions", "cooldown_until"]:
+		if entry.has(field) and not _saved_integer(entry[field]):
+			return _reject("invalid_job_state", "Nebenauftragszaehler ungueltig")
+	if entry.has("window_start") and not (_saved_integer(entry.window_start) or (typeof(entry.window_start) in [TYPE_INT, TYPE_FLOAT] and float(entry.window_start) == -1.0)):
+		return _reject("invalid_job_state", "Angebotsfenster ungueltig")
+	if entry.has("reopen_at_home") and (typeof(entry.reopen_at_home) != TYPE_BOOL or (bool(entry.reopen_at_home) and String(entry.get("status", "")) != "failed")):
+		return _reject("invalid_job_state", "Rückzugsmerker ungültig")
+	return {"ok": true}
 
 func _saved_integer(value: Variant) -> bool:
 	return typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)) and float(value) >= 0 and float(value) == floor(float(value)) and float(value) <= 2147483647
