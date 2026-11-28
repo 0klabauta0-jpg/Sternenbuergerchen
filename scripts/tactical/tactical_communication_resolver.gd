@@ -3,6 +3,7 @@ extends RefCounted
 
 const TACTICAL_COMMUNICATION_EVENT_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_event.gd")
 const FIRETEAMLEADER_FEEDBACK_BUBBLE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/ui/fireteamleader_feedback_bubble_resolver.gd")
+const TACTICAL_COMMUNICATION_COPY_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_copy.gd")
 
 const COPY_CATALOG_PATH: String = "res://data/tactical_communication_copy.json"
 const SOURCE_ID: String = "tactical_communication_feedback"
@@ -20,11 +21,21 @@ var _last_emit_msec_by_key: Dictionary = {}
 static func build_event(event_type: String, context: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
 	var normalized_type: String = TACTICAL_COMMUNICATION_EVENT_SCRIPT.call("normalize_event_type", event_type)
 	var copy_entry: Dictionary = _copy_entry_for_type(normalized_type)
+	var trigger_entry: Dictionary = TACTICAL_COMMUNICATION_COPY_SCRIPT.call("trigger_entry", String(context.get("copy_trigger", "")))
+	var has_catalog_copy: bool = not copy_entry.is_empty() or not trigger_entry.is_empty()
+	if not trigger_entry.is_empty():
+		# Der Anlass (z. B. Sanitaeter, Munition) bestimmt den Satz; die Ereignisart liefert Prioritaet und Kanaele.
+		copy_entry = copy_entry.duplicate(true)
+		copy_entry["copy"] = trigger_entry.get("copy", {})
+		copy_entry["map_label"] = trigger_entry.get("map_label", copy_entry.get("map_label", ""))
 	var skill_tier: String = _resolve_skill_tier(context)
 	var template_payload: Dictionary = Dictionary(Dictionary(copy_entry.get("copy", {})).get(skill_tier, Dictionary(Dictionary(copy_entry.get("copy", {})).get("neutral", {})))).duplicate(true)
-	var short_text: String = _format_copy(String(context.get("short_text", template_payload.get("short", ""))).strip_edges(), context, skill_tier)
+	# Eine Satzquelle: Gibt es Katalogtext, gewinnt er gegen mitgegebene Texte (nur die Detailzeile darf vom Aufrufer kommen).
+	var short_template: String = String(template_payload.get("short", "")) if has_catalog_copy and not template_payload.is_empty() else String(context.get("short_text", template_payload.get("short", "")))
+	var short_text: String = _format_copy(short_template.strip_edges(), context, skill_tier)
 	var detail_text: String = _format_copy(String(context.get("detail_text", template_payload.get("detail", ""))).strip_edges(), context, skill_tier)
-	var map_label: String = _format_copy(String(context.get("map_label", copy_entry.get("map_label", short_text))).strip_edges(), context, skill_tier)
+	var map_label_template: String = String(copy_entry.get("map_label", "")) if has_catalog_copy and not String(copy_entry.get("map_label", "")).is_empty() else String(context.get("map_label", copy_entry.get("map_label", short_text)))
+	var map_label: String = _format_copy(map_label_template.strip_edges(), context, skill_tier)
 	var phase: int = maxi(int(context.get("phase", context.get("plan_phase_index", options.get("phase", 0)))), 0)
 	var fireteam_id: String = String(context.get("fireteam_id", "")).strip_edges().to_lower()
 	var unit_id: String = String(context.get("unit_id", context.get("leader_unit_id", ""))).strip_edges()
@@ -112,6 +123,7 @@ func reset_cooldowns() -> void:
 static func clear_copy_catalog_cache() -> void:
 	_copy_catalog_cache.clear()
 	_copy_catalog_cache_loaded = false
+	TACTICAL_COMMUNICATION_COPY_SCRIPT.call("clear_cache")
 
 
 static func build_events_for_multi_fireteam_plan(plan: Dictionary, options: Dictionary = {}) -> Array:
@@ -184,7 +196,8 @@ static func build_selected_fireteam_text(events: Array, selected_fireteam_ids: P
 		var short_text: String = String(event.get("short_text", "")).strip_edges()
 		if short_text.is_empty():
 			continue
-		lines.append(short_text)
+		# Mehrere Trupps im Fenster: der Satz steht in Ich-Form, daher den Trupp voranstellen.
+		lines.append("%s: %s" % [fireteam_id.to_upper(), short_text] if not fireteam_id.is_empty() else short_text)
 		if lines.size() >= maxi(limit, 1):
 			break
 	return "\n".join(lines)
@@ -226,15 +239,23 @@ static func build_bubble_payload(event: Dictionary, leader, anchor_position: Vec
 	))
 	if not bool(payload.get("ok", false)):
 		return {}
+	# Einzige Satzquelle: der Satz des Ereignisses (tactical_communication_copy.json). Der Ersatz aus der
+	# Befehlsrueckmeldung gilt nur, wenn das Ereignis keinen Satz hat.
 	var event_text: String = String(event.get("short_text", "")).strip_edges()
-	if not event_text.is_empty() and String(payload.get("text_source", "")).strip_edges() != "comms_lines":
-		payload["text"] = event_text
+	if not event_text.is_empty():
+		payload["text"] = event_text.replace("\n", " ")
+		payload["text_source"] = TACTICAL_COMMUNICATION_COPY_SCRIPT.TEXT_SOURCE_ID
+		payload["text_key"] = "events.%s" % String(event.get("event_type", ""))
 	payload["source"] = SOURCE_ID
 	payload["tactical_communication_event_id"] = String(event.get("event_id", ""))
 	payload["tactical_communication_event_type"] = String(event.get("event_type", ""))
 	payload["priority"] = int(event.get("priority", 0))
 	payload["channels"] = PackedStringArray(event.get("channels", PackedStringArray()))
-	payload["duration_seconds"] = float(event.get("duration_seconds", payload.get("duration_seconds", 1.8)))
+	payload["duration_seconds"] = float(TACTICAL_COMMUNICATION_COPY_SCRIPT.call(
+		"duration_for_text",
+		String(payload.get("text", "")),
+		bool(TACTICAL_COMMUNICATION_COPY_SCRIPT.call("is_important", int(event.get("priority", 0)), String(event.get("feedback_state", ""))))
+	))
 	payload["category"] = "ftl_command_feedback"
 	return payload
 
@@ -333,45 +354,8 @@ static func _copy_entry_for_type(event_type: String) -> Dictionary:
 
 
 static func _load_copy_catalog() -> Dictionary:
-	if _copy_catalog_cache_loaded:
-		return _copy_catalog_cache.duplicate(true)
-	_copy_catalog_cache_loaded = true
-	if not FileAccess.file_exists(COPY_CATALOG_PATH):
-		return {}
-	var file := FileAccess.open(COPY_CATALOG_PATH, FileAccess.READ)
-	if file == null:
-		return {}
-	var text: String = file.get_as_text()
-	file.close()
-	var parsed = JSON.parse_string(text)
-	_copy_catalog_cache = Dictionary(parsed) if typeof(parsed) == TYPE_DICTIONARY else {}
-	return _copy_catalog_cache.duplicate(true)
+	return TACTICAL_COMMUNICATION_COPY_SCRIPT.call("load_catalog")
 
 
-static func _format_copy(template: String, context: Dictionary, skill_tier: String) -> String:
-	var result: String = template
-	var team_text: String = str(context.get("team", context.get("display_label", context.get("fireteam_id", "")))).strip_edges()
-	if team_text.is_empty():
-		team_text = str(context.get("fireteam_id", "Team")).strip_edges().to_upper()
-	var direction_text: String = str(context.get("direction_label", context.get("direction", ""))).strip_edges()
-	if direction_text.is_empty() and result.contains("{direction}"):
-		result = result.replace(" {direction}", "")
-		result = result.replace("{direction}", "")
-	var replacements: Dictionary = {
-		"{team}": team_text.to_upper(),
-		"{fireteam}": str(context.get("fireteam_id", "")).strip_edges().to_upper(),
-		"{role}": str(context.get("role", "")).strip_edges(),
-		"{role_label}": str(context.get("role_label", context.get("role", ""))).strip_edges().to_upper(),
-		"{step}": str(context.get("step", context.get("next_step", ""))).strip_edges(),
-		"{phase}": str(context.get("phase", context.get("plan_phase_index", "0"))),
-		"{direction}": direction_text,
-		"{objective}": str(context.get("objective_label", "Objective")).strip_edges(),
-		"{detail}": str(context.get("detail", "")).strip_edges(),
-		"{quality}": "%d" % int(round(_resolve_communication_clarity(context) * 100.0)),
-		"{skill_tier}": skill_tier,
-	}
-	for key in replacements.keys():
-		result = result.replace(str(key), str(replacements[key]))
-	while result.contains("  "):
-		result = result.replace("  ", " ")
-	return result.strip_edges()
+static func _format_copy(template: String, context: Dictionary, _skill_tier: String) -> String:
+	return String(TACTICAL_COMMUNICATION_COPY_SCRIPT.call("format_text", template, context))

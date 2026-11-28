@@ -4,7 +4,7 @@ extends RefCounted
 const COMIC_BUBBLE_VISUAL_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_visual_contract.gd")
 const COMIC_BUBBLE_TEXT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_text_resolver.gd")
 const CHARACTER_GAMEPLAY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/character_gameplay_resolver.gd")
-const COMMS_LINES_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/comms_lines_resolver.gd")
+const TACTICAL_COMMUNICATION_COPY_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_copy.gd")
 
 const SOURCE_ID: String = "fireteamleader_command_feedback"
 const DEFAULT_ENABLED: bool = true
@@ -71,6 +71,8 @@ static func build_command_feedback(
 	var text_context: Dictionary = context.duplicate(true)
 	text_context["skill_tier"] = skill_tier
 	text_context["character_gameplay_context"] = character_context
+	# Einzige Satzquelle: data/tactical_communication_copy.json (ueber TacticalCommunicationCopy).
+	# Befehlskontext, comms_lines und comic_bubble_text_catalog liefern hier keinen Satz mehr.
 	var text_payload: Dictionary = {}
 	if not validation_feedback.is_empty():
 		text_payload = {
@@ -83,38 +85,16 @@ static func build_command_feedback(
 			"delay_seconds": 0.0,
 		}
 	else:
-		var explicit_feedback_text: String = String(text_context.get("feedback_text", "")).strip_edges()
-		if explicit_feedback_text.is_empty():
-			explicit_feedback_text = String(text_context.get("order_summary_text", "")).strip_edges()
-		if not explicit_feedback_text.is_empty():
-			text_payload = {
-				"ok": true,
-				"text": explicit_feedback_text,
-				"text_source": "command_context",
-				"text_key": "command_context.%s.%s" % [action, state],
-				"trigger": String(text_context.get("comms_trigger", "order_confirmed")),
-				"quality_level": int(text_context.get("communication_quality_level", -1)),
-				"delay_seconds": 0.0,
-			}
-	if text_payload.is_empty():
-		text_payload = Dictionary(COMMS_LINES_RESOLVER_SCRIPT.call("resolve_feedback_text_payload", action, state, leader, text_context))
-	if not bool(text_payload.get("ok", false)):
-		text_payload = Dictionary(COMIC_BUBBLE_TEXT_RESOLVER_SCRIPT.call(
-			"resolve_ftl_text_payload",
-			action,
-			state,
-			leader,
-			text_context
-		))
-	var text: String = String(text_payload.get("text", ""))
+		text_payload = Dictionary(TACTICAL_COMMUNICATION_COPY_SCRIPT.call("command_text", action, state, skill_tier, text_context))
+		text_payload["ok"] = not text_payload.is_empty()
+		text_payload["trigger"] = String(text_context.get("comms_trigger", "order_confirmed"))
+		text_payload["quality_level"] = -1
+		text_payload["delay_seconds"] = 0.0
+	var text: String = String(text_payload.get("text", "")).replace("\n", " ").strip_edges()
 	if text.is_empty():
-		text = _resolve_text(action, state, skill_tier)
-	var modifiers: Dictionary = Dictionary(character_context.get("gameplay_modifiers", {}))
-	var duration_seconds: float = clampf(
-		_resolve_duration_seconds(state, skill_tier) * float(modifiers.get("feedback_duration_multiplier", 1.0)),
-		1.2,
-		2.4
-	)
+		text = String(TACTICAL_COMMUNICATION_COPY_SCRIPT.call("validation_text", "default"))
+	var important: bool = bool(TACTICAL_COMMUNICATION_COPY_SCRIPT.call("is_important", int(validation_feedback.get("priority", 0)), state))
+	var duration_seconds: float = float(TACTICAL_COMMUNICATION_COPY_SCRIPT.call("duration_for_text", text, important))
 	var unit_id: String = _resolve_unit_id(leader, String(context.get("unit_id", "")))
 	var payload: Dictionary = Dictionary(COMIC_BUBBLE_VISUAL_CONTRACT_SCRIPT.call(
 		"build_display_payload",
@@ -126,6 +106,10 @@ static func build_command_feedback(
 	))
 	if not bool(payload.get("ok", false)):
 		return payload
+	var modifiers: Dictionary = Dictionary(character_context.get("gameplay_modifiers", {}))
+	# Ganzer Satz in einer Zeile; die HUD-Blase bricht selbst um (sonst kuerzt der Bildvertrag auf zwei Zeilen).
+	payload["text"] = text
+	payload["duration_seconds"] = duration_seconds
 	payload["source"] = SOURCE_ID
 	payload["feedback_action"] = action
 	payload["feedback_state"] = state
@@ -231,49 +215,11 @@ static func _resolve_bubble_id(action: String, state: String) -> String:
 			return "bubble_ftl_ack"
 
 
-static func _resolve_text(action: String, state: String, skill_tier: String) -> String:
-	var high_skill: bool = skill_tier == SKILL_TIER_HIGH
-	match state:
-		STATE_BLOCKED:
-			return "Nicht moeglich.\nNeuer Punkt." if high_skill else "Geht nicht.\nNeuer Punkt?"
-		STATE_CONTACT:
-			return "Kontakt.\nFeuer frei." if high_skill else "Kontakt da.\nIch halte drauf."
-		STATE_COVER:
-			return "In Deckung.\nSektor halten." if high_skill else "Deckung suchen.\nIch halte hier."
-		STATE_RUNNING:
-			if action == "take":
-				return "Objective laeuft.\nWir nehmen es." if high_skill else "Zum Objective.\nWir versuchen's."
-			return "Laeuft.\nNaechster Schritt." if high_skill else "Bin dran.\nWeiter."
-		STATE_DONE:
-			return "Auftrag erledigt." if high_skill else "Fertig.\nSoweit klar."
-		_:
-			match action:
-				"move":
-					return "Verstanden.\nRuecke vor." if high_skill else "Okay.\nIch geh los."
-				"defend":
-					return "In Deckung.\nSektor halten." if high_skill else "Halte hier.\nDeckung suchen."
-				"flank":
-					return "Flanke laeuft.\nLeise vor." if high_skill else "Flanke.\nIch probier's."
-				"take":
-					return "Objective laeuft.\nWir nehmen es." if high_skill else "Zum Objective.\nWir versuchen's."
-				"support":
-					return "Support kommt.\nHalte durch." if high_skill else "Bin unterwegs.\nBleib liegen."
-				"go":
-					return "GO bestaetigt.\nAusfuehren." if high_skill else "GO gehoert.\nWir gehen."
-				_:
-					return "Verstanden." if high_skill else "Okay."
-
-
-static func _resolve_duration_seconds(state: String, skill_tier: String) -> float:
-	if state == STATE_BLOCKED:
-		return 2.2
-	if state == STATE_CONTACT:
-		return 2.0
-	return 1.7 if skill_tier == SKILL_TIER_HIGH else 1.9
-
-
 static func _resolve_validation_feedback(state: String, action: String, context: Dictionary) -> Dictionary:
 	if state != STATE_BLOCKED:
+		return {}
+	if not String(context.get("tactical_event_type", "")).strip_edges().is_empty() and String(context.get("validation_key", "")).strip_edges().is_empty():
+		# Ereignisse tragen ihren Satz selbst; ihre Detailzeile ist keine Pruefmeldung.
 		return {}
 	var raw_key: String = String(context.get("validation_key", "")).strip_edges()
 	if raw_key.is_empty():
@@ -333,34 +279,9 @@ static func _normalize_validation_key(raw_key: String) -> String:
 			return key
 
 
-static func _validation_message_for_key(validation_key: String, action: String) -> String:
-	match validation_key:
-		"select_tile_first":
-			return "Select tile\nfirst"
-		"observer_mode":
-			return "Host controls"
-		"wait_for_insertion":
-			return "Wait insertion"
-		"blocked_route":
-			return "Blocked route"
-		"no_los":
-			return "No LOS"
-		"too_far":
-			return "Too far"
-		"no_orders":
-			return "No orders"
-		"no_contact":
-			return "No contact"
-		"select_fireteam_first":
-			return "Select fireteam"
-		"set_lz_first":
-			return "Set LZ first"
-		"drop_cooldown":
-			return "Drop cooldown"
-		"dropship_unavailable":
-			return "Dropship unavailable"
-		_:
-			return "%s blocked" % action.capitalize()
+static func _validation_message_for_key(validation_key: String, _action: String) -> String:
+	# Verstaendliche Meldungen stehen in data/tactical_communication_copy.json (Abschnitt "validation").
+	return String(TACTICAL_COMMUNICATION_COPY_SCRIPT.call("validation_text", validation_key))
 
 
 static func _resolve_unit_id(leader, fallback: String = "") -> String:

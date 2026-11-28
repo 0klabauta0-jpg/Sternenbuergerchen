@@ -65,8 +65,8 @@ func _test_resolver_uses_catalog_and_skill_variants() -> void:
 	_assert(String(high_payload.get("skill_tier", "")) == "high", "High leadership resolves to high feedback tier")
 	_assert(String(low_payload.get("skill_tier", "")) == "low", "Low leadership resolves to low feedback tier")
 	_assert(String(high_payload.get("text", "")) != String(low_payload.get("text", "")), "Skill tiers produce distinct command text")
-	_assert(_text_within_limits(String(high_payload.get("text", "")), 2, 26), "High-skill text stays within the compact bubble contract")
-	_assert(_text_within_limits(String(low_payload.get("text", "")), 2, 26), "Low-skill text stays within the compact bubble contract")
+	_assert(String(high_payload.get("text", "")).split(" ", false).size() <= 9, "High-skill text is a short sentence (at most 9 words)")
+	_assert(String(low_payload.get("text", "")).split(" ", false).size() <= 9, "Low-skill text is a short sentence (at most 9 words)")
 	_assert(disabled_payload.is_empty(), "Disabled feedback settings return no bubble payload")
 	_assert(_is_visual_only_payload(high_payload), "Resolver payload remains visual-only and has no gameplay command keys")
 	high_leader.free()
@@ -131,6 +131,9 @@ func _test_controller_command_binding_and_toggle() -> void:
 func _test_primary_map_renders_feedback_bubbles() -> void:
 	var leader: Node2D = _make_unit("map_lead", "blue", true, Vector2(0.0, 256.0), 0.9)
 	var payload: Dictionary = Dictionary(RESOLVER_SCRIPT.call("build_command_feedback", "take", "running", leader, leader.global_position, {}, {"fireteam_id": "blue"}))
+	# Die Truppfuehrer-Blase wird nur noch an der Fireteam-Karte (HUD) gezeichnet, nie ueber der Figur.
+	payload["anchor_space"] = "hud"
+	payload["hud_anchor_position"] = Vector2(320.0, 200.0)
 	var map_data: RefCounted = TERRAIN_MAP_DATA_SCRIPT.call("create_empty", "task210_feedback_bubbles", Vector2i(7, 7), Vector2.ZERO, 64.0, 32.0, 3)
 	var primary_view: Node = TERRAIN_MAP_3D_VIEW_SCRIPT.new()
 	root.add_child(primary_view)

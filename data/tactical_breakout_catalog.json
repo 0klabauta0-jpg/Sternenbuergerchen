@@ -27,71 +27,71 @@
       "breakout_class": "hold_and_report",
       "communication_event_type": "contact_report",
       "priority": 80,
-      "short_label": "CONTACT",
-      "cause_label": "Contact"
+      "short_label": "KONTAKT",
+      "cause_label": "Feindkontakt"
     },
     "suppressed_pinned": {
       "breakout_class": "hold_and_report",
       "communication_event_type": "breakout_adaptation",
       "priority": 80,
-      "short_label": "PINNED",
-      "cause_label": "Suppressed"
+      "short_label": "FESTGENAGELT",
+      "cause_label": "Unter Beschuss"
     },
     "casualty_medic_needed": {
       "breakout_class": "hold_and_report",
       "communication_event_type": "needs_orders",
       "priority": 80,
-      "short_label": "MEDIC",
-      "cause_label": "Medic needed"
+      "short_label": "SANITÄTER",
+      "cause_label": "Sanitäter gebraucht"
     },
     "blocked_route": {
       "breakout_class": "auto_adapt",
       "communication_event_type": "cannot_execute",
       "priority": 100,
-      "short_label": "BLOCKED",
-      "cause_label": "Blocked route"
+      "short_label": "BLOCKIERT",
+      "cause_label": "Weg versperrt"
     },
     "out_of_weapon_range": {
       "breakout_class": "request_orders",
       "communication_event_type": "needs_orders",
       "priority": 80,
-      "short_label": "RANGE",
-      "cause_label": "Out of range"
+      "short_label": "ZU WEIT",
+      "cause_label": "Außer Reichweite"
     },
     "low_ammo_no_weapon": {
       "breakout_class": "request_orders",
       "communication_event_type": "needs_orders",
       "priority": 80,
-      "short_label": "AMMO",
-      "cause_label": "Low ammo"
+      "short_label": "MUNITION",
+      "cause_label": "Munition knapp"
     },
     "leader_down": {
       "breakout_class": "request_orders",
       "communication_event_type": "needs_orders",
       "priority": 100,
-      "short_label": "LEADER",
-      "cause_label": "Leader down"
+      "short_label": "FÜHRER GEFALLEN",
+      "cause_label": "Truppführer gefallen"
     },
     "air_asset_threatened": {
       "breakout_class": "request_orders",
       "communication_event_type": "air_asset_threatened",
       "priority": 100,
-      "short_label": "AIR THREAT",
-      "cause_label": "Air asset threatened"
+      "short_label": "SCHIFF IN GEFAHR",
+      "cause_label": "Schiff bedroht"
     },
     "air_asset_destroyed": {
       "breakout_class": "abort_to_safe",
       "communication_event_type": "air_asset_destroyed",
       "priority": 100,
-      "short_label": "AIR LOST",
-      "cause_label": "Air asset destroyed"
+      "short_label": "SCHIFF VERLOREN",
+      "cause_label": "Schiff zerstört"
     },
     "rule_conflict": {
       "breakout_class": "request_orders",
       "communication_event_type": "needs_orders",
       "priority": 80,
-      "short_label": "RULE",
-      "cause_label": "Rule conflict"
+      "short_label": "REGEL",
+      "cause_label": "Regel verletzt"
     }
   }
 }

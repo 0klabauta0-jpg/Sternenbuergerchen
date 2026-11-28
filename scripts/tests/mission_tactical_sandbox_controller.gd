@@ -321,6 +321,14 @@ const FIRETEAM_SELECTED_CARDS_ROW_PATH: String = "../TacticalUI/BottomDock/Botto
 const FIRETEAM_MINI_PANEL_PATH: String = "../TacticalUI/FireteamMiniPanel"
 const FIRETEAM_MINI_HEADER_LABEL_PATH: String = "../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniHeaderLabel"
 const FIRETEAM_MINI_CARDS_VBOX_PATH: String = "../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox"
+const FIRETEAM_BUBBLE_AVOID_PANEL_PATHS: PackedStringArray = [
+	"../TacticalUI/TopNavPanel",
+	"../TacticalUI/MissionIdentityPanel",
+	"../TacticalUI/MissionDropshipPanel",
+	"../TacticalUI/TacticalEventLogPanel",
+	"../TacticalUI/A5TargetOrderPanel",
+	"../TacticalUI/BottomDock/A5InstrumentSurface",
+]
 const TACTICAL_EVENT_LOG_PANEL_PATH: String = "../TacticalUI/TacticalEventLogPanel"
 const MISSION_IDENTITY_HEADER_LABEL_PATH: String = "../TacticalUI/MissionIdentityPanel/MissionIdentityMargin/MissionIdentityVBox/MissionIdentityHeaderLabel"
 const MISSION_IDENTITY_BODY_LABEL_PATH: String = "../TacticalUI/MissionIdentityPanel/MissionIdentityMargin/MissionIdentityVBox/MissionIdentityBodyLabel"
@@ -20914,8 +20922,7 @@ func resolve_tactical_breakout_return_to_plan(breakout_id: String, context: Dict
 				"phase": int(returned.get("phase", 0)),
 				"role": "return_to_plan",
 				"step": str(returned.get("trigger", "")),
-				"short_text": "RETURN PLAN",
-				"detail_text": "Breakout resolved | return to plan",
+				"copy_trigger": "return_to_plan",
 				"priority": TACTICAL_COMMUNICATION_EVENT_SCRIPT.PRIORITY_NORMAL,
 			}, context))
 			_record_tactical_communication_events([event], context)
@@ -20973,9 +20980,8 @@ func _build_tactical_breakout_communication_event(breakout: Dictionary, options:
 			"phase": int(breakout.get("phase", 0)),
 			"role": "needs_orders",
 			"step": str(breakout.get("trigger", "")),
-			"short_text": "%s wartet auf Befehl" % fireteam_label,
-			"detail_text": str(breakout.get("detail_text", "FTL requests commander input")),
-			"map_label": "NEEDS ORDERS",
+			"copy_trigger": str(breakout.get("trigger", "")),
+			"team": fireteam_label,
 			"priority": int(breakout.get("priority", TACTICAL_COMMUNICATION_EVENT_SCRIPT.PRIORITY_HIGH)),
 			"communication_clarity": float(breakout.get("communication_clarity", 0.5)),
 			"anchor_position": breakout.get("anchor_position", null),
@@ -21258,6 +21264,9 @@ func _bind_tactical_event_to_active_command_bubble(payload: Dictionary) -> bool:
 			return false
 		if not String(bubble.get("tactical_communication_event_id", "")).strip_edges().is_empty():
 			return false
+		if _get_fireteamleader_feedback_priority(payload) >= 80 and _get_fireteamleader_feedback_priority(payload) > _get_fireteamleader_feedback_priority(bubble):
+			# Eine wichtigere Meldung (z. B. Kontakt) ersetzt die stehende Bestaetigung, statt sich an ihr festzuhaengen.
+			return false
 		bubble["tactical_communication_event_id"] = event_id
 		bubble["minimum_visible_until_frame"] = Engine.get_process_frames() + TACTICAL_COMMUNICATION_BUBBLE_MIN_VISIBLE_FRAMES
 		_fireteamleader_feedback_bubbles[bubble_index] = bubble
@@ -21387,6 +21396,26 @@ func _apply_fireteamleader_feedback_hud_anchor(payload: Dictionary, fireteam_id:
 	payload["anchor_space"] = "hud"
 	payload["hud_anchor_source"] = "fireteam_mini_card"
 	payload["hud_anchor_position"] = Vector2(hud_anchor_variant)
+	payload["hud_avoid_rects"] = _collect_fireteam_bubble_avoid_rects()
+
+
+## Flaechen, die die Truppfuehrer-Blase nicht ueberdecken darf: Kopfleiste, Auftragskarte, Schiffskarte,
+## Meldungsfenster, Zielkarte und das Band unten.
+func _collect_fireteam_bubble_avoid_rects() -> Array:
+	var rects: Array = []
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var viewport_area: float = maxf(viewport_size.x * viewport_size.y, 1.0)
+	for path in FIRETEAM_BUBBLE_AVOID_PANEL_PATHS:
+		var control := get_node_or_null(path) as Control
+		if control == null or not control.is_visible_in_tree():
+			continue
+		var rect: Rect2 = control.get_global_rect()
+		if rect.size.x <= 0.0 or rect.size.y <= 0.0:
+			continue
+		if rect.size.x * rect.size.y > viewport_area * 0.5:
+			continue
+		rects.append(rect)
+	return rects
 
 
 func _resolve_fireteam_mini_card_bubble_anchor_position(fireteam_id: String) -> Variant:
@@ -21431,6 +21460,7 @@ func _store_fireteamleader_feedback_bubble(payload: Dictionary) -> void:
 	var fireteam_id: String = String(normalized_payload.get("fireteam_id", "")).strip_edges().to_lower()
 	var unit_id: String = String(normalized_payload.get("unit_id", "")).strip_edges()
 	var retained_bubbles: Array = []
+	var new_priority: int = _get_fireteamleader_feedback_priority(normalized_payload)
 	for bubble_variant in _fireteamleader_feedback_bubbles:
 		if typeof(bubble_variant) != TYPE_DICTIONARY:
 			continue
@@ -21438,6 +21468,11 @@ func _store_fireteamleader_feedback_bubble(payload: Dictionary) -> void:
 		var same_fireteam: bool = not fireteam_id.is_empty() and String(existing.get("fireteam_id", "")).strip_edges().to_lower() == fireteam_id
 		var same_unit: bool = not unit_id.is_empty() and String(existing.get("unit_id", "")).strip_edges() == unit_id
 		if same_fireteam or same_unit:
+			# Je Trupp hoechstens eine Blase: eine noch stehende wichtige Meldung (Kontakt, blockiert,
+			# getroffen, gefallen) wird von einer gewoehnlichen Bestaetigung nicht verdraengt.
+			var existing_priority: int = _get_fireteamleader_feedback_priority(existing)
+			if existing_priority >= 80 and new_priority < existing_priority and now_msec < int(existing.get("expires_at_msec", 0)):
+				return
 			continue
 		retained_bubbles.append(existing)
 	retained_bubbles.append(normalized_payload)

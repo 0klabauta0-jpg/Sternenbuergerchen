@@ -11200,6 +11200,9 @@ func _add_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 	if String(feedback_bubble.get("anchor_space", "")).strip_edges().to_lower() == "hud" and typeof(feedback_bubble.get("hud_anchor_position", null)) == TYPE_VECTOR2:
 		_add_hud_feedback_bubble_visual(feedback_bubble)
 		return
+	if _is_fireteamleader_feedback_bubble(feedback_bubble):
+		# Die Truppfuehrer-Blase gehoert an die Fireteam-Karte im HUD, nie ueber die Figur auf der Karte.
+		return
 	if _should_suppress_release_firefight_world_bubble(feedback_bubble):
 		_world_label_declutter_suppressed_count += 1
 		return
@@ -11264,6 +11267,23 @@ func _add_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 	})
 
 
+func _is_fireteamleader_feedback_bubble(feedback_bubble: Dictionary) -> bool:
+	var source: String = String(feedback_bubble.get("source", "")).strip_edges().to_lower()
+	if source == "fireteamleader_command_feedback" or source == "tactical_communication_feedback":
+		return true
+	return String(feedback_bubble.get("category", "")).strip_edges().to_lower() == "ftl_command_feedback"
+
+
+func _coerce_hud_avoid_rects(value: Variant) -> Array:
+	var rects: Array = []
+	if typeof(value) != TYPE_ARRAY:
+		return rects
+	for item in Array(value):
+		if item is Rect2 and Rect2(item).size.x > 0.0 and Rect2(item).size.y > 0.0:
+			rects.append(Rect2(item))
+	return rects
+
+
 func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 	if _feedback_bubble_hud_root == null:
 		return
@@ -11278,7 +11298,13 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 	var viewport_size := Vector2(_get_viewport_size())
 	if viewport_size.x < bubble_size.x + 1.0 or viewport_size.y < bubble_size.y + 1.0:
 		viewport_size = Vector2(1280.0, 720.0)
-	var bubble_position: Vector2 = _resolve_hud_feedback_bubble_position(hud_anchor_position, bubble_size, viewport_size)
+	var avoid_rects: Array = _coerce_hud_avoid_rects(feedback_bubble.get("hud_avoid_rects", []))
+	var bubble_position: Vector2 = _resolve_hud_feedback_bubble_position(hud_anchor_position, bubble_size, viewport_size, avoid_rects)
+	var avoid_clear: bool = true
+	for avoid_rect_variant in avoid_rects:
+		if Rect2(bubble_position, bubble_size).intersects(Rect2(avoid_rect_variant)):
+			avoid_clear = false
+			break
 
 	var bubble_root := Control.new()
 	bubble_root.name = "HudFeedbackBubble_%s_%d" % [_sanitize_node_name(bubble_id), _feedback_bubble_visual_count]
@@ -11315,7 +11341,7 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
 	label.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_FEEDBACK_BUBBLE_TEXT)
-	var hud_font_size: int = 10
+	var hud_font_size: int = 12
 	label.add_theme_font_size_override("font_size", hud_font_size)
 	label.position = Vector2(8.0, 6.0)
 	label.size = Vector2(maxf(bubble_size.x - 16.0, 1.0), maxf(bubble_size.y - 12.0, 1.0))
@@ -11352,6 +11378,7 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 		"wrapped_text": display_text,
 		"hud_tail_side": "left",
 		"hud_tail_points_to_anchor": true,
+		"hud_avoid_clear": avoid_clear,
 		"visual_only": true,
 	})
 
@@ -11368,18 +11395,19 @@ func _coerce_hud_bubble_size(value: Variant) -> Vector2:
 	return Vector2(168.0, 72.0)
 
 
-func _build_compact_hud_bubble_size(text: String, requested_size: Vector2) -> Vector2:
+func _build_compact_hud_bubble_size(text: String, _requested_size: Vector2) -> Vector2:
 	var trimmed_text: String = text.strip_edges()
 	var character_count: int = trimmed_text.length()
 	var line_count: int = maxi(trimmed_text.split("\n").size(), 1)
 	var longest_line: int = 0
 	for line in trimmed_text.split("\n"):
 		longest_line = maxi(longest_line, String(line).length())
-	var target_width: float = 92.0 + float(mini(longest_line, 20)) * 2.2
-	var target_height: float = 36.0 + float(maxi(line_count - 1, 0)) * 10.0
+	# Schrift 12 px: etwa 6 px je Zeichen plus Rand; Hoehe 15 px je Zeile plus Rand.
+	var target_width: float = 20.0 + float(mini(longest_line, 24)) * 6.0
+	var target_height: float = 18.0 + float(maxi(line_count, 1)) * 15.0
 	return Vector2(
-		clampf(minf(maxf(requested_size.x, 112.0), target_width), 96.0, 162.0),
-		clampf(minf(maxf(requested_size.y, 42.0), target_height), 38.0, 72.0)
+		clampf(target_width, 72.0, 160.0),
+		clampf(target_height, 36.0, 78.0)
 	)
 
 
@@ -11408,16 +11436,24 @@ func _wrap_hud_feedback_bubble_text(text: String) -> String:
 	return "\n".join(wrapped_lines)
 
 
-func _resolve_hud_feedback_bubble_position(hud_anchor_position: Vector2, bubble_size: Vector2, viewport_size: Vector2) -> Vector2:
+func _resolve_hud_feedback_bubble_position(hud_anchor_position: Vector2, bubble_size: Vector2, viewport_size: Vector2, avoid_rects: Array = []) -> Vector2:
 	var base_position: Vector2 = _clamp_hud_feedback_bubble_position(
 		hud_anchor_position + Vector2(10.0, -bubble_size.y * 0.52),
 		bubble_size,
 		viewport_size
 	)
 	var step: float = bubble_size.y + 4.0
-	for offset_y in [0.0, step, -step, step * 2.0, -step * 2.0]:
+	for offset_y in [0.0, step, -step, step * 2.0, -step * 2.0, step * 3.0, -step * 3.0]:
 		var candidate: Vector2 = _clamp_hud_feedback_bubble_position(base_position + Vector2(0.0, offset_y), bubble_size, viewport_size)
-		if not _hud_feedback_bubble_position_overlaps(candidate, bubble_size):
+		if _hud_feedback_bubble_position_overlaps(candidate, bubble_size):
+			continue
+		var candidate_rect := Rect2(candidate, bubble_size)
+		var blocked: bool = false
+		for avoid_rect_variant in avoid_rects:
+			if candidate_rect.intersects(Rect2(avoid_rect_variant)):
+				blocked = true
+				break
+		if not blocked:
 			return candidate
 	return base_position
 
