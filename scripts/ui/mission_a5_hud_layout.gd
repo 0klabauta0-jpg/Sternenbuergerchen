@@ -422,6 +422,9 @@ static func _refresh_combined_team_card(controller:Node) -> void:
 		var original:=sources[i] as TextureRect
 		portrait.texture=original.texture;portrait.modulate=original.modulate;portrait.tooltip_text=original.tooltip_text;portrait.custom_minimum_size=Vector2(minf(edge,ph),ph)
 		var unit_id:=String(original.get_meta("mission_member_unit_id",""))
+		# Sprechzeilen der Mitglieder (Funk) finden ihr Bild ueber diese Merker.
+		portrait.set_meta("funk_band_unit_id",unit_id)
+		portrait.set_meta("funk_band_name",String(original.get_meta("mission_member_name","")))
 		var callback:=Callable(controller,"_on_native_member_portrait_gui_input").bind(unit_id,id)
 		var route_key:=id+":"+unit_id
 		if String(portrait.get_meta("combined_member_route",""))!=route_key:

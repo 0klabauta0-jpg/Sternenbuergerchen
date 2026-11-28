@@ -93,63 +93,63 @@
 	"npc": {
 		"health": {
 			"downed": {
-				"high": "Ich brauche Hilfe.",
-				"low": "Hilfe.\nIch bin unten.",
-				"neutral": "Ich brauche Hilfe."
+				"high": "Ich liege am Boden.\nBitte helft mir.",
+				"low": "Hilfe, ich bin\nverwundet.",
+				"neutral": "Ich liege am Boden.\nBitte helft mir."
 			},
 			"respawning": {
-				"high": "Zurueckholen.\nBin noch da.",
-				"low": "Nicht weg.\nIch komm wieder.",
-				"neutral": "Zurueckholen.\nBin noch da."
+				"high": "Holt mich zurück,\nich bin noch da.",
+				"low": "Ich komme wieder,\ngebt nicht auf.",
+				"neutral": "Holt mich zurück,\nich bin noch da."
 			},
 			"wounded": {
-				"high": "Getroffen.\nHalte durch.",
-				"low": "Tut weh.\nIch bleib dran.",
-				"neutral": "Getroffen.\nHalte durch."
+				"high": "Ich bin getroffen,\naber ich halte durch.",
+				"low": "Das tut weh,\naber ich bleibe.",
+				"neutral": "Ich bin getroffen,\naber ich halte durch."
 			}
 		},
 		"order": {
 			"default": {
-				"high": "Befehl sitzt.\nIch bewege.",
-				"low": "Befehl da.\nIch gehe.",
-				"neutral": "Befehl da.\nIch bewege."
+				"high": "Ich habe den Befehl\nund bin unterwegs.",
+				"low": "Befehl da,\nich gehe los.",
+				"neutral": "Ich habe den Befehl\nund bewege mich."
 			}
 		},
 		"role": {
 			"leader": {
-				"high": "Team bleibt\nbei mir.",
-				"low": "Alle bei mir.\nLangsam.",
-				"neutral": "Team bleibt\nbei mir."
+				"high": "Mein Trupp bleibt\nbei mir.",
+				"low": "Alle zu mir,\nlangsam vor.",
+				"neutral": "Mein Trupp bleibt\nbei mir."
 			},
 			"medic": {
-				"high": "Wunden im Blick.\nIch bleibe nah.",
-				"low": "Ich helfe.\nSo gut ich kann.",
-				"neutral": "Wunden im Blick.\nIch bleibe nah."
+				"high": "Ich behalte die\nVerwundeten im Blick.",
+				"low": "Ich helfe so gut\nich kann.",
+				"neutral": "Ich behalte die\nVerwundeten im Blick."
 			},
 			"shooter": {
-				"high": "Linie frei.\nIch sichere.",
-				"low": "Ich sehe wenig.\nIch sichere.",
-				"neutral": "Ich sichere.\nWeiter ruhig."
+				"high": "Die Linie ist frei,\nich sichere.",
+				"low": "Ich sehe wenig,\nich sichere.",
+				"neutral": "Ich sichere,\nalles ist ruhig."
 			},
 			"pilot": {
-				"high": "Landezone\nim Kopf.",
-				"low": "Landezone...\nIch merk sie mir.",
-				"neutral": "Landezone\nim Kopf."
+				"high": "Die Landezone\nhabe ich im Kopf.",
+				"low": "Landezone... ich\nmerke sie mir.",
+				"neutral": "Die Landezone\nhabe ich im Kopf."
 			},
 			"engineer": {
-				"high": "Technik klar.\nWeiter.",
-				"low": "Technik wirkt.\nIch pruefe.",
-				"neutral": "Technik klar.\nWeiter."
+				"high": "Die Technik ist klar,\nweiter geht's.",
+				"low": "Technik wirkt komisch,\nich prüfe.",
+				"neutral": "Die Technik ist klar,\nweiter geht's."
 			},
 			"heavy": {
-				"high": "Schweres Geraet\nbereit.",
-				"low": "Schwer dabei.\nIch halte.",
-				"neutral": "Schweres Geraet\nbereit."
+				"high": "Mein schweres Gerät\nist bereit.",
+				"low": "Es ist schwer,\naber ich halte.",
+				"neutral": "Mein schweres Gerät\nist bereit."
 			},
 			"default": {
-				"high": "Ich sichere.\nWeiter ruhig.",
-				"low": "Ruhig bleiben.\nAugen offen.",
-				"neutral": "Ruhig bleiben.\nAugen offen."
+				"high": "Ich sichere,\nalles ist ruhig.",
+				"low": "Ich bleibe ruhig,\nAugen offen.",
+				"neutral": "Ich bleibe ruhig,\nAugen offen."
 			}
 		}
 	}

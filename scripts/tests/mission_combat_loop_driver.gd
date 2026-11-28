@@ -9,6 +9,7 @@ const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tacti
 const LOCAL_AVOIDANCE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/local_avoidance_resolver.gd")
 const COMBAT_CADENCE_SCRIPT: GDScript = preload("res://scripts/combat/combat_cadence.gd")
 const COMBAT_AMMO_SCRIPT: GDScript = preload("res://scripts/combat/combat_ammo.gd")
+const FUNK_SAETZE_SCRIPT: GDScript = preload("res://scripts/tactical/funk_saetze.gd")
 const COMBAT_DECISION_INTERVAL_TICKS: int = COMBAT_CADENCE_SCRIPT.DECISION_INTERVAL_TICKS
 const SUPPRESSION_MATH_SCRIPT: GDScript = preload("res://scripts/tactical/suppression_math.gd")
 const SUPPRESSION_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/suppression_tracker.gd")
@@ -2503,11 +2504,13 @@ func _ammo_note_shot(unit) -> void:
 		return
 	var unit_id: String = String(unit.call("get_unit_id"))
 	var weapon_id: String = _ammo_weapon_id(unit)
-	if String(_ammo_tracker().note_shot(unit_id, weapon_id, _current_tick, _ammo_unit_unlimited(unit))) == "empty":
+	var note_result: String = String(_ammo_tracker().note_shot(unit_id, weapon_id, _current_tick, _ammo_unit_unlimited(unit)))
+	if note_result == "empty":
 		if OS.is_debug_build():
 			# Einmal je Einheit und Magazin im Protokoll (nur Test-/Debug-Laeufe): wer ist wann ohne Munition, nach wie vielen Schuessen.
 			print("AMMO_EMPTY unit=%s weapon=%s tick=%d shots=%d" % [unit_id, weapon_id, _current_tick, int(_ammo_tracker().shots_fired(unit_id, weapon_id))])
 		_ammo_review_empty_weapon(unit_id, unit)
+	_funk_note_ammo_state(unit, unit_id, weapon_id, note_result)
 
 
 ## M6c (C1): Waffenplatz der Einheit (1 = Hauptwaffe, 2 = Zweitwaffe); Einheiten ohne Wechsel-Schnittstelle bleiben bei 1.
@@ -4868,6 +4871,102 @@ func _record_friendly_fire_feedback(attacker, target, attacker_id: String, inten
 	)
 
 
+# ---------------------------------------------------------------- Funk: Anlaesse der Mitglieder (Paket 2)
+## Meldet nur Anlaesse an die Taktik-Steuerung (Sprechzeile im Band, Zeile im Meldungsfenster). Keine Kampflogik, kein Zufall.
+var _funk_last_attacker: Dictionary = {}        # Ziel-Einheit -> letzter Angreifer
+var _funk_enemy_kill_reported: Dictionary = {}  # Gegner, fuer die "Gegner erledigt" schon gemeldet wurde (bis er wieder steht)
+
+
+func _funk_notify(unit, occasion: String, context: Dictionary = {}) -> void:
+	if unit == null or not is_instance_valid(unit) or not _is_friendly_unit(unit):
+		return
+	var tactical_controller = _get_tactical_controller()
+	if tactical_controller == null or not tactical_controller.has_method("report_member_funk_event"):
+		return
+	tactical_controller.call("report_member_funk_event", unit, occasion, context)
+
+
+func _funk_note_damage(unit, unit_id: String, amount: int, hit_context: Dictionary) -> void:
+	var attacker_id: String = String(hit_context.get("attacker_unit_id", "")).strip_edges()
+	if not attacker_id.is_empty():
+		_funk_last_attacker[unit_id] = attacker_id
+	if amount <= 0 or not _is_friendly_unit(unit):
+		return
+	# Wer mit diesem Treffer am Boden liegt, meldet "liegt" (kommt ueber den Lebenszustand), nicht zusaetzlich "getroffen".
+	if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+		return
+	_funk_notify(unit, "getroffen")
+
+
+func _funk_note_vital_state(unit, unit_id: String, vital_state: String) -> void:
+	if unit == null:
+		return
+	if _is_friendly_unit(unit):
+		match vital_state:
+			"down":
+				_funk_notify(unit, "liegt")
+			"bleedout":
+				_funk_notify_comrade_fell(unit, unit_id)
+		return
+	if vital_state != "down" and vital_state != "bleedout":
+		return
+	if _funk_enemy_kill_reported.has(unit_id):
+		return
+	_funk_enemy_kill_reported[unit_id] = true
+	var attacker = _resolve_unit_by_id(String(_funk_last_attacker.get(unit_id, "")))
+	if attacker == null:
+		return
+	var context: Dictionary = {}
+	if attacker is Node2D and unit is Node2D:
+		context["richtung"] = FUNK_SAETZE_SCRIPT.call("compass_label", (attacker as Node2D).global_position, (unit as Node2D).global_position)
+	_funk_notify(attacker, "gegner_erledigt", context)
+
+
+## Ein Kamerad faellt: genau ein Mitglied des Trupps (kampffaehig, bevorzugt nicht der Truppfuehrer, kleinste Kennung) meldet es.
+func _funk_notify_comrade_fell(fallen, fallen_id: String) -> void:
+	var fireteam_id: String = _get_unit_fireteam_id(fallen)
+	var speaker = null
+	var speaker_id: String = ""
+	var speaker_is_lead: bool = true
+	for mate in _get_units(friendly_unit_paths):
+		if mate == null or mate == fallen or not mate.has_method("get_unit_id") or not mate.has_method("get_vital_state"):
+			continue
+		if _get_unit_fireteam_id(mate) != fireteam_id or String(mate.call("get_vital_state")) != "fit":
+			continue
+		var mate_id: String = String(mate.call("get_unit_id"))
+		var mate_is_lead: bool = bool(mate.get("is_fireteam_lead"))
+		var better: bool = speaker == null or (speaker_is_lead and not mate_is_lead) or (speaker_is_lead == mate_is_lead and mate_id < speaker_id)
+		if better:
+			speaker = mate
+			speaker_id = mate_id
+			speaker_is_lead = mate_is_lead
+	if speaker != null:
+		_funk_notify(speaker, "kamerad_faellt", {"kamerad": _ammo_unit_name(fallen, fallen_id)})
+
+
+func _funk_note_heal(patient, heal_context: Dictionary) -> void:
+	var healer_id: String = String(heal_context.get("healer_unit_id", "")).strip_edges()
+	if healer_id.is_empty() or not _is_friendly_unit(patient):
+		return
+	var healer = _resolve_unit_by_id(healer_id)
+	if healer == null or healer == patient:
+		return
+	_funk_notify(healer, "gerettet", {"kamerad": _ammo_unit_name(patient, String(patient.call("get_unit_id")))})
+
+
+func _funk_note_ammo_state(unit, unit_id: String, weapon_id: String, note_result: String) -> void:
+	if not _is_friendly_unit(unit):
+		return
+	if note_result == "empty":
+		_funk_notify(unit, "magazin_leer")
+		return
+	if not note_result.is_empty():
+		return
+	var state: Dictionary = Dictionary(_ammo_tracker().status(unit_id, weapon_id, _current_tick, _ammo_unit_unlimited(unit)))
+	if String(state.get("state", "")) == "reloading" and int(state.get("rounds", 1)) <= 0:
+		_funk_notify(unit, "nachladen")
+
+
 func _get_unit_fireteam_id(unit) -> String:
 	if unit != null and unit.has_method("get_fireteam_id"):
 		return String(unit.call("get_fireteam_id")).strip_edges().to_lower()
@@ -5054,12 +5153,14 @@ func _on_unit_damage_applied(amount: int, _health_points: int, _hit_context: Dic
 	_broadcast_remote_event("%s HIT -%d" % [unit_id, amount], unit_id, HIT_EVENT_COLOR, EVENT_DEFAULT_DURATION, "HIT -%d" % amount)
 	_emit_impact_sfx(_hit_context, unit)
 	_try_reposition_enemy_on_damage(unit, _hit_context)
+	_funk_note_damage(unit, unit_id, amount, _hit_context)
 	_update_status_label("contact")
 
 
 func _on_unit_healed_applied(amount: int, _health_points: int, heal_context: Dictionary, unit) -> void:
 	if unit == null or not unit.has_method("get_unit_id"):
 		return
+	_funk_note_heal(unit, heal_context)
 
 	var unit_id: String = String(unit.call("get_unit_id"))
 	var healer_unit_id: String = String(heal_context.get("healer_unit_id", ""))
@@ -5084,6 +5185,8 @@ func _on_unit_vital_status_changed(vital_status, unit) -> void:
 	if vital_state == "fit":
 		_queued_bleedout_by_unit_id.erase(unit_id)
 		_clear_down_state_linger(unit_id)
+		_funk_enemy_kill_reported.erase(unit_id)
+	_funk_note_vital_state(unit, unit_id, vital_state)
 	match vital_state:
 		"down":
 			_mark_unit_down_started(unit_id)
