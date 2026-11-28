@@ -111,6 +111,14 @@ func _mouse(canvas: Control, pressed: bool, point: Vector2, ctrl: bool = false) 
 	event.ctrl_pressed = ctrl
 	canvas._gui_input(event)
 
+func _right(canvas: Control, point: Vector2) -> void:
+	for pressed in [true, false]:
+		var event := InputEventMouseButton.new()
+		event.button_index = MOUSE_BUTTON_RIGHT
+		event.pressed = pressed
+		event.position = point
+		canvas._gui_input(event)
+
 func _motion(canvas: Control, point: Vector2) -> void:
 	var event := InputEventMouseMotion.new()
 	event.position = point
@@ -130,18 +138,29 @@ func _canvas_checks() -> void:
 	canvas.crafts_box_selected.connect(func(ids: Array, additive: bool): selected_box.append([ids, additive]))
 	var ship_screen: Vector2 = canvas.plane_to_screen(ship_plane)
 	var empty_screen: Vector2 = canvas.hex_to_screen(GRID.from_offset(Vector2i(300, 120)))
-	# Einfacher Klick auf freie Flaeche: Kurs (erst beim Loslassen).
+	# Linksklick auf freie Flaeche: schickt nichts los und aendert die Auswahl nicht (Entscheidung 12).
 	_mouse(canvas, true, empty_screen)
-	check(moves.is_empty(), "Druck allein setzt noch keinen Kurs")
 	_mouse(canvas, false, empty_screen)
-	check(moves.size() == 1 and moves[0][0] == "a", "Einfacher Klick setzt den Kurs")
-	# Kleine Bewegung (unter der Schwelle) bleibt ein Klick.
+	check(moves.is_empty() and selected_one.is_empty() and selected_box.is_empty(), "Linksklick ins Leere: kein Kurs, keine Auswahlaenderung")
+	# Rechtsklick auf freie Flaeche: Kurs fuer das gewaehlte Schiff.
+	_right(canvas, empty_screen)
+	check(moves.size() == 1 and moves[0][0] == "a", "Rechtsklick setzt den Kurs")
+	# Rechtsklick auf den Planetenkoerper (ungueltiges Ziel): kein Kurs.
 	moves.clear()
+	_right(canvas, canvas.hex_to_screen(GRID.from_offset(Vector2i(256, 0))))
+	check(moves.is_empty(), "Rechtsklick auf den Planeten setzt keinen Kurs")
+	# Kleine Bewegung (unter der Schwelle) bleibt ein Klick: kein Rahmen, keine Auswahl, kein Kurs.
 	_mouse(canvas, true, empty_screen)
-	_motion(canvas, empty_screen + Vector2(3, 2))
-	check(not canvas.is_box_selecting(), "Unter der Schwelle kein Rahmen")
-	_mouse(canvas, false, empty_screen + Vector2(3, 2))
-	check(moves.size() == 1 and selected_box.is_empty(), "Kleine Bewegung = Klick, kein Rahmen")
+	_motion(canvas, empty_screen + Vector2(6, 5))
+	check(not canvas.is_box_selecting(), "Unter der Schwelle kein Rahmen (verwackelter Klick)")
+	_mouse(canvas, false, empty_screen + Vector2(6, 5))
+	check(moves.is_empty() and selected_box.is_empty(), "Verwackelter Linksklick: kein Kurs, Auswahl bleibt")
+	# Rechtsklick waehrend eines Linksdrucks wird ignoriert.
+	_mouse(canvas, true, empty_screen)
+	_right(canvas, empty_screen)
+	check(moves.is_empty(), "Rechtsklick waehrend Linksdruck setzt keinen Kurs")
+	_mouse(canvas, false, empty_screen)
+	check(canvas.HINT_TEXT.contains("Rechtsklick") and canvas.HINT_TEXT.contains("Linksklick"), "Bedienhinweis nennt Rechts- und Linksklick")
 	# Rahmen um das Schiff: Auswahl, kein Kurs.
 	moves.clear()
 	var corner_a: Vector2 = ship_screen - Vector2(60, 60)

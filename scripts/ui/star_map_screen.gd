@@ -27,6 +27,8 @@ var _orbit_button: Button
 var _system_button: Button
 var _orbit_center: Button
 var _pending_jump: Dictionary = {}
+## Statuszeile nach dem Doppelklick auf einen fernen Ort ("Kurs zu <Ort> gesetzt – Start drücken"); gilt, solange der Kurs vorgemerkt ist.
+var _course_notice := ""
 var _course_box: VBoxContainer
 var _course_text: Label
 var _course_start: Button
@@ -477,6 +479,8 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	_status.text = _phase_text(travel, preparation)
 	var service_status: String = SERVICE_ROUTE_PROJECTION.describe(Dictionary(travel.get("service_shuttle", {})), Dictionary(travel.get("service_shuttle_home", {})), Dictionary(travel.get("service_shuttle_dispatch", {})))
 	if not service_status.is_empty(): _status.text += "\n" + service_status
+	if not _course_notice.is_empty() and not _pending_jump.is_empty(): _status.text += "\n" + _course_notice
+	else: _course_notice = ""
 	_update_flight_status(travel, phase)
 	_abort.visible = phase == "quantum" or (phase == "approach" and bool(preparation.get("cancel_available", false)))
 	_abort.text = "Anflug abbrechen" if phase == "approach" else "Sprung abbrechen"
@@ -1034,7 +1038,12 @@ func _on_location_activated(location_id: String) -> void:
 		if distance < best_distance:
 			best_distance = distance
 			best_id = marker_id
-	if not best_id.is_empty(): _preview_jump(orbit_id, best_id)
+	if not best_id.is_empty():
+		_preview_jump(orbit_id, best_id)
+		if not _pending_jump.is_empty():
+			var site_name := DISPLAY.location_name(location_id, Dictionary(Dictionary(_runtime.get("campaign", {})).get("locations", {})).get(location_id, {}))
+			_course_notice = "Kurs zu %s gesetzt – Start drücken" % site_name
+			_status.text = _phase_text(travel, _runtime.get("map_preparation", {})) + "\n" + _course_notice
 
 func _cancel_current_travel() -> void:
 	var phase := String(Dictionary(_runtime.get("space_travel", {})).get("phase", ""))

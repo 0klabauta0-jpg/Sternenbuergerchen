@@ -321,6 +321,14 @@ func _gui_input(event: InputEvent) -> void:
 		accept_event()
 
 ## Ort, dessen gesperrter Marker (Flugziel in der Ferne, "course_target") an diesem Leinwandpunkt liegt; leer, wenn keiner.
+const COURSE_SITE_HINT := "Doppelklick: Kurs setzen"
+
+## Tooltip fuer ferne Orte: ihr Marker ist gesperrt und ignoriert die Maus, darum haengt der Hinweis an der Karte selbst.
+func _get_tooltip(at_position: Vector2) -> String:
+	var site := course_site_at(at_position)
+	if site.is_empty(): return tooltip_text
+	return String(Dictionary(_locations.get(site, {})).get("name", site)) + "\n" + COURSE_SITE_HINT
+
 func course_site_at(point: Vector2) -> String:
 	var ids: Array = _location_buttons.keys()
 	ids.sort()
@@ -638,8 +646,9 @@ func _draw() -> void:
 			continue
 		var hex: PackedVector2Array = _location_marker_polygon(body)
 		var selected: bool = _locations[id].get("selected", false)
-		draw_colored_polygon(hex, Color(0.12, 0.57, 0.67, 0.42))
-		_outline(hex, Color("e8fff8") if selected else Color("91e4ee"))
+		var far_site: bool = bool(_locations[id].get("course_target", false))
+		draw_colored_polygon(hex, Color(0.67, 0.5, 0.18, 0.38) if far_site else Color(0.12, 0.57, 0.67, 0.42))
+		_outline(hex, Color("e8fff8") if selected else (Color("f2c47c") if far_site else Color("91e4ee")))
 		if bool(_locations[id].get("accepted_job", false)):
 			var point := _hex_center(hex)
 			draw_line(point + Vector2(0, -5), point + Vector2(0, -20), Color("f2c47c"), 2.0)
@@ -703,8 +712,9 @@ func _draw_location_labels() -> void:
 		if not bool(entry.visible): continue
 		var rect: Rect2 = entry.rect
 		draw_rect(rect, Color(0.024, 0.055, 0.094, 0.82), true)
-		draw_rect(rect, Color("91e4ee"), false, 1.0)
-		draw_string(ThemeDB.fallback_font, rect.position + Vector2(5.0, 13.0), String(entry.text), HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_FONT_SIZE, Color("ebfaff"))
+		var far_site: bool = bool(Dictionary(_locations.get(id, {})).get("course_target", false))
+		draw_rect(rect, Color("f2c47c") if far_site else Color("91e4ee"), false, 1.0)
+		draw_string(ThemeDB.fallback_font, rect.position + Vector2(5.0, 13.0), String(entry.text), HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_FONT_SIZE, Color("f6dba8") if far_site else Color("ebfaff"))
 
 
 func _draw_preview_course() -> void:
@@ -948,7 +958,7 @@ func set_location_snapshot(locations: Dictionary) -> void:
 		var button: Button=_location_buttons[id]
 		button.text="◆" if bool(data.get("selected",false)) else ("◈" if String(id)=="satellite_crash" else "⌂")
 		button.disabled=not bool(data.get("available",false))
-		button.tooltip_text=String(data.get("name",id))+"\n"+String(data.get("reason","Ort auswaehlen"))
+		button.tooltip_text=String(data.get("name",id))+"\n"+(COURSE_SITE_HINT if bool(data.get("course_target",false)) else String(data.get("reason","Ort auswaehlen")))
 	_layout_location_buttons()
 
 func _body_for_location(id: String) -> Dictionary:
