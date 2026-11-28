@@ -33,7 +33,7 @@ const TIP_SCREENS: Dictionary = {
 	"editor": "editor",
 }
 const FALLBACK_TIPS: Array[String] = [
-	"Im Orbit planst du Flüge auf der Sternkarte; ein Doppelklick auf einen Ort startet den Anflug.",
+	"Im Orbit planst du Flüge auf der Sternkarte; ein Doppelklick auf einen Ort setzt den Kurs, gestartet wird mit dem Start-Knopf.",
 	"Prüfe vor dem Start, ob Treibstoff, Munition und Besatzung für den Einsatz reichen.",
 	"Verwundete Personen fallen im Einsatz aus. Plane Ersatz in der Basis ein.",
 	"Mit Esc öffnest du das Menü; dort speicherst du und kehrst zum Hauptmenü zurück.",
