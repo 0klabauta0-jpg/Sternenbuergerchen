@@ -26,6 +26,8 @@ const TASK_1159_EVENT_LOG_BORDER_COLOR: Color = UI_THEME.COLOR_BORDER
 @export var collapse_when_empty: bool = true
 
 var _event_entries: Array = []
+## Anzeigenamen der Trupps (Kennung -> Name); fehlt einer, steht wie bisher die Kennung in Grossbuchstaben.
+var _fireteam_display_labels: Dictionary = {}
 var _selected_fireteam_ids: PackedStringArray = PackedStringArray()
 var _rendered_entries: Array = []
 var _last_render_signature: String = ""
@@ -48,6 +50,10 @@ func _ready() -> void:
 	_ensure_structure()
 	_apply_task_1159_background_style()
 	_refresh_display()
+
+
+func set_fireteam_display_labels(labels: Dictionary) -> void:
+	_fireteam_display_labels = labels.duplicate()
 
 
 func set_feedback_snapshot(snapshot: Dictionary) -> void:
@@ -443,6 +449,9 @@ func _build_feedback_snapshot_signature(entries: Array, selected_fireteam_ids: P
 
 func _format_event_text(entry: Dictionary) -> String:
 	var team: String = String(entry.get("fireteam_id", "")).strip_edges().to_upper()
+	var team_label: String = String(_fireteam_display_labels.get(String(entry.get("fireteam_id", "")).strip_edges().to_lower(), "")).strip_edges()
+	if not team_label.is_empty():
+		team = team_label
 	var text: String = String(entry.get("short_text", entry.get("map_label", ""))).strip_edges()
 	if text.is_empty():
 		text = String(entry.get("event_type", "event")).strip_edges().replace("_", " ").to_upper()

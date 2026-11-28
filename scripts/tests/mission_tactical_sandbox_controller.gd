@@ -189,6 +189,10 @@ const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scrip
 const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")
 const COMIC_BUBBLE_RUNTIME_GATE_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_runtime_gate.gd")
 const NPC_THOUGHT_BUBBLE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/ui/npc_thought_bubble_resolver.gd")
+const FUNK_BAND_LINES_SCRIPT: GDScript = preload("res://scripts/tactical/funk_band_lines.gd")
+const FUNK_SAETZE_SCRIPT: GDScript = preload("res://scripts/tactical/funk_saetze.gd")
+const FUNK_CHARACTER_GAMEPLAY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/character_gameplay_resolver.gd")
+const FUNK_BAND_PORTRAITS_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/A5TeamPortraits"
 const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
 const FTL_READINESS_GAUGE_SCRIPT: GDScript = preload("res://scripts/ui/ftl_readiness_gauge.gd")
 const FIRETEAM_MEMBER_STATUS_ROW_SCRIPT: GDScript = preload("res://scripts/ui/fireteam_member_status_row.gd")
@@ -564,6 +568,8 @@ var _tactical_breakout_records: Array = []
 var _npc_thought_bubbles: Array = []
 var _npc_thought_peek_active_last_frame: bool = false
 var _npc_thought_bubble_refresh_msec: int = 0
+var _funk_band_lines: RefCounted = null
+var _funk_band_labels_shown: bool = false
 var _last_command_text: String = "AWAITING INPUT"
 var _last_mission_interaction_use_intent_snapshot: Dictionary = {}
 var _network_mission_interaction_feedback: Dictionary = {}
@@ -877,6 +883,7 @@ func _process(delta: float) -> void:
 	if not on_sim_tick:
 		_run_order_execution_step(delta)
 	_update_npc_thought_peek_visuals()
+	_update_funk_band_visuals()
 	if profile_enabled:
 		scopes_usec["execution_updates_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
@@ -4827,6 +4834,14 @@ func _refresh_tactical_event_log_panel() -> Dictionary:
 	if panel == null or not panel.has_method("set_feedback_snapshot"):
 		return {}
 	var feedback_snapshot: Dictionary = get_live_tactical_event_log_feedback_snapshot()
+	# Anzeigename des Trupps statt der rohen Kennung ("BLUE: ...") vor jeder Zeile des Meldungsfensters.
+	if panel.has_method("set_fireteam_display_labels"):
+		var fireteam_labels: Dictionary = {}
+		for fireteam_id_variant in _get_available_fireteam_ids():
+			var label_fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+			if not label_fireteam_id.is_empty():
+				fireteam_labels[label_fireteam_id] = _get_fireteam_display_label(label_fireteam_id)
+		panel.call("set_fireteam_display_labels", fireteam_labels)
 	panel.call("set_feedback_snapshot", feedback_snapshot)
 	return feedback_snapshot
 
@@ -6794,6 +6809,7 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		portrait_rect.set_meta("mission_fireteam_member_portrait", true)
 		var unit_id := String(unit.call("get_unit_id")) if unit.has_method("get_unit_id") else String(unit.name)
 		portrait_rect.set_meta("mission_member_unit_id", unit_id)
+		portrait_rect.set_meta("mission_member_name", String(unit.call("get_display_name")) if unit.has_method("get_display_name") else unit.name)
 		var input_callable := Callable(self, "_on_native_member_portrait_gui_input").bind(unit_id, fireteam_id)
 		if not portrait_rect.gui_input.is_connected(input_callable):
 			for connection in portrait_rect.get_signal_connection_list("gui_input"):
@@ -14793,6 +14809,7 @@ func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: Stri
 		_deployed_unit_ids.erase(id)
 		_deployed_unit_positions.erase(id)
 		_embarked_unit_ids[id] = true
+		report_member_funk_event(unit, "eingestiegen")
 		if _is_active_drop_sequence_for_craft(craft_id):
 			_drop_sequence_embarked_unit_ids[id] = true
 		elif _parallel_drop_sequences_by_craft.has(craft_id):
@@ -20443,7 +20460,8 @@ func get_npc_thought_bubble_snapshot() -> Array:
 	return _npc_thought_bubbles.duplicate(true)
 
 
-func get_comic_bubble_visual_payload_snapshot() -> Array:
+## `include_thoughts = false`: Die Gedanken (Taste V) erscheinen im Band der Truppkarte, nicht ueber den Figuren auf der Karte.
+func get_comic_bubble_visual_payload_snapshot(include_thoughts: bool = true) -> Array:
 	var payloads: Array = []
 	for bubble_variant in get_fireteamleader_feedback_bubble_snapshot():
 		if typeof(bubble_variant) != TYPE_DICTIONARY:
@@ -20451,7 +20469,11 @@ func get_comic_bubble_visual_payload_snapshot() -> Array:
 		var bubble: Dictionary = Dictionary(bubble_variant).duplicate(true)
 		_apply_fireteamleader_feedback_hud_anchor(bubble, String(bubble.get("fireteam_id", "")))
 		payloads.append(bubble)
-	payloads.append_array(get_npc_thought_bubble_snapshot())
+	if include_thoughts:
+		payloads.append_array(get_npc_thought_bubble_snapshot())
+	else:
+		# Die Gedanken zaehlen trotzdem weiter (Auffrischung, Band), nur gezeichnet werden sie auf der Karte nicht.
+		get_npc_thought_bubble_snapshot()
 	return payloads
 
 
@@ -21571,6 +21593,237 @@ func _update_npc_thought_peek_visuals() -> void:
 	_npc_thought_peek_active_last_frame = active
 	_refresh_npc_thought_bubbles(true)
 	_refresh_order_visuals()
+
+
+# ---------------------------------------------------------------- Funk: Sprechzeilen der Mitglieder im Band (Paket 2)
+# Das Band ist der Bilderstreifen der ausgewaehlten Truppkarte (A5TeamPortraits). Jedes Mitglied (ausser dem Truppfuehrer, der an der
+# Karte spricht) bekommt dort eine kleine Zeile an seinem Bild: letzter Satz 3 bis 5 s, dann verblassen. Saetze: FunkSaetze,
+# Bremse und Zustand: FunkBandLines. Die Zeilen liegen als Kinder der Bilder und aendern weder Breite noch Knoepfe.
+const FUNK_LINE_NODE_NAME: String = "FunkLine"
+
+func _ensure_funk_band_lines() -> RefCounted:
+	if _funk_band_lines == null:
+		_funk_band_lines = FUNK_BAND_LINES_SCRIPT.new()
+	return _funk_band_lines
+
+
+func get_funk_band_lines() -> RefCounted:
+	return _ensure_funk_band_lines()
+
+
+## Eine Person meldet sich zu einem Anlass (siehe data/comms/funk_saetze.json). Gibt die entstandene Zeile zurueck oder {}, wenn
+## die Bremse greift. Wichtige Anlaesse (liegt, Kamerad faellt) stehen zusaetzlich im Meldungsfenster, mit dem Namen der Person.
+func report_member_funk_event(unit, occasion: String, context: Dictionary = {}, now_msec: int = -1) -> Dictionary:
+	if unit == null or not is_instance_valid(unit) or not unit.has_method("get_unit_id"):
+		return {}
+	var now: int = now_msec if now_msec >= 0 else Time.get_ticks_msec()
+	var person: Dictionary = _build_funk_person(unit)
+	var resolved_occasion: String = occasion.strip_edges().to_lower()
+	# Angst und Mut folgen der Moral der Person.
+	var morale_state: String = String(person.get("morale_state", ""))
+	if resolved_occasion == "getroffen" and morale_state == "low":
+		resolved_occasion = "angst"
+	elif resolved_occasion == "gegner_erledigt" and morale_state == "high":
+		resolved_occasion = "mut"
+	var line_context: Dictionary = context.duplicate()
+	if not line_context.has("team"):
+		line_context["team"] = _get_fireteam_display_label(String(person.get("fireteam_id", ""))).capitalize()
+	var line: Dictionary = Dictionary(_ensure_funk_band_lines().call("offer", person, resolved_occasion, line_context, now))
+	if line.is_empty():
+		return {}
+	if bool(line.get("important", false)):
+		_record_funk_member_log_event(line, now)
+	return line
+
+
+func _build_funk_person(unit) -> Dictionary:
+	var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+	var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower() if unit.has_method("get_fireteam_id") else ""
+	var state: Dictionary = Dictionary(FUNK_CHARACTER_GAMEPLAY_RESOLVER_SCRIPT.call("build_unit_character_state", unit, {}))
+	var display_name: String = String(unit.call("get_display_name")).strip_edges() if unit.has_method("get_display_name") else ""
+	if display_name.is_empty() and unit.has_method("get_callsign"):
+		display_name = String(unit.call("get_callsign")).strip_edges()
+	if display_name.is_empty():
+		display_name = unit_id
+	# Persoenlichkeit: kommt mit Paket 3 als Feld "personality"; bis dahin spricht jeder wie "profi".
+	var personality: String = ""
+	var personality_variant: Variant = unit.get("personality")
+	if personality_variant != null:
+		personality = String(personality_variant)
+	return {
+		"unit_id": unit_id,
+		"fireteam_id": fireteam_id,
+		"name": display_name,
+		"personality": personality,
+		"clarity": float(state.get("communication", 0.5)),
+		"morale_state": String(state.get("morale_state", "")),
+		"is_leader": _is_unit_current_fireteam_lead(unit),
+	}
+
+
+func _record_funk_member_log_event(line: Dictionary, now_msec: int) -> void:
+	var text: String = "%s: %s" % [String(line.get("name", "")), String(line.get("text", ""))]
+	record_tactical_communication_event("funk_member_line", {
+		"event_id": "funk_member:%s:%s:%d" % [String(line.get("unit_id", "")), String(line.get("occasion", "")), int(line.get("start_msec", now_msec))],
+		"fireteam_id": String(line.get("fireteam_id", "")),
+		"unit_id": String(line.get("unit_id", "")),
+		"phase": 1,
+		"short_text": text,
+		"detail_text": text,
+		"map_label": text,
+		"priority": TACTICAL_COMMUNICATION_EVENT_SCRIPT.PRIORITY_HIGH,
+		"duration_seconds": 3.0,
+		"channels": PackedStringArray([TACTICAL_COMMUNICATION_EVENT_SCRIPT.CHANNEL_MISSION_CONTROL]),
+	}, {"now_msec": now_msec, "cooldown_msec": 0})
+
+
+func _update_funk_band_visuals() -> void:
+	if _funk_band_lines == null and not _funk_band_labels_shown and not bool(_get_comic_bubble_runtime_gate().call("is_thought_peek_active")):
+		return
+	var now: int = Time.get_ticks_msec()
+	var peek_active: bool = bool(_get_comic_bubble_runtime_gate().call("is_thought_peek_active"))
+	if not peek_active and not _funk_band_labels_shown and not bool(_ensure_funk_band_lines().call("has_active_lines", now)):
+		return
+	apply_funk_band_visuals(now, peek_active)
+
+
+## Setzt Zeilen und Gedanken an die Bilder des Bands. Oeffentlich, damit ein Pruefer feste Zeiten vorgeben kann.
+func apply_funk_band_visuals(now_msec: int, peek_active: bool = false) -> Array:
+	var shown: Array = []
+	var lines: RefCounted = _ensure_funk_band_lines()
+	var active: Array = Array(lines.call("get_active_lines", now_msec))
+	var row := get_node_or_null(FUNK_BAND_PORTRAITS_PATH) as Control
+	if row == null:
+		_funk_band_labels_shown = false
+		return shown
+	var selected_id: String = _get_selected_fireteam_id()
+	var portraits: Array = []
+	for child in row.get_children():
+		var portrait := child as Control
+		if portrait != null and portrait.visible:
+			portraits.append(portrait)
+	var wanted: Array = []  # {portrait, text, kind, alpha, important}
+	if not selected_id.is_empty():
+		if peek_active:
+			_refresh_npc_thought_bubbles(false)
+			var thought_by_unit: Dictionary = {}
+			for payload_variant in _npc_thought_bubbles:
+				if typeof(payload_variant) != TYPE_DICTIONARY:
+					continue
+				var payload: Dictionary = Dictionary(payload_variant)
+				var thought_text: String = String(payload.get("text", "")).replace("\n", " ").strip_edges()
+				if not thought_text.is_empty():
+					thought_by_unit[String(payload.get("unit_id", ""))] = thought_text
+			for portrait in portraits:
+				var thought_unit_id: String = String(portrait.get_meta("funk_band_unit_id", ""))
+				if thought_by_unit.has(thought_unit_id):
+					wanted.append({"portrait": portrait, "text": "%s: %s" % [_funk_first_name(String(portrait.get_meta("funk_band_name", ""))), String(thought_by_unit[thought_unit_id])], "kind": "thought", "alpha": 1.0, "important": false})
+		else:
+			var line_by_unit: Dictionary = {}
+			for line_variant in active:
+				var line: Dictionary = Dictionary(line_variant)
+				if String(line.get("fireteam_id", "")) != selected_id or bool(line.get("is_leader", false)):
+					continue
+				line_by_unit[String(line.get("unit_id", ""))] = line
+			var speaking: Array = []
+			for portrait in portraits:
+				var speak_unit_id: String = String(portrait.get_meta("funk_band_unit_id", ""))
+				if line_by_unit.has(speak_unit_id):
+					speaking.append({"portrait": portrait, "line": line_by_unit[speak_unit_id]})
+			speaking.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+				return int(Dictionary(a.line).get("start_msec", 0)) > int(Dictionary(b.line).get("start_msec", 0))
+			)
+			var max_lines: int = int(FUNK_BAND_LINES_SCRIPT.MAX_VISIBLE_LINES)
+			for index in range(mini(speaking.size(), max_lines)):
+				var entry: Dictionary = Dictionary(speaking[index])
+				var spoken: Dictionary = Dictionary(entry.line)
+				wanted.append({
+					"portrait": entry.portrait,
+					"text": String(spoken.get("text", "")),
+					"kind": "speech",
+					"alpha": float(FUNK_BAND_LINES_SCRIPT.alpha_for(spoken, now_msec)),
+					"important": bool(spoken.get("important", false)),
+				})
+	# Zeilen stapeln von unten nach oben (neueste unten); jede Zeile bleibt im Bereich des Bilderstreifens.
+	var used: Dictionary = {}
+	var slot: int = 0
+	for entry_variant in wanted:
+		var item: Dictionary = Dictionary(entry_variant)
+		var portrait_item := item.portrait as Control
+		if _funk_place_line(row, portrait_item, String(item.text), String(item.kind), float(item.alpha), bool(item.important), slot):
+			used[portrait_item.get_instance_id()] = true
+			slot += 1
+			shown.append({"unit_id": String(portrait_item.get_meta("funk_band_unit_id", "")), "text": String(item.text), "kind": String(item.kind)})
+		else:
+			break
+	for portrait in portraits:
+		var label := (portrait as Control).get_node_or_null(FUNK_LINE_NODE_NAME) as Label
+		if label != null and not used.has((portrait as Control).get_instance_id()):
+			label.visible = false
+	_funk_band_labels_shown = not shown.is_empty()
+	return shown
+
+
+func _funk_first_name(full_name: String) -> String:
+	var parts: PackedStringArray = full_name.strip_edges().split(" ", false)
+	return parts[0] if not parts.is_empty() else ""
+
+
+func _funk_place_line(row: Control, portrait: Control, text: String, kind: String, alpha: float, important: bool, slot: int) -> bool:
+	if portrait == null or text.is_empty():
+		return false
+	var portrait_height: float = portrait.size.y
+	var font_size: int = 11 if portrait_height <= 84.0 else (12 if portrait_height <= 92.0 else 13)
+	var text_line_height: float = float(font_size) + 3.0
+	var max_text_lines: int = 2 if kind == "speech" else 1
+	var label_height: float = text_line_height * float(max_text_lines) + 4.0
+	var gap: float = 2.0
+	var top: float = portrait_height - 2.0 - label_height - float(slot) * (label_height + gap)
+	if top < 0.0:
+		return false
+	var row_width: float = maxf(row.size.x, portrait.size.x)
+	var label_width: float = minf(row_width, 190.0 if kind == "speech" else row_width)
+	var left_in_row: float = clampf(portrait.position.x if kind == "speech" else 0.0, 0.0, maxf(0.0, row_width - label_width))
+	var label := portrait.get_node_or_null(FUNK_LINE_NODE_NAME) as Label
+	if label == null:
+		label = Label.new()
+		label.name = FUNK_LINE_NODE_NAME
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.clip_text = true
+		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.z_index = 20
+		portrait.add_child(label)
+	var style_key: String = "%s|%s|%d" % [kind, str(important), font_size]
+	if String(label.get_meta("funk_style_key", "")) != style_key:
+		label.set_meta("funk_style_key", style_key)
+		label.add_theme_font_size_override("font_size", font_size)
+		var box := StyleBoxFlat.new()
+		match kind:
+			"thought":
+				box.bg_color = Color(0.07, 0.12, 0.20, 0.94)
+				box.border_color = Color(0.55, 0.72, 0.95, 0.95)
+				label.add_theme_color_override("font_color", Color(0.86, 0.93, 1.0, 1.0))
+			_:
+				box.bg_color = Color(0.05, 0.08, 0.10, 0.94)
+				box.border_color = Color(0.95, 0.45, 0.30, 0.95) if important else Color(0.62, 0.80, 0.70, 0.95)
+				label.add_theme_color_override("font_color", Color(0.97, 0.97, 0.94, 1.0))
+		box.set_border_width_all(1)
+		box.content_margin_left = 4.0
+		box.content_margin_right = 4.0
+		box.content_margin_top = 1.0
+		box.content_margin_bottom = 1.0
+		label.add_theme_stylebox_override("normal", box)
+	label.max_lines_visible = max_text_lines
+	if label.text != text:
+		label.text = text
+	label.position = Vector2(left_in_row - portrait.position.x, top)
+	label.custom_minimum_size = Vector2(label_width, label_height)
+	label.size = Vector2(label_width, label_height)
+	label.modulate = Color(1.0, 1.0, 1.0, clampf(alpha, 0.0, 1.0))
+	label.visible = true
+	return true
 
 
 func _refresh_npc_thought_bubbles(force_refresh: bool = false) -> void:
@@ -32921,7 +33174,7 @@ func _sync_primary_3d_order_visuals_from_sources(sources: Dictionary) -> void:
 			"enemy_security_dicts": get_enemy_security_snapshot(),
 			"enemy_tactics_dicts": get_enemy_team_tactics_snapshot(),
 			"fire_event_dicts": _get_release_first_exchange_fire_visual_event_dicts(),
-			"feedback_bubble_dicts": get_comic_bubble_visual_payload_snapshot(),
+			"feedback_bubble_dicts": get_comic_bubble_visual_payload_snapshot(false),
 			"tactical_communication_event_dicts": get_tactical_communication_event_snapshot(),
 		}
 	)

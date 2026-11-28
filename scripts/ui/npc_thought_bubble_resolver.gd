@@ -85,29 +85,30 @@ static func _resolve_text(unit, context: Dictionary) -> String:
 	var vital_state: String = _get_string(unit, "get_vital_state", "fit").strip_edges().to_lower()
 	var role_id: String = _get_string(unit, "get_role_id", "").strip_edges().to_lower()
 	var health_ratio: float = _health_ratio(unit)
+	# Ersatztexte: ganze deutsche Saetze, die man ohne Vorwissen versteht.
 	if vital_state == "down" or vital_state == "bleedout":
-		return "Ich brauche Hilfe."
+		return "Ich liege am Boden und brauche Hilfe."
 	if vital_state == "respawning":
-		return "Zurueckholen.\nBin noch da."
+		return "Holt mich zurück, ich bin noch da."
 	if health_ratio < 0.55:
-		return "Getroffen.\nHalte durch."
+		return "Ich bin getroffen, aber ich halte durch."
 	if _has_current_command(unit):
-		return "Befehl sitzt.\nIch bewege."
+		return "Ich habe den Befehl und bin unterwegs."
 	if bool(unit.get("is_fireteam_lead")):
-		return "Team bleibt\nbei mir."
+		return "Mein Trupp bleibt bei mir."
 	match role_id:
 		"medic", "combat_medic", "field_medic":
-			return "Wunden im Blick.\nIch bleibe nah."
+			return "Ich habe die Verwundeten im Blick und bleibe nah."
 		"pilot", "dropship_pilot":
-			return "Landezone\nim Kopf."
+			return "Ich habe die Landezone im Kopf."
 		"heavy", "support", "specialist":
-			return "Schweres Geraet\nbereit."
+			return "Mein schweres Gerät ist bereit."
 		"engineer":
-			return "Technik klar.\nWeiter."
+			return "Die Technik ist klar, es kann weitergehen."
 		_:
 			if bool(context.get("selected", false)):
-				return "Ich sichere.\nWeiter ruhig."
-			return "Ruhig bleiben.\nAugen offen."
+				return "Ich sichere die Umgebung, alles ruhig."
+			return "Ich bleibe ruhig und halte die Augen offen."
 
 
 static func _resolve_thought_kind(unit, context: Dictionary, character_context: Dictionary = {}) -> String:
