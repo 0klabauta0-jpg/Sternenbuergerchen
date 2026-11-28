@@ -1,6 +1,21 @@
 {
-  "schema_version": 1,
-  "purpose": "Short visual-only tactical communication copy for #17, #18, map markers and FTL bubbles.",
+  "schema_version": 2,
+  "purpose": "Einzige Satzquelle der Truppführer-Blase und der Funkzeilen (Kurzfassung bei schlechter, genauere Fassung bei guter Funkgüte). Platzhalter: {team}, {direction}, {objective}, {phase}, {role_label}; Teile in [eckigen Klammern] entfallen, wenn ein Platzhalter darin leer ist.",
+  "timing": {
+    "min_seconds": 2.0,
+    "max_seconds": 4.0,
+    "base_chars": 16,
+    "seconds_per_char": 0.06,
+    "important_bonus": 0.3
+  },
+  "direction_words": {
+    "n": "Nord", "ne": "Nordost", "e": "Ost", "se": "Südost", "s": "Süd", "sw": "Südwest", "w": "West", "nw": "Nordwest",
+    "nord": "Nord", "ost": "Ost", "süd": "Süd", "west": "West",
+    "nordost": "Nordost", "südost": "Südost", "südwest": "Südwest", "nordwest": "Nordwest",
+    "left": "links", "right": "rechts", "rear": "hinten", "front": "vorne", "back": "hinten",
+    "links": "links", "rechts": "rechts", "hinten": "hinten", "vorne": "vorne",
+    "here": "", "hier": ""
+  },
   "events": {
     "order_received": {
       "priority": 20,
@@ -8,11 +23,11 @@
       "channels": ["selected_fireteam", "mission_control", "ftl_bubble"],
       "feedback_action": "move",
       "feedback_state": "accepted",
-      "map_label": "ACK",
+      "map_label": "Verstanden",
       "copy": {
-        "low": {"short": "{team} ok", "detail": "{team} nimmt Befehl an"},
-        "neutral": {"short": "{team} bestaetigt", "detail": "{team} bestaetigt den Befehl"},
-        "high": {"short": "{team} bestaetigt Q{quality}", "detail": "{team} meldet Befehl verstanden, Q{quality}"}
+        "low": {"short": "Verstanden.", "detail": "{team} hat den Befehl verstanden."},
+        "neutral": {"short": "Verstanden, wir legen los.", "detail": "{team} hat den Befehl verstanden."},
+        "high": {"short": "Verstanden, wir führen den Befehl aus.", "detail": "{team} hat den Befehl verstanden und führt ihn aus."}
       }
     },
     "plan_role_assigned": {
@@ -21,11 +36,11 @@
       "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble"],
       "feedback_action": "move",
       "feedback_state": "accepted",
-      "map_label": "{role_label}",
+      "map_label": "Auftrag",
       "copy": {
-        "low": {"short": "{team} {role_label}", "detail": "{team} bekommt Rolle {role_label}"},
-        "neutral": {"short": "{team} {role_label} | {step}", "detail": "{team} Rolle {role_label}: {step}"},
-        "high": {"short": "{team} {role_label} P{phase}", "detail": "{team} Rolle {role_label}, naechster Schritt {step}, Q{quality}"}
+        "low": {"short": "Verstanden.", "detail": "{team} hat einen Auftrag im Plan."},
+        "neutral": {"short": "Verstanden, wir übernehmen unseren Teil.", "detail": "{team} übernimmt seinen Teil des Plans."},
+        "high": {"short": "Verstanden, wir übernehmen unseren Teil, dann weiter.", "detail": "{team} übernimmt seinen Teil des Plans und meldet sich danach."}
       }
     },
     "phase_started": {
@@ -34,11 +49,11 @@
       "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble"],
       "feedback_action": "go",
       "feedback_state": "running",
-      "map_label": "P{phase}",
+      "map_label": "Los",
       "copy": {
-        "low": {"short": "Phase {phase} laeuft", "detail": "Phase {phase} gestartet"},
-        "neutral": {"short": "Phase {phase} startet", "detail": "Phase {phase} ist aktiv"},
-        "high": {"short": "Phase {phase} aktiv Q{quality}", "detail": "Phase {phase} aktiv, Meldungen klar Q{quality}"}
+        "low": {"short": "Wir gehen los.", "detail": "{team} bricht zum nächsten Abschnitt auf."},
+        "neutral": {"short": "Nächster Abschnitt, wir rücken vor.", "detail": "{team} rückt zum nächsten Abschnitt vor."},
+        "high": {"short": "Nächster Abschnitt beginnt, wir rücken vor.", "detail": "{team} beginnt den nächsten Abschnitt des Plans."}
       }
     },
     "phase_completed": {
@@ -47,11 +62,11 @@
       "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble"],
       "feedback_action": "go",
       "feedback_state": "done",
-      "map_label": "DONE",
+      "map_label": "Geschafft",
       "copy": {
-        "low": {"short": "{team} fertig", "detail": "{team} meldet Phase fertig"},
-        "neutral": {"short": "{team} Phase {phase} fertig", "detail": "{team} hat Phase {phase} abgeschlossen"},
-        "high": {"short": "{team} P{phase} komplett", "detail": "{team} Phase {phase} abgeschlossen, bereit fuer Folgeauftrag"}
+        "low": {"short": "Fertig.", "detail": "{team} ist mit dem Abschnitt fertig."},
+        "neutral": {"short": "Abschnitt geschafft.", "detail": "{team} hat den Abschnitt geschafft."},
+        "high": {"short": "Abschnitt geschafft, bereit für den nächsten Befehl.", "detail": "{team} hat den Abschnitt geschafft und wartet auf den nächsten Befehl."}
       }
     },
     "contact_report": {
@@ -60,11 +75,11 @@
       "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble", "audio_blip"],
       "feedback_action": "engage",
       "feedback_state": "contact",
-      "map_label": "KONTAKT",
+      "map_label": "Kontakt",
       "copy": {
-        "low": {"short": "{team} Kontakt", "detail": "{team} meldet Kontakt"},
-        "neutral": {"short": "{team} Kontakt {direction}", "detail": "{team} meldet Kontakt {direction}"},
-        "high": {"short": "{team} Kontakt {direction} Q{quality}", "detail": "{team} bestaetigt Kontakt {direction}, Rueckmeldung Q{quality}"}
+        "low": {"short": "Kontakt!", "detail": "{team} meldet Feindkontakt."},
+        "neutral": {"short": "Feindkontakt[ {direction}]!", "detail": "{team} meldet Feindkontakt[ {direction}]."},
+        "high": {"short": "Kontakt[ {direction}], wir gehen in Deckung.", "detail": "{team} meldet Feindkontakt[ {direction}] und geht in Deckung."}
       }
     },
     "breakout_adaptation": {
@@ -73,11 +88,11 @@
       "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble", "audio_blip"],
       "feedback_action": "flank",
       "feedback_state": "running",
-      "map_label": "ADAPT",
+      "map_label": "Ausweichen",
       "copy": {
-        "low": {"short": "{team} weicht aus", "detail": "{team} passt Route an"},
-        "neutral": {"short": "{team} Route angepasst", "detail": "{team} weicht aus und haelt Ziel {objective}"},
-        "high": {"short": "{team} Breakout Q{quality}", "detail": "{team} passt Route kontrolliert an, Ziel bleibt {objective}"}
+        "low": {"short": "Wir weichen aus.", "detail": "{team} weicht aus."},
+        "neutral": {"short": "Wir weichen aus, das Ziel bleibt.", "detail": "{team} weicht aus und behält das Ziel."},
+        "high": {"short": "Wir weichen aus und halten das Ziel.", "detail": "{team} ändert die Route und behält das Ziel im Blick."}
       }
     },
     "cannot_execute": {
@@ -86,11 +101,11 @@
       "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble", "audio_blip"],
       "feedback_action": "move",
       "feedback_state": "blocked",
-      "map_label": "BLOCK",
+      "map_label": "Blockiert",
       "copy": {
-        "low": {"short": "{team} kann nicht", "detail": "{team} meldet blockiert"},
-        "neutral": {"short": "{team} blockiert", "detail": "{team} kann den Schritt nicht ausfuehren"},
-        "high": {"short": "{team} blockiert Q{quality}", "detail": "{team} meldet Blockade, neue Order noetig"}
+        "low": {"short": "Geht nicht!", "detail": "{team} kommt nicht weiter."},
+        "neutral": {"short": "Hier kommen wir nicht weiter.", "detail": "{team} kommt nicht weiter."},
+        "high": {"short": "Kommen hier nicht weiter, brauche neuen Befehl.", "detail": "{team} kommt nicht weiter und braucht einen neuen Befehl."}
       }
     },
     "needs_orders": {
@@ -99,11 +114,11 @@
       "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble", "audio_blip"],
       "feedback_action": "move",
       "feedback_state": "blocked",
-      "map_label": "ORDERS?",
+      "map_label": "Befehl?",
       "copy": {
-        "low": {"short": "{team} wartet", "detail": "{team} braucht neue Order"},
-        "neutral": {"short": "{team} braucht Order", "detail": "{team} wartet auf neuen Befehl"},
-        "high": {"short": "{team} braucht Folgeorder", "detail": "{team} meldet sauberen Haltepunkt, Folgeorder noetig"}
+        "low": {"short": "Brauche Befehl!", "detail": "{team} braucht einen neuen Befehl."},
+        "neutral": {"short": "Wir warten auf einen neuen Befehl.", "detail": "{team} wartet auf einen neuen Befehl."},
+        "high": {"short": "Stellung gehalten, brauche neuen Befehl.", "detail": "{team} hält die Stellung und braucht einen neuen Befehl."}
       }
     },
     "objective_progress": {
@@ -112,11 +127,11 @@
       "channels": ["mission_control", "map_marker", "ftl_bubble"],
       "feedback_action": "take",
       "feedback_state": "running",
-      "map_label": "OBJ",
+      "map_label": "Am Ziel",
       "copy": {
-        "low": {"short": "{objective} laeuft", "detail": "{objective} wird bearbeitet"},
-        "neutral": {"short": "{objective} Fortschritt", "detail": "{objective} macht Fortschritt"},
-        "high": {"short": "{objective} Fortschritt Q{quality}", "detail": "{objective} Fortschritt stabil, Q{quality}"}
+        "low": {"short": "Bin dran.", "detail": "Wir arbeiten am Ziel."},
+        "neutral": {"short": "Wir arbeiten am Ziel.", "detail": "Wir arbeiten am Ziel."},
+        "high": {"short": "Wir arbeiten am Ziel, es läuft gut.", "detail": "Wir arbeiten am Ziel, es läuft gut."}
       }
     },
     "objective_complete": {
@@ -125,11 +140,11 @@
       "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble", "audio_blip"],
       "feedback_action": "take",
       "feedback_state": "done",
-      "map_label": "OBJ DONE",
+      "map_label": "Gesichert",
       "copy": {
-        "low": {"short": "{objective} fertig", "detail": "{objective} abgeschlossen"},
-        "neutral": {"short": "{objective} gesichert", "detail": "{objective} wurde gesichert"},
-        "high": {"short": "{objective} gesichert Q{quality}", "detail": "{objective} gesichert, Teams bereit fuer Folgeauftrag"}
+        "low": {"short": "Erledigt.", "detail": "Das Ziel ist gesichert."},
+        "neutral": {"short": "Ziel gesichert.", "detail": "Das Ziel ist gesichert."},
+        "high": {"short": "Ziel gesichert, wir sind bereit.", "detail": "Das Ziel ist gesichert, die Trupps sind bereit für den nächsten Auftrag."}
       }
     },
     "air_asset_threatened": {
@@ -138,11 +153,11 @@
       "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble", "audio_blip"],
       "feedback_action": "engage",
       "feedback_state": "contact",
-      "map_label": "AIR RISK",
+      "map_label": "Schiff in Gefahr",
       "copy": {
-        "low": {"short": "Air Gefahr", "detail": "Air Asset bedroht"},
-        "neutral": {"short": "Air Asset bedroht", "detail": "Air Asset meldet Bedrohung {direction}"},
-        "high": {"short": "Air bedroht {direction}", "detail": "Air Asset bedroht {direction}, LZ pruefen"}
+        "low": {"short": "Schiff in Gefahr!", "detail": "Das Schiff ist in Gefahr."},
+        "neutral": {"short": "Unser Schiff wird beschossen!", "detail": "Das Schiff wird beschossen[ aus Richtung {direction}]."},
+        "high": {"short": "Unser Schiff wird[ {direction}] beschossen!", "detail": "Das Schiff wird beschossen[ aus Richtung {direction}], die Landezone prüfen."}
       }
     },
     "air_asset_destroyed": {
@@ -151,12 +166,159 @@
       "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble", "audio_blip"],
       "feedback_action": "engage",
       "feedback_state": "contact",
-      "map_label": "AIR LOST",
+      "map_label": "Schiff verloren",
       "copy": {
-        "low": {"short": "Air verloren", "detail": "Air Asset verloren"},
-        "neutral": {"short": "Air Asset verloren", "detail": "Air Asset zerstort, Recovery noetig"},
-        "high": {"short": "Air Asset verloren", "detail": "Air Asset verloren, Recovery-Loop aktivieren"}
+        "low": {"short": "Schiff verloren!", "detail": "Das Schiff ist verloren."},
+        "neutral": {"short": "Wir haben das Schiff verloren!", "detail": "Das Schiff ist zerstört, wir brauchen Abholung."},
+        "high": {"short": "Schiff verloren, wir brauchen Abholung.", "detail": "Das Schiff ist zerstört, die Bergung muss neu geplant werden."}
+      }
+    },
+    "bounding_rotation": {
+      "map_label": "Deckungswechsel",
+      "copy": {
+        "low": {"short": "Wir wechseln.", "detail": "Die Trupps wechseln sich ab."},
+        "neutral": {"short": "Wir wechseln die Deckung.", "detail": "Ein Trupp sichert, der andere rückt vor."},
+        "high": {"short": "Wir wechseln die Deckung, ihr sichert.", "detail": "Ein Trupp sichert, der andere rückt vor."}
+      }
+    },
+    "friendly_fire": {
+      "map_label": "Eigenbeschuss",
+      "copy": {
+        "low": {"short": "Eigenes Feuer!", "detail": "Eigenbeschuss: ein Kamerad wurde getroffen."},
+        "neutral": {"short": "Vorsicht, eigenes Feuer!", "detail": "Eigenbeschuss: ein Kamerad wurde getroffen."},
+        "high": {"short": "Feuer einstellen, wir treffen uns selbst!", "detail": "Eigenbeschuss: ein Kamerad wurde getroffen."}
       }
     }
+  },
+  "triggers": {
+    "contact": {
+      "map_label": "Kontakt",
+      "copy": {
+        "low": {"short": "Kontakt!", "detail": "{team} meldet Feindkontakt."},
+        "neutral": {"short": "Feindkontakt[ {direction}]!", "detail": "{team} meldet Feindkontakt[ {direction}]."},
+        "high": {"short": "Kontakt[ {direction}], wir halten und melden.", "detail": "{team} meldet Feindkontakt[ {direction}] und hält die Stellung."}
+      }
+    },
+    "suppressed_pinned": {
+      "map_label": "Festgenagelt",
+      "copy": {
+        "low": {"short": "Wir liegen fest!", "detail": "{team} liegt unter Beschuss fest."},
+        "neutral": {"short": "Wir stehen unter Beschuss.", "detail": "{team} steht unter Beschuss."},
+        "high": {"short": "Wir stehen unter Beschuss und kommen nicht weg.", "detail": "{team} steht unter Beschuss und kann sich nicht lösen."}
+      }
+    },
+    "casualty_medic_needed": {
+      "map_label": "Sanitäter",
+      "copy": {
+        "low": {"short": "Sanitäter!", "detail": "{team} braucht einen Sanitäter."},
+        "neutral": {"short": "Wir brauchen einen Sanitäter.", "detail": "{team} braucht einen Sanitäter."},
+        "high": {"short": "Verwundeter, wir brauchen sofort einen Sanitäter.", "detail": "{team} hat einen Verwundeten und braucht sofort einen Sanitäter."}
+      }
+    },
+    "blocked_route": {
+      "map_label": "Blockiert",
+      "copy": {
+        "low": {"short": "Geht nicht!", "detail": "{team} kommt nicht weiter."},
+        "neutral": {"short": "Hier kommen wir nicht weiter.", "detail": "{team} kommt nicht weiter."},
+        "high": {"short": "Weg versperrt, wir suchen einen anderen.", "detail": "{team} sucht einen anderen Weg."}
+      }
+    },
+    "out_of_weapon_range": {
+      "map_label": "Zu weit",
+      "copy": {
+        "low": {"short": "Zu weit!", "detail": "Das Ziel ist außer Reichweite."},
+        "neutral": {"short": "Das Ziel ist außer Reichweite.", "detail": "{team}: Das Ziel ist außer Reichweite."},
+        "high": {"short": "Außer Reichweite, brauche neuen Befehl.", "detail": "{team}: Das Ziel ist außer Reichweite, neuer Befehl nötig."}
+      }
+    },
+    "low_ammo_no_weapon": {
+      "map_label": "Munition",
+      "copy": {
+        "low": {"short": "Keine Munition!", "detail": "{team} hat keine Munition mehr."},
+        "neutral": {"short": "Wir haben keine Munition mehr.", "detail": "{team} hat keine Munition mehr."},
+        "high": {"short": "Munition aus, brauche neuen Befehl.", "detail": "{team} hat keine Munition mehr und braucht einen neuen Befehl."}
+      }
+    },
+    "leader_down": {
+      "map_label": "Führer gefallen",
+      "copy": {
+        "low": {"short": "Anführer gefallen!", "detail": "Der Truppführer von {team} ist gefallen."},
+        "neutral": {"short": "Unser Truppführer ist gefallen.", "detail": "Der Truppführer von {team} ist gefallen."},
+        "high": {"short": "Truppführer gefallen, ich übernehme, brauche Befehl.", "detail": "Der Truppführer von {team} ist gefallen, ein Kamerad übernimmt."}
+      }
+    },
+    "air_asset_threatened": {
+      "map_label": "Schiff in Gefahr",
+      "copy": {
+        "low": {"short": "Schiff in Gefahr!", "detail": "Das Schiff ist in Gefahr."},
+        "neutral": {"short": "Unser Schiff wird beschossen!", "detail": "Das Schiff wird beschossen."},
+        "high": {"short": "Unser Schiff wird[ {direction}] beschossen!", "detail": "Das Schiff wird beschossen[ aus Richtung {direction}]."}
+      }
+    },
+    "air_asset_destroyed": {
+      "map_label": "Schiff verloren",
+      "copy": {
+        "low": {"short": "Schiff verloren!", "detail": "Das Schiff ist verloren."},
+        "neutral": {"short": "Wir haben das Schiff verloren!", "detail": "Das Schiff ist zerstört, wir brauchen Abholung."},
+        "high": {"short": "Schiff verloren, wir brauchen Abholung.", "detail": "Das Schiff ist zerstört, die Bergung muss neu geplant werden."}
+      }
+    },
+    "return_to_plan": {
+      "map_label": "Zurück im Plan",
+      "copy": {
+        "low": {"short": "Weiter im Plan.", "detail": "{team} ist zurück im Plan."},
+        "neutral": {"short": "Wir sind zurück im Plan.", "detail": "{team} ist zurück im Plan."},
+        "high": {"short": "Hindernis umgangen, wir sind zurück im Plan.", "detail": "{team} hat das Hindernis umgangen und folgt wieder dem Plan."}
+      }
+    },
+    "rule_conflict": {
+      "map_label": "Regel",
+      "copy": {
+        "low": {"short": "Das geht nicht!", "detail": "{team}: Der Befehl widerspricht den Regeln."},
+        "neutral": {"short": "Das widerspricht unseren Regeln.", "detail": "{team}: Der Befehl widerspricht den Regeln."},
+        "high": {"short": "Das widerspricht den Regeln, brauche neuen Befehl.", "detail": "{team}: Der Befehl widerspricht den Regeln, ein neuer Befehl ist nötig."}
+      }
+    }
+  },
+  "command_feedback": {
+    "move.accepted": {"low": "Verstanden.", "neutral": "Verstanden, wir rücken vor.", "high": "Verstanden, wir rücken[ nach {direction}] vor."},
+    "move.running": {"low": "Bin dran.", "neutral": "Wir sind unterwegs.", "high": "Wir sind unterwegs[ nach {direction}]."},
+    "move.done": {"low": "Da.", "neutral": "Wir sind da.", "high": "Position erreicht, wir warten."},
+    "take.accepted": {"low": "Verstanden.", "neutral": "Verstanden, wir nehmen das Ziel.", "high": "Verstanden, wir holen uns das Ziel."},
+    "take.running": {"low": "Bin dran.", "neutral": "Wir arbeiten am Ziel.", "high": "Wir sind am Ziel, es dauert noch."},
+    "take.done": {"low": "Erledigt.", "neutral": "Ziel gesichert.", "high": "Ziel gesichert, wir sind bereit."},
+    "defend.accepted": {"low": "Verstanden.", "neutral": "Verstanden, wir halten die Stellung.", "high": "Verstanden, wir sichern[ nach {direction}]."},
+    "defend.cover": {"low": "In Deckung.", "neutral": "Wir gehen in Deckung.", "high": "In Deckung, wir halten den Abschnitt."},
+    "defend.running": {"low": "Halte.", "neutral": "Wir halten die Stellung.", "high": "Wir halten die Stellung und beobachten."},
+    "flank.accepted": {"low": "Verstanden.", "neutral": "Verstanden, wir gehen um die Flanke.", "high": "Verstanden, wir umgehen den Gegner leise."},
+    "flank.running": {"low": "Bin dran.", "neutral": "Wir umgehen den Gegner.", "high": "Wir umgehen den Gegner, bleibt leise."},
+    "engage.accepted": {"low": "Verstanden.", "neutral": "Verstanden, wir greifen an.", "high": "Verstanden, wir greifen[ aus {direction}] an."},
+    "engage.running": {"low": "Feuer!", "neutral": "Wir halten drauf.", "high": "Wir halten drauf, Feuer frei."},
+    "engage.contact": {"low": "Kontakt!", "neutral": "Feindkontakt!", "high": "Kontakt, wir halten drauf."},
+    "go.accepted": {"low": "Los!", "neutral": "Verstanden, wir führen den Plan aus.", "high": "Verstanden, wir führen den Plan jetzt aus."},
+    "go.running": {"low": "Weiter.", "neutral": "Wir machen weiter.", "high": "Wir machen mit dem Plan weiter."},
+    "support.accepted": {"low": "Komme!", "neutral": "Wir kommen zur Hilfe.", "high": "Wir kommen, haltet durch."},
+    "sort.accepted": {"low": "Verstanden.", "neutral": "Wir ordnen uns neu.", "high": "Wir ordnen uns neu und sind bereit."},
+    "default.accepted": {"low": "Verstanden.", "neutral": "Verstanden, wir legen los.", "high": "Verstanden, wir führen den Befehl aus."},
+    "default.running": {"low": "Bin dran.", "neutral": "Wir sind dran.", "high": "Wir sind dran, es läuft."},
+    "default.done": {"low": "Erledigt.", "neutral": "Wir sind fertig.", "high": "Wir sind fertig, bereit für mehr."},
+    "default.blocked": {"low": "Geht nicht!", "neutral": "Das geht so nicht.", "high": "Das geht so nicht, brauche neuen Befehl."},
+    "default.contact": {"low": "Kontakt!", "neutral": "Feindkontakt!", "high": "Kontakt, wir gehen in Deckung."},
+    "default.cover": {"low": "In Deckung.", "neutral": "Wir gehen in Deckung.", "high": "In Deckung, wir halten die Stellung."}
+  },
+  "validation": {
+    "select_tile_first": "Wohin? Wähle ein Feld auf der Karte.",
+    "observer_mode": "Hier gibt der Gastgeber die Befehle.",
+    "wait_for_insertion": "Wir sind noch nicht abgesetzt.",
+    "blocked_route": "Hier kommen wir nicht durch.",
+    "no_los": "Von hier sehe ich das Ziel nicht.",
+    "too_far": "Das Ziel ist zu weit weg.",
+    "no_orders": "Ich habe keinen Befehl.",
+    "no_contact": "Ich sehe keinen Feind.",
+    "select_fireteam_first": "Welcher Trupp? Wähle erst einen aus.",
+    "set_lz_first": "Wo sollen wir landen? Lege eine Landezone fest.",
+    "drop_cooldown": "Das Schiff ist noch nicht bereit.",
+    "dropship_unavailable": "Kein Schiff verfügbar.",
+    "default": "Das geht so nicht."
   }
 }

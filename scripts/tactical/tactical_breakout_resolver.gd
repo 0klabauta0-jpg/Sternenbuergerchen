@@ -230,9 +230,8 @@ static func build_communication_event(breakout: Dictionary, options: Dictionary 
 		"phase": int(breakout.get("phase", 0)),
 		"role": str(breakout.get("breakout_class", "")),
 		"step": str(breakout.get("trigger", "")),
-		"short_text": str(breakout.get("short_label", "")),
-		"detail_text": str(breakout.get("detail_text", "")),
-		"map_label": str(breakout.get("short_label", "")),
+		# Saetze und Kartenlabel kommen aus data/tactical_communication_copy.json (Anlass = "copy_trigger").
+		"copy_trigger": str(breakout.get("trigger", "")),
 		"priority": int(breakout.get("priority", TACTICAL_COMMUNICATION_EVENT_SCRIPT.PRIORITY_HIGH)),
 		"communication_clarity": float(breakout.get("communication_clarity", 0.5)),
 		"anchor_position": breakout.get("anchor_position", null),
@@ -374,15 +373,15 @@ static func _build_event_id(trigger: String, fireteam_id: String, plan_id: Strin
 
 
 static func _build_detail_text(cause_label: String, breakout_class: String, judgement: float, communication_clarity: float) -> String:
-	var action_text: String = "reports and waits"
+	var action_text: String = "meldet und wartet"
 	match normalize_breakout_class(breakout_class):
 		BREAKOUT_AUTO_ADAPT:
-			action_text = "adapts route and keeps plan intent"
+			action_text = "ändert die Route und behält das Ziel"
 		BREAKOUT_REQUEST_ORDERS:
-			action_text = "requests commander input"
+			action_text = "braucht einen Befehl"
 		BREAKOUT_ABORT_TO_SAFE:
-			action_text = "aborts toward safety"
-	return "%s | %s | FTL %.0f | COMMS %.0f" % [
+			action_text = "zieht sich zurück"
+	return "%s | %s | Urteil %.0f | Funkgüte %.0f" % [
 		cause_label,
 		action_text,
 		judgement * 100.0,

@@ -3,6 +3,7 @@ extends RefCounted
 
 const CATALOG_PATH: String = "res://data/comms_lines.json"
 const TEXT_SOURCE_ID: String = "comms_lines"
+const TACTICAL_COMMUNICATION_COPY_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_copy.gd")
 
 const TRIGGER_ENEMY_CONTACT: String = "enemy_contact"
 const TRIGGER_SUPPRESSION_START: String = "suppression_start"
@@ -321,9 +322,10 @@ static func _replacement_for_placeholder(placeholder: String, context: Dictionar
 			var fireteam_id: String = String(context.get("fireteam_id", "")).strip_edges()
 			return "FT" if fireteam_id.is_empty() else fireteam_id.to_upper()
 		"{direction}":
-			return String(context.get("direction_label", context.get("direction", ""))).strip_edges()
+			return String(TACTICAL_COMMUNICATION_COPY_SCRIPT.call("format_direction", String(context.get("direction_label", context.get("direction", "")))))
 		"{distance}":
-			return String(context.get("distance", "")).strip_edges()
+			var distance_text: String = String(context.get("distance", "")).strip_edges()
+			return "%s Meter" % distance_text if distance_text.is_valid_int() else distance_text
 		"{enemy_count}":
 			return _enemy_count_display(context.get("enemy_count", ""))
 		"{leader_name}":
