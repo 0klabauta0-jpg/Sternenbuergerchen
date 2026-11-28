@@ -8,6 +8,7 @@ const MENU_ICONS=preload("res://scripts/ui/menu_equipment_icons.gd")
 var _screen: WeakRef
 var _content: VBoxContainer
 var _device: PanelContainer
+var _scroll: ScrollContainer
 var _actions: HBoxContainer
 var _footer_slot: MarginContainer
 var _footer_align_pending := false
@@ -39,8 +40,16 @@ var _standing_entries: Array = []
 var _standing_id: String = ""
 var _standing_buttons: Dictionary = {}
 var _selector: VBoxContainer
+var _side_box: VBoxContainer
+var _side_heading: Label
+var _side_reputation: Label
+var _side_empty: Label
+var _side_cards: VBoxContainer
+var _side_visible_count := 0
+var _item_labels: Dictionary = {}
 const CARD_WIDTH := 230
 const CARD_HEIGHT := 72
+const SIDE_CARD_HEIGHT := 140
 const STANDING_CARD_HEIGHT := 96
 const CARD_NORMAL_BG := Color("0f3140")
 const CARD_NORMAL_BORDER := Color("2b6272")
@@ -69,6 +78,7 @@ func configure(screen: Control) -> void:
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	layout.add_child(scroll)
+	_scroll = scroll
 	_device = PanelContainer.new()
 	_device.name = "MobileDevice"
 	_device.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -98,6 +108,33 @@ func configure(screen: Control) -> void:
 	_empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_empty.custom_minimum_size.x = CARD_WIDTH
 	selector.add_child(_empty)
+	# Nebenauftraege (N1): eigener Abschnitt zwischen Kampagnen- und Dauerauftraegen; ohne definierte Nebenauftraege ausgeblendet.
+	_side_box = VBoxContainer.new()
+	_side_box.name = "SideJobs"
+	_side_box.add_theme_constant_override("separation", 6)
+	_side_box.visible = false
+	selector.add_child(_side_box)
+	_side_heading = Label.new()
+	_side_heading.name = "SideJobsHeading"
+	_side_heading.text = "Nebenaufträge"
+	_side_heading.add_theme_font_size_override("font_size", 16)
+	_side_box.add_child(_side_heading)
+	_side_reputation = Label.new()
+	_side_reputation.name = "SideJobsReputation"
+	_side_reputation.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_side_reputation.custom_minimum_size.x = CARD_WIDTH
+	_side_reputation.add_theme_font_size_override("font_size", 14)
+	_side_box.add_child(_side_reputation)
+	_side_empty = Label.new()
+	_side_empty.name = "SideJobsEmpty"
+	_side_empty.text = "Gerade keine Nebenaufträge."
+	_side_empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_side_empty.custom_minimum_size.x = CARD_WIDTH
+	_side_box.add_child(_side_empty)
+	_side_cards = VBoxContainer.new()
+	_side_cards.name = "SideJobCards"
+	_side_cards.add_theme_constant_override("separation", 6)
+	_side_box.add_child(_side_cards)
 	# Dauerauftraege (H3): nur Anzeige unter den normalen Auftraegen, kein Annehmen-Knopf (Annahme beim Haendler).
 	_standing_box = VBoxContainer.new()
 	_standing_box.name = "StandingOrders"
@@ -180,7 +217,10 @@ func configure(screen: Control) -> void:
 
 func _layout_device() -> void:
 	if _device == null: return
-	_device.custom_minimum_size.x = maxf(size.x - 20, 280)
+	# Platz fuer die senkrechte Bildlaufleiste freihalten: sonst ist der Inhalt um ihre Breite zu breit und die Liste
+	# rutscht seitlich (unsichtbarer waagerechter Bildlauf), sobald die Liste laenger als die Tafel ist (N1, 28.11.).
+	var bar_width: float = _scroll.get_v_scroll_bar().get_combined_minimum_size().x if _scroll != null else 0.0
+	_device.custom_minimum_size.x = maxf(size.x - 20 - bar_width, 280)
 	_body.columns = 2 if size.x >= 640 and _details_expanded else 1
 	_job_cards.visible = size.x >= 640 or not _details_expanded
 	_jobs.visible = size.x < 640 and _details_expanded
@@ -253,7 +293,7 @@ func refresh() -> void:
 	_refresh_standing_orders(Array(campaign.get("standing_orders", [])))
 	# Verschwindet der gewaehlte Dauerauftrag, wird die Wahl zurueckgesetzt (sonst blieben alle Auftragsfelder grau).
 	if not _standing_id.is_empty() and _standing_entry(_standing_id).is_empty(): _standing_id = ""
-	var signature: String = JSON.stringify([jobs, availability])
+	var signature: String = JSON.stringify([jobs, availability, campaign.get("reputation", {}), campaign.get("factions", {})])
 	if signature != _signature:
 		_signature = signature
 		_job_list_rebuilds += 1
@@ -264,12 +304,21 @@ func refresh() -> void:
 		for child:Node in _job_cards.get_children():_job_cards.remove_child(child);child.queue_free()
 		_card_buttons.clear()
 		_visible_job_ids.clear()
+		for child:Node in _side_cards.get_children():_side_cards.remove_child(child);child.queue_free()
+		_side_visible_count = 0
 		for id in jobs:
 			if not bool(Dictionary(availability.get(id, {})).get("visible", false)): continue
 			_visible_job_ids.append(String(id))
 			_jobs.add_item(String(jobs[id].title))
 			_jobs.set_item_metadata(_jobs.item_count - 1, id)
-			var card:=Button.new();card.name="JobCard_"+String(id);card.text=String(jobs[id].title);card.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;card.custom_minimum_size=Vector2(CARD_WIDTH,CARD_HEIGHT);_job_cards.add_child(card)
+			var is_side_card: bool = bool(jobs[id].get("side", false))
+			var card:=Button.new();card.name=("SideJobCard_" if is_side_card else "JobCard_")+String(id);card.text=String(jobs[id].title);card.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+			card.custom_minimum_size=Vector2(CARD_WIDTH,SIDE_CARD_HEIGHT if is_side_card else CARD_HEIGHT)
+			if is_side_card:
+				_side_cards.add_child(card)
+				_side_visible_count += 1
+			else:
+				_job_cards.add_child(card)
 			card.alignment=HORIZONTAL_ALIGNMENT_LEFT;card.icon=MENU_ICONS.get_icon("satellite_chip");card.expand_icon=true;card.add_theme_constant_override("icon_max_width",30)
 			# Das ganze Feld ist der Treffer (Maus ueberall im Feld, Fokus + Enter); das Zeichen vor dem Titel ist nur Zierde.
 			var locked_card: bool = bool(Dictionary(availability.get(id, {})).get("shown_as_locked", false)) or bool(jobs[id].get("locked", false))
@@ -280,11 +329,14 @@ func refresh() -> void:
 		if not _visible_job_ids.has(_job_id):
 			_job_id = String(_visible_job_ids[0]) if not _visible_job_ids.is_empty() else ""
 		if _card_buttons.has(focused_job): _card_buttons[focused_job].call_deferred("grab_focus")
-	_empty.visible = _visible_job_ids.is_empty()
+	# Nebenauftraege haben ihren eigenen Abschnitt: der Leertext gilt nur den Kampagnenauftraegen.
+	_empty.visible = _visible_job_ids.size() - _side_visible_count <= 0
 	_empty.text = "Zurzeit keine verfügbaren Aufträge."
+	if _visible_job_ids.is_empty(): _details_expanded = false
+	_refresh_side_section(jobs, campaign)
 	if _empty.visible:
-		_details_expanded = false
 		for id: String in jobs:
+			if bool(jobs[id].get("side", false)): continue
 			if String(jobs[id].get("status", "")) == "failed":
 				_empty.text += "\n" + String(Dictionary(availability.get(id, {})).get("message", ""))
 				break
@@ -297,7 +349,11 @@ func refresh() -> void:
 	var job: Dictionary = jobs.get(_job_id, {})
 	for id:String in _card_buttons:
 		_card_buttons[id].modulate=Color.WHITE if id==_job_id and _standing_id.is_empty() else Color("b0c1c3")
-		_card_buttons[id].text=("▾  " if id==_job_id and _details_expanded and _standing_id.is_empty() else "▸  ")+String(jobs[id].title) + "\n" + _lock_text(availability, id, _status_text(jobs[id]))
+		var marker: String = "▾  " if id==_job_id and _details_expanded and _standing_id.is_empty() else "▸  "
+		if bool(jobs[id].get("side", false)):
+			_card_buttons[id].text = marker + String(jobs[id].title) + "\n" + _side_card_lines(jobs[id], Dictionary(availability.get(id, {})), campaign)
+		else:
+			_card_buttons[id].text = marker + String(jobs[id].title) + "\n" + _lock_text(availability, id, _status_text(jobs[id]))
 	var status: String = String(job.get("status", "offered"))
 	var locations: Dictionary = campaign.get("locations", {})
 	var location_id := String(job.get("location_id", ""))
@@ -320,6 +376,8 @@ func refresh() -> void:
 	if not body_name.is_empty():
 		_details.text="Himmelskörper: %s (%s)\nEinsatzgebiet: %s\nStatus: %s\nBelohnung: %d Kredite"%[body_name,String(briefing.get("body_kind","")),String(briefing.get("site_label",location.get("name","—"))),_lock_text(availability,_job_id,_status_text(job)),int(Dictionary(job.get("reward",{})).get("credits",0))]
 		if not issuer.is_empty():_details.text+="\nAuftraggeber: "+String(issuer.display_name)
+	if bool(job.get("side", false)):
+		_details.text = _side_facts(job, Dictionary(availability.get(_job_id, {})), campaign)
 	var objectives:PackedStringArray=PackedStringArray()
 	for objective:String in briefing.get("objectives",[]):objectives.append("• "+objective)
 	_objectives.text="ZIELE\n" + "\n".join(objectives) if not objectives.is_empty() else ""
@@ -362,6 +420,88 @@ func refresh() -> void:
 	_detail_card.visible=_details_expanded;_objectives.visible=_details_expanded and not standing_open;_actions.visible=_details_expanded and (not standing_open or bounty_open)
 	_footer.visible = _details_expanded and (not standing_open or bounty_open)
 	_layout_device()
+
+## Nebenauftraege (N1): Abschnitt ein-/ausblenden, Rufzeile setzen. Die Karten baut refresh() bei Signaturwechsel.
+func _refresh_side_section(jobs: Dictionary, campaign: Dictionary) -> void:
+	var defined := false
+	for id: String in jobs:
+		if bool(jobs[id].get("side", false)): defined = true; break
+	_side_box.visible = defined
+	_side_cards.visible = _side_visible_count > 0
+	_side_empty.visible = _side_visible_count == 0
+	var reputation_text := _side_reputation_text(campaign)
+	if _side_reputation.text != reputation_text: _side_reputation.text = reputation_text
+	_side_reputation.visible = not reputation_text.is_empty()
+
+## "Ruf: Verwaltung 5 · Müllers Hof 0 · Templer −3 · Shady Lab 10" (Reihenfolge wie die Fraktionen im Kampagnenstand).
+func _side_reputation_text(campaign: Dictionary) -> String:
+	var factions: Dictionary = Dictionary(campaign.get("factions", {}))
+	if factions.is_empty(): return ""
+	var reputation: Dictionary = Dictionary(campaign.get("reputation", {}))
+	var parts: PackedStringArray = PackedStringArray()
+	for faction_id: String in factions:
+		parts.append("%s %s" % [String(factions[faction_id]), _signed(int(reputation.get(faction_id, 0)), false)])
+	return "Ruf: " + " · ".join(parts)
+
+func _signed(value: int, with_plus: bool) -> String:
+	if value < 0: return "−%d" % -value
+	if with_plus and value > 0: return "+%d" % value
+	return "%d" % value
+
+func _item_label(item_id: String) -> String:
+	if _item_labels.is_empty():
+		_item_labels = load("res://scripts/ui/components/personnel_inventory_panel.gd").LABELS
+	return String(_item_labels.get(item_id, item_id))
+
+## "100 Cr · Leichte Rüstung · 2× Rakete · 1 neue Person · Ruf Verwaltung +5"
+func _side_reward_text(job: Dictionary, campaign: Dictionary) -> String:
+	var reward: Dictionary = Dictionary(job.get("reward", {}))
+	var parts: PackedStringArray = PackedStringArray()
+	if int(reward.get("credits", 0)) > 0: parts.append("%d Cr" % int(reward.credits))
+	for entry: Variant in Array(reward.get("items", [])):
+		if typeof(entry) != TYPE_DICTIONARY: continue
+		var quantity := int(Dictionary(entry).get("quantity", 1))
+		var label := _item_label(String(Dictionary(entry).get("item_id", "")))
+		parts.append(label if quantity <= 1 else "%d× %s" % [quantity, label])
+	if not String(reward.get("blueprint_id", "")).is_empty(): parts.append("Bauplan " + String(reward.blueprint_id))
+	var recruits := int(reward.get("recruits", 0))
+	if recruits == 1: parts.append("1 neue Person")
+	elif recruits > 1: parts.append("%d neue Personen" % recruits)
+	var factions: Dictionary = Dictionary(campaign.get("factions", {}))
+	var gains: Dictionary = Dictionary(reward.get("reputation", {}))
+	for faction_id: String in gains:
+		if int(gains[faction_id]) != 0:
+			parts.append("Ruf %s %s" % [String(factions.get(faction_id, faction_id)), _signed(int(gains[faction_id]), true)])
+	return " · ".join(parts) if not parts.is_empty() else "keine"
+
+## Zustandszeile: Sperrgrund (Wortlaut des Kampagnenstands) oder Status, Rest des Angebots, bisherige Abschluesse.
+func _side_state_text(job: Dictionary, entry: Dictionary) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	var status := String(job.get("status", "offered"))
+	if bool(entry.get("shown_as_locked", false)) and not String(entry.get("message", "")).is_empty():
+		parts.append("Gesperrt: " + String(entry.message))
+	elif status != "offered":
+		parts.append(_status_text(job))
+	var left := int(entry.get("landings_left", -1))
+	if status == "offered" and left >= 0:
+		parts.append("Angebot noch %d Heimlandung%s" % [left, "" if left == 1 else "en"])
+	var done := int(job.get("completions", 0))
+	if done > 0: parts.append("Schon %d× erledigt" % done)
+	return "\n".join(parts) if not parts.is_empty() else _status_text(job)
+
+func _side_faction_name(job: Dictionary, campaign: Dictionary) -> String:
+	var faction_id := String(job.get("faction", ""))
+	return String(Dictionary(campaign.get("factions", {})).get(faction_id, faction_id))
+
+func _side_card_lines(job: Dictionary, entry: Dictionary, campaign: Dictionary) -> String:
+	var location_id := String(job.get("location_id", ""))
+	var place: String = DISPLAY.location_name(location_id, Dictionary(Dictionary(campaign.get("locations", {})).get(location_id, {})))
+	return "%s · %s\n%s\n%s" % [_side_faction_name(job, campaign), place, _side_reward_text(job, campaign), _side_state_text(job, entry)]
+
+func _side_facts(job: Dictionary, entry: Dictionary, campaign: Dictionary) -> String:
+	var location_id := String(job.get("location_id", ""))
+	var place: String = DISPLAY.location_name(location_id, Dictionary(Dictionary(campaign.get("locations", {})).get(location_id, {})))
+	return "Auftraggeber: %s\nZielort: %s\nStatus: %s\nBelohnung: %s" % [_side_faction_name(job, campaign), place, _side_state_text(job, entry).replace("\n", " · "), _side_reward_text(job, campaign)]
 
 ## Dauerauftraege (H3) unter den normalen Auftraegen: Titel, darunter der Satz des Besitzers; gesperrt und nicht verfuegbar mit "Gesperrt: ".
 ## Baut nur neu, wenn sich der Snapshot aendert (die Sperrzeit tickt im Sekundentakt). Ohne Eintraege (Skirmish, alter Stand) bleibt der Block leer.
