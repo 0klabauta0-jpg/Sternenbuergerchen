@@ -296,7 +296,9 @@ static func _valid_transport(witness:Dictionary)->bool:
 	for craft in witness:
 		if not craft is String or craft.is_empty() or craft.length()>256:return false
 		var value:Variant=witness[craft]
-		if not value is Dictionary or value.size()!=3 or not value.get("pilot") is String or value.pilot.length()>256 or not value.get("home") is bool or not value.get("teams") is Dictionary or value.teams.size()>64:return false
+		# "gunner" (Turmschuetze) ist ein additives, optionales Feld: fehlt es, bleibt das Zeugnis bei den drei alten Feldern.
+		if value is Dictionary and value.has("gunner") and (not value.gunner is String or value.gunner.is_empty() or value.gunner.length()>256):return false
+		if not value is Dictionary or value.size()!=(4 if value.has("gunner") else 3) or not value.get("pilot") is String or value.pilot.length()>256 or not value.get("home") is bool or not value.get("teams") is Dictionary or value.teams.size()>64:return false
 		for team in value.teams:
 			var members:Variant=value.teams[team]
 			if not team is String or team.is_empty() or team.length()>256 or not members is Array or members.size()>64:return false

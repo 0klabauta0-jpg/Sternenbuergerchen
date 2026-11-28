@@ -371,12 +371,17 @@ static func _validate_hex_payload(payload: Dictionary, roster_ids: Array) -> Dic
 	var assigned_teams: Dictionary = {}
 	for craft_id in payload.hex_tactical.transport:
 		var transport: Variant = payload.hex_tactical.transport[craft_id]
-		if not ships.has(craft_id) or not transport is Dictionary or transport.size() != 3 or transport.get("home") != true or not transport.get("teams") is Dictionary or transport.get("pilot") != ships[craft_id].get("pilot_id", "") or ships[craft_id].get("location", "homebase") not in ["homebase", "waiting_pad"]:
+		if not ships.has(craft_id) or not transport is Dictionary or transport.size() != (4 if transport.has("gunner") else 3) or transport.get("home") != true or not transport.get("teams") is Dictionary or transport.get("pilot") != ships[craft_id].get("pilot_id", "") or ships[craft_id].get("location", "homebase") not in ["homebase", "waiting_pad"]:
 			return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
+		var craft_members: Array = []
 		for team in transport.teams:
 			if assigned_teams.has(team) or not definitions.has(team) or JSON.stringify(transport.teams[team]) != JSON.stringify(definitions[team]):
 				return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
 			assigned_teams[team] = craft_id
+			craft_members.append_array(Array(transport.teams[team]))
+		# Turmschuetze (additives Feld, fehlt in alten Staenden): eine Person aus den Trupps dieses Schiffs, nicht der Pilot.
+		if transport.has("gunner") and (typeof(transport.gunner) != TYPE_STRING or String(transport.gunner).is_empty() or not craft_members.has(transport.gunner) or transport.gunner == transport.get("pilot")):
+			return {"ok":false,"reason":"invalid_hex_checkpoint_transport"}
 	return {"ok":true}
 
 static func _valid_path(path: String) -> bool:

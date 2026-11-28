@@ -1064,7 +1064,7 @@ func apply_operation(operation: String, payload: Dictionary) -> Dictionary:
 	if operation == "base_unboard":
 		return _unboard(id, craft, payload)
 	if state.status == "boarding" and _board_groups.has(String(state.craft_id)) and bool(_board_groups[state.craft_id].committed):
-		return _reject("boarding_in_progress", "Boarding abschliessen oder aussteigen lassen")
+		return _reject("boarding_in_progress", "Einsteigen abwarten oder aussteigen lassen")
 	if state.status == "aboard":
 		return _reject("unit_aboard", "Person zuerst aussteigen lassen")
 	match operation:
@@ -1850,6 +1850,10 @@ func _checkpoint_transport_context(state:Dictionary)->Dictionary:
 		if _screen.has_method("_get_homebase_direct_payload_fireteam_ids_for_craft_raw"):
 			for team in _screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw",craft):teams[String(team)]=PackedStringArray(_screen.call("_get_member_unit_ids_for_fireteam",String(team))).duplicate()
 		result[craft]={"pilot":_screen.call("_get_assigned_pilot_id",craft) if _screen.has_method("_get_assigned_pilot_id") else "","teams":teams,"home":_checkpoint_home_craft(craft)}
+		# Turmschuetzenplatz: additives Feld, nur fuer ein Schiff zuhause und nur, wenn besetzt (alte Staende und leere Plaetze haben es nicht).
+		if result[craft].home and _screen.has_method("get_checkpoint_gunner_id"):
+			var gunner:String=String(_screen.call("get_checkpoint_gunner_id",craft))
+			if not gunner.is_empty():result[craft]["gunner"]=gunner
 	return result
 
 func _checkpoint_home_craft(craft_id:String)->bool:

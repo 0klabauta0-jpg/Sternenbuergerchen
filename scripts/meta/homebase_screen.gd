@@ -111,7 +111,8 @@ var _homebase_dropship_staged_fireteam_ids: PackedStringArray = []
 var _homebase_dropship_payload_craft_id: String = ""
 var _homebase_dropship_staged_fireteam_ids_by_craft: Dictionary = {}
 var _homebase_dispatch_target_by_craft: Dictionary = {}
-## Turmschuetzenplatz je Schiff (craft_id -> unit_id). Nur Anzeige und Belegung dieser Sitzung, bewusst NICHT im Speicherstand.
+## Turmschuetzenplatz je Schiff (craft_id -> unit_id). Wird im Heimat-Speicherstand additiv als Feld "gunner" im Transportzeugnis des
+## Schiffs mitgeschrieben (get_checkpoint_gunner_id / restore_checkpoint_gunner); alte Staende ohne Feld laden mit leerem Platz.
 ## Zaehlt als an Bord, weil die Person im Trupp-Payload des Schiffs bleibt; Schusslogik gibt es dazu (noch) nicht.
 var _gunner_by_craft: Dictionary = {}
 var _homebase_direct_boarding_state_by_fireteam_id: Dictionary = {}
@@ -9233,7 +9234,7 @@ func _operations_unit_entry(unit_data: Dictionary) -> Dictionary:
 	if in_transit:
 		status = "Unterwegs"
 	elif not payload_craft.is_empty():
-		status = ("An Bord" if physical_status == "aboard" else ("Boarding" if physical_status in ["moving", "boarding"] else "Nicht an Bord")) if base_runtime != null else ("An Bord" if _are_homebase_payload_fireteams_boarded(PackedStringArray([fireteam_id])) else "Boarding")
+		status = ("An Bord" if physical_status == "aboard" else ("Steigt ein" if physical_status in ["moving", "boarding"] else "Nicht an Bord")) if base_runtime != null else ("An Bord" if _are_homebase_payload_fireteams_boarded(PackedStringArray([fireteam_id])) else "Steigt ein")
 	elif not pilot_craft.is_empty():
 		status = "An Bord · Pilot" if base_runtime != null and bool(base_runtime.call("is_pilot_aboard", pilot_craft)) else "Nicht an Bord · Pilot"
 	elif not fireteam_id.is_empty():
@@ -9344,7 +9345,7 @@ func get_operations_snapshot(include_runtime: bool = true) -> Dictionary:
 				pilots.append({"id": String(unit.id), "label": String(unit.name)})
 		var progress: float = _get_homebase_direct_boarding_progress_ratio_for_craft(id) * 100.0
 		var status: String = "Bereit" if can_start else "Vorbereitung"
-		var next_step: String = "Boarding starten"
+		var next_step: String = "Ziehe einen Trupp auf das Schiff"
 		if busy:
 			status = "Unterwegs" if _is_craft_in_transit(id) else "Im Einsatz"
 			var transfer: Dictionary = _find_transfer_entry_for_craft(id)
@@ -9352,10 +9353,10 @@ func get_operations_snapshot(include_runtime: bool = true) -> Dictionary:
 			next_step = "Rückkehr abwarten"
 		elif pilot_id.is_empty():
 			status = "Pilot fehlt"
-			next_step = "Pilot zuweisen"
+			next_step = "Ziehe eine Person auf den Pilotenplatz"
 		elif not payload_teams.is_empty() and not boarded:
-			status = "Boarding läuft"
-			next_step = "Boarding abwarten"
+			status = "Einsteigen läuft"
+			next_step = "Warten, bis alle eingestiegen sind"
 		elif not pilot_present:
 			status = "Pilot nicht an Bord"
 			next_step = "Pilot zum Schiff schicken"
@@ -9552,7 +9553,7 @@ func _request_operation_from_base(operation: String, payload: Dictionary = {}) -
 					_on_aircraft_pilot_drop_panel_unit_dropped(unit_id, craft_id)
 			elif operation == "board":
 				if _get_fireteam_definition(team_id).is_empty() or _get_member_unit_ids_for_fireteam(team_id).is_empty() or not _operations_payload_craft_for_team(team_id).is_empty() or not bool(_build_homebase_direct_staging_craft_gate_for_craft(craft_id).get("can_stage", false)):
-					return _operations_rejected("boarding_blocked", "Trupp für Boarding vorbereiten (Trupp leer oder schon an Bord, Schiff nicht bereit)")
+					return _operations_rejected("boarding_blocked", "Zum Einsteigen: Ziehe einen Trupp auf das Schiff (der Trupp ist leer oder schon an Bord, oder das Schiff ist nicht bereit).")
 				_on_shipcard_dispatch_target_toggled(true, craft_id)
 				_on_homebase_shipcard_fireteam_dropped(team_id, craft_id)
 			elif operation == "unboard":
@@ -9561,9 +9562,9 @@ func _request_operation_from_base(operation: String, payload: Dictionary = {}) -
 				_on_homebase_dropship_fireteam_remove_pressed(team_id, craft_id)
 			else:
 				if _get_assigned_pilot_id(craft_id).is_empty():
-					return _operations_rejected("pilot_missing", "Pilot zuweisen")
+					return _operations_rejected("pilot_missing", "Ziehe eine Person auf den Pilotenplatz")
 				if not _has_homebase_direct_launch_payload_for_craft(craft_id) or not _can_send_craft(_get_aircraft_definition_by_id(craft_id), craft_id):
-					return _operations_rejected("launch_blocked", "Pilot, Trupp und Boarding prüfen")
+					return _operations_rejected("launch_blocked", "Prüfe: Pilot auf den Pilotenplatz ziehen und den Trupp einsteigen lassen")
 				if _singleplayer_command_handler.is_valid():
 					var departure: Dictionary = _singleplayer_command_handler.call("prepare_departure", {"craft_id": craft_id})
 					if not bool(departure.get("ok", false)):
@@ -9599,6 +9600,42 @@ func _gunner_id_for_craft(craft_id: String, payload_ids: PackedStringArray) -> S
 	if gunner_id.is_empty() or not payload_ids.has(gunner_id) or gunner_id == _get_assigned_pilot_id(craft_id):
 		return ""
 	return gunner_id
+
+
+## Turmschuetze fuer den Speicherstand: nur wer noch im Trupp-Payload des Schiffs steht und nicht Pilot ist (sonst leer).
+func get_checkpoint_gunner_id(craft_id: String) -> String:
+	if not _gunner_by_craft.has(craft_id):
+		return ""
+	var payload_ids: PackedStringArray = PackedStringArray()
+	for team_variant in _get_homebase_direct_payload_fireteam_ids_for_craft_raw(craft_id):
+		payload_ids.append_array(_get_member_unit_ids_for_fireteam(String(team_variant)))
+	return _gunner_id_for_craft(craft_id, payload_ids)
+
+
+## Turmschuetzenplatz aus dem Speicherstand zurueck: gilt nur, wenn das Schiff einen Turmplatz hat, die Person im Trupp-Payload
+## dieses Schiffs steht und nicht Pilot ist. Sonst bleibt der Platz leer (die Person sitzt dann als Passagier).
+func restore_checkpoint_gunner(craft_id: String, unit_id: String) -> bool:
+	_gunner_by_craft.erase(craft_id)
+	if craft_id.is_empty() or unit_id.is_empty() or unit_id == _get_assigned_pilot_id(craft_id):
+		return false
+	var definition: Dictionary = _get_aircraft_definition_by_id(craft_id)
+	if definition.is_empty():
+		return false
+	# Gleiche Vorgabe wie in der Schiffskarte: das Startschiff ohne model_id/crew_capacity ist die Cutlass (Katalogwert 8).
+	var model_id: String = String(definition.get("model_id", ""))
+	var capacity: int = int(definition.get("crew_capacity", 0))
+	if capacity <= 0 and model_id in ["", "cutlass"] and String(definition.get("craft_type", "")) == "dropship":
+		model_id = "cutlass"
+		capacity = 8
+	if int(SHIP_SEATS_SCRIPT.seat_layout({"model_id": model_id, "crew_capacity": capacity}).gunner) <= 0:
+		return false
+	var payload_ids: PackedStringArray = PackedStringArray()
+	for team_variant in _get_homebase_direct_payload_fireteam_ids_for_craft_raw(craft_id):
+		payload_ids.append_array(_get_member_unit_ids_for_fireteam(String(team_variant)))
+	if not payload_ids.has(unit_id):
+		return false
+	_gunner_by_craft[craft_id] = unit_id
+	return true
 
 
 func _snapshot_craft_entry(craft_id: String) -> Dictionary:

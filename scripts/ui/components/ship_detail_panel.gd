@@ -373,7 +373,7 @@ func _handle_drop(payload: Dictionary) -> void:
 		_handle_person_drop(payload, "passenger")
 		return
 	var id: String = String(payload.get("fireteam_id", "")).strip_edges()
-	var problem: String = String(fireteam_check.call(id)) if fireteam_check.is_valid() else "Boarding gerade nicht verfügbar."
+	var problem: String = String(fireteam_check.call(id)) if fireteam_check.is_valid() else "Einsteigen ist gerade nicht möglich."
 	if not problem.is_empty():
 		show_message(problem)
 		return

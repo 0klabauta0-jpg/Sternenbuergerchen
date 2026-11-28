@@ -21,6 +21,8 @@ class HexCheckpointReadContext extends Node:
 		get: return definitions
 	var pilots: Dictionary = {}
 	var payload_teams: Dictionary = {}
+	## Turmschuetze je Schiff aus dem gespeicherten Transportzeugnis (Feld "gunner", fehlt in alten Staenden).
+	var gunners: Dictionary = {}
 	var member_reader: Control
 	func is_campaign_start() -> bool: return true
 	func _find_homebase_aircraft_definition(id: String) -> Dictionary:
@@ -31,6 +33,7 @@ class HexCheckpointReadContext extends Node:
 	func get_space_travel_snapshot(id: String = "") -> Dictionary:
 		return {"phase":"grounded"} if id.is_empty() or _aircraft_location_by_craft.has(id) else {}
 	func _get_assigned_pilot_id(id: String) -> String: return String(pilots.get(id, ""))
+	func get_checkpoint_gunner_id(id: String) -> String: return String(gunners.get(id, ""))
 	func _get_homebase_direct_payload_fireteam_ids_for_craft_raw(id: String) -> PackedStringArray:
 		return PackedStringArray(payload_teams.get(id, []))
 	func _get_member_unit_ids_for_fireteam(id: String) -> PackedStringArray:
@@ -58,6 +61,7 @@ static func preflight_campaign_hex_checkpoint(flow: Node, payload: Dictionary) -
 		candidate._aircraft_location_by_craft[id] = String(ship.get("location", "homebase"))
 	for id in payload.hex_tactical.transport:
 		candidate.payload_teams[id] = Dictionary(payload.hex_tactical.transport[id].teams).keys()
+		if String(payload.hex_tactical.transport[id].get("gunner", "")) != "": candidate.gunners[id] = String(payload.hex_tactical.transport[id].gunner)
 	candidate.member_reader = load("res://scripts/meta/homebase_screen.gd").new()
 	candidate.member_reader.set("_fireteam_definitions", Array(payload.craft.get("fireteam_definitions", [])).duplicate(true))
 	candidate.set_meta("campaign_pad2_built", bool(payload.campaign.get("progress", {}).get("second_pad_built", false)))
@@ -345,6 +349,11 @@ func _restore_campaign_hex_checkpoint(checkpoint: Dictionary) -> Dictionary:
 			else:
 				_screen.call("_add_homebase_direct_payload_fireteam_to_craft", String(team), String(craft_id))
 			if not _hex_continue_context_current(context): return {"ok":false,"reason":"checkpoint_bootstrap_changed"}
+	# Turmschuetzenplatz (additives Feld "gunner", fehlt in alten Staenden): erst jetzt, wenn die Trupps im Schiff stehen.
+	for gunner_craft_id in state.transport:
+		var saved_gunner: String = String(Dictionary(state.transport[gunner_craft_id]).get("gunner", ""))
+		if not saved_gunner.is_empty() and _screen.has_method("restore_checkpoint_gunner"):
+			_screen.call("restore_checkpoint_gunner", String(gunner_craft_id), saved_gunner)
 	var prepared: Dictionary = _simulation.call("prepare_hex_checkpoint_restore", state)
 	if not prepared.get("ok", false): return prepared
 	var checked: Dictionary = _simulation.call("validate_prepared_hex_checkpoint_restore", prepared.prepared)
@@ -1246,10 +1255,10 @@ func preview_departure(craft_id: String) -> Dictionary:
 func preview_reapproach(craft_id: String) -> Dictionary:
 	return _validate_departure_gates(craft_id, false, true)
 
-## Einsteigen geht ohne Piloten, Abheben nicht: ohne zugewiesenen Piloten klare Meldung (sonst gilt "Pilot nicht an Bord").
+## Einsteigen geht ohne Piloten, Abheben nicht: ohne zugewiesenen Piloten klare Meldung mit Handlungshinweis (sonst gilt "Pilot nicht an Bord").
 func _pilot_missing_gate(craft_id: String) -> Dictionary:
 	if _base_personnel != null and _screen != null and String(_screen.call("_get_assigned_pilot_id", craft_id)).is_empty():
-		return _reject("pilot_missing", "Pilot zuweisen")
+		return _reject("pilot_missing", "Ziehe eine Person auf den Pilotenplatz")
 	return {}
 
 func _validate_departure_gates(craft_id: String, observe_progress: bool, reuse_departure: bool = false) -> Dictionary:
