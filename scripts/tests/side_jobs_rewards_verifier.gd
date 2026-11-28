@@ -185,7 +185,7 @@ func _case_restore_rules() -> void:
 	var ghost: Dictionary = base_state.duplicate(true)
 	ghost.reward_receipts["side_gibt_es_nicht:completed:1"] = _receipt("side_gibt_es_nicht", 1, _reward(10, []))
 	var ghost_loaded: Dictionary = _load_into_fresh(ghost)
-	_check(bool(ghost_loaded.get("ok", false)) and not Array(ghost_loaded.owner.get_supply_snapshot().reward_completion_ids).has("side_gibt_es_nicht:completed:1") and Array(ghost_loaded.owner.get_supply_snapshot().reward_completion_ids).has("side_farm_night_watch:completed:1"), "Beleg eines unbekannten Nebenauftrags wird still verworfen, der bekannte bleibt")
+	_check(bool(ghost_loaded.get("ok", false)) and Array(ghost_loaded.owner.get_supply_snapshot().reward_completion_ids).has("side_gibt_es_nicht:completed:1") and Array(ghost_loaded.owner.get_supply_snapshot().reward_completion_ids).has("side_farm_night_watch:completed:1"), "Beleg eines unbekannten Nebenauftrags BLEIBT, der bekannte auch")
 	var bad_cases := {
 		"Zaehler 0": ["side_farm_night_watch:completed:0", "side_farm_night_watch:completed:0", true],
 		"Zaehler keine Zahl": ["side_farm_night_watch:completed:x", "side_farm_night_watch:completed:x", true],
@@ -307,7 +307,7 @@ func _case_real_campaign_chain() -> void:
 		var campaign_again: Dictionary = Dictionary(JSON.parse_string(JSON.stringify(campaign_loaded.export_state())))
 		var supply_again: Dictionary = Dictionary(JSON.parse_string(JSON.stringify(supply_result.owner.export_state())))
 		_check(_store_rule(campaign_again, supply_again) and int(campaign_loaded.get_campaign_snapshot().reputation.templer) == 9 and int(campaign_loaded.get_campaign_snapshot().reputation.mueller) == 10, "Nach dem Laden stimmig; Ruf bleibt (Templer 9, Mueller 10)")
-	# Ein verworfener Beleg (Auftrag gibt es nicht mehr) faellt auf beiden Seiten gleich weg.
+	# Ein Beleg ohne Auftrag (es gibt ihn nicht mehr) bleibt auf beiden Seiten gleich erhalten.
 	var ghost_campaign: Dictionary = campaign_state.duplicate(true)
 	var ghost_supply: Dictionary = supply_state.duplicate(true)
 	var ghost_receipt: Dictionary = _receipt("side_gibt_es_nicht", 1, _reward(10, []))
@@ -321,7 +321,7 @@ func _case_real_campaign_chain() -> void:
 	if bool(ghost_campaign_result.get("ok", false)) and bool(ghost_supply_result.get("ok", false)):
 		var gc: Dictionary = Dictionary(JSON.parse_string(JSON.stringify(ghost_campaign_owner.export_state())))
 		var gs: Dictionary = Dictionary(JSON.parse_string(JSON.stringify(ghost_supply_result.owner.export_state())))
-		_check(_store_rule(gc, gs) and not Dictionary(gc.completion_receipts).has("side_gibt_es_nicht:completed:1") and not Dictionary(gs.reward_receipts).has("side_gibt_es_nicht:completed:1"), "Unbekannter Nebenauftrag: Beleg fehlt danach in Kampagne UND Versorgung")
+		_check(_store_rule(gc, gs) and Dictionary(gc.completion_receipts).has("side_gibt_es_nicht:completed:1") and Dictionary(gs.reward_receipts).has("side_gibt_es_nicht:completed:1"), "Unbekannter Nebenauftrag: Beleg bleibt in Kampagne UND Versorgung")
 	else:
 		_check(false, "Unbekannter Nebenauftrag: beide Besitzer laden (Kampagne: %s, Versorgung: %s)" % [str(ghost_campaign_result.get("reason", "")), str(ghost_supply_result.get("reason", ""))])
 

@@ -5,6 +5,7 @@ extends RefCounted
 const LOCATIONS: GDScript = preload("res://scripts/mission/singleplayer_location_contract.gd")
 const JOBS: GDScript = preload("res://scripts/mission/singleplayer_job_contract.gd")
 const COMMANDS: GDScript = preload("res://scripts/mission/singleplayer_campaign_command_contract.gd")
+const INVENTORY: GDScript = preload("res://scripts/mission/inventory_transfer_contract.gd")
 
 ## Missionsende mit result "aborted" und einer dieser win_condition_type-Kennungen ist ein Rueckzug, kein Fehlschlag.
 const RETREAT_WIN_CONDITIONS: Array = ["evacuation", "departure"]
@@ -122,6 +123,17 @@ func _load_side_jobs(source: Variant, locations: Dictionary, campaign_jobs: Dict
 			if strict:
 				return _reject("invalid_side_job", "Nebenauftrag ungueltig: " + String(key))
 			continue
+		# Gegenstandskennungen der Belohnung muessen dem Lager bekannt sein (sonst wuerde der Gegenstand beim Buchen still wegfallen).
+		var unknown_item := _unknown_reward_item(job)
+		if not unknown_item.is_empty():
+			if strict:
+				return _reject("invalid_side_job", "Gegenstand unbekannt: %s (%s)" % [unknown_item, String(key)])
+			push_warning("Nebenauftrag %s: unbekannter Gegenstand %s wird entfernt" % [String(key), unknown_item])
+			var kept_items: Array = []
+			for entry in Array(job.reward.get("items", [])):
+				if typeof(entry) == TYPE_DICTIONARY and INVENTORY.known(String(Dictionary(entry).get("item_id", ""))):
+					kept_items.append(entry)
+			job.reward["items"] = kept_items
 		job["status"] = "offered"
 		job["completions"] = 0
 		job["window_start"] = -1
@@ -140,6 +152,16 @@ func _load_side_jobs(source: Variant, locations: Dictionary, campaign_jobs: Dict
 					changed = true
 					break
 	return {"ok": true, "jobs": side, "factions": factions}
+
+## Erste unbekannte Gegenstandskennung in reward.items, sonst "".
+func _unknown_reward_item(job: Dictionary) -> String:
+	var reward: Variant = job.get("reward", {})
+	if typeof(reward) != TYPE_DICTIONARY or typeof(Dictionary(reward).get("items", [])) != TYPE_ARRAY:
+		return ""
+	for entry in Array(Dictionary(reward).get("items", [])):
+		if typeof(entry) != TYPE_DICTIONARY or not INVENTORY.known(String(Dictionary(entry).get("item_id", ""))):
+			return String(Dictionary(entry).get("item_id", "?")) if typeof(entry) == TYPE_DICTIONARY else "?"
+	return ""
 
 func _is_side(job_id: String) -> bool:
 	return _jobs.has(job_id) and bool(Dictionary(_jobs[job_id]).get("side", false))
@@ -300,6 +322,12 @@ func get_job_availability(retry_allowed: bool = false) -> Dictionary:
 			shown_as_locked = shown_as_locked or prior_status in ["accepted", "active", "pending_upload", "failed"]
 		result[id] = {"visible":not side_hidden and (status in ["accepted", "active", "completed", "pending_upload"] or bool(gate.ok) or shown_as_locked), "can_accept":status in ["offered", "failed"] and bool(gate.ok), "shown_as_locked":shown_as_locked, "reason":String(gate.get("reason", "")), "message":String(gate.get("message", "")),
 			"side":is_side, "faction":String(_jobs[id].get("faction", "")), "landings_left":_side_landings_left(_jobs[id]), "cooldown_left":_side_cooldown_left(_jobs[id])}
+		if is_side and status in SIDE_ONLY_STATUSES:
+			# Sperrzeit: bleibt fuer Annahme/Sternkarte unsichtbar (visible=false), das Smart Mobile zeigt ihn grau ("waiting").
+			var wait: int = maxi(1, _side_cooldown_left(_jobs[id]))
+			result[id]["waiting"] = true
+			result[id]["wait_landings"] = wait
+			result[id]["message"] = "Wieder verfügbar in %d Heimlandung%s" % [wait, "" if wait == 1 else "en"]
 	return result
 
 ## true, wenn an diesem Ort ein Auftrag angenommen/aktiv/hochzuladen ist (dann gilt dessen Szenario bzw. die Begegnung).
@@ -619,6 +647,8 @@ func _fail(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var evidence: Dictionary = Dictionary(context.get("runtime_evidence", {}))
 	if not bool(context.get("mission_aborted", false)) and not String(evidence.get("result", "")) in ["defeat", "aborted", "timeout"]:
 		return _reject("failure_not_authorized", "Fehlschlag nicht bestaetigt")
+	if bool(_jobs[job_id].get("side", false)):
+		return _fail_side(job_id)
 	_jobs[job_id].status = "failed"
 	# Rueckzug: nur aus dem bestaetigten Ergebnis, nie aus dem Kontext (mission_aborted = bewusstes Aufgeben).
 	var retreat: bool = String(evidence.get("result", "")) == "aborted" and RETREAT_WIN_CONDITIONS.has(String(evidence.get("win_condition_type", "")))
@@ -629,6 +659,21 @@ func _fail(payload: Dictionary, context: Dictionary) -> Dictionary:
 		_selected_job_id = ""
 	_revision += 1
 	return {"ok": true, "job_id": job_id, "retreat": retreat, "message": "Rückzug. Auftrag bleibt offen." if retreat else "Auftrag beendet"}
+
+## Nebenauftrag gescheitert oder aufgegeben (Bjoern 28.11.): kein "failed", sondern die normale Sperrzeit (cooldown_landings), danach wieder im Angebot.
+func _fail_side(job_id: String) -> Dictionary:
+	_put_side_in_cooldown(job_id)
+	if _selected_job_id == job_id:
+		_selected_job_id = ""
+	_revision += 1
+	var left: int = maxi(1, _side_cooldown_left(_jobs[job_id]))
+	return {"ok": true, "job_id": job_id, "retreat": false, "side_cooldown": true, "cooldown_left": left, "message": "Auftrag beendet. Wieder verfügbar in %d Heimlandung%s." % [left, "" if left == 1 else "en"]}
+
+func _put_side_in_cooldown(job_id: String) -> void:
+	_jobs[job_id].status = "cooldown"
+	_jobs[job_id].cooldown_until = _home_landings + int(_jobs[job_id].get("cooldown_landings", 0))
+	_jobs[job_id].erase("craft_id")
+	_jobs[job_id].erase("reopen_at_home")
 
 func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
@@ -731,6 +776,10 @@ func restore_state(data: Dictionary) -> Dictionary:
 		if typeof(saved_reputation) == TYPE_DICTIONARY and Dictionary(saved_reputation).has(faction):
 			_reputation[faction] = clampi(int(saved_reputation[faction]), -REPUTATION_LIMIT, REPUTATION_LIMIT)
 	_home_landings = int(data.get("home_landings", 0))
+	# Alter Stand mit gescheitertem Nebenauftrag: gilt jetzt als Sperrzeit (Entscheidung 28.11.), danach wieder im Angebot.
+	for side_id in _jobs:
+		if bool(_jobs[side_id].get("side", false)) and String(_jobs[side_id].status) == "failed":
+			_put_side_in_cooldown(String(side_id))
 	_selected_location_id = String(data.selected_location_id)
 	# Ein Stand, der einen additiven Ort anwaehlt, den sein eigener Ortsblock nicht kennt, ist nicht stimmig: Auswahl auf den Ausgangsort zuruecksetzen statt ablehnen.
 	if ADDITIVE_LOCATION_IDS.has(_selected_location_id) and not data.locations.has(_selected_location_id):
@@ -742,10 +791,8 @@ func restore_state(data: Dictionary) -> Dictionary:
 	for craft_id in _departures_by_craft_id.keys():
 		if dropped_side_ids.has(String(Dictionary(_departures_by_craft_id[craft_id]).get("job_id", ""))):
 			_departures_by_craft_id.erase(craft_id)
+	# Belege entfernter Nebenauftraege bleiben (der Rekrut behaelt seine Deckung im Kader, der Versorgungsstand behaelt denselben Beleg).
 	_completion_receipts = data.completion_receipts.duplicate(true)
-	for receipt_id in _completion_receipts.keys():
-		if dropped_side_ids.has(String(Dictionary(_completion_receipts[receipt_id]).get("job_id", ""))):
-			_completion_receipts.erase(receipt_id)
 	_requests = data.requests.duplicate(true)
 	_progress = Dictionary(data.get("progress",_progress)).duplicate(true)
 	_revision = int(data.revision)
@@ -836,7 +883,8 @@ func _validate_saved_state(data: Dictionary) -> Dictionary:
 		if bool(job.get("side", false)):
 			# Nebenauftragsbeleg: Kennung "<id>:completed:<n>", Szenario wie heute; die Belohnung steht im Beleg und wird nicht mit der heutigen Datei verglichen.
 			var count_text := String(receipt_id).trim_prefix(String(receipt.job_id) + ":completed:")
-			if not count_text.is_valid_int() or count_text.to_int() < 1 or receipt.get("side") != true or receipt.get("completion_id") != receipt_id or receipt.get("runtime_verified") != true or receipt.get("scenario_id") != job.scenario_id or typeof(receipt.get("reward")) != TYPE_DICTIONARY:
+			if not count_text.is_valid_int() or count_text.to_int() < 1 or receipt.get("side") != true or receipt.get("completion_id") != receipt_id or receipt.get("runtime_verified") != true or typeof(receipt.get("scenario_id")) != TYPE_STRING or typeof(receipt.get("reward")) != TYPE_DICTIONARY:
+				# Das Szenario des Belegs wird nicht mit der heutigen Datei verglichen (Inhalt darf sich aendern).
 				return _reject("invalid_completion_receipt", "Nebenauftragsbeleg ungueltig")
 			continue
 		if String(receipt_id) != String(receipt.job_id) + ":completed" or receipt.get("completion_id") != receipt_id or receipt.get("runtime_verified") != true or receipt.get("scenario_id") != job.scenario_id or not _saved_equal(receipt.get("reward"), job.reward):
