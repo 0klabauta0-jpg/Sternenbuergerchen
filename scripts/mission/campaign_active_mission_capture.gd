@@ -55,12 +55,30 @@ static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	if not is_instance_valid(sim) or not is_instance_valid(terrain) or not is_instance_valid(controller) or not is_instance_valid(driver) or not is_instance_valid(setup): return _reject("mission_owner_unavailable")
 	var deployed: Variant = controller.get("_deployed_unit_ids")
 	if not deployed is Dictionary or deployed.is_empty(): return _reject("mission_crew_not_deployed")
-	var active_ids: Array = deployed.keys()
+	# Paket I (c): Der Pilot darf an Bord des gelandeten Schiffs bleiben. Nur er; alle anderen muessen draussen sein.
+	# Er steht dann nicht in _deployed_unit_ids, aber im Transportblock als eingeschifft (kein neues Feld im Stand).
+	var aboard_pilot: bool = false
+	var aboard_ids: Variant = controller.get("_embarked_unit_ids")
+	if aboard_ids is Dictionary and not deployed.has(pilot) and aboard_ids.has(pilot) and aboard_ids[pilot] == true:
+		for id in aboard_ids:
+			if id != pilot: return _reject("mission_crew_unsupported")
+		aboard_pilot = true
+	var members: Dictionary = deployed.duplicate()
+	if aboard_pilot: members[pilot] = true
+	var active_ids: Array = members.keys()
 	active_ids.sort()
 	var registry: Node = sim.get_unit_registry()
-	if not is_instance_valid(registry) or registry.get_all_units().size() != active_ids.size(): return _reject("mission_crew_unsupported")
+	if not is_instance_valid(registry): return _reject("mission_crew_unsupported")
+	var staged_ids: Array = []
+	if aboard_pilot:
+		# Der eingeschiffte Pilot kann aus dem Register ausgetragen sein; dann wird er ueber seine Kennung mitgesichert.
+		for unit in registry.get_all_units():
+			if not is_instance_valid(unit) or not members.has(String(unit.get("unit_id"))): return _reject("mission_crew_unsupported")
+		if not is_instance_valid(sim.call("_resolve_known_unit_for_contract", pilot)): return _reject("mission_crew_unsupported")
+		if not registry.has_unit(pilot): staged_ids.append(pilot)
+	elif registry.get_all_units().size() != active_ids.size(): return _reject("mission_crew_unsupported")
 	for id in active_ids:
-		if typeof(id) != TYPE_STRING or deployed[id] != true or not is_instance_valid(registry.get_unit(id)): return _reject("mission_crew_unsupported")
+		if typeof(id) != TYPE_STRING or members[id] != true or (not is_instance_valid(registry.get_unit(id)) and not staged_ids.has(id)): return _reject("mission_crew_unsupported")
 	if not active_ids.has(pilot): return _reject("mission_crew_unsupported")
 	var home: Dictionary = HOME_STORE.load_checkpoint()
 	if not home.get("ok",false): return home
@@ -136,7 +154,7 @@ static func capture_components(flow: Node, runtime: Node) -> Dictionary:
 	checked = market_candidate.restore_state(market_state)
 	if not checked.get("ok",false): return checked
 	var actors := ACTORS.new()
-	var actor_state: Dictionary = actors.export_actors(sim)
+	var actor_state: Dictionary = actors.export_actors(sim, staged_ids)
 	if not actor_state.get("ok",false): return actor_state
 	if not sim.is_hex_ground_runtime_active(): return _reject("hex_ground_inactive")
 	var exported: Dictionary = sim.export_hex_checkpoint_state()

@@ -475,6 +475,8 @@ func _part_real() -> void:
 	_check(still_aboard, "(E7) geparkt, Trupp noch an Bord")
 
 	# Trupp absetzen ueber den vorhandenen Weg.
+	# Seit 28.11. (Paket I) ist die Vorgabe "Pilot bleibt an Bord"; dieser Ablauf prueft den Weg "ganzer Trupp samt Pilot steigt aus" und stellt ihn ueber den Schalter ein.
+	if not bool(controller.call("_is_pilot_disembark_selected", _craft_id)): controller.call("request_campaign_pilot_disembark_toggle", _craft_id)
 	var deploy: Dictionary = controller.call("request_campaign_crew_deployment", _craft_id)
 	_check(bool(deploy.get("ok", false)), "(b) der Trupp steigt ueber request_campaign_crew_deployment aus: " + str(deploy))
 	if not await _wait(func(): return _all_crew_deployed(controller) and int(root_owner.call("get_tick")) > 0, 30000, "(b) der abgesetzte Trupp steht auf dem Boden und ist spielbar"): return

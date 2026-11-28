@@ -2854,8 +2854,8 @@ func get_hex_checkpoint_guard()->Dictionary:
 func export_hex_checkpoint_state()->Dictionary:
 	return _get_hex_checkpoint_transaction().export_state()
 
-func prepare_hex_checkpoint_restore(state:Dictionary, actor_checkpoint:Dictionary={})->Dictionary:
-	return _get_hex_checkpoint_transaction().prepare(state, actor_checkpoint)
+func prepare_hex_checkpoint_restore(state:Dictionary, actor_checkpoint:Dictionary={}, embarked_ids:Array=[])->Dictionary:
+	return _get_hex_checkpoint_transaction().prepare(state, actor_checkpoint, embarked_ids)
 
 func validate_prepared_hex_checkpoint_restore(prepared:RefCounted)->Dictionary:
 	return _get_hex_checkpoint_transaction().validate(prepared)
